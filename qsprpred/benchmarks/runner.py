@@ -7,7 +7,7 @@ import time
 import traceback
 from multiprocessing import Lock as MPLock
 from threading import Lock as TLock
-from typing import Generator, Literal
+from typing import Generator
 
 import pandas as pd
 
@@ -15,11 +15,6 @@ from .replica import Replica
 from .settings.benchmark import BenchmarkSettings
 from ..logs import logger
 from ..utils.parallel import parallel_jit_generator
-
-lock_data_mp = MPLock()
-lock_report_mp = MPLock()
-lock_data_t = TLock()
-lock_report_t = TLock()
 
 
 class BenchmarkRunner:
@@ -152,12 +147,17 @@ class BenchmarkRunner:
             logger.warning("No GPU replicas found. Exiting without results...")
             return
         replica_logger = self.getLoggerForReplica(current, self.logLevel)
+        lock_data_t = TLock()
+        lock_report_t = TLock()
         while thread_pool or current is not None:
             if len(gpu_pool) > 0 and current is not None:
-                current.setGPUs([gpu_pool.pop()])
+                gpu = gpu_pool.pop(0)
+                logger.debug(f"Setting GPU {gpu} for replica {current.id}.")
+                current.setGPUs([gpu])
                 # make a thread and run the replica in that thread
                 thread = threading.Thread(
-                    target=self.runReplica, args=(current, self.resultsFile, "th")
+                    target=self.runReplica,
+                    args=(current, self.resultsFile, lock_data_t, lock_report_t),
                 )
                 thread.start()
                 replica_logger.debug(f"Started thread for GPU replica {current.id}.")
@@ -181,11 +181,13 @@ class BenchmarkRunner:
     def processCPUReplicas(
         self, cpu_replicas: Generator[Replica, None, None], raise_errors=False
     ):
+        lock_data_mp = MPLock()
+        lock_report_mp = MPLock()
         for result in parallel_jit_generator(
             cpu_replicas,
             self.runReplica,
             self.nProc,
-            args=(self.resultsFile, "mp"),
+            args=(self.resultsFile, lock_data_mp, lock_report_mp),
             pool_type=self.poolType,
         ):
             if isinstance(result, self.ReplicaException):
@@ -412,7 +414,11 @@ class BenchmarkRunner:
 
     @classmethod
     def runReplica(
-        cls, replica: Replica, results_file: str, locking: Literal["mp", "th"] = "mp"
+        cls,
+        replica: Replica,
+        results_file: str,
+        lock_data,
+        lock_report,
     ) -> str | ReplicaException:
         """Runs a single replica. This is executed in parallel by the `run` method.
         It is a classmethod so that it can be pickled and executed in parallel
@@ -423,16 +429,12 @@ class BenchmarkRunner:
                 Replica to run.
             results_file (str):
                 Path to the results file.
-            locking (Literal["mp", "th"], optional):
-                Type of locking to use. Defaults to "mp".
 
         Returns:
             str | ReplicaException:
                 ID of the replica that was run or a `ReplicaException` if an error
                 was encountered.
         """
-        lock_data = lock_data_mp if locking == "mp" else lock_data_t
-        lock_report = lock_report_mp if locking == "mp" else lock_report_t
         logger = cls.getLoggerForReplica(replica, cls.logLevel)
         logger.debug(f"Starting replica: {replica.id}")
         try:
