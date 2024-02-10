@@ -16,7 +16,7 @@ from tqdm import trange
 
 from qsprpred.data.sampling.splits import DataSplit
 from qsprpred.tasks import ModelTasks
-from .base_torch import QSPRModelPyTorchGPU, DEFAULT_TORCH_GPUS, DEFAULT_TORCH_DEVICE
+from .base_torch import QSPRModelPyTorchGPU, DEFAULT_TORCH_GPUS
 from ....data.tables.qspr import QSPRDataset
 from ....logs import logger
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
@@ -105,7 +105,6 @@ class ChempropModel(QSPRModelPyTorchGPU):
 
     Attributes:
         name (str): name of the model
-        data (QSPRDataset): data set used to train the model
         alg (Type): estimator class
         parameters (dict): dictionary of algorithm specific parameters
         estimator (Any):
@@ -127,6 +126,7 @@ class ChempropModel(QSPRModelPyTorchGPU):
 
     def setGPUs(self, gpus: list[int]):
         self.gpus = gpus
+        self.setDevice(f"cuda:{gpus[0]}")
 
     def getDevice(self) -> torch.device:
         return torch.device(self.device)
@@ -168,8 +168,8 @@ class ChempropModel(QSPRModelPyTorchGPU):
         self.chempropLogger = chemprop.utils.create_logger(
             name="chemprop_logger", save_dir=self.outDir, quiet=quiet_logger
         )
-        self.gpus = DEFAULT_TORCH_GPUS
-        self.device = str(DEFAULT_TORCH_DEVICE)
+        self.gpus = None
+        self.setGPUs(DEFAULT_TORCH_GPUS)
 
     def supportsEarlyStopping(self) -> bool:
         """Return if the model supports early stopping.

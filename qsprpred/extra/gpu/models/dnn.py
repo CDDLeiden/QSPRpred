@@ -12,7 +12,7 @@ import torch
 from sklearn.model_selection import ShuffleSplit
 
 from qsprpred.tasks import ModelTasks
-from .base_torch import QSPRModelPyTorchGPU, DEFAULT_TORCH_DEVICE, DEFAULT_TORCH_GPUS
+from .base_torch import QSPRModelPyTorchGPU, DEFAULT_TORCH_GPUS
 from ....data.sampling.splits import DataSplit
 from ....data.tables.qspr import QSPRDataset
 from ....extra.gpu.models.neural_network import STFullyConnected, Base
@@ -60,8 +60,9 @@ class DNNModel(QSPRModelPyTorchGPU):
 
     def setGPUs(self, gpus: list[int]):
         self.gpus = gpus
-        if isinstance(self.estimator, Base):
+        if not isinstance(self.estimator, str):
             self.estimator.gpus = gpus
+        self.setDevice(f"cuda:{gpus[0]}")
 
     def getDevice(self) -> torch.device:
         return self.device
@@ -79,7 +80,6 @@ class DNNModel(QSPRModelPyTorchGPU):
         parameters: dict | None = None,
         random_state: int | None = None,
         autoload: bool = True,
-        device: str = str(DEFAULT_TORCH_DEVICE),
         gpus: list[int] = DEFAULT_TORCH_GPUS,
         patience: int = 50,
         tol: float = 0,
@@ -123,7 +123,6 @@ class DNNModel(QSPRModelPyTorchGPU):
             autoload=autoload,
             random_state=random_state,
         )
-        self.setDevice(device)
         self.setGPUs(gpus)
 
     def initRandomState(self, random_state):

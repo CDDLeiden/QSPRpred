@@ -64,6 +64,23 @@ class BenchMarkTest(BenchMarkTestCase):
         self.checkRunResults(results)
         self.checkSettings()
 
+    # takes too long
+    # def testChemPropSingleTaskCLS(self):
+    #     """Run single task tests for classification."""
+    #     self.settings.models = [
+    #         ChempropModel(
+    #             name="ChempropModel",
+    #             base_dir=f"{self.generatedPath}/models",
+    #             random_state=42,
+    #         )
+    #     ]
+    #     self.settings.descriptors = [[SmilesDesc()]]
+    #     self.settings.prep_settings[0].feature_standardizer = None
+    #     self.checkSettings()
+    #     results = self.benchmark.run(raise_errors=True)
+    #     self.checkRunResults(results)
+    #     self.checkSettings()
+
 
 class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     """This class holds the tests for the DNNModel class."""
