@@ -151,6 +151,7 @@ class Replica(JSONSerializable):
             overwrite=reload,
             random_state=self.randomSeed,
         )
+        self.ds.dropInvalids()
 
     def addDescriptors(self, reload: bool = False):
         """Adds descriptors to the current data set. Make sure to call
