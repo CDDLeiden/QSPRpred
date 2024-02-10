@@ -182,7 +182,11 @@ class BenchmarkRunner:
         self, cpu_replicas: Generator[Replica, None, None], raise_errors=False
     ):
         for result in parallel_jit_generator(
-            cpu_replicas, self.runReplica, self.nProc, args=(self.resultsFile, "mp")
+            cpu_replicas,
+            self.runReplica,
+            self.nProc,
+            args=(self.resultsFile, "mp"),
+            pool_type=self.poolType,
         ):
             if isinstance(result, self.ReplicaException):
                 if raise_errors:
