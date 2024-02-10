@@ -30,7 +30,7 @@ def parallel_jit_generator(
         generator: Generator,
         process_func: Callable,
         n_cpus: int,
-        pool_type: Literal["pebble", "multiprocessing"] = "multiprocessing",
+        pool_type: Literal["pebble", "multiprocessing", "torch"] = "multiprocessing",
         timeout: int | None = None,
         args: tuple | None = None,
         kwargs: dict | None = None
@@ -69,7 +69,7 @@ def parallel_jit_generator(
     """
     args = args or ()
     kwargs = kwargs or {}
-    if pool_type not in ["pebble", "multiprocessing"]:
+    if pool_type not in ["pebble", "multiprocessing", "torch"]:
         raise ValueError(f"The 'pool_type' must be one of 'pebble' "
                          f"or 'multiprocessing', got {pool_type} instead.")
     if pool_type != "pebble" and timeout is not None:
@@ -84,6 +84,10 @@ def parallel_jit_generator(
             pool_type_to_pool["pebble"] = ProcessPool(max_workers=n_cpus)
         except ImportError:
             raise ImportError("Failed to import pool type 'pebble'. Install it first.")
+    if pool_type == "torch":
+        from torch.multiprocessing import Pool, set_start_method
+        set_start_method("spawn", force=True)
+        pool_type_to_pool["torch"] = Pool(n_cpus)
     with pool_type_to_pool[pool_type] as pool:
         queue = []
         done = False
