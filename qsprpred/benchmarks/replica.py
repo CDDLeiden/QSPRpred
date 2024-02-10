@@ -102,7 +102,7 @@ class Replica(JSONSerializable):
             bool:
                 Whether the model requires a GPU.
         """
-        return hasattr(self.model, "gpus")
+        return hasattr(self.model, "setGPUs")
 
     def setGPUs(self, gpus: list[int]):
         """Sets the GPUs to use for the model.
@@ -111,7 +111,10 @@ class Replica(JSONSerializable):
             gpus (list[int]):
                 List of GPU indices to use.
         """
-        self.model.gpus = gpus
+        if hasattr(self.model, "setGPUs"):
+            self.model.setGPUs(gpus)
+        else:
+            raise ValueError("Model does not support GPU usage.")
 
     def getGPUs(self) -> list[int]:
         """Gets the GPUs to use for the model.
@@ -120,8 +123,8 @@ class Replica(JSONSerializable):
             list[int]:
                 List of GPU indices to use.
         """
-        if hasattr(self.model, "gpus"):
-            return self.model.gpus
+        if hasattr(self.model, "getGPUs"):
+            return self.model.getGPUs()
         else:
             return []
 
@@ -166,6 +169,8 @@ class Replica(JSONSerializable):
             raise ValueError("Data set not initialized. Call initData first.")
         desc_id = "_".join(sorted([str(d) for d in self.descriptors]))
         self.ds.name = f"{self.ds.name}_{desc_id}"
+        if self.requiresGpu:
+            self.ds.name = f"{self.ds.name}_gpu"
         # attempt to load the data set with descriptors
         if os.path.exists(self.ds.metaFile) and not reload:
             logger.info(f"Reloading existing {self.ds.name} from cache...")

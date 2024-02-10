@@ -317,7 +317,7 @@ class ChempropModel(QSPRModelPyTorchGPU):
         )
 
         if args.cuda:
-            self.chempropLogger.debug("Moving model to cuda")
+            self.chempropLogger.debug("Moving trained model to cuda")
         estimator = estimator.to(args.device)
 
         # Optimizers
