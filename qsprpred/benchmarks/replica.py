@@ -243,7 +243,13 @@ class Replica(JSONSerializable):
                     score_df = pd.DataFrame(
                         {
                             "Assessor": [assessor.__class__.__name__],
-                            "ScoreFunc": [assessor.scoreFunc.name],
+                            "ScoreFunc": [
+                                (
+                                    assessor.scoreFunc.name
+                                    if hasattr(assessor.scoreFunc, "name")
+                                    else assessor.scoreFunc.__name__
+                                )
+                            ],
                             "Score": [fold_score],
                             "TargetProperty": [tp.name],
                             "TargetTask": [tp.task.name],
@@ -255,7 +261,13 @@ class Replica(JSONSerializable):
                         score_df = pd.DataFrame(
                             {
                                 "Assessor": [assessor.__class__.__name__],
-                                "ScoreFunc": [assessor.scoreFunc.name],
+                                "ScoreFunc": [
+                                    (
+                                        assessor.scoreFunc.name
+                                        if hasattr(assessor.scoreFunc, "name")
+                                        else assessor.scoreFunc.__name__
+                                    )
+                                ],
                                 "Score": [tp_score],
                                 "TargetProperty": [tp.name],
                                 "TargetTask": [tp.task.name],
