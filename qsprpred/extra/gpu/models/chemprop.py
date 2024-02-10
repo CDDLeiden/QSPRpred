@@ -16,6 +16,7 @@ from tqdm import trange
 
 from qsprpred.data.sampling.splits import DataSplit
 from qsprpred.tasks import ModelTasks
+from .base_torch import QSPRModelPyTorchGPU, DEFAULT_TORCH_GPUS, DEFAULT_TORCH_DEVICE
 from ....data.tables.qspr import QSPRDataset
 from ....logs import logger
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
@@ -99,7 +100,7 @@ class ChempropMoleculeModel(chemprop.models.MoleculeModel):
         return train_args
 
 
-class ChempropModel(QSPRModel):
+class ChempropModel(QSPRModelPyTorchGPU):
     """QSPRpred implementation of Chemprop model.
 
     Attributes:
@@ -120,6 +121,18 @@ class ChempropModel(QSPRModel):
             base directory of the model,
             the model files are stored in a subdirectory `{baseDir}/{outDir}/`
     """
+
+    def getGPUs(self):
+        return self.gpus
+
+    def setGPUs(self, gpus: list[int]):
+        self.gpus = gpus
+
+    def getDevice(self) -> torch.device:
+        return torch.device(self.device)
+
+    def setDevice(self, device: str):
+        self.device = device
 
     _notJSON = [*QSPRModel._notJSON, "chempropLogger"]
 
@@ -155,7 +168,8 @@ class ChempropModel(QSPRModel):
         self.chempropLogger = chemprop.utils.create_logger(
             name="chemprop_logger", save_dir=self.outDir, quiet=quiet_logger
         )
-        self.gpus = [0]
+        self.gpus = DEFAULT_TORCH_GPUS
+        self.device = str(DEFAULT_TORCH_DEVICE)
 
     def supportsEarlyStopping(self) -> bool:
         """Return if the model supports early stopping.
@@ -221,9 +235,9 @@ class ChempropModel(QSPRModel):
         args = estimator.args
         if args.cuda:
             args.gpu = self.gpus[0]
-            args.device = torch.device(f"cuda:{args.gpu}")
+            args.device = torch.device(self.device)
 
-        # set task names
+        # set task namesargs
         args.task_names = [prop.name for prop in self.targetProperties]
 
         # Get number of molecules per class in training data
@@ -457,6 +471,11 @@ class ChempropModel(QSPRModel):
         estimator = self.estimator if estimator is None else estimator
         X = self.convertToMoleculeDataset(X)
         args = estimator.args
+        if args.cuda:
+            args.gpu = self.gpus[0]
+            args.device = torch.device(self.device)
+            estimator = estimator.to(args.device)
+            logger.debug("Moving prediction model to cuda")
 
         X_loader = chemprop.data.MoleculeDataLoader(
             dataset=X, batch_size=args.batch_size
@@ -518,7 +537,9 @@ class ChempropModel(QSPRModel):
 
         # set task names
         args.task_names = [prop.name for prop in self.targetProperties]
-
+        # set devices
+        args.gpu = self.gpus[0]
+        args.device = torch.device(self.device)
         return self.alg(args)
 
     def loadEstimatorFromFile(
