@@ -27,13 +27,15 @@ def batched_generator(iterable: Iterable, batch_size: int) -> Generator:
 
 
 def parallel_jit_generator(
-        generator: Generator,
-        process_func: Callable,
-        n_cpus: int,
-        pool_type: Literal["pebble", "multiprocessing", "torch"] = "multiprocessing",
-        timeout: int | None = None,
-        args: tuple | None = None,
-        kwargs: dict | None = None
+    generator: Generator,
+    process_func: Callable,
+    n_cpus: int,
+    pool_type: Literal["pebble", "multiprocessing", "torch"] = "multiprocessing",
+    timeout: int | None = None,
+    args: tuple | None = None,
+    kwargs: dict | None = None,
+    pool_initializer: Callable | None = None,
+    pool_initargs: tuple | None = None,
 ) -> Generator:
     """
     A parallel 'JIT (Just In Time)' generator that yields the results of a function
@@ -76,7 +78,7 @@ def parallel_jit_generator(
         raise ValueError(f"The 'timeout' argument is only supported "
                          f"for 'pebble' pools, got {pool_type} instead.")
     pool_type_to_pool = {
-        "multiprocessing": multiprocessing.Pool(processes=n_cpus)
+        "multiprocessing": multiprocessing.Pool(processes=n_cpus, initializer=pool_initializer, initargs=pool_initargs)
     }
     if pool_type == "pebble":
         try:
@@ -87,7 +89,7 @@ def parallel_jit_generator(
     if pool_type == "torch":
         from torch.multiprocessing import Pool, set_start_method
         set_start_method("spawn", force=True)
-        pool_type_to_pool["torch"] = Pool(n_cpus)
+        pool_type_to_pool["torch"] = Pool(n_cpus, initializer=pool_initializer, initargs=pool_initargs)
     with pool_type_to_pool[pool_type] as pool:
         queue = []
         done = False
