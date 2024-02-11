@@ -11,19 +11,21 @@ from papyrus_scripts.preprocess import (
 )
 from papyrus_scripts.reader import read_papyrus
 
+from qsprpred.logs import logger
+
 
 def papyrus_filter(
     acc_key: list[str],
     quality: str,
     outdir: str,
     activity_types: list[str] | str = "all",
-    prefix: str = None,
+    prefix: str | None = None,
     drop_duplicates: bool = True,
     chunk_size: int = 1e5,
     use_existing: bool = True,
     stereo: bool = False,
     plusplus: bool = False,
-    papyrus_dir: str = None,
+    papyrus_dir: str | None = None,
 ):
     """Filters the downloaded Papyrus dataset for quality and accession key (UniProt)
     and outputs a .tsv file of all compounds fulfilling these requirements.
@@ -51,38 +53,38 @@ def papyrus_filter(
     papyrus_dir = outdir if not papyrus_dir else papyrus_dir
 
     if use_existing and os.path.exists(outfile):
-        print(f"Using existing data from {outfile}...")
+        logger.info(f"Using existing data from {outfile}...")
         return pd.read_table(outfile, sep="\t", header=0), outfile
 
     # read data
-    print(f"Reading data from {papyrus_dir}...")
+    logger.info(f"Reading data from {papyrus_dir}...")
     sample_data = read_papyrus(
         is3d=stereo, chunksize=chunk_size, source_path=papyrus_dir, plusplus=plusplus
     )
-    print("Read all data.")
+    logger.info("Read all data.")
 
     # data filters
     filter1 = keep_quality(data=sample_data, min_quality=quality)
     filter2 = keep_accession(data=filter1, accession=acc_key)
     filter3 = keep_type(data=filter2, activity_types=activity_types)
-    print("Initialized filters.")
+    logger.info("Initialized filters.")
 
     # filter data per chunk
     filtered_data = consume_chunks(generator=filter3)
-    print(f"Number of compounds:{filtered_data.shape[0]}")
+    logger.info(f"Number of compounds:{filtered_data.shape[0]}")
 
     # filter out duplicate InChiKeys
     if drop_duplicates:
-        print("Filtering out duplicate molecules")
+        logger.info("Filtering out duplicate molecules")
         amnt_mols_i = len(filtered_data["InChIKey"])
         filtered_data.drop_duplicates(
             subset=["InChIKey"], inplace=True, ignore_index=True
         )
         amnt_mols_f = len(filtered_data["InChIKey"])
-        print(f"Filtered out {amnt_mols_i - amnt_mols_f} duplicate molecules")
+        logger.info(f"Filtered out {amnt_mols_i - amnt_mols_f} duplicate molecules")
 
     # write filtered data to .tsv file
     filtered_data.to_csv(outfile, sep="\t", index=False)
-    print(f"Wrote data to file '{outfile}'.")
+    logger.info(f"Wrote data to file '{outfile}'.")
 
     return filtered_data, outfile

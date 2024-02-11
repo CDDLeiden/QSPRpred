@@ -1,5 +1,6 @@
 """Module for hyperparameter optimization of QSPRModels."""
 
+from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Callable, Iterable
 
@@ -7,12 +8,67 @@ import numpy as np
 import optuna.trial
 from sklearn.model_selection import ParameterGrid
 
+from qsprpred.models.assessment.methods import ModelAssessor
+from ..data import QSPRDataset
 from ..logs import logger
-from ..models.assessment_methods import CrossValAssessor
-from ..models.interfaces import HyperParameterOptimization, ModelAssessor, QSPRModel
+from ..models.models import QSPRModel
+from ..models.monitors import BaseMonitor, HyperparameterOptimizationMonitor
 
 
-class OptunaOptimization(HyperParameterOptimization):
+class HyperparameterOptimization(ABC):
+    """Base class for hyperparameter optimization.
+
+    Attributes:
+        runAssessment (ModelAssessor): evaluation method to use
+        scoreAggregation (Callable[[Iterable], float]): function to aggregate scores
+        paramGrid (dict): dictionary of parameters to optimize
+        monitor (HyperparameterOptimizationMonitor): monitor to track the optimization
+        bestScore (float): best score found during optimization
+        bestParams (dict): best parameters found during optimization
+    """
+
+    def __init__(
+        self,
+        param_grid: dict,
+        model_assessor: ModelAssessor,
+        score_aggregation: Callable[[Iterable], float],
+        monitor: HyperparameterOptimizationMonitor | None = None,
+    ):
+        """Initialize the hyperparameter optimization class.
+
+        param_grid (dict):
+            dictionary of parameters to optimize
+        model_assessor (ModelAssessor):
+            assessment method to use for determining the best parameters
+        score_aggregation (Callable[[Iterable], float]): function to aggregate scores
+        monitor (HyperparameterOptimizationMonitor): monitor to track the optimization,
+            if None, a BaseMonitor is used
+        """
+        self.runAssessment = model_assessor
+        self.scoreAggregation = score_aggregation
+        self.paramGrid = param_grid
+        self.bestScore = -np.inf
+        self.bestParams = None
+        self.monitor = monitor
+        self.config = {
+            "param_grid": param_grid,
+            "model_assessor": model_assessor,
+            "score_aggregation": score_aggregation,
+        }
+
+    @abstractmethod
+    def optimize(self, model: QSPRModel, ds: QSPRDataset) -> dict:
+        """Optimize the model hyperparameters.
+
+        Args:
+            model (QSPRModel): model to optimize
+            ds (QSPRDataset): dataset to use for the optimization
+        Returns:
+            dict: dictionary of best parameters
+        """
+
+
+class OptunaOptimization(HyperparameterOptimization):
     """Class for hyperparameter optimization of QSPRModels using Optuna.
 
     Attributes:
@@ -26,7 +82,7 @@ class OptunaOptimization(HyperParameterOptimization):
             best parameters found during optimization
 
     Example of OptunaOptimization for scikit-learn's MLPClassifier:
-        >>> model = SklearnModel(base_dir=".", data=dataset,
+        >>> model = SklearnModel(base_dir=".",
         >>>                     alg = MLPClassifier(), alg_name="MLP")
         >>> search_space = {
         >>>    "learning_rate_init": ["float", 1e-5, 1e-3,],
@@ -38,17 +94,18 @@ class OptunaOptimization(HyperParameterOptimization):
         >>>     param_grid=search_space,
         >>>     n_trials=10
         >>> )
-        >>> best_params = optimizer.optimize(model)
+        >>> best_params = optimizer.optimize(model, dataset) # dataset is a QSPRDataset
 
     Available suggestion types:
         ["categorical", "discrete_uniform", "float", "int", "loguniform", "uniform"]
     """
+
     def __init__(
         self,
-        scoring: str | Callable[[Iterable, Iterable], float],
         param_grid: dict,
-        model_assessor: ModelAssessor = CrossValAssessor(),
+        model_assessor: ModelAssessor,
         score_aggregation: Callable[[Iterable], float] = np.mean,
+        monitor: HyperparameterOptimizationMonitor | None = None,
         n_trials: int = 100,
         n_jobs: int = 1,
     ):
@@ -56,24 +113,27 @@ class OptunaOptimization(HyperParameterOptimization):
         of QSPRModels using Optuna.
 
         Args:
-            scoring (str | Callable[[Iterable, Iterable], float]]):
-                scoring function for the optimization.
             param_grid (dict):
                 search space for bayesian optimization, keys are the parameter names,
                 values are lists with first element the type of the parameter and the
                 following elements the parameter bounds or values.
-            model_assessor (ModelAssessor): assessment method to use for the
-                                            optimization (default: CrossValAssessor)
-            score_aggregation (Callable): function to aggregate the scores of different
-                                          folds if the assessment method returns
-                                          multiple predictions
+            model_assessor (ModelAssessor):
+                assessment method to use for the optimization
+                (default: CrossValAssessor)
+            score_aggregation (Callable):
+                function to aggregate the scores of different folds if the assessment
+                method returns multiple predictions
+            monitor (HyperparameterOptimizationMonitor):
+                monitor for the optimization, if None, a BaseMonitor is used
             n_trials (int):
                 number of trials for bayes optimization
             n_jobs (int):
                 number of jobs to run in parallel.
                 At the moment only n_jobs=1 is supported.
         """
-        super().__init__(scoring, param_grid, model_assessor, score_aggregation)
+        super().__init__(param_grid, model_assessor, score_aggregation, monitor)
+        if monitor is None:
+            self.monitor = BaseMonitor()
         search_space_types = [
             "categorical",
             "discrete_uniform",
@@ -93,44 +153,63 @@ class OptunaOptimization(HyperParameterOptimization):
             )
 
         self.nTrials = n_trials
-        if n_jobs > 1:
+        self.nJobs = n_jobs
+        if self.nJobs > 1:
             logger.warning(
                 "At the moment n_jobs>1 not available for bayes optimization, "
                 "n_jobs set to 1."
             )
-        self.nJobs = 1
+            self.nJobs = 1
         self.bestScore = -np.inf
         self.bestParams = None
+        self.config.update(
+            {
+                "n_trials": n_trials,
+                "n_jobs": n_jobs,
+            }
+        )
 
-    def optimize(self, model: QSPRModel, **kwargs) -> dict:
+    def optimize(
+        self, model: QSPRModel, ds: QSPRDataset, save_params: bool = True, **kwargs
+    ) -> dict:
         """Bayesian optimization of hyperparameters using optuna.
 
         Args:
             model (QSPRModel): the model to optimize
+            ds (QSPRDataset): dataset to use for the optimization
+            save_params (bool):
+                whether to set and save the best parameters to the model
+                after optimization
             **kwargs: additional arguments for the assessment method
 
         Returns:
             dict: best parameters found during optimization
         """
-        self.scoreFunc.checkMetricCompatibility(model.task, self.runAssessment.useProba)
         import optuna
+
+        self.monitor.onOptimizationStart(
+            model, ds, self.config, self.__class__.__name__
+        )
 
         logger.info(
             "Bayesian optimization can take a while "
             "for some hyperparameter combinations"
         )
         # create optuna study
-        study = optuna.create_study(direction="maximize")
+        study = optuna.create_study(
+            direction="maximize",
+            sampler=optuna.samplers.TPESampler(seed=model.randomState),
+        )
         logger.info(
-            "Bayesian optimization started: %s" %
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "Bayesian optimization started: %s"
+            % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
         study.optimize(
-            lambda t: self.objective(t, model), self.nTrials, n_jobs=self.nJobs
+            lambda t: self.objective(t, model, ds), self.nTrials, n_jobs=self.nJobs
         )
         logger.info(
-            "Bayesian optimization ended: %s" %
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "Bayesian optimization ended: %s"
+            % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
         # save the best study
         trial = study.best_trial
@@ -139,14 +218,23 @@ class OptunaOptimization(HyperParameterOptimization):
         # save the best score and parameters, return the best parameters
         self.bestScore = trial.value
         self.bestParams = trial.params
+
+        self.monitor.onOptimizationEnd(self.bestScore, self.bestParams)
+        # save the best parameters to the model if requested
+        if save_params:
+            model.setParams(self.bestParams)
+            model.save()
         return self.bestParams
 
-    def objective(self, trial: optuna.trial.Trial, model: QSPRModel, **kwargs) -> float:
+    def objective(
+        self, trial: optuna.trial.Trial, model: QSPRModel, ds: QSPRDataset, **kwargs
+    ) -> float:
         """Objective for bayesian optimization.
 
         Arguments:
             trial (optuna.trial.Trial): trial object for the optimization
             model (QSPRModel): the model to optimize
+            ds (QSPRDataset): dataset to use for the optimization
             **kwargs: additional arguments for the assessment method
 
         Returns:
@@ -171,59 +259,61 @@ class OptunaOptimization(HyperParameterOptimization):
                 )
             elif value[0] == "uniform":
                 bayesian_params[key] = trial.suggest_float(key, value[1], value[2])
+        self.monitor.onIterationStart(bayesian_params)
         # assess the model with the current parameters and return the score
-        y, y_ind = model.data.getTargetPropertiesValues()
-        predictions = self.runAssessment(
-            model, save=False, parameters=bayesian_params, **kwargs
+        scores = self.runAssessment(
+            model,
+            ds=ds,
+            save=False,
+            parameters=bayesian_params,
+            monitor=self.monitor,
+            **kwargs,
         )
-        scores = []
-        # TODO: this should be removed once random seeds are fixed
-        for pred in predictions:
-            if model.task.isClassification():
-                # check if more than 1 class in y_true
-                if not len(np.unique(pred[0])) > 1:
-                    logger.warning("Only 1 class in y_true, skipping fold.")
-                    pass
-            scores.append(self.scoreFunc(*pred))
-        assert len(scores) > 0, "No scores calculated, all folds skipped."
-        # scores = [self.scoreFunc(*pred) for pred in predictions]
         score = self.scoreAggregation(scores)
         logger.info(bayesian_params)
         logger.info(f"Score: {score}, std: {np.std(scores)}")
+        self.monitor.onIterationEnd(score, scores)
         return score
 
 
-class GridSearchOptimization(HyperParameterOptimization):
+class GridSearchOptimization(HyperparameterOptimization):
     """Class for hyperparameter optimization of QSPRModels using GridSearch."""
+
     def __init__(
         self,
-        scoring: str | Callable[[Iterable, Iterable], float],
         param_grid: dict,
-        model_assessor: ModelAssessor = CrossValAssessor(),
+        model_assessor: ModelAssessor,
         score_aggregation: Callable = np.mean,
+        monitor: HyperparameterOptimizationMonitor | None = None,
     ):
         """Initialize the class.
 
         Args:
-            scoring (Union[str, Callable[[Iterable, Iterable], Iterable]]):
-                metric name from sklearn.metrics or user-defined scoring function.
             param_grid (dict):
-                dictionary with parameter names as keys and lists
-                of parameter settings to try as values
-            model_assessor (ModelAssessor): assessment method to use for the
-                                                  optimization
-            score_aggregation (Callable): function to aggregate the scores of different
-                                          folds if the assessment method returns
-                                          multiple predictions (default: np.mean)
+                dictionary with parameter names as keys and lists of parameter settings
+                to try as values
+            model_assessor (ModelAssessor):
+                assessment method to use for the optimization
+            score_aggregation (Callable):
+                function to aggregate the scores of different folds if the assessment
+                method returns multiple predictions (default: np.mean)
+            monitor (HyperparameterOptimizationMonitor):
+                monitor for the optimization, if None, a BaseMonitor is used
         """
-        super().__init__(scoring, param_grid, model_assessor, score_aggregation)
+        super().__init__(param_grid, model_assessor, score_aggregation, monitor)
+        if monitor is None:
+            self.monitor = BaseMonitor()
 
-    def optimize(self, model: QSPRModel, save_params: bool = True, **kwargs) -> dict:
+    def optimize(
+        self, model: QSPRModel, ds: QSPRDataset, save_params: bool = True, **kwargs
+    ) -> dict:
         """Optimize the hyperparameters of the model.
 
         Args:
             model (QSPRModel):
                 the model to optimize
+            ds (QSPRDataset):
+                dataset to use for the optimization
             save_params (bool):
                 whether to set and save the best parameters to the model
                 after optimization
@@ -232,40 +322,35 @@ class GridSearchOptimization(HyperParameterOptimization):
         Returns:
             dict: best parameters found during optimization
         """
-        self.scoreFunc.checkMetricCompatibility(model.task, self.runAssessment.useProba)
+        self.monitor.onOptimizationStart(
+            model, ds, self.config, self.__class__.__name__
+        )
         logger.info(
             "Grid search started: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
         for params in ParameterGrid(self.paramGrid):
+            self.monitor.onIterationStart(params)
             logger.info(params)
-            predictions = self.runAssessment(
-                model, save=False, parameters=params, **kwargs
+            scores = self.runAssessment(
+                model, ds, save=False, parameters=params, monitor=self.monitor, **kwargs
             )
-            scores = []
-            # TODO: this should be removed once random seeds are fixed
-            for pred in predictions:
-                if model.task.isClassification():
-                    # check if more than 1 class in y_true
-                    if not len(np.unique(pred[0])) > 1:
-                        logger.warning("Only 1 class in y_true, skipping fold.")
-                        pass
-                scores.append(self.scoreFunc(*pred))
-            assert len(scores) > 0, "No scores calculated, all folds skipped."
-            # scores = [self.scoreFunc(*pred) for pred in predictions]
             score = self.scoreAggregation(scores)
             logger.info(f"Score: {score}, std: {np.std(scores)}")
             if score > self.bestScore:
                 self.bestScore = score
                 self.bestParams = params
+            self.monitor.onIterationEnd(score, scores)
         # log some info and return the best parameters
         logger.info(
             "Grid search ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
         logger.info(
-            "Grid search best params: %s with score: %s" %
-            (self.bestParams, self.bestScore)
+            "Grid search best params: %s with score: %s"
+            % (self.bestParams, self.bestScore)
         )
         # save the best parameters to the model if requested
         if save_params:
-            model.saveParams(self.bestParams)
+            model.setParams(self.bestParams)
+            model.save()
+        self.monitor.onOptimizationEnd(self.bestScore, self.bestParams)
         return self.bestParams

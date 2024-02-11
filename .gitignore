@@ -1,5 +1,6 @@
 ### QSPRpred Specific
 /.*
+!.github
 !.gitignore
 !.gitlab-ci.yml
 !.pre-commit-config.yaml
@@ -11,9 +12,13 @@
 *.gzip
 *.tar.gz
 *.out
-/**/test_files/generated/
 /**/tutorial/test_files/
 /**/tutorial/cli_tutorial/
+/**/tutorials/tutorial_data/papyrus/
+/**/tutorials/tutorial_data/A2A_LIGANDS.tsv
+/**/tutorials/tutorial_data/AR_LIGANDS.tsv
+/**/tutorials/tutorial_data/AR_LIGANDS_pivot.tsv
+/**/tutorials/tutorial_output
 
 ### Python template
 # Byte-compiled / optimized / DLL files

@@ -1,33 +1,31 @@
 # This workflow will install Python dependencies, run tests, and write documentation
 
 variables:
-   GIT_STRATEGY: clone # clone entire repo instead of reusing workspace
-   GIT_DEPTH: "0" # avoid shallow clone to give sonar all the info it needs
+  GIT_STRATEGY: clone # clone entire repo instead of reusing workspace
+  GIT_DEPTH: "0" # avoid shallow clone to give sonar all the info it needs
 
 stages:
-   - test
-   - deploy
+  - test
+  - deploy
 
 # Install python dependencies and run python tests with pytest and the CLI test script
 .test:
-   stage: test
-   before_script:
-      - python --version  # For debugging python version
-      - wget http://www.clustal.org/omega/clustalo-1.2.4-Ubuntu-x86_64 -O clustalo && chmod +x clustalo
-      - wget https://mafft.cbrc.jp/alignment/software/mafft-7.520-linux.tgz -O mafft.tgz && tar -xzvf mafft.tgz && chmod +x mafft-linux64/mafftdir/bin/mafft
-      - export PATH=$PATH:$PWD/mafft-linux64/mafftdir/bin/:$PWD
-      - export MAFFT_BINARIES=$PWD/mafft-linux64/mafftdir/libexec/
-      - clustalo --version  # For debugging clustalo version
-      - mafft --version  # For debugging mafft version
-      - python -m pip install ".[full]" --no-cache-dir
-      - python -c "import qsprpred; print(qsprpred.__version__)" # For debugging package version
-      - python -m pip install pytest
-      - python -m pip install jupyterlab
-      - python -m pip freeze # For debugging environment
-   script:
-      - pytest qsprpred
-      - cd clitest && ./run.sh
-      - cd ../tutorial && ./run_all.sh
+  stage: test
+  before_script:
+    - python --version  # For debugging python version
+    - wget http://www.clustal.org/omega/clustalo-1.2.4-Ubuntu-x86_64 -O clustalo && chmod +x clustalo
+    - wget https://mafft.cbrc.jp/alignment/software/mafft-7.520-linux.tgz -O mafft.tgz && tar -xzvf mafft.tgz && chmod +x mafft-linux64/mafftdir/bin/mafft
+    - export PATH=$PATH:$PWD/mafft-linux64/mafftdir/bin/:$PWD
+    - export MAFFT_BINARIES=$PWD/mafft-linux64/mafftdir/libexec/
+    - clustalo --version  # For debugging clustalo version
+    - mafft --version  # For debugging mafft version
+    - pip install ".[full]" --no-cache-dir
+    - python -c "import qsprpred; print(qsprpred.__version__)" # For debugging package version
+    - pip install pytest
+    - pip install jupyterlab
+    - pip freeze # For debugging environment
+  script:
+    - cd testing && QSPPRED_TEST_SPLIT_UNITS=true QSPRPRED_VERBOSE_LOGGING=true ./run.sh
 
 # # Run tests on Python version 11 (linux image)
 # test:python3.11:
@@ -36,21 +34,5 @@ stages:
 
 # Run tests on Python version 10 (linux image)
 test:python3.10:
-   extends: .test
-   image: python:3.10
-
-# Write documentation on main branch
-pages:
-   stage: deploy
-   image: python:3.10
-   before_script:
-      - python -m pip install -U sphinx
-      - python -m pip install sphinx-rtd-theme
-   script:
-      - mkdir public
-      - sphinx-build -b html ./docs public
-   artifacts:
-      paths:
-      - public
-   only:
-      - main
+  extends: .test
+  image: python:3.10

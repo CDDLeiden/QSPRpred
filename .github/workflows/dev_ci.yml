@@ -1,0 +1,70 @@
+name: Multi-OS Complete Test
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+  pull_request:
+    branches:
+      - dev
+      - main
+
+env:
+  QSPPRED_TEST_EXTRAS: true
+  QSPRPRED_VERBOSE_LOGGING: true
+
+jobs:
+  tests-all:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ] # FIXME: add macos-latest and windows-latest (removed for now due to limited debugging options)
+        python-version: [ '3.10' ]
+      fail-fast: false
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Set Up Dependencies
+        run: |
+          python -m pip cache purge
+          source .github/setup.sh ${{ runner.os }} $env
+
+      - name: Check Environment Info
+        run: |
+          echo "Clustal Omega version: $(clustalo --version)"
+          echo "MAFFT version: $(mafft --version)"
+          python -m pip freeze
+          python -c "print('Python version: ' + '$(python --version)')"
+          python -c "import platform; print('System info: ', platform.system(), platform.release())"
+          python -c "import qsprpred; print('QSPRpred version:', qsprpred.__version__)"
+
+      - name: Run pytest
+        run: cd testing/test_pytest && ./run.sh
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4
+        if: success() || failure() # always run even if the previous step fails
+        with:
+          report_paths: 'testing/test_pytest/test_report.xml'
+
+      - name: Test CLI
+        run: cd testing/test_cli && ./run.sh
+
+      - name: Test Consistency
+        run: cd testing/test_consistency && ./run.sh
+
+      - name: Test Tutorials
+        run: cd testing/test_tutorial && ./run.sh

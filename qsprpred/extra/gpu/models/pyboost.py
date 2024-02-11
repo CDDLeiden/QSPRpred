@@ -19,12 +19,14 @@ import numpy as np
 import pandas as pd
 from py_boost.gpu.losses import BCELoss, MSELoss
 from py_boost.gpu.losses.metrics import Metric, auc
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import ShuffleSplit
 
-from ....data.data import QSPRDataset
+from ....data.sampling.splits import DataSplit
+from ....data.tables.qspr import QSPRDataset
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
-from ....models.interfaces import QSPRModel
-from ....models.tasks import ModelTasks
+from ....models.models import QSPRModel
+from ....models.monitors import BaseMonitor, FitMonitor
+from ....tasks import ModelTasks
 
 
 class PyBoostModel(QSPRModel):
@@ -42,18 +44,18 @@ class PyBoostModel(QSPRModel):
     >>> parameters = {'loss':  'mse', 'metric': 'r2_score', 'verbose': -1}
     >>> model = PyBoostModel(
     ...     base_dir='qspr/models/',
-    ...     data=dataset,
     ...     name="PyBoost",
     ...     parameters=parameters
     ... )
     """
+
     def __init__(
         self,
         base_dir: str,
-        data: Optional[QSPRDataset] = None,
         name: Optional[str] = None,
         parameters: Optional[dict] = None,
         autoload=True,
+        random_state: Optional[int] = None,
     ):
         """Initialize a QSPR model instance.
 
@@ -64,21 +66,57 @@ class PyBoostModel(QSPRModel):
             base_dir (str):
                 base directory of the model,
                 the model files are stored in a subdirectory `{baseDir}/{outDir}/`
-            data (QSPRDataset): data set used to train the model
             name (str): name of the model
             parameters (dict): dictionary of algorithm specific parameters
             autoload (bool):
                 if `True`, the estimator is loaded from the serialized file
                 if it exists, otherwise a new instance of alg is created
+            random_state (int): random state to use for the model
         """
         super().__init__(
             base_dir,
             import_module("py_boost").GradientBoosting,
-            data,
             name,
             parameters,
             autoload,
+            random_state,
         )
+
+    @property
+    def supportsEarlyStopping(self) -> bool:
+        """Check if the model supports early stopping.
+
+        Returns:
+            (bool): whether the model supports early stopping or not
+        """
+        return True
+
+    @early_stopping
+    def fit(
+        self,
+        X: pd.DataFrame | np.ndarray,
+        y: pd.DataFrame | np.ndarray,
+        estimator: Optional[Type[import_module("py_boost").GradientBoosting]] = None,
+        mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+        split: DataSplit | None = None,
+        monitor: FitMonitor | None = None,
+        **kwargs,
+    ) -> import_module("py_boost").GradientBoosting:
+        """Fit the model to the given data matrix or `QSPRDataset`.
+
+        Args:
+            X (pd.DataFrame, np.ndarray): data matrix to fit
+            y (pd.DataFrame, np.ndarray): target matrix to fit
+            estimator (Any): estimator instance to use for fitting
+            mode (EarlyStoppingMode): mode to use for early stopping
+            split (DataSplit): data split to use for early stopping,
+                if None, a ShuffleSplit with 10% validation set size is used
+            monitor (FitMonitor): monitor to use for fitting, if None, a BaseMonitor
+            kwargs: additional keyword arguments for the fit function
+
+        Returns:
+            (Pyboost): fitted estimator instance
+        """
         if self.task == ModelTasks.MULTITASK_MIXED:
             raise ValueError(
                 "MultiTask with a mix of classification and regression tasks "
@@ -96,38 +134,11 @@ class PyBoostModel(QSPRModel):
                 "Multi-class is not supported for pyboost "
                 "that can handle missing data models."
             )
-
-    @property
-    def supportsEarlyStopping(self) -> bool:
-        """Check if the model supports early stopping.
-
-        Returns:
-            (bool): whether the model supports early stopping or not
-        """
-        return True
-
-    @early_stopping
-    def fit(
-        self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        y: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Optional[Type[import_module("py_boost").GradientBoosting]] = None,
-        mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
-        **kwargs,
-    ) -> import_module("py_boost").GradientBoosting:
-        """Fit the model to the given data matrix or `QSPRDataset`.
-
-        Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
-            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
-            estimator (Any): estimator instance to use for fitting
-            early_stopping (bool): if True, early stopping is used
-            kwargs: additional keyword arguments for the fit function
-
-        Returns:
-            (GzipKNNAlgorithm): fitted estimator instance
-        """
+        monitor = BaseMonitor() if monitor is None else monitor
         estimator = self.estimator if estimator is None else estimator
+        split = split or ShuffleSplit(
+            n_splits=1, test_size=0.1, random_state=self.randomState
+        )
         X, y = self.convertToNumpy(X, y)
 
         if self.task == ModelTasks.MULTICLASS:
@@ -136,20 +147,31 @@ class PyBoostModel(QSPRModel):
         if self.earlyStopping:
             # split cross validation fold train set into train
             # and validation set for early stopping
-            X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.1)
-            estimator.fit(X_train, y_train, eval_sets=[{"X": X_val, "y": y_val}])
-
+            train_index, val_index = next(split.split(X, y))
+            monitor.onFitStart(
+                self,
+                X[train_index, :],
+                y[train_index],
+                X[val_index, :],
+                y[val_index],
+            )
+            estimator.fit(
+                X[train_index, :],
+                y[train_index],
+                eval_sets=[{"X": X[val_index, :], "y": y[val_index]}],
+            )
+            monitor.onFitEnd(estimator, estimator.best_round)
             return estimator, estimator.best_round
 
+        monitor.onFitStart(self, X, y)
         estimator.params.update({"ntrees": self.earlyStopping.getEpochs()})
         estimator.fit(X, y)
 
+        monitor.onFitEnd(estimator)
         return estimator, self.earlyStopping.getEpochs()
 
     def predict(
-        self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Any = None
+        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
     ) -> np.ndarray:
         """Make predictions for the given data matrix or `QSPRDataset`.
 
@@ -187,9 +209,7 @@ class PyBoostModel(QSPRModel):
             return preds
 
     def predictProba(
-        self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Any = None
+        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
     ) -> np.ndarray:
         estimator = self.estimator if estimator is None else estimator
         X = self.convertToNumpy(X)
@@ -279,6 +299,7 @@ class MSEwithNaNLoss(MSELoss):
     Masked MSE loss function. Custom loss wrapper for pyboost that can handle
     missing data, as adapted from the tutorials in https://github.com/sb-ai-lab/Py-Boost
     """
+
     def base_score(self, y_true):
         # Replace .mean with nanmean function to calc base score
         return cp.nanmean(y_true, axis=0)
@@ -304,6 +325,7 @@ class BCEWithNaNLoss(BCELoss):
     Masked BCE loss function. Custom loss wrapper for pyboost that can handle missing
     data, as adapted from the tutorials in https://github.com/sb-ai-lab/Py-Boost
     """
+
     def base_score(self, y_true):
         # Replace .mean with nanmean function to calc base score
         means = cp.clip(
@@ -333,14 +355,16 @@ class NaNRMSEScore(Metric):
     Custom metric wrapper for pyboost that can handle missing data,
     as adapted from  the tutorials in https://github.com/sb-ai-lab/Py-Boost
     """
+
     def __call__(self, y_true, y_pred, sample_weight=None):
         mask = ~np.isnan(y_true)
 
         if sample_weight is not None:
-            err = ((y_true - y_pred)[mask]**2 *
-                   sample_weight[mask]).sum(axis=0) / sample_weight[mask].sum()
+            err = ((y_true - y_pred)[mask] ** 2 * sample_weight[mask]).sum(
+                axis=0
+            ) / sample_weight[mask].sum()
         else:
-            err = np.nanmean((np.where(mask, (y_true - y_pred), np.nan)**2), axis=0)
+            err = np.nanmean((np.where(mask, (y_true - y_pred), np.nan) ** 2), axis=0)
 
         return np.average(err, weights=np.count_nonzero(mask, axis=0))
 
@@ -354,16 +378,19 @@ class NaNR2Score(Metric):
     Custom metric wrapper for pyboost that can handle missing data,
     as adapted from  the tutorials in https://github.com/sb-ai-lab/Py-Boost
     """
+
     def __call__(self, y_true, y_pred, sample_weight=None):
         mask = ~np.isnan(y_true)
 
         if sample_weight is not None:
-            err = ((y_true - y_pred)[mask]**2 *
-                   sample_weight[mask]).sum(axis=0) / sample_weight[mask].sum()
-            std = ((y_true[mask] - y_true[mask].mean(axis=0))**2 *
-                   sample_weight[mask]).sum(axis=0) / sample_weight[mask].sum()
+            err = ((y_true - y_pred)[mask] ** 2 * sample_weight[mask]).sum(
+                axis=0
+            ) / sample_weight[mask].sum()
+            std = (
+                (y_true[mask] - y_true[mask].mean(axis=0)) ** 2 * sample_weight[mask]
+            ).sum(axis=0) / sample_weight[mask].sum()
         else:
-            err = np.nanmean((np.where(mask, (y_true - y_pred), np.nan)**2), axis=0)
+            err = np.nanmean((np.where(mask, (y_true - y_pred), np.nan) ** 2), axis=0)
             std = np.nanvar(np.where(mask, y_true, np.nan), axis=0)
 
         return np.average(1 - err / std, weights=np.count_nonzero(mask, axis=0))
@@ -378,6 +405,7 @@ class NaNAucMetric(Metric):
     Custom metric wrapper for pyboost that can handle missing data,
     as adapted from  the tutorials in https://github.com/sb-ai-lab/Py-Boost
     """
+
     def __call__(self, y_true, y_pred, sample_weight=None):
         aucs = []
         mask = ~cp.isnan(y_true)

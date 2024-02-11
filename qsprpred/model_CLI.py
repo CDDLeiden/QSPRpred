@@ -2,13 +2,9 @@
 
 import argparse
 import json
-import os
 import os.path
-import random
 import sys
-from copy import deepcopy
 from datetime import datetime
-from importlib.util import find_spec
 
 import numpy as np
 import optuna
@@ -19,15 +15,14 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
-from .data.data import QSPRDataset
+from qsprpred.data.tables.qspr import QSPRDataset
+from qsprpred.models.assessment.methods import CrossValAssessor, TestSetAssessor
+from qsprpred.tasks import TargetTasks
 from .extra.gpu.models.dnn import DNNModel
 from .logs.utils import backup_files, enable_file_logger
-from .models.assessment_methods import CrossValAssessor, TestSetAssessor
 from .models.early_stopping import EarlyStoppingMode
 from .models.hyperparam_optimization import GridSearchOptimization, OptunaOptimization
-from .models.metrics import SklearnMetric
-from .models.sklearn import QSPRModel, SklearnModel
-from .models.tasks import TargetTasks
+from .models.scikit_learn import QSPRModel, SklearnModel
 
 
 def QSPRArgParser(txt=None):
@@ -134,8 +129,7 @@ def QSPRArgParser(txt=None):
         "--optimization",
         type=str,
         default=None,
-        help=
-        "Hyperparameter optimization, if 'None' no optimization, if 'grid' gridsearch, \
+        help="Hyperparameter optimization, if 'None' no optimization, if 'grid' gridsearch, \
                             if 'bayes' bayesian optimization",
     )
     parser.add_argument(
@@ -145,8 +139,7 @@ def QSPRArgParser(txt=None):
         default=None,
         help=(
             "search_space hyperparameter optimization json file location "
-            "(./my_search_space.json). If None, default "
-            "qsprpred.models.search_space.json used."
+            "(./my_search_space.json)."
         ),
     )
     parser.add_argument(
@@ -205,16 +198,10 @@ def QSPR_modelling(args):
                 args.model_types,
             )
         else:
-            # Get default search space
-            model_types = deepcopy(args.model_types)
-            if "DNN" in args.model_types:
-                dnn_grid_params = DNNModel.loadParamsGrid(
-                    None, args.optimization, "DNN"
-                )
-                model_types.remove("DNN")
-            grid_params = QSPRModel.loadParamsGrid(None, args.optimization, model_types)
-            if "DNN" in args.model_types:
-                grid_params = np.concatenate((grid_params, dnn_grid_params))
+            log.error(
+                "Please specify a search_space file for hyperparameter optimization."
+            )
+            sys.exit()
 
     for dataset in args.datasets:
         log.info(f"Dataset: {dataset.name}")
@@ -271,10 +258,13 @@ def QSPR_modelling(args):
                     parameters["class_weight"] = class_weight
                 counts = dataset.y.value_counts()
                 scale_pos_weight = (
-                    counts[0] / counts[1] if (
-                        args.sample_weighing and len(tasks) == 1 and
-                        not tasks[0].isMultiClass()
-                    ) else 1
+                    counts[0] / counts[1]
+                    if (
+                        args.sample_weighing
+                        and len(tasks) == 1
+                        and not tasks[0].isMultiClass()
+                    )
+                    else 1
                 )
                 if alg_dict[model_type] == XGBClassifier:
                     parameters["scale_pos_weight"] = scale_pos_weight
@@ -291,38 +281,44 @@ def QSPR_modelling(args):
 
             # Create QSPR model object
             model_name = (
-                f"{model_type}_{dataset.name}" if not args.model_suffix else
-                f"{model_type}_{dataset.name}_{args.model_suffix}"
+                f"{model_type}_{dataset.name}"
+                if not args.model_suffix
+                else f"{model_type}_{dataset.name}_{args.model_suffix}"
             )
             if model_type == "DNN":
-                QSPRmodel = DNNModel(
+                qspr_model = DNNModel(
                     base_dir=f"{args.output_dir}",
-                    data=dataset,
                     parameters=parameters,
                     name=model_name,
                     gpus=args.gpus,
                     patience=args.patience,
                     tol=args.tolerance,
+                    random_state=args.random_state,
                 )
             else:
-                QSPRmodel = SklearnModel(
+                qspr_model = SklearnModel(
                     base_dir=f"{args.output_dir}",
-                    data=dataset,
                     alg=alg_dict[model_type],
                     name=model_name,
                     parameters=parameters,
+                    random_state=args.random_state,
                 )
 
             # if desired run parameter optimization
-            score_func = SklearnMetric.getDefaultMetric(QSPRmodel.task)
+            score_func = (
+                "r2"
+                if dataset.targetProperties[0].task.isRegression()
+                else "roc_auc_ovr"
+            )
+            best_params = None
             if args.optimization == "grid":
                 search_space_gs = grid_params[grid_params[:, 0] == model_type, 1][0]
                 log.info(search_space_gs)
                 gridsearcher = GridSearchOptimization(
-                    scoring=score_func, param_grid=search_space_gs
+                    model_assessor=CrossValAssessor(scoring=score_func),
+                    param_grid=search_space_gs,
                 )
-                best_params = gridsearcher.optimize(QSPRmodel)
-                QSPRmodel.saveParams(best_params)
+                best_params = gridsearcher.optimize(qspr_model, dataset)
             elif args.optimization == "bayes":
                 search_space_bs = grid_params[grid_params[:, 0] == model_type, 1][0]
                 log.info(search_space_bs)
@@ -333,28 +329,30 @@ def QSPR_modelling(args):
                         )
                     else:
                         search_space_bs.update(
-                            {
-                                "criterion":
-                                    ["categorical", ["squared_error", "poisson"]]
-                            }
+                            {"criterion": ["categorical", ["squared_error", "poisson"]]}
                         )
                 elif model_type == "RF":
                     search_space_bs.update(
                         {"criterion": ["categorical", ["gini", "entropy"]]}
                     )
                 bayesoptimizer = OptunaOptimization(
-                    scoring=score_func,
+                    model_assessor=CrossValAssessor(scoring=score_func),
                     param_grid=search_space_bs,
                     n_trials=args.n_trials,
                     n_jobs=args.n_jobs,
                 )
-                best_params = bayesoptimizer.optimize(QSPRmodel)
-
-            # initialize models from saved or default parameters
+                best_params = bayesoptimizer.optimize(qspr_model, dataset)
+            if best_params is not None:
+                qspr_model.setParams(best_params)
 
             if args.model_evaluation:
-                CrossValAssessor(mode=EarlyStoppingMode.RECORDING)(QSPRmodel)
-                TestSetAssessor(mode=EarlyStoppingMode.NOT_RECORDING)(QSPRmodel)
+                CrossValAssessor(mode=EarlyStoppingMode.RECORDING, scoring=score_func)(
+                    qspr_model,
+                    dataset,
+                )
+                TestSetAssessor(
+                    mode=EarlyStoppingMode.NOT_RECORDING, scoring=score_func
+                )(qspr_model, dataset)
 
             if args.save_model:
                 if (model_type == "DNN") and not (args.model_evaluation):
@@ -363,20 +361,11 @@ def QSPR_modelling(args):
                         "for determining optimal number of epochs to stop training."
                     )
                 else:
-                    QSPRmodel.fitAttached()
+                    qspr_model.fitDataset(dataset)
 
 
 if __name__ == "__main__":
     args = QSPRArgParser()
-
-    # Set random seeds
-    random.seed(args.random_state)
-    np.random.seed(args.random_state)
-    if find_spec("torch") is not None:
-        import torch
-
-        torch.manual_seed(args.random_state)
-    os.environ["TF_DETERMINISTIC_OPS"] = str(args.random_state)
 
     # Backup files
     datasets = [QSPRDataset.fromFile(data_file) for data_file in args.data_paths]

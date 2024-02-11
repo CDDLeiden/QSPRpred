@@ -4,16 +4,14 @@ import argparse
 import json
 import os
 import os.path
-import random
 import sys
-from importlib.util import find_spec
 
 import numpy as np
 import optuna
 import pandas as pd
 
 from .logs.utils import backup_files, enable_file_logger
-from .models.interfaces import QSPRModel
+from .models.models import QSPRModel
 
 
 def QSPRArgParser(txt=None):
@@ -148,15 +146,6 @@ def QSPR_predict(args):
 
 if __name__ == "__main__":
     args = QSPRArgParser()
-
-    # Set random seeds
-    random.seed(args.random_state)
-    np.random.seed(args.random_state)
-    if find_spec("torch") is not None:
-        import torch
-
-        torch.manual_seed(args.random_state)
-    os.environ["TF_DETERMINISTIC_OPS"] = str(args.random_state)
 
     # Backup files
     if not args.skip_backup:

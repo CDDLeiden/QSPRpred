@@ -7,11 +7,13 @@ from typing import Callable
 
 import numpy as np
 
-from ...data.data import MoleculeTable
-from ...models.interfaces import QSPRModel
-from ...models.sklearn import SklearnModel
-from ..data.data import PCMDataSet
-from ..data.utils.descriptorcalculator import ProteinDescriptorCalculator
+from qsprpred.extra.data.tables.pcm import PCMDataSet
+from ..data.descriptors.sets import ProteinDescriptorSet
+from ...data.tables.mol import MoleculeTable
+from ...models.models import QSPRModel
+from ...models.scikit_learn import SklearnModel
+from rdkit import Chem
+from rdkit.Chem import Mol
 
 
 class PCMModel(QSPRModel, ABC):
@@ -20,6 +22,7 @@ class PCMModel(QSPRModel, ABC):
     Extension of `QSPRModel` for proteochemometric models (PCM). It modifies
     the `predictMols` method to handle PCM descriptors and specification of protein ids.
     """
+
     def createPredictionDatasetFromMols(
         self,
         mols: list[str],
@@ -48,14 +51,18 @@ class PCMModel(QSPRModel, ABC):
             PCMDataSet:
                 Dataset with the features calculated for the molecules.
         """
+        # make a molecule table first and add the target properties
+        if isinstance(mols[0], Mol):
+            mols = [Chem.MolToSmiles(mol) for mol in mols]
         dataset = MoleculeTable.fromSMILES(
             f"{self.__class__.__name__}_{hash(self)}",
             mols,
             drop_invalids=False,
             n_jobs=n_jobs,
         )
-        for targetproperty in self.targetProperties:
-            dataset.addProperty(targetproperty.name, np.nan)
+        for target_property in self.targetProperties:
+            target_property.imputer = None
+            dataset.addProperty(target_property.name, np.nan)
         dataset.addProperty("protein_id", protein_id)
         # convert to PCMDataSet
         dataset = PCMDataSet.fromMolTable(
@@ -119,18 +126,20 @@ class PCMModel(QSPRModel, ABC):
         is_pcm = False
         protein_ids = set()
         for calc in self.featureCalculators:
-            if isinstance(calc, ProteinDescriptorCalculator):
+            if isinstance(calc, ProteinDescriptorSet):
                 is_pcm = True
-                if not protein_ids:
+                if not protein_ids and hasattr(calc, "msaProvider"):
                     protein_ids = set(calc.msaProvider.current.keys())
-                else:
+                if protein_ids and hasattr(calc, "msaProvider"):
                     assert protein_ids == set(calc.msaProvider.current.keys()), (
                         "All protein descriptor calculators "
                         "must have the same protein ids."
                     )
             if (
-                isinstance(calc, ProteinDescriptorCalculator) and calc.msaProvider and
-                protein_id not in calc.msaProvider.current.keys()
+                isinstance(calc, ProteinDescriptorSet)
+                and hasattr(calc, "msaProvider")
+                and calc.msaProvider
+                and protein_id not in calc.msaProvider.current.keys()
             ):
                 raise ValueError(
                     f"Protein id {protein_id} not found in the available MSA, "
