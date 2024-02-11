@@ -1,19 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.sources.papyrus.papyrus_filter &mdash; QSPRpred 2.1.0 documentation</title>
-      <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../../../_static/css/theme.css" type="text/css" />
+  <title>qsprpred.data.sources.papyrus.papyrus_filter &mdash; QSPRpred 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
-        <script src="../../../../../_static/doctools.js"></script>
-        <script src="../../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>
+    </script>
+        <script src="../../../../../_static/design-tabs.js?v=36754332"></script>
+        <script src="../../../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
@@ -44,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.1.0
+                v3.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -58,8 +67,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../use.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../features.html">Overview of available features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../api/modules.html">Python API</a></li>
 </ul>
 
@@ -101,19 +110,23 @@
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">papyrus_scripts.reader</span> <span class="kn">import</span> <span class="n">read_papyrus</span>
 
+<span class="kn">from</span> <span class="nn">qsprpred.logs</span> <span class="kn">import</span> <span class="n">logger</span>
 
-<div class="viewcode-block" id="papyrus_filter"><a class="viewcode-back" href="../../../../../api/qsprpred.data.sources.papyrus.html#qsprpred.data.sources.papyrus.papyrus_filter.papyrus_filter">[docs]</a><span class="k">def</span> <span class="nf">papyrus_filter</span><span class="p">(</span>
+
+<div class="viewcode-block" id="papyrus_filter">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.sources.papyrus.html#qsprpred.data.sources.papyrus.papyrus_filter.papyrus_filter">[docs]</a>
+<span class="k">def</span> <span class="nf">papyrus_filter</span><span class="p">(</span>
     <span class="n">acc_key</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">quality</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">outdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">activity_types</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
-    <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">drop_duplicates</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mf">1e5</span><span class="p">,</span>
     <span class="n">use_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">stereo</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">plusplus</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">papyrus_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">papyrus_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Filters the downloaded Papyrus dataset for quality and accession key (UniProt)</span>
 <span class="sd">    and outputs a .tsv file of all compounds fulfilling these requirements.</span>
@@ -141,41 +154,42 @@
     <span class="n">papyrus_dir</span> <span class="o">=</span> <span class="n">outdir</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">papyrus_dir</span> <span class="k">else</span> <span class="n">papyrus_dir</span>
 
     <span class="k">if</span> <span class="n">use_existing</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">outfile</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using existing data from </span><span class="si">{</span><span class="n">outfile</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Using existing data from </span><span class="si">{</span><span class="n">outfile</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">outfile</span>
 
     <span class="c1"># read data</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading data from </span><span class="si">{</span><span class="n">papyrus_dir</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading data from </span><span class="si">{</span><span class="n">papyrus_dir</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
     <span class="n">sample_data</span> <span class="o">=</span> <span class="n">read_papyrus</span><span class="p">(</span>
         <span class="n">is3d</span><span class="o">=</span><span class="n">stereo</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="n">chunk_size</span><span class="p">,</span> <span class="n">source_path</span><span class="o">=</span><span class="n">papyrus_dir</span><span class="p">,</span> <span class="n">plusplus</span><span class="o">=</span><span class="n">plusplus</span>
     <span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Read all data.&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Read all data.&quot;</span><span class="p">)</span>
 
     <span class="c1"># data filters</span>
     <span class="n">filter1</span> <span class="o">=</span> <span class="n">keep_quality</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">sample_data</span><span class="p">,</span> <span class="n">min_quality</span><span class="o">=</span><span class="n">quality</span><span class="p">)</span>
     <span class="n">filter2</span> <span class="o">=</span> <span class="n">keep_accession</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">filter1</span><span class="p">,</span> <span class="n">accession</span><span class="o">=</span><span class="n">acc_key</span><span class="p">)</span>
     <span class="n">filter3</span> <span class="o">=</span> <span class="n">keep_type</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">filter2</span><span class="p">,</span> <span class="n">activity_types</span><span class="o">=</span><span class="n">activity_types</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Initialized filters.&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Initialized filters.&quot;</span><span class="p">)</span>
 
     <span class="c1"># filter data per chunk</span>
     <span class="n">filtered_data</span> <span class="o">=</span> <span class="n">consume_chunks</span><span class="p">(</span><span class="n">generator</span><span class="o">=</span><span class="n">filter3</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of compounds:</span><span class="si">{</span><span class="n">filtered_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of compounds:</span><span class="si">{</span><span class="n">filtered_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="c1"># filter out duplicate InChiKeys</span>
     <span class="k">if</span> <span class="n">drop_duplicates</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Filtering out duplicate molecules&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Filtering out duplicate molecules&quot;</span><span class="p">)</span>
         <span class="n">amnt_mols_i</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered_data</span><span class="p">[</span><span class="s2">&quot;InChIKey&quot;</span><span class="p">])</span>
         <span class="n">filtered_data</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span>
             <span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;InChIKey&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
         <span class="n">amnt_mols_f</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">filtered_data</span><span class="p">[</span><span class="s2">&quot;InChIKey&quot;</span><span class="p">])</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Filtered out </span><span class="si">{</span><span class="n">amnt_mols_i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">amnt_mols_f</span><span class="si">}</span><span class="s2"> duplicate molecules&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Filtered out </span><span class="si">{</span><span class="n">amnt_mols_i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">amnt_mols_f</span><span class="si">}</span><span class="s2"> duplicate molecules&quot;</span><span class="p">)</span>
 
     <span class="c1"># write filtered data to .tsv file</span>
     <span class="n">filtered_data</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">outfile</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wrote data to file &#39;</span><span class="si">{</span><span class="n">outfile</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Wrote data to file &#39;</span><span class="si">{</span><span class="n">outfile</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">filtered_data</span><span class="p">,</span> <span class="n">outfile</span></div>
+
 </pre></div>
 
            </div>

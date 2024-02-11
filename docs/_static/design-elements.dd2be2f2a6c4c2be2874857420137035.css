@@ -1,0 +1,63 @@
+/**
+ * Appearance shortcuts.
+ */
+
+
+/* General */
+
+/* Very small text size */
+.text-small {
+  font-size: small;
+}
+
+/* Smaller text size */
+.text-smaller {
+  font-size: smaller;
+}
+
+/* Medium text size */
+.text-medium {
+  font-size: medium;
+}
+
+/* Large text size */
+.text-large {
+  font-size: large;
+}
+
+/* Very large text size */
+.text-larger {
+  font-size: larger;
+}
+
+
+/* Grid table: Light-weight table-row outline styling. */
+.top-border {
+  border-top-width: thin;
+  border-top-style: solid;
+  border-top-color: lightgray;
+}
+.bottom-border {
+  border-bottom-width: thin;
+  border-bottom-style: solid;
+  border-top-color: lightgray;
+}
+
+
+/**
+ * Appearance bugfixes.
+ */
+
+/* Grid table: Fix margins of child elements inside table items. */
+.sd-col > .highlight-markdown {
+  margin: unset;
+}
+.sd-col > .highlight-restructuredtext {
+  margin: unset;
+}
+
+/* Info card: Fix grid item formatting. */
+.sd-col > div.line-block {
+  margin-top: unset;
+  margin-bottom: unset;
+}

@@ -1,19 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Overview: module code &mdash; QSPRpred 2.1.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>Overview: module code &mdash; QSPRpred 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>
+    </script>
+        <script src="../_static/design-tabs.js?v=36754332"></script>
+        <script src="../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -44,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.1.0
+                v3.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -58,8 +67,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to QSPRpred’s documentation!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../use.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features.html">Overview of available features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../api/modules.html">Python API</a></li>
 </ul>
 
@@ -88,57 +97,86 @@
              
   <h1>All modules for which code is available</h1>
 <ul><li><a href="builtins.html">builtins</a></li>
-<li><a href="qsprpred/data/data.html">qsprpred.data.data</a></li>
-<li><a href="qsprpred/data/interfaces.html">qsprpred.data.interfaces</a></li>
+<li><a href="qsprpred/benchmarks/replica.html">qsprpred.benchmarks.replica</a></li>
+<li><a href="qsprpred/benchmarks/runner.html">qsprpred.benchmarks.runner</a></li>
+<li><a href="qsprpred/benchmarks/settings/benchmark.html">qsprpred.benchmarks.settings.benchmark</a></li>
+<li><a href="qsprpred/benchmarks/settings/data_prep.html">qsprpred.benchmarks.settings.data_prep</a></li>
+<li><a href="qsprpred/benchmarks/tests.html">qsprpred.benchmarks.tests</a></li>
+<li><a href="qsprpred/data/chem/clustering.html">qsprpred.data.chem.clustering</a></li>
+<li><a href="qsprpred/data/chem/matching.html">qsprpred.data.chem.matching</a></li>
+<li><a href="qsprpred/data/chem/scaffolds.html">qsprpred.data.chem.scaffolds</a></li>
+<li><a href="qsprpred/data/chem/standardization.html">qsprpred.data.chem.standardization</a></li>
+<li><a href="qsprpred/data/chem/tests.html">qsprpred.data.chem.tests</a></li>
+<li><a href="qsprpred/data/descriptors/fingerprints.html">qsprpred.data.descriptors.fingerprints</a></li>
+<li><a href="qsprpred/data/descriptors/sets.html">qsprpred.data.descriptors.sets</a></li>
+<li><a href="qsprpred/data/descriptors/tests.html">qsprpred.data.descriptors.tests</a></li>
+<li><a href="qsprpred/data/processing/applicability_domain.html">qsprpred.data.processing.applicability_domain</a></li>
+<li><a href="qsprpred/data/processing/data_filters.html">qsprpred.data.processing.data_filters</a></li>
+<li><a href="qsprpred/data/processing/feature_filters.html">qsprpred.data.processing.feature_filters</a></li>
+<li><a href="qsprpred/data/processing/feature_standardizers.html">qsprpred.data.processing.feature_standardizers</a></li>
+<li><a href="qsprpred/data/processing/mol_processor.html">qsprpred.data.processing.mol_processor</a></li>
+<li><a href="qsprpred/data/processing/tests.html">qsprpred.data.processing.tests</a></li>
+<li><a href="qsprpred/data/sampling/folds.html">qsprpred.data.sampling.folds</a></li>
+<li><a href="qsprpred/data/sampling/splits.html">qsprpred.data.sampling.splits</a></li>
+<li><a href="qsprpred/data/sampling/tests.html">qsprpred.data.sampling.tests</a></li>
+<li><a href="qsprpred/data/sources/data_source.html">qsprpred.data.sources.data_source</a></li>
 <li><a href="qsprpred/data/sources/papyrus/papyrus_class.html">qsprpred.data.sources.papyrus.papyrus_class</a></li>
 <li><a href="qsprpred/data/sources/papyrus/papyrus_filter.html">qsprpred.data.sources.papyrus.papyrus_filter</a></li>
-<li><a href="qsprpred/data/tests.html">qsprpred.data.tests</a></li>
-<li><a href="qsprpred/data/utils/data_clustering.html">qsprpred.data.utils.data_clustering</a></li>
-<li><a href="qsprpred/data/utils/datafilters.html">qsprpred.data.utils.datafilters</a></li>
-<li><a href="qsprpred/data/utils/datasplitters.html">qsprpred.data.utils.datasplitters</a></li>
-<li><a href="qsprpred/data/utils/descriptor_utils/drugexproperties.html">qsprpred.data.utils.descriptor_utils.drugexproperties</a></li>
-<li><a href="qsprpred/data/utils/descriptor_utils/fingerprints.html">qsprpred.data.utils.descriptor_utils.fingerprints</a></li>
-<li><a href="qsprpred/data/utils/descriptor_utils/interfaces.html">qsprpred.data.utils.descriptor_utils.interfaces</a></li>
-<li><a href="qsprpred/data/utils/descriptor_utils/rdkitdescriptors.html">qsprpred.data.utils.descriptor_utils.rdkitdescriptors</a></li>
-<li><a href="qsprpred/data/utils/descriptorcalculator.html">qsprpred.data.utils.descriptorcalculator</a></li>
-<li><a href="qsprpred/data/utils/descriptorsets.html">qsprpred.data.utils.descriptorsets</a></li>
-<li><a href="qsprpred/data/utils/feature_standardization.html">qsprpred.data.utils.feature_standardization</a></li>
-<li><a href="qsprpred/data/utils/featurefilters.html">qsprpred.data.utils.featurefilters</a></li>
-<li><a href="qsprpred/data/utils/folds.html">qsprpred.data.utils.folds</a></li>
-<li><a href="qsprpred/data/utils/scaffolds.html">qsprpred.data.utils.scaffolds</a></li>
-<li><a href="qsprpred/data/utils/smiles_standardization.html">qsprpred.data.utils.smiles_standardization</a></li>
+<li><a href="qsprpred/data/tables/base.html">qsprpred.data.tables.base</a></li>
+<li><a href="qsprpred/data/tables/mol.html">qsprpred.data.tables.mol</a></li>
+<li><a href="qsprpred/data/tables/pandas.html">qsprpred.data.tables.pandas</a></li>
+<li><a href="qsprpred/data/tables/qspr.html">qsprpred.data.tables.qspr</a></li>
+<li><a href="qsprpred/data/tables/searchable.html">qsprpred.data.tables.searchable</a></li>
+<li><a href="qsprpred/data/tables/tests.html">qsprpred.data.tables.tests</a></li>
 <li><a href="qsprpred/data_CLI.html">qsprpred.data_CLI</a></li>
-<li><a href="qsprpred/extra/data/data.html">qsprpred.extra.data.data</a></li>
-<li><a href="qsprpred/extra/data/tests.html">qsprpred.extra.data.tests</a></li>
-<li><a href="qsprpred/extra/data/utils/datasplitters.html">qsprpred.extra.data.utils.datasplitters</a></li>
-<li><a href="qsprpred/extra/data/utils/descriptor_utils/fingerprints.html">qsprpred.extra.data.utils.descriptor_utils.fingerprints</a></li>
-<li><a href="qsprpred/extra/data/utils/descriptor_utils/msa_calculator.html">qsprpred.extra.data.utils.descriptor_utils.msa_calculator</a></li>
-<li><a href="qsprpred/extra/data/utils/descriptorcalculator.html">qsprpred.extra.data.utils.descriptorcalculator</a></li>
-<li><a href="qsprpred/extra/data/utils/descriptorsets.html">qsprpred.extra.data.utils.descriptorsets</a></li>
+<li><a href="qsprpred/extra/data/descriptors/fingerprints.html">qsprpred.extra.data.descriptors.fingerprints</a></li>
+<li><a href="qsprpred/extra/data/descriptors/sets.html">qsprpred.extra.data.descriptors.sets</a></li>
+<li><a href="qsprpred/extra/data/descriptors/tests.html">qsprpred.extra.data.descriptors.tests</a></li>
+<li><a href="qsprpred/extra/data/sampling/splits.html">qsprpred.extra.data.sampling.splits</a></li>
+<li><a href="qsprpred/extra/data/sampling/tests.html">qsprpred.extra.data.sampling.tests</a></li>
+<li><a href="qsprpred/extra/data/tables/pcm.html">qsprpred.extra.data.tables.pcm</a></li>
+<li><a href="qsprpred/extra/data/tables/tests.html">qsprpred.extra.data.tables.tests</a></li>
+<li><a href="qsprpred/extra/data/utils/msa_calculator.html">qsprpred.extra.data.utils.msa_calculator</a></li>
+<li><a href="qsprpred/extra/data/utils/testing/path_mixins.html">qsprpred.extra.data.utils.testing.path_mixins</a></li>
+<li><a href="qsprpred/extra/gpu/models/chemprop.html">qsprpred.extra.gpu.models.chemprop</a></li>
 <li><a href="qsprpred/extra/gpu/models/dnn.html">qsprpred.extra.gpu.models.dnn</a></li>
 <li><a href="qsprpred/extra/gpu/models/neural_network.html">qsprpred.extra.gpu.models.neural_network</a></li>
+<li><a href="qsprpred/extra/gpu/models/tests.html">qsprpred.extra.gpu.models.tests</a></li>
 <li><a href="qsprpred/extra/models/pcm.html">qsprpred.extra.models.pcm</a></li>
+<li><a href="qsprpred/extra/models/random.html">qsprpred.extra.models.random</a></li>
 <li><a href="qsprpred/extra/models/tests.html">qsprpred.extra.models.tests</a></li>
 <li><a href="qsprpred/logs.html">qsprpred.logs</a></li>
 <ul><li><a href="qsprpred/logs/config.html">qsprpred.logs.config</a></li>
-<li><a href="qsprpred/logs/stopwatch.html">qsprpred.logs.stopwatch</a></li>
 <li><a href="qsprpred/logs/utils.html">qsprpred.logs.utils</a></li>
-</ul><li><a href="qsprpred/metrics/calibration.html">qsprpred.metrics.calibration</a></li>
-<li><a href="qsprpred/model_CLI.html">qsprpred.model_CLI</a></li>
-<li><a href="qsprpred/models/assessment_methods.html">qsprpred.models.assessment_methods</a></li>
+</ul><li><a href="qsprpred/model_CLI.html">qsprpred.model_CLI</a></li>
+<li><a href="qsprpred/models/assessment/classification.html">qsprpred.models.assessment.classification</a></li>
+<li><a href="qsprpred/models/assessment/methods.html">qsprpred.models.assessment.methods</a></li>
+<li><a href="qsprpred/models/assessment/regression.html">qsprpred.models.assessment.regression</a></li>
 <li><a href="qsprpred/models/early_stopping.html">qsprpred.models.early_stopping</a></li>
 <li><a href="qsprpred/models/hyperparam_optimization.html">qsprpred.models.hyperparam_optimization</a></li>
-<li><a href="qsprpred/models/interfaces.html">qsprpred.models.interfaces</a></li>
 <li><a href="qsprpred/models/metrics.html">qsprpred.models.metrics</a></li>
-<li><a href="qsprpred/models/sklearn.html">qsprpred.models.sklearn</a></li>
-<li><a href="qsprpred/models/tasks.html">qsprpred.models.tasks</a></li>
+<li><a href="qsprpred/models/models.html">qsprpred.models.models</a></li>
+<li><a href="qsprpred/models/monitors.html">qsprpred.models.monitors</a></li>
+<li><a href="qsprpred/models/scikit_learn.html">qsprpred.models.scikit_learn</a></li>
 <li><a href="qsprpred/models/tests.html">qsprpred.models.tests</a></li>
+<li><a href="qsprpred/plotting/base_plot.html">qsprpred.plotting.base_plot</a></li>
 <li><a href="qsprpred/plotting/classification.html">qsprpred.plotting.classification</a></li>
-<li><a href="qsprpred/plotting/interfaces.html">qsprpred.plotting.interfaces</a></li>
+<li><a href="qsprpred/plotting/grid_visualizers.html">qsprpred.plotting.grid_visualizers</a></li>
 <li><a href="qsprpred/plotting/regression.html">qsprpred.plotting.regression</a></li>
 <li><a href="qsprpred/plotting/tests.html">qsprpred.plotting.tests</a></li>
 <li><a href="qsprpred/predict_CLI.html">qsprpred.predict_CLI</a></li>
+<li><a href="qsprpred/tasks.html">qsprpred.tasks</a></li>
 <li><a href="qsprpred/utils/inspect.html">qsprpred.utils.inspect</a></li>
+<li><a href="qsprpred/utils/interfaces/randomized.html">qsprpred.utils.interfaces.randomized</a></li>
+<li><a href="qsprpred/utils/interfaces/summarizable.html">qsprpred.utils.interfaces.summarizable</a></li>
+<li><a href="qsprpred/utils/parallel.html">qsprpred.utils.parallel</a></li>
+<li><a href="qsprpred/utils/serialization.html">qsprpred.utils.serialization</a></li>
+<li><a href="qsprpred/utils/stopwatch.html">qsprpred.utils.stopwatch</a></li>
+<li><a href="qsprpred/utils/stringops.html">qsprpred.utils.stringops</a></li>
+<li><a href="qsprpred/utils/testing/base.html">qsprpred.utils.testing.base</a></li>
+<li><a href="qsprpred/utils/testing/check_mixins.html">qsprpred.utils.testing.check_mixins</a></li>
+<li><a href="qsprpred/utils/testing/path_mixins.html">qsprpred.utils.testing.path_mixins</a></li>
+<li><a href="qsprpred/utils/tests.html">qsprpred.utils.tests</a></li>
 <li><a href="time.html">time</a></li>
 </ul>
 

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.tasks &mdash; QSPRpred 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>
+    </script>
+        <script src="../../_static/design-tabs.js?v=36754332"></script>
+        <script src="../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../features.html">Overview of available features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.tasks</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.tasks</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Callable</span>
+
+<span class="kn">from</span> <span class="nn">qsprpred.utils.serialization</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">JSONSerializable</span><span class="p">,</span>
+    <span class="n">function_as_string</span><span class="p">,</span>
+    <span class="n">function_from_string</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="TargetTasks">
+<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetTasks">[docs]</a>
+<span class="k">class</span> <span class="nc">TargetTasks</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enum representing the type of task the model</span>
+<span class="sd">    is supposed to perform for a single target property.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">REGRESSION</span> <span class="o">=</span> <span class="s2">&quot;REGRESSION&quot;</span>
+    <span class="n">SINGLECLASS</span> <span class="o">=</span> <span class="s2">&quot;SINGLECLASS&quot;</span>
+    <span class="n">MULTICLASS</span> <span class="o">=</span> <span class="s2">&quot;MULTICLASS&quot;</span>
+
+<div class="viewcode-block" id="TargetTasks.isClassification">
+<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetTasks.isClassification">[docs]</a>
+    <span class="k">def</span> <span class="nf">isClassification</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the task is a classification task.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="TargetTasks.isRegression">
+<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetTasks.isRegression">[docs]</a>
+    <span class="k">def</span> <span class="nf">isRegression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the task is a regression task.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">]</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the task.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
+
+
+
+<div class="viewcode-block" id="ModelTasks">
+<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.ModelTasks">[docs]</a>
+<span class="k">class</span> <span class="nc">ModelTasks</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enum representing the general type of task the</span>
+<span class="sd">    model is supposed to perform for all target properties.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">REGRESSION</span> <span class="o">=</span> <span class="s2">&quot;REGRESSION&quot;</span>
+    <span class="n">SINGLECLASS</span> <span class="o">=</span> <span class="s2">&quot;SINGLECLASS&quot;</span>
+    <span class="n">MULTICLASS</span> <span class="o">=</span> <span class="s2">&quot;MULTICLASS&quot;</span>
+    <span class="n">MULTITASK_REGRESSION</span> <span class="o">=</span> <span class="s2">&quot;MULTITASK_REGRESSION&quot;</span>
+    <span class="n">MULTITASK_SINGLECLASS</span> <span class="o">=</span> <span class="s2">&quot;MULTITASK_SINGLECLASS&quot;</span>
+    <span class="n">MULTITASK_MULTICLASS</span> <span class="o">=</span> <span class="s2">&quot;MULTITASK_MULTICLASS&quot;</span>
+    <span class="n">MULTITASK_MIXED</span> <span class="o">=</span> <span class="s2">&quot;MULTITASK_MIXED&quot;</span>
+
+<div class="viewcode-block" id="ModelTasks.isClassification">
+<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.ModelTasks.isClassification">[docs]</a>
+    <span class="k">def</span> <span class="nf">isClassification</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the task is a classification task.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_MULTICLASS</span><span class="p">,</span>
+        <span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ModelTasks.isRegression">
+<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.ModelTasks.isRegression">[docs]</a>
+    <span class="k">def</span> <span class="nf">isRegression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the task is a regression task.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_REGRESSION</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ModelTasks.isMixed">
+<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.ModelTasks.isMixed">[docs]</a>
+    <span class="k">def</span> <span class="nf">isMixed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the task is a mixed task.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_MIXED</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ModelTasks.isMultiTask">
+<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.ModelTasks.isMultiTask">[docs]</a>
+    <span class="k">def</span> <span class="nf">isMultiTask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the task is a multitask task.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_REGRESSION</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_MULTICLASS</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_MIXED</span><span class="p">,</span>
+        <span class="p">]</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the task.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+<div class="viewcode-block" id="ModelTasks.getModelTask">
+<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.ModelTasks.getModelTask">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">getModelTask</span><span class="p">(</span><span class="n">target_properties</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the model type for a given list of target properties.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_properties</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ModelTasks</span><span class="p">[</span><span class="n">target_properties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="n">target_property</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isRegression</span><span class="p">()</span> <span class="k">for</span> <span class="n">target_property</span> <span class="ow">in</span> <span class="n">target_properties</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_REGRESSION</span>
+        <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="n">target_property</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">target_property</span> <span class="ow">in</span> <span class="n">target_properties</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span>
+                <span class="n">target_property</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span>
+                <span class="k">for</span> <span class="n">target_property</span> <span class="ow">in</span> <span class="n">target_properties</span>
+            <span class="p">):</span>
+                <span class="k">return</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_MULTICLASS</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_MIXED</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="TargetProperty">
+<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetProperty">[docs]</a>
+<span class="k">class</span> <span class="nc">TargetProperty</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Target property for QSPRmodelling class.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        name (str): name of the target property</span>
+<span class="sd">        task (Literal[TargetTasks.REGRESSION,</span>
+<span class="sd">              TargetTasks.SINGLECLASS,</span>
+<span class="sd">              TargetTasks.MULTICLASS]): task type for the target property</span>
+<span class="sd">        th (int): threshold for the target property, only used for classification tasks</span>
+<span class="sd">        nClasses (int): number of classes for the target property, only used for</span>
+<span class="sd">            classification tasks</span>
+<span class="sd">        transformer (Callable): function to transform the target property</span>
+<span class="sd">        imputer (Callable): function to impute the target property</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_notJSON</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;transformer&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">JSONSerializable</span><span class="o">.</span><span class="n">_notJSON</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">task</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span>
+            <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span>
+        <span class="p">],</span>
+        <span class="n">th</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_classes</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">transformer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">imputer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a TargetProperty object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): name of the target property</span>
+<span class="sd">            task (Literal[TargetTasks.REGRESSION,</span>
+<span class="sd">              TargetTasks.SINGLECLASS,</span>
+<span class="sd">              TargetTasks.MULTICLASS]): task type for the target property</span>
+<span class="sd">            th (list[float] | str): threshold for the target property, only used</span>
+<span class="sd">                for classification tasks. If th is precomputed, set it to &quot;precomputed&quot;.</span>
+<span class="sd">                If th is precomputed, n_classes must be specified.</span>
+<span class="sd">            n_classes (int): number of classes for the target property. Must be</span>
+<span class="sd">                specified if th is precomputed, otherwise it is inferred from th.</span>
+<span class="sd">            transformer (Callable): function to transform the target property</span>
+<span class="sd">            imputer (Callable): function to impute the target property</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="n">task</span>
+        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">():</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">th</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">),</span> <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Threshold not specified for classification task `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">`. &quot;</span>
+                <span class="s2">&quot;If the task is already precomputed, set `th` to `precomputed`, and &quot;</span>
+                <span class="s2">&quot;define the correct number of classes with `n_classes.&quot;</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">th</span> <span class="o">=</span> <span class="n">th</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">th</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">th</span> <span class="o">==</span> <span class="s2">&quot;precomputed&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nClasses</span> <span class="o">=</span> <span class="n">n_classes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transformer</span> <span class="o">=</span> <span class="n">transformer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imputer</span> <span class="o">=</span> <span class="n">imputer</span>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">o_dict</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__getstate__</span><span class="p">()</span>
+        <span class="n">o_dict</span><span class="p">[</span><span class="s2">&quot;transformer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">function_as_string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transformer</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">transformer</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">o_dict</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setstate__</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;transformer&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transformer</span> <span class="o">=</span> <span class="n">function_from_string</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transformer</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">th</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the threshold for the target property.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            th ([list[int] | str]): threshold for the target property</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_th</span>
+
+    <span class="nd">@th</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">th</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">th</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the threshold for the target property and the number of classes if th is</span>
+<span class="sd">        not precomputed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            th (list[float] | str): threshold for the target property</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">()</span>
+        <span class="p">),</span> <span class="s2">&quot;Threshold can only be set for classification tasks&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_th</span> <span class="o">=</span> <span class="n">th</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">th</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="n">th</span> <span class="o">==</span> <span class="s2">&quot;precomputed&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Invalid threshold </span><span class="si">{</span><span class="n">th</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nClasses</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">th</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">th</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">2</span>
+
+    <span class="nd">@th</span><span class="o">.</span><span class="n">deleter</span>
+    <span class="k">def</span> <span class="nf">th</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete the threshold for the target property and the number of classes.&quot;&quot;&quot;</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_th</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nClasses</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nClasses</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of classes for the target property.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            nClasses (int): number of classes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nClasses</span>
+
+    <span class="nd">@nClasses</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">nClasses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nClasses</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the number of classes for the target property if th is precomputed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            nClasses (int): number of classes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">th</span> <span class="o">==</span> <span class="s2">&quot;precomputed&quot;</span>
+        <span class="p">),</span> <span class="s2">&quot;Number of classes can only be set if threshold is precomputed&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nClasses</span> <span class="o">=</span> <span class="n">nClasses</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Representation of the TargetProperty object.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">th</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;TargetProperty(name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, task=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="si">}</span><span class="s2">, th=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">th</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;TargetProperty(name=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">, task=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">task</span><span class="si">}</span><span class="s2">)&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return string identifier of the TargetProperty object.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+<div class="viewcode-block" id="TargetProperty.fromDict">
+<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetProperty.fromDict">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">fromDict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a TargetProperty object from a dictionary.</span>
+
+<span class="sd">        task can be specified as a string or as a TargetTasks object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            d (dict): dictionary containing the target property information</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt; TargetProperty.fromDict({&quot;name&quot;: &quot;property_name&quot;, &quot;task&quot;: &quot;regression&quot;})</span>
+<span class="sd">            TargetProperty(name=property_name, task=REGRESSION)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            TargetProperty: TargetProperty object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;task&quot;</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">TargetProperty</span><span class="p">(</span>
+                <span class="o">**</span><span class="p">{</span>
+                    <span class="n">k</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span> <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;task&quot;</span> <span class="k">else</span> <span class="n">v</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">TargetProperty</span><span class="p">(</span><span class="o">**</span><span class="n">d</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TargetProperty.fromList">
+<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetProperty.fromList">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">fromList</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a list of TargetProperty objects from a list of dictionaries.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            _list (list): list of dictionaries containing the target property</span>
+<span class="sd">                information</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[TargetProperty]: list of TargetProperty objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">_list</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="TargetProperty.toList">
+<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetProperty.toList">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">toList</span><span class="p">(</span><span class="n">_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">task_as_str</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">drop_transformer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a list of TargetProperty objects to a list of dictionaries.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            _list (list): list of TargetProperty objects</span>
+<span class="sd">            task_as_str (bool): whether to convert the task to a string</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[dict]: list of dictionaries containing the target property information</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">target_props</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">target_prop</span> <span class="ow">in</span> <span class="n">_list</span><span class="p">:</span>
+            <span class="n">target_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">target_prop</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">target_prop</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">task_as_str</span> <span class="k">else</span> <span class="n">target_prop</span><span class="o">.</span><span class="n">task</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">target_prop</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">():</span>
+                <span class="n">target_props</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="n">target_prop</span><span class="o">.</span><span class="n">th</span><span class="p">,</span> <span class="s2">&quot;n_classes&quot;</span><span class="p">:</span> <span class="n">target_prop</span><span class="o">.</span><span class="n">nClasses</span><span class="p">}</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">drop_transformer</span><span class="p">:</span>
+                <span class="n">target_props</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;transformer&quot;</span><span class="p">:</span> <span class="n">target_prop</span><span class="o">.</span><span class="n">transformer</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">target_props</span></div>
+
+
+<div class="viewcode-block" id="TargetProperty.selectFromList">
+<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetProperty.selectFromList">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">selectFromList</span><span class="p">(</span><span class="n">_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Select a subset of TargetProperty objects from a list of TargetProperty</span>
+<span class="sd">        objects.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            _list (list): list of TargetProperty objects</span>
+<span class="sd">            names (list): list of names of the target properties to be selected</span>
+<span class="sd">            original_names (bool): whether to use the original names of the target</span>
+<span class="sd">                properties</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[TargetProperty]: list of TargetProperty objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">_list</span> <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="TargetProperty.getNames">
+<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetProperty.getNames">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">getNames</span><span class="p">(</span><span class="n">_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the names of the target properties from a list of TargetProperty objects.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            _list (list): list of TargetProperty objects</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[str]: list of names of the target properties</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">_list</span><span class="p">]</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

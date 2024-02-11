@@ -4,18 +4,18 @@ qsprpred.extra.models package
 Submodules
 ----------
 
-qsprpred.extra.models.models module
------------------------------------
-
-.. automodule:: qsprpred.extra.models.models
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 qsprpred.extra.models.pcm module
 --------------------------------
 
 .. automodule:: qsprpred.extra.models.pcm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.extra.models.random module
+-----------------------------------
+
+.. automodule:: qsprpred.extra.models.random
    :members:
    :undoc-members:
    :show-inheritance:

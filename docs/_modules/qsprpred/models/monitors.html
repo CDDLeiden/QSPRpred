@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.models.monitors &mdash; QSPRpred 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>
+    </script>
+        <script src="../../../_static/design-tabs.js?v=36754332"></script>
+        <script src="../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features.html">Overview of available features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.models.monitors</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.models.monitors</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
+<span class="kn">from</span> <span class="nn">rdkit.Chem</span> <span class="kn">import</span> <span class="n">Draw</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">QSPRModel</span>
+<span class="kn">from</span> <span class="nn">..data.tables.qspr</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
+<span class="kn">from</span> <span class="nn">..utils.serialization</span> <span class="kn">import</span> <span class="n">JSONSerializable</span>
+
+
+<div class="viewcode-block" id="FitMonitor">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.FitMonitor">[docs]</a>
+<span class="k">class</span> <span class="nc">FitMonitor</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for monitoring the fitting of a model.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FitMonitor.onFitStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.FitMonitor.onFitStart">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">onFitStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
+        <span class="n">X_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">X_val</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">y_val</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before the training has started.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): model to be fitted</span>
+<span class="sd">            X_train (np.ndarray): training data</span>
+<span class="sd">            y_train (np.ndarray): training targets</span>
+<span class="sd">            X_val (np.ndarray | None): validation data, used for early stopping</span>
+<span class="sd">            y_val (np.ndarray | None): validation targets, used for early stopping</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="FitMonitor.onFitEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.FitMonitor.onFitEnd">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">onFitEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">best_epoch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after the training has finished.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            estimator (Any): estimator that was fitted</span>
+<span class="sd">            best_epoch (int | None): index of the best epoch</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="FitMonitor.onEpochStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.FitMonitor.onEpochStart">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">onEpochStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before each epoch of the training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epoch (int): index of the current epoch</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="FitMonitor.onEpochEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.FitMonitor.onEpochEnd">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">onEpochEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">train_loss</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">val_loss</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each epoch of the training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epoch (int): index of the current epoch</span>
+<span class="sd">            train_loss (float): loss of the current epoch</span>
+<span class="sd">            val_loss (float | None): validation loss of the current epoch</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="FitMonitor.onBatchStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.FitMonitor.onBatchStart">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">onBatchStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before each batch of the training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch (int): index of the current batch</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="FitMonitor.onBatchEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.FitMonitor.onBatchEnd">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">onBatchEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">loss</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each batch of the training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch (int): index of the current batch</span>
+<span class="sd">            loss (float): loss of the current batch</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="AssessorMonitor">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.AssessorMonitor">[docs]</a>
+<span class="k">class</span> <span class="nc">AssessorMonitor</span><span class="p">(</span><span class="n">FitMonitor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for monitoring the assessment of a model.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="AssessorMonitor.onAssessmentStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.AssessorMonitor.onAssessmentStart">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">onAssessmentStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">assesment_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before the assessment has started.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): model to assess</span>
+<span class="sd">            data (QSPRDataset): data set used in assessment</span>
+<span class="sd">            assesment_type (str): type of assessment</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="AssessorMonitor.onAssessmentEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.AssessorMonitor.onAssessmentEnd">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">onAssessmentEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after the assessment has finished.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            predictions (pd.DataFrame): predictions of the assessment</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="AssessorMonitor.onFoldStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.AssessorMonitor.onFoldStart">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">onFoldStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">fold</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">X_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">X_test</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_test</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before each fold of the assessment.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fold (int): index of the current fold</span>
+<span class="sd">            X_train (np.ndarray): training data of the current fold</span>
+<span class="sd">            y_train (np.ndarray): training targets of the current fold</span>
+<span class="sd">            X_test (np.ndarray): test data of the current fold</span>
+<span class="sd">            y_test (np.ndarray): test targets of the current fold</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="AssessorMonitor.onFoldEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.AssessorMonitor.onFoldEnd">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">onFoldEnd</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model_fit</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">fold_predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each fold of the assessment.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or</span>
+<span class="sd">                                             tuple containing the fitted estimator and</span>
+<span class="sd">                                             the number of epochs it was trained for</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="HyperparameterOptimizationMonitor">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.HyperparameterOptimizationMonitor">[docs]</a>
+<span class="k">class</span> <span class="nc">HyperparameterOptimizationMonitor</span><span class="p">(</span><span class="n">AssessorMonitor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for monitoring the hyperparameter optimization of a model.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="HyperparameterOptimizationMonitor.onOptimizationStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.HyperparameterOptimizationMonitor.onOptimizationStart">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">onOptimizationStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">optimization_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before the hyperparameter optimization has started.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): model to optimize</span>
+<span class="sd">            data (QSPRDataset): data set used in optimization</span>
+<span class="sd">            config (dict): configuration of the hyperparameter optimization</span>
+<span class="sd">            optimization_type (str): type of hyperparameter optimization</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="HyperparameterOptimizationMonitor.onOptimizationEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.HyperparameterOptimizationMonitor.onOptimizationEnd">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">onOptimizationEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">best_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">best_parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after the hyperparameter optimization has finished.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            best_score (float): best score found during optimization</span>
+<span class="sd">            best_parameters (dict): best parameters found during optimization</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="HyperparameterOptimizationMonitor.onIterationStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.HyperparameterOptimizationMonitor.onIterationStart">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">onIterationStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before each iteration of the hyperparameter optimization.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            params (dict): parameters used for the current iteration</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="HyperparameterOptimizationMonitor.onIterationEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.HyperparameterOptimizationMonitor.onIterationEnd">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">onIterationEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">scores</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each iteration of the hyperparameter optimization.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            score (float): (aggregated) score of the current iteration</span>
+<span class="sd">            scores (list[float]): scores of the current iteration</span>
+<span class="sd">                                  (e.g for cross-validation)</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="NullMonitor">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.NullMonitor">[docs]</a>
+<span class="k">class</span> <span class="nc">NullMonitor</span><span class="p">(</span><span class="n">HyperparameterOptimizationMonitor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Monitor that does nothing.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="NullMonitor.onFitStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.NullMonitor.onFitStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onFitStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
+        <span class="n">X_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">X_val</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">y_val</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before the training has started.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): model to be fitted</span>
+<span class="sd">            X_train (np.ndarray): training data</span>
+<span class="sd">            y_train (np.ndarray): training targets</span>
+<span class="sd">            X_val (np.ndarray | None): validation data, used for early stopping</span>
+<span class="sd">            y_val (np.ndarray | None): validation targets, used for early stopping</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NullMonitor.onFitEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.NullMonitor.onFitEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onFitEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">best_epoch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after the training has finished.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            estimator (Any): estimator that was fitted</span>
+<span class="sd">            best_epoch (int | None): index of the best epoch</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NullMonitor.onEpochStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.NullMonitor.onEpochStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onEpochStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before each epoch of the training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epoch (int): index of the current epoch</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NullMonitor.onEpochEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.NullMonitor.onEpochEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onEpochEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">train_loss</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">val_loss</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each epoch of the training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epoch (int): index of the current epoch</span>
+<span class="sd">            train_loss (float): loss of the current epoch</span>
+<span class="sd">            val_loss (float | None): validation loss of the current epoch</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NullMonitor.onBatchStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.NullMonitor.onBatchStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onBatchStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before each batch of the training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch (int): index of the current batch</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NullMonitor.onBatchEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.NullMonitor.onBatchEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onBatchEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">loss</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each batch of the training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch (int): index of the current batch</span>
+<span class="sd">            loss (float): loss of the current batch</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NullMonitor.onAssessmentStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.NullMonitor.onAssessmentStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onAssessmentStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">assesment_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before the assessment has started.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): model to assess</span>
+<span class="sd">            data (QSPRDataset): data set used in assessment</span>
+<span class="sd">            assesment_type (str): type of assessment</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NullMonitor.onAssessmentEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.NullMonitor.onAssessmentEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onAssessmentEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after the assessment has finished.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            predictions (pd.DataFrame): predictions of the assessment</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NullMonitor.onFoldStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.NullMonitor.onFoldStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onFoldStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">fold</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">X_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">X_test</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_test</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before each fold of the assessment.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fold (int): index of the current fold</span>
+<span class="sd">            X_train (np.ndarray): training data of the current fold</span>
+<span class="sd">            y_train (np.ndarray): training targets of the current fold</span>
+<span class="sd">            X_test (np.ndarray): test data of the current fold</span>
+<span class="sd">            y_test (np.ndarray): test targets of the current fold</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NullMonitor.onFoldEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.NullMonitor.onFoldEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onFoldEnd</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model_fit</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">fold_predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each fold of the assessment.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or</span>
+<span class="sd">                                             tuple containing the fitted estimator and</span>
+<span class="sd">                                             the number of epochs it was trained for</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NullMonitor.onOptimizationStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.NullMonitor.onOptimizationStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onOptimizationStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">optimization_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before the hyperparameter optimization has started.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): model to optimize</span>
+<span class="sd">            data (QSPRDataset): data set used in optimization</span>
+<span class="sd">            config (dict): configuration of the hyperparameter optimization</span>
+<span class="sd">            optimization_type (str): type of hyperparameter optimization</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NullMonitor.onOptimizationEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.NullMonitor.onOptimizationEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onOptimizationEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">best_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">best_parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after the hyperparameter optimization has finished.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            best_score (float): best score found during optimization</span>
+<span class="sd">            best_parameters (dict): best parameters found during optimization</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NullMonitor.onIterationStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.NullMonitor.onIterationStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onIterationStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before each iteration of the hyperparameter optimization.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            params (dict): parameters used for the current iteration</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="NullMonitor.onIterationEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.NullMonitor.onIterationEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onIterationEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">scores</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each iteration of the hyperparameter optimization.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            score (float): (aggregated) score of the current iteration</span>
+<span class="sd">            scores (list[float]): scores of the current iteration</span>
+<span class="sd">                                  (e.g for cross-validation)</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ListMonitor">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.ListMonitor">[docs]</a>
+<span class="k">class</span> <span class="nc">ListMonitor</span><span class="p">(</span><span class="n">HyperparameterOptimizationMonitor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Monitor that combines multiple monitors.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        monitors (list[HyperparameterOptimizationMonitor]): list of monitors</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">monitors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">HyperparameterOptimizationMonitor</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the monitor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            monitors (list[HyperparameterOptimizationMonitor]): list of monitors</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span> <span class="o">=</span> <span class="n">monitors</span>
+
+<div class="viewcode-block" id="ListMonitor.onFitStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.ListMonitor.onFitStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onFitStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
+        <span class="n">X_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">X_val</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">y_val</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before the training has started.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): model to be fitted</span>
+<span class="sd">            X_train (np.ndarray): training data</span>
+<span class="sd">            y_train (np.ndarray): training targets</span>
+<span class="sd">            X_val (np.ndarray | None): validation data, used for early stopping</span>
+<span class="sd">            y_val (np.ndarray | None): validation targets, used for early stopping</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">monitor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span><span class="p">:</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onFitStart</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListMonitor.onFitEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.ListMonitor.onFitEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onFitEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">best_epoch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after the training has finished.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            estimator (Any): estimator that was fitted</span>
+<span class="sd">            best_epoch (int | None): index of the best epoch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">monitor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span><span class="p">:</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onFitEnd</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="n">best_epoch</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListMonitor.onEpochStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.ListMonitor.onEpochStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onEpochStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before each epoch of the training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epoch (int): index of the current epoch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">monitor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span><span class="p">:</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onEpochStart</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListMonitor.onEpochEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.ListMonitor.onEpochEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onEpochEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">train_loss</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">val_loss</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each epoch of the training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epoch (int): index of the current epoch</span>
+<span class="sd">            train_loss (float): loss of the current epoch</span>
+<span class="sd">            val_loss (float | None): validation loss of the current epoch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">monitor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span><span class="p">:</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onEpochEnd</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">train_loss</span><span class="p">,</span> <span class="n">val_loss</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListMonitor.onBatchStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.ListMonitor.onBatchStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onBatchStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before each batch of the training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch (int): index of the current batch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">monitor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span><span class="p">:</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onBatchStart</span><span class="p">(</span><span class="n">batch</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListMonitor.onBatchEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.ListMonitor.onBatchEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onBatchEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">loss</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each batch of the training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch (int): index of the current batch</span>
+<span class="sd">            loss (float): loss of the current batch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">monitor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span><span class="p">:</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onBatchEnd</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListMonitor.onAssessmentStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.ListMonitor.onAssessmentStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onAssessmentStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">assesment_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before the assessment has started.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): model to assess</span>
+<span class="sd">            data (QSPRDataset): data set used in assessment</span>
+<span class="sd">            assesment_type (str): type of assessment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">monitor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span><span class="p">:</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onAssessmentStart</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">assesment_type</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListMonitor.onAssessmentEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.ListMonitor.onAssessmentEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onAssessmentEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after the assessment has finished.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            predictions (pd.DataFrame): predictions of the assessment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">monitor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span><span class="p">:</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onAssessmentEnd</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListMonitor.onFoldStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.ListMonitor.onFoldStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onFoldStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">fold</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">X_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">X_test</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_test</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before each fold of the assessment.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fold (int): index of the current fold</span>
+<span class="sd">            X_train (np.ndarray): training data of the current fold</span>
+<span class="sd">            y_train (np.ndarray): training targets of the current fold</span>
+<span class="sd">            X_test (np.ndarray): test data of the current fold</span>
+<span class="sd">            y_test (np.ndarray): test targets of the current fold</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">monitor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span><span class="p">:</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onFoldStart</span><span class="p">(</span><span class="n">fold</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListMonitor.onFoldEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.ListMonitor.onFoldEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onFoldEnd</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model_fit</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">fold_predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each fold of the assessment.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or</span>
+<span class="sd">                                             tuple containing the fitted estimator and</span>
+<span class="sd">                                             the number of epochs it was trained for</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">monitor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span><span class="p">:</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onFoldEnd</span><span class="p">(</span><span class="n">model_fit</span><span class="p">,</span> <span class="n">fold_predictions</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListMonitor.onOptimizationStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.ListMonitor.onOptimizationStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onOptimizationStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">optimization_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before the hyperparameter optimization has started.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): model to optimize</span>
+<span class="sd">            data (QSPRDataset): data set used in optimization</span>
+<span class="sd">            config (dict): configuration of the hyperparameter optimization</span>
+<span class="sd">            optimization_type (str): type of hyperparameter optimization</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">monitor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span><span class="p">:</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onOptimizationStart</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">optimization_type</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListMonitor.onOptimizationEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.ListMonitor.onOptimizationEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onOptimizationEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">best_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">best_parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after the hyperparameter optimization has finished.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            best_score (float): best score found during optimization</span>
+<span class="sd">            best_parameters (dict): best parameters found during optimization</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">monitor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span><span class="p">:</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onOptimizationEnd</span><span class="p">(</span><span class="n">best_score</span><span class="p">,</span> <span class="n">best_parameters</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListMonitor.onIterationStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.ListMonitor.onIterationStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onIterationStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before each iteration of the hyperparameter optimization.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            params (dict): parameters used for the current iteration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">monitor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span><span class="p">:</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onIterationStart</span><span class="p">(</span><span class="n">params</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ListMonitor.onIterationEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.ListMonitor.onIterationEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onIterationEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">scores</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each iteration of the hyperparameter optimization.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            score (float): (aggregated) score of the current iteration</span>
+<span class="sd">            scores (list[float]): scores of the current iteration</span>
+<span class="sd">                                  (e.g for cross-validation)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">monitor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitors</span><span class="p">:</span>
+            <span class="n">monitor</span><span class="o">.</span><span class="n">onIterationEnd</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">scores</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="BaseMonitor">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.BaseMonitor">[docs]</a>
+<span class="k">class</span> <span class="nc">BaseMonitor</span><span class="p">(</span><span class="n">HyperparameterOptimizationMonitor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base monitoring the fitting, training and optimization of a model.</span>
+
+<span class="sd">    Information about the fitting, training and optimization process is stored</span>
+<span class="sd">    internally, but not logged. This class can be used as a base class for other</span>
+<span class="sd">    other monitors that do log the information elsewhere.</span>
+
+<span class="sd">    If used to monitor hyperparameter optimization, the information about the</span>
+<span class="sd">    underlying assessments and fits is stored in the assessments and fits</span>
+<span class="sd">    attributes, respectively. If used to monitor assessment, the information</span>
+<span class="sd">    about the fits is stored in the fits attribute.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        config (dict): configuration of the hyperparameter optimization</span>
+<span class="sd">        bestScore (float): best score found during optimization</span>
+<span class="sd">        bestParameters (dict): best parameters found during optimization</span>
+<span class="sd">        assessments (dict): dictionary of assessments, keyed by the iteration number</span>
+<span class="sd">            (each assessment includes: assessmentModel, assessmentDataset, foldData,</span>
+<span class="sd">                predictions, estimators, fits)</span>
+<span class="sd">        scores (pd.DataFrame): scores for each hyperparameter search iteration</span>
+<span class="sd">        model (QSPRModel): model to optimize</span>
+<span class="sd">        data (QSPRDataset): dataset used in optimization</span>
+
+<span class="sd">        assessmentType (str): type of current assessment</span>
+<span class="sd">        assessmentModel (QSPRModel): model to assess in current assessment</span>
+<span class="sd">        assessmentDataset (QSPRDataset): data set used in current assessment</span>
+<span class="sd">        foldData (dict): dictionary of input data, keyed by the fold index, of the</span>
+<span class="sd">            current assessment</span>
+<span class="sd">        predictions (pd.DataFrame): predictions for the dataset of the current assessment</span>
+<span class="sd">        estimators (dict): dictionary of fitted estimators, keyed by the fold index of</span>
+<span class="sd">            the current assessment</span>
+<span class="sd">        currentFold (int): index of the current fold of the</span>
+<span class="sd">            current assessment</span>
+<span class="sd">        fits (dict): dictionary of fit data, keyed by the fold index of the current</span>
+<span class="sd">            assessment (each fit includes: fitData, fitLog, batchLog, bestEstimator,</span>
+<span class="sd">                bestEpoch)</span>
+
+<span class="sd">        fitData (dict): dictionary of input data of the current fit of the current</span>
+<span class="sd">            assessment</span>
+<span class="sd">        fitModel (QSPRModel): model to fit in current fit of the current assessment</span>
+<span class="sd">        fitLog (pd.DataFrame): log of the training process of the current fit of the</span>
+<span class="sd">            current assessment</span>
+<span class="sd">        batchLog (pd.DataFrame): log of the training process per batch of the current</span>
+<span class="sd">            fit of the current assessment</span>
+<span class="sd">        currentEpoch (int): index of the current epoch of the current fit of the current</span>
+<span class="sd">            assessment</span>
+<span class="sd">        currentBatch (int): index of the current batch of the current fit of the current</span>
+<span class="sd">            assessment</span>
+<span class="sd">        bestEstimator (Any): best estimator of the current fit of the current</span>
+<span class="sd">            assessment</span>
+<span class="sd">        bestEpoch (int): index of the best epoch of the current fit of the current</span>
+<span class="sd">            assessment</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizationType</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># hyperparameter optimization data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bestScore</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bestParameters</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assessments</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scores</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;aggregated_score&quot;</span><span class="p">,</span> <span class="s2">&quot;fold_scores&quot;</span><span class="p">]</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">rename_axis</span><span class="p">(</span><span class="s2">&quot;Iteration&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># assessment data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assessmentModel</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assessmentDataset</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">foldData</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictions</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimators</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentFold</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fits</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># fit data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitModel</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitData</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitLog</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;epoch&quot;</span><span class="p">,</span> <span class="s2">&quot;train_loss&quot;</span><span class="p">,</span> <span class="s2">&quot;val_loss&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batchLog</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;epoch&quot;</span><span class="p">,</span> <span class="s2">&quot;batch&quot;</span><span class="p">,</span> <span class="s2">&quot;loss&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentEpoch</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentBatch</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bestEstimator</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bestEpoch</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">o_dict</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__getstate__</span><span class="p">()</span>
+        <span class="c1"># convert all data frames to dicts</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">o_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+                <span class="n">o_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;pd.DataFrame&quot;</span><span class="p">:</span> <span class="n">value</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()}</span>
+        <span class="k">return</span> <span class="n">o_dict</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="c1"># convert all dicts to data frames</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;pd.DataFrame&quot;</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                <span class="n">state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s2">&quot;pd.DataFrame&quot;</span><span class="p">])</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setstate__</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BaseMonitor.onOptimizationStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.BaseMonitor.onOptimizationStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onOptimizationStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">optimization_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before the hyperparameter optimization has started.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): model to optimize</span>
+<span class="sd">            data (QSPRDataset): data set used in optimization</span>
+<span class="sd">            config (dict): configuration of the hyperparameter optimization</span>
+<span class="sd">            optimization_type (str): type of hyperparameter optimization</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizationType</span> <span class="o">=</span> <span class="n">optimization_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span></div>
+
+
+<div class="viewcode-block" id="BaseMonitor.onOptimizationEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.BaseMonitor.onOptimizationEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onOptimizationEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">best_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">best_parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after the hyperparameter optimization has finished.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            best_score (float): best score found during optimization</span>
+<span class="sd">            best_parameters (dict): best parameters found during optimization</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bestScore</span> <span class="o">=</span> <span class="n">best_score</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bestParameters</span> <span class="o">=</span> <span class="n">best_parameters</span></div>
+
+
+<div class="viewcode-block" id="BaseMonitor.onIterationStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.BaseMonitor.onIterationStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onIterationStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before each iteration of the hyperparameter optimization.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            params (dict): parameters used for the current iteration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">]</span> <span class="o">=</span> <span class="n">params</span></div>
+
+
+<div class="viewcode-block" id="BaseMonitor.onIterationEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.BaseMonitor.onIterationEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onIterationEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">scores</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each iteration of the hyperparameter optimization.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            score (float): (aggregated) score of the current iteration</span>
+<span class="sd">            scores (list[float]): scores of the current iteration</span>
+<span class="sd">                                  (e.g for cross-validation)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scores</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">score</span><span class="p">,</span> <span class="n">scores</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assessments</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_assessment</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clear_assessment</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="BaseMonitor.onAssessmentStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.BaseMonitor.onAssessmentStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onAssessmentStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">assesment_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before the assessment has started.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): model to assess</span>
+<span class="sd">            data (QSPRDataset): data set used in assessment</span>
+<span class="sd">            assesment_type (str): type of assessment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assessmentModel</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assessmentDataset</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assessmentType</span> <span class="o">=</span> <span class="n">assesment_type</span></div>
+
+
+<div class="viewcode-block" id="BaseMonitor.onAssessmentEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.BaseMonitor.onAssessmentEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onAssessmentEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after the assessment has finished.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            predictions (pd.DataFrame): predictions of the assessment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictions</span> <span class="o">=</span> <span class="n">predictions</span></div>
+
+
+<div class="viewcode-block" id="BaseMonitor.onFoldStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.BaseMonitor.onFoldStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onFoldStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">fold</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">X_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">X_test</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_test</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before each fold of the assessment.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fold (int): index of the current fold</span>
+<span class="sd">            X_train (np.ndarray): training data of the current fold</span>
+<span class="sd">            y_train (np.ndarray): training targets of the current fold</span>
+<span class="sd">            X_test (np.ndarray): test data of the current fold</span>
+<span class="sd">            y_test (np.ndarray): test targets of the current fold</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentFold</span> <span class="o">=</span> <span class="n">fold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">foldData</span><span class="p">[</span><span class="n">fold</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;X_train&quot;</span><span class="p">:</span> <span class="n">X_train</span><span class="p">,</span>
+            <span class="s2">&quot;y_train&quot;</span><span class="p">:</span> <span class="n">y_train</span><span class="p">,</span>
+            <span class="s2">&quot;X_test&quot;</span><span class="p">:</span> <span class="n">X_test</span><span class="p">,</span>
+            <span class="s2">&quot;y_test&quot;</span><span class="p">:</span> <span class="n">y_test</span><span class="p">,</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="BaseMonitor.onFoldEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.BaseMonitor.onFoldEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onFoldEnd</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model_fit</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">fold_predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each fold of the assessment.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or</span>
+<span class="sd">                                             tuple containing the fitted estimator and</span>
+<span class="sd">                                             the number of epochs it was trained for</span>
+<span class="sd">            fold_predictions (pd.DataFrame): predictions of the current fold</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimators</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">currentFold</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_fit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fits</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">currentFold</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getFit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_clearFit</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_clear_assessment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear the assessment data.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assessmentModel</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">asssessmentDataset</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">foldData</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictions</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimators</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fits</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">_get_assessment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">QSPRModel</span><span class="p">,</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the assessment data.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;assessmentModel&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">assessmentModel</span><span class="p">,</span>
+            <span class="s2">&quot;assessmentDataset&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">assessmentDataset</span><span class="p">,</span>
+            <span class="s2">&quot;foldData&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">foldData</span><span class="p">,</span>
+            <span class="s2">&quot;predictions&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictions</span><span class="p">,</span>
+            <span class="s2">&quot;estimators&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimators</span><span class="p">,</span>
+            <span class="s2">&quot;fits&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fits</span><span class="p">,</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="BaseMonitor.onFitStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.BaseMonitor.onFitStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onFitStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
+        <span class="n">X_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">X_val</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">y_val</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before the training has started.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): model to be fitted</span>
+<span class="sd">            data (QSPRDataset): data set used in training</span>
+<span class="sd">            X_train (np.ndarray): training data</span>
+<span class="sd">            y_train (np.ndarray): training targets</span>
+<span class="sd">            X_val (np.ndarray | None): validation data, used for early stopping</span>
+<span class="sd">            y_val (np.ndarray | None): validation targets, used for early stopping</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitModel</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitData</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;X_train&quot;</span><span class="p">:</span> <span class="n">X_train</span><span class="p">,</span>
+            <span class="s2">&quot;y_train&quot;</span><span class="p">:</span> <span class="n">y_train</span><span class="p">,</span>
+            <span class="s2">&quot;X_val&quot;</span><span class="p">:</span> <span class="n">X_val</span><span class="p">,</span>
+            <span class="s2">&quot;y_val&quot;</span><span class="p">:</span> <span class="n">y_val</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentEpoch</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentBatch</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="BaseMonitor.onFitEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.BaseMonitor.onFitEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onFitEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">best_epoch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after the training has finished.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            estimator (Any): estimator that was fitted</span>
+<span class="sd">            best_epoch (int | None): index of the best epoch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bestEstimator</span> <span class="o">=</span> <span class="n">estimator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bestEpoch</span> <span class="o">=</span> <span class="n">best_epoch</span></div>
+
+
+<div class="viewcode-block" id="BaseMonitor.onEpochStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.BaseMonitor.onEpochStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onEpochStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before each epoch of the training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epoch (int): index of the current epoch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentEpoch</span> <span class="o">=</span> <span class="n">epoch</span></div>
+
+
+<div class="viewcode-block" id="BaseMonitor.onEpochEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.BaseMonitor.onEpochEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onEpochEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">train_loss</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">val_loss</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each epoch of the training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epoch (int): index of the current epoch</span>
+<span class="sd">            train_loss (float): loss of the current epoch</span>
+<span class="sd">            val_loss (float | None): validation loss of the current epoch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitLog</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">epoch</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">epoch</span><span class="p">,</span> <span class="n">train_loss</span><span class="p">,</span> <span class="n">val_loss</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="BaseMonitor.onBatchStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.BaseMonitor.onBatchStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onBatchStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before each batch of the training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch (int): index of the current batch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentBatch</span> <span class="o">=</span> <span class="n">batch</span></div>
+
+
+<div class="viewcode-block" id="BaseMonitor.onBatchEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.BaseMonitor.onBatchEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onBatchEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">loss</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each batch of the training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch (int): index of the current batch</span>
+<span class="sd">            loss (float): loss of the current batch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batchLog</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">batchLog</span><span class="p">)]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">currentEpoch</span><span class="p">,</span> <span class="n">batch</span><span class="p">,</span> <span class="n">loss</span><span class="p">]</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_clearFit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitLog</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;epoch&quot;</span><span class="p">,</span> <span class="s2">&quot;train_loss&quot;</span><span class="p">,</span> <span class="s2">&quot;val_loss&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batchLog</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;epoch&quot;</span><span class="p">,</span> <span class="s2">&quot;batch&quot;</span><span class="p">,</span> <span class="s2">&quot;loss&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitData</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentEpoch</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentBatch</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bestEstimator</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bestEpoch</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_getFit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;fitData&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitData</span><span class="p">,</span>
+            <span class="s2">&quot;fitLog&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitLog</span><span class="p">,</span>
+            <span class="s2">&quot;batchLog&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">batchLog</span><span class="p">,</span>
+            <span class="s2">&quot;bestEstimator&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bestEstimator</span><span class="p">,</span>
+            <span class="s2">&quot;bestEpoch&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">bestEpoch</span><span class="p">,</span>
+        <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="FileMonitor">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.FileMonitor">[docs]</a>
+<span class="k">class</span> <span class="nc">FileMonitor</span><span class="p">(</span><span class="n">BaseMonitor</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">save_optimization</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">save_assessments</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">save_fits</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Monitor hyperparameter optimization, assessment and fitting to files.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            save_optimization (bool): whether to save the hyperparameter optimization</span>
+<span class="sd">                scores</span>
+<span class="sd">            save_assessments (bool): whether to save assessment predictions</span>
+<span class="sd">            save_fits (bool): whether to save the fit log and batch log</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveOptimization</span> <span class="o">=</span> <span class="n">save_optimization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveAssessments</span> <span class="o">=</span> <span class="n">save_assessments</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveFits</span> <span class="o">=</span> <span class="n">save_fits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outDir</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="FileMonitor.onOptimizationStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.FileMonitor.onOptimizationStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onOptimizationStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">optimization_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before the hyperparameter optimization has started.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): model to optimize</span>
+<span class="sd">            data (QSPRDataset): data set used in optimization</span>
+<span class="sd">            config (dict): configuration of the hyperparameter optimization</span>
+<span class="sd">            optimization_type (str): type of hyperparameter optimization</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">onOptimizationStart</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">optimization_type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outDir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outDir</span> <span class="ow">or</span> <span class="n">model</span><span class="o">.</span><span class="n">outDir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizationPath</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizationType</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+<div class="viewcode-block" id="FileMonitor.onIterationStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.FileMonitor.onIterationStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onIterationStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before each iteration of the hyperparameter optimization.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            params (dict): parameters used for the current iteration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">onIterationStart</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizationItPath</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizationPath</span><span class="si">}</span><span class="s2">/iteration_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+<div class="viewcode-block" id="FileMonitor.onIterationEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.FileMonitor.onIterationEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onIterationEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">scores</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each iteration of the hyperparameter optimization.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            score (float): (aggregated) score of the current iteration</span>
+<span class="sd">            scores (list[float]): scores of the current iteration</span>
+<span class="sd">                                  (e.g for cross-validation)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveAssessments</span><span class="p">:</span>
+            <span class="c1"># save parameters to json</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizationItPath</span><span class="si">}</span><span class="s2">/parameters.json&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">],</span> <span class="n">f</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">onIterationEnd</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">scores</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveOptimization</span><span class="p">:</span>
+            <span class="c1"># add parameters to scores with separate columns</span>
+            <span class="n">savescores</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">scores</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+            <span class="p">)</span>
+            <span class="n">savescores</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizationPath</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizationType</span><span class="si">}</span><span class="s2">_scores.tsv&quot;</span><span class="p">,</span>
+                <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FileMonitor.onAssessmentStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.FileMonitor.onAssessmentStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onAssessmentStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">assesment_type</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before the assessment has started.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): model to assess</span>
+<span class="sd">            data (QSPRDataset): data set used in assessment</span>
+<span class="sd">            assesment_type (str): type of assessment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">onAssessmentStart</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">assesment_type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outDir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outDir</span> <span class="ow">or</span> <span class="n">model</span><span class="o">.</span><span class="n">outDir</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveAssessments</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assessmentPath</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizationItPath</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">assessmentType</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assessmentPath</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">assessmentType</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assessmentPath</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FileMonitor.onAssessmentEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.FileMonitor.onAssessmentEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onAssessmentEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after the assessment has finished.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            predictions (pd.DataFrame): predictions of the assessment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">onAssessmentEnd</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveAssessments</span><span class="p">:</span>
+            <span class="n">predictions</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">assessmentPath</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">assessmentType</span><span class="si">}</span><span class="s2">_predictions.tsv&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FileMonitor.onFitStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.FileMonitor.onFitStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onFitStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
+        <span class="n">X_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">X_val</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">y_val</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before the training has started.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): model to be fitted</span>
+<span class="sd">            X_train (np.ndarray): training data</span>
+<span class="sd">            y_train (np.ndarray): training targets</span>
+<span class="sd">            X_val (np.ndarray | None): validation data, used for early stopping</span>
+<span class="sd">            y_val (np.ndarray | None): validation targets, used for early stopping</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">onFitStart</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outDir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outDir</span> <span class="ow">or</span> <span class="n">model</span><span class="o">.</span><span class="n">outDir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitPath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outDir</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveFits</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fitPath</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizationItPath</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fitPath</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fitPath</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">assessmentType</span><span class="si">}</span><span class="s2">/fold_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">currentFold</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitPath</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FileMonitor.onFitEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.FileMonitor.onFitEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onFitEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">best_epoch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after the training has finished.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            estimator (Any): estimator that was fitted</span>
+<span class="sd">            best_epoch (int | None): index of the best epoch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">onFitEnd</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="n">best_epoch</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveFits</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitLog</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fitPath</span><span class="si">}</span><span class="s2">/fit_log.tsv&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">batchLog</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fitPath</span><span class="si">}</span><span class="s2">/batch_log.tsv&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="WandBMonitor">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.WandBMonitor">[docs]</a>
+<span class="k">class</span> <span class="nc">WandBMonitor</span><span class="p">(</span><span class="n">BaseMonitor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Monitor hyperparameter optimization to weights and biases.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Monitor assessment to weights and biases.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            project_name (str): name of the project to log to</span>
+<span class="sd">            kwargs: additional keyword arguments for wandb.init</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">wandb</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;WandBMonitor requires wandb to be installed.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wandb</span> <span class="o">=</span> <span class="n">wandb</span>
+
+        <span class="n">wandb</span><span class="o">.</span><span class="n">login</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">projectName</span> <span class="o">=</span> <span class="n">project_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+
+<div class="viewcode-block" id="WandBMonitor.onFoldStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.WandBMonitor.onFoldStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onFoldStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">fold</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">X_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">X_test</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_test</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before each fold of the assessment.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fold (int): index of the current fold</span>
+<span class="sd">            X_train (np.ndarray): training data of the current fold</span>
+<span class="sd">            y_train (np.ndarray): training targets of the current fold</span>
+<span class="sd">            X_test (np.ndarray): test data of the current fold</span>
+<span class="sd">            y_test (np.ndarray): test targets of the current fold</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">onFoldStart</span><span class="p">(</span><span class="n">fold</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;fold&quot;</span><span class="p">:</span> <span class="n">fold</span><span class="p">,</span>
+            <span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">assessmentModel</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="s2">&quot;assessmentType&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">assessmentType</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="c1"># add hyperparameter optimization parameters if available</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;optimizationType&quot;</span><span class="p">):</span>
+            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;optimizationType&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizationType</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="p">])</span>
+            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;hyperParamOpt_iteration&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">config</span><span class="p">[</span><span class="s2">&quot;optimizationType&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">group</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">optimizationType</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">iteration</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;optimizationType&quot;</span><span class="p">)</span>
+            <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">assessmentModel</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">assessmentType</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">fold</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">init</span><span class="p">(</span>
+            <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projectName</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">group</span><span class="o">=</span><span class="n">group</span><span class="p">,</span>
+            <span class="nb">dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">assessmentModel</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="WandBMonitor.onFoldEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.WandBMonitor.onFoldEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onFoldEnd</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model_fit</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">fold_predictions</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each fold of the assessment.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model_fit (Any |tuple[Any, int]):</span>
+<span class="sd">                fitted estimator of the current fold</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">onFoldEnd</span><span class="p">(</span><span class="n">model_fit</span><span class="p">,</span> <span class="n">fold_predictions</span><span class="p">)</span>
+
+        <span class="n">fold_predictions_copy</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">fold_predictions</span><span class="p">)</span>
+
+        <span class="c1"># add smiles to fold predictions by merging on index</span>
+        <span class="n">dataset_smiles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assessmentDataset</span><span class="o">.</span><span class="n">getDF</span><span class="p">()[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assessmentDataset</span><span class="o">.</span><span class="n">smilesCol</span>
+        <span class="p">]</span>
+        <span class="n">fold_predictions_copy</span> <span class="o">=</span> <span class="n">fold_predictions_copy</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+            <span class="n">dataset_smiles</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+
+        <span class="n">fold_predictions_copy</span><span class="p">[</span><span class="s2">&quot;molecule&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">fold_predictions_copy</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">assessmentDataset</span><span class="o">.</span><span class="n">smilesCol</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">mol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">fold_predictions_copy</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="s2">&quot;molecule&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">Image</span><span class="p">(</span>
+                    <span class="n">Draw</span><span class="o">.</span><span class="n">MolToImage</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">))</span>
+                <span class="p">)</span>
+
+        <span class="n">wandbTable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">Table</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">fold_predictions_copy</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">log</span><span class="p">({</span><span class="s2">&quot;Test Results&quot;</span><span class="p">:</span> <span class="n">wandbTable</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="WandBMonitor.onFitStart">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.WandBMonitor.onFitStart">[docs]</a>
+    <span class="k">def</span> <span class="nf">onFitStart</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
+        <span class="n">X_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">y_train</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">X_val</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">y_val</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called before the training has started.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): model to train</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">onFitStart</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span>
+        <span class="c1"># initialize wandb run if not already initialized</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">run</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">init</span><span class="p">(</span>
+                <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projectName</span><span class="p">,</span>
+                <span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;model&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitModel</span><span class="o">.</span><span class="n">name</span><span class="p">},</span>
+                <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fitModel</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_fit&quot;</span><span class="p">,</span>
+                <span class="n">group</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fitModel</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="nb">dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fitModel</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="WandBMonitor.onFitEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.WandBMonitor.onFitEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onFitEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">best_epoch</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after the training has finished.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            estimator (Any): estimator that was fitted</span>
+<span class="sd">            best_epoch (int | None): index of the best epoch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">onFitEnd</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="n">best_epoch</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">log</span><span class="p">({</span><span class="s2">&quot;best_epoch&quot;</span><span class="p">:</span> <span class="n">best_epoch</span><span class="p">})</span>
+        <span class="c1"># finish wandb run if not already finished</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;assessmentType&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="WandBMonitor.onEpochEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.WandBMonitor.onEpochEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onEpochEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">train_loss</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">val_loss</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each epoch of the training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            epoch (int): index of the current epoch</span>
+<span class="sd">            train_loss (float): loss of the current epoch</span>
+<span class="sd">            val_loss (float | None): validation loss of the current epoch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">onEpochEnd</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">train_loss</span><span class="p">,</span> <span class="n">val_loss</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">log</span><span class="p">({</span><span class="s2">&quot;epoch&quot;</span><span class="p">:</span> <span class="n">epoch</span><span class="p">,</span> <span class="s2">&quot;train_loss&quot;</span><span class="p">:</span> <span class="n">train_loss</span><span class="p">,</span> <span class="s2">&quot;val_loss&quot;</span><span class="p">:</span> <span class="n">val_loss</span><span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="WandBMonitor.onBatchEnd">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.monitors.WandBMonitor.onBatchEnd">[docs]</a>
+    <span class="k">def</span> <span class="nf">onBatchEnd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">loss</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Called after each batch of the training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            batch (int): index of the current batch</span>
+<span class="sd">            loss (float): loss of the current batch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">onBatchEnd</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span> <span class="n">loss</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">log</span><span class="p">({</span><span class="s2">&quot;batch&quot;</span><span class="p">:</span> <span class="n">batch</span><span class="p">,</span> <span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="n">loss</span><span class="p">})</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

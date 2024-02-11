@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.data.tables.qspr &mdash; QSPRpred 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>
+    </script>
+        <script src="../../../../_static/design-tabs.js?v=36754332"></script>
+        <script src="../../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../features.html">Overview of available features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.data.tables.qspr</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.data.tables.qspr</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">mlchemad.applicability_domains</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ApplicabilityDomain</span> <span class="k">as</span> <span class="n">MLChemADApplicabilityDomain</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">LabelEncoder</span>
+
+<span class="kn">from</span> <span class="nn">.mol</span> <span class="kn">import</span> <span class="n">MoleculeTable</span>
+<span class="kn">from</span> <span class="nn">..descriptors.sets</span> <span class="kn">import</span> <span class="n">DescriptorSet</span>
+<span class="kn">from</span> <span class="nn">...data.processing.applicability_domain</span> <span class="kn">import</span> <span class="n">ApplicabilityDomain</span><span class="p">,</span> <span class="n">MLChemADWrapper</span>
+<span class="kn">from</span> <span class="nn">...data.processing.data_filters</span> <span class="kn">import</span> <span class="n">RepeatsFilter</span>
+<span class="kn">from</span> <span class="nn">...data.processing.feature_standardizers</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">SKLearnStandardizer</span><span class="p">,</span>
+    <span class="n">apply_feature_standardizer</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">...data.sampling.folds</span> <span class="kn">import</span> <span class="n">FoldsFromDataSplit</span>
+<span class="kn">from</span> <span class="nn">...logs</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">...tasks</span> <span class="kn">import</span> <span class="n">TargetProperty</span><span class="p">,</span> <span class="n">TargetTasks</span>
+
+
+<div class="viewcode-block" id="QSPRDataset">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset">[docs]</a>
+<span class="k">class</span> <span class="nc">QSPRDataset</span><span class="p">(</span><span class="n">MoleculeTable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prepare dataset for QSPR model training.</span>
+
+<span class="sd">    It splits the data in train and test set, as well as creating cross-validation</span>
+<span class="sd">    folds. Optionally low quality data is filtered out. For classification the dataset</span>
+<span class="sd">    samples are labelled as active/inactive.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        targetProperties (str) : property to be predicted with QSPRmodel</span>
+<span class="sd">        df (pd.dataframe) : dataset</span>
+<span class="sd">        X (np.ndarray/pd.DataFrame) : m x n feature matrix for cross validation, where m</span>
+<span class="sd">            is the number of samplesand n is the number of features.</span>
+<span class="sd">        y (np.ndarray/pd.DataFrame) : m-d label array for cross validation, where m is</span>
+<span class="sd">            the number of samples and equals to row of X.</span>
+<span class="sd">        X_ind (np.ndarray/pd.DataFrame) : m x n Feature matrix for independent set,</span>
+<span class="sd">            where m is the number of samples and n is the number of features.</span>
+<span class="sd">        y_ind (np.ndarray/pd.DataFrame) : m-l label array for independent set, where m</span>
+<span class="sd">            is the number of samples and equals to row of X_ind, and l is the number of</span>
+<span class="sd">            types.</span>
+<span class="sd">        X_ind_outliers (np.ndarray/pd.DataFrame) : m x n Feature matrix for outliers</span>
+<span class="sd">            in independent set, where m is the number of samples and n is the number of</span>
+<span class="sd">            features.</span>
+<span class="sd">        y_ind_outliers (np.ndarray/pd.DataFrame) : m-l label array for outliers in</span>
+<span class="sd">            independent set, where m is the number of samples and equals to row of</span>
+<span class="sd">            X_ind_outliers, and l is the number of types.</span>
+<span class="sd">        featureNames (list of str) : feature names</span>
+<span class="sd">        featureStandardizer (SKLearnStandardizer) : feature standardizer</span>
+<span class="sd">        applicabilityDomain (ApplicabilityDomain) : applicability domain</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_notJSON</span><span class="p">:</span> <span class="n">ClassVar</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">MoleculeTable</span><span class="o">.</span><span class="n">_notJSON</span><span class="p">,</span> <span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;X_ind&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;y_ind&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetProperty</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">smiles_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;SMILES&quot;</span><span class="p">,</span>
+        <span class="n">add_rdkit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">store_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+        <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">drop_invalids</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">drop_empty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">index_cols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">autoindex_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;QSPRID&quot;</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">store_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pkl&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct QSPRdata, also apply transformations of output property if</span>
+<span class="sd">                specified.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str):</span>
+<span class="sd">                data name, used in saving the data</span>
+<span class="sd">            target_props (list[TargetProperty | dict] | None):</span>
+<span class="sd">                target properties, names</span>
+<span class="sd">                should correspond with target columnname in df. If `None`, target</span>
+<span class="sd">                properties will be inferred if this data set has been saved</span>
+<span class="sd">                previously. Defaults to `None`.</span>
+<span class="sd">            df (pd.DataFrame, optional):</span>
+<span class="sd">                input dataframe containing smiles and target</span>
+<span class="sd">                property. Defaults to None.</span>
+<span class="sd">            smiles_col (str, optional):</span>
+<span class="sd">                name of column in df containing SMILES.</span>
+<span class="sd">                Defaults to &quot;SMILES&quot;.</span>
+<span class="sd">            add_rdkit (bool, optional):</span>
+<span class="sd">                if true, column with rdkit molecules will be</span>
+<span class="sd">                added to df. Defaults to False.</span>
+<span class="sd">            store_dir (str, optional):</span>
+<span class="sd">                directory for saving the output data.</span>
+<span class="sd">                Defaults to &#39;.&#39;.</span>
+<span class="sd">            overwrite (bool, optional):</span>
+<span class="sd">                if already saved data at output dir if should</span>
+<span class="sd">                be overwritten. Defaults to False.</span>
+<span class="sd">            n_jobs (int, optional):</span>
+<span class="sd">                number of parallel jobs. If &lt;= 0, all available</span>
+<span class="sd">                cores will be used. Defaults to 1.</span>
+<span class="sd">            chunk_size (int, optional):</span>
+<span class="sd">                chunk size for parallel processing.</span>
+<span class="sd">                Defaults to 50.</span>
+<span class="sd">            drop_invalids (bool, optional):</span>
+<span class="sd">                if true, invalid SMILES will be dropped.</span>
+<span class="sd">                Defaults to True.</span>
+<span class="sd">            drop_empty (bool, optional):</span>
+<span class="sd">                if true, rows with empty target property will  be removed.</span>
+<span class="sd">            index_cols (list[str], optional):</span>
+<span class="sd">                columns to be used as index in the</span>
+<span class="sd">                dataframe. Defaults to `None` in which case a custom ID will be</span>
+<span class="sd">                generated.</span>
+<span class="sd">            autoindex_name (str):</span>
+<span class="sd">                Column name to use for automatically generated IDs.</span>
+<span class="sd">            random_state (int, optional):</span>
+<span class="sd">                random state for splitting the data.</span>
+<span class="sd">            store_format (str, optional):</span>
+<span class="sd">                format to use for storing the data (&#39;pkl&#39; or &#39;csv&#39;).</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            `ValueError`: Raised if threshold given with non-classification task.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span>
+            <span class="n">df</span><span class="p">,</span>
+            <span class="n">smiles_col</span><span class="p">,</span>
+            <span class="n">add_rdkit</span><span class="p">,</span>
+            <span class="n">store_dir</span><span class="p">,</span>
+            <span class="n">overwrite</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="p">,</span>
+            <span class="n">chunk_size</span><span class="p">,</span>
+            <span class="kc">False</span><span class="p">,</span>
+            <span class="n">index_cols</span><span class="p">,</span>
+            <span class="n">autoindex_name</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="p">,</span>
+            <span class="n">store_format</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># load target properties if not specified and file exists</span>
+        <span class="k">if</span> <span class="n">target_props</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">):</span>
+            <span class="n">meta</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">))</span>
+            <span class="n">target_props</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s2">&quot;py/state&quot;</span><span class="p">][</span><span class="s2">&quot;targetProperties&quot;</span><span class="p">]</span>
+            <span class="n">target_props</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">TargetProperty</span><span class="o">.</span><span class="n">fromJSON</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">target_props</span>
+            <span class="p">]</span>
+        <span class="k">elif</span> <span class="n">target_props</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Target properties must be specified for a new QSPRDataset.&quot;</span>
+            <span class="p">)</span>
+        <span class="c1"># load names of descriptors to use as training features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFeatureNames</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># populate feature matrix and target properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setTargetProperties</span><span class="p">(</span><span class="n">target_props</span><span class="p">,</span> <span class="n">drop_empty</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span> <span class="o">=</span> <span class="n">chunk_size</span>
+        <span class="k">if</span> <span class="n">drop_invalids</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dropInvalids</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span> <span class="o">=</span> <span class="n">chunk_size</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Dataset &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; created for &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;target Properties: &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="si">}</span><span class="s2">&#39;. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Number of samples: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Chunk size: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span><span class="si">}</span><span class="s2">. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Number of CPUs: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setstate__</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restoreTrainingData</span><span class="p">()</span>
+
+<div class="viewcode-block" id="QSPRDataset.fromTableFile">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.fromTableFile">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromTableFile</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sep</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create QSPRDataset from table file (i.e. CSV or TSV).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): name of the data set</span>
+<span class="sd">            filename (str): path to the table file</span>
+<span class="sd">            sep (str, optional): separator in the table file. Defaults to &quot;\t&quot;.</span>
+<span class="sd">            *args: additional arguments for QSPRDataset constructor</span>
+<span class="sd">            **kwargs: additional keyword arguments for QSPRDataset constructor</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            QSPRDataset: `QSPRDataset` object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">QSPRDataset</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span>
+            <span class="n">df</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="n">sep</span><span class="p">),</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>  <span class="c1"># noqa: B026 # FIXME: this is a bug in flake8...</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.fromSDF">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.fromSDF">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromSDF</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">smiles_prop</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create QSPRDataset from SDF file.</span>
+
+<span class="sd">        It is currently not implemented for QSPRDataset, but you can convert from</span>
+<span class="sd">        &#39;MoleculeTable&#39; with the &#39;fromMolTable&#39; method.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): name of the data set</span>
+<span class="sd">            filename (str): path to the SDF file</span>
+<span class="sd">            smiles_prop (str): name of the property in the SDF file containing SMILES</span>
+<span class="sd">            *args: additional arguments for QSPRDataset constructor</span>
+<span class="sd">            **kwargs: additional keyword arguments for QSPRDataset constructor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;SDF loading not implemented for </span><span class="si">{</span><span class="n">QSPRDataset</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">, yet. You can &quot;</span>
+            <span class="s2">&quot;convert from &#39;MoleculeTable&#39; with &#39;fromMolTable&#39;.&quot;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.resetTargetProperty">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.resetTargetProperty">[docs]</a>
+    <span class="k">def</span> <span class="nf">resetTargetProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop</span><span class="p">:</span> <span class="n">TargetProperty</span> <span class="o">|</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset target property to its original value.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            prop (TargetProperty | str): target property to reset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTargetProperties</span><span class="p">([</span><span class="n">prop</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_original&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_original&quot;</span><span class="p">]</span>
+        <span class="c1"># save original values for next reset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_original&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restoreTrainingData</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.setTargetProperties">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.setTargetProperties">[docs]</a>
+    <span class="k">def</span> <span class="nf">setTargetProperties</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetProperty</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">],</span>
+        <span class="n">drop_empty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set list of target properties and apply transformations if specified.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_props (list[TargetProperty]):</span>
+<span class="sd">                list of target properties</span>
+<span class="sd">            drop_empty (bool, optional):</span>
+<span class="sd">                whether to drop rows with empty target property values. Defaults to</span>
+<span class="sd">                `True`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_props</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="p">(</span>
+            <span class="s2">&quot;target_props should be a list of TargetProperty objects or dictionaries &quot;</span>
+            <span class="s2">&quot;initialize TargetProperties from. Not a </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">target_props</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_props</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">target_props</span><span class="p">),</span> <span class="p">(</span>
+                <span class="s2">&quot;target_props should be a list of TargetProperty objects or &quot;</span>
+                <span class="s2">&quot;dictionaries to initialize TargetProperties from, not a mix.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">target_props</span> <span class="o">=</span> <span class="n">TargetProperty</span><span class="o">.</span><span class="n">fromList</span><span class="p">(</span><span class="n">target_props</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">TargetProperty</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">target_props</span><span class="p">),</span> <span class="p">(</span>
+                <span class="s2">&quot;target_props should be a list of TargetProperty objects or &quot;</span>
+                <span class="s2">&quot;dictionaries to initialize TargetProperties from, not a mix.&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">target_props</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setTargetProperty</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">drop_empty</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hasFeatures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check whether the currently selected set of features is not empty.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span> <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="k">else</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="QSPRDataset.getFeatureNames">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.getFeatureNames">[docs]</a>
+    <span class="k">def</span> <span class="nf">getFeatureNames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get current feature names for this data set.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[str]: list of feature names</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDescriptors</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">:</span>
+            <span class="n">features</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">getDescriptorNames</span><span class="p">(</span><span class="n">active_only</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">features</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.restoreTrainingData">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.restoreTrainingData">[docs]</a>
+    <span class="k">def</span> <span class="nf">restoreTrainingData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Restore training data from the data frame.</span>
+
+<span class="sd">        If the data frame contains a column &#39;Split_IsTrain&#39;,</span>
+<span class="sd">        the data will be split into training and independent sets. Otherwise, the</span>
+<span class="sd">        independent set will be empty. If descriptors are available, the resulting</span>
+<span class="sd">        training matrices will be featurized.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Restoring training data...&quot;</span><span class="p">)</span>
+        <span class="c1"># split data into training and independent sets if saved previously</span>
+        <span class="k">if</span> <span class="s2">&quot;Split_IsTrain&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s2">&quot;Split_IsTrain&quot;</span><span class="p">)[</span><span class="bp">self</span><span class="o">.</span><span class="n">targetPropertyNames</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                <span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetPropertyNames</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">targetPropertyNames</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                <span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetPropertyNames</span>
+            <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">featurizeSplits</span><span class="p">(</span><span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Training data restored.&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training features shape: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Test set features shape: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training labels shape: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Test set labels shape: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training features indices: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Test set features indices: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training labels indices: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Test set labels indices: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.makeRegression">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.makeRegression">[docs]</a>
+    <span class="k">def</span> <span class="nf">makeRegression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_property</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Switch to regression task using the given target property.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_property (str): name of the target property to use for regression</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">target_property</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTargetProperties</span><span class="p">([</span><span class="n">target_property</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resetTargetProperty</span><span class="p">(</span><span class="n">target_property</span><span class="p">)</span>
+        <span class="n">target_property</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">target_property</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="n">target_property</span><span class="o">.</span><span class="n">th</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restoreTrainingData</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Target property converted to regression.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.makeClassification">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.makeClassification">[docs]</a>
+    <span class="k">def</span> <span class="nf">makeClassification</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">target_property</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">th</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Switch to classification task using the given threshold values.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            target_property (str):</span>
+<span class="sd">                Target property to use for classification</span>
+<span class="sd">                or name of the target property.</span>
+<span class="sd">            th (list[float], optional):</span>
+<span class="sd">                list of threshold values. If not provided, the</span>
+<span class="sd">                values will be inferred from th specified in TargetProperty.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">prop_name</span> <span class="o">=</span> <span class="n">target_property</span>
+        <span class="n">target_property</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTargetProperties</span><span class="p">([</span><span class="n">target_property</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resetTargetProperty</span><span class="p">(</span><span class="n">target_property</span><span class="p">)</span>
+        <span class="c1"># perform some checks</span>
+        <span class="k">if</span> <span class="n">th</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">th</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="n">th</span> <span class="o">==</span> <span class="s2">&quot;precomputed&quot;</span>
+            <span class="p">),</span> <span class="s2">&quot;Threshold values should be provided as a list of floats.&quot;</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">th</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">th</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="p">),</span> <span class="s2">&quot;Threshold values should be provided as a list of floats.&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_property</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">target_property</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTargetProperties</span><span class="p">([</span><span class="n">target_property</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># check if the column only has nan values</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">target_property</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Target property </span><span class="si">{</span><span class="n">target_property</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="s2">&quot; is all nan, assuming predictor.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">target_property</span>
+        <span class="c1"># if no threshold values provided, use the ones specified in the TargetProperty</span>
+        <span class="k">if</span> <span class="n">th</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">target_property</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">),</span> <span class="p">(</span>
+                <span class="s2">&quot;Target property does not have a threshold attribute and &quot;</span>
+                <span class="s2">&quot;no threshold specified in function args.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">th</span> <span class="o">=</span> <span class="n">target_property</span><span class="o">.</span><span class="n">th</span>
+        <span class="k">if</span> <span class="n">th</span> <span class="o">==</span> <span class="s2">&quot;precomputed&quot;</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span>
+                <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">))</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">is_integer</span><span class="p">())</span>
+                <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">prop_name</span><span class="p">]</span>
+            <span class="p">),</span> <span class="s2">&quot;Precomputed classification target must be integers or booleans.&quot;</span>
+            <span class="n">n_classes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">prop_name</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+            <span class="n">target_property</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span>
+                <span class="k">if</span> <span class="n">n_classes</span> <span class="o">&gt;</span> <span class="mi">2</span>  <span class="c1"># noqa: PLR2004</span>
+                <span class="k">else</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span>
+            <span class="p">)</span>
+            <span class="n">target_property</span><span class="o">.</span><span class="n">th</span> <span class="o">=</span> <span class="n">th</span>
+            <span class="n">target_property</span><span class="o">.</span><span class="n">nClasses</span> <span class="o">=</span> <span class="n">n_classes</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">th</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Threshold list must contain at least one value.&quot;</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">th</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">th</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">,</span> <span class="p">(</span>  <span class="c1"># noqa: PLR2004</span>
+                    <span class="s2">&quot;For multi-class classification, &quot;</span>
+                    <span class="s2">&quot;set more than 3 values as threshold.&quot;</span>
+                <span class="p">)</span>
+                <span class="k">assert</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">prop_name</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">th</span><span class="p">),</span> <span class="p">(</span>
+                    <span class="s2">&quot;Make sure final threshold value is not smaller &quot;</span>
+                    <span class="s2">&quot;than largest value of property&quot;</span>
+                <span class="p">)</span>
+                <span class="k">assert</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">prop_name</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="nb">min</span><span class="p">(</span><span class="n">th</span><span class="p">),</span> <span class="p">(</span>
+                    <span class="s2">&quot;Make sure first threshold value is not larger &quot;</span>
+                    <span class="s2">&quot;than smallest value of property&quot;</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prop_name</span><span class="si">}</span><span class="s2">_intervals&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">prop_name</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="n">th</span><span class="p">,</span> <span class="n">include_lowest</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">prop_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">LabelEncoder</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prop_name</span><span class="si">}</span><span class="s2">_intervals&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">prop_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">prop_name</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">th</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">target_property</span><span class="o">.</span><span class="n">task</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">th</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span>
+            <span class="p">)</span>
+            <span class="n">target_property</span><span class="o">.</span><span class="n">th</span> <span class="o">=</span> <span class="n">th</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restoreTrainingData</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Target property &#39;</span><span class="si">{</span><span class="n">prop_name</span><span class="si">}</span><span class="s2">&#39; converted to classification.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.searchWithIndex">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.searchWithIndex">[docs]</a>
+    <span class="k">def</span> <span class="nf">searchWithIndex</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;MoleculeTable&quot;</span><span class="p">:</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">searchWithIndex</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="o">.</span><span class="n">fromMolTable</span><span class="p">(</span><span class="n">ret</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">ret</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">featureStandardizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">featurize</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.fromMolTable">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.fromMolTable">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromMolTable</span><span class="p">(</span>
+        <span class="n">mol_table</span><span class="p">:</span> <span class="n">MoleculeTable</span><span class="p">,</span>
+        <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetProperty</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">],</span>
+        <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;QSPRDataset&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create QSPRDataset from a MoleculeTable.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mol_table (MoleculeTable): MoleculeTable to use as the data source</span>
+<span class="sd">            target_props (list): list of target properties to use</span>
+<span class="sd">            name (str, optional): name of the data set. Defaults to None.</span>
+<span class="sd">            kwargs: additional keyword arguments to pass to the constructor</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            QSPRDataset: created data set</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">mol_table</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">name</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;store_dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">mol_table</span><span class="o">.</span><span class="n">baseDir</span> <span class="k">if</span> <span class="s2">&quot;store_dir&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;store_dir&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;random_state&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">mol_table</span><span class="o">.</span><span class="n">randomState</span>
+            <span class="k">if</span> <span class="s2">&quot;random_state&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
+            <span class="k">else</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;random_state&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">mol_table</span><span class="o">.</span><span class="n">nJobs</span> <span class="k">if</span> <span class="s2">&quot;n_jobs&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;chunk_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">mol_table</span><span class="o">.</span><span class="n">chunkSize</span> <span class="k">if</span> <span class="s2">&quot;chunk_size&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;chunk_size&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;smiles_col&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">mol_table</span><span class="o">.</span><span class="n">smilesCol</span> <span class="k">if</span> <span class="s2">&quot;smiles_col&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;smiles_col&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;index_cols&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">mol_table</span><span class="o">.</span><span class="n">indexCols</span> <span class="k">if</span> <span class="s2">&quot;index_cols&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;index_cols&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;store_format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">mol_table</span><span class="o">.</span><span class="n">storeFormat</span>
+            <span class="k">if</span> <span class="s2">&quot;store_format&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span>
+            <span class="k">else</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;store_format&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span>
+            <span class="n">target_props</span><span class="p">,</span>
+            <span class="n">mol_table</span><span class="o">.</span><span class="n">getDF</span><span class="p">(),</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">descriptors</span> <span class="o">=</span> <span class="n">mol_table</span><span class="o">.</span><span class="n">descriptors</span>
+        <span class="k">return</span> <span class="n">ds</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.filter">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.filter">[docs]</a>
+    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_filters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter the data set using the given filters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            table_filters (list[Callable]): list of filters to apply</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">table_filters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restoreTrainingData</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">featurize</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.addDescriptors">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.addDescriptors">[docs]</a>
+    <span class="k">def</span> <span class="nf">addDescriptors</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">descriptors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorSet</span><span class="p">],</span>
+        <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">featurize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add descriptors to the data set.</span>
+
+<span class="sd">        If descriptors are already present, they will be recalculated if `recalculate`</span>
+<span class="sd">        is `True`. Featurization will be performed after adding descriptors if</span>
+<span class="sd">        `featurize` is `True`. Featurization converts current data matrices to pure</span>
+<span class="sd">        numeric matrices of selected descriptors (features).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            descriptors (list[DescriptorSet]): list of descriptor sets to add</span>
+<span class="sd">            recalculate (bool, optional): whether to recalculate descriptors if they are</span>
+<span class="sd">                already present. Defaults to `False`.</span>
+<span class="sd">            featurize (bool, optional): whether to featurize the data set splits after</span>
+<span class="sd">                adding descriptors. Defaults to `True`.</span>
+<span class="sd">            *args: additional positional arguments to pass to each descriptor set</span>
+<span class="sd">            **kwargs: additional keyword arguments to pass to each descriptor set</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">(</span><span class="n">descriptors</span><span class="p">,</span> <span class="n">recalculate</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">featurize</span><span class="p">(</span><span class="n">update_splits</span><span class="o">=</span><span class="n">featurize</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.featurize">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.featurize">[docs]</a>
+    <span class="k">def</span> <span class="nf">featurize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update_splits</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFeatureNames</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">update_splits</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">featurizeSplits</span><span class="p">(</span><span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.saveSplit">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.saveSplit">[docs]</a>
+    <span class="k">def</span> <span class="nf">saveSplit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save split data to the managed data frame.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Split_IsTrain&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;No split data available. Skipping split data save.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.save">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.save">[docs]</a>
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_split</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the data set to file and serialize metadata.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            save_split (bool): whether to save split data to the managed data frame.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">save_split</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">saveSplit</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="s2">&quot;Split_IsTrain&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;Split_IsOutlier&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.split">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.split">[docs]</a>
+    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split</span><span class="p">:</span> <span class="s2">&quot;DataSplit&quot;</span><span class="p">,</span> <span class="n">featurize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Split dataset into train and test set.</span>
+
+<span class="sd">        You can either split tha data frame itself or you can set `featurize` to `True`</span>
+<span class="sd">        if you want to use feature matrices instead of the raw data frame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            split (DataSplit):</span>
+<span class="sd">                split instance orchestrating the split</span>
+<span class="sd">            featurize (bool):</span>
+<span class="sd">                whether to featurize the data set splits after splitting.</span>
+<span class="sd">                Defaults to `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">hasattr</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="s2">&quot;hasDataSet&quot;</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="s2">&quot;setDataSet&quot;</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">split</span><span class="o">.</span><span class="n">hasDataSet</span>
+        <span class="p">):</span>
+            <span class="n">split</span><span class="o">.</span><span class="n">setDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="s2">&quot;setSeed&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="s2">&quot;getSeed&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">split</span><span class="o">.</span><span class="n">getSeed</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">split</span><span class="o">.</span><span class="n">setSeed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">randomState</span><span class="p">)</span>
+        <span class="c1"># split the data into train and test</span>
+        <span class="n">folds</span> <span class="o">=</span> <span class="n">FoldsFromDataSplit</span><span class="p">(</span><span class="n">split</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+            <span class="n">folds</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">concat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="c1"># select target properties</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Total: train: </span><span class="si">%s</span><span class="s2"> test: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="p">)))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;First index train: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;First index test: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Last index train: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Last index test: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Target property: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;    In train: active: </span><span class="si">%s</span><span class="s2"> not active: </span><span class="si">%s</span><span class="s2">&quot;</span>
+                    <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]),</span>
+                        <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">])</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]),</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;    In test:  active: </span><span class="si">%s</span><span class="s2"> not active: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]),</span>
+                        <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">])</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]),</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">task</span> <span class="o">==</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;train: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;test: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">())</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()])</span>
+                    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">([</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()])</span>
+                <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span>
+                        <span class="s2">&quot;All bins in multi-class classification &quot;</span>
+                        <span class="s2">&quot;should contain at least one sample&quot;</span>
+                    <span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">err</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;category&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">codes</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">codes</span>
+        <span class="k">if</span> <span class="s2">&quot;Split_IsOutlier&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;Split_IsOutlier&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># convert splits to features if required</span>
+        <span class="k">if</span> <span class="n">featurize</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">featurizeSplits</span><span class="p">(</span><span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.loadDescriptorsToSplits">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.loadDescriptorsToSplits">[docs]</a>
+    <span class="k">def</span> <span class="nf">loadDescriptorsToSplits</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load all available descriptors into the train and test splits.</span>
+
+<span class="sd">        If no descriptors are available, an exception will be raised.</span>
+
+<span class="sd">        args:</span>
+<span class="sd">            shuffle (bool): whether to shuffle the training and test sets</span>
+<span class="sd">            random_state (int): random state for shuffling</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: if no descriptors are available</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDescriptors</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;No descriptors available. Cannot load descriptors to splits.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">descriptors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDescriptors</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">descriptors</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetPropertyNames</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="o">=</span> <span class="n">descriptors</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetPropertyNames</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">descriptors</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDescriptorNames</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">descriptors</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetPropertyNames</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="o">=</span> <span class="n">descriptors</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="p">:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetPropertyNames</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">shuffle</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="c1"># make sure no extra data is present in the splits</span>
+        <span class="n">mask_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">mask_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mask_train</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Some items will be removed from the training set because &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;they no longer exist in the data set: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">~</span><span class="n">mask_train</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">mask_test</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Some items will be removed from the test set because &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;they no longer exist in the data set: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">~</span><span class="n">mask_test</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mask_train</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mask_test</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="p">:]</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.shuffle">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.shuffle">[docs]</a>
+    <span class="k">def</span> <span class="nf">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">random_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+            <span class="n">frac</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="p">:]</span></div>
+
+        <span class="c1"># self.df = self.df.loc[self.X.index, :]</span>
+
+<div class="viewcode-block" id="QSPRDataset.featurizeSplits">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.featurizeSplits">[docs]</a>
+    <span class="k">def</span> <span class="nf">featurizeSplits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shuffle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;If the data set has descriptors, load them into the train and test splits.</span>
+
+<span class="sd">        If no descriptors are available, remove all features from</span>
+<span class="sd">        the splits. They will become zero length along the feature axis (columns), but</span>
+<span class="sd">        will retain their original length along the sample axis (rows). This is useful</span>
+<span class="sd">        for the case where the data set has no descriptors, but the user wants to retain</span>
+<span class="sd">        train and test splits.</span>
+
+<span class="sd">        shuffle (bool): whether to shuffle the training and test sets</span>
+<span class="sd">        random_state (int): random state for shuffling</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDescriptors</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasFeatures</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadDescriptorsToSplits</span><span class="p">(</span>
+                <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">),</span> <span class="p">:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">shuffle</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">random_state</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span><span class="p">)</span>
+        <span class="c1"># make sure no extra data is present in the splits</span>
+        <span class="n">mask_train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">mask_test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mask_train</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Some items will be removed from the training set because &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;they no longer exist in the data set: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">~</span><span class="n">mask_train</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">mask_test</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Some items will be removed from the test set because &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;they no longer exist in the data set: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">~</span><span class="n">mask_test</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mask_train</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mask_test</span><span class="p">,</span> <span class="p">:]</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.fillMissing">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.fillMissing">[docs]</a>
+    <span class="k">def</span> <span class="nf">fillMissing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fill_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fill missing values in the data set with a given value.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fill_value (float): value to fill missing values with</span>
+<span class="sd">            columns (list[str], optional): columns to fill missing values in.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filled</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">desc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">:</span>
+            <span class="n">desc</span><span class="o">.</span><span class="n">fillMissing</span><span class="p">(</span><span class="n">fill_value</span><span class="p">,</span> <span class="n">columns</span><span class="p">)</span>
+            <span class="n">filled</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">filled</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Missing values filled with </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fill_value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">featurize</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.filterFeatures">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.filterFeatures">[docs]</a>
+    <span class="k">def</span> <span class="nf">filterFeatures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_filters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter features in the data set.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            feature_filters (list[Callable]): list of feature filter functions that take</span>
+<span class="sd">                X feature matrix and y target vector as arguments</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasFeatures</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No features to filter&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Only one feature present. Skipping feature filtering.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">featurefilter</span> <span class="ow">in</span> <span class="n">feature_filters</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">featurefilter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+            <span class="c1"># update features</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span><span class="p">]</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Selected features: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="c1"># update descriptor calculator</span>
+            <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">:</span>
+                <span class="n">to_keep</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">x</span>
+                    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">getDescriptorNames</span><span class="p">(</span><span class="n">active_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span>
+                <span class="p">]</span>
+                <span class="n">ds</span><span class="o">.</span><span class="n">keepDescriptors</span><span class="p">(</span><span class="n">to_keep</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.setFeatureStandardizer">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.setFeatureStandardizer">[docs]</a>
+    <span class="k">def</span> <span class="nf">setFeatureStandardizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feature_standardizer</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set feature standardizer.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            feature_standardizer (SKLearnStandardizer | BaseEstimator): feature</span>
+<span class="sd">                standardizer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">feature_standardizer</span><span class="p">,</span> <span class="s2">&quot;toFile&quot;</span><span class="p">):</span>
+            <span class="n">feature_standardizer</span> <span class="o">=</span> <span class="n">SKLearnStandardizer</span><span class="p">(</span><span class="n">feature_standardizer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span> <span class="o">=</span> <span class="n">feature_standardizer</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.addFeatures">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.addFeatures">[docs]</a>
+    <span class="k">def</span> <span class="nf">addFeatures</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">feature_calculators</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorSet</span><span class="p">],</span>
+        <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add features to the data set.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            feature_calculators (list[DescriptorSet]): list of</span>
+<span class="sd">                feature calculators to add. Defaults to None.</span>
+<span class="sd">            recalculate (bool): if True, recalculate features even if they are already</span>
+<span class="sd">                present in the data set. Defaults to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">(</span>
+            <span class="n">feature_calculators</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="n">recalculate</span><span class="p">,</span> <span class="n">featurize</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">featurize</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.dropInvalids">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.dropInvalids">[docs]</a>
+    <span class="k">def</span> <span class="nf">dropInvalids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dropInvalids</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restoreTrainingData</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.reset">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.reset">[docs]</a>
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset the data set. Splits will be removed and all descriptors will be</span>
+<span class="sd">        moved to the training data. Molecule</span>
+<span class="sd">        standardization and molecule filtering are not affected.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDescriptorNames</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadDescriptorsToSplits</span><span class="p">(</span><span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.prepareDataset">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.prepareDataset">[docs]</a>
+    <span class="k">def</span> <span class="nf">prepareDataset</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">smiles_standardizer</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;chembl&quot;</span><span class="p">,</span>
+        <span class="n">data_filters</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">(</span><span class="n">RepeatsFilter</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="kc">True</span><span class="p">),),</span>
+        <span class="n">split</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">feature_calculators</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="s2">&quot;DescriptorSet&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">feature_filters</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">feature_standardizer</span><span class="p">:</span> <span class="n">SKLearnStandardizer</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">feature_fill_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+        <span class="n">applicability_domain</span><span class="p">:</span> <span class="n">ApplicabilityDomain</span>
+        <span class="o">|</span> <span class="n">MLChemADApplicabilityDomain</span>
+        <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">drop_outliers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">recalculate_features</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">shuffle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare the dataset for use in QSPR model.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            smiles_standardizer (str | Callable): either `chembl`, `old`, or a</span>
+<span class="sd">                partial function that reads and standardizes smiles. If `None`, no</span>
+<span class="sd">                standardization will be performed. Defaults to `chembl`.</span>
+<span class="sd">            data_filters (list of datafilter obj): filters number of rows from dataset</span>
+<span class="sd">            split (datasplitter obj): splits the dataset into train and test set</span>
+<span class="sd">            feature_calculators (list[DescriptorSet]): descriptor sets to add to the data set</span>
+<span class="sd">            feature_filters (list of feature filter objs): filters features</span>
+<span class="sd">            feature_standardizer (SKLearnStandardizer or sklearn.base.BaseEstimator):</span>
+<span class="sd">                standardizes and/or scales features</span>
+<span class="sd">            feature_fill_value (float): value to fill missing values with.</span>
+<span class="sd">                Defaults to `numpy.nan`</span>
+<span class="sd">            applicability_domain (applicabilityDomain obj): attaches an</span>
+<span class="sd">                applicability domain calculator to the dataset and fits it on</span>
+<span class="sd">                the training set</span>
+<span class="sd">            drop_outliers (bool): whether to drop samples that are outside the</span>
+<span class="sd">                applicability domain from the test set, if one is attached.</span>
+<span class="sd">            recalculate_features (bool): recalculate features even if they are already</span>
+<span class="sd">                present in the file</span>
+<span class="sd">            shuffle (bool): whether to shuffle the created training and test sets</span>
+<span class="sd">            random_state (int): random state for shuffling</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># reset everything</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="c1"># apply sanitization and standardization</span>
+        <span class="k">if</span> <span class="n">smiles_standardizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">standardizeSmiles</span><span class="p">(</span><span class="n">smiles_standardizer</span><span class="p">)</span>
+        <span class="c1"># calculate features</span>
+        <span class="k">if</span> <span class="n">feature_calculators</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addFeatures</span><span class="p">(</span><span class="n">feature_calculators</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="n">recalculate_features</span><span class="p">)</span>
+        <span class="c1"># apply data filters</span>
+        <span class="k">if</span> <span class="n">data_filters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">data_filters</span><span class="p">)</span>
+        <span class="c1"># Replace any NaN values in featureNames by 0</span>
+        <span class="c1"># FIXME: this is not very good, we should probably add option to do custom</span>
+        <span class="c1"># data imputation here or drop rows with NaNs</span>
+        <span class="k">if</span> <span class="n">feature_fill_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fillMissing</span><span class="p">(</span><span class="n">feature_fill_value</span><span class="p">)</span>
+        <span class="c1"># shuffle the data</span>
+        <span class="k">if</span> <span class="n">shuffle</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">random_state</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span><span class="p">)</span>
+        <span class="c1"># split dataset</span>
+        <span class="k">if</span> <span class="n">split</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">split</span><span class="p">)</span>
+        <span class="c1"># apply feature filters on training set</span>
+        <span class="k">if</span> <span class="n">feature_filters</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDescriptors</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filterFeatures</span><span class="p">(</span><span class="n">feature_filters</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDescriptors</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No descriptors present, feature filters will be skipped.&quot;</span><span class="p">)</span>
+        <span class="c1"># set feature standardizers</span>
+        <span class="k">if</span> <span class="n">feature_standardizer</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setFeatureStandardizer</span><span class="p">(</span><span class="n">feature_standardizer</span><span class="p">)</span>
+        <span class="c1"># set applicability domain and fit it on the training set</span>
+        <span class="k">if</span> <span class="n">applicability_domain</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setApplicabilityDomain</span><span class="p">(</span><span class="n">applicability_domain</span><span class="p">)</span>
+        <span class="c1"># drop outliers from test set based on applicability domain</span>
+        <span class="k">if</span> <span class="n">drop_outliers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dropOutliers</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.checkFeatures">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.checkFeatures">[docs]</a>
+    <span class="k">def</span> <span class="nf">checkFeatures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check consistency of features and descriptors.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;X and y have different number of rows: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> != </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;X has no rows.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.getFeatures">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.getFeatures">[docs]</a>
+    <span class="k">def</span> <span class="nf">getFeatures</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">concat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">raw</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">ordered</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">refit_standardizer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the current feature sets (training and test) from the dataset.</span>
+
+<span class="sd">        This method also applies any feature standardizers that have been set on the</span>
+<span class="sd">        dataset during preparation. Outliers are dropped from the test set if they are</span>
+<span class="sd">        present, unless `concat` is `True`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            inplace (bool): If `True`, the created feature matrices will be saved to the</span>
+<span class="sd">                dataset object itself as &#39;X&#39; and &#39;X_ind&#39; attributes. Note that this will</span>
+<span class="sd">                overwrite any existing feature matrices and if the data preparation</span>
+<span class="sd">                workflow changes, these are not kept up to date. Therefore, it is</span>
+<span class="sd">                recommended to generate new feature sets after any data set changes.</span>
+<span class="sd">            concat (bool): If `True`, the training and test feature matrices will be</span>
+<span class="sd">                concatenated into a single matrix. This is useful for training models</span>
+<span class="sd">                that do not require separate training and test sets (i.e. the final</span>
+<span class="sd">                optimized models).</span>
+<span class="sd">            raw (bool): If `True`, the raw feature matrices will be returned without</span>
+<span class="sd">                any standardization applied.</span>
+<span class="sd">            ordered (bool):</span>
+<span class="sd">                If `True`, the returned feature matrices will be ordered</span>
+<span class="sd">                according to the original order of the data set. This is only relevant</span>
+<span class="sd">                if `concat` is `True`.</span>
+<span class="sd">            refit_standardizer (bool): If `True`, the feature standardizer will be</span>
+<span class="sd">                refit on the training set upon this call. If `False`, the previously</span>
+<span class="sd">                fitted standardizer will be used. Defaults to `True`. Use `False` if</span>
+<span class="sd">                this dataset is used for prediction only and the standardizer has</span>
+<span class="sd">                been initialized already.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkFeatures</span><span class="p">()</span>
+        <span class="c1"># get feature matrices using feature names</span>
+        <span class="k">if</span> <span class="n">concat</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">df_X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                    <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+                <span class="p">)</span>
+                <span class="n">df_X_ind</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">df_X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">df_X_ind</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">df_X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span><span class="p">]</span>
+            <span class="n">df_X_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">featureNames</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df_X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span>
+            <span class="n">df_X_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span>
+        <span class="c1"># convert to numpy arrays and standardize</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">df_X</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">X_ind</span> <span class="o">=</span> <span class="n">df_X_ind</span><span class="o">.</span><span class="n">values</span> <span class="k">if</span> <span class="n">df_X_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">raw</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span><span class="p">:</span>
+            <span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span> <span class="o">=</span> <span class="n">apply_feature_standardizer</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span><span class="p">,</span>
+                <span class="n">df_X</span><span class="p">,</span>
+                <span class="n">fit</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">refit_standardizer</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">X_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">X_ind</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">X_ind</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">apply_feature_standardizer</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span><span class="p">,</span> <span class="n">df_X_ind</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span>
+                <span class="p">)</span>
+        <span class="c1"># convert to data frames and make sure column order is correct</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_X</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">df_X</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">X_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">X_ind</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X_ind</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_X_ind</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">df_X_ind</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="c1"># drop outliers from test set</span>
+        <span class="k">if</span> <span class="s2">&quot;Split_IsOutlier&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">concat</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">X_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">X_ind</span> <span class="o">=</span> <span class="n">X_ind</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Split_IsOutlier&quot;</span><span class="p">],</span> <span class="p">:]</span>
+        <span class="c1"># replace original feature matrices if inplace</span>
+        <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="o">=</span> <span class="n">X_ind</span>
+        <span class="c1"># order if concatenating</span>
+        <span class="k">if</span> <span class="n">ordered</span> <span class="ow">and</span> <span class="n">concat</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">X_ind</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">concat</span> <span class="k">else</span> <span class="n">X</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.getTargetPropertiesValues">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.getTargetPropertiesValues">[docs]</a>
+    <span class="k">def</span> <span class="nf">getTargetPropertiesValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">concat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ordered</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the response values (training and test) for the set target property.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            concat (bool): if `True`, return concatenated training and validation set</span>
+<span class="sd">                target properties</span>
+<span class="sd">            ordered (bool): if `True`, return the target properties in the original</span>
+<span class="sd">                order of the data set. This is only relevant if `concat` is `True`.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            `tuple` of (train_responses, test_responses) or `pandas.DataFrame` of all</span>
+<span class="sd">            target property values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">concat</span><span class="p">:</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">ret</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="p">:]</span> <span class="k">if</span> <span class="n">ordered</span> <span class="k">else</span> <span class="n">ret</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;Split_IsOutlier&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">y_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Split_IsOutlier&quot;</span><span class="p">],</span> <span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">y_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">y_ind</span> <span class="k">if</span> <span class="n">y_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.getTargetProperties">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.getTargetProperties">[docs]</a>
+    <span class="k">def</span> <span class="nf">getTargetProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetProperty</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the target properties with the given names.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            names (list[str]): name of the target properties</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[TargetProperty]: list of target properties</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">tp</span> <span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span> <span class="k">if</span> <span class="n">tp</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">targetPropertyNames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the names of the target properties.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">TargetProperty</span><span class="o">.</span><span class="n">getNames</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isMultiTask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the dataset contains multiple target properties.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            `bool`: `True` if the dataset contains multiple target properties</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nTargetProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of target properties in the dataset.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)</span>
+
+<div class="viewcode-block" id="QSPRDataset.unsetTargetProperty">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.unsetTargetProperty">[docs]</a>
+    <span class="k">def</span> <span class="nf">unsetTargetProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">TargetProperty</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Unset the target property. It will not remove it from the data set, but</span>
+<span class="sd">        will make it unavailable for training.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str | TargetProperty):</span>
+<span class="sd">                name of the target property to drop or the property itself</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">TargetProperty</span><span class="p">)</span> <span class="k">else</span> <span class="n">name</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetPropertyNames</span>
+        <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Target property &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in dataset.&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+        <span class="p">),</span> <span class="s2">&quot;Cannot drop task from single-task dataset.&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span> <span class="o">=</span> <span class="p">[</span><span class="n">tp</span> <span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span> <span class="k">if</span> <span class="n">tp</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">name</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restoreTrainingData</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.dropEmptyProperties">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.dropEmptyProperties">[docs]</a>
+    <span class="k">def</span> <span class="nf">dropEmptyProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">dropEmptyProperties</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restoreTrainingData</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.transform">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.transform">[docs]</a>
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">transformer</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">add_as</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">transformer</span><span class="p">,</span> <span class="n">add_as</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">add_as</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetPropertyNames</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">restoreTrainingData</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.imputeProperties">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.imputeProperties">[docs]</a>
+    <span class="k">def</span> <span class="nf">imputeProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">imputer</span><span class="p">:</span> <span class="n">Callable</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">imputeProperties</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">imputer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restoreTrainingData</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.setTargetProperty">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.setTargetProperty">[docs]</a>
+    <span class="k">def</span> <span class="nf">setTargetProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop</span><span class="p">:</span> <span class="n">TargetProperty</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">drop_empty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a target property to the dataset.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            prop (TargetProperty):</span>
+<span class="sd">                name of the target property to add</span>
+<span class="sd">            drop_empty (bool):</span>
+<span class="sd">                whether to drop rows with empty target property values. Defaults to</span>
+<span class="sd">                `True`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Adding target property &#39;</span><span class="si">{</span><span class="n">prop</span><span class="si">}</span><span class="s2">&#39; to dataset.&quot;</span><span class="p">)</span>
+        <span class="c1"># deep copy the property to avoid modifying the original</span>
+        <span class="n">prop</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">prop</span> <span class="o">=</span> <span class="n">TargetProperty</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetPropertyNames</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Property &#39;</span><span class="si">{</span><span class="n">prop</span><span class="si">}</span><span class="s2">&#39; already exists in dataset. It will be reset.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">assert</span> <span class="n">prop</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Property </span><span class="si">{</span><span class="n">prop</span><span class="si">}</span><span class="s2"> not found in data set.&quot;</span>
+        <span class="c1"># add the target property to the list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span>
+        <span class="c1"># restore original values if they were transformed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resetTargetProperty</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span>
+        <span class="c1"># impute the property</span>
+        <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">imputer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">imputeProperties</span><span class="p">([</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">],</span> <span class="n">prop</span><span class="o">.</span><span class="n">imputer</span><span class="p">)</span>
+        <span class="c1"># transform the property</span>
+        <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">transformer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
+                <span class="n">prop</span><span class="o">.</span><span class="n">transformer</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="c1"># drop rows with missing smiles/no target property for any of</span>
+        <span class="c1"># the target properties</span>
+        <span class="k">if</span> <span class="n">drop_empty</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dropEmptyProperties</span><span class="p">([</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+        <span class="c1"># convert classification targets to integers</span>
+        <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">makeClassification</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">prop</span><span class="o">.</span><span class="n">th</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.iterFolds">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.iterFolds">[docs]</a>
+    <span class="k">def</span> <span class="nf">iterFolds</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">split</span><span class="p">:</span> <span class="s2">&quot;DataSplit&quot;</span><span class="p">,</span>
+        <span class="n">concat</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span>
+        <span class="nb">tuple</span><span class="p">[</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+            <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+            <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="p">],</span>
+        <span class="kc">None</span><span class="p">,</span>
+        <span class="kc">None</span><span class="p">,</span>
+    <span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterate over the folds of the dataset.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            split (DataSplit):</span>
+<span class="sd">                split instance orchestrating the split</span>
+<span class="sd">            concat (bool):</span>
+<span class="sd">                whether to concatenate the training and test feature matrices</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            tuple:</span>
+<span class="sd">                training and test feature matrices and target vectors</span>
+<span class="sd">                for each fold</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkFeatures</span><span class="p">()</span>
+        <span class="n">folds</span> <span class="o">=</span> <span class="n">FoldsFromDataSplit</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">folds</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">concat</span><span class="o">=</span><span class="n">concat</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.setApplicabilityDomain">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.setApplicabilityDomain">[docs]</a>
+    <span class="k">def</span> <span class="nf">setApplicabilityDomain</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">applicability_domain</span><span class="p">:</span> <span class="n">ApplicabilityDomain</span> <span class="o">|</span> <span class="n">MLChemADApplicabilityDomain</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the applicability domain calculator.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            applicability_domain (ApplicabilityDomain | MLChemADApplicabilityDomain):</span>
+<span class="sd">                applicability domain calculator instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">applicability_domain</span><span class="p">,</span> <span class="n">MLChemADApplicabilityDomain</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span> <span class="o">=</span> <span class="n">MLChemADWrapper</span><span class="p">(</span><span class="n">applicability_domain</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span> <span class="o">=</span> <span class="n">applicability_domain</span></div>
+
+
+<div class="viewcode-block" id="QSPRDataset.dropOutliers">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.dropOutliers">[docs]</a>
+    <span class="k">def</span> <span class="nf">dropOutliers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Drop outliers from the test set based on the applicability domain.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;No applicability domain calculator attached to the data set.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">X_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">X_ind</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;No test samples available, skipping outlier removal from test set.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+        <span class="c1"># check if X or X_ind contain any nan values</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">or</span> <span class="n">X_ind</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Feature matrix contains NaN values. &quot;</span>
+                <span class="s2">&quot;Please fill them before applying outlier removal.&quot;</span>
+                <span class="s2">&quot;Outliers will not be dropped.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+        <span class="c1"># fit applicability domain on the training set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">X_ind</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;All samples in the test set are outside the applicability domain,&quot;</span>
+                <span class="s2">&quot;outliers will not be dropped.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Split_IsOutlier&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="s2">&quot;Split_IsOutlier&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">~</span><span class="n">mask</span><span class="p">[</span><span class="s2">&quot;in_domain&quot;</span><span class="p">]</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Marked </span><span class="si">{</span><span class="p">(</span><span class="o">~</span><span class="n">mask</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> samples from the test set as outlier.&quot;</span>
+        <span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

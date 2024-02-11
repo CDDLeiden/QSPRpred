@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.utils.testing.check_mixins &mdash; QSPRpred 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>
+    </script>
+        <script src="../../../../_static/design-tabs.js?v=36754332"></script>
+        <script src="../../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../features.html">Overview of available features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.utils.testing.check_mixins</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.utils.testing.check_mixins</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">exists</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">KFold</span>
+
+<span class="kn">from</span> <span class="nn">.path_mixins</span> <span class="kn">import</span> <span class="n">ModelDataSetsPathMixIn</span>
+<span class="kn">from</span> <span class="nn">...</span> <span class="kn">import</span> <span class="n">TargetTasks</span>
+<span class="kn">from</span> <span class="nn">...data</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
+<span class="kn">from</span> <span class="nn">...data.descriptors.sets</span> <span class="kn">import</span> <span class="n">DescriptorSet</span>
+<span class="kn">from</span> <span class="nn">...data.processing.feature_standardizers</span> <span class="kn">import</span> <span class="n">SKLearnStandardizer</span>
+<span class="kn">from</span> <span class="nn">...models</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">QSPRModel</span><span class="p">,</span>
+    <span class="n">OptunaOptimization</span><span class="p">,</span>
+    <span class="n">CrossValAssessor</span><span class="p">,</span>
+    <span class="n">EarlyStoppingMode</span><span class="p">,</span>
+    <span class="n">SklearnMetrics</span><span class="p">,</span>
+    <span class="n">GridSearchOptimization</span><span class="p">,</span>
+    <span class="n">TestSetAssessor</span><span class="p">,</span>
+    <span class="n">HyperparameterOptimizationMonitor</span><span class="p">,</span>
+    <span class="n">AssessorMonitor</span><span class="p">,</span>
+    <span class="n">FitMonitor</span><span class="p">,</span>
+    <span class="n">BaseMonitor</span><span class="p">,</span>
+    <span class="n">FileMonitor</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">...models.monitors</span> <span class="kn">import</span> <span class="n">ListMonitor</span>
+<span class="kn">from</span> <span class="nn">...tasks</span> <span class="kn">import</span> <span class="n">TargetProperty</span>
+
+
+<div class="viewcode-block" id="DescriptorCheckMixIn">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn">[docs]</a>
+<span class="k">class</span> <span class="nc">DescriptorCheckMixIn</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mixin class for common descriptor checks.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DescriptorCheckMixIn.checkFeatures">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn.checkFeatures">[docs]</a>
+    <span class="k">def</span> <span class="nf">checkFeatures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">expected_length</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the feature names and the feature matrix of a data set is consistent</span>
+<span class="sd">        with expected number of variables.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ds (QSPRDataset): The data set to check.</span>
+<span class="sd">            expected_length (int): The expected number of features.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AssertionError: If the feature names or the feature matrix is not consistent</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">featureNames</span><span class="p">),</span> <span class="n">expected_length</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">getFeatureNames</span><span class="p">()),</span> <span class="n">expected_length</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">expected_length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">features</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">(</span><span class="n">concat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">ds</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">,</span> <span class="n">concat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">features</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">ds</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">ds</span><span class="o">.</span><span class="n">X_ind</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">features</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">expected_length</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">expected_length</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">expected_length</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">expected_length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="n">split</span><span class="o">=</span><span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">)):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">fold</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">fold</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">expected_length</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">fold</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">expected_length</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span>
+                <span class="ne">ValueError</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="n">split</span><span class="o">=</span><span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="mi">5</span><span class="p">)))</span>
+            <span class="p">)</span>
+
+        <span class="c1"># check if outliers are dropped</span>
+        <span class="k">if</span> <span class="s2">&quot;TestOutlier&quot;</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">num_dropped</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">TestOutlier</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="c1"># expected number of samples is the total number of samples minus the number</span>
+            <span class="c1"># of samples in the training set, minus the number of dropped</span>
+            <span class="n">expected_num_samples</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">X</span><span class="p">))</span> <span class="o">-</span> <span class="n">num_dropped</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">X_ind</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">(</span><span class="n">concat</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">X_ind</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">expected_num_samples</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DescriptorCheckMixIn.checkDescriptors">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn.checkDescriptors">[docs]</a>
+    <span class="k">def</span> <span class="nf">checkDescriptors</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span> <span class="o">|</span> <span class="n">TargetProperty</span><span class="p">]</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if information about descriptors is consistent in the data set. Checks</span>
+<span class="sd">        if calculators are consistent with the descriptors contained in the data set.</span>
+<span class="sd">        This is tested also before and after serialization.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dataset (QSPRDataset): The data set to check.</span>
+<span class="sd">            target_props (List of dicts or TargetProperty): list of target properties</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            AssertionError: If the consistency check fails.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># test some basic consistency rules on the resulting features</span>
+        <span class="n">expected_length</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">calc</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">descriptorSets</span><span class="p">:</span>
+            <span class="n">expected_length</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">calc</span><span class="o">.</span><span class="n">descriptors</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkFeatures</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">expected_length</span><span class="p">)</span>
+        <span class="c1"># save to file, check if it can be loaded, and if the features are consistent</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">ds_loaded</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ds_loaded</span><span class="o">.</span><span class="n">nJobs</span><span class="p">,</span> <span class="n">dataset</span><span class="o">.</span><span class="n">nJobs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ds_loaded</span><span class="o">.</span><span class="n">chunkSize</span><span class="p">,</span> <span class="n">dataset</span><span class="o">.</span><span class="n">chunkSize</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ds_loaded</span><span class="o">.</span><span class="n">randomState</span><span class="p">,</span> <span class="n">dataset</span><span class="o">.</span><span class="n">randomState</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ds_loaded_prop</span><span class="p">,</span> <span class="n">target_prop</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">ds_loaded</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">,</span> <span class="n">target_props</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">ds_loaded_prop</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ds_loaded_prop</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">target_prop</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ds_loaded_prop</span><span class="o">.</span><span class="n">task</span><span class="p">,</span> <span class="n">target_prop</span><span class="p">[</span><span class="s2">&quot;task&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">ds_loaded</span><span class="o">.</span><span class="n">descriptorSets</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">calc</span> <span class="ow">in</span> <span class="n">ds_loaded</span><span class="o">.</span><span class="n">descriptors</span><span class="p">:</span>
+            <span class="n">calc</span> <span class="o">=</span> <span class="n">calc</span><span class="o">.</span><span class="n">calculator</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">calc</span><span class="p">,</span> <span class="n">DescriptorSet</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkFeatures</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">expected_length</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DataPrepCheckMixIn">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn">[docs]</a>
+<span class="k">class</span> <span class="nc">DataPrepCheckMixIn</span><span class="p">(</span><span class="n">DescriptorCheckMixIn</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mixin for testing data preparation.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DataPrepCheckMixIn.checkPrep">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn.checkPrep">[docs]</a>
+    <span class="k">def</span> <span class="nf">checkPrep</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="p">,</span>
+        <span class="n">feature_calculators</span><span class="p">,</span>
+        <span class="n">split</span><span class="p">,</span>
+        <span class="n">feature_standardizer</span><span class="p">,</span>
+        <span class="n">feature_filter</span><span class="p">,</span>
+        <span class="n">data_filter</span><span class="p">,</span>
+        <span class="n">applicability_domain</span><span class="p">,</span>
+        <span class="n">expected_target_props</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check the consistency of the dataset after preparation.&quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">name</span>
+        <span class="c1"># if a split needs a dataset, give it one</span>
+        <span class="k">if</span> <span class="n">split</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="s2">&quot;setDataSet&quot;</span><span class="p">):</span>
+            <span class="n">split</span><span class="o">.</span><span class="n">setDataSet</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">split</span><span class="o">.</span><span class="n">getDataSet</span><span class="p">)</span>
+            <span class="n">split</span><span class="o">.</span><span class="n">setDataSet</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEquals</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">split</span><span class="o">.</span><span class="n">getDataSet</span><span class="p">())</span>
+
+        <span class="c1"># prepare the dataset and check consistency</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span>
+            <span class="n">feature_calculators</span><span class="o">=</span><span class="n">feature_calculators</span><span class="p">,</span>
+            <span class="n">split</span><span class="o">=</span><span class="n">split</span> <span class="k">if</span> <span class="n">split</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">feature_standardizer</span><span class="o">=</span><span class="n">feature_standardizer</span> <span class="k">if</span> <span class="n">feature_standardizer</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">feature_filters</span><span class="o">=</span><span class="p">[</span><span class="n">feature_filter</span><span class="p">]</span> <span class="k">if</span> <span class="n">feature_filter</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">data_filters</span><span class="o">=</span><span class="p">[</span><span class="n">data_filter</span><span class="p">]</span> <span class="k">if</span> <span class="n">data_filter</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">applicability_domain</span><span class="o">=</span><span class="n">applicability_domain</span><span class="p">,</span>
+            <span class="n">drop_outliers</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">applicability_domain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">expected_feature_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">featureNames</span><span class="p">)</span>
+        <span class="n">original_features</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">featureNames</span>
+        <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkFeatures</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">expected_feature_count</span><span class="p">)</span>
+        <span class="c1"># save the dataset</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="c1"># reload the dataset and check consistency again</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">task</span><span class="p">,</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">expected_target_props</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">prop</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">calc</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">descriptors</span><span class="p">:</span>
+            <span class="n">calc</span> <span class="o">=</span> <span class="n">calc</span><span class="o">.</span><span class="n">calculator</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">calc</span><span class="p">,</span> <span class="n">DescriptorSet</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">feature_standardizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">featureStandardizer</span><span class="p">,</span> <span class="n">SKLearnStandardizer</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">featureStandardizer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkFeatures</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">expected_feature_count</span><span class="p">)</span>
+        <span class="c1"># verify prep results are the same after reloading</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span>
+            <span class="n">feature_calculators</span><span class="o">=</span><span class="n">feature_calculators</span><span class="p">,</span>
+            <span class="n">split</span><span class="o">=</span><span class="n">split</span> <span class="k">if</span> <span class="n">split</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">feature_standardizer</span><span class="o">=</span><span class="n">feature_standardizer</span> <span class="k">if</span> <span class="n">feature_standardizer</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">feature_filters</span><span class="o">=</span><span class="p">[</span><span class="n">feature_filter</span><span class="p">]</span> <span class="k">if</span> <span class="n">feature_filter</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">data_filters</span><span class="o">=</span><span class="p">[</span><span class="n">data_filter</span><span class="p">]</span> <span class="k">if</span> <span class="n">data_filter</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">applicability_domain</span><span class="o">=</span><span class="n">applicability_domain</span><span class="p">,</span>
+            <span class="n">drop_outliers</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">applicability_domain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkFeatures</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">expected_feature_count</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">featureNames</span><span class="p">),</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">original_features</span><span class="p">))</span>
+        <span class="n">train2</span><span class="p">,</span> <span class="n">test2</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">train</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">train2</span><span class="o">.</span><span class="n">index</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">test2</span><span class="o">.</span><span class="n">index</span><span class="p">))</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DescriptorInDataCheckMixIn">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.DescriptorInDataCheckMixIn">[docs]</a>
+<span class="k">class</span> <span class="nc">DescriptorInDataCheckMixIn</span><span class="p">(</span><span class="n">DescriptorCheckMixIn</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mixin for testing descriptor sets in data sets.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DescriptorInDataCheckMixIn.getDatSetName">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.DescriptorInDataCheckMixIn.getDatSetName">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">getDatSetName</span><span class="p">(</span><span class="n">desc_set</span><span class="p">,</span> <span class="n">target_props</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a unique name for a data set.&quot;&quot;&quot;</span>
+        <span class="n">target_props_id</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">target_prop</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">target_prop</span><span class="p">[</span><span class="s1">&#39;task&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">for</span> <span class="n">target_prop</span> <span class="ow">in</span> <span class="n">target_props</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">desc_set</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">target_props_id</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+<div class="viewcode-block" id="DescriptorInDataCheckMixIn.checkDataSetContainsDescriptorSet">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.DescriptorInDataCheckMixIn.checkDataSetContainsDescriptorSet">[docs]</a>
+    <span class="k">def</span> <span class="nf">checkDataSetContainsDescriptorSet</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">desc_set</span><span class="p">,</span> <span class="n">prep_combo</span><span class="p">,</span> <span class="n">target_props</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if a descriptor set is in a data set.&quot;&quot;&quot;</span>
+        <span class="c1"># run the preparation</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Testing descriptor set: </span><span class="si">{</span><span class="n">desc_set</span><span class="si">}</span><span class="s2"> in data set: </span><span class="si">{</span><span class="n">dataset</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">preparation</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">preparation</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">prep_combo</span><span class="p">)</span>
+        <span class="n">preparation</span><span class="p">[</span><span class="s2">&quot;feature_calculators&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">desc_set</span><span class="p">]</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span><span class="o">**</span><span class="n">preparation</span><span class="p">)</span>
+        <span class="c1"># test consistency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkDescriptors</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">target_props</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ModelCheckMixIn">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.ModelCheckMixIn">[docs]</a>
+<span class="k">class</span> <span class="nc">ModelCheckMixIn</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the tests for the QSPRmodel class.&quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">gridFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/search_space_test.json&quot;</span>
+
+<div class="viewcode-block" id="ModelCheckMixIn.getParamGrid">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.getParamGrid">[docs]</a>
+    <span class="k">def</span> <span class="nf">getParamGrid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">grid</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the parameter grid for a model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): The model to get the parameter grid for.</span>
+<span class="sd">            grid (str): The grid type to get the parameter grid for.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: The parameter grid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">mname</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">grid_params</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">loadParamsGrid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gridFile</span><span class="p">,</span> <span class="n">grid</span><span class="p">,</span> <span class="n">mname</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">grid_params</span><span class="p">[</span><span class="n">grid_params</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">mname</span><span class="p">,</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="ModelCheckMixIn.fitTest">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.fitTest">[docs]</a>
+    <span class="k">def</span> <span class="nf">fitTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model fitting, optimization and evaluation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): The model to test.</span>
+<span class="sd">            ds (QSPRDataset): The dataset to use for testing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># perform bayes optimization</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">initFromDataset</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+        <span class="n">score_func</span> <span class="o">=</span> <span class="s2">&quot;r2&quot;</span> <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isRegression</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;roc_auc_ovr&quot;</span>
+        <span class="n">search_space_bs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getParamGrid</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;bayes&quot;</span><span class="p">)</span>
+        <span class="n">bayesoptimizer</span> <span class="o">=</span> <span class="n">OptunaOptimization</span><span class="p">(</span>
+            <span class="n">param_grid</span><span class="o">=</span><span class="n">search_space_bs</span><span class="p">,</span>
+            <span class="n">n_trials</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">model_assessor</span><span class="o">=</span><span class="n">CrossValAssessor</span><span class="p">(</span>
+                <span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">best_params</span> <span class="o">=</span> <span class="n">bayesoptimizer</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="n">best_params</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">model_new</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">best_params</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">model_new</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">param</span><span class="p">],</span> <span class="n">best_params</span><span class="p">[</span><span class="n">param</span><span class="p">])</span>
+        <span class="c1"># perform grid search</span>
+        <span class="n">search_space_gs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getParamGrid</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;grid&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">():</span>
+            <span class="n">score_func</span> <span class="o">=</span> <span class="n">SklearnMetrics</span><span class="p">(</span><span class="s2">&quot;accuracy&quot;</span><span class="p">)</span>
+        <span class="n">gridsearcher</span> <span class="o">=</span> <span class="n">GridSearchOptimization</span><span class="p">(</span>
+            <span class="n">param_grid</span><span class="o">=</span><span class="n">search_space_gs</span><span class="p">,</span>
+            <span class="n">score_aggregation</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">,</span>
+            <span class="n">model_assessor</span><span class="o">=</span><span class="n">TestSetAssessor</span><span class="p">(</span>
+                <span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">,</span>
+                <span class="n">use_proba</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">best_params</span> <span class="o">=</span> <span class="n">gridsearcher</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds</span><span class="p">)</span>
+        <span class="n">model_new</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">best_params</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">model_new</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">param</span><span class="p">],</span> <span class="n">best_params</span><span class="p">[</span><span class="n">param</span><span class="p">])</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">cleanFiles</span><span class="p">()</span>
+        <span class="c1"># perform crossvalidation</span>
+        <span class="n">score_func</span> <span class="o">=</span> <span class="s2">&quot;r2&quot;</span> <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isRegression</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;roc_auc_ovr&quot;</span>
+        <span class="n">n_folds</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="n">CrossValAssessor</span><span class="p">(</span>
+            <span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">RECORDING</span><span class="p">,</span>
+            <span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">,</span>
+            <span class="n">split_multitask_scores</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">isMultiTask</span><span class="p">,</span>
+            <span class="n">split</span><span class="o">=</span><span class="n">KFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="n">n_folds</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">randomState</span><span class="p">),</span>
+        <span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">isMultiTask</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">scores</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="n">n_folds</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)))</span>
+        <span class="n">scores</span> <span class="o">=</span> <span class="n">TestSetAssessor</span><span class="p">(</span>
+            <span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span><span class="p">,</span>
+            <span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">,</span>
+            <span class="n">split_multitask_scores</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">isMultiTask</span><span class="p">,</span>
+        <span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">isMultiTask</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">scores</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">),))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.ind.tsv&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.cv.tsv&quot;</span><span class="p">))</span>
+        <span class="c1"># train the model on all data</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fitDataset</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">exists</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">metaFile</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ModelCheckMixIn.predictorTest">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.predictorTest">[docs]</a>
+    <span class="k">def</span> <span class="nf">predictorTest</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span>
+        <span class="n">comparison_model</span><span class="p">:</span> <span class="n">QSPRModel</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">expect_equal_result</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">pred_kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model predictions.</span>
+
+<span class="sd">        Checks if the shape of the predictions is as expected and if the predictions</span>
+<span class="sd">        of the predictMols function are consistent with the predictions of the</span>
+<span class="sd">        predict/predictProba functions. Also checks if the predictions of the model are</span>
+<span class="sd">        the same as the predictions of the comparison model if given.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (QSPRModel): The model to make predictions with.</span>
+<span class="sd">            dataset (QSPRDataset): The dataset to make predictions for.</span>
+<span class="sd">            comparison_model (QSPRModel): another model to compare the predictions with.</span>
+<span class="sd">            expect_equal_result (bool): Whether the expected result should be equal or</span>
+<span class="sd">                not equal to the predictions of the comparison model.</span>
+<span class="sd">            **pred_kwargs:</span>
+<span class="sd">                Extra keyword arguments to pass to the predictor&#39;s `predictMols` method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># define checks of the shape of the predictions</span>
+        <span class="k">def</span> <span class="nf">check_shape</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">num_smiles</span><span class="p">,</span> <span class="n">use_probas</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">()</span> <span class="ow">and</span> <span class="n">use_probas</span><span class="p">:</span>
+                <span class="c1"># check predictions are a list of arrays of shape (n_smiles, n_classes)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
+                        <span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                        <span class="p">(</span><span class="n">num_smiles</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">nClasses</span><span class="p">),</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># check predictions are an array of shape (n_smiles, n_targets)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
+                    <span class="n">predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">num_smiles</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)),</span>
+                <span class="p">)</span>
+
+        <span class="c1"># define check for comparing predictions with expected result</span>
+        <span class="k">def</span> <span class="nf">check_predictions</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">expected_result</span><span class="p">,</span> <span class="n">expect_equal_result</span><span class="p">):</span>
+            <span class="c1"># check if predictions are almost equal to expected result (rtol=1e-5)</span>
+            <span class="n">check_outcome</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span> <span class="k">if</span> <span class="n">expect_equal_result</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expected_result</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">expected_result</span><span class="p">)):</span>
+                    <span class="n">check_outcome</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">expected_result</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">check_outcome</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">expected_result</span><span class="p">))</span>
+
+        <span class="c1"># Check if the predictMols function gives the same result as the</span>
+        <span class="c1"># predict/predictProba function</span>
+        <span class="c1"># get the expected result from the basic predict function</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">(</span>
+            <span class="n">concat</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ordered</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">refit_standardizer</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="n">expected_result</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+        <span class="c1"># make predictions with the predictMols function and check with previous result</span>
+        <span class="n">smiles</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">smiles</span><span class="p">)</span>
+        <span class="n">num_smiles</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span><span class="n">smiles</span><span class="p">,</span> <span class="n">use_probas</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">pred_kwargs</span><span class="p">)</span>
+        <span class="n">check_shape</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">num_smiles</span><span class="p">,</span> <span class="n">use_probas</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">check_predictions</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">expected_result</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># do the same for the predictProba function</span>
+        <span class="n">predictions_proba</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isClassification</span><span class="p">():</span>
+            <span class="n">expected_result_proba</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predictProba</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+            <span class="n">predictions_proba</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span>
+                <span class="n">smiles</span><span class="p">,</span> <span class="n">use_probas</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">pred_kwargs</span>
+            <span class="p">)</span>
+            <span class="n">check_shape</span><span class="p">(</span><span class="n">predictions_proba</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">smiles</span><span class="p">),</span> <span class="n">use_probas</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">check_predictions</span><span class="p">(</span><span class="n">predictions_proba</span><span class="p">,</span> <span class="n">expected_result_proba</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># check if the predictions are (not) the same as of the comparison model</span>
+        <span class="k">if</span> <span class="n">comparison_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">predictions_comparison</span> <span class="o">=</span> <span class="n">comparison_model</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span>
+                <span class="n">smiles</span><span class="p">,</span> <span class="n">use_probas</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">pred_kwargs</span>
+            <span class="p">)</span>
+            <span class="n">check_predictions</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">predictions_comparison</span><span class="p">,</span> <span class="n">expect_equal_result</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">predictions_proba</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">predictions_comparison_proba</span> <span class="o">=</span> <span class="n">comparison_model</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span>
+                    <span class="n">smiles</span><span class="p">,</span> <span class="n">use_probas</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">pred_kwargs</span>
+                <span class="p">)</span>
+                <span class="n">check_predictions</span><span class="p">(</span>
+                    <span class="n">predictions_proba</span><span class="p">,</span> <span class="n">predictions_comparison_proba</span><span class="p">,</span> <span class="n">expect_equal_result</span>
+                <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="MonitorsCheckMixIn">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn">[docs]</a>
+<span class="k">class</span> <span class="nc">MonitorsCheckMixIn</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">ModelCheckMixIn</span><span class="p">):</span>
+<div class="viewcode-block" id="MonitorsCheckMixIn.trainModelWithMonitoring">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.trainModelWithMonitoring">[docs]</a>
+    <span class="k">def</span> <span class="nf">trainModelWithMonitoring</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
+        <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span>
+        <span class="n">hyperparam_monitor</span><span class="p">:</span> <span class="n">HyperparameterOptimizationMonitor</span><span class="p">,</span>
+        <span class="n">crossval_monitor</span><span class="p">:</span> <span class="n">AssessorMonitor</span><span class="p">,</span>
+        <span class="n">test_monitor</span><span class="p">:</span> <span class="n">AssessorMonitor</span><span class="p">,</span>
+        <span class="n">fit_monitor</span><span class="p">:</span> <span class="n">FitMonitor</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span>
+        <span class="n">HyperparameterOptimizationMonitor</span><span class="p">,</span>
+        <span class="n">AssessorMonitor</span><span class="p">,</span>
+        <span class="n">AssessorMonitor</span><span class="p">,</span>
+        <span class="n">FitMonitor</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">score_func</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;r2&quot;</span> <span class="k">if</span> <span class="n">ds</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">isRegression</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;roc_auc_ovr&quot;</span>
+        <span class="p">)</span>
+        <span class="n">search_space_gs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getParamGrid</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;grid&quot;</span><span class="p">)</span>
+        <span class="n">gridsearcher</span> <span class="o">=</span> <span class="n">GridSearchOptimization</span><span class="p">(</span>
+            <span class="n">param_grid</span><span class="o">=</span><span class="n">search_space_gs</span><span class="p">,</span>
+            <span class="n">model_assessor</span><span class="o">=</span><span class="n">CrossValAssessor</span><span class="p">(</span>
+                <span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">,</span>
+                <span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">monitor</span><span class="o">=</span><span class="n">hyperparam_monitor</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">best_params</span> <span class="o">=</span> <span class="n">gridsearcher</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="n">best_params</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="c1"># perform crossvalidation</span>
+        <span class="n">CrossValAssessor</span><span class="p">(</span>
+            <span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">RECORDING</span><span class="p">,</span>
+            <span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">,</span>
+            <span class="n">monitor</span><span class="o">=</span><span class="n">crossval_monitor</span><span class="p">,</span>
+        <span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds</span><span class="p">)</span>
+        <span class="n">TestSetAssessor</span><span class="p">(</span>
+            <span class="n">mode</span><span class="o">=</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span><span class="p">,</span>
+            <span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">,</span>
+            <span class="n">monitor</span><span class="o">=</span><span class="n">test_monitor</span><span class="p">,</span>
+        <span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds</span><span class="p">)</span>
+        <span class="c1"># train the model on all data</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">fitDataset</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">monitor</span><span class="o">=</span><span class="n">fit_monitor</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">hyperparam_monitor</span><span class="p">,</span> <span class="n">crossval_monitor</span><span class="p">,</span> <span class="n">test_monitor</span><span class="p">,</span> <span class="n">fit_monitor</span></div>
+
+
+<div class="viewcode-block" id="MonitorsCheckMixIn.baseMonitorTest">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.baseMonitorTest">[docs]</a>
+    <span class="k">def</span> <span class="nf">baseMonitorTest</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">monitor</span><span class="p">:</span> <span class="n">BaseMonitor</span><span class="p">,</span>
+        <span class="n">monitor_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;hyperparam&quot;</span><span class="p">,</span> <span class="s2">&quot;crossval&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="s2">&quot;fit&quot;</span><span class="p">],</span>
+        <span class="n">neural_net</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the base monitor.&quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">check_fit_empty</span><span class="p">(</span><span class="n">monitor</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">fitLog</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">batchLog</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">currentEpoch</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">currentBatch</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">bestEstimator</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">bestEpoch</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">check_assessment_empty</span><span class="p">(</span><span class="n">monitor</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">assessmentModel</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">asssessmentDataset</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertDictEqual</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">foldData</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">predictions</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertDictEqual</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">estimators</span><span class="p">,</span> <span class="p">{})</span>
+
+        <span class="k">def</span> <span class="nf">check_hyperparam_monitor</span><span class="p">(</span><span class="n">monitor</span><span class="p">):</span>
+            <span class="c1"># calculate number of iterations from config</span>
+            <span class="n">n_iter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">monitor</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;param_grid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertGreater</span><span class="p">(</span><span class="n">n_iter</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">assessments</span><span class="p">),</span> <span class="n">n_iter</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">parameters</span><span class="p">),</span> <span class="n">n_iter</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">scores</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="n">n_iter</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># agg score + scores</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
+                <span class="nb">max</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">scores</span><span class="o">.</span><span class="n">aggregated_score</span><span class="p">),</span>
+                <span class="n">monitor</span><span class="o">.</span><span class="n">bestScore</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertDictEqual</span><span class="p">(</span>
+                <span class="n">monitor</span><span class="o">.</span><span class="n">bestParameters</span><span class="p">,</span>
+                <span class="n">monitor</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">monitor</span><span class="o">.</span><span class="n">scores</span><span class="o">.</span><span class="n">aggregated_score</span><span class="o">.</span><span class="n">argmax</span><span class="p">()],</span>
+            <span class="p">)</span>
+            <span class="n">check_assessment_empty</span><span class="p">(</span><span class="n">monitor</span><span class="p">)</span>
+            <span class="n">check_fit_empty</span><span class="p">(</span><span class="n">monitor</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">check_assessor_monitor</span><span class="p">(</span><span class="n">monitor</span><span class="p">,</span> <span class="n">n_folds</span><span class="p">,</span> <span class="n">len_y</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
+                <span class="n">monitor</span><span class="o">.</span><span class="n">predictions</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">len_y</span><span class="p">,</span> <span class="mi">3</span> <span class="k">if</span> <span class="n">n_folds</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">2</span><span class="p">),</span>  <span class="c1"># labels + preds (+ fold)</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">foldData</span><span class="p">),</span> <span class="n">n_folds</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">fits</span><span class="p">),</span> <span class="n">n_folds</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">estimators</span><span class="p">),</span> <span class="n">n_folds</span><span class="p">)</span>
+            <span class="n">check_fit_empty</span><span class="p">(</span><span class="n">monitor</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">check_fit_monitor</span><span class="p">(</span><span class="n">monitor</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertGreater</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">fitLog</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertGreater</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">batchLog</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">bestEstimator</span><span class="p">,</span> <span class="n">monitor</span><span class="o">.</span><span class="n">fitModel</span><span class="o">.</span><span class="n">alg</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNotNone</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">currentEpoch</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNotNone</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">currentBatch</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">monitor_type</span> <span class="o">==</span> <span class="s2">&quot;hyperparam&quot;</span><span class="p">:</span>
+            <span class="n">check_hyperparam_monitor</span><span class="p">(</span><span class="n">monitor</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">monitor_type</span> <span class="o">==</span> <span class="s2">&quot;crossval&quot;</span><span class="p">:</span>
+            <span class="n">check_assessor_monitor</span><span class="p">(</span><span class="n">monitor</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">assessmentDataset</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">monitor_type</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span>
+            <span class="n">check_assessor_monitor</span><span class="p">(</span><span class="n">monitor</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">assessmentDataset</span><span class="o">.</span><span class="n">y_ind</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">monitor_type</span> <span class="o">==</span> <span class="s2">&quot;fit&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">neural_net</span><span class="p">:</span>
+                <span class="n">check_fit_monitor</span><span class="p">(</span><span class="n">monitor</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">check_fit_empty</span><span class="p">(</span><span class="n">monitor</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown monitor type </span><span class="si">{</span><span class="n">monitor_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MonitorsCheckMixIn.fileMonitorTest">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.fileMonitorTest">[docs]</a>
+    <span class="k">def</span> <span class="nf">fileMonitorTest</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">monitor</span><span class="p">:</span> <span class="n">FileMonitor</span><span class="p">,</span>
+        <span class="n">monitor_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;hyperparam&quot;</span><span class="p">,</span> <span class="s2">&quot;crossval&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="s2">&quot;fit&quot;</span><span class="p">],</span>
+        <span class="n">neural_net</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test if the correct files are generated&quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">check_fit_files</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">/fit_log.tsv&quot;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">/batch_log.tsv&quot;</span><span class="p">))</span>
+
+        <span class="k">def</span> <span class="nf">check_assessment_files</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">monitor</span><span class="p">):</span>
+            <span class="n">output_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">monitor</span><span class="o">.</span><span class="n">assessmentType</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">output_path</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">monitor</span><span class="o">.</span><span class="n">assessmentType</span><span class="si">}</span><span class="s2">_predictions.tsv&quot;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">monitor</span><span class="o">.</span><span class="n">saveFits</span> <span class="ow">and</span> <span class="n">neural_net</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="n">monitor</span><span class="o">.</span><span class="n">foldData</span><span class="p">:</span>
+                    <span class="n">check_fit_files</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">/fold_</span><span class="si">{</span><span class="n">fold</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">check_hyperparam_files</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">monitor</span><span class="p">):</span>
+            <span class="n">output_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">/GridSearchOptimization&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">output_path</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">/GridSearchOptimization_scores.tsv&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">monitor</span><span class="o">.</span><span class="n">saveAssessments</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">assessment</span> <span class="ow">in</span> <span class="n">monitor</span><span class="o">.</span><span class="n">assessments</span><span class="p">:</span>
+                    <span class="n">check_assessment_files</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">output_path</span><span class="si">}</span><span class="s2">/iteration_</span><span class="si">{</span><span class="n">assessment</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">monitor</span>
+                    <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">monitor_type</span> <span class="o">==</span> <span class="s2">&quot;hyperparam&quot;</span><span class="p">:</span>
+            <span class="n">check_hyperparam_files</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">outDir</span><span class="p">,</span> <span class="n">monitor</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">monitor_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;crossval&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">]:</span>
+            <span class="n">check_assessment_files</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">outDir</span><span class="p">,</span> <span class="n">monitor</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">monitor_type</span> <span class="o">==</span> <span class="s2">&quot;fit&quot;</span> <span class="ow">and</span> <span class="n">neural_net</span><span class="p">:</span>
+            <span class="n">check_fit_files</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">outDir</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MonitorsCheckMixIn.listMonitorTest">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.listMonitorTest">[docs]</a>
+    <span class="k">def</span> <span class="nf">listMonitorTest</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">monitor</span><span class="p">:</span> <span class="n">ListMonitor</span><span class="p">,</span>
+        <span class="n">monitor_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;hyperparam&quot;</span><span class="p">,</span> <span class="s2">&quot;crossval&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="s2">&quot;fit&quot;</span><span class="p">],</span>
+        <span class="n">neural_net</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">baseMonitorTest</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitors</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">monitor_type</span><span class="p">,</span> <span class="n">neural_net</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileMonitorTest</span><span class="p">(</span><span class="n">monitor</span><span class="o">.</span><span class="n">monitors</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">monitor_type</span><span class="p">,</span> <span class="n">neural_net</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MonitorsCheckMixIn.runMonitorTest">
+<a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.runMonitorTest">[docs]</a>
+    <span class="k">def</span> <span class="nf">runMonitorTest</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">monitor_type</span><span class="p">,</span> <span class="n">test_method</span><span class="p">,</span> <span class="n">nerual_net</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="n">hyperparam_monitor</span> <span class="o">=</span> <span class="n">monitor_type</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">crossval_monitor</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">hyperparam_monitor</span><span class="p">)</span>
+        <span class="n">test_monitor</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">hyperparam_monitor</span><span class="p">)</span>
+        <span class="n">fit_monitor</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">hyperparam_monitor</span><span class="p">)</span>
+        <span class="p">(</span>
+            <span class="n">hyperparam_monitor</span><span class="p">,</span>
+            <span class="n">crossval_monitor</span><span class="p">,</span>
+            <span class="n">test_monitor</span><span class="p">,</span>
+            <span class="n">fit_monitor</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainModelWithMonitoring</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">hyperparam_monitor</span><span class="p">,</span> <span class="n">crossval_monitor</span><span class="p">,</span> <span class="n">test_monitor</span><span class="p">,</span> <span class="n">fit_monitor</span>
+        <span class="p">)</span>
+        <span class="n">test_method</span><span class="p">(</span><span class="n">hyperparam_monitor</span><span class="p">,</span> <span class="s2">&quot;hyperparam&quot;</span><span class="p">,</span> <span class="n">nerual_net</span><span class="p">)</span>
+        <span class="n">test_method</span><span class="p">(</span><span class="n">crossval_monitor</span><span class="p">,</span> <span class="s2">&quot;crossval&quot;</span><span class="p">,</span> <span class="n">nerual_net</span><span class="p">)</span>
+        <span class="n">test_method</span><span class="p">(</span><span class="n">test_monitor</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">nerual_net</span><span class="p">)</span>
+        <span class="n">test_method</span><span class="p">(</span><span class="n">fit_monitor</span><span class="p">,</span> <span class="s2">&quot;fit&quot;</span><span class="p">,</span> <span class="n">nerual_net</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

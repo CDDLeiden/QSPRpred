@@ -1,25 +1,34 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Python API &mdash; QSPRpred 2.1.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>Python API &mdash; QSPRpred 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/doctools.js"></script>
-        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>
+    </script>
+        <script src="../_static/design-tabs.js?v=36754332"></script>
+        <script src="../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="qsprpred package" href="qsprpred.html" />
-    <link rel="prev" title="Usage" href="../use.html" />
+    <link rel="prev" title="Overview of available features" href="../features.html" />
  
 
 <!-- Google tag (gtag.js) -->
@@ -47,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.1.0
+                v3.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -61,8 +70,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to QSPRpred’s documentation!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../use.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features.html">Overview of available features</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Python API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qsprpred.html">qsprpred package</a></li>
 </ul>
@@ -93,17 +102,22 @@
            <div itemprop="articleBody">
              
   <section id="python-api">
-<h1>Python API<a class="headerlink" href="#python-api" title="Permalink to this heading"></a></h1>
+<h1>Python API<a class="headerlink" href="#python-api" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="qsprpred.html">qsprpred package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qsprpred.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.benchmarks.html">qsprpred.benchmarks package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.benchmarks.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.benchmarks.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.benchmarks.html#module-qsprpred.benchmarks.replica">qsprpred.benchmarks.replica module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.benchmarks.html#module-qsprpred.benchmarks.runner">qsprpred.benchmarks.runner module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.benchmarks.html#module-qsprpred.benchmarks.tests">qsprpred.benchmarks.tests module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.benchmarks.html#module-qsprpred.benchmarks">Module contents</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="qsprpred.data.html">qsprpred.data package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#subpackages">Subpackages</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#module-qsprpred.data.data">qsprpred.data.data module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#module-qsprpred.data.interfaces">qsprpred.data.interfaces module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#module-qsprpred.data.tests">qsprpred.data.tests module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html#module-qsprpred.data">Module contents</a></li>
 </ul>
 </li>
@@ -115,42 +129,42 @@
 <li class="toctree-l3"><a class="reference internal" href="qsprpred.logs.html">qsprpred.logs package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html#module-qsprpred.logs.config">qsprpred.logs.config module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html#module-qsprpred.logs.stopwatch">qsprpred.logs.stopwatch module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html#module-qsprpred.logs.utils">qsprpred.logs.utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html#module-qsprpred.logs">Module contents</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="qsprpred.metrics.html">qsprpred.metrics package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.metrics.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.metrics.html#module-qsprpred.metrics.calibration">qsprpred.metrics.calibration module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.metrics.html#module-qsprpred.metrics">Module contents</a></li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="qsprpred.models.html">qsprpred.models package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#module-qsprpred.models.assessment_methods">qsprpred.models.assessment_methods module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#module-qsprpred.models.early_stopping">qsprpred.models.early_stopping module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#module-qsprpred.models.hyperparam_optimization">qsprpred.models.hyperparam_optimization module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#module-qsprpred.models.interfaces">qsprpred.models.interfaces module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#module-qsprpred.models.metrics">qsprpred.models.metrics module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#module-qsprpred.models.sklearn">qsprpred.models.sklearn module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#module-qsprpred.models.tasks">qsprpred.models.tasks module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#module-qsprpred.models.models">qsprpred.models.models module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#module-qsprpred.models.monitors">qsprpred.models.monitors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#module-qsprpred.models.scikit_learn">qsprpred.models.scikit_learn module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#module-qsprpred.models.tests">qsprpred.models.tests module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html#module-qsprpred.models">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qsprpred.plotting.html">qsprpred.plotting package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#module-qsprpred.plotting.base_plot">qsprpred.plotting.base_plot module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#module-qsprpred.plotting.classification">qsprpred.plotting.classification module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#module-qsprpred.plotting.interfaces">qsprpred.plotting.interfaces module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#module-qsprpred.plotting.grid_visualizers">qsprpred.plotting.grid_visualizers module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#module-qsprpred.plotting.regression">qsprpred.plotting.regression module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#module-qsprpred.plotting.tests">qsprpred.plotting.tests module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html#module-qsprpred.plotting">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qsprpred.utils.html">qsprpred.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html#subpackages">Subpackages</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html#module-qsprpred.utils.inspect">qsprpred.utils.inspect module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html#module-qsprpred.utils.parallel">qsprpred.utils.parallel module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html#module-qsprpred.utils.serialization">qsprpred.utils.serialization module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html#module-qsprpred.utils.stopwatch">qsprpred.utils.stopwatch module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html#module-qsprpred.utils.stringops">qsprpred.utils.stringops module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html#module-qsprpred.utils.tests">qsprpred.utils.tests module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html#module-qsprpred.utils">Module contents</a></li>
 </ul>
 </li>
@@ -172,6 +186,46 @@
 <li class="toctree-l3"><a class="reference internal" href="qsprpred.html#qsprpred.predict_CLI.QSPR_predict"><code class="docutils literal notranslate"><span class="pre">QSPR_predict()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.html#module-qsprpred.tasks">qsprpred.tasks module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.ModelTasks"><code class="docutils literal notranslate"><span class="pre">ModelTasks</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.ModelTasks.MULTICLASS"><code class="docutils literal notranslate"><span class="pre">ModelTasks.MULTICLASS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.ModelTasks.MULTITASK_MIXED"><code class="docutils literal notranslate"><span class="pre">ModelTasks.MULTITASK_MIXED</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.ModelTasks.MULTITASK_MULTICLASS"><code class="docutils literal notranslate"><span class="pre">ModelTasks.MULTITASK_MULTICLASS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.ModelTasks.MULTITASK_REGRESSION"><code class="docutils literal notranslate"><span class="pre">ModelTasks.MULTITASK_REGRESSION</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.ModelTasks.MULTITASK_SINGLECLASS"><code class="docutils literal notranslate"><span class="pre">ModelTasks.MULTITASK_SINGLECLASS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.ModelTasks.REGRESSION"><code class="docutils literal notranslate"><span class="pre">ModelTasks.REGRESSION</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.ModelTasks.SINGLECLASS"><code class="docutils literal notranslate"><span class="pre">ModelTasks.SINGLECLASS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.ModelTasks.getModelTask"><code class="docutils literal notranslate"><span class="pre">ModelTasks.getModelTask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.ModelTasks.isClassification"><code class="docutils literal notranslate"><span class="pre">ModelTasks.isClassification()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.ModelTasks.isMixed"><code class="docutils literal notranslate"><span class="pre">ModelTasks.isMixed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.ModelTasks.isMultiTask"><code class="docutils literal notranslate"><span class="pre">ModelTasks.isMultiTask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.ModelTasks.isRegression"><code class="docutils literal notranslate"><span class="pre">ModelTasks.isRegression()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty"><code class="docutils literal notranslate"><span class="pre">TargetProperty</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty.fromDict"><code class="docutils literal notranslate"><span class="pre">TargetProperty.fromDict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty.fromFile"><code class="docutils literal notranslate"><span class="pre">TargetProperty.fromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty.fromJSON"><code class="docutils literal notranslate"><span class="pre">TargetProperty.fromJSON()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty.fromList"><code class="docutils literal notranslate"><span class="pre">TargetProperty.fromList()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty.getNames"><code class="docutils literal notranslate"><span class="pre">TargetProperty.getNames()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty.nClasses"><code class="docutils literal notranslate"><span class="pre">TargetProperty.nClasses</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty.selectFromList"><code class="docutils literal notranslate"><span class="pre">TargetProperty.selectFromList()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty.th"><code class="docutils literal notranslate"><span class="pre">TargetProperty.th</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty.toFile"><code class="docutils literal notranslate"><span class="pre">TargetProperty.toFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty.toJSON"><code class="docutils literal notranslate"><span class="pre">TargetProperty.toJSON()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty.toList"><code class="docutils literal notranslate"><span class="pre">TargetProperty.toList()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetTasks"><code class="docutils literal notranslate"><span class="pre">TargetTasks</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetTasks.MULTICLASS"><code class="docutils literal notranslate"><span class="pre">TargetTasks.MULTICLASS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetTasks.REGRESSION"><code class="docutils literal notranslate"><span class="pre">TargetTasks.REGRESSION</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetTasks.SINGLECLASS"><code class="docutils literal notranslate"><span class="pre">TargetTasks.SINGLECLASS</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetTasks.isClassification"><code class="docutils literal notranslate"><span class="pre">TargetTasks.isClassification()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetTasks.isRegression"><code class="docutils literal notranslate"><span class="pre">TargetTasks.isRegression()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qsprpred.html#module-qsprpred">Module contents</a></li>
 </ul>
 </li>
@@ -183,7 +237,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../use.html" class="btn btn-neutral float-left" title="Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../features.html" class="btn btn-neutral float-left" title="Overview of available features" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="qsprpred.html" class="btn btn-neutral float-right" title="qsprpred package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

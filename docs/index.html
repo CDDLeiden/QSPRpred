@@ -1,20 +1,29 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to QSPRpred’s documentation! &mdash; QSPRpred 2.1.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>Welcome to QSPRpred’s documentation! &mdash; QSPRpred 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>
+    </script>
+        <script src="_static/design-tabs.js?v=36754332"></script>
+        <script src="_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -46,7 +55,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.1.0
+                v3.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -60,8 +69,8 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Welcome to QSPRpred’s documentation!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="use.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Overview of available features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/modules.html">Python API</a></li>
 </ul>
 
@@ -89,20 +98,21 @@
            <div itemprop="articleBody">
              
   <section id="welcome-to-qsprpred-s-documentation">
-<h1>Welcome to QSPRpred’s documentation!<a class="headerlink" href="#welcome-to-qsprpred-s-documentation" title="Permalink to this heading"></a></h1>
-<p>QSPRpred provides functionality to assist with building Quantitative Structure Property relationship models. Model built with QSPRpred can also be used as the enviroment reward function in DrugEx. Here you will find the installation guide (<a class="reference internal" href="install.html#installation"><span class="std std-ref">Installation</span></a>), usage examples (<a class="reference internal" href="use.html#usage"><span class="std std-ref">Usage</span></a>) and API documentation.</p>
+<h1>Welcome to QSPRpred’s documentation!<a class="headerlink" href="#welcome-to-qsprpred-s-documentation" title="Link to this heading"></a></h1>
+<p>QSPRpred is open-source software libary for building <strong>Quantitative Structure Property Relationship (QSPR)</strong> models developed by Gerard van Westen’s Computational Drug
+Discovery group. It provides a unified interface for building QSPR models based on different types of descriptors and machine learning algorithms.
+Here you will find the installation guide (<a class="reference internal" href="install.html#installation-guide"><span class="std std-ref">Installation</span></a>), an overview of available features (<a class="reference internal" href="features.html#features"><span class="std std-ref">Overview of available features</span></a>), usage examples (<a class="reference internal" href="cli_usage.html#cli-usage"><span class="std std-ref">Command Line Interface Usage</span></a>) and API documentation (<a class="reference internal" href="api/modules.html#python-api"><span class="std std-ref">Python API</span></a>).
+For tutorials and examples of the Python API, please visit the <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred">QSPRpred GitHub repository</a>.</p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Welcome to QSPRpred’s documentation!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="use.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="use.html#cli-example">CLI Example</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="use.html#preparing-data">Preparing Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="use.html#model-training">Model Training</a></li>
-<li class="toctree-l2"><a class="reference internal" href="use.html#prediction">Prediction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_usage.html">Command Line Interface Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cli_usage.html#cli-example">CLI Example</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Overview of available features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/modules.html">Python API</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api/qsprpred.html">qsprpred package</a></li>
 </ul>
@@ -111,7 +121,7 @@
 </div>
 </section>
 <section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this heading"></a></h1>
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>

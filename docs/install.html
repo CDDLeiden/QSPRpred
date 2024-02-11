@@ -1,24 +1,33 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation &mdash; QSPRpred 2.1.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>Installation &mdash; QSPRpred 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>
+    </script>
+        <script src="_static/design-tabs.js?v=36754332"></script>
+        <script src="_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Usage" href="use.html" />
+    <link rel="next" title="Command Line Interface Usage" href="cli_usage.html" />
     <link rel="prev" title="Welcome to QSPRpred’s documentation!" href="index.html" />
  
 
@@ -47,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.1.0
+                v3.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -61,8 +70,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="index.html">Welcome to QSPRpred’s documentation!</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="use.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="features.html">Overview of available features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/modules.html">Python API</a></li>
 </ul>
 
@@ -90,12 +99,29 @@
            <div itemprop="articleBody">
              
   <section id="installation">
-<span id="id1"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h1>
-<p>You do not need anything special to install the package. Just run the following to get the latest version and all dependencies:</p>
+<span id="installation-guide"></span><h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
+<p>You do not need anything special to install the package . Just run the following (with python &gt;= 3.10) to get the latest version and all basic dependencies:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">git</span><span class="o">+</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">CDDLeiden</span><span class="o">/</span><span class="n">QSPRpred</span><span class="o">.</span><span class="n">git</span><span class="nd">@main</span>
 </pre></div>
 </div>
-<p>You can also get tags and development snapshots by varying the <code class="code docutils literal notranslate"><span class="pre">&#64;main</span></code> part (i.e. <code class="code docutils literal notranslate"><span class="pre">&#64;1.0.0</span></code>). After that you can start building models (see <a class="reference internal" href="use.html#usage"><span class="std std-ref">Usage</span></a>).</p>
+<p>You can also get tags and development snapshots by varying the <code class="code docutils literal notranslate"><span class="pre">&#64;main</span></code> part (i.e. <code class="code docutils literal notranslate"><span class="pre">&#64;1.0.0</span></code>). After that you can start building models (see <a class="reference internal" href="cli_usage.html#cli-usage"><span class="std std-ref">Command Line Interface Usage</span></a>).</p>
+<p>Note that this will install the basic dependencies, but not the optional dependencies.
+If you want to use the optional dependencies, you can install the package with an
+option:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">git</span><span class="o">+</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">CDDLeiden</span><span class="o">/</span><span class="n">QSPRpred</span><span class="o">.</span><span class="n">git</span><span class="nd">@main</span><span class="c1">#egg=qsprpred[&lt;option&gt;]</span>
+</pre></div>
+</div>
+<p>The following options are available:</p>
+<ul class="simple">
+<li><p>extra : include extra dependencies for PCM models and extra descriptor sets from
+packages other than RDKit</p></li>
+<li><p>deep : include deep learning models (torch and chemprop)</p></li>
+<li><p>pyboost : include pyboost model (requires cupy, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">cupy-cudaX</span></code>, replace X
+with your <a class="reference external" href="https://docs.cupy.dev/en/stable/install.html">cuda version</a>, you can obtain
+cude toolkit from Anaconda as well: <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">cudatoolkit</span></code>)</p></li>
+<li><p>full : include all optional dependecies (requires cupy, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">cupy-cudaX</span></code>,
+replace X with your <a class="reference external" href="https://docs.cupy.dev/en/stable/install.html">cuda version</a>)</p></li>
+</ul>
 <p>You can test the installation by running the unit test suite:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">unittest</span> <span class="n">discover</span> <span class="n">qsprpred</span>
 </pre></div>
@@ -107,7 +133,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="Welcome to QSPRpred’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="use.html" class="btn btn-neutral float-right" title="Usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="cli_usage.html" class="btn btn-neutral float-right" title="Command Line Interface Usage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

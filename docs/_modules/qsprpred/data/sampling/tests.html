@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.data.sampling.tests &mdash; QSPRpred 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>
+    </script>
+        <script src="../../../../_static/design-tabs.js?v=36754332"></script>
+        <script src="../../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../features.html">Overview of available features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.data.sampling.tests</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.data.sampling.tests</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">parameterized</span> <span class="kn">import</span> <span class="n">parameterized</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">KFold</span><span class="p">,</span> <span class="n">StratifiedKFold</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span><span class="p">,</span> <span class="n">MinMaxScaler</span>
+
+<span class="kn">from</span> <span class="nn">..descriptors.fingerprints</span> <span class="kn">import</span> <span class="n">MorganFP</span>
+<span class="kn">from</span> <span class="nn">...data</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">RandomSplit</span><span class="p">,</span>
+    <span class="n">TemporalSplit</span><span class="p">,</span>
+    <span class="n">BootstrapSplit</span><span class="p">,</span>
+    <span class="n">ScaffoldSplit</span><span class="p">,</span>
+    <span class="n">ClusterSplit</span><span class="p">,</span>
+    <span class="n">QSPRDataset</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">...data.chem.clustering</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">FPSimilarityLeaderPickerClusters</span><span class="p">,</span>
+    <span class="n">FPSimilarityMaxMinClusters</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">...data.chem.scaffolds</span> <span class="kn">import</span> <span class="n">Murcko</span><span class="p">,</span> <span class="n">BemisMurcko</span>
+<span class="kn">from</span> <span class="nn">...data.sampling.folds</span> <span class="kn">import</span> <span class="n">FoldsFromDataSplit</span>
+<span class="kn">from</span> <span class="nn">...data.sampling.splits</span> <span class="kn">import</span> <span class="n">ManualSplit</span>
+<span class="kn">from</span> <span class="nn">...utils.testing.base</span> <span class="kn">import</span> <span class="n">QSPRTestCase</span>
+<span class="kn">from</span> <span class="nn">...utils.testing.path_mixins</span> <span class="kn">import</span> <span class="n">DataSetsPathMixIn</span>
+
+
+<div class="viewcode-block" id="TestDataSplitters">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.tests.TestDataSplitters">[docs]</a>
+<span class="k">class</span> <span class="nc">TestDataSplitters</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Small tests to only check if the data splitters work on their own.</span>
+
+<span class="sd">    The tests here should be used to check for all their specific parameters and edge</span>
+<span class="sd">    cases.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestDataSplitters.setUp">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.tests.TestDataSplitters.setUp">[docs]</a>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitYear</span> <span class="o">=</span> <span class="mi">2000</span></div>
+
+
+<div class="viewcode-block" id="TestDataSplitters.testManualSplit">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.tests.TestDataSplitters.testManualSplit">[docs]</a>
+    <span class="k">def</span> <span class="nf">testManualSplit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the manual split function, where the split is done manually.&quot;&quot;&quot;</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">()</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">nJobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">chunkSize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span>
+        <span class="c1"># Add extra column to the data frame to use for splitting</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;split&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;train&quot;</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">dataset</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="s2">&quot;split&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;test&quot;</span>
+        <span class="n">split</span> <span class="o">=</span> <span class="n">ManualSplit</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;split&quot;</span><span class="p">],</span> <span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">)</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span><span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate_split</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span></div>
+
+
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="kc">False</span><span class="p">,),</span>
+            <span class="p">(</span><span class="kc">True</span><span class="p">,),</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">testRandomSplit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">multitask</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the random split function.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">multitask</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeMultitaskDataSet</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">()</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">()</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span><span class="n">split</span><span class="o">=</span><span class="n">RandomSplit</span><span class="p">(</span><span class="n">test_fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate_split</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="kc">False</span><span class="p">,),</span>
+            <span class="p">(</span><span class="kc">True</span><span class="p">,),</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">testTemporalSplit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">multitask</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the temporal split function, where the split is done based on a time</span>
+<span class="sd">        property.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">multitask</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeMultitaskDataSet</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">()</span>
+        <span class="n">split</span> <span class="o">=</span> <span class="n">TemporalSplit</span><span class="p">(</span>
+            <span class="n">timesplit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">splitYear</span><span class="p">,</span>
+            <span class="n">timeprop</span><span class="o">=</span><span class="s2">&quot;Year of first disclosure&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># prepare and validate the split</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span><span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate_split</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="c1"># test if dates higher than 2000 are in test set</span>
+        <span class="n">test_set</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">years</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getDF</span><span class="p">()</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">test_set</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="s2">&quot;Year of first disclosure&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">years</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitYear</span><span class="p">))</span>
+        <span class="c1"># test bootstrapping</span>
+        <span class="k">if</span> <span class="n">multitask</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeMultitaskDataSet</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;TemporalSplit_bootstrap_mt&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;TemporalSplit_bootstrap&quot;</span><span class="p">)</span>
+        <span class="n">split</span> <span class="o">=</span> <span class="n">TemporalSplit</span><span class="p">(</span>
+            <span class="n">timesplit</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">splitYear</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitYear</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitYear</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="n">timeprop</span><span class="o">=</span><span class="s2">&quot;Year of first disclosure&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">bootstrap_split</span> <span class="o">=</span> <span class="n">BootstrapSplit</span><span class="p">(</span>
+            <span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">,</span>
+            <span class="n">n_bootstraps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">time</span><span class="p">,</span> <span class="n">fold_info</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">split</span><span class="o">.</span><span class="n">timeSplit</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="n">bootstrap_split</span><span class="p">))</span>
+        <span class="p">):</span>
+            <span class="n">years</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getDF</span><span class="p">()</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fold_info</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="s2">&quot;Year of first disclosure&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">years</span> <span class="o">&gt;</span> <span class="n">time</span><span class="p">))</span>
+
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">Murcko</span><span class="p">(),</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="p">(</span>
+                <span class="kc">False</span><span class="p">,</span>
+                <span class="n">BemisMurcko</span><span class="p">(</span><span class="n">use_csk</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                <span class="p">[</span><span class="s2">&quot;ScaffoldSplit_000&quot;</span><span class="p">,</span> <span class="s2">&quot;ScaffoldSplit_001&quot;</span><span class="p">],</span>
+            <span class="p">),</span>
+            <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">Murcko</span><span class="p">(),</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">testScaffoldSplit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">multitask</span><span class="p">,</span> <span class="n">scaffold</span><span class="p">,</span> <span class="n">custom_test_list</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the scaffold split function.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">multitask</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeMultitaskDataSet</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ScaffoldSplit&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ScaffoldSplit&quot;</span><span class="p">)</span>
+        <span class="n">split</span> <span class="o">=</span> <span class="n">ScaffoldSplit</span><span class="p">(</span>
+            <span class="n">scaffold</span><span class="o">=</span><span class="n">scaffold</span><span class="p">,</span>
+            <span class="n">custom_test_list</span><span class="o">=</span><span class="n">custom_test_list</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span><span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate_split</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="c1"># check that smiles in custom_test_list are in the test set</span>
+        <span class="k">if</span> <span class="n">custom_test_list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+                <span class="nb">all</span><span class="p">(</span><span class="n">mol_id</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span> <span class="k">for</span> <span class="n">mol_id</span> <span class="ow">in</span> <span class="n">custom_test_list</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="c1"># check folding by scaffold</span>
+        <span class="k">if</span> <span class="n">multitask</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeMultitaskDataSet</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ScaffoldSplit_folding_mt&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ScaffoldSplit_folding&quot;</span><span class="p">)</span>
+        <span class="n">n_folds</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="n">split</span> <span class="o">=</span> <span class="n">ScaffoldSplit</span><span class="p">(</span>
+            <span class="n">scaffold</span><span class="o">=</span><span class="n">scaffold</span><span class="p">,</span>
+            <span class="n">custom_test_list</span><span class="o">=</span><span class="n">custom_test_list</span><span class="p">,</span>
+            <span class="n">n_folds</span><span class="o">=</span><span class="n">n_folds</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">test_index_all</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="n">split</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">test_index_all</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">test_index</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_test</span><span class="p">))</span>
+            <span class="n">test_index_all</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">X_test</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">n_folds</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test_index_all</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">(</span><span class="n">concat</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
+
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="kc">False</span><span class="p">,</span>
+                <span class="n">FPSimilarityLeaderPickerClusters</span><span class="p">(</span>
+                    <span class="n">fp_calculator</span><span class="o">=</span><span class="n">MorganFP</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>
+                <span class="p">),</span>
+                <span class="kc">None</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="p">(</span>
+                <span class="kc">False</span><span class="p">,</span>
+                <span class="n">FPSimilarityMaxMinClusters</span><span class="p">(</span><span class="n">fp_calculator</span><span class="o">=</span><span class="n">MorganFP</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">128</span><span class="p">)),</span>
+                <span class="p">[</span><span class="s2">&quot;ClusterSplit_000&quot;</span><span class="p">,</span> <span class="s2">&quot;ClusterSplit_001&quot;</span><span class="p">],</span>
+            <span class="p">),</span>
+            <span class="p">(</span>
+                <span class="kc">True</span><span class="p">,</span>
+                <span class="n">FPSimilarityMaxMinClusters</span><span class="p">(</span><span class="n">fp_calculator</span><span class="o">=</span><span class="n">MorganFP</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">128</span><span class="p">)),</span>
+                <span class="kc">None</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="p">(</span>
+                <span class="kc">True</span><span class="p">,</span>
+                <span class="n">FPSimilarityLeaderPickerClusters</span><span class="p">(</span>
+                    <span class="n">fp_calculator</span><span class="o">=</span><span class="n">MorganFP</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>
+                <span class="p">),</span>
+                <span class="p">[</span><span class="s2">&quot;ClusterSplit_000&quot;</span><span class="p">,</span> <span class="s2">&quot;ClusterSplit_001&quot;</span><span class="p">],</span>
+            <span class="p">),</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">testClusterSplit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">multitask</span><span class="p">,</span> <span class="n">clustering_algorithm</span><span class="p">,</span> <span class="n">custom_test_list</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the cluster split function.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">multitask</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeMultitaskDataSet</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ClusterSplit&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;ClusterSplit&quot;</span><span class="p">)</span>
+        <span class="n">split</span> <span class="o">=</span> <span class="n">ClusterSplit</span><span class="p">(</span>
+            <span class="n">clustering</span><span class="o">=</span><span class="n">clustering_algorithm</span><span class="p">,</span>
+            <span class="n">custom_test_list</span><span class="o">=</span><span class="n">custom_test_list</span><span class="p">,</span>
+            <span class="n">time_limit_seconds</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span><span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate_split</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="c1"># check that smiles in custom_test_list are in the test set</span>
+        <span class="k">if</span> <span class="n">custom_test_list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+                <span class="nb">all</span><span class="p">(</span><span class="n">mol_id</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span> <span class="k">for</span> <span class="n">mol_id</span> <span class="ow">in</span> <span class="n">custom_test_list</span><span class="p">)</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="TestDataSplitters.testSerialization">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.tests.TestDataSplitters.testSerialization">[docs]</a>
+    <span class="k">def</span> <span class="nf">testSerialization</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the serialization of dataset with datasplit.&quot;&quot;&quot;</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">()</span>
+        <span class="n">split</span> <span class="o">=</span> <span class="n">ScaffoldSplit</span><span class="p">()</span>
+        <span class="n">n_bits</span> <span class="o">=</span> <span class="mi">128</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span>
+            <span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">,</span>
+            <span class="n">feature_calculators</span><span class="o">=</span><span class="p">[</span><span class="n">MorganFP</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="n">n_bits</span><span class="p">)],</span>
+            <span class="n">feature_standardizer</span><span class="o">=</span><span class="n">StandardScaler</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate_split</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="n">test_ids</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">train_ids</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">dataset_new</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validate_split</span><span class="p">(</span><span class="n">dataset_new</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">dataset_new</span><span class="o">.</span><span class="n">descriptorSets</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">dataset_new</span><span class="o">.</span><span class="n">featureStandardizer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset_new</span><span class="o">.</span><span class="n">featureNames</span><span class="p">)</span> <span class="o">==</span> <span class="n">n_bits</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">mol_id</span> <span class="ow">in</span> <span class="n">dataset_new</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span> <span class="k">for</span> <span class="n">mol_id</span> <span class="ow">in</span> <span class="n">test_ids</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">mol_id</span> <span class="ow">in</span> <span class="n">dataset_new</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">index</span> <span class="k">for</span> <span class="n">mol_id</span> <span class="ow">in</span> <span class="n">train_ids</span><span class="p">))</span>
+        <span class="n">dataset_new</span><span class="o">.</span><span class="n">clearFiles</span><span class="p">()</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="TestFoldSplitters">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.tests.TestFoldSplitters">[docs]</a>
+<span class="k">class</span> <span class="nc">TestFoldSplitters</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Small tests to only check if the fold splitters work on their own.</span>
+
+<span class="sd">    The tests here should be used to check for all their specific parameters and</span>
+<span class="sd">    edge cases.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestFoldSplitters.setUp">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.tests.TestFoldSplitters.setUp">[docs]</a>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="TestFoldSplitters.validateFolds">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.tests.TestFoldSplitters.validateFolds">[docs]</a>
+    <span class="k">def</span> <span class="nf">validateFolds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">folds</span><span class="p">,</span> <span class="n">more</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the folds have the data they should have after splitting.&quot;&quot;&quot;</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">tested_indices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">X_train</span><span class="p">,</span>
+            <span class="n">X_test</span><span class="p">,</span>
+            <span class="n">y_train</span><span class="p">,</span>
+            <span class="n">y_test</span><span class="p">,</span>
+            <span class="n">train_index</span><span class="p">,</span>
+            <span class="n">test_index</span><span class="p">,</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="n">folds</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_train</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_train</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_test</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_test</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">train_index</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_train</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test_index</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_test</span><span class="p">))</span>
+            <span class="n">tested_indices</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">X_test</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">more</span><span class="p">:</span>
+                <span class="n">more</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">k</span><span class="p">,</span> <span class="n">tested_indices</span></div>
+
+
+<div class="viewcode-block" id="TestFoldSplitters.testStandardFolds">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.tests.TestFoldSplitters.testStandardFolds">[docs]</a>
+    <span class="k">def</span> <span class="nf">testStandardFolds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the default fold generator, which is a 5-fold cross validation.&quot;&quot;&quot;</span>
+        <span class="c1"># test default settings with regression</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">()</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">([</span><span class="n">MorganFP</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">128</span><span class="p">)])</span>
+        <span class="n">fold</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">randomState</span><span class="p">)</span>
+        <span class="n">generator</span> <span class="o">=</span> <span class="n">FoldsFromDataSplit</span><span class="p">(</span><span class="n">fold</span><span class="p">)</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validateFolds</span><span class="p">(</span><span class="n">generator</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="n">dataset</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">indices</span><span class="p">))</span>
+        <span class="c1"># test directly on data set</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validateFolds</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="n">fold</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">indices</span><span class="p">))</span>
+        <span class="c1"># test default settings with classification</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">makeClassification</span><span class="p">(</span><span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="n">th</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">])</span>
+        <span class="n">fold</span> <span class="o">=</span> <span class="n">StratifiedKFold</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">randomState</span><span class="p">)</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validateFolds</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="n">fold</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">indices</span><span class="p">))</span>
+        <span class="c1"># test with a standarizer</span>
+        <span class="n">MAX_VAL</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">MIN_VAL</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">scaler</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">(</span><span class="n">feature_range</span><span class="o">=</span><span class="p">(</span><span class="n">MIN_VAL</span><span class="p">,</span> <span class="n">MAX_VAL</span><span class="p">))</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span><span class="n">feature_standardizer</span><span class="o">=</span><span class="n">scaler</span><span class="p">)</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validateFolds</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="n">fold</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">indices</span><span class="p">))</span>
+
+        <span class="k">def</span> <span class="nf">check_min_max</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="n">MAX_VAL</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="n">MIN_VAL</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">X_test</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="n">MAX_VAL</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">X_test</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="n">MIN_VAL</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">validateFolds</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="n">fold</span><span class="p">),</span> <span class="n">more</span><span class="o">=</span><span class="n">check_min_max</span><span class="p">)</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validateFolds</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="n">fold</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">indices</span><span class="p">))</span>
+
+        <span class="c1"># try with a split data set</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">RandomSplit</span><span class="p">(</span><span class="n">test_fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">))</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validateFolds</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="n">fold</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">indices</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="TestFoldSplitters.testBootstrappedFold">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.tests.TestFoldSplitters.testBootstrappedFold">[docs]</a>
+    <span class="k">def</span> <span class="nf">testBootstrappedFold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">([</span><span class="n">MorganFP</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">128</span><span class="p">)])</span>
+        <span class="n">split</span> <span class="o">=</span> <span class="n">RandomSplit</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+        <span class="n">fold</span> <span class="o">=</span> <span class="n">BootstrapSplit</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="n">n_bootstraps</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validateFolds</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="n">fold</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="c1"># check if the indices are the same if we do the same split again</span>
+        <span class="n">split</span> <span class="o">=</span> <span class="n">RandomSplit</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+        <span class="n">fold</span> <span class="o">=</span> <span class="n">BootstrapSplit</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="n">n_bootstraps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">randomState</span><span class="p">)</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">indices_second</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validateFolds</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="n">fold</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">indices_second</span><span class="p">)</span>
+        <span class="c1"># check if the indices are different if we do a different split</span>
+        <span class="n">split</span> <span class="o">=</span> <span class="n">RandomSplit</span><span class="p">(</span><span class="mf">0.2</span><span class="p">)</span>
+        <span class="n">fold</span> <span class="o">=</span> <span class="n">BootstrapSplit</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="n">n_bootstraps</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+        <span class="n">k</span><span class="p">,</span> <span class="n">indices_third</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validateFolds</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="n">fold</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">split</span><span class="o">.</span><span class="n">getSeed</span><span class="p">(),</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertNotEqual</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">indices_third</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,19 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.plotting.tests &mdash; QSPRpred 2.1.0 documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <title>qsprpred.plotting.tests &mdash; QSPRpred 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>
+    </script>
+        <script src="../../../_static/design-tabs.js?v=36754332"></script>
+        <script src="../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -44,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.1.0
+                v3.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -58,8 +67,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features.html">Overview of available features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Python API</a></li>
 </ul>
 
@@ -92,29 +101,37 @@
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span>
-<span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">TestCase</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">matplotlib.axes</span> <span class="kn">import</span> <span class="n">SubplotBase</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
 <span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">from</span> <span class="nn">parameterized</span> <span class="kn">import</span> <span class="n">parameterized</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="n">RandomForestRegressor</span>
 
-<span class="kn">from</span> <span class="nn">..data.data</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
-<span class="kn">from</span> <span class="nn">..models.assessment_methods</span> <span class="kn">import</span> <span class="n">CrossValAssessor</span><span class="p">,</span> <span class="n">TestSetAssessor</span>
-<span class="kn">from</span> <span class="nn">..models.sklearn</span> <span class="kn">import</span> <span class="n">SklearnModel</span>
-<span class="kn">from</span> <span class="nn">..models.tasks</span> <span class="kn">import</span> <span class="n">TargetTasks</span>
-<span class="kn">from</span> <span class="nn">..models.tests</span> <span class="kn">import</span> <span class="n">ModelDataSetsMixIn</span>
-<span class="kn">from</span> <span class="nn">..plotting.classification</span> <span class="kn">import</span> <span class="n">MetricsPlot</span><span class="p">,</span> <span class="n">ROCPlot</span>
-<span class="kn">from</span> <span class="nn">..plotting.regression</span> <span class="kn">import</span> <span class="n">CorrelationPlot</span>
+<span class="kn">from</span> <span class="nn">qsprpred.models.assessment.methods</span> <span class="kn">import</span> <span class="n">CrossValAssessor</span><span class="p">,</span> <span class="n">TestSetAssessor</span>
+<span class="kn">from</span> <span class="nn">..data.processing.feature_filters</span> <span class="kn">import</span> <span class="n">LowVarianceFilter</span>
+<span class="kn">from</span> <span class="nn">..data.tables.qspr</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
+<span class="kn">from</span> <span class="nn">..models.scikit_learn</span> <span class="kn">import</span> <span class="n">SklearnModel</span>
+<span class="kn">from</span> <span class="nn">..plotting.classification</span> <span class="kn">import</span> <span class="n">ConfusionMatrixPlot</span><span class="p">,</span> <span class="n">MetricsPlot</span><span class="p">,</span> <span class="n">ROCPlot</span>
+<span class="kn">from</span> <span class="nn">..plotting.regression</span> <span class="kn">import</span> <span class="n">CorrelationPlot</span><span class="p">,</span> <span class="n">WilliamsPlot</span>
+<span class="kn">from</span> <span class="nn">..tasks</span> <span class="kn">import</span> <span class="n">TargetTasks</span>
+<span class="kn">from</span> <span class="nn">..utils.testing.base</span> <span class="kn">import</span> <span class="n">QSPRTestCase</span>
+<span class="kn">from</span> <span class="nn">..utils.testing.path_mixins</span> <span class="kn">import</span> <span class="n">ModelDataSetsPathMixIn</span>
 
 
-<div class="viewcode-block" id="ModelRetriever"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ModelRetriever">[docs]</a><span class="k">class</span> <span class="nc">ModelRetriever</span><span class="p">(</span><span class="n">ModelDataSetsMixIn</span><span class="p">):</span>
-<div class="viewcode-block" id="ModelRetriever.getModel"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ModelRetriever.getModel">[docs]</a>    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">dataset</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span>
-        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SklearnModel</span><span class="p">:</span>
+<div class="viewcode-block" id="PlottingTest">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.PlottingTest">[docs]</a>
+<span class="k">class</span> <span class="nc">PlottingTest</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="PlottingTest.setUp">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.PlottingTest.setUp">[docs]</a>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="PlottingTest.getModel">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.PlottingTest.getModel">[docs]</a>
+    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SklearnModel</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a model for testing.</span>
 
 <span class="sd">        Args:</span>
@@ -132,88 +149,249 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">SklearnModel</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
             <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
             <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">,</span>
-        <span class="p">)</span></div></div>
+        <span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="ROCPlotTest"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ROCPlotTest">[docs]</a><span class="k">class</span> <span class="nc">ROCPlotTest</span><span class="p">(</span><span class="n">ModelRetriever</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ROCPlotTest">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ROCPlotTest">[docs]</a>
+<span class="k">class</span> <span class="nc">ROCPlotTest</span><span class="p">(</span><span class="n">PlottingTest</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test ROC curve plotting class.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="ROCPlotTest.testPlotSingle"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ROCPlotTest.testPlotSingle">[docs]</a>    <span class="k">def</span> <span class="nf">testPlotSingle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ROCPlotTest.setUp">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ROCPlotTest.setUp">[docs]</a>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ROCPlotTest.testPlotSingle">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ROCPlotTest.testPlotSingle">[docs]</a>
+    <span class="k">def</span> <span class="nf">testPlotSingle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test plotting ROC curve for single task.&quot;&quot;&quot;</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
             <span class="s2">&quot;test_roc_plot_single_data&quot;</span><span class="p">,</span>
-            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
-                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
-                <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">50</span><span class="p">]</span>
-            <span class="p">}],</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]}],</span>
             <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
         <span class="p">)</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="s2">&quot;test_roc_plot_single_model&quot;</span><span class="p">)</span>
-        <span class="n">CrossValAssessor</span><span class="p">()(</span><span class="n">model</span><span class="p">)</span>
-        <span class="n">TestSetAssessor</span><span class="p">()(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span><span class="s2">&quot;test_roc_plot_single_model&quot;</span><span class="p">)</span>
+        <span class="n">score_func</span> <span class="o">=</span> <span class="s2">&quot;roc_auc_ovr&quot;</span>
+        <span class="n">CrossValAssessor</span><span class="p">(</span><span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+        <span class="n">TestSetAssessor</span><span class="p">(</span><span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
         <span class="c1"># make plots</span>
         <span class="n">plt</span> <span class="o">=</span> <span class="n">ROCPlot</span><span class="p">([</span><span class="n">model</span><span class="p">])</span>
         <span class="c1"># cross validation plot</span>
-        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="s2">&quot;CL_class&quot;</span><span class="p">,</span> <span class="n">validation</span><span class="o">=</span><span class="s2">&quot;cv&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">validation</span><span class="o">=</span><span class="s2">&quot;cv&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">Figure</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">.cv.png&quot;</span><span class="p">))</span>
         <span class="c1"># independent test set plot</span>
-        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="s2">&quot;CL_class&quot;</span><span class="p">,</span> <span class="n">validation</span><span class="o">=</span><span class="s2">&quot;ind&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">validation</span><span class="o">=</span><span class="s2">&quot;ind&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">Figure</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">.ind.png&quot;</span><span class="p">))</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">.ind.png&quot;</span><span class="p">))</span></div>
+</div>
 
 
-<div class="viewcode-block" id="MetricsPlotTest"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.MetricsPlotTest">[docs]</a><span class="k">class</span> <span class="nc">MetricsPlotTest</span><span class="p">(</span><span class="n">ModelRetriever</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MetricsPlotTest">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.MetricsPlotTest">[docs]</a>
+<span class="k">class</span> <span class="nc">MetricsPlotTest</span><span class="p">(</span><span class="n">PlottingTest</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test metrics plotting class.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="MetricsPlotTest.testPlotSingle"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.MetricsPlotTest.testPlotSingle">[docs]</a>    <span class="k">def</span> <span class="nf">testPlotSingle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test plotting metrics for single task.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MetricsPlotTest.setUp">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.MetricsPlotTest.setUp">[docs]</a>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
+
+
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="p">(</span><span class="s2">&quot;binary&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]),</span>
+                <span class="p">(</span><span class="s2">&quot;multi_class&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1100</span><span class="p">]),</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">testPlotSingle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test plotting metrics for single task single class and multi-class.&quot;&quot;&quot;</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
-            <span class="s2">&quot;test_metrics_plot_single_data&quot;</span><span class="p">,</span>
-            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
-                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
-                <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">50</span><span class="p">]</span>
-            <span class="p">}],</span>
+            <span class="sa">f</span><span class="s2">&quot;test_metrics_plot_single_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">_data&quot;</span><span class="p">,</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span>
+                    <span class="k">if</span> <span class="n">task</span> <span class="o">==</span> <span class="s2">&quot;binary&quot;</span>
+                    <span class="k">else</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span>
+                    <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="n">th</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
             <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
         <span class="p">)</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="s2">&quot;test_metrics_plot_single_model&quot;</span><span class="p">)</span>
-        <span class="n">CrossValAssessor</span><span class="p">()(</span><span class="n">model</span><span class="p">)</span>
-        <span class="n">TestSetAssessor</span><span class="p">()(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;test_metrics_plot_single_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">_model&quot;</span><span class="p">)</span>
+        <span class="n">score_func</span> <span class="o">=</span> <span class="s2">&quot;roc_auc_ovr&quot;</span>
+        <span class="n">CrossValAssessor</span><span class="p">(</span><span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+        <span class="n">TestSetAssessor</span><span class="p">(</span><span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
         <span class="c1"># generate metrics plot and associated files</span>
         <span class="n">plt</span> <span class="o">=</span> <span class="n">MetricsPlot</span><span class="p">([</span><span class="n">model</span><span class="p">])</span>
-        <span class="n">figures</span><span class="p">,</span> <span class="n">summary</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="s2">&quot;CL_class&quot;</span><span class="p">,</span> <span class="n">out_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">outDir</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">figures</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">Figure</span><span class="p">)</span>
+        <span class="n">figures</span><span class="p">,</span> <span class="n">summary</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">make</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">figures</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">sns</span><span class="o">.</span><span class="n">FacetGrid</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">summary</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/metrics_summary.tsv&quot;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/metrics_f1_score.png&quot;</span><span class="p">))</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_precision.png&quot;</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="CorrPlotTest"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.CorrPlotTest">[docs]</a><span class="k">class</span> <span class="nc">CorrPlotTest</span><span class="p">(</span><span class="n">ModelRetriever</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CorrPlotTest">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.CorrPlotTest">[docs]</a>
+<span class="k">class</span> <span class="nc">CorrPlotTest</span><span class="p">(</span><span class="n">PlottingTest</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test correlation plotting class.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="CorrPlotTest.testPlotSingle"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.CorrPlotTest.testPlotSingle">[docs]</a>    <span class="k">def</span> <span class="nf">testPlotSingle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CorrPlotTest.setUp">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.CorrPlotTest.setUp">[docs]</a>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="CorrPlotTest.testPlotSingle">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.CorrPlotTest.testPlotSingle">[docs]</a>
+    <span class="k">def</span> <span class="nf">testPlotSingle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test plotting correlation for single task.&quot;&quot;&quot;</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
             <span class="s2">&quot;test_corr_plot_single_data&quot;</span><span class="p">,</span> <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">()</span>
         <span class="p">)</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
-            <span class="n">dataset</span><span class="p">,</span> <span class="s2">&quot;test_corr_plot_single_model&quot;</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="n">RandomForestRegressor</span>
-        <span class="p">)</span>
-        <span class="n">CrossValAssessor</span><span class="p">()(</span><span class="n">model</span><span class="p">)</span>
-        <span class="n">TestSetAssessor</span><span class="p">()(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span><span class="s2">&quot;test_corr_plot_single_model&quot;</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="n">RandomForestRegressor</span><span class="p">)</span>
+        <span class="n">score_func</span> <span class="o">=</span> <span class="s2">&quot;r2&quot;</span>
+        <span class="n">CrossValAssessor</span><span class="p">(</span><span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+        <span class="n">TestSetAssessor</span><span class="p">(</span><span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
         <span class="c1"># generate metrics plot and associated files</span>
         <span class="n">plt</span> <span class="o">=</span> <span class="n">CorrelationPlot</span><span class="p">([</span><span class="n">model</span><span class="p">])</span>
-        <span class="n">axes</span><span class="p">,</span> <span class="n">summary</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="n">out_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">outDir</span><span class="p">)</span>
+        <span class="n">g</span><span class="p">,</span> <span class="n">summary</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="s2">&quot;CL&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">summary</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span>
+        <span class="c1"># assert g is sns.FacetGrid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">sns</span><span class="o">.</span><span class="n">FacetGrid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_correlation.png&quot;</span><span class="p">))</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="WilliamsPlotTest">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.WilliamsPlotTest">[docs]</a>
+<span class="k">class</span> <span class="nc">WilliamsPlotTest</span><span class="p">(</span><span class="n">PlottingTest</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test plotting Williams plot for single task.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="WilliamsPlotTest.setUp">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.WilliamsPlotTest.setUp">[docs]</a>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="WilliamsPlotTest.testPlotSingle">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.WilliamsPlotTest.testPlotSingle">[docs]</a>
+    <span class="k">def</span> <span class="nf">testPlotSingle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test plotting Williams plot for single task.&quot;&quot;&quot;</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
+            <span class="s2">&quot;test_williams_plot_single_data&quot;</span><span class="p">,</span> <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="c1"># filter features to below the number of samples in the test set</span>
+        <span class="c1"># to avoid error in WilliamsPlot</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">filterFeatures</span><span class="p">([</span><span class="n">LowVarianceFilter</span><span class="p">(</span><span class="mf">0.23</span><span class="p">)])</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
+            <span class="s2">&quot;test_williams_plot_single_model&quot;</span><span class="p">,</span> <span class="n">alg</span><span class="o">=</span><span class="n">RandomForestRegressor</span>
+        <span class="p">)</span>
+        <span class="n">score_func</span> <span class="o">=</span> <span class="s2">&quot;r2&quot;</span>
+        <span class="n">CrossValAssessor</span><span class="p">(</span><span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+        <span class="n">TestSetAssessor</span><span class="p">(</span><span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="c1"># generate metrics plot and associated files</span>
+        <span class="n">plt</span> <span class="o">=</span> <span class="n">WilliamsPlot</span><span class="p">([</span><span class="n">model</span><span class="p">],</span> <span class="p">[</span><span class="n">dataset</span><span class="p">])</span>
+        <span class="n">g</span><span class="p">,</span> <span class="n">leverages</span><span class="p">,</span> <span class="n">hstar</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">make</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">leverages</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">hstar</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+        <span class="c1"># assert g is sns.FacetGrid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">sns</span><span class="o">.</span><span class="n">FacetGrid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_williamsplot.png&quot;</span><span class="p">))</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ConfusionMatrixPlotTest">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ConfusionMatrixPlotTest">[docs]</a>
+<span class="k">class</span> <span class="nc">ConfusionMatrixPlotTest</span><span class="p">(</span><span class="n">PlottingTest</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test confusion matrix plotting class.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ConfusionMatrixPlotTest.setUp">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ConfusionMatrixPlotTest.setUp">[docs]</a>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
+
+
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="p">(</span><span class="s2">&quot;binary&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]),</span>
+                <span class="p">(</span><span class="s2">&quot;multi_class&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1100</span><span class="p">]),</span>
+            <span class="p">)</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">testPlotSingle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test plotting confusion matrix for single task.&quot;&quot;&quot;</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;test_cm_plot_single_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">_data&quot;</span><span class="p">,</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span>
+                    <span class="k">if</span> <span class="n">task</span> <span class="o">==</span> <span class="s2">&quot;binary&quot;</span>
+                    <span class="k">else</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span>
+                    <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="n">th</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">],</span>
+            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;test_cm_plot_single_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">_model&quot;</span><span class="p">)</span>
+        <span class="n">score_func</span> <span class="o">=</span> <span class="s2">&quot;roc_auc_ovr&quot;</span>
+        <span class="n">CrossValAssessor</span><span class="p">(</span><span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+        <span class="n">TestSetAssessor</span><span class="p">(</span><span class="n">scoring</span><span class="o">=</span><span class="n">score_func</span><span class="p">)(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="c1"># make plots</span>
+        <span class="n">plt</span> <span class="o">=</span> <span class="n">ConfusionMatrixPlot</span><span class="p">([</span><span class="n">model</span><span class="p">])</span>
+        <span class="n">axes</span><span class="p">,</span> <span class="n">cm_dict</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">make</span><span class="p">()</span>
+        <span class="c1"># assert all figures are sns.FacetGrid</span>
         <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">SubplotBase</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outDir</span><span class="si">}</span><span class="s2">/corrplot.png&quot;</span><span class="p">))</span></div></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">Figure</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">cm_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_CL_0.0_confusion_matrix.png&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_CL_1.0_confusion_matrix.png&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_CL_2.0_confusion_matrix.png&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_CL_3.0_confusion_matrix.png&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_CL_4.0_confusion_matrix.png&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_CL_Independent Test_confusion_matrix.png&quot;</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
+
 </pre></div>
 
            </div>

@@ -1,19 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models.early_stopping &mdash; QSPRpred 2.1.0 documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <title>qsprpred.models.early_stopping &mdash; QSPRpred 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>
+    </script>
+        <script src="../../../_static/design-tabs.js?v=36754332"></script>
+        <script src="../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -44,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.1.0
+                v3.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -58,8 +67,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features.html">Overview of available features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Python API</a></li>
 </ul>
 
@@ -96,11 +105,13 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="kn">from</span> <span class="nn">..data.data</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
+<span class="kn">from</span> <span class="nn">..data.tables.qspr</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
 <span class="kn">from</span> <span class="nn">..logs</span> <span class="kn">import</span> <span class="n">logger</span>
 
 
-<div class="viewcode-block" id="EarlyStoppingMode"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.early_stopping.EarlyStoppingMode">[docs]</a><span class="k">class</span> <span class="nc">EarlyStoppingMode</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<div class="viewcode-block" id="EarlyStoppingMode">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.early_stopping.EarlyStoppingMode">[docs]</a>
+<span class="k">class</span> <span class="nc">EarlyStoppingMode</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Enum representing the type of early stopping to use.</span>
 
 <span class="sd">    Attributes:</span>
@@ -126,7 +137,10 @@
         <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">NOT_RECORDING</span><span class="p">,</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">RECORDING</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="EarlyStopping"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.early_stopping.EarlyStopping">[docs]</a><span class="k">class</span> <span class="nc">EarlyStopping</span><span class="p">:</span>
+
+<div class="viewcode-block" id="EarlyStopping">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.early_stopping.EarlyStopping">[docs]</a>
+<span class="k">class</span> <span class="nc">EarlyStopping</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Early stopping tracker for training of QSPRpred models.</span>
 
 <span class="sd">    An instance of this class is used to track the number of epochs trained in a model</span>
@@ -194,7 +208,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_trainedEpochs</span> <span class="o">=</span> <span class="n">epochs</span>
 
-<div class="viewcode-block" id="EarlyStopping.recordEpochs"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.early_stopping.EarlyStopping.recordEpochs">[docs]</a>    <span class="k">def</span> <span class="nf">recordEpochs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<div class="viewcode-block" id="EarlyStopping.recordEpochs">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.early_stopping.EarlyStopping.recordEpochs">[docs]</a>
+    <span class="k">def</span> <span class="nf">recordEpochs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Record number of epochs.</span>
 
 <span class="sd">        Args:</span>
@@ -203,18 +219,24 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Recorded best epoch: </span><span class="si">{</span><span class="n">epochs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_trainedEpochs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="EarlyStopping.getEpochs"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.early_stopping.EarlyStopping.getEpochs">[docs]</a>    <span class="k">def</span> <span class="nf">getEpochs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+
+<div class="viewcode-block" id="EarlyStopping.getEpochs">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.early_stopping.EarlyStopping.getEpochs">[docs]</a>
+    <span class="k">def</span> <span class="nf">getEpochs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of epochs to train in a non-early stopping mode.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">FIXED</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">numEpochs</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimalEpochs</span></div>
 
+
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the task.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="o">.</span><span class="n">name</span>
 
-<div class="viewcode-block" id="EarlyStopping.toFile"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.early_stopping.EarlyStopping.toFile">[docs]</a>    <span class="k">def</span> <span class="nf">toFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="EarlyStopping.toFile">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.early_stopping.EarlyStopping.toFile">[docs]</a>
+    <span class="k">def</span> <span class="nf">toFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Save early stopping object to file.</span>
 
 <span class="sd">        Args:</span>
@@ -231,7 +253,10 @@
                 <span class="n">f</span><span class="p">,</span>
             <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EarlyStopping.fromFile"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.early_stopping.EarlyStopping.fromFile">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="EarlyStopping.fromFile">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.early_stopping.EarlyStopping.fromFile">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">fromFile</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;EarlyStopping&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load early stopping object from file.</span>
 
@@ -246,12 +271,23 @@
         <span class="n">early_stopping</span><span class="o">.</span><span class="n">trainedEpochs</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;trained_epochs&quot;</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">early_stopping</span></div>
 
+
     <span class="k">def</span> <span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether early stopping is used.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="o">.</span><span class="fm">__bool__</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="o">.</span><span class="fm">__bool__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="EarlyStopping.clean">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.early_stopping.EarlyStopping.clean">[docs]</a>
+    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clean early stopping object.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trainedEpochs</span> <span class="o">=</span> <span class="p">[]</span></div>
+</div>
 
 
-<div class="viewcode-block" id="early_stopping"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.early_stopping.early_stopping">[docs]</a><span class="k">def</span> <span class="nf">early_stopping</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+
+<div class="viewcode-block" id="early_stopping">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.early_stopping.early_stopping">[docs]</a>
+<span class="k">def</span> <span class="nf">early_stopping</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Early stopping decorator for fit method of models that support early stopping.</span>
 
 <span class="sd">    Returns:</span>
@@ -263,6 +299,8 @@
         <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">QSPRDataset</span><span class="p">,</span>
         <span class="n">estimator</span><span class="p">:</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">mode</span><span class="p">:</span> <span class="n">EarlyStoppingMode</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">split</span><span class="p">:</span> <span class="s2">&quot;DataSplit&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">monitor</span><span class="p">:</span> <span class="s2">&quot;FitMonitor&quot;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrapper for fit method of models that support early stopping.</span>
@@ -272,6 +310,10 @@
 <span class="sd">            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit</span>
 <span class="sd">            estimator (Any): estimator instance to use for fitting</span>
 <span class="sd">            mode (EarlyStoppingMode): early stopping mode</span>
+<span class="sd">            split (DataSplit): data split to use for early stopping,</span>
+<span class="sd">                if None, a ShuffleSplit with 10% validation set size is used</span>
+<span class="sd">            monitor (FitMonitor): monitor to use for fitting, if None, a BaseMonitor</span>
+<span class="sd">                is used</span>
 <span class="sd">            kwargs (dict): additional keyword arguments for the estimator&#39;s fit method</span>
 
 <span class="sd">        Returns:</span>
@@ -282,12 +324,15 @@
             <span class="s2">&quot; early stopping.&quot;</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">earlyStopping</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span> <span class="k">if</span> <span class="n">mode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">earlyStopping</span><span class="o">.</span><span class="n">mode</span>
-        <span class="n">estimator</span><span class="p">,</span> <span class="n">best_epoch</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">estimator</span><span class="p">,</span> <span class="n">best_epoch</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">monitor</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">earlyStopping</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">RECORDING</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">earlyStopping</span><span class="o">.</span><span class="n">recordEpochs</span><span class="p">(</span><span class="n">best_epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># +1 for 0-indexing</span>
         <span class="k">return</span> <span class="n">estimator</span>
 
     <span class="k">return</span> <span class="n">wrapper_fit</span></div>
+
 </pre></div>
 
            </div>

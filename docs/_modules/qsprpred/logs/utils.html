@@ -1,19 +1,28 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.logs.utils &mdash; QSPRpred 2.1.0 documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <title>qsprpred.logs.utils &mdash; QSPRpred 3.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+
+  
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>
+    </script>
+        <script src="../../../_static/design-tabs.js?v=36754332"></script>
+        <script src="../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -44,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v2.1.0
+                v3.0.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -58,8 +67,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../use.html">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../use.html#cli-example">CLI Example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../features.html">Overview of available features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">Python API</a></li>
 </ul>
 
@@ -104,7 +113,9 @@
 <span class="n">BACKUP_DIR_FOLDER_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;backup&quot;</span>
 
 
-<div class="viewcode-block" id="export_conda_environment"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.export_conda_environment">[docs]</a><span class="k">def</span> <span class="nf">export_conda_environment</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="export_conda_environment">
+<a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.export_conda_environment">[docs]</a>
+<span class="k">def</span> <span class="nf">export_conda_environment</span><span class="p">(</span><span class="n">filepath</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Export the conda environment to a yaml file.</span>
 
 <span class="sd">    Args:</span>
@@ -124,7 +135,10 @@
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;An unexpected error occurred: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="enable_file_logger"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.enable_file_logger">[docs]</a><span class="k">def</span> <span class="nf">enable_file_logger</span><span class="p">(</span>
+
+<div class="viewcode-block" id="enable_file_logger">
+<a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.enable_file_logger">[docs]</a>
+<span class="k">def</span> <span class="nf">enable_file_logger</span><span class="p">(</span>
     <span class="n">log_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -162,7 +176,10 @@
     <span class="k">return</span> <span class="n">settings</span></div>
 
 
-<div class="viewcode-block" id="generate_backup_runID"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.generate_backup_runID">[docs]</a><span class="k">def</span> <span class="nf">generate_backup_runID</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
+
+<div class="viewcode-block" id="generate_backup_runID">
+<a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.generate_backup_runID">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_backup_runID</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generates runID for generation backups of files to be overwritten.</span>
 
@@ -180,7 +197,7 @@
     <span class="k">if</span> <span class="n">previous</span><span class="p">:</span>
         <span class="n">runid</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">previous</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
 
-    <span class="c1"># backup_files = sorted([ _file for _file in os.listdir(path) if _file.startswith(&#39;#&#39;)]) # noqa: E501</span>
+    <span class="c1"># backup_files = sorted([ _file for _file in os.listdir(path) if _file.startswith(&#39;#&#39;)])</span>
     <span class="c1"># if len(backup_files) == 0 :</span>
     <span class="c1">#     runid = 0</span>
     <span class="c1"># else :</span>
@@ -190,7 +207,10 @@
     <span class="k">return</span> <span class="n">runid</span></div>
 
 
-<div class="viewcode-block" id="generate_backup_dir"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.generate_backup_dir">[docs]</a><span class="k">def</span> <span class="nf">generate_backup_dir</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">backup_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+
+<div class="viewcode-block" id="generate_backup_dir">
+<a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.generate_backup_dir">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_backup_dir</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">backup_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates backup directory for files to be overwritten.</span>
 
 <span class="sd">    Args:</span>
@@ -208,7 +228,10 @@
     <span class="k">return</span> <span class="n">new_dir</span></div>
 
 
-<div class="viewcode-block" id="backup_files_in_folder"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.backup_files_in_folder">[docs]</a><span class="k">def</span> <span class="nf">backup_files_in_folder</span><span class="p">(</span>
+
+<div class="viewcode-block" id="backup_files_in_folder">
+<a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.backup_files_in_folder">[docs]</a>
+<span class="k">def</span> <span class="nf">backup_files_in_folder</span><span class="p">(</span>
     <span class="n">_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">backup_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">output_prefixes</span><span class="p">,</span>
@@ -268,7 +291,10 @@
     <span class="k">return</span> <span class="n">message</span></div>
 
 
-<div class="viewcode-block" id="backup_files"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.backup_files">[docs]</a><span class="k">def</span> <span class="nf">backup_files</span><span class="p">(</span><span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output_prefixes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">cp_suffix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="backup_files">
+<a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.utils.backup_files">[docs]</a>
+<span class="k">def</span> <span class="nf">backup_files</span><span class="p">(</span><span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">output_prefixes</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">cp_suffix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">output_dir</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">backup_id</span> <span class="o">=</span> <span class="n">generate_backup_runID</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
         <span class="n">message</span> <span class="o">=</span> <span class="n">backup_files_in_folder</span><span class="p">(</span>
@@ -281,6 +307,7 @@
         <span class="k">return</span> <span class="n">message</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
+
 </pre></div>
 
            </div>
