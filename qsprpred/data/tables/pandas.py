@@ -432,31 +432,45 @@ class PandasDataTable(DataTable, JSONSerializable):
                 logger.debug(f"Result for chunk returned: {result!r}")
                 yield result
 
-    def transform(
-        self, targets: list[str], transformer: Callable, add_as: list[str] | None = None
-    ):
-        """Transform the data frame (or its part) using a list of transformers.
-
-        Each transformer is a function that takes the data frame (or a subset of it as
-        defined by the `targets` argument) and returns a transformed data frame. The
-        transformed data frame can then be added to the original data frame if `add_as`
-        is set to a `list` of new column names. If `add_as` is not `None`, the result of
-        the application of transformers must have the same number of rows as the
-        original data frame.
+    def transformProperties(self, names: list[str], transformer: Callable):
+        """Transform property values using a transformer function.
 
         Args:
             targets (list[str]): list of column names to transform.
             transformer (Callable): Function that transforms the data in target columns
                 to a new representation.
-            add_as (list): If `True`, the transformed data is added to the original data
-                frame and the
-            names in this list are used as column names for the new data.
         """
-        ret = self.df[targets]
-        ret = transformer(ret)
-        if add_as:
-            self.df[add_as] = ret
-        return ret
+        assert all(
+            name in self.df.columns for name in names
+        ), "Not all properties in dataframe columns for transformation."
+        names_old = [f"{name}_before_transform" for name in names]
+        self.df[names_old] = self.df[names]
+        self.df[names] = transformer(self.df[names])
+        logger.debug(f"Transformed properties in: {names}")
+        logger.debug(f"Old values saved in: {names_old}")
+
+    def imputeProperties(self, names: list[str], imputer: Callable):
+        """Impute missing property values.
+
+        Args:
+            names (list):
+                List of property names to impute.
+            imputer (Callable):
+                imputer object implementing the `fit_transform`
+                 method from scikit-learn API.
+        """
+        assert hasattr(imputer, "fit_transform"), (
+            "Imputer object must implement the `fit_transform` "
+            "method from scikit-learn API."
+        )
+        assert all(
+            name in self.df.columns for name in names
+        ), "Not all properties in dataframe columns for imputation."
+        names_old = [f"{name}_before_impute" for name in names]
+        self.df[names_old] = self.df[names]
+        self.df[names] = imputer.fit_transform(self.df[names])
+        logger.debug(f"Imputed missing values for properties: {names}")
+        logger.debug(f"Old values saved in: {names_old}")
 
     def filter(self, table_filters: list[Callable]):
         """Filter the data frame using a list of filters.
