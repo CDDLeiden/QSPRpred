@@ -301,7 +301,7 @@ class PandasDataTable(DataTable, JSONSerializable):
             data (list): list of property values.
         """
         if isinstance(data, pd.Series):
-            if not np.array_equal(data.index.txt, self.df.index.txt):
+            if not self.df.index.equals(data.index):
                 logger.info(
                     f"Adding property '{name}' to data set might be introducing 'nan' "
                     "values due to index with pandas series. Make sure the index of "
