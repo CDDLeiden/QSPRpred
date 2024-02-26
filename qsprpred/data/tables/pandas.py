@@ -263,6 +263,17 @@ class PandasDataTable(DataTable, JSONSerializable):
             f"_{name}.{self.storeFormat}"
         )
 
+    def hasProperty(self, name):
+        """Check whether a property is present in the data frame.
+
+        Args:
+            name (str): Name of the property.
+
+        Returns:
+            bool: Whether the property is present.
+        """
+        return name in self.df.columns
+
     def getProperty(self, name: str) -> pd.Series:
         """Get property values from the data set.
 
@@ -274,22 +285,23 @@ class PandasDataTable(DataTable, JSONSerializable):
         """
         return self.df[name]
 
-    def getProperties(self):
-        """Get the properties of the data set.
+    def getProperties(self) -> list[str]:
+        """Get names of all properties/variables saved in the data frame (all columns).
 
-        Returns: list of properties of the data set.
+        Returns:
+            list: list of property names.
         """
-        return self.df.columns
+        return self.df.columns.tolist()
 
     def addProperty(self, name: str, data: list):
-        """Add a property to the data set.
+        """Add a property to the data frame.
 
         Args:
             name (str): Name of the property.
-            data (list): List of values for the property.
+            data (list): list of property values.
         """
         if isinstance(data, pd.Series):
-            if not self.df.index.equals(data.index):
+            if not np.array_equal(data.index.txt, self.df.index.txt):
                 logger.info(
                     f"Adding property '{name}' to data set might be introducing 'nan' "
                     "values due to index with pandas series. Make sure the index of "
@@ -297,13 +309,21 @@ class PandasDataTable(DataTable, JSONSerializable):
                 )
         self.df[name] = data
 
-    def removeProperty(self, name: str):
-        """Remove a property from the data set.
+    def removeProperty(self, name):
+        """Remove a property from the data frame.
 
         Args:
-            name (str): Name of the property to remove.
+            name (str): Name of the property to delete.
         """
-        self.df.drop(columns=[name], inplace=True)
+        del self.df[name]
+
+    def dropEmptyProperties(self, names: list[str]):
+        """Drop rows with empty target property value from the data set.
+
+        Args:
+            names (list[str]): list of property names to check for empty values.
+        """
+        self.df.dropna(subset=names, how="all", inplace=True)
 
     def getSubset(self, prefix: str):
         """Get a subset of the data set by providing a prefix for the column names or a

@@ -683,10 +683,6 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         """Drop rows with empty SMILES from the data set."""
         self.df.dropna(subset=[self.smilesCol], inplace=True)
 
-    def dropEmptyProperties(self, names: list[str]):
-        """Drop rows with empty target property value from the data set."""
-        self.df.dropna(subset=names, how="all", inplace=True)
-
     def attachDescriptors(
         self,
         calculator: DescriptorSet,
@@ -850,49 +846,6 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             Generator[str, None, None]: Generator of SMILES strings.
         """
         return iter(self.df[self.smilesCol].values)
-
-    def getProperties(self):
-        """Get names of all properties/variables saved in the data frame (all columns).
-
-        Returns:
-            list: list of property names.
-        """
-        return self.df.columns.tolist()
-
-    def hasProperty(self, name):
-        """Check whether a property is present in the data frame.
-
-        Args:
-            name (str): Name of the property.
-
-        Returns:
-            bool: Whether the property is present.
-        """
-        return name in self.df.columns
-
-    def addProperty(self, name: str, data: list):
-        """Add a property to the data frame.
-
-        Args:
-            name (str): Name of the property.
-            data (list): list of property values.
-        """
-        if isinstance(data, pd.Series):
-            if not np.array_equal(data.index.txt, self.df.index.txt):
-                logger.info(
-                    f"Adding property '{name}' to data set might be introducing 'nan' "
-                    "values due to index with pandas series. Make sure the index of "
-                    "the data frame and the series match or convert series to list."
-                )
-        self.df[name] = data
-
-    def removeProperty(self, name):
-        """Remove a property from the data frame.
-
-        Args:
-            name (str): Name of the property to delete.
-        """
-        del self.df[name]
 
     def addScaffolds(
         self,
