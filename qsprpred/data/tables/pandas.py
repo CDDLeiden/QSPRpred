@@ -263,6 +263,17 @@ class PandasDataTable(DataTable, JSONSerializable):
             f"_{name}.{self.storeFormat}"
         )
 
+    def hasProperty(self, name):
+        """Check whether a property is present in the data frame.
+
+        Args:
+            name (str): Name of the property.
+
+        Returns:
+            bool: Whether the property is present.
+        """
+        return name in self.df.columns
+
     def getProperty(self, name: str) -> pd.Series:
         """Get property values from the data set.
 
@@ -274,19 +285,20 @@ class PandasDataTable(DataTable, JSONSerializable):
         """
         return self.df[name]
 
-    def getProperties(self):
-        """Get the properties of the data set.
+    def getProperties(self) -> list[str]:
+        """Get names of all properties/variables saved in the data frame (all columns).
 
-        Returns: list of properties of the data set.
+        Returns:
+            list: list of property names.
         """
-        return self.df.columns
+        return self.df.columns.tolist()
 
     def addProperty(self, name: str, data: list):
-        """Add a property to the data set.
+        """Add a property to the data frame.
 
         Args:
             name (str): Name of the property.
-            data (list): List of values for the property.
+            data (list): list of property values.
         """
         if isinstance(data, pd.Series):
             if not self.df.index.equals(data.index):
@@ -297,13 +309,21 @@ class PandasDataTable(DataTable, JSONSerializable):
                 )
         self.df[name] = data
 
-    def removeProperty(self, name: str):
-        """Remove a property from the data set.
+    def removeProperty(self, name):
+        """Remove a property from the data frame.
 
         Args:
-            name (str): Name of the property to remove.
+            name (str): Name of the property to delete.
         """
-        self.df.drop(columns=[name], inplace=True)
+        del self.df[name]
+
+    def dropEmptyProperties(self, names: list[str]):
+        """Drop rows with empty target property value from the data set.
+
+        Args:
+            names (list[str]): list of property names to check for empty values.
+        """
+        self.df.dropna(subset=names, how="all", inplace=True)
 
     def getSubset(self, prefix: str):
         """Get a subset of the data set by providing a prefix for the column names or a
@@ -432,31 +452,45 @@ class PandasDataTable(DataTable, JSONSerializable):
                 logger.debug(f"Result for chunk returned: {result!r}")
                 yield result
 
-    def transform(
-        self, targets: list[str], transformer: Callable, add_as: list[str] | None = None
-    ):
-        """Transform the data frame (or its part) using a list of transformers.
-
-        Each transformer is a function that takes the data frame (or a subset of it as
-        defined by the `targets` argument) and returns a transformed data frame. The
-        transformed data frame can then be added to the original data frame if `add_as`
-        is set to a `list` of new column names. If `add_as` is not `None`, the result of
-        the application of transformers must have the same number of rows as the
-        original data frame.
+    def transformProperties(self, names: list[str], transformer: Callable):
+        """Transform property values using a transformer function.
 
         Args:
             targets (list[str]): list of column names to transform.
             transformer (Callable): Function that transforms the data in target columns
                 to a new representation.
-            add_as (list): If `True`, the transformed data is added to the original data
-                frame and the
-            names in this list are used as column names for the new data.
         """
-        ret = self.df[targets]
-        ret = transformer(ret)
-        if add_as:
-            self.df[add_as] = ret
-        return ret
+        assert all(
+            name in self.df.columns for name in names
+        ), "Not all properties in dataframe columns for transformation."
+        names_old = [f"{name}_before_transform" for name in names]
+        self.df[names_old] = self.df[names]
+        self.df[names] = transformer(self.df[names])
+        logger.debug(f"Transformed properties in: {names}")
+        logger.debug(f"Old values saved in: {names_old}")
+
+    def imputeProperties(self, names: list[str], imputer: Callable):
+        """Impute missing property values.
+
+        Args:
+            names (list):
+                List of property names to impute.
+            imputer (Callable):
+                imputer object implementing the `fit_transform`
+                 method from scikit-learn API.
+        """
+        assert hasattr(imputer, "fit_transform"), (
+            "Imputer object must implement the `fit_transform` "
+            "method from scikit-learn API."
+        )
+        assert all(
+            name in self.df.columns for name in names
+        ), "Not all properties in dataframe columns for imputation."
+        names_old = [f"{name}_before_impute" for name in names]
+        self.df[names_old] = self.df[names]
+        self.df[names] = imputer.fit_transform(self.df[names])
+        logger.debug(f"Imputed missing values for properties: {names}")
+        logger.debug(f"Old values saved in: {names_old}")
 
     def filter(self, table_filters: list[Callable]):
         """Filter the data frame using a list of filters.
