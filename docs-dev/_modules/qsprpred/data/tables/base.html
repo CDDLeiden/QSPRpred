@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.tables.base &mdash; QSPRpred 3.0.0.dev502+gb28f8439 documentation</title>
+  <title>qsprpred.data.tables.base &mdash; QSPRpred 3.0.0.dev506+g2e4cf644 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=13920a4d"></script>
+        <script src="../../../../_static/documentation_options.js?v=1923fd57"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0.dev502+gb28f8439
+                v3.0.0.dev506+g2e4cf644
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -192,6 +192,19 @@
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
 
+<div class="viewcode-block" id="DataTable.transformProperties">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.transformProperties">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">transformProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">transformers</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform property values using a transformer function.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            targets (list[str]): list of column names to transform.</span>
+<span class="sd">            transformer (Callable): Function that transforms the data in target columns</span>
+<span class="sd">                to a new representation.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
 <div class="viewcode-block" id="DataTable.getSubset">
 <a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.getSubset">[docs]</a>
     <span class="nd">@abstractmethod</span>
@@ -222,13 +235,6 @@
 <span class="sd">            func_args (list, optional): The positional arguments of the function.</span>
 <span class="sd">            func_kwargs (dict, optional): The keyword arguments of the function.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
-
-
-<div class="viewcode-block" id="DataTable.transform">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.transform">[docs]</a>
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">transformers</span><span class="p">):</span>
-        <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="DataTable.filter">
