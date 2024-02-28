@@ -1059,12 +1059,18 @@ class QSPRDataset(MoleculeTable):
         super().dropEmptyProperties(names)
         self.restoreTrainingData()
 
-    def transform(
-        self, targets: list[str], transformer: Callable, add_as: list[str] | None = None
-    ):
-        super().transform(targets, transformer, add_as)
-        if add_as is None and (set(targets) & set(self.targetPropertyNames)):
-            self.restoreTrainingData()
+    def transformProperties(self, targets: list[str], transformer: Callable):
+        """Transform the target properties using the given transformer.
+
+        Args:
+            targets (list[str]): list of target properties names to transform
+            transformer (Callable): transformer function
+            add_as (list[str] | None, optional): list of names to add the transformed
+                target properties as. If `None`, the original target properties will be
+                overwritten. Defaults to `None`.
+        """
+        super().transformProperties(targets, transformer)
+        self.restoreTrainingData()
 
     def imputeProperties(self, names: list[str], imputer: Callable):
         super().imputeProperties(names, imputer)
@@ -1099,10 +1105,7 @@ class QSPRDataset(MoleculeTable):
             self.imputeProperties([prop.name], prop.imputer)
         # transform the property
         if prop.transformer is not None:
-            self.transform(
-                [prop.name],
-                prop.transformer,
-            )
+            self.transformProperties([prop.name], prop.transformer)
         # drop rows with missing smiles/no target property for any of
         # the target properties
         if drop_empty:

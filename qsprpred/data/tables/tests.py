@@ -688,6 +688,29 @@ class TestTargetImputation(PathMixIn, QSPRTestCase):
         self.assertEqual(self.dataset.df["z"].isna().sum(), 0)
 
 
+class TestTargetTransformation(DataSetsPathMixIn, QSPRTestCase):
+    """Tests the transformation of target properties."""
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+
+    def prop_transform(self, x):
+        return np.log10(x)
+
+    def testTransformation(self):
+        dataset = self.createLargeTestDataSet(
+            target_props=[
+                {
+                    "name": "CL",
+                    "task": TargetTasks.REGRESSION,
+                    "transformer": prop_transform,
+                },
+            ]
+        )
+        self.assertTrue(all(dataset.df["CL"] == np.log10(dataset.df["CL_before_transform"])))
+
+
 class TestApply(DataSetsPathMixIn, QSPRTestCase):
     """Tests the apply method of the data set."""
 
