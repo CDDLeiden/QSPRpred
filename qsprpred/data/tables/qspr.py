@@ -274,7 +274,7 @@ class QSPRDataset(MoleculeTable):
         Returns:
             list[str]: list of feature names
         """
-        if not self.hasDescriptors:
+        if not self.hasDescriptors():
             return []
         features = []
         for ds in self.descriptors:
@@ -627,7 +627,7 @@ class QSPRDataset(MoleculeTable):
         Raises:
             ValueError: if no descriptors are available
         """
-        if not self.hasDescriptors:
+        if not self.hasDescriptors():
             raise ValueError(
                 "No descriptors available. Cannot load descriptors to splits."
             )
@@ -684,7 +684,7 @@ class QSPRDataset(MoleculeTable):
         shuffle (bool): whether to shuffle the training and test sets
         random_state (int): random state for shuffling
         """
-        if self.hasDescriptors and self.hasFeatures:
+        if self.hasDescriptors() and self.hasFeatures:
             self.loadDescriptorsToSplits(
                 shuffle=shuffle, random_state=random_state or self.randomState
             )
@@ -876,9 +876,9 @@ class QSPRDataset(MoleculeTable):
         if split is not None:
             self.split(split)
         # apply feature filters on training set
-        if feature_filters and self.hasDescriptors:
+        if feature_filters and self.hasDescriptors():
             self.filterFeatures(feature_filters)
-        elif not self.hasDescriptors:
+        elif not self.hasDescriptors():
             logger.warning("No descriptors present, feature filters will be skipped.")
         # set feature standardizers
         if feature_standardizer:
