@@ -478,6 +478,8 @@ class QSPRDataset(MoleculeTable):
             **kwargs,
         )
         ds.descriptors = mol_table.descriptors
+        ds.featureNames = mol_table.getDescriptorNames()
+        ds.loadDescriptorsToSplits()
         return ds
 
     def filter(self, table_filters: list[Callable]):
@@ -627,10 +629,6 @@ class QSPRDataset(MoleculeTable):
         Raises:
             ValueError: if no descriptors are available
         """
-        if not self.hasDescriptors():
-            raise ValueError(
-                "No descriptors available. Cannot load descriptors to splits."
-            )
         descriptors = self.getDescriptors()
         if self.X_ind is not None and self.y_ind is not None:
             self.X = descriptors.loc[self.X.index, :]
