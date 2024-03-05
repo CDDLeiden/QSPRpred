@@ -1,18 +1,20 @@
 # Change Log
 
-From v3.0.0 to v3.0.1
+From v3.0.1 to v3.0.2
 
 ## Fixes
-- Fixed a bug in `QSPRDataset` where property transformations were not applied.
+
+- Fixed a bug with incorrect checking of whether a data set contains descriptors or not.
 
 ## Changes
 
-- renamed `PandasDataTable.transform` to `PandasDataTable.transformProperties`
-- moved `imputeProperties`, `dropEmptyProperties` and `hasProperty` from `MoleculeTable`
-  to `PandasDataTable`.
-- removed `getProperties`, `addProperty`, `removeProperty`, now use `PandasDataTable`
-  methods directly.
+- If a `MoleculeTable` contains descriptors and `QSPRDataset.fromMolTable` is called the
+  descriptors are now automatically loaded as features of the created data set.
 
 ## New Features
 
+None.
+
 ## Removed Features
+
+None.
