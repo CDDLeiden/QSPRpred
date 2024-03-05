@@ -24,6 +24,31 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
     """`MolProcessorWithID` that calculates descriptors for a molecule."""
 
     @staticmethod
+    def setIndex(df: pd.DataFrame, cols: list[str]):
+        """Create an index column from several columns of the data set.
+        This also sets the name of the index columns to be the joined column names
+        by a '~' character. The values of the columns are also joined in the
+        same way to create the index. Thus, make sure the values of the columns are
+        unique together and can be joined to a string. The original columns are
+        dropped from the dataframe.
+
+        Args:
+            df (pd.DataFrame): dataframe to set index for.
+            cols (list[str]): list of columns to use as index.
+        """
+        idProp = "~".join(cols)
+        df[idProp] = df[cols].apply(
+            lambda x: "~".join(map(str, x.tolist())), axis=1
+        )
+        df.set_index(idProp, inplace=True, verify_integrity=True, drop=False)
+        df.drop(
+            inplace=True,
+            columns=cols,
+        )
+        df.index.name = idProp
+        return df
+
+    @staticmethod
     def treatInfs(df: pd.DataFrame) -> pd.DataFrame:
         """Replace infinite values by NaNs.
 
@@ -167,14 +192,15 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
 class DataFrameDescriptorSet(DescriptorSet):
     """`DescriptorSet` that uses a `pandas.DataFrame` of precalculated descriptors."""
 
-    def __init__(self, df: pd.DataFrame):
+    def __init__(self, df: pd.DataFrame, cols: list[str] | None = None):
         """Initialize the descriptor set with a dataframe of descriptors.
 
         Args:
             df: dataframe of descriptors
         """
         super().__init__()
-        self._df = df
+        self._df = self.setIndex(df, cols)
+        self._cols = cols
         self._descriptors = df.columns.tolist() if df is not None else []
 
     def getDF(self):
@@ -184,6 +210,10 @@ class DataFrameDescriptorSet(DescriptorSet):
     def getIndex(self):
         """Return the index of the dataframe."""
         return self._df.index if self._df is not None else None
+
+    def getIndexCols(self):
+        """Return the index columns of the dataframe."""
+        return self._cols if self._df is not None else None
 
     def getDescriptors(
         self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
