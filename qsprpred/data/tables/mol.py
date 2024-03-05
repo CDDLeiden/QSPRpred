@@ -771,15 +771,19 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         # get the data frame with the descriptors
         # and attach it to this table as descriptors
         for calculator in to_calculate:
-            df_descriptors = []
-            for result in self.processMols(
-                calculator, proc_args=args, proc_kwargs=kwargs
-            ):
-                df_descriptors.append(result)
-            df_descriptors = pd.concat(df_descriptors, axis=0)
+            if calculator.__str__() == "DataFrame":
+                df_descriptors = calculator.getDF()
+            else:
+                df_descriptors = []
+                for result in self.processMols(
+                    calculator, proc_args=args, proc_kwargs=kwargs
+                ):
+                    df_descriptors.append(result)
+                df_descriptors = pd.concat(df_descriptors, axis=0)
             df_descriptors[self.indexCols] = None
             df_descriptors.loc[self.df.index, self.indexCols] = self.df[self.indexCols]
-            self.attachDescriptors(calculator, df_descriptors, self.indexCols)
+            df_descriptors.dropna(subset=self.indexCols, inplace=True) # only needed for DataFrame
+            self.attachDescriptors(calculator, df_descriptors, [self.idProp])
 
     def getDescriptors(self):
         """Get the calculated descriptors as a pandas data frame.
