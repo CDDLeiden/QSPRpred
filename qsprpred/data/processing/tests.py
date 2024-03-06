@@ -142,8 +142,8 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
             n_jobs=self.nCPU,
             chunk_size=self.chunkSize,
         )
-        self.df_descriptors.index = self.dataset.df.index
-        self.dataset.addDescriptors([DataFrameDescriptorSet(self.df_descriptors)])
+        self.df_descriptors['QSPRID'] = self.dataset.df.index
+        self.dataset.addDescriptors([DataFrameDescriptorSet(self.df_descriptors, self.dataset.indexCols)])
         self.descriptors = self.dataset.featureNames
 
     def testLowVarianceFilter(self):
