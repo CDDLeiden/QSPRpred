@@ -89,7 +89,7 @@ custom implementation of the `MSAProvider` class will have to be made.
 
 After installation, you will have access to various command line features and you can
 use the Python API directly (
-see [Documentation](https://cddleiden.github.io/QSPRPred/docs/)). For a quick start, you
+see [Documentation](https://cddleiden.github.io/QSPRpred/docs/)). For a quick start, you
 can also check out the [Jupyter notebook tutorials](./tutorials/README.md), which
 document the use of the Python API to build different types of models. The tutorials as
 well as the documentation are still work in progress, and we will be happy for any
