@@ -562,7 +562,7 @@ class QSPRModel(JSONSerializable, ABC):
         # return predictions and if mols are within applicability domain if requested
         if hasattr(self, "applicabilityDomain") and use_applicability_domain:
             in_domain = self.applicabilityDomain.contains(
-                dataset.getFeatures(concat=True, ordered=True, refit_standardizer=False)
+                dataset.getFeatures(concat=True)
             )
             in_domain = self.handleInvalidsInPredictions(mols, in_domain, failed_mask)
             return predictions, in_domain.values
