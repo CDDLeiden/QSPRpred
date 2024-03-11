@@ -1,15 +1,15 @@
 # Change Log
 
-From v3.0.1 to v3.0.2
+From v3.0.2 to v3.0.1
 
 ## Fixes
 
-- Fixed a bug with incorrect checking of whether a data set contains descriptors or not.
+- Fixed a bug where an attached standardizer would be refit when calling 
+`QSPRModel.predictMols` with `use_applicability_domain=True`.
 
 ## Changes
 
-- If a `MoleculeTable` contains descriptors and `QSPRDataset.fromMolTable` is called the
-  descriptors are now automatically loaded as features of the created data set.
+None.
 
 ## New Features
 
