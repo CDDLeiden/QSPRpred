@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models package &mdash; QSPRpred 3.0.2.dev6+gc2c68b19 documentation</title>
+  <title>qsprpred.models package &mdash; QSPRpred 3.0.2.dev14+g21c42ec7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=56616b0b"></script>
+        <script src="../_static/documentation_options.js?v=2a9fbbbc"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2.dev6+gc2c68b19
+                v3.0.2.dev14+g21c42ec7
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -4741,6 +4741,828 @@ block, allowing further test code to be executed.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.tests.</span></span><span class="sig-name descname"><span class="pre">TestAttachedApplicabilityDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestAttachedApplicabilityDomain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn" title="qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelDataSetsPathMixIn</span></code></a>, <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.base.QSPRTestCase" title="qsprpred.utils.testing.base.QSPRTestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSPRTestCase</span></code></a></p>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.addClassCleanup">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">addClassCleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.addClassCleanup" title="Link to this definition"></a></dt>
+<dd><p>Same as addCleanup, except the cleanup items are called even if
+setUpClass fails (unlike tearDownClass).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.addCleanup">
+<span class="sig-name descname"><span class="pre">addCleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.addCleanup" title="Link to this definition"></a></dt>
+<dd><p>Add a function, with arguments, to be called when the test is
+completed. Functions added are called on a LIFO basis and are
+called after tearDown on test failure or success.</p>
+<p>Cleanup items are called even if setUp fails (unlike tearDown).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.addTypeEqualityFunc">
+<span class="sig-name descname"><span class="pre">addTypeEqualityFunc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typeobj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.addTypeEqualityFunc" title="Link to this definition"></a></dt>
+<dd><p>Add a type specific assertEqual style function to compare a type.</p>
+<p>This method is for use by TestCase subclasses that need to register
+their own type equality functions to provide nicer error messages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>typeobj</strong> – The data type to call this function on when both values
+are of the same type in assertEqual().</p></li>
+<li><p><strong>function</strong> – The callable taking two arguments and an optional
+msg= argument that raises self.failureException with a
+useful error message when the two arguments are not equal.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertAlmostEqual">
+<span class="sig-name descname"><span class="pre">assertAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">places</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertAlmostEqual" title="Link to this definition"></a></dt>
+<dd><p>Fail if the two objects are unequal as determined by their
+difference rounded to the given number of decimal places
+(default 7) and comparing to zero, or by comparing that the
+difference between the two objects is more than the given
+delta.</p>
+<p>Note that decimal places (from zero) are usually not the same
+as significant digits (measured from the most significant digit).</p>
+<p>If the two objects compare equal then they will automatically
+compare almost equal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertAlmostEquals">
+<span class="sig-name descname"><span class="pre">assertAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertAlmostEquals" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertCountEqual">
+<span class="sig-name descname"><span class="pre">assertCountEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertCountEqual" title="Link to this definition"></a></dt>
+<dd><p>Asserts that two iterables have the same elements, the same number of
+times, without regard to order.</p>
+<blockquote>
+<div><blockquote>
+<div><dl class="simple">
+<dt>self.assertEqual(Counter(list(first)),</dt><dd><p>Counter(list(second)))</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="simple">
+<dt>Example:</dt><dd><ul class="simple">
+<li><p>[0, 1, 1] and [1, 0, 1] compare equal.</p></li>
+<li><p>[0, 0, 1] and [0, 1] compare unequal.</p></li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertDictContainsSubset">
+<span class="sig-name descname"><span class="pre">assertDictContainsSubset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertDictContainsSubset" title="Link to this definition"></a></dt>
+<dd><p>Checks whether dictionary is a superset of subset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertDictEqual">
+<span class="sig-name descname"><span class="pre">assertDictEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertDictEqual" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertEqual">
+<span class="sig-name descname"><span class="pre">assertEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertEqual" title="Link to this definition"></a></dt>
+<dd><p>Fail if the two objects are unequal as determined by the ‘==’
+operator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertEquals">
+<span class="sig-name descname"><span class="pre">assertEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertEquals" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertFalse">
+<span class="sig-name descname"><span class="pre">assertFalse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertFalse" title="Link to this definition"></a></dt>
+<dd><p>Check that the expression is false.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertGreater">
+<span class="sig-name descname"><span class="pre">assertGreater</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertGreater" title="Link to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &gt; b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertGreaterEqual">
+<span class="sig-name descname"><span class="pre">assertGreaterEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertGreaterEqual" title="Link to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &gt;= b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertIn">
+<span class="sig-name descname"><span class="pre">assertIn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">member</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertIn" title="Link to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a in b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertIs">
+<span class="sig-name descname"><span class="pre">assertIs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertIs" title="Link to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a is b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertIsInstance">
+<span class="sig-name descname"><span class="pre">assertIsInstance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertIsInstance" title="Link to this definition"></a></dt>
+<dd><p>Same as self.assertTrue(isinstance(obj, cls)), with a nicer
+default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertIsNone">
+<span class="sig-name descname"><span class="pre">assertIsNone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertIsNone" title="Link to this definition"></a></dt>
+<dd><p>Same as self.assertTrue(obj is None), with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertIsNot">
+<span class="sig-name descname"><span class="pre">assertIsNot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertIsNot" title="Link to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a is not b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertIsNotNone">
+<span class="sig-name descname"><span class="pre">assertIsNotNone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertIsNotNone" title="Link to this definition"></a></dt>
+<dd><p>Included for symmetry with assertIsNone.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertLess">
+<span class="sig-name descname"><span class="pre">assertLess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertLess" title="Link to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &lt; b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertLessEqual">
+<span class="sig-name descname"><span class="pre">assertLessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertLessEqual" title="Link to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &lt;= b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertListEqual">
+<span class="sig-name descname"><span class="pre">assertListEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertListEqual" title="Link to this definition"></a></dt>
+<dd><p>A list-specific equality assertion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>list1</strong> – The first list to compare.</p></li>
+<li><p><strong>list2</strong> – The second list to compare.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertLogs">
+<span class="sig-name descname"><span class="pre">assertLogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertLogs" title="Link to this definition"></a></dt>
+<dd><p>Fail unless a log message of level <em>level</em> or higher is emitted
+on <em>logger_name</em> or its children.  If omitted, <em>level</em> defaults to
+INFO and <em>logger</em> defaults to the root logger.</p>
+<p>This method must be used as a context manager, and will yield
+a recording object with two attributes: <code class="xref any docutils literal notranslate"><span class="pre">output</span></code> and <code class="xref any docutils literal notranslate"><span class="pre">records</span></code>.
+At the end of the context manager, the <code class="xref any docutils literal notranslate"><span class="pre">output</span></code> attribute will
+be a list of the matching formatted log messages and the
+<code class="xref any docutils literal notranslate"><span class="pre">records</span></code> attribute will be a list of the corresponding LogRecord
+objects.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertLogs</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INFO&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cm</span><span class="p">:</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;first message&#39;</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;foo.bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;second message&#39;</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;INFO:foo:first message&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;ERROR:foo.bar:second message&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertMultiLineEqual">
+<span class="sig-name descname"><span class="pre">assertMultiLineEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertMultiLineEqual" title="Link to this definition"></a></dt>
+<dd><p>Assert that two multi-line strings are equal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNoLogs">
+<span class="sig-name descname"><span class="pre">assertNoLogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNoLogs" title="Link to this definition"></a></dt>
+<dd><p>Fail unless no log messages of level <em>level</em> or higher are emitted
+on <em>logger_name</em> or its children.</p>
+<p>This method must be used as a context manager.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotAlmostEqual">
+<span class="sig-name descname"><span class="pre">assertNotAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">places</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotAlmostEqual" title="Link to this definition"></a></dt>
+<dd><p>Fail if the two objects are equal as determined by their
+difference rounded to the given number of decimal places
+(default 7) and comparing to zero, or by comparing that the
+difference between the two objects is less than the given delta.</p>
+<p>Note that decimal places (from zero) are usually not the same
+as significant digits (measured from the most significant digit).</p>
+<p>Objects that are equal automatically fail.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotAlmostEquals">
+<span class="sig-name descname"><span class="pre">assertNotAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotAlmostEquals" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotEqual">
+<span class="sig-name descname"><span class="pre">assertNotEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotEqual" title="Link to this definition"></a></dt>
+<dd><p>Fail if the two objects are equal as determined by the ‘!=’
+operator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotEquals">
+<span class="sig-name descname"><span class="pre">assertNotEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotEquals" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotIn">
+<span class="sig-name descname"><span class="pre">assertNotIn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">member</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotIn" title="Link to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a not in b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotIsInstance">
+<span class="sig-name descname"><span class="pre">assertNotIsInstance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotIsInstance" title="Link to this definition"></a></dt>
+<dd><p>Included for symmetry with assertIsInstance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotRegex">
+<span class="sig-name descname"><span class="pre">assertNotRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unexpected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotRegex" title="Link to this definition"></a></dt>
+<dd><p>Fail the test if the text matches the regular expression.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotRegexpMatches">
+<span class="sig-name descname"><span class="pre">assertNotRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotRegexpMatches" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertRaises">
+<span class="sig-name descname"><span class="pre">assertRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_exception</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertRaises" title="Link to this definition"></a></dt>
+<dd><p>Fail unless an exception of class expected_exception is raised
+by the callable when invoked with specified positional and
+keyword arguments. If a different type of exception is
+raised, it will not be caught, and the test case will be
+deemed to have suffered an error, exactly as for an
+unexpected exception.</p>
+<p>If called with the callable and arguments omitted, will return a
+context object used like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">SomeException</span><span class="p">):</span>
+    <span class="n">do_something</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>An optional keyword argument ‘msg’ can be provided when assertRaises
+is used as a context object.</p>
+<p>The context manager keeps a reference to the exception as
+the ‘exception’ attribute. This allows you to inspect the
+exception after the assertion:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">SomeException</span><span class="p">)</span> <span class="k">as</span> <span class="n">cm</span><span class="p">:</span>
+    <span class="n">do_something</span><span class="p">()</span>
+<span class="n">the_exception</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">exception</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">the_exception</span><span class="o">.</span><span class="n">error_code</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertRaisesRegex">
+<span class="sig-name descname"><span class="pre">assertRaisesRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_exception</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertRaisesRegex" title="Link to this definition"></a></dt>
+<dd><p>Asserts that the message in a raised exception matches a regex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expected_exception</strong> – Exception class expected to be raised.</p></li>
+<li><p><strong>expected_regex</strong> – Regex (re.Pattern object or string) expected
+to be found in error message.</p></li>
+<li><p><strong>args</strong> – Function to be called and extra positional args.</p></li>
+<li><p><strong>kwargs</strong> – Extra kwargs.</p></li>
+<li><p><strong>msg</strong> – Optional message used in case of failure. Can only be used
+when assertRaisesRegex is used as a context manager.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertRaisesRegexp">
+<span class="sig-name descname"><span class="pre">assertRaisesRegexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertRaisesRegexp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertRegex">
+<span class="sig-name descname"><span class="pre">assertRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertRegex" title="Link to this definition"></a></dt>
+<dd><p>Fail the test unless the text matches the regular expression.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertRegexpMatches">
+<span class="sig-name descname"><span class="pre">assertRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertRegexpMatches" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertSequenceEqual">
+<span class="sig-name descname"><span class="pre">assertSequenceEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertSequenceEqual" title="Link to this definition"></a></dt>
+<dd><p>An equality assertion for ordered sequences (like lists and tuples).</p>
+<p>For the purposes of this function, a valid ordered sequence type is one
+which can be indexed, has a length, and has an equality operator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq1</strong> – The first sequence to compare.</p></li>
+<li><p><strong>seq2</strong> – The second sequence to compare.</p></li>
+<li><p><strong>seq_type</strong> – The expected datatype of the sequences, or None if no
+datatype should be enforced.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertSetEqual">
+<span class="sig-name descname"><span class="pre">assertSetEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertSetEqual" title="Link to this definition"></a></dt>
+<dd><p>A set-specific equality assertion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>set1</strong> – The first set to compare.</p></li>
+<li><p><strong>set2</strong> – The second set to compare.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+<p>assertSetEqual uses ducktyping to support different types of sets, and
+is optimized for sets specifically (parameters must support a
+difference method).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertTrue">
+<span class="sig-name descname"><span class="pre">assertTrue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertTrue" title="Link to this definition"></a></dt>
+<dd><p>Check that the expression is true.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertTupleEqual">
+<span class="sig-name descname"><span class="pre">assertTupleEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tuple1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tuple2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertTupleEqual" title="Link to this definition"></a></dt>
+<dd><p>A tuple-specific equality assertion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tuple1</strong> – The first tuple to compare.</p></li>
+<li><p><strong>tuple2</strong> – The second tuple to compare.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertWarns">
+<span class="sig-name descname"><span class="pre">assertWarns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_warning</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertWarns" title="Link to this definition"></a></dt>
+<dd><p>Fail unless a warning of class warnClass is triggered
+by the callable when invoked with specified positional and
+keyword arguments.  If a different type of warning is
+triggered, it will not be handled: depending on the other
+warning filtering rules in effect, it might be silenced, printed
+out, or raised as an exception.</p>
+<p>If called with the callable and arguments omitted, will return a
+context object used like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertWarns</span><span class="p">(</span><span class="n">SomeWarning</span><span class="p">):</span>
+    <span class="n">do_something</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>An optional keyword argument ‘msg’ can be provided when assertWarns
+is used as a context object.</p>
+<p>The context manager keeps a reference to the first matching
+warning as the ‘warning’ attribute; similarly, the ‘filename’
+and ‘lineno’ attributes give you information about the line
+of Python code from which the warning was triggered.
+This allows you to inspect the warning after the assertion:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertWarns</span><span class="p">(</span><span class="n">SomeWarning</span><span class="p">)</span> <span class="k">as</span> <span class="n">cm</span><span class="p">:</span>
+    <span class="n">do_something</span><span class="p">()</span>
+<span class="n">the_warning</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">warning</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">the_warning</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">,</span> <span class="mi">147</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertWarnsRegex">
+<span class="sig-name descname"><span class="pre">assertWarnsRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_warning</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertWarnsRegex" title="Link to this definition"></a></dt>
+<dd><p>Asserts that the message in a triggered warning matches a regexp.
+Basic functioning is similar to assertWarns() with the addition
+that only warnings whose messages also match the regular expression
+are considered successful matches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expected_warning</strong> – Warning class expected to be triggered.</p></li>
+<li><p><strong>expected_regex</strong> – Regex (re.Pattern object or string) expected
+to be found in error message.</p></li>
+<li><p><strong>args</strong> – Function to be called and extra positional args.</p></li>
+<li><p><strong>kwargs</strong> – Extra kwargs.</p></li>
+<li><p><strong>msg</strong> – Optional message used in case of failure. Can only be used
+when assertWarnsRegex is used as a context manager.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assert_">
+<span class="sig-name descname"><span class="pre">assert_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assert_" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.clearGenerated">
+<span class="sig-name descname"><span class="pre">clearGenerated</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.clearGenerated" title="Link to this definition"></a></dt>
+<dd><p>Remove the directories that are used for testing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.countTestCases">
+<span class="sig-name descname"><span class="pre">countTestCases</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.countTestCases" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.createLargeMultitaskDataSet">
+<span class="sig-name descname"><span class="pre">createLargeMultitaskDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'QSPRDataset_multi_test'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[{'name':</span> <span class="pre">'HBD',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.MULTICLASS,</span> <span class="pre">'th':</span> <span class="pre">[-1,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">100]},</span> <span class="pre">{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.REGRESSION}]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preparation_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.createLargeMultitaskDataSet" title="Link to this definition"></a></dt>
+<dd><p>Create a large dataset for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
+<li><p><strong>preparation_settings</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.createLargeTestDataSet">
+<span class="sig-name descname"><span class="pre">createLargeTestDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'QSPRDataset_test_large'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.REGRESSION}]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preparation_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.createLargeTestDataSet" title="Link to this definition"></a></dt>
+<dd><p>Create a large dataset for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>preparation_settings</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.createSmallTestDataSet">
+<span class="sig-name descname"><span class="pre">createSmallTestDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'QSPRDataset_test_small'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.REGRESSION}]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preparation_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.createSmallTestDataSet" title="Link to this definition"></a></dt>
+<dd><p>Create a small dataset for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>preparation_settings</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.createTestDataSetFromFrame">
+<span class="sig-name descname"><span class="pre">createTestDataSetFromFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'QSPRDataset_test'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">TargetTasks.REGRESSION}]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.createTestDataSetFromFrame" title="Link to this definition"></a></dt>
+<dd><p>Create a dataset for testing purposes from the given data frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – data frame containing the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>prep</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.debug">
+<span class="sig-name descname"><span class="pre">debug</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.debug" title="Link to this definition"></a></dt>
+<dd><p>Run the test without collecting errors in a TestResult</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.defaultTestResult">
+<span class="sig-name descname"><span class="pre">defaultTestResult</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.defaultTestResult" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.doClassCleanups">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">doClassCleanups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.doClassCleanups" title="Link to this definition"></a></dt>
+<dd><p>Execute all class cleanup functions. Normally called for you after
+tearDownClass.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.doCleanups">
+<span class="sig-name descname"><span class="pre">doCleanups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.doCleanups" title="Link to this definition"></a></dt>
+<dd><p>Execute all cleanup functions. Normally called for you after
+tearDown.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.fail">
+<span class="sig-name descname"><span class="pre">fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.fail" title="Link to this definition"></a></dt>
+<dd><p>Fail immediately, with the given message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.failIf">
+<span class="sig-name descname"><span class="pre">failIf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.failIf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.failIfAlmostEqual">
+<span class="sig-name descname"><span class="pre">failIfAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.failIfAlmostEqual" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.failIfEqual">
+<span class="sig-name descname"><span class="pre">failIfEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.failIfEqual" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.failUnless">
+<span class="sig-name descname"><span class="pre">failUnless</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.failUnless" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.failUnlessAlmostEqual">
+<span class="sig-name descname"><span class="pre">failUnlessAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.failUnlessAlmostEqual" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.failUnlessEqual">
+<span class="sig-name descname"><span class="pre">failUnlessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.failUnlessEqual" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.failUnlessRaises">
+<span class="sig-name descname"><span class="pre">failUnlessRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.failUnlessRaises" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.failureException">
+<span class="sig-name descname"><span class="pre">failureException</span></span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.failureException" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#AssertionError" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AssertionError</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.getAllDescriptors">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getAllDescriptors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.getAllDescriptors" title="Link to this definition"></a></dt>
+<dd><p>Return a list of (ideally) all available descriptor sets. For now
+they need to be added manually to the list below.</p>
+<p>TODO: would be nice to create the list automatically by implementing a
+descriptor set registry that would hold all installed descriptor sets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.getBigDF">
+<span class="sig-name descname"><span class="pre">getBigDF</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.getBigDF" title="Link to this definition"></a></dt>
+<dd><p>Get a large data frame for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a <code class="xref any docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> containing the dataset</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.getDataPrepGrid">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDataPrepGrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.getDataPrepGrid" title="Link to this definition"></a></dt>
+<dd><p>Return a list of many possible combinations of descriptor calculators,
+splits, feature standardizers, feature filters and data filters. Again, this is
+not exhaustive, but should cover a lot of cases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a generator that yields tuples of all possible combinations as stated
+above, each tuple is defined as: (descriptor_calculator, split,
+feature_standardizer, feature_filters, data_filters)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>grid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.getDefaultCalculatorCombo">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDefaultCalculatorCombo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.getDefaultCalculatorCombo" title="Link to this definition"></a></dt>
+<dd><p>Makes a list of default descriptor calculators that can be used in tests.
+It creates a calculator with only morgan fingerprints and rdkit descriptors,
+but also one with them both to test behaviour with multiple descriptor sets.
+Override this method if you want to test with other descriptor sets and
+calculator combinations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of created <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.getDefaultPrep">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDefaultPrep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.getDefaultPrep" title="Link to this definition"></a></dt>
+<dd><p>Return a dictionary with default preparation settings.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.getPrepCombos">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getPrepCombos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.getPrepCombos" title="Link to this definition"></a></dt>
+<dd><p>Return a list of all possible preparation combinations as generated by
+<a class="reference internal" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.getDataPrepGrid" title="qsprpred.models.tests.TestAttachedApplicabilityDomain.getDataPrepGrid"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">getDataPrepGrid</span></code></a> as well as their names. The generated list can be used
+to parameterize tests with the given named combinations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id5"><span class="problematic" id="id6">`</span></a>list`s of all possible combinations of preparation</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.getSmallDF">
+<span class="sig-name descname"><span class="pre">getSmallDF</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.getSmallDF" title="Link to this definition"></a></dt>
+<dd><p>Get a small data frame for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a <code class="xref any docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> containing the dataset</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.id">
+<span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.longMessage">
+<span class="sig-name descname"><span class="pre">longMessage</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.longMessage" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.maxDiff">
+<span class="sig-name descname"><span class="pre">maxDiff</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">640</span></em><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.maxDiff" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.run" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.setUp">
+<span class="sig-name descname"><span class="pre">setUp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestAttachedApplicabilityDomain.setUp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.setUp" title="Link to this definition"></a></dt>
+<dd><p>Hook method for setting up the test fixture before exercising it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.setUpClass">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setUpClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.setUpClass" title="Link to this definition"></a></dt>
+<dd><p>Hook method for setting up class fixture before running tests in the class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.setUpPaths">
+<span class="sig-name descname"><span class="pre">setUpPaths</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.setUpPaths" title="Link to this definition"></a></dt>
+<dd><p>Set up the test environment.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.shortDescription">
+<span class="sig-name descname"><span class="pre">shortDescription</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.shortDescription" title="Link to this definition"></a></dt>
+<dd><p>Returns a one-line description of the test, or None if no
+description has been provided.</p>
+<p>The default implementation of this method returns the first line of
+the specified test method’s docstring.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.skipTest">
+<span class="sig-name descname"><span class="pre">skipTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reason</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.skipTest" title="Link to this definition"></a></dt>
+<dd><p>Skip this test.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.subTest">
+<span class="sig-name descname"><span class="pre">subTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg=&lt;object</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.subTest" title="Link to this definition"></a></dt>
+<dd><p>Return a context manager that will return the enclosed block
+of code in a subtest identified by the optional message and
+keyword parameters.  A failure in the subtest marks the test
+case as failed but resumes execution at the end of the enclosed
+block, allowing further test code to be executed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.tearDown">
+<span class="sig-name descname"><span class="pre">tearDown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.tearDown" title="Link to this definition"></a></dt>
+<dd><p>Remove all files and directories that are used for testing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.tearDownClass">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tearDownClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.tearDownClass" title="Link to this definition"></a></dt>
+<dd><p>Hook method for deconstructing the class fixture after running all tests in the class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.testAttachedApplicabilityDomain">
+<span class="sig-name descname"><span class="pre">testAttachedApplicabilityDomain</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestAttachedApplicabilityDomain.testAttachedApplicabilityDomain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.testAttachedApplicabilityDomain" title="Link to this definition"></a></dt>
+<dd><p>Test the attached applicability domain class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.validate_split">
+<span class="sig-name descname"><span class="pre">validate_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.validate_split" title="Link to this definition"></a></dt>
+<dd><p>Check if the split has the data it should have after splitting.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.tests.</span></span><span class="sig-name descname"><span class="pre">TestEarlyStopping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestEarlyStopping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn" title="qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelDataSetsPathMixIn</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TestCase</span></code></p>
@@ -5451,7 +6273,7 @@ calculator combinations.</p>
 to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id5"><span class="problematic" id="id6">`</span></a>list`s of all possible combinations of preparation</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id7"><span class="problematic" id="id8">`</span></a>list`s of all possible combinations of preparation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
@@ -6944,7 +7766,7 @@ calculator combinations.</p>
 to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id7"><span class="problematic" id="id8">`</span></a>list`s of all possible combinations of preparation</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id9"><span class="problematic" id="id10">`</span></a>list`s of all possible combinations of preparation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
@@ -7879,7 +8701,7 @@ to None.</p></li>
 to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id9"><span class="problematic" id="id10">`</span></a>list`s of all possible combinations of preparation</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id11"><span class="problematic" id="id12">`</span></a>list`s of all possible combinations of preparation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
@@ -8899,7 +9721,7 @@ to None.</p></li>
 to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id11"><span class="problematic" id="id12">`</span></a>list`s of all possible combinations of preparation</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id13"><span class="problematic" id="id14">`</span></a>list`s of all possible combinations of preparation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
@@ -9830,7 +10652,7 @@ to None.</p></li>
 to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id13"><span class="problematic" id="id14">`</span></a>list`s of all possible combinations of preparation</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id15"><span class="problematic" id="id16">`</span></a>list`s of all possible combinations of preparation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
@@ -10797,7 +11619,7 @@ to None.</p></li>
 to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id15"><span class="problematic" id="id16">`</span></a>list`s of all possible combinations of preparation</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id17"><span class="problematic" id="id18">`</span></a>list`s of all possible combinations of preparation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
@@ -11727,7 +12549,7 @@ to None.</p></li>
 to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id17"><span class="problematic" id="id18">`</span></a>list`s of all possible combinations of preparation</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id19"><span class="problematic" id="id20">`</span></a>list`s of all possible combinations of preparation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>

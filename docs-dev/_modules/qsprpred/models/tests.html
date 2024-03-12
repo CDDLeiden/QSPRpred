@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models.tests &mdash; QSPRpred 3.0.2.dev6+gc2c68b19 documentation</title>
+  <title>qsprpred.models.tests &mdash; QSPRpred 3.0.2.dev14+g21c42ec7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=56616b0b"></script>
+        <script src="../../../_static/documentation_options.js?v=2a9fbbbc"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2.dev6+gc2c68b19
+                v3.0.2.dev14+g21c42ec7
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -104,6 +104,7 @@
 <span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">TestCase</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">mlchemad.applicability_domains</span> <span class="kn">import</span> <span class="n">KNNApplicabilityDomain</span>
 <span class="kn">from</span> <span class="nn">parameterized</span> <span class="kn">import</span> <span class="n">parameterized</span>
 <span class="kn">from</span> <span class="nn">sklearn.cross_decomposition</span> <span class="kn">import</span> <span class="n">PLSRegression</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="n">RandomForestRegressor</span>
@@ -112,37 +113,33 @@
     <span class="n">accuracy_score</span><span class="p">,</span>
     <span class="n">explained_variance_score</span><span class="p">,</span>
     <span class="n">log_loss</span><span class="p">,</span>
-    <span class="n">top_k_accuracy_score</span><span class="p">,</span>
+    <span class="n">make_scorer</span><span class="p">,</span>
     <span class="n">mean_squared_error</span><span class="p">,</span>
     <span class="n">roc_auc_score</span><span class="p">,</span>
+    <span class="n">top_k_accuracy_score</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">make_scorer</span>
 <span class="kn">from</span> <span class="nn">sklearn.naive_bayes</span> <span class="kn">import</span> <span class="n">GaussianNB</span>
 <span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="kn">import</span> <span class="n">KNeighborsClassifier</span><span class="p">,</span> <span class="n">KNeighborsRegressor</span>
 <span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="kn">import</span> <span class="n">SVC</span><span class="p">,</span> <span class="n">SVR</span>
 <span class="kn">from</span> <span class="nn">xgboost</span> <span class="kn">import</span> <span class="n">XGBClassifier</span><span class="p">,</span> <span class="n">XGBRegressor</span>
 
-<span class="kn">from</span> <span class="nn">.assessment.classification</span> <span class="kn">import</span> <span class="n">create_metrics_summary</span>
-<span class="kn">from</span> <span class="nn">.assessment.regression</span> <span class="kn">import</span> <span class="n">create_correlation_summary</span>
+<span class="kn">from</span> <span class="nn">..data.processing.applicability_domain</span> <span class="kn">import</span> <span class="n">MLChemADWrapper</span>
 <span class="kn">from</span> <span class="nn">..models.early_stopping</span> <span class="kn">import</span> <span class="n">EarlyStopping</span><span class="p">,</span> <span class="n">EarlyStoppingMode</span><span class="p">,</span> <span class="n">early_stopping</span>
 <span class="kn">from</span> <span class="nn">..models.metrics</span> <span class="kn">import</span> <span class="n">SklearnMetrics</span>
-<span class="kn">from</span> <span class="nn">..models.monitors</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">BaseMonitor</span><span class="p">,</span>
-    <span class="n">FileMonitor</span><span class="p">,</span>
-    <span class="n">ListMonitor</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..models.monitors</span> <span class="kn">import</span> <span class="n">BaseMonitor</span><span class="p">,</span> <span class="n">FileMonitor</span><span class="p">,</span> <span class="n">ListMonitor</span>
 <span class="kn">from</span> <span class="nn">..models.scikit_learn</span> <span class="kn">import</span> <span class="n">SklearnModel</span>
 <span class="kn">from</span> <span class="nn">..tasks</span> <span class="kn">import</span> <span class="n">TargetTasks</span>
 <span class="kn">from</span> <span class="nn">..utils.testing.base</span> <span class="kn">import</span> <span class="n">QSPRTestCase</span>
 <span class="kn">from</span> <span class="nn">..utils.testing.check_mixins</span> <span class="kn">import</span> <span class="n">ModelCheckMixIn</span><span class="p">,</span> <span class="n">MonitorsCheckMixIn</span>
 <span class="kn">from</span> <span class="nn">..utils.testing.path_mixins</span> <span class="kn">import</span> <span class="n">ModelDataSetsPathMixIn</span>
+<span class="kn">from</span> <span class="nn">.assessment.classification</span> <span class="kn">import</span> <span class="n">create_metrics_summary</span>
+<span class="kn">from</span> <span class="nn">.assessment.regression</span> <span class="kn">import</span> <span class="n">create_correlation_summary</span>
 
 
 <div class="viewcode-block" id="SklearnBaseModelTestCase">
 <a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.SklearnBaseModelTestCase">[docs]</a>
 <span class="k">class</span> <span class="nc">SklearnBaseModelTestCase</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">ModelCheckMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the tests for the SklearnModel class.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="SklearnBaseModelTestCase.setUp">
 <a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.SklearnBaseModelTestCase.setUp">[docs]</a>
     <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -188,17 +185,14 @@
 <a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnRegression">[docs]</a>
 <span class="k">class</span> <span class="nc">TestSklearnRegression</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the SklearnModel class for regression models.&quot;&quot;&quot;</span>
-
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
             <span class="p">(</span><span class="n">alg_name</span><span class="p">,</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">random_state</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">(</span>
                 <span class="p">(</span><span class="n">RandomForestRegressor</span><span class="p">,</span> <span class="s2">&quot;RFR&quot;</span><span class="p">),</span>
                 <span class="p">(</span><span class="n">XGBRegressor</span><span class="p">,</span> <span class="s2">&quot;XGBR&quot;</span><span class="p">),</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">random_state</span> <span class="ow">in</span> <span class="p">([</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">42</span><span class="p">],</span> <span class="p">[</span><span class="mi">42</span><span class="p">,</span> <span class="mi">42</span><span class="p">])</span>
-        <span class="p">]</span>
-        <span class="o">+</span> <span class="p">[</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">random_state</span> <span class="ow">in</span> <span class="p">([</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">42</span><span class="p">],</span> <span class="p">[</span><span class="mi">42</span><span class="p">,</span> <span class="mi">42</span><span class="p">])</span>
+        <span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
             <span class="p">(</span><span class="n">alg_name</span><span class="p">,</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="p">[</span><span class="kc">None</span><span class="p">])</span>
             <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">(</span>
                 <span class="p">(</span><span class="n">PLSRegression</span><span class="p">,</span> <span class="s2">&quot;PLSR&quot;</span><span class="p">),</span>
@@ -215,7 +209,10 @@
             <span class="n">parameters</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="c1"># initialize dataset</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
-            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">}],</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span>
+            <span class="p">}],</span>
             <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="c1"># initialize model for training from class</span>
@@ -261,7 +258,10 @@
         <span class="n">model_class</span> <span class="o">=</span> <span class="n">PLSRegression</span>
         <span class="n">parameters</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
-            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">}],</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span>
+            <span class="p">}],</span>
             <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
@@ -293,16 +293,14 @@
 <a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnRegressionMultiTask">[docs]</a>
 <span class="k">class</span> <span class="nc">TestSklearnRegressionMultiTask</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the SklearnModel class for multi-task regression models.&quot;&quot;&quot;</span>
-
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
             <span class="p">(</span><span class="n">alg_name</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">random_state</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">((</span><span class="n">RandomForestRegressor</span><span class="p">,</span> <span class="s2">&quot;RFR&quot;</span><span class="p">),)</span>
+            <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">((</span><span class="n">RandomForestRegressor</span><span class="p">,</span> <span class="s2">&quot;RFR&quot;</span><span class="p">),</span> <span class="p">)</span>
             <span class="k">for</span> <span class="n">random_state</span> <span class="ow">in</span> <span class="p">([</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">42</span><span class="p">],</span> <span class="p">[</span><span class="mi">42</span><span class="p">,</span> <span class="mi">42</span><span class="p">])</span>
-        <span class="p">]</span>
-        <span class="o">+</span> <span class="p">[</span>
+        <span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
             <span class="p">(</span><span class="n">alg_name</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="p">[</span><span class="kc">None</span><span class="p">])</span>
-            <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">((</span><span class="n">KNeighborsRegressor</span><span class="p">,</span> <span class="s2">&quot;KNNR&quot;</span><span class="p">),)</span>
+            <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">((</span><span class="n">KNeighborsRegressor</span><span class="p">,</span> <span class="s2">&quot;KNNR&quot;</span><span class="p">),</span> <span class="p">)</span>
         <span class="p">]</span>
     <span class="p">)</span>
     <span class="k">def</span> <span class="nf">testRegressionMultiTaskFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model_class</span><span class="p">,</span> <span class="n">random_state</span><span class="p">):</span>
@@ -367,13 +365,20 @@
 <a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnSerialization.testJSON">[docs]</a>
     <span class="k">def</span> <span class="nf">testJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
-            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]}],</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
+                <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]</span>
+            <span class="p">}],</span>
             <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;TestSerialization&quot;</span><span class="p">,</span>
             <span class="n">alg</span><span class="o">=</span><span class="n">RandomForestClassifier</span><span class="p">,</span>
-            <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">,</span> <span class="s2">&quot;n_estimators&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">,</span>
+                <span class="s2">&quot;n_estimators&quot;</span><span class="p">:</span> <span class="mi">10</span>
+            <span class="p">},</span>
             <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
@@ -396,28 +401,23 @@
 <a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnClassification">[docs]</a>
 <span class="k">class</span> <span class="nc">TestSklearnClassification</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the SklearnModel class for classification models.&quot;&quot;&quot;</span>
-
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
             <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">random_state</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">(</span>
                 <span class="p">(</span><span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="s2">&quot;RFC&quot;</span><span class="p">),</span>
                 <span class="p">(</span><span class="n">XGBClassifier</span><span class="p">,</span> <span class="s2">&quot;XGBC&quot;</span><span class="p">),</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span> <span class="ow">in</span> <span class="p">(</span>
                 <span class="p">(</span><span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]),</span>
                 <span class="p">(</span><span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1100</span><span class="p">]),</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">random_state</span> <span class="ow">in</span> <span class="p">([</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">42</span><span class="p">],</span> <span class="p">[</span><span class="mi">42</span><span class="p">,</span> <span class="mi">42</span><span class="p">])</span>
-        <span class="p">]</span>
-        <span class="o">+</span> <span class="p">[</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">random_state</span> <span class="ow">in</span> <span class="p">([</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">42</span><span class="p">],</span> <span class="p">[</span><span class="mi">42</span><span class="p">,</span> <span class="mi">42</span><span class="p">])</span>
+        <span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
             <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="p">[</span><span class="kc">None</span><span class="p">])</span>
             <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">(</span>
                 <span class="p">(</span><span class="n">SVC</span><span class="p">,</span> <span class="s2">&quot;SVC&quot;</span><span class="p">),</span>
                 <span class="p">(</span><span class="n">KNeighborsClassifier</span><span class="p">,</span> <span class="s2">&quot;KNNC&quot;</span><span class="p">),</span>
                 <span class="p">(</span><span class="n">GaussianNB</span><span class="p">,</span> <span class="s2">&quot;NB&quot;</span><span class="p">),</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span> <span class="ow">in</span> <span class="p">(</span>
                 <span class="p">(</span><span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]),</span>
                 <span class="p">(</span><span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1100</span><span class="p">]),</span>
             <span class="p">)</span>
@@ -442,7 +442,11 @@
             <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;subsample&quot;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">}</span>
         <span class="c1"># initialize dataset</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
-            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="n">th</span><span class="p">}],</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span>
+                <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="n">th</span>
+            <span class="p">}],</span>
             <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="c1"># test classifier</span>
@@ -488,7 +492,11 @@
         <span class="p">}</span>
         <span class="c1"># initialize dataset</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
-            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]}],</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
+                <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]</span>
+            <span class="p">}],</span>
             <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="c1"># test classifier</span>
@@ -522,16 +530,14 @@
 <a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnClassificationMultiTask">[docs]</a>
 <span class="k">class</span> <span class="nc">TestSklearnClassificationMultiTask</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the SklearnModel class for multi-task classification models.&quot;&quot;&quot;</span>
-
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
             <span class="p">(</span><span class="n">alg_name</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="n">random_state</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">((</span><span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="s2">&quot;RFC&quot;</span><span class="p">),)</span>
+            <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">((</span><span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="s2">&quot;RFC&quot;</span><span class="p">),</span> <span class="p">)</span>
             <span class="k">for</span> <span class="n">random_state</span> <span class="ow">in</span> <span class="p">([</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">42</span><span class="p">],</span> <span class="p">[</span><span class="mi">42</span><span class="p">,</span> <span class="mi">42</span><span class="p">])</span>
-        <span class="p">]</span>
-        <span class="o">+</span> <span class="p">[</span>
+        <span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
             <span class="p">(</span><span class="n">alg_name</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">alg</span><span class="p">,</span> <span class="p">[</span><span class="kc">None</span><span class="p">])</span>
-            <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">((</span><span class="n">KNeighborsClassifier</span><span class="p">,</span> <span class="s2">&quot;KNNC&quot;</span><span class="p">),)</span>
+            <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">((</span><span class="n">KNeighborsClassifier</span><span class="p">,</span> <span class="s2">&quot;KNNC&quot;</span><span class="p">),</span> <span class="p">)</span>
         <span class="p">]</span>
     <span class="p">)</span>
     <span class="k">def</span> <span class="nf">testClassificationMultiTaskFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model_class</span><span class="p">,</span> <span class="n">random_state</span><span class="p">):</span>
@@ -604,7 +610,6 @@
 <a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics">[docs]</a>
 <span class="k">class</span> <span class="nc">TestMetrics</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the SklearnMetrics from the metrics module.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="TestMetrics.test_SklearnMetrics">
 <a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_SklearnMetrics">[docs]</a>
     <span class="k">def</span> <span class="nf">test_SklearnMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -799,7 +804,6 @@
 <a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.test_early_stopping_decorator">[docs]</a>
     <span class="k">def</span> <span class="nf">test_early_stopping_decorator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the early stopping decorator.&quot;&quot;&quot;</span>
-
         <span class="k">class</span> <span class="nc">test_class</span><span class="p">:</span>
             <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">support</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">earlyStopping</span> <span class="o">=</span> <span class="n">EarlyStopping</span><span class="p">(</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">RECORDING</span><span class="p">)</span>
@@ -918,6 +922,79 @@
             <span class="kc">False</span><span class="p">,</span>
             <span class="p">[</span><span class="n">BaseMonitor</span><span class="p">(),</span> <span class="n">FileMonitor</span><span class="p">()],</span>
         <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="TestAttachedApplicabilityDomain">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestAttachedApplicabilityDomain">[docs]</a>
+<span class="k">class</span> <span class="nc">TestAttachedApplicabilityDomain</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestAttachedApplicabilityDomain.setUp">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestAttachedApplicabilityDomain.setUp">[docs]</a>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="TestAttachedApplicabilityDomain.testAttachedApplicabilityDomain">
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestAttachedApplicabilityDomain.testAttachedApplicabilityDomain">[docs]</a>
+    <span class="k">def</span> <span class="nf">testAttachedApplicabilityDomain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the attached applicability domain class.&quot;&quot;&quot;</span>
+
+        <span class="c1"># initialize test dataset with attached applicability domain</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="s2">&quot;REGRESSION&quot;</span>
+            <span class="p">}],</span>
+            <span class="n">preparation_settings</span><span class="o">=</span><span class="p">{</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
+                <span class="s2">&quot;applicability_domain&quot;</span><span class="p">:</span>
+                    <span class="n">KNNApplicabilityDomain</span><span class="p">(</span><span class="n">dist</span><span class="o">=</span><span class="s2">&quot;euclidean&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+        <span class="c1"># initialize model for training</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="p">(</span>
+            <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
+            <span class="n">alg</span><span class="o">=</span><span class="n">RandomForestRegressor</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;RFR_with_AD&quot;</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">},</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">model</span><span class="o">.</span><span class="n">fitDataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+
+        <span class="c1"># check if the applicability domain is attached to the model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;applicabilityDomain&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">applicabilityDomain</span><span class="p">,</span> <span class="n">MLChemADWrapper</span><span class="p">)</span>
+
+        <span class="c1"># check if the applicability domain is saved and loaded correctly</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="n">model2</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">model2</span><span class="p">,</span> <span class="s2">&quot;applicabilityDomain&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">model2</span><span class="o">.</span><span class="n">applicabilityDomain</span><span class="p">,</span> <span class="n">MLChemADWrapper</span><span class="p">)</span>
+
+        <span class="c1"># make predictions with mlchemad ap on the dataset directly</span>
+        <span class="n">comparison_ap</span> <span class="o">=</span> <span class="n">KNNApplicabilityDomain</span><span class="p">(</span>
+            <span class="n">dist</span><span class="o">=</span><span class="s2">&quot;euclidean&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="n">features</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">(</span>
+            <span class="n">concat</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ordered</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">refit_standardizer</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="n">comparison_ap</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+        <span class="n">ap_pred</span> <span class="o">=</span> <span class="n">comparison_ap</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+
+        <span class="c1"># check if the applicability domain predictions from the dataset are equal to the ones from the model</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ap_preds_model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;SMILES&quot;</span><span class="p">],</span> <span class="n">use_applicability_domain</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">ap_pred</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">ap_preds_model</span><span class="p">))</span>
+
+        <span class="c1"># check if the applicability domain predictions arrays are equal after saving and loading</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">ap_preds_model2</span> <span class="o">=</span> <span class="n">model2</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;SMILES&quot;</span><span class="p">],</span> <span class="n">use_applicability_domain</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">ap_pred</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">ap_preds_model2</span><span class="p">))</span></div>
 </div>
 
 </pre></div>
