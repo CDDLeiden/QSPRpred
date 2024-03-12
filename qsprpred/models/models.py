@@ -646,10 +646,12 @@ class QSPRModel(JSONSerializable, ABC):
         """Save model to file.
 
         Returns:
-            str: absolute path to the saved model
+            str: absolute path to the metafile of the saved model
         """
         os.makedirs(self.outDir, exist_ok=True)
-        return self.toFile(self.metaFile)
+        meta_path = self.toFile(self.metaFile)
+        self.saveEstimator()
+        return meta_path
 
     @classmethod
     def fromFile(cls, filename: str) -> "QSPRModel":
