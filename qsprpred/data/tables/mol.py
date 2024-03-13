@@ -771,42 +771,15 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         # get the data frame with the descriptors
         # and attach it to this table as descriptors
         for calculator in to_calculate:
-            if calculator.__str__() == "DataFrame":
-                df_descriptors = calculator.getDF()
-                # check index columns in the descriptor data frame
-                descriptor_index_cols = calculator.getIndexCols()
-                if self.indexCols != descriptor_index_cols:
-                    # temporarily set the index columns to the descriptor index columns
-                    # if descriptor_index_cols in self.df.columns:
-                    if set(descriptor_index_cols).issubset(set(self.df.columns)):
-                        original_index_cols = self.indexCols
-                        self.setIndex(descriptor_index_cols)
-                    else:
-                        logger.error(
-                            f"Index columns in the descriptor data frame do are not "
-                            f"present in the data frame. The index columns in the "
-                            f"descriptor data frame are: {descriptor_index_cols}. "
-                            f"Available columns in the data frame are: {self.df.columns}."
-                        )
-                else:
-                    original_index_cols = None
-                df_descriptors[self.indexCols] = None
-                df_descriptors.loc[self.df.index, self.indexCols] = self.df[self.indexCols]
-                df_descriptors.dropna(subset=self.indexCols, inplace=True)  # only needed for DataFrame
-                self.attachDescriptors(calculator, df_descriptors, [self.idProp])
-                # revert to original index columns
-                if original_index_cols is not None:
-                    self.setIndex(original_index_cols)
-            else:
-                df_descriptors = []
-                for result in self.processMols(
-                    calculator, proc_args=args, proc_kwargs=kwargs
-                ):
-                    df_descriptors.append(result)
-                df_descriptors = pd.concat(df_descriptors, axis=0)
-                df_descriptors[self.indexCols] = None
-                df_descriptors.loc[self.df.index, self.indexCols] = self.df[self.indexCols]
-                self.attachDescriptors(calculator, df_descriptors, [self.idProp])
+            df_descriptors = []
+            for result in self.processMols(
+                calculator, proc_args=args, proc_kwargs=kwargs
+            ):
+                df_descriptors.append(result)
+            df_descriptors = pd.concat(df_descriptors, axis=0)
+            df_descriptors[self.indexCols] = None
+            df_descriptors.loc[self.df.index, self.indexCols] = self.df[self.indexCols]
+            self.attachDescriptors(calculator, df_descriptors, [self.idProp])
 
     def getDescriptors(self):
         """Get the calculated descriptors as a pandas data frame.

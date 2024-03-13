@@ -3,9 +3,9 @@ import itertools
 
 import numpy as np
 import pandas as pd
+from mlchemad.applicability_domains import KNNApplicabilityDomain
 from parameterized import parameterized
 from rdkit.Chem import Mol
-from mlchemad.applicability_domains import KNNApplicabilityDomain
 from sklearn.preprocessing import StandardScaler
 
 from .mol_processor import MolProcessor
@@ -30,6 +30,7 @@ class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
 
     The tests here should be used to check for all their specific parameters and
     edge cases."""
+
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -102,10 +103,17 @@ class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
 
 
 class TestFeatureFilters(PathMixIn, QSPRTestCase):
-    """Tests to check if the feature filters work on their own."""
+    """Tests to check if the feature filters work on their own.
+
+    Note: This also tests the `DataframeDescriptorSet`,
+    as it is used to add test descriptors.
+    """
+
     def setUp(self):
         """Set up the small test Dataframe."""
         super().setUp()
+        self.nCPU = 2  # just to test parallel processing
+        self.chunkSize = 2
         self.setUpPaths()
         descriptors = [
             "Descriptor_F1",
@@ -133,39 +141,85 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         )
         self.dataset = QSPRDataset(
             "TestFeatureFilters",
-            target_props=[{
-                "name": "y",
-                "task": TargetTasks.REGRESSION
-            }],
+            target_props=[{"name": "y", "task": TargetTasks.REGRESSION}],
             df=self.df,
             store_dir=self.generatedPath,
             n_jobs=self.nCPU,
             chunk_size=self.chunkSize,
         )
-        self.df_descriptors['QSPRID'] = self.dataset.df.index
-        self.dataset.addDescriptors([DataFrameDescriptorSet(self.df_descriptors, self.dataset.indexCols)])
+        self.df_descriptors["QSPRID"] = self.dataset.df.index
+        self.dataset.addDescriptors(
+            [DataFrameDescriptorSet(self.df_descriptors, self.dataset.indexCols)]
+        )
         self.descriptors = self.dataset.featureNames
 
-    def testLowVarianceFilter(self):
+    def recalculateWithMultiIndex(self):
+        self.dataset.dropDescriptors(self.dataset.descriptorSets)
+        self.df_descriptors["ID_COL1"] = (
+            self.dataset.getProperty(self.dataset.idProp)
+            .apply(lambda x: x.split("_")[0])
+            .to_list()
+        )
+        self.df_descriptors["ID_COL2"] = (
+            self.dataset.getProperty(self.dataset.idProp)
+            .apply(lambda x: x.split("_")[1])
+            .to_list()
+        )
+        self.dataset.addProperty("ID_COL1", self.df_descriptors["ID_COL1"].values)
+        self.dataset.addProperty("ID_COL2", self.df_descriptors["ID_COL2"].values)
+        self.dataset.addDescriptors(
+            [
+                DataFrameDescriptorSet(
+                    self.df_descriptors,
+                    ["ID_COL1", "ID_COL2"],
+                )
+            ]
+        )
+
+    @parameterized.expand(
+        [
+            (True,),
+            (False,),
+        ]
+    )
+    def testLowVarianceFilter(self, use_index_cols):
         """Test the low variance filter, which drops features with a variance below
         a threshold."""
+        if use_index_cols:
+            self.recalculateWithMultiIndex()
         self.dataset.filterFeatures([LowVarianceFilter(0.01)])
         # check if correct columns selected and values still original
         self.assertListEqual(list(self.dataset.featureNames), self.descriptors[1:])
         self.assertListEqual(list(self.dataset.X.columns), self.descriptors[1:])
 
-    def testHighCorrelationFilter(self):
+    @parameterized.expand(
+        [
+            (True,),
+            (False,),
+        ]
+    )
+    def testHighCorrelationFilter(self, use_index_cols):
         """Test the high correlation filter, which drops features with a correlation
         above a threshold."""
+        if use_index_cols:
+            self.recalculateWithMultiIndex()
         self.dataset.filterFeatures([HighCorrelationFilter(0.8)])
         # check if correct columns selected and values still original
         self.descriptors.pop(2)
         self.assertListEqual(list(self.dataset.featureNames), self.descriptors)
         self.assertListEqual(list(self.dataset.X.columns), self.descriptors)
 
-    def testBorutaFilter(self):
+    @parameterized.expand(
+        [
+            (True,),
+            (False,),
+        ]
+    )
+    def testBorutaFilter(self, use_index_cols):
         """Test the Boruta filter, which removes the features which are statistically as
         relevant as random features."""
+        if use_index_cols:
+            self.recalculateWithMultiIndex()
         self.dataset.filterFeatures([BorutaFilter()])
         # check if correct columns selected and values still original
         self.assertListEqual(list(self.dataset.featureNames), self.descriptors[-1:])
@@ -174,6 +228,7 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
 
 class TestFeatureStandardizer(DataSetsPathMixIn, QSPRTestCase):
     """Test the feature standardizer."""
+
     def setUp(self):
         """Create a small test dataset with MorganFP descriptors."""
         super().setUp()
@@ -277,6 +332,7 @@ class TestMolProcessor(DataSetsPathMixIn, QSPRTestCase):
 
 class testApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
     """Test the applicability domain."""
+
     def setUp(self):
         """Create a small test dataset with MorganFP descriptors."""
         super().setUp()
