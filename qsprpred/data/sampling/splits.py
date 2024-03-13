@@ -552,3 +552,14 @@ class ClusterSplit(GBMTDataSplit):
         self.seed = seed
         if hasattr(self.clustering, "seed"):
             self.clustering.seed = seed
+            
+    def getSeed(self):
+        """Get the seed for this instance.
+        
+        Returns:
+            int: the seed for this instance or None if no seed is set.
+        """
+        if hasattr(self, "seed"):
+            return self.seed
+        else:
+            return None
