@@ -181,18 +181,45 @@ class DataFrameDescriptorSet(DescriptorSet):
         df.index = df_index
         return df
 
-    def __init__(self, df: pd.DataFrame, cols: list[str] | None = None):
+    def __init__(
+        self,
+        df: pd.DataFrame,
+        joining_cols: list[str] | None = None,
+        suffix="",
+        source_is_multi_index=False,
+    ):
         """Initialize the descriptor set with a dataframe of descriptors.
 
         Args:
-            df: dataframe of descriptors
+            df:
+                dataframe of descriptors
+            joining_cols:
+                list of columns to use as joining index,
+                properties of the same name must exist in the data set
+                this descriptor is added to
+            suffix:
+                suffix to add to the descriptor name
+            source_is_multi_index:
+                assume that a multi-index is already present in the supplied dataframe.
+                If `True`, the `joining_cols` argument must
+                also be specified to indicate which properties should
+                be used to create the multi-index in the destination.
         """
         super().__init__()
-        self._df = self.setIndex(df, cols)
-        self._cols = cols
+        if source_is_multi_index and not joining_cols:
+            raise ValueError(
+                "When 'source_is_multi_index=True', 'joining_cols' must be specified."
+            )
+        self._df = df
+        if joining_cols and not source_is_multi_index:
+            self._df = self.setIndex(self._df, joining_cols)
+        self._cols = joining_cols
         self._descriptors = df.columns.tolist() if df is not None else []
-        if cols:
-            self._descriptors = [col for col in self._descriptors if col not in cols]
+        if joining_cols:
+            self._descriptors = [
+                col for col in self._descriptors if col not in joining_cols
+            ]
+        self.suffix = suffix
 
     @property
     def requiredProps(self) -> list[str]:
@@ -230,12 +257,15 @@ class DataFrameDescriptorSet(DescriptorSet):
         """
         # create a return data frame with the desired columns as index
         index_cols = self.getIndexCols()
-        ret = pd.DataFrame(
-            # fetch the join columns from our required props
-            {col: props[col] for col in index_cols}
-        )
-        ret = self.setIndex(ret, index_cols)  # set our multi-index
-        ret.drop(columns=index_cols, inplace=True)  # only keep the index
+        if index_cols:
+            ret = pd.DataFrame(
+                # fetch the join columns from our required props
+                {col: props[col] for col in index_cols}
+            )
+            ret = self.setIndex(ret, index_cols)  # set our multi-index
+            ret.drop(columns=index_cols, inplace=True)  # only keep the index
+        else:
+            ret = pd.DataFrame(index=pd.Index(props[self.idProp], name=self.idProp))
         ret = ret.join(
             # join in our descriptors
             # each molecule gets the correct descriptors from the data frame
@@ -255,7 +285,7 @@ class DataFrameDescriptorSet(DescriptorSet):
         self._descriptors = value
 
     def __str__(self):
-        return "DataFrame"
+        return "DataFrame" if not self.suffix else f"{self.suffix}_DataFrame"
 
 
 class DrugExPhyschem(DescriptorSet):
