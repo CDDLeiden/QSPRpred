@@ -806,7 +806,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             df_descriptors.loc[self.df.index, self.indexCols] = self.df[self.indexCols]
             self.attachDescriptors(calculator, df_descriptors, [self.idProp])
 
-    def getDescriptors(self):
+    def getDescriptors(self, active_only=False):
         """Get the calculated descriptors as a pandas data frame.
 
         Returns:
@@ -814,7 +814,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         """
         ret = pd.DataFrame(index=pd.Index(self.df.index.values, name=self.idProp))
         for descriptors in self.descriptors:
-            df_descriptors = descriptors.getDescriptors()
+            df_descriptors = descriptors.getDescriptors(active_only=active_only)
             ret = ret.join(df_descriptors, how="left")
         return ret
 
