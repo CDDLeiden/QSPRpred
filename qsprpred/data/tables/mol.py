@@ -789,7 +789,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 Additional keyword arguments to pass to each descriptor set.
         """
         if recalculate and self.hasDescriptors():
-            self.dropDescriptorSets(descriptors)
+            self.dropDescriptorSets(descriptors, clear=True)
         to_calculate = []
         for desc_set, exists in zip(descriptors, self.hasDescriptors(descriptors)):
             if exists:
