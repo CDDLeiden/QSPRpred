@@ -3,6 +3,7 @@
 From v3.0.0 to v3.0.1
 
 ## Fixes
+
 - Fixed a bug in `QSPRDataset` where property transformations were not applied.
 
 ## Changes
@@ -14,5 +15,8 @@ From v3.0.0 to v3.0.1
   methods directly.
 
 ## New Features
+
+- The `DataFrameDescriptorSet` class was extended to allow more flexibility when joining
+  custom descriptor sets.
 
 ## Removed Features
