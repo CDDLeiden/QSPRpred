@@ -174,13 +174,12 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
             ]
         )
 
-    # def testDefaultDescriptorAdd(self):
-    #     """Test adding without index columns."""
-    #     # TODO: issue 88 needs to be solved for this to work
-    #     self.dataset.nJobs = 1
-    #     df_new = self.dataset.getFeatures(concat=True).copy()
-    #     calc = DataFrameDescriptorSet(df_new, suffix="new_df_desc")
-    #     self.dataset.addDescriptors([calc])
+    def testDefaultDescriptorAdd(self):
+        """Test adding without index columns."""
+        self.dataset.nJobs = 1
+        df_new = self.dataset.getFeatures(concat=True).copy()
+        calc = DataFrameDescriptorSet(df_new, suffix="new_df_desc")
+        self.dataset.addDescriptors([calc])
 
     @parameterized.expand(
         [

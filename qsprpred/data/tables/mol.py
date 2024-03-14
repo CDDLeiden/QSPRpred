@@ -107,11 +107,10 @@ class DescriptorTable(PandasDataTable):
                 the current descriptor set. Defaults to `True`.
 
         """
-        all_descs = self.df.columns[~self.df.columns.isin(self.indexCols)].tolist()
         if active_only:
-            return [x for x in all_descs if x in self.calculator.descriptors]
+            return self.calculator.transformToFeatureNames()
         else:
-            return all_descs
+            return self.df.columns[~self.df.columns.isin(self.indexCols)].tolist()
 
     def fillMissing(self, fill_value, names):
         """Fill missing values in the descriptor table.
@@ -138,8 +137,11 @@ class DescriptorTable(PandasDataTable):
         """
         all_descs = self.getDescriptorNames(active_only=False)
         to_keep = set(all_descs) & set(descriptors)
+        prefix = str(self.calculator) + "_"
         self.calculator.descriptors = [
-            x for x in self.calculator.descriptors if x in to_keep
+            x.replace(prefix, "", 1)  # remove prefix
+            for x in self.calculator.transformToFeatureNames()
+            if x in to_keep
         ]
         return self.getDescriptorNames()
 
@@ -787,18 +789,10 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         Returns:
             pd.DataFrame: Data frame containing only descriptors.
         """
-        # join_cols = set()
-        # for descriptors in self.descriptors:
-        #     join_cols.update(set(descriptors.indexCols))
-        # join_cols = list(join_cols)
-        # ret = self.df[join_cols].copy()
-        # ret.reset_index(drop=True, inplace=True)
         ret = pd.DataFrame(index=pd.Index(self.df.index.values, name=self.idProp))
         for descriptors in self.descriptors:
             df_descriptors = descriptors.getDescriptors()
             ret = ret.join(df_descriptors, how="left")
-        # ret.set_index(self.df.index, inplace=True)
-        # ret.drop(columns=join_cols, inplace=True)
         return ret
 
     def getDescriptorNames(self):

@@ -66,8 +66,9 @@ class Fingerprint(DescriptorSet, ABC):
         values = self.getDescriptors(mols, props, *args, **kwargs)
         values = values[:, self.usedBits]
         values = values.astype(self.dtype)
-        df = pd.DataFrame(values, index=props[self.idProp])
-        df.columns = self.descriptors
+        df = pd.DataFrame(
+            values, index=props[self.idProp], columns=self.transformToFeatureNames()
+        )
         return df
 
 

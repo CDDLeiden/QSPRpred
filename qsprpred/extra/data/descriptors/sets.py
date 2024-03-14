@@ -396,8 +396,9 @@ class ProteinDescriptorSet(DescriptorSet):
         # create a data frame with the same order of acc_keys as in props
         df = pd.DataFrame({"acc_keys": props["acc_keys"]})
         # merge the calculated values with the data frame to attach them to the rows
-        df = df.merge(values, left_on="acc_keys", right_on="acc_keys",
-                      how="left").set_index("acc_keys")
+        df = df.merge(
+            values, left_on="acc_keys", right_on="acc_keys", how="left"
+        ).set_index("acc_keys")
         return df.values
 
     @property
