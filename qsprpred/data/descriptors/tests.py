@@ -36,7 +36,8 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
         dataset = self.createLargeTestDataSet("TestDropping")
         # test dropping of all sets
         dataset.addDescriptors(self.getDescList())
-        self.assertTrue(dataset.getFeatures(concat=True).shape[1] > 0)
+        full_len = sum(len(x) for x in dataset.descriptorSets)
+        self.assertTrue(dataset.getFeatures(concat=True).shape[1] == full_len)
         dataset.dropDescriptorSets(dataset.descriptorSets)
         self.assertEqual(dataset.getFeatures(concat=True).shape[1], 0)
         dataset.dropDescriptorSets(dataset.descriptorSets, clear=True)
@@ -48,7 +49,7 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(len(dataset.descriptors), 0)
         # test dropping of single set
         dataset.addDescriptors(self.getDescList())
-        self.assertTrue(dataset.getFeatures(concat=True).shape[1] > 0)
+        self.assertTrue(dataset.getFeatures(concat=True).shape[1] == full_len)
         dataset.dropDescriptorSets([dataset.descriptorSets[0]])
         self.assertEqual(
             dataset.getFeatures(concat=True).shape[1], len(self.getDescList()[1])
@@ -59,6 +60,13 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(
             dataset.getFeatures(concat=True).shape[1], len(self.getDescList()[1])
         )
+        # test restoring of dropped sets
+        dataset.addDescriptors(self.getDescList())
+        self.assertTrue(dataset.getFeatures(concat=True).shape[1] == full_len)
+        dataset.dropDescriptorSets(dataset.descriptorSets, clear=False)
+        self.assertEqual(dataset.getFeatures(concat=True).shape[1], 0)
+        dataset.restoreDescriptorSets(dataset.descriptorSets)
+        self.assertTrue(dataset.getFeatures(concat=True).shape[1] == full_len)
 
     @parameterized.expand([(None, None), (1, None), (2, None), (4, 50)])
     def testSwitching(self, n_cpu, chunk_size):

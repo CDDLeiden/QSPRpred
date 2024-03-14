@@ -145,6 +145,15 @@ class DescriptorTable(PandasDataTable):
         ]
         return self.getDescriptorNames()
 
+    def restoreDescriptors(self) -> list[str]:
+        """Restore all descriptors to active in this set."""
+        all_descs = self.getDescriptorNames(active_only=False)
+        prefix = str(self.calculator) + "_"
+        self.calculator.descriptors = [
+            x.replace(prefix, "", 1) for x in all_descs  # remove prefix
+        ]
+        return self.getDescriptorNames()
+
 
 class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
     """Class that holds and prepares molecule data for modelling and other analyses.
@@ -703,6 +712,22 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         for idx in reversed(to_remove):
             self.descriptors[idx].clearFiles()
             self.descriptors.pop(idx)
+
+    def restoreDescriptorSets(self, descriptors: list[DescriptorSet | str]):
+        """Restore descriptors that were previously removed.
+
+        Args:
+            descriptors (list[DescriptorSet | str]):
+                List of `DescriptorSet` objects or their names. Name of a descriptor
+                set corresponds to the result returned by its `__str__` method.
+        """
+        if not isinstance(descriptors[0], str):
+            descriptors = [str(x) for x in descriptors]
+        for name in descriptors:
+            for ds in self.descriptors:
+                calc = ds.calculator
+                if name == str(calc):
+                    ds.restoreDescriptors()
 
     def dropEmptySmiles(self):
         """Drop rows with empty SMILES from the data set."""

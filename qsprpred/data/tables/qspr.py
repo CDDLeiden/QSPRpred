@@ -521,6 +521,10 @@ class QSPRDataset(MoleculeTable):
         super().dropDescriptors(descriptors)
         self.featurize(update_splits=True)
 
+    def restoreDescriptorSets(self, descriptors: list[DescriptorSet | str]):
+        super().restoreDescriptorSets(descriptors)
+        self.featurize(update_splits=True)
+
     def featurize(self, update_splits=True):
         self.featureNames = self.getFeatureNames()
         if update_splits:
