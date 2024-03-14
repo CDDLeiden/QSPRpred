@@ -405,7 +405,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         )
 
         df_test = pd.DataFrame(assessor.monitor.foldData[0]["X_test"])
-        df_test.rename(columns={"Descriptor_SmilesDesc_SMILES": "SMILES"}, inplace=True)
+        df_test.rename(columns={"SmilesDesc_SMILES": "SMILES"}, inplace=True)
         df_test["pchembl_value_Mean"] = assessor.monitor.foldData[0]["y_test"]
         df_test.to_csv(
             f"{self.generatedModelsPath}/consistency_data_test.csv", index=False
