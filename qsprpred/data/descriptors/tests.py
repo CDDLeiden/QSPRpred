@@ -27,6 +27,39 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
         super().setUp()
         self.setUpPaths()
 
+    @staticmethod
+    def getDescList():
+        return [MorganFP(radius=3, nBits=256), DrugExPhyschem()]
+
+    def testDropping(self):
+        """Test dropping of descriptors from data sets."""
+        dataset = self.createLargeTestDataSet("TestDropping")
+        # test dropping of all sets
+        dataset.addDescriptors(self.getDescList())
+        self.assertTrue(dataset.getFeatures(concat=True).shape[1] > 0)
+        dataset.dropDescriptorSets(dataset.descriptorSets)
+        self.assertEqual(dataset.getFeatures(concat=True).shape[1], 0)
+        dataset.dropDescriptorSets(dataset.descriptorSets, clear=True)
+        self.assertEqual(len(dataset.descriptors), 0)
+        dataset.addDescriptors(self.getDescList())
+        dataset.dropDescriptorSets([str(x) for x in self.getDescList()])
+        self.assertEqual(dataset.getFeatures(concat=True).shape[1], 0)
+        dataset.dropDescriptorSets([str(x) for x in self.getDescList()], clear=True)
+        self.assertEqual(len(dataset.descriptors), 0)
+        # test dropping of single set
+        dataset.addDescriptors(self.getDescList())
+        self.assertTrue(dataset.getFeatures(concat=True).shape[1] > 0)
+        dataset.dropDescriptorSets([dataset.descriptorSets[0]])
+        self.assertEqual(
+            dataset.getFeatures(concat=True).shape[1], len(self.getDescList()[1])
+        )
+        dataset.dropDescriptorSets(dataset.descriptorSets, clear=True)
+        dataset.addDescriptors(self.getDescList())
+        dataset.dropDescriptorSets([str(dataset.descriptorSets[0])], clear=True)
+        self.assertEqual(
+            dataset.getFeatures(concat=True).shape[1], len(self.getDescList()[1])
+        )
+
     @parameterized.expand([(None, None), (1, None), (2, None), (4, 50)])
     def testSwitching(self, n_cpu, chunk_size):
         """Test if the feature calculator can be switched to a new dataset."""
@@ -163,14 +196,16 @@ class TestDescriptorsAll(DataSetsPathMixIn, DescriptorInDataCheckMixIn, QSPRTest
         super().setUp()
         self.setUpPaths()
 
-    @parameterized.expand([
-        (
-            f"{desc_set}_{TargetTasks.REGRESSION}",
-            desc_set,
-            [{"name": "CL", "task": TargetTasks.REGRESSION}],
-        )
-        for desc_set in DataSetsPathMixIn.getAllDescriptors()
-    ])
+    @parameterized.expand(
+        [
+            (
+                f"{desc_set}_{TargetTasks.REGRESSION}",
+                desc_set,
+                [{"name": "CL", "task": TargetTasks.REGRESSION}],
+            )
+            for desc_set in DataSetsPathMixIn.getAllDescriptors()
+        ]
+    )
     def testDescriptorsAll(self, _, desc_set, target_props):
         """Tests all available descriptor sets.
 

@@ -648,17 +648,35 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         """Generate a descriptor set name from a descriptor set."""
         return f"Descriptors_{self.name}_{ds_set}"
 
-    def dropDescriptors(
-        self,
-        descriptors: list[DescriptorSet] | list[str],
-    ):
-        """
-        Drop descriptors from the data frame
-        that were calculated with a specific calculator.
+    def dropDescriptors(self, descriptors: list[str]):
+        """Drop descriptors by name. Performs a simple feature selection by removing
+        the given descriptor names from the data set.
 
         Args:
-            descriptors (list): list of `DescriptorSet` objects or prefixes of
-                descriptors to drop.
+            descriptors (list[str]): List of descriptor names to drop.
+        """
+        for ds in self.descriptors:
+            calc = ds.calculator
+            ds_names = calc.transformToFeatureNames()
+            to_keep = [x for x in ds_names if x not in descriptors]
+            ds.keepDescriptors(to_keep)
+
+    def dropDescriptorSets(
+        self,
+        descriptors: list[DescriptorSet | str],
+        clear: bool = False,
+    ):
+        """
+        Drop descriptors from the given sets from the data frame.
+
+        Args:
+            descriptors (list[DescriptorSet | str]):
+                List of `DescriptorSet` objects or their names. Name of a descriptor
+                set corresponds to the result returned by its `__str__` method.
+            clear (bool):
+                Whether to remove the descriptor data (will perform full removal).
+                By default, a soft removal is performed by just rendering the
+                descriptors inactive.
         """
         # sanity check
         assert (
@@ -669,14 +687,19 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 "No descriptors specified to drop. All descriptors will be retained."
             )
             return
-        # convert descriptors to descriptor set names
-        descriptors = [self.generateDescriptorDataSetName(x) for x in descriptors]
-        # drop the descriptors
+        if not isinstance(descriptors[0], str):
+            descriptors = [str(x) for x in descriptors]
+        # remove the descriptors
         to_remove = []
-        for idx, ds in enumerate(self.descriptors):
-            if ds.name in descriptors:
-                logger.info(f"Removing descriptor set: {ds.name}")
-                to_remove.append(idx)
+        to_drop = []
+        for name in descriptors:
+            for idx, ds in enumerate(self.descriptors):
+                calc = ds.calculator
+                if name == str(calc):
+                    to_drop.extend(ds.getDescriptorNames())
+                    if clear:
+                        to_remove.append(idx)
+        self.dropDescriptors(to_drop)
         for idx in reversed(to_remove):
             self.descriptors[idx].clearFiles()
             self.descriptors.pop(idx)
@@ -741,7 +764,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 Additional keyword arguments to pass to each descriptor set.
         """
         if recalculate and self.hasDescriptors():
-            self.dropDescriptors(descriptors)
+            self.dropDescriptorSets(descriptors)
         to_calculate = []
         for desc_set, exists in zip(descriptors, self.hasDescriptors(descriptors)):
             if exists:
