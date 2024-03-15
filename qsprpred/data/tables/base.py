@@ -139,7 +139,6 @@ class MoleculeDataTable(DataTable):
             a `list` of descriptor names
         """
 
-    @property
     @abstractmethod
     def hasDescriptors(self):
         """Indicates if the dataset has descriptors."""

@@ -348,9 +348,7 @@ class testApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
     def testApplicabilityDomain(self):
         """Test the applicability domain fitting, transforming and serialization."""
         ad = MLChemADWrapper(
-            KNNApplicabilityDomain(
-                dist="rogerstanimoto", scaling=None, hard_threshold=0.75
-            )
+            KNNApplicabilityDomain(dist="jaccard", scaling=None, alpha=0.95)
         )
         ad.fit(self.dataset.X)
         self.assertIsInstance(ad.contains(self.dataset.X), pd.DataFrame)
