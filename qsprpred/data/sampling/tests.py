@@ -16,7 +16,7 @@ from ...data.chem.clustering import (
     FPSimilarityLeaderPickerClusters,
     FPSimilarityMaxMinClusters,
 )
-from ...data.chem.scaffolds import Murcko, BemisMurcko
+from ...data.chem.scaffolds import BemisMurckoRDKit, BemisMurcko
 from ...data.sampling.folds import FoldsFromDataSplit
 from ...data.sampling.splits import ManualSplit
 from ...utils.testing.base import QSPRTestCase
@@ -109,13 +109,13 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
 
     @parameterized.expand(
         [
-            (False, Murcko(), None),
+            (False, BemisMurckoRDKit(), None),
             (
                 False,
                 BemisMurcko(use_csk=True),
                 ["ScaffoldSplit_000", "ScaffoldSplit_001"],
             ),
-            (True, Murcko(), None),
+            (True, BemisMurckoRDKit(), None),
         ]
     )
     def testScaffoldSplit(self, multitask, scaffold, custom_test_list):
