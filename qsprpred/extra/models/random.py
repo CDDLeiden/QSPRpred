@@ -10,7 +10,7 @@ import scipy as sp
 from qsprpred.models.early_stopping import EarlyStoppingMode
 from qsprpred.models.monitors import FitMonitor
 from ...data.tables.qspr import QSPRDataset
-from ...models.models import QSPRModel
+from ...models.model import QSPRModel
 
 
 class RandomDistributionAlgorithm(ABC):

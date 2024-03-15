@@ -14,7 +14,7 @@ import pandas as pd
 from sklearn.exceptions import NotFittedError
 from sklearn.utils.validation import check_is_fitted
 
-from .models import QSPRModel
+from .model import QSPRModel
 from ..data.tables.qspr import QSPRDataset
 from ..logs import logger
 from ..tasks import ModelTasks
