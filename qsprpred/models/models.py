@@ -365,13 +365,13 @@ class QSPRModel(JSONSerializable, ABC):
         """
         self._optimalEpochs = value
 
-    def setParams(self, params: dict, reset_estimator: bool = True):
+    def setParams(self, params: dict | None, reset_estimator: bool = True):
         """Set model parameters. The estimator is also
         updated with the new parameters if 'reload_estimator' is `True`.
 
         Args:
             params (dict):
-                dictionary of model parameters
+                dictionary of model parameters or `None` to reset the parameters
             reset_estimator (bool):
                 if `True`, the estimator is reinitialized with the new parameters
         """
@@ -380,7 +380,7 @@ class QSPRModel(JSONSerializable, ABC):
         else:
             self.parameters = params
         if reset_estimator:
-            self.estimator = self.loadEstimator(params)
+            self.estimator = self.loadEstimator(self.parameters)
 
     def checkData(self, ds: QSPRDataset, exception: bool = True) -> bool:
         """Check if the model has a data set.
