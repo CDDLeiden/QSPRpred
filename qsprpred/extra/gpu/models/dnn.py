@@ -205,15 +205,6 @@ class DNNModel(QSPRModel):
                 f.write(self.estimator)
         return path
 
-    def setParams(self, params: dict):
-        """Set parameters of the model.
-
-        Args:
-            params (dict): parameters
-        """
-        super().setParams(params)
-        self.estimator = self.loadEstimator(self.parameters)
-
     @early_stopping
     def fit(
         self,

@@ -777,12 +777,3 @@ class ChempropModel(QSPRModel):
             name="chemprop_logger", save_dir=ret.outDir, quiet=ret.quietLogger
         )
         return ret
-
-    def setParams(self, params: dict):
-        """Set parameters of the model.
-
-        Args:
-            params (dict): parameters
-        """
-        super().setParams(params)
-        self.estimator = self.loadEstimator(self.parameters)
