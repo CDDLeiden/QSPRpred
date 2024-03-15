@@ -567,12 +567,17 @@ class ChempropModel(QSPRModel):
         Returns:
             path (str): path to the saved estimator
         """
-        chemprop.utils.save_checkpoint(
-            f"{self.outPrefix}.pt",
-            self.estimator,
-            scaler=self.estimator.scaler,
-            args=self.estimator.args,
-        )
+        if not isinstance(self.estimator, str):
+            chemprop.utils.save_checkpoint(
+                f"{self.outPrefix}.pt",
+                self.estimator,
+                scaler=self.estimator.scaler,
+                args=self.estimator.args,
+            )
+        else:
+            # just save a file with the estimator message
+            with open(f"{self.outPrefix}.pt", "w") as f:
+                f.write(self.estimator)
         return f"{self.outPrefix}.pt"
 
     def convertToMoleculeDataset(
