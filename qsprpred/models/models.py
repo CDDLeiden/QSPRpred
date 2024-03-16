@@ -565,7 +565,10 @@ class QSPRModel(JSONSerializable, ABC):
                 dataset.getFeatures(concat=True, ordered=True, refit_standardizer=False)
             )
             in_domain = self.handleInvalidsInPredictions(mols, in_domain, failed_mask)
-            return predictions, in_domain.values
+            if isinstance(in_domain, pd.DataFrame):
+                in_domain = in_domain.values 
+            
+            return predictions, in_domain
 
         return predictions
 
