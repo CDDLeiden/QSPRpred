@@ -563,10 +563,8 @@ class QSPRModel(JSONSerializable, ABC):
         if hasattr(self, "applicabilityDomain") and use_applicability_domain:
             in_domain = self.applicabilityDomain.contains(
                 dataset.getFeatures(concat=True, ordered=True, refit_standardizer=False)
-            )
+            ).values
             in_domain = self.handleInvalidsInPredictions(mols, in_domain, failed_mask)
-            if isinstance(in_domain, pd.DataFrame):
-                in_domain = in_domain.values 
             
             return predictions, in_domain
 
