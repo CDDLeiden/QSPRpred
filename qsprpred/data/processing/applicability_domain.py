@@ -70,7 +70,7 @@ class MLChemADWrapper(ApplicabilityDomain):
     def __init__(
         self,
         applicability_domain: MLChemADApplicabilityDomain,
-        astype: str | None = "float32",
+        astype: str | None = "float64",
     ) -> None:
         """Initialize the MLChemADFilter with the domain_type attribute.
 
