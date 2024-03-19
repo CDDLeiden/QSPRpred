@@ -112,7 +112,7 @@ class PandasDataTable(DataTable, JSONSerializable):
         self.storeFormat = store_format
         self.randomState = None
         self.setRandomState(
-            random_state or int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
+            random_state or int(np.random.randint(0, 2**31-1, dtype=np.int64))
         )
         self.name = name
         self.indexCols = index_cols
