@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.descriptors package &mdash; QSPRpred 3.0.2.dev19+gd7036925 documentation</title>
+  <title>qsprpred.data.descriptors package &mdash; QSPRpred 3.0.2.dev22+g7f63e85d documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=d76a8a4d"></script>
+        <script src="../_static/documentation_options.js?v=dc15aaef"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2.dev19+gd7036925
+                v3.0.2.dev22+g7f63e85d
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -191,7 +191,10 @@ Defaults to “QSPRID”.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.AtomPairFP.getDescriptors">
 <span class="sig-name descname"><span class="pre">getDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/qsprpred/data/descriptors/fingerprints.html#AtomPairFP.getDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.AtomPairFP.getDescriptors" title="Link to this definition"></a></dt>
-<dd><p>Main method to calculate descriptors for a list of molecules.</p>
+<dd><p>Method to calculate descriptors for a list of molecules.</p>
+<p>This method should use molecules as they are without any preparation.
+Any preparation steps should be defined in the <a class="reference internal" href="#qsprpred.data.descriptors.sets.DescriptorSet.prepMols" title="qsprpred.data.descriptors.sets.DescriptorSet.prepMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DescriptorSet.prepMols</span></code></a> method.,
+which is picked up by the main <code class="xref any docutils literal notranslate"><span class="pre">DescriptorSet.__call__</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -228,6 +231,12 @@ Defaults to “QSPRID”.</p>
 <dd class="field-even"><p>a list  or  generator of RDKit molecules</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.AtomPairFP.prepMols">
+<span class="sig-name descname"><span class="pre">prepMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.AtomPairFP.prepMols" title="Link to this definition"></a></dt>
+<dd><p>Prepare the molecules for descriptor calculation.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -361,7 +370,10 @@ Defaults to “QSPRID”.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.AvalonFP.getDescriptors">
 <span class="sig-name descname"><span class="pre">getDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/qsprpred/data/descriptors/fingerprints.html#AvalonFP.getDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.AvalonFP.getDescriptors" title="Link to this definition"></a></dt>
-<dd><p>Main method to calculate descriptors for a list of molecules.</p>
+<dd><p>Method to calculate descriptors for a list of molecules.</p>
+<p>This method should use molecules as they are without any preparation.
+Any preparation steps should be defined in the <a class="reference internal" href="#qsprpred.data.descriptors.sets.DescriptorSet.prepMols" title="qsprpred.data.descriptors.sets.DescriptorSet.prepMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DescriptorSet.prepMols</span></code></a> method.,
+which is picked up by the main <code class="xref any docutils literal notranslate"><span class="pre">DescriptorSet.__call__</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -398,6 +410,12 @@ Defaults to “QSPRID”.</p>
 <dd class="field-even"><p>a list  or  generator of RDKit molecules</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.AvalonFP.prepMols">
+<span class="sig-name descname"><span class="pre">prepMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.AvalonFP.prepMols" title="Link to this definition"></a></dt>
+<dd><p>Prepare the molecules for descriptor calculation.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -537,7 +555,10 @@ Defaults to “QSPRID”.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.Fingerprint.getDescriptors">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.Fingerprint.getDescriptors" title="Link to this definition"></a></dt>
-<dd><p>Main method to calculate descriptors for a list of molecules.</p>
+<dd><p>Method to calculate descriptors for a list of molecules.</p>
+<p>This method should use molecules as they are without any preparation.
+Any preparation steps should be defined in the <a class="reference internal" href="#qsprpred.data.descriptors.sets.DescriptorSet.prepMols" title="qsprpred.data.descriptors.sets.DescriptorSet.prepMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DescriptorSet.prepMols</span></code></a> method.,
+which is picked up by the main <code class="xref any docutils literal notranslate"><span class="pre">DescriptorSet.__call__</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -574,6 +595,12 @@ Defaults to “QSPRID”.</p>
 <dd class="field-even"><p>a list  or  generator of RDKit molecules</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.Fingerprint.prepMols">
+<span class="sig-name descname"><span class="pre">prepMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsprpred/data/descriptors/fingerprints.html#Fingerprint.prepMols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.Fingerprint.prepMols" title="Link to this definition"></a></dt>
+<dd><p>Prepare the molecules for descriptor calculation.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -707,7 +734,10 @@ Defaults to “QSPRID”.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.LayeredFP.getDescriptors">
 <span class="sig-name descname"><span class="pre">getDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/qsprpred/data/descriptors/fingerprints.html#LayeredFP.getDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.LayeredFP.getDescriptors" title="Link to this definition"></a></dt>
-<dd><p>Main method to calculate descriptors for a list of molecules.</p>
+<dd><p>Method to calculate descriptors for a list of molecules.</p>
+<p>This method should use molecules as they are without any preparation.
+Any preparation steps should be defined in the <a class="reference internal" href="#qsprpred.data.descriptors.sets.DescriptorSet.prepMols" title="qsprpred.data.descriptors.sets.DescriptorSet.prepMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DescriptorSet.prepMols</span></code></a> method.,
+which is picked up by the main <code class="xref any docutils literal notranslate"><span class="pre">DescriptorSet.__call__</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -744,6 +774,12 @@ Defaults to “QSPRID”.</p>
 <dd class="field-even"><p>a list  or  generator of RDKit molecules</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.LayeredFP.prepMols">
+<span class="sig-name descname"><span class="pre">prepMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.LayeredFP.prepMols" title="Link to this definition"></a></dt>
+<dd><p>Prepare the molecules for descriptor calculation.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -877,7 +913,10 @@ Defaults to “QSPRID”.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.MaccsFP.getDescriptors">
 <span class="sig-name descname"><span class="pre">getDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/qsprpred/data/descriptors/fingerprints.html#MaccsFP.getDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.MaccsFP.getDescriptors" title="Link to this definition"></a></dt>
-<dd><p>Main method to calculate descriptors for a list of molecules.</p>
+<dd><p>Method to calculate descriptors for a list of molecules.</p>
+<p>This method should use molecules as they are without any preparation.
+Any preparation steps should be defined in the <a class="reference internal" href="#qsprpred.data.descriptors.sets.DescriptorSet.prepMols" title="qsprpred.data.descriptors.sets.DescriptorSet.prepMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DescriptorSet.prepMols</span></code></a> method.,
+which is picked up by the main <code class="xref any docutils literal notranslate"><span class="pre">DescriptorSet.__call__</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -914,6 +953,12 @@ Defaults to “QSPRID”.</p>
 <dd class="field-even"><p>a list  or  generator of RDKit molecules</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.MaccsFP.prepMols">
+<span class="sig-name descname"><span class="pre">prepMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.MaccsFP.prepMols" title="Link to this definition"></a></dt>
+<dd><p>Prepare the molecules for descriptor calculation.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1048,19 +1093,21 @@ Defaults to “QSPRID”.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.MorganFP.getDescriptors">
 <span class="sig-name descname"><span class="pre">getDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/qsprpred/data/descriptors/fingerprints.html#MorganFP.getDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.MorganFP.getDescriptors" title="Link to this definition"></a></dt>
-<dd><p>Return the Morgan fingerprints for the input molecules.</p>
+<dd><p>Method to calculate descriptors for a list of molecules.</p>
+<p>This method should use molecules as they are without any preparation.
+Any preparation steps should be defined in the <a class="reference internal" href="#qsprpred.data.descriptors.sets.DescriptorSet.prepMols" title="qsprpred.data.descriptors.sets.DescriptorSet.prepMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DescriptorSet.prepMols</span></code></a> method.,
+which is picked up by the main <code class="xref any docutils literal notranslate"><span class="pre">DescriptorSet.__call__</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mols</strong> – molecules to obtain the fingerprint of</p></li>
-<li><p><strong>props</strong> – dictionary of properties</p></li>
+<li><p><strong>mols</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – list of SMILES or RDKit molecules</p></li>
+<li><p><strong>props</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary of properties</p></li>
+<li><p><strong>*args</strong> – positional arguments</p></li>
+<li><p><strong>**kwargs</strong> – keyword arguments</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref any docutils literal notranslate"><span class="pre">np.ndarray</span></code> of fingerprints for “mols”, shape (n_mols, n_bits)</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>array</p>
+<dd class="field-even"><p>numpy array of descriptor values of shape (n_mols, n_descriptors)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1086,6 +1133,12 @@ Defaults to “QSPRID”.</p>
 <dd class="field-even"><p>a list  or  generator of RDKit molecules</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.MorganFP.prepMols">
+<span class="sig-name descname"><span class="pre">prepMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.MorganFP.prepMols" title="Link to this definition"></a></dt>
+<dd><p>Prepare the molecules for descriptor calculation.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1219,7 +1272,10 @@ Defaults to “QSPRID”.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.PatternFP.getDescriptors">
 <span class="sig-name descname"><span class="pre">getDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/qsprpred/data/descriptors/fingerprints.html#PatternFP.getDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.PatternFP.getDescriptors" title="Link to this definition"></a></dt>
-<dd><p>Main method to calculate descriptors for a list of molecules.</p>
+<dd><p>Method to calculate descriptors for a list of molecules.</p>
+<p>This method should use molecules as they are without any preparation.
+Any preparation steps should be defined in the <a class="reference internal" href="#qsprpred.data.descriptors.sets.DescriptorSet.prepMols" title="qsprpred.data.descriptors.sets.DescriptorSet.prepMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DescriptorSet.prepMols</span></code></a> method.,
+which is picked up by the main <code class="xref any docutils literal notranslate"><span class="pre">DescriptorSet.__call__</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1256,6 +1312,12 @@ Defaults to “QSPRID”.</p>
 <dd class="field-even"><p>a list  or  generator of RDKit molecules</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.PatternFP.prepMols">
+<span class="sig-name descname"><span class="pre">prepMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.PatternFP.prepMols" title="Link to this definition"></a></dt>
+<dd><p>Prepare the molecules for descriptor calculation.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1389,7 +1451,10 @@ Defaults to “QSPRID”.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.RDKitFP.getDescriptors">
 <span class="sig-name descname"><span class="pre">getDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/qsprpred/data/descriptors/fingerprints.html#RDKitFP.getDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.RDKitFP.getDescriptors" title="Link to this definition"></a></dt>
-<dd><p>Main method to calculate descriptors for a list of molecules.</p>
+<dd><p>Method to calculate descriptors for a list of molecules.</p>
+<p>This method should use molecules as they are without any preparation.
+Any preparation steps should be defined in the <a class="reference internal" href="#qsprpred.data.descriptors.sets.DescriptorSet.prepMols" title="qsprpred.data.descriptors.sets.DescriptorSet.prepMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DescriptorSet.prepMols</span></code></a> method.,
+which is picked up by the main <code class="xref any docutils literal notranslate"><span class="pre">DescriptorSet.__call__</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1426,6 +1491,12 @@ Defaults to “QSPRID”.</p>
 <dd class="field-even"><p>a list  or  generator of RDKit molecules</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.RDKitFP.prepMols">
+<span class="sig-name descname"><span class="pre">prepMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.RDKitFP.prepMols" title="Link to this definition"></a></dt>
+<dd><p>Prepare the molecules for descriptor calculation.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1560,16 +1631,21 @@ Defaults to “QSPRID”.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.RDKitMACCSFP.getDescriptors">
 <span class="sig-name descname"><span class="pre">getDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/qsprpred/data/descriptors/fingerprints.html#RDKitMACCSFP.getDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.RDKitMACCSFP.getDescriptors" title="Link to this definition"></a></dt>
-<dd><p>Return the MACCS fingerprints for the input molecules.</p>
+<dd><p>Method to calculate descriptors for a list of molecules.</p>
+<p>This method should use molecules as they are without any preparation.
+Any preparation steps should be defined in the <a class="reference internal" href="#qsprpred.data.descriptors.sets.DescriptorSet.prepMols" title="qsprpred.data.descriptors.sets.DescriptorSet.prepMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DescriptorSet.prepMols</span></code></a> method.,
+which is picked up by the main <code class="xref any docutils literal notranslate"><span class="pre">DescriptorSet.__call__</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>mols</strong> – molecules to obtain the fingerprint of</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mols</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – list of SMILES or RDKit molecules</p></li>
+<li><p><strong>props</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary of properties</p></li>
+<li><p><strong>*args</strong> – positional arguments</p></li>
+<li><p><strong>**kwargs</strong> – keyword arguments</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of fingerprints for “mols”</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>fingerprint (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a>)</p>
+<dd class="field-even"><p>numpy array of descriptor values of shape (n_mols, n_descriptors)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1595,6 +1671,12 @@ Defaults to “QSPRID”.</p>
 <dd class="field-even"><p>a list  or  generator of RDKit molecules</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.RDKitMACCSFP.prepMols">
+<span class="sig-name descname"><span class="pre">prepMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.RDKitMACCSFP.prepMols" title="Link to this definition"></a></dt>
+<dd><p>Prepare the molecules for descriptor calculation.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1728,7 +1810,10 @@ Defaults to “QSPRID”.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.TopologicalFP.getDescriptors">
 <span class="sig-name descname"><span class="pre">getDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/qsprpred/data/descriptors/fingerprints.html#TopologicalFP.getDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.TopologicalFP.getDescriptors" title="Link to this definition"></a></dt>
-<dd><p>Main method to calculate descriptors for a list of molecules.</p>
+<dd><p>Method to calculate descriptors for a list of molecules.</p>
+<p>This method should use molecules as they are without any preparation.
+Any preparation steps should be defined in the <a class="reference internal" href="#qsprpred.data.descriptors.sets.DescriptorSet.prepMols" title="qsprpred.data.descriptors.sets.DescriptorSet.prepMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DescriptorSet.prepMols</span></code></a> method.,
+which is picked up by the main <code class="xref any docutils literal notranslate"><span class="pre">DescriptorSet.__call__</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1765,6 +1850,12 @@ Defaults to “QSPRID”.</p>
 <dd class="field-even"><p>a list  or  generator of RDKit molecules</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.descriptors.fingerprints.TopologicalFP.prepMols">
+<span class="sig-name descname"><span class="pre">prepMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.data.descriptors.fingerprints.TopologicalFP.prepMols" title="Link to this definition"></a></dt>
+<dd><p>Prepare the molecules for descriptor calculation.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1956,6 +2047,12 @@ for descriptor values in the data frame using the <code class="xref any docutils
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.descriptors.sets.DataFrameDescriptorSet.prepMols">
+<span class="sig-name descname"><span class="pre">prepMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.data.descriptors.sets.DataFrameDescriptorSet.prepMols" title="Link to this definition"></a></dt>
+<dd><p>Prepare the molecules for descriptor calculation.</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.sets.DataFrameDescriptorSet.requiredProps">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">requiredProps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qsprpred.data.descriptors.sets.DataFrameDescriptorSet.requiredProps" title="Link to this definition"></a></dt>
@@ -2083,7 +2180,10 @@ Defaults to “QSPRID”.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.sets.DescriptorSet.getDescriptors">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/qsprpred/data/descriptors/sets.html#DescriptorSet.getDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.descriptors.sets.DescriptorSet.getDescriptors" title="Link to this definition"></a></dt>
-<dd><p>Main method to calculate descriptors for a list of molecules.</p>
+<dd><p>Method to calculate descriptors for a list of molecules.</p>
+<p>This method should use molecules as they are without any preparation.
+Any preparation steps should be defined in the <a class="reference internal" href="#qsprpred.data.descriptors.sets.DescriptorSet.prepMols" title="qsprpred.data.descriptors.sets.DescriptorSet.prepMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DescriptorSet.prepMols</span></code></a> method.,
+which is picked up by the main <code class="xref any docutils literal notranslate"><span class="pre">DescriptorSet.__call__</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2120,6 +2220,12 @@ Defaults to “QSPRID”.</p>
 <dd class="field-even"><p>a list  or  generator of RDKit molecules</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.descriptors.sets.DescriptorSet.prepMols">
+<span class="sig-name descname"><span class="pre">prepMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsprpred/data/descriptors/sets.html#DescriptorSet.prepMols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.descriptors.sets.DescriptorSet.prepMols" title="Link to this definition"></a></dt>
+<dd><p>Prepare the molecules for descriptor calculation.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -2277,6 +2383,12 @@ calculate) to select a subset.</p>
 <dd class="field-even"><p>a list  or  generator of RDKit molecules</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.descriptors.sets.DrugExPhyschem.prepMols">
+<span class="sig-name descname"><span class="pre">prepMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.data.descriptors.sets.DrugExPhyschem.prepMols" title="Link to this definition"></a></dt>
+<dd><p>Prepare the molecules for descriptor calculation.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -2439,6 +2551,12 @@ a molecule.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.descriptors.sets.PredictorDesc.prepMols">
+<span class="sig-name descname"><span class="pre">prepMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.data.descriptors.sets.PredictorDesc.prepMols" title="Link to this definition"></a></dt>
+<dd><p>Prepare the molecules for descriptor calculation.</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.sets.PredictorDesc.requiredProps">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">requiredProps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qsprpred.data.descriptors.sets.PredictorDesc.requiredProps" title="Link to this definition"></a></dt>
@@ -2575,7 +2693,10 @@ Defaults to “QSPRID”.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.sets.RDKitDescs.getDescriptors">
 <span class="sig-name descname"><span class="pre">getDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/qsprpred/data/descriptors/sets.html#RDKitDescs.getDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.descriptors.sets.RDKitDescs.getDescriptors" title="Link to this definition"></a></dt>
-<dd><p>Main method to calculate descriptors for a list of molecules.</p>
+<dd><p>Method to calculate descriptors for a list of molecules.</p>
+<p>This method should use molecules as they are without any preparation.
+Any preparation steps should be defined in the <a class="reference internal" href="#qsprpred.data.descriptors.sets.DescriptorSet.prepMols" title="qsprpred.data.descriptors.sets.DescriptorSet.prepMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DescriptorSet.prepMols</span></code></a> method.,
+which is picked up by the main <code class="xref any docutils literal notranslate"><span class="pre">DescriptorSet.__call__</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2612,6 +2733,12 @@ Defaults to “QSPRID”.</p>
 <dd class="field-even"><p>a list  or  generator of RDKit molecules</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.descriptors.sets.RDKitDescs.prepMols">
+<span class="sig-name descname"><span class="pre">prepMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.data.descriptors.sets.RDKitDescs.prepMols" title="Link to this definition"></a></dt>
+<dd><p>Prepare the molecules for descriptor calculation.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -2773,6 +2900,12 @@ Defaults to “QSPRID”.</p>
 <dd class="field-even"><p>a list  or  generator of RDKit molecules</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.descriptors.sets.SmilesDesc.prepMols">
+<span class="sig-name descname"><span class="pre">prepMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.data.descriptors.sets.SmilesDesc.prepMols" title="Link to this definition"></a></dt>
+<dd><p>Prepare the molecules for descriptor calculation.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -2951,6 +3084,12 @@ molecules to calculate the distances.</p>
 <dd class="field-even"><p>a list  or  generator of RDKit molecules</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.descriptors.sets.TanimotoDistances.prepMols">
+<span class="sig-name descname"><span class="pre">prepMols</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Mol</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#qsprpred.data.descriptors.sets.TanimotoDistances.prepMols" title="Link to this definition"></a></dt>
+<dd><p>Prepare the molecules for descriptor calculation.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -5593,7 +5732,7 @@ block, allowing further test code to be executed.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_00_RDkit_REGRESSION">
 <span class="sig-name descname"><span class="pre">testDescriptorsAll_00_RDkit_REGRESSION</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_00_RDkit_REGRESSION" title="Link to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets [with _=’RDkit_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.sets….tDescs object at 0x76e17b94cc70&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
+<dd><p>Tests all available descriptor sets [with _=’RDkit_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.sets….tDescs object at 0x7102fdf4c8b0&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
 <p>Note that they are not checked with all possible settings and all possible
 preparations, but only with the default settings provided by
 <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DataSetsPathMixIn.getDefaultPrep()</span></code></a>. The list itself is defined and configured by
@@ -5604,7 +5743,7 @@ tested, add it there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_01_DrugExPhyschem_REGRESSION">
 <span class="sig-name descname"><span class="pre">testDescriptorsAll_01_DrugExPhyschem_REGRESSION</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_01_DrugExPhyschem_REGRESSION" title="Link to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets [with _=’DrugExPhyschem_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.sets….yschem object at 0x76e17b94c3d0&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
+<dd><p>Tests all available descriptor sets [with _=’DrugExPhyschem_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.sets….yschem object at 0x7102fdf4c910&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
 <p>Note that they are not checked with all possible settings and all possible
 preparations, but only with the default settings provided by
 <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DataSetsPathMixIn.getDefaultPrep()</span></code></a>. The list itself is defined and configured by
@@ -5615,7 +5754,7 @@ tested, add it there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_02_PredictorDesc_REGRESSION">
 <span class="sig-name descname"><span class="pre">testDescriptorsAll_02_PredictorDesc_REGRESSION</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_02_PredictorDesc_REGRESSION" title="Link to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets [with _=’PredictorDesc_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.sets….orDesc object at 0x76e17dc23130&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
+<dd><p>Tests all available descriptor sets [with _=’PredictorDesc_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.sets….orDesc object at 0x7103f412d810&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
 <p>Note that they are not checked with all possible settings and all possible
 preparations, but only with the default settings provided by
 <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DataSetsPathMixIn.getDefaultPrep()</span></code></a>. The list itself is defined and configured by
@@ -5626,7 +5765,7 @@ tested, add it there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_03_TanimotoDistances_REGRESSION">
 <span class="sig-name descname"><span class="pre">testDescriptorsAll_03_TanimotoDistances_REGRESSION</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_03_TanimotoDistances_REGRESSION" title="Link to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets [with _=’TanimotoDistances_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.sets….tances object at 0x76e17b4f4520&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
+<dd><p>Tests all available descriptor sets [with _=’TanimotoDistances_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.sets….tances object at 0x7102fe923cd0&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
 <p>Note that they are not checked with all possible settings and all possible
 preparations, but only with the default settings provided by
 <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DataSetsPathMixIn.getDefaultPrep()</span></code></a>. The list itself is defined and configured by
@@ -5637,7 +5776,7 @@ tested, add it there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_04_AtomPairFP_REGRESSION">
 <span class="sig-name descname"><span class="pre">testDescriptorsAll_04_AtomPairFP_REGRESSION</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_04_AtomPairFP_REGRESSION" title="Link to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets [with _=’AtomPairFP_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.finge…PairFP object at 0x76e17b4f4070&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
+<dd><p>Tests all available descriptor sets [with _=’AtomPairFP_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.finge…PairFP object at 0x7102fe922830&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
 <p>Note that they are not checked with all possible settings and all possible
 preparations, but only with the default settings provided by
 <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DataSetsPathMixIn.getDefaultPrep()</span></code></a>. The list itself is defined and configured by
@@ -5648,7 +5787,7 @@ tested, add it there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_05_AvalonFP_REGRESSION">
 <span class="sig-name descname"><span class="pre">testDescriptorsAll_05_AvalonFP_REGRESSION</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_05_AvalonFP_REGRESSION" title="Link to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets [with _=’AvalonFP_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.finge…alonFP object at 0x76e17b4f4d60&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
+<dd><p>Tests all available descriptor sets [with _=’AvalonFP_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.finge…alonFP object at 0x7102fe9233a0&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
 <p>Note that they are not checked with all possible settings and all possible
 preparations, but only with the default settings provided by
 <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DataSetsPathMixIn.getDefaultPrep()</span></code></a>. The list itself is defined and configured by
@@ -5659,7 +5798,7 @@ tested, add it there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_06_LayeredFP_REGRESSION">
 <span class="sig-name descname"><span class="pre">testDescriptorsAll_06_LayeredFP_REGRESSION</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_06_LayeredFP_REGRESSION" title="Link to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets [with _=’LayeredFP_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.finge…eredFP object at 0x76e17b4f50c0&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
+<dd><p>Tests all available descriptor sets [with _=’LayeredFP_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.finge…eredFP object at 0x7102fe922dd0&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
 <p>Note that they are not checked with all possible settings and all possible
 preparations, but only with the default settings provided by
 <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DataSetsPathMixIn.getDefaultPrep()</span></code></a>. The list itself is defined and configured by
@@ -5670,7 +5809,7 @@ tested, add it there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_07_MACCSFP_REGRESSION">
 <span class="sig-name descname"><span class="pre">testDescriptorsAll_07_MACCSFP_REGRESSION</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_07_MACCSFP_REGRESSION" title="Link to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets [with _=’MACCSFP_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.finge…accsFP object at 0x76e17b4f4ca0&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
+<dd><p>Tests all available descriptor sets [with _=’MACCSFP_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.finge…accsFP object at 0x7102fe922a40&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
 <p>Note that they are not checked with all possible settings and all possible
 preparations, but only with the default settings provided by
 <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DataSetsPathMixIn.getDefaultPrep()</span></code></a>. The list itself is defined and configured by
@@ -5681,7 +5820,7 @@ tested, add it there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_08_MorganFP_REGRESSION">
 <span class="sig-name descname"><span class="pre">testDescriptorsAll_08_MorganFP_REGRESSION</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_08_MorganFP_REGRESSION" title="Link to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets [with _=’MorganFP_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.finge…rganFP object at 0x76e17b4f4d00&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
+<dd><p>Tests all available descriptor sets [with _=’MorganFP_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.finge…rganFP object at 0x7102fe9204f0&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
 <p>Note that they are not checked with all possible settings and all possible
 preparations, but only with the default settings provided by
 <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DataSetsPathMixIn.getDefaultPrep()</span></code></a>. The list itself is defined and configured by
@@ -5692,7 +5831,7 @@ tested, add it there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_09_PatternFP_REGRESSION">
 <span class="sig-name descname"><span class="pre">testDescriptorsAll_09_PatternFP_REGRESSION</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_09_PatternFP_REGRESSION" title="Link to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets [with _=’PatternFP_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.finge…ternFP object at 0x76e17b4f7c70&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
+<dd><p>Tests all available descriptor sets [with _=’PatternFP_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.finge…ternFP object at 0x7102fe920370&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
 <p>Note that they are not checked with all possible settings and all possible
 preparations, but only with the default settings provided by
 <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DataSetsPathMixIn.getDefaultPrep()</span></code></a>. The list itself is defined and configured by
@@ -5703,7 +5842,7 @@ tested, add it there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_10_RDKitFP_REGRESSION">
 <span class="sig-name descname"><span class="pre">testDescriptorsAll_10_RDKitFP_REGRESSION</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_10_RDKitFP_REGRESSION" title="Link to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets [with _=’RDKitFP_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.finge…DKitFP object at 0x76e17b4f7ca0&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
+<dd><p>Tests all available descriptor sets [with _=’RDKitFP_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.finge…DKitFP object at 0x7102fe922320&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
 <p>Note that they are not checked with all possible settings and all possible
 preparations, but only with the default settings provided by
 <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DataSetsPathMixIn.getDefaultPrep()</span></code></a>. The list itself is defined and configured by
@@ -5714,7 +5853,7 @@ tested, add it there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_11_RDKitMACCSFP_REGRESSION">
 <span class="sig-name descname"><span class="pre">testDescriptorsAll_11_RDKitMACCSFP_REGRESSION</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_11_RDKitMACCSFP_REGRESSION" title="Link to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets [with _=’RDKitMACCSFP_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.finge…ACCSFP object at 0x76e17b4f6bf0&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
+<dd><p>Tests all available descriptor sets [with _=’RDKitMACCSFP_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.finge…ACCSFP object at 0x7102fe921f60&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
 <p>Note that they are not checked with all possible settings and all possible
 preparations, but only with the default settings provided by
 <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DataSetsPathMixIn.getDefaultPrep()</span></code></a>. The list itself is defined and configured by
@@ -5725,7 +5864,7 @@ tested, add it there.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_12_TopologicalFP_REGRESSION">
 <span class="sig-name descname"><span class="pre">testDescriptorsAll_12_TopologicalFP_REGRESSION</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.descriptors.tests.TestDescriptorsAll.testDescriptorsAll_12_TopologicalFP_REGRESSION" title="Link to this definition"></a></dt>
-<dd><p>Tests all available descriptor sets [with _=’TopologicalFP_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.finge…icalFP object at 0x76e17b4f7dc0&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
+<dd><p>Tests all available descriptor sets [with _=’TopologicalFP_REGRESSION’, desc_set=&lt;qsprpred.data.descriptors.finge…icalFP object at 0x7102fe922c20&gt;, target_props=[{‘name’: ‘CL’, ‘task’: &lt;TargetTasks.REGRESSION: ‘REGRESSION’&gt;}]].</p>
 <p>Note that they are not checked with all possible settings and all possible
 preparations, but only with the default settings provided by
 <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">DataSetsPathMixIn.getDefaultPrep()</span></code></a>. The list itself is defined and configured by
