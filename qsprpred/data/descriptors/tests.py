@@ -40,12 +40,14 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
         self.assertTrue(dataset.getFeatures(concat=True).shape[1] == full_len)
         dataset.dropDescriptorSets(dataset.descriptorSets)
         self.assertEqual(dataset.getFeatures(concat=True).shape[1], 0)
-        dataset.dropDescriptorSets(dataset.descriptorSets, clear=True)
+        dataset.dropDescriptorSets(dataset.descriptorSets, full_removal=True)
         self.assertEqual(len(dataset.descriptors), 0)
         dataset.addDescriptors(self.getDescList())
         dataset.dropDescriptorSets([str(x) for x in self.getDescList()])
         self.assertEqual(dataset.getFeatures(concat=True).shape[1], 0)
-        dataset.dropDescriptorSets([str(x) for x in self.getDescList()], clear=True)
+        dataset.dropDescriptorSets(
+            [str(x) for x in self.getDescList()], full_removal=True
+        )
         self.assertEqual(len(dataset.descriptors), 0)
         # test dropping of single set
         dataset.addDescriptors(self.getDescList())
@@ -54,16 +56,16 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(
             dataset.getFeatures(concat=True).shape[1], len(self.getDescList()[1])
         )
-        dataset.dropDescriptorSets(dataset.descriptorSets, clear=True)
+        dataset.dropDescriptorSets(dataset.descriptorSets, full_removal=True)
         dataset.addDescriptors(self.getDescList())
-        dataset.dropDescriptorSets([str(dataset.descriptorSets[0])], clear=True)
+        dataset.dropDescriptorSets([str(dataset.descriptorSets[0])], full_removal=True)
         self.assertEqual(
             dataset.getFeatures(concat=True).shape[1], len(self.getDescList()[1])
         )
         # test restoring of dropped sets
         dataset.addDescriptors(self.getDescList())
         self.assertTrue(dataset.getFeatures(concat=True).shape[1] == full_len)
-        dataset.dropDescriptorSets(dataset.descriptorSets, clear=False)
+        dataset.dropDescriptorSets(dataset.descriptorSets, full_removal=False)
         self.assertEqual(dataset.getFeatures(concat=True).shape[1], 0)
         dataset.restoreDescriptorSets(dataset.descriptorSets)
         self.assertTrue(dataset.getFeatures(concat=True).shape[1] == full_len)

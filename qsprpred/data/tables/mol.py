@@ -673,7 +673,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
     def dropDescriptorSets(
         self,
         descriptors: list[DescriptorSet | str],
-        clear: bool = False,
+        full_removal: bool = False,
     ):
         """
         Drop descriptors from the given sets from the data frame.
@@ -682,7 +682,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             descriptors (list[DescriptorSet | str]):
                 List of `DescriptorSet` objects or their names. Name of a descriptor
                 set corresponds to the result returned by its `__str__` method.
-            clear (bool):
+            full_removal (bool):
                 Whether to remove the descriptor data (will perform full removal).
                 By default, a soft removal is performed by just rendering the
                 descriptors inactive.
@@ -706,7 +706,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 calc = ds.calculator
                 if name == str(calc):
                     to_drop.extend(ds.getDescriptorNames())
-                    if clear:
+                    if full_removal:
                         to_remove.append(idx)
         self.dropDescriptors(to_drop)
         for idx in reversed(to_remove):
@@ -789,7 +789,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 Additional keyword arguments to pass to each descriptor set.
         """
         if recalculate and self.hasDescriptors():
-            self.dropDescriptorSets(descriptors, clear=True)
+            self.dropDescriptorSets(descriptors, full_removal=True)
         to_calculate = []
         for desc_set, exists in zip(descriptors, self.hasDescriptors(descriptors)):
             if exists:

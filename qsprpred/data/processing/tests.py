@@ -152,7 +152,7 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         self.descriptors = self.dataset.featureNames
 
     def recalculateWithMultiIndex(self):
-        self.dataset.dropDescriptorSets(self.dataset.descriptorSets, clear=True)
+        self.dataset.dropDescriptorSets(self.dataset.descriptorSets, full_removal=True)
         self.df_descriptors["ID_COL1"] = (
             self.dataset.getProperty(self.dataset.idProp)
             .apply(lambda x: x.split("_")[0])
