@@ -5,8 +5,8 @@ From v3.0.1 to v3.1.0
 ## Fixes
 
 - Fixed a bug in `QSPRDataset` where property transformations were not applied.
-- Fixed a bug where an attached standardizer would be refit when calling 
-`QSPRModel.predictMols` with `use_applicability_domain=True`.
+- Fixed a bug where an attached standardizer would be refit when calling
+  `QSPRModel.predictMols` with `use_applicability_domain=True`.
 - Fixed random seed not set in `FoldsFromDataSplit.iterFolds` for `ClusterSplit`.
 
 ## Changes
@@ -34,6 +34,9 @@ From v3.0.1 to v3.1.0
       descriptor sets and properties.
     - All drop actions are restorable with `restoreDescriptorSets` unless explicitly
       cleared from the data set with the `clear` parameter of `dropDescriptorSets`.
+      =======
+- Added the `prepMols` method to `DescriptorSet` to allow separated customization of
+  molecule preparation before descriptor calculation.
 
 ## Removed Features
 

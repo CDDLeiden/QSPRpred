@@ -46,11 +46,19 @@ class Fingerprint(DescriptorSet, ABC):
     def dtype(self):
         return bool
 
+    def prepMols(self, mols: list[str | Mol]) -> list[Mol]:
+        return [Chem.AddHs(mol) for mol in self.iterMols(mols)]
+
     def __call__(
         self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> pd.DataFrame:
         """Calculate binary fingerprints for the input molecules. Only the bits
         specified by `usedBits` will be returned if more bits are calculated.
+
+        Before calculating the fingerprints, the molecules are
+        prepared by adding hydrogens (see `Fingerprint.prepMols`).
+        If this is undesirable, the user can prepare the molecules
+        themselves and call `Fingerprint.getDescriptors` directly.
 
         Args:
             mols(list): list of SMILES or RDKit molecules
@@ -61,9 +69,7 @@ class Fingerprint(DescriptorSet, ABC):
         Returns:
             data frame of descriptor values of shape (n_mols, n_descriptors)
         """
-        mols = list(self.iterMols(mols, to_list=True))
-        mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
-        values = self.getDescriptors(mols, props, *args, **kwargs)
+        values = self.getDescriptors(self.prepMols(mols), props, *args, **kwargs)
         values = values[:, self.usedBits]
         values = values.astype(self.dtype)
         df = pd.DataFrame(
@@ -84,15 +90,6 @@ class MorganFP(Fingerprint):
     def getDescriptors(
         self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
-        """Return the Morgan fingerprints for the input molecules.
-
-        Args:
-            mols: molecules to obtain the fingerprint of
-            props: dictionary of properties
-
-        Returns:
-            array: `np.ndarray` of fingerprints for "mols", shape (n_mols, n_bits)
-        """
         convertFP = DataStructs.ConvertToNumpyArray
         ret = np.zeros((len(mols), len(self)))
         for idx, mol in enumerate(mols):
@@ -117,14 +114,6 @@ class RDKitMACCSFP(Fingerprint):
     def getDescriptors(
         self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
-        """Return the MACCS fingerprints for the input molecules.
-
-        Args:
-            mols: molecules to obtain the fingerprint of
-
-        Returns:
-            fingerprint (list): `list` of fingerprints for "mols"
-        """
         convertFP = DataStructs.ConvertToNumpyArray
 
         ret = np.zeros((len(mols), len(self)))

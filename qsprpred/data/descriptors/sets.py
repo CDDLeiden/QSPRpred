@@ -66,6 +66,10 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
             ret = list(ret)
         return ret
 
+    def prepMols(self, mols: list[str | Mol]) -> list[Mol]:
+        """Prepare the molecules for descriptor calculation."""
+        return self.iterMols(mols, to_list=True)
+
     def __len__(self):
         """Return the number of descriptors currently calculated by this instance."""
         return len(self.descriptors)
@@ -119,6 +123,9 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
         to the dtype specified by `self.dtype`. Infinite values are replaced by NaNs
         using the `treatInfs` method.
 
+        The molecules are prepared first by calling the `DescriptorSet.prepMols` method.
+        If you call `DescriptorSet.getDescriptors` directly, you can skip this step.
+
         Args:
             mols(list): list of SMILES or RDKit molecules
             props(dict): dictionary of properties for the passed molecules
@@ -129,7 +136,7 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
             data frame of descriptor values of shape (n_mols, n_descriptors)
         """
         mols = self.iterMols(mols, to_list=True)
-        values = self.getDescriptors(mols, props, *args, **kwargs)
+        values = self.getDescriptors(self.prepMols(mols), props, *args, **kwargs)
         # check if descriptors have unique names
         assert len(set(self.descriptors)) == len(
             self.descriptors
@@ -161,7 +168,11 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
     def getDescriptors(
         self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
-        """Main method to calculate descriptors for a list of molecules.
+        """Method to calculate descriptors for a list of molecules.
+
+        This method should use molecules as they are without any preparation.
+        Any preparation steps should be defined in the `DescriptorSet.prepMols` method.,
+        which is picked up by the main `DescriptorSet.__call__`.
 
         Args:
             mols(list): list of SMILES or RDKit molecules
