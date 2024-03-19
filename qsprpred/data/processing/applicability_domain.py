@@ -91,10 +91,6 @@ class MLChemADWrapper(ApplicabilityDomain):
         Args:
             X (pd.DataFrame): array of features to fit model on
         """
-        try:
-            X = X.astype(float)
-        except ValueError:
-            logger.warning("Cannot convert X to numeric, fitting with raw data")
         self.applicabilityDomain.fit(X)
 
     def contains(self, X: pd.DataFrame) -> pd.DataFrame:
