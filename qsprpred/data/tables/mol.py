@@ -685,7 +685,9 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             clear (bool):
                 Whether to remove the descriptor data (will perform full removal).
                 By default, a soft removal is performed by just rendering the
-                descriptors inactive.
+                descriptors inactive. A full removal will remove the descriptorSet from the
+                dataset, including the saved files. It is not possible to restore a
+                descriptorSet after a full removal.
         """
         # sanity check
         assert (
