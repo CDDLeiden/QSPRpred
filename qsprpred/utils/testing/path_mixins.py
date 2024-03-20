@@ -10,12 +10,21 @@ from mlchemad.applicability_domains import TopKatApplicabilityDomain
 from sklearn.preprocessing import StandardScaler
 
 from ...data import RandomSplit, QSPRDataset
-from ...data.descriptors.fingerprints import MorganFP
+from ...data.descriptors.fingerprints import (
+    AtomPairFP,
+    AvalonFP,
+    LayeredFP,
+    MaccsFP,
+    MorganFP,
+    PatternFP,
+    RDKitFP,
+    RDKitMACCSFP,
+    TopologicalFP,
+)
 from ...data.descriptors.sets import (
     RDKitDescs,
     DrugExPhyschem,
     PredictorDesc,
-    RDKitDescs,
     TanimotoDistances,
 )
 from ...data.processing.data_filters import RepeatsFilter
@@ -101,7 +110,15 @@ class DataSetsPathMixIn(PathMixIn):
                 radius=2,
                 nBits=128,
             ),
+            AtomPairFP(nBits=128),
+            AvalonFP(nBits=128),
+            LayeredFP(nBits=128),
+            MaccsFP(),
             MorganFP(radius=2, nBits=128),
+            PatternFP(nBits=128),
+            RDKitFP(nBits=128),
+            RDKitMACCSFP(),
+            TopologicalFP(nBits=128),
         ]
 
         return descriptor_sets

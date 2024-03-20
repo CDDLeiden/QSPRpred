@@ -65,6 +65,16 @@ class DataTable(StoredTable):
         """
 
     @abstractmethod
+    def transformProperties(self, names, transformers):
+        """Transform property values using a transformer function.
+
+        Args:
+            targets (list[str]): list of column names to transform.
+            transformer (Callable): Function that transforms the data in target columns
+                to a new representation.
+        """
+
+    @abstractmethod
     def getSubset(self, prefix: str):
         """Get a subset of the dataset.
 
@@ -89,10 +99,6 @@ class DataTable(StoredTable):
             func_args (list, optional): The positional arguments of the function.
             func_kwargs (dict, optional): The keyword arguments of the function.
         """
-
-    @abstractmethod
-    def transform(self, targets, transformers):
-        pass
 
     @abstractmethod
     def filter(self, table_filters: list[Callable]):
@@ -133,7 +139,6 @@ class MoleculeDataTable(DataTable):
             a `list` of descriptor names
         """
 
-    @property
     @abstractmethod
     def hasDescriptors(self):
         """Indicates if the dataset has descriptors."""

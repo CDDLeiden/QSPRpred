@@ -274,7 +274,7 @@ class QSPRDataset(MoleculeTable):
         Returns:
             list[str]: list of feature names
         """
-        if not self.hasDescriptors:
+        if not self.hasDescriptors():
             return []
         features = []
         for ds in self.descriptors:
@@ -484,6 +484,8 @@ class QSPRDataset(MoleculeTable):
         if mol_table.invalidsRemoved or kwargs["drop_invalids"]:
             ds.invalidsRemoved = True
         ds.descriptors = mol_table.descriptors
+        ds.featureNames = mol_table.getDescriptorNames()
+        ds.loadDescriptorsToSplits()
         return ds
 
     def filter(self, table_filters: list[Callable]):
@@ -633,10 +635,6 @@ class QSPRDataset(MoleculeTable):
         Raises:
             ValueError: if no descriptors are available
         """
-        if not self.hasDescriptors:
-            raise ValueError(
-                "No descriptors available. Cannot load descriptors to splits."
-            )
         descriptors = self.getDescriptors()
         if self.X_ind is not None and self.y_ind is not None:
             self.X = descriptors.loc[self.X.index, :]
@@ -690,7 +688,7 @@ class QSPRDataset(MoleculeTable):
         shuffle (bool): whether to shuffle the training and test sets
         random_state (int): random state for shuffling
         """
-        if self.hasDescriptors and self.hasFeatures:
+        if self.hasDescriptors() and self.hasFeatures:
             self.loadDescriptorsToSplits(
                 shuffle=shuffle, random_state=random_state or self.randomState
             )
@@ -882,9 +880,9 @@ class QSPRDataset(MoleculeTable):
         if split is not None:
             self.split(split)
         # apply feature filters on training set
-        if feature_filters and self.hasDescriptors:
+        if feature_filters and self.hasDescriptors():
             self.filterFeatures(feature_filters)
-        elif not self.hasDescriptors:
+        elif not self.hasDescriptors():
             logger.warning("No descriptors present, feature filters will be skipped.")
         # set feature standardizers
         if feature_standardizer:
@@ -1065,12 +1063,18 @@ class QSPRDataset(MoleculeTable):
         super().dropEmptyProperties(names)
         self.restoreTrainingData()
 
-    def transform(
-        self, targets: list[str], transformer: Callable, add_as: list[str] | None = None
-    ):
-        super().transform(targets, transformer, add_as)
-        if add_as is None and (set(targets) & set(self.targetPropertyNames)):
-            self.restoreTrainingData()
+    def transformProperties(self, targets: list[str], transformer: Callable):
+        """Transform the target properties using the given transformer.
+
+        Args:
+            targets (list[str]): list of target properties names to transform
+            transformer (Callable): transformer function
+            add_as (list[str] | None, optional): list of names to add the transformed
+                target properties as. If `None`, the original target properties will be
+                overwritten. Defaults to `None`.
+        """
+        super().transformProperties(targets, transformer)
+        self.restoreTrainingData()
 
     def imputeProperties(self, names: list[str], imputer: Callable):
         super().imputeProperties(names, imputer)
@@ -1105,10 +1109,7 @@ class QSPRDataset(MoleculeTable):
             self.imputeProperties([prop.name], prop.imputer)
         # transform the property
         if prop.transformer is not None:
-            self.transform(
-                [prop.name],
-                prop.transformer,
-            )
+            self.transformProperties([prop.name], prop.transformer)
         # drop rows with missing smiles/no target property for any of
         # the target properties
         if drop_empty:
