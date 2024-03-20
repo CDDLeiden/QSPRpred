@@ -126,7 +126,10 @@ class ChempropModel(QSPRModelPyTorchGPU):
 
     def setGPUs(self, gpus: list[int]):
         self.gpus = gpus
-        self.setDevice(f"cuda:{gpus[0]}")
+        if torch.cuda.is_available() and gpus:
+            self.setDevice(f"cuda:{gpus[0]}")
+        else:
+            self.setDevice("cpu")
 
     def getDevice(self) -> torch.device:
         return torch.device(self.device)
