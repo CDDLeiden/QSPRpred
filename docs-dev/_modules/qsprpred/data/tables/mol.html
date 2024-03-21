@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.tables.mol &mdash; QSPRpred 3.0.2.dev22+g7f63e85d documentation</title>
+  <title>qsprpred.data.tables.mol &mdash; QSPRpred 3.0.2.dev33+g4d370197 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=dc15aaef"></script>
+        <script src="../../../../_static/documentation_options.js?v=2455f3c6"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2.dev22+g7f63e85d
+                v3.0.2.dev33+g4d370197
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -945,7 +945,7 @@
             <span class="n">df_descriptors</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">df_descriptors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
             <span class="n">df_descriptors</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indexCols</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">df_descriptors</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexCols</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indexCols</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">attachDescriptors</span><span class="p">(</span><span class="n">calculator</span><span class="p">,</span> <span class="n">df_descriptors</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexCols</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attachDescriptors</span><span class="p">(</span><span class="n">calculator</span><span class="p">,</span> <span class="n">df_descriptors</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="MoleculeTable.getDescriptors">
@@ -956,17 +956,18 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            pd.DataFrame: Data frame containing only descriptors.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">join_cols</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">descriptors</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">:</span>
-            <span class="n">join_cols</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">descriptors</span><span class="o">.</span><span class="n">indexCols</span><span class="p">))</span>
-        <span class="n">join_cols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">join_cols</span><span class="p">)</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">join_cols</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># join_cols = set()</span>
+        <span class="c1"># for descriptors in self.descriptors:</span>
+        <span class="c1">#     join_cols.update(set(descriptors.indexCols))</span>
+        <span class="c1"># join_cols = list(join_cols)</span>
+        <span class="c1"># ret = self.df[join_cols].copy()</span>
+        <span class="c1"># ret.reset_index(drop=True, inplace=True)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">descriptors</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">:</span>
             <span class="n">df_descriptors</span> <span class="o">=</span> <span class="n">descriptors</span><span class="o">.</span><span class="n">getDescriptors</span><span class="p">()</span>
-            <span class="n">ret</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">df_descriptors</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">descriptors</span><span class="o">.</span><span class="n">indexCols</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">join_cols</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">ret</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">df_descriptors</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+        <span class="c1"># ret.set_index(self.df.index, inplace=True)</span>
+        <span class="c1"># ret.drop(columns=join_cols, inplace=True)</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 
 

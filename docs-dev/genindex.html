@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; QSPRpred 3.0.2.dev22+g7f63e85d documentation</title>
+  <title>Index &mdash; QSPRpred 3.0.2.dev33+g4d370197 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=dc15aaef"></script>
+        <script src="_static/documentation_options.js?v=2455f3c6"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2.dev22+g7f63e85d
+                v3.0.2.dev33+g4d370197
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -9379,6 +9379,8 @@
       </ul></li>
       <li><a href="api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.DataFrameDescriptorSet.getIndex">getIndex() (qsprpred.data.descriptors.sets.DataFrameDescriptorSet method)</a>
 </li>
+      <li><a href="api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.DataFrameDescriptorSet.getIndexCols">getIndexCols() (qsprpred.data.descriptors.sets.DataFrameDescriptorSet method)</a>
+</li>
       <li><a href="api/qsprpred.data.processing.html#qsprpred.data.processing.feature_standardizers.SKLearnStandardizer.getInstance">getInstance() (qsprpred.data.processing.feature_standardizers.SKLearnStandardizer method)</a>
 </li>
       <li><a href="api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.getLoggerForReplica">getLoggerForReplica() (qsprpred.benchmarks.runner.BenchmarkRunner class method)</a>
@@ -12711,6 +12713,8 @@
 </li>
       <li><a href="api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.RDKitMACCSFP">RDKitMACCSFP (class in qsprpred.data.descriptors.fingerprints)</a>
 </li>
+      <li><a href="api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.recalculateWithMultiIndex">recalculateWithMultiIndex() (qsprpred.data.processing.tests.TestFeatureFilters method)</a>
+</li>
       <li><a href="api/qsprpred.models.html#qsprpred.models.early_stopping.EarlyStopping.recordEpochs">recordEpochs() (qsprpred.models.early_stopping.EarlyStopping method)</a>
 </li>
       <li><a href="api/qsprpred.models.html#qsprpred.models.early_stopping.EarlyStoppingMode.RECORDING">RECORDING (qsprpred.models.early_stopping.EarlyStoppingMode attribute)</a>
@@ -13265,9 +13269,11 @@
         <li><a href="api/qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.setFeatureStandardizer">(qsprpred.extra.data.tables.pcm.PCMDataSet method)</a>
 </li>
       </ul></li>
-      <li><a href="api/qsprpred.data.tables.html#qsprpred.data.tables.mol.DescriptorTable.setIndex">setIndex() (qsprpred.data.tables.mol.DescriptorTable method)</a>
+      <li><a href="api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.DataFrameDescriptorSet.setIndex">setIndex() (qsprpred.data.descriptors.sets.DataFrameDescriptorSet static method)</a>
 
       <ul>
+        <li><a href="api/qsprpred.data.tables.html#qsprpred.data.tables.mol.DescriptorTable.setIndex">(qsprpred.data.tables.mol.DescriptorTable method)</a>
+</li>
         <li><a href="api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.setIndex">(qsprpred.data.tables.mol.MoleculeTable method)</a>
 </li>
         <li><a href="api/qsprpred.data.tables.html#qsprpred.data.tables.pandas.PandasDataTable.setIndex">(qsprpred.data.tables.pandas.PandasDataTable method)</a>
@@ -14591,7 +14597,11 @@
       </ul></li>
       <li><a href="api/qsprpred.data.sampling.html#qsprpred.data.sampling.tests.TestFoldSplitters.testBootstrappedFold">testBootstrappedFold() (qsprpred.data.sampling.tests.TestFoldSplitters method)</a>
 </li>
-      <li><a href="api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter">testBorutaFilter() (qsprpred.data.processing.tests.TestFeatureFilters method)</a>
+      <li><a href="api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter">testBorutaFilter (qsprpred.data.processing.tests.TestFeatureFilters attribute)</a>
+</li>
+      <li><a href="api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter_0">testBorutaFilter_0() (qsprpred.data.processing.tests.TestFeatureFilters method)</a>
+</li>
+      <li><a href="api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter_1">testBorutaFilter_1() (qsprpred.data.processing.tests.TestFeatureFilters method)</a>
 </li>
       <li><a href="api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestDataFilters.testCategoryFilter">testCategoryFilter() (qsprpred.data.processing.tests.TestDataFilters method)</a>
 </li>
@@ -14807,7 +14817,11 @@
 </li>
       <li><a href="api/qsprpred.data.sampling.html#qsprpred.data.sampling.tests.TestFoldSplitters">TestFoldSplitters (class in qsprpred.data.sampling.tests)</a>
 </li>
-      <li><a href="api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testHighCorrelationFilter">testHighCorrelationFilter() (qsprpred.data.processing.tests.TestFeatureFilters method)</a>
+      <li><a href="api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testHighCorrelationFilter">testHighCorrelationFilter (qsprpred.data.processing.tests.TestFeatureFilters attribute)</a>
+</li>
+      <li><a href="api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testHighCorrelationFilter_0">testHighCorrelationFilter_0() (qsprpred.data.processing.tests.TestFeatureFilters method)</a>
+</li>
+      <li><a href="api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testHighCorrelationFilter_1">testHighCorrelationFilter_1() (qsprpred.data.processing.tests.TestFeatureFilters method)</a>
 </li>
       <li><a href="api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestTargetImputation.testImputation">testImputation() (qsprpred.data.tables.tests.TestTargetImputation method)</a>
 </li>
@@ -14833,7 +14847,11 @@
         <li><a href="api/qsprpred.models.html#qsprpred.models.tests.TestMonitors.testListMonitor">(qsprpred.models.tests.TestMonitors method)</a>
 </li>
       </ul></li>
-      <li><a href="api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testLowVarianceFilter">testLowVarianceFilter() (qsprpred.data.processing.tests.TestFeatureFilters method)</a>
+      <li><a href="api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testLowVarianceFilter">testLowVarianceFilter (qsprpred.data.processing.tests.TestFeatureFilters attribute)</a>
+</li>
+      <li><a href="api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testLowVarianceFilter_0">testLowVarianceFilter_0() (qsprpred.data.processing.tests.TestFeatureFilters method)</a>
+</li>
+      <li><a href="api/qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testLowVarianceFilter_1">testLowVarianceFilter_1() (qsprpred.data.processing.tests.TestFeatureFilters method)</a>
 </li>
       <li><a href="api/qsprpred.data.sampling.html#qsprpred.data.sampling.tests.TestDataSplitters.testManualSplit">testManualSplit() (qsprpred.data.sampling.tests.TestDataSplitters method)</a>
 </li>
@@ -15151,14 +15169,14 @@
 </li>
       <li><a href="api/qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_06_MorganFP_ProDec_None_None_HighCorrelationFilter_RepeatsFilter_None">testPrepCombinations_06_MorganFP_ProDec_None_None_HighCorrelationFilter_RepeatsFilter_None() (qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_07_MorganFP_ProDec_None_None_HighCorrelationFilter_RepeatsFilter_TopKatApplicabilityDomain">testPrepCombinations_07_MorganFP_ProDec_None_None_HighCorrelationFilter_RepeatsFilter_TopKatApplicabilityDomain() (qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation method)</a>
 </li>
       <li><a href="api/qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_08_MorganFP_ProDec_None_StandardScaler_None_None_None">testPrepCombinations_08_MorganFP_ProDec_None_StandardScaler_None_None_None() (qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation method)</a>
 </li>
       <li><a href="api/qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_09_MorganFP_ProDec_None_StandardScaler_None_None_TopKatApplicabilityDomain">testPrepCombinations_09_MorganFP_ProDec_None_StandardScaler_None_None_TopKatApplicabilityDomain() (qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_10_MorganFP_ProDec_None_StandardScaler_None_RepeatsFilter_None">testPrepCombinations_10_MorganFP_ProDec_None_StandardScaler_None_RepeatsFilter_None() (qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation method)</a>
 </li>
       <li><a href="api/qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_11_MorganFP_ProDec_None_StandardScaler_None_RepeatsFilter_TopKatApplicabilityDomain">testPrepCombinations_11_MorganFP_ProDec_None_StandardScaler_None_RepeatsFilter_TopKatApplicabilityDomain() (qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation method)</a>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.processing package &mdash; QSPRpred 3.0.2.dev22+g7f63e85d documentation</title>
+  <title>qsprpred.data.processing package &mdash; QSPRpred 3.0.2.dev33+g4d370197 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=dc15aaef"></script>
+        <script src="../_static/documentation_options.js?v=2455f3c6"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2.dev22+g7f63e85d
+                v3.0.2.dev33+g4d370197
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -1601,6 +1601,8 @@ from dataset.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.processing.tests.</span></span><span class="sig-name descname"><span class="pre">TestFeatureFilters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/processing/tests.html#TestFeatureFilters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.processing.tests.TestFeatureFilters" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.PathMixIn" title="qsprpred.utils.testing.path_mixins.PathMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">PathMixIn</span></code></a>, <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.base.QSPRTestCase" title="qsprpred.utils.testing.base.QSPRTestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSPRTestCase</span></code></a></p>
 <p>Tests to check if the feature filters work on their own.</p>
+<p>Note: This also tests the <code class="xref any docutils literal notranslate"><span class="pre">DataframeDescriptorSet</span></code>,
+as it is used to add test descriptors.</p>
 <p>Create an instance of the class that will use the named test
 method when executed. Raises a ValueError if the instance does
 not have a method with the specified name.</p>
@@ -2154,6 +2156,11 @@ tearDown.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.processing.tests.TestFeatureFilters.recalculateWithMultiIndex">
+<span class="sig-name descname"><span class="pre">recalculateWithMultiIndex</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/processing/tests.html#TestFeatureFilters.recalculateWithMultiIndex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.processing.tests.TestFeatureFilters.recalculateWithMultiIndex" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.processing.tests.TestFeatureFilters.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.processing.tests.TestFeatureFilters.run" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -2213,24 +2220,60 @@ block, allowing further test code to be executed.</p>
 <dd><p>Hook method for deconstructing the class fixture after running all tests in the class.</p>
 </dd></dl>
 
-<dl class="py method">
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter">
-<span class="sig-name descname"><span class="pre">testBorutaFilter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/processing/tests.html#TestFeatureFilters.testBorutaFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter" title="Link to this definition"></a></dt>
-<dd><p>Test the Boruta filter, which removes the features which are statistically as
+<span class="sig-name descname"><span class="pre">testBorutaFilter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter_0">
+<span class="sig-name descname"><span class="pre">testBorutaFilter_0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter_0" title="Link to this definition"></a></dt>
+<dd><p>Test the Boruta filter, which removes the features which are statistically as [with use_index_cols=True]
 relevant as random features.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter_1">
+<span class="sig-name descname"><span class="pre">testBorutaFilter_1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter_1" title="Link to this definition"></a></dt>
+<dd><p>Test the Boruta filter, which removes the features which are statistically as [with use_index_cols=False]
+relevant as random features.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.data.processing.tests.TestFeatureFilters.testHighCorrelationFilter">
-<span class="sig-name descname"><span class="pre">testHighCorrelationFilter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/processing/tests.html#TestFeatureFilters.testHighCorrelationFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.processing.tests.TestFeatureFilters.testHighCorrelationFilter" title="Link to this definition"></a></dt>
-<dd><p>Test the high correlation filter, which drops features with a correlation
+<span class="sig-name descname"><span class="pre">testHighCorrelationFilter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qsprpred.data.processing.tests.TestFeatureFilters.testHighCorrelationFilter" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.processing.tests.TestFeatureFilters.testHighCorrelationFilter_0">
+<span class="sig-name descname"><span class="pre">testHighCorrelationFilter_0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.processing.tests.TestFeatureFilters.testHighCorrelationFilter_0" title="Link to this definition"></a></dt>
+<dd><p>Test the high correlation filter, which drops features with a correlation [with use_index_cols=True]
 above a threshold.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.processing.tests.TestFeatureFilters.testHighCorrelationFilter_1">
+<span class="sig-name descname"><span class="pre">testHighCorrelationFilter_1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.processing.tests.TestFeatureFilters.testHighCorrelationFilter_1" title="Link to this definition"></a></dt>
+<dd><p>Test the high correlation filter, which drops features with a correlation [with use_index_cols=False]
+above a threshold.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.data.processing.tests.TestFeatureFilters.testLowVarianceFilter">
-<span class="sig-name descname"><span class="pre">testLowVarianceFilter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/processing/tests.html#TestFeatureFilters.testLowVarianceFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.processing.tests.TestFeatureFilters.testLowVarianceFilter" title="Link to this definition"></a></dt>
-<dd><p>Test the low variance filter, which drops features with a variance below
+<span class="sig-name descname"><span class="pre">testLowVarianceFilter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qsprpred.data.processing.tests.TestFeatureFilters.testLowVarianceFilter" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.processing.tests.TestFeatureFilters.testLowVarianceFilter_0">
+<span class="sig-name descname"><span class="pre">testLowVarianceFilter_0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.processing.tests.TestFeatureFilters.testLowVarianceFilter_0" title="Link to this definition"></a></dt>
+<dd><p>Test the low variance filter, which drops features with a variance below [with use_index_cols=True]
+a threshold.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.processing.tests.TestFeatureFilters.testLowVarianceFilter_1">
+<span class="sig-name descname"><span class="pre">testLowVarianceFilter_1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.processing.tests.TestFeatureFilters.testLowVarianceFilter_1" title="Link to this definition"></a></dt>
+<dd><p>Test the low variance filter, which drops features with a variance below [with use_index_cols=False]
 a threshold.</p>
 </dd></dl>
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data package &mdash; QSPRpred 3.0.2.dev22+g7f63e85d documentation</title>
+  <title>qsprpred.data package &mdash; QSPRpred 3.0.2.dev33+g4d370197 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=dc15aaef"></script>
+        <script src="../_static/documentation_options.js?v=2455f3c6"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2.dev22+g7f63e85d
+                v3.0.2.dev33+g4d370197
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -561,10 +561,12 @@
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.DataFrameDescriptorSet.getDF"><code class="docutils literal notranslate"><span class="pre">DataFrameDescriptorSet.getDF()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.DataFrameDescriptorSet.getDescriptors"><code class="docutils literal notranslate"><span class="pre">DataFrameDescriptorSet.getDescriptors()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.DataFrameDescriptorSet.getIndex"><code class="docutils literal notranslate"><span class="pre">DataFrameDescriptorSet.getIndex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.DataFrameDescriptorSet.getIndexCols"><code class="docutils literal notranslate"><span class="pre">DataFrameDescriptorSet.getIndexCols()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.DataFrameDescriptorSet.isFP"><code class="docutils literal notranslate"><span class="pre">DataFrameDescriptorSet.isFP</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.DataFrameDescriptorSet.iterMols"><code class="docutils literal notranslate"><span class="pre">DataFrameDescriptorSet.iterMols()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.DataFrameDescriptorSet.prepMols"><code class="docutils literal notranslate"><span class="pre">DataFrameDescriptorSet.prepMols()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.DataFrameDescriptorSet.requiredProps"><code class="docutils literal notranslate"><span class="pre">DataFrameDescriptorSet.requiredProps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.DataFrameDescriptorSet.setIndex"><code class="docutils literal notranslate"><span class="pre">DataFrameDescriptorSet.setIndex()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.DataFrameDescriptorSet.supportsParallel"><code class="docutils literal notranslate"><span class="pre">DataFrameDescriptorSet.supportsParallel</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.DataFrameDescriptorSet.toFile"><code class="docutils literal notranslate"><span class="pre">DataFrameDescriptorSet.toFile()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.DataFrameDescriptorSet.toJSON"><code class="docutils literal notranslate"><span class="pre">DataFrameDescriptorSet.toJSON()</span></code></a></li>
@@ -1193,6 +1195,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.id"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.id()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.longMessage"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.longMessage</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.maxDiff"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.maxDiff</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.recalculateWithMultiIndex"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.recalculateWithMultiIndex()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.run"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.run()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.setUp"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.setUp()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.setUpClass"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.setUpClass()</span></code></a></li>
@@ -1202,9 +1205,15 @@
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.subTest"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.subTest()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.tearDown"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.tearDown()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.tearDownClass"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.tearDownClass()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.testBorutaFilter()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testHighCorrelationFilter"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.testHighCorrelationFilter()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testLowVarianceFilter"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.testLowVarianceFilter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.testBorutaFilter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter_0"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.testBorutaFilter_0()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter_1"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.testBorutaFilter_1()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testHighCorrelationFilter"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.testHighCorrelationFilter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testHighCorrelationFilter_0"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.testHighCorrelationFilter_0()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testHighCorrelationFilter_1"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.testHighCorrelationFilter_1()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testLowVarianceFilter"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.testLowVarianceFilter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testLowVarianceFilter_0"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.testLowVarianceFilter_0()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureFilters.testLowVarianceFilter_1"><code class="docutils literal notranslate"><span class="pre">TestFeatureFilters.testLowVarianceFilter_1()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.tests.TestFeatureStandardizer"><code class="docutils literal notranslate"><span class="pre">TestFeatureStandardizer</span></code></a><ul>
