@@ -24,6 +24,7 @@ From v3.0.1 to v3.1.0
 
 ## New Features
 
+
 - Descriptors are now saved with prefixes to indicate the descriptor sets. This reduces
   the chance of name collisions when using multiple descriptor sets.
 - Added new methods to `MoleculeTable` and `QSARDataset` for more fine-grained control
@@ -34,7 +35,8 @@ From v3.0.1 to v3.1.0
       descriptor sets and properties.
     - All drop actions are restorable with `restoreDescriptorSets` unless explicitly
       cleared from the data set with the `clear` parameter of `dropDescriptorSets`.
-      =======
+- The `DataFrameDescriptorSet` class was extended to allow more flexibility when joining
+  custom descriptor sets.
 - Added the `prepMols` method to `DescriptorSet` to allow separated customization of
   molecule preparation before descriptor calculation.
 

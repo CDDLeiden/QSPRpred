@@ -147,7 +147,10 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
             n_jobs=self.nCPU,
             chunk_size=self.chunkSize,
         )
-        self.df_descriptors.index = self.dataset.df.index
+        self.df_descriptors["QSPRID"] = self.dataset.getProperty(
+            self.dataset.idProp
+        ).values
+        self.df_descriptors.set_index("QSPRID", inplace=True, drop=True)
         self.dataset.addDescriptors([DataFrameDescriptorSet(self.df_descriptors)])
         self.descriptors = self.dataset.featureNames
 
