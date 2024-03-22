@@ -1137,7 +1137,7 @@
             }
         ],
         "randomSeed": 1181241943,
-        "model": "/zfsdata/data/helle/01_MainProjects/03_QSPRpred/Scripts/QSPRpred/testing/test_consistency/data/models/ConsistencyChecksCLS_1181241943/ConsistencyChecksCLS_1181241943_meta.json",
+        "model": "/home/sichom/projects/QSPRpred/testing/test_consistency/data/models/ConsistencyChecksCLS_1181241943_ConsistencyChecks_MorganFP_RDkit/ConsistencyChecksCLS_1181241943_ConsistencyChecks_MorganFP_RDkit_meta.json",
         "ds": null,
         "results": null
     }
