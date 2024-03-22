@@ -7,7 +7,7 @@ You do not need anything special to install the package . Just run the following
 
 ..  code-block::
 
-    pip install git+https://github.com/CDDLeiden/QSPRpred.git@main
+    pip install qsprpred
 
 You can also get tags and development snapshots by varying the :code:`@main` part (i.e. :code:`@1.0.0`). After that you can start building models (see :ref:`cli-usage`).
 
@@ -32,6 +32,13 @@ The following options are available:
 
 You can test the installation by running the unit test suite:
 
-..  code-block::
+..  code-block:: bash
 
     python -m unittest discover qsprpred
+
+Note that this can potentially take a long time and some tests may require you to have
+additional dependencies installed. However, you can also test each module separately:
+
+..  code-block:: bash
+
+    python -m unittest qsprpred.data.tables.tests
