@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.chem.scaffolds &mdash; QSPRpred 3.0.2.dev33+g4d370197 documentation</title>
+  <title>qsprpred.data.chem.scaffolds &mdash; QSPRpred 3.0.2.dev35+g33ed1b47 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=2455f3c6"></script>
+        <script src="../../../../_static/documentation_options.js?v=d6c213b5"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2.dev33+g4d370197
+                v3.0.2.dev35+g33ed1b47
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -138,22 +138,16 @@
 
 
 
-<div class="viewcode-block" id="Murcko">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.scaffolds.Murcko">[docs]</a>
-<span class="k">class</span> <span class="nc">Murcko</span><span class="p">(</span><span class="n">Scaffold</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for calculating Murcko scaffolds of a given molecule.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="BemisMurckoRDKit">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.scaffolds.BemisMurckoRDKit">[docs]</a>
+<span class="k">class</span> <span class="nc">BemisMurckoRDKit</span><span class="p">(</span><span class="n">Scaffold</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for calculating Murcko scaffolds of a given molecule</span>
+<span class="sd">    using the default implementation in RDKit. If you want, an implementation</span>
+<span class="sd">    closer to the original paper, see the `BemisMurcko` class.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate the Murcko scaffold for a molecule as implemented</span>
-<span class="sd">        in RDKit.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            mol: SMILES as `str` or an instance of `Mol`</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            SMILES of the Murcko scaffold as `str`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">mols</span><span class="p">:</span>
             <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">mol</span>
@@ -162,7 +156,7 @@
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">props</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;Murcko&quot;</span></div>
+        <span class="k">return</span> <span class="s2">&quot;BemisMurckoRDKit&quot;</span></div>
 
 
 
@@ -227,15 +221,6 @@
 
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate the Bemis-Murcko scaffold for a molecule.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            mol: SMILES as `str` or an instance of `Mol`</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            SMILES of the Bemis-Murcko scaffold as `str`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">mols</span><span class="p">:</span>
             <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">mol</span>
