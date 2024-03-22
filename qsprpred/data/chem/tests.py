@@ -3,7 +3,7 @@ from rdkit import Chem
 
 from ... import TargetTasks
 from ...data import QSPRDataset
-from ...data.chem.scaffolds import Murcko, BemisMurcko
+from ...data.chem.scaffolds import BemisMurckoRDKit, BemisMurcko
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn
 
@@ -19,7 +19,7 @@ class TestScaffolds(DataSetsPathMixIn, QSPRTestCase):
 
     @parameterized.expand(
         [
-            ("Murcko", Murcko()),
+            ("Murcko", BemisMurckoRDKit()),
             ("BemisMurcko", BemisMurcko()),
             ("BemisMurckoCSK", BemisMurcko(True, True)),
             ("BemisMurckoJustCSK", BemisMurcko(False, True)),
