@@ -19,8 +19,8 @@ stages:
     - export MAFFT_BINARIES=$PWD/mafft-linux64/mafftdir/libexec/
     - clustalo --version  # For debugging clustalo version
     - mafft --version  # For debugging mafft version
-    - pip config set global.index-url https://pypi.org/simple/
-    - pip config set global.extra-index-url https://test.pypi.org/simple/
+    #    - pip config set global.index-url https://pypi.org/simple/
+    #    - pip config set global.extra-index-url https://test.pypi.org/simple/
     - pip install ".[full]" --no-cache-dir
     - python -c "import qsprpred; print(qsprpred.__version__)" # For debugging package version
     - pip install pytest
