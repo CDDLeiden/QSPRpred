@@ -62,7 +62,7 @@ dependencies = [
 [project.optional-dependencies]
 
 extra = [
-    "mold2-pywrapper @ git+https://github.com/OlivierBeq/Mold2_pywrapper.git@master",
+    "mold2-pywrapper",
     "padel-pywrapper >= 1.0.2.post1", "Mordred", "biopython", "prodec", "Signature-pywrapper",
 ]
 pyboost = ["py-boost"]
