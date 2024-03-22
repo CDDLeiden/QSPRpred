@@ -42,7 +42,7 @@ Quick Start
 QSPRpred can be installed with pip like so (with python >= 3.10):
 
 ```bash
-pip install git+https://github.com/CDDLeiden/QSPRpred.git@main
+pip install qsprpred
 ```
 
 Note that this will install the basic dependencies, but not the optional dependencies.
@@ -50,7 +50,7 @@ If you want to use the optional dependencies, you can install the package with a
 option:
 
 ```bash
-pip install git+https://github.com/CDDLeiden/QSPRpred.git@main#egg=qsprpred[<option>]
+pip install qsprpred[<option>]
 ```
 
 The following options are available:
