@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.models package &mdash; QSPRpred 3.0.2.dev35+g33ed1b47 documentation</title>
+  <title>qsprpred.extra.models package &mdash; QSPRpred 3.0.2.dev47+ga98097fe documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=d6c213b5"></script>
+        <script src="../_static/documentation_options.js?v=75d5cbf0"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2.dev35+g33ed1b47
+                v3.0.2.dev47+ga98097fe
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -1896,12 +1896,21 @@ contain all  data necessary to reconstruct the object.</p>
 <dt class="sig sig-object py" id="qsprpred.extra.models.random.RatioDistributionAlgorithm">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.extra.models.random.</span></span><span class="sig-name descname"><span class="pre">RatioDistributionAlgorithm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/models/random.html#RatioDistributionAlgorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.models.random.RatioDistributionAlgorithm" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qsprpred.extra.models.random.RandomDistributionAlgorithm" title="qsprpred.extra.models.random.RandomDistributionAlgorithm"><code class="xref py py-class docutils literal notranslate"><span class="pre">RandomDistributionAlgorithm</span></code></a></p>
-<p>Categorical distribution using ratio of categories as probabilities
-Values of X are irrelevant, only distribution of y is used</p>
+<p>Categorical distribution using ratio of categories as probabilities</p>
+<p>Values of X are irrelevant, only distribution of y is used</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ratios</strong> (<em>pd.DataFrame</em>) – ratio of each category in y</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state for reproducibility</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.models.random.RatioDistributionAlgorithm.fit">
 <span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/models/random.html#RatioDistributionAlgorithm.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.models.random.RatioDistributionAlgorithm.fit" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Calculate ratio of each category in y_df and store as probability distribution</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.models.random.RatioDistributionAlgorithm.from_dict">
@@ -1911,7 +1920,8 @@ Values of X are irrelevant, only distribution of y is used</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.models.random.RatioDistributionAlgorithm.get_probas">
 <span class="sig-name descname"><span class="pre">get_probas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X_test</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/extra/models/random.html#RatioDistributionAlgorithm.get_probas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.extra.models.random.RatioDistributionAlgorithm.get_probas" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Get probabilities of each category for each sample in X_test</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.models.random.RatioDistributionAlgorithm.to_dict">

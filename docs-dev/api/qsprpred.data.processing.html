@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.processing package &mdash; QSPRpred 3.0.2.dev35+g33ed1b47 documentation</title>
+  <title>qsprpred.data.processing package &mdash; QSPRpred 3.0.2.dev47+ga98097fe documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=d6c213b5"></script>
+        <script src="../_static/documentation_options.js?v=75d5cbf0"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2.dev35+g33ed1b47
+                v3.0.2.dev47+ga98097fe
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -263,7 +263,7 @@ contain all  data necessary to reconstruct the object.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.data.processing.applicability_domain.MLChemADWrapper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.processing.applicability_domain.</span></span><span class="sig-name descname"><span class="pre">MLChemADWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">applicability_domain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ApplicabilityDomain</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/processing/applicability_domain.html#MLChemADWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.processing.applicability_domain.MLChemADWrapper" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.processing.applicability_domain.</span></span><span class="sig-name descname"><span class="pre">MLChemADWrapper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">applicability_domain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ApplicabilityDomain</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">astype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'float64'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/processing/applicability_domain.html#MLChemADWrapper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.processing.applicability_domain.MLChemADWrapper" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qsprpred.data.processing.applicability_domain.ApplicabilityDomain" title="qsprpred.data.processing.applicability_domain.ApplicabilityDomain"><code class="xref py py-class docutils literal notranslate"><span class="pre">ApplicabilityDomain</span></code></a></p>
 <p>Define the applicability domain for a dataset using the MLChemAD package.</p>
 <p>This class uses the MLChemAD package to filter out molecules that are not in the
@@ -280,7 +280,11 @@ applicability domain. The MLChemAD package is available at
 <p>Initialize the MLChemADFilter with the domain_type attribute.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>applicability_domain</strong> (<em>MLChemAD</em>) – applicability domain object</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>applicability_domain</strong> (<em>MLChemAD</em>) – applicability domain object</p></li>
+<li><p><strong>astype</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> | </em><em>None</em>) – type to cast the features to before fitting or
+checking the applicability domain</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="py method">

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.processing.applicability_domain &mdash; QSPRpred 3.0.2.dev35+g33ed1b47 documentation</title>
+  <title>qsprpred.data.processing.applicability_domain &mdash; QSPRpred 3.0.2.dev47+ga98097fe documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=d6c213b5"></script>
+        <script src="../../../../_static/documentation_options.js?v=75d5cbf0"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2.dev35+g33ed1b47
+                v3.0.2.dev47+ga98097fe
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -167,7 +167,6 @@
 
 
 
-
 <div class="viewcode-block" id="MLChemADWrapper">
 <a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.applicability_domain.MLChemADWrapper">[docs]</a>
 <span class="k">class</span> <span class="nc">MLChemADWrapper</span><span class="p">(</span><span class="n">ApplicabilityDomain</span><span class="p">):</span>
@@ -181,13 +180,20 @@
 <span class="sd">        applicabilityDomain (MLChemApplicabilityDomain): applicability domain object</span>
 <span class="sd">        fitted (bool): whether the applicability domain is fitted or not</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicability_domain</span><span class="p">:</span> <span class="n">MLChemADApplicabilityDomain</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">applicability_domain</span><span class="p">:</span> <span class="n">MLChemADApplicabilityDomain</span><span class="p">,</span>
+        <span class="n">astype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;float64&quot;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the MLChemADFilter with the domain_type attribute.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            applicability_domain (MLChemAD): applicability domain object</span>
+<span class="sd">            astype (str | None): type to cast the features to before fitting or</span>
+<span class="sd">                checking the applicability domain</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span> <span class="o">=</span> <span class="n">applicability_domain</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">astype</span> <span class="o">=</span> <span class="n">astype</span>
 
     <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">o_dict</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__getstate__</span><span class="p">()</span>
@@ -206,10 +212,13 @@
 <span class="sd">        Args:</span>
 <span class="sd">            X (pd.DataFrame): array of features to fit model on</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Cannot convert X to numeric, fitting with raw data&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">astype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">astype</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Cannot convert X to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">astype</span><span class="si">}</span><span class="s2">, fitting with raw data&quot;</span>
+                <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
 
 
@@ -227,6 +236,15 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Applicability domain not fitted, call fit first&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">astype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">astype</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Cannot convert X to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">astype</span><span class="si">}</span><span class="s2">, checking with raw data.&quot;</span>
+                    <span class="s2">&quot;Note. if the data type is different from the one used for fitting,&quot;</span>
+                    <span class="s2">&quot;the result may be incorrect&quot;</span>
+                <span class="p">)</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_domain&quot;</span><span class="p">]</span>
         <span class="p">)</span></div>
