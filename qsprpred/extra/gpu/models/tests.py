@@ -80,7 +80,7 @@ class BenchMarkTest(BenchMarkTestCase):
             data_dir=f"{self.generatedPath}/benchmarks",
             results_file=f"{self.generatedPath}/benchmarks/results.tsv",
             gpus=GPUS,
-            models_per_gpu=os.cpu_count() // len(GPUS),
+            models_per_gpu=os.cpu_count(),
             gpu_proces_pool_type="threading",
         )
         results = self.benchmark.run(raise_errors=True)
