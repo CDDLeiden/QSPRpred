@@ -74,8 +74,8 @@ dev = ["qsprpred[full]", "pre-commit", "isort", "yapf", "ruff", "pytest"]
 where = ["."]
 
 [project.urls]
-homepage = "https://github.com/CDDLeiden/QSPRPred"
-repository = "https://github.com/CDDLeiden/QSPRPred"
+homepage = "https://github.com/CDDLeiden/QSPRpred"
+repository = "https://github.com/CDDLeiden/QSPRpred"
 documentation = "https://cddleiden.github.io/QSPRpred/docs/"
 
 [tool.setuptools]
