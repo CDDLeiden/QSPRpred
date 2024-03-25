@@ -1,7 +1,7 @@
 import os
 from importlib import import_module, util
 from typing import Type
-from unittest import TestCase
+from unittest import TestCase, skipIf
 
 import chemprop
 import pandas as pd
@@ -63,6 +63,12 @@ class BenchMarkTest(BenchMarkTestCase):
         self.checkRunResults(results)
         self.checkSettings()
 
+    @skipIf(
+        len(GPUS) == 0,
+        "No GPU is available. "
+        "Skipping Chemprop benchmark test "
+        "since it is too time-consuming on CPU.",
+    )
     def testChemProp(self):
         """Run single task tests for classification."""
         self.settings.models = [
