@@ -76,7 +76,7 @@ where = ["."]
 [project.urls]
 homepage = "https://github.com/CDDLeiden/QSPRPred"
 repository = "https://github.com/CDDLeiden/QSPRPred"
-documentation = "https://cddleiden.github.io/QSPRPred/docs/"
+documentation = "https://cddleiden.github.io/QSPRpred/docs/"
 
 [tool.setuptools]
 include-package-data = true
