@@ -240,7 +240,7 @@ class QSPRModel(JSONSerializable, ABC):
                 Random state to use for shuffling and other random operations.
         """
         if random_state is None:
-            self.randomState = int(np.random.randint(0, 2**32 - 1, dtype=np.int64))
+            self.randomState = int(np.random.randint(0, 2**31-1, dtype=np.int64))
             logger.info(
                 "No random state supplied."
                 f"Setting random state to: {self.randomState}."
@@ -569,9 +569,10 @@ class QSPRModel(JSONSerializable, ABC):
         if hasattr(self, "applicabilityDomain") and use_applicability_domain:
             in_domain = self.applicabilityDomain.contains(
                 dataset.getFeatures(concat=True, ordered=True, refit_standardizer=False)
-            )
+            ).values
             in_domain = self.handleInvalidsInPredictions(mols, in_domain, failed_mask)
-            return predictions, in_domain.values
+            
+            return predictions, in_domain
 
         return predictions
 

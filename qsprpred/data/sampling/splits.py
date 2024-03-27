@@ -18,7 +18,7 @@ from ...data.chem.clustering import (
     RandomClusters,
     ScaffoldClusters,
 )
-from ...data.chem.scaffolds import Murcko, Scaffold
+from ...data.chem.scaffolds import BemisMurckoRDKit, Scaffold
 from ...data.tables.base import MoleculeDataTable, DataSetDependant
 from ...data.tables.qspr import QSPRDataset
 from ...logs import logger
@@ -476,7 +476,7 @@ class ScaffoldSplit(GBMTDataSplit):
     def __init__(
         self,
         dataset: QSPRDataset | None = None,
-        scaffold: Scaffold = Murcko(),
+        scaffold: Scaffold = BemisMurckoRDKit(),
         test_fraction: float = 0.1,
         n_folds: int = 1,
         custom_test_list: list | None = None,
@@ -552,3 +552,14 @@ class ClusterSplit(GBMTDataSplit):
         self.seed = seed
         if hasattr(self.clustering, "seed"):
             self.clustering.seed = seed
+
+    def getSeed(self):
+        """Get the seed for this instance.
+
+        Returns:
+            int: the seed for this instance or None if no seed is set.
+        """
+        if hasattr(self, "seed"):
+            return self.seed
+        else:
+            return None
