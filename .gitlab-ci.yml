@@ -23,9 +23,9 @@ stages:
     #    - pip config set global.extra-index-url https://test.pypi.org/simple/
     - python -m pip install ".[full]" --no-cache-dir
     - python -c "import qsprpred; print(qsprpred.__version__)" # For debugging package version
-    - python -m  install pytest
-    - python -m  install jupyterlab
-    - python -m  freeze # For debugging environment
+    - python -m pip install pytest
+    - python -m pip install jupyterlab
+    - python -m pip freeze # For debugging environment
   script:
     - cd testing && QSPPRED_TEST_SPLIT_UNITS=true QSPRPRED_VERBOSE_LOGGING=true ./run.sh
 
