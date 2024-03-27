@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.utils.testing package &mdash; QSPRpred 3.0.2a2.dev28+gdb815672 documentation</title>
+  <title>qsprpred.utils.testing package &mdash; QSPRpred 3.0.2a3.dev11+g06079a5a documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=4c3b5d92"></script>
+        <script src="../_static/documentation_options.js?v=fe80501d"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -55,7 +55,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2a2.dev28+gdb815672
+                v3.0.2a3.dev11+g06079a5a
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -893,6 +893,11 @@ with expected number of variables.</p>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>This class holds the tests for the QSPRmodel class.</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.ModelCheckMixIn.checkOptimization">
+<span class="sig-name descname"><span class="pre">checkOptimization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRModel" title="qsprpred.models.models.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.hyperparam_optimization.HyperparameterOptimization" title="qsprpred.models.hyperparam_optimization.HyperparameterOptimization"><span class="pre">HyperparameterOptimization</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#ModelCheckMixIn.checkOptimization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.checkOptimization" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.ModelCheckMixIn.fitTest">
 <span class="sig-name descname"><span class="pre">fitTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRModel" title="qsprpred.models.models.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#ModelCheckMixIn.fitTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.fitTest" title="Link to this definition"></a></dt>
 <dd><p>Test model fitting, optimization and evaluation.</p>
@@ -964,6 +969,11 @@ not equal to the predictions of the comparison model.</p></li>
 <span class="sig-name descname"><span class="pre">baseMonitorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.BaseMonitor" title="qsprpred.models.monitors.BaseMonitor"><span class="pre">BaseMonitor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Literal" title="(in Python v3.9)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'hyperparam'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'crossval'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'test'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'fit'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neural_net</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#MonitorsCheckMixIn.baseMonitorTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.baseMonitorTest" title="Link to this definition"></a></dt>
 <dd><p>Test the base monitor.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.checkOptimization">
+<span class="sig-name descname"><span class="pre">checkOptimization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.models.QSPRModel" title="qsprpred.models.models.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.hyperparam_optimization.HyperparameterOptimization" title="qsprpred.models.hyperparam_optimization.HyperparameterOptimization"><span class="pre">HyperparameterOptimization</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.checkOptimization" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.clearGenerated">

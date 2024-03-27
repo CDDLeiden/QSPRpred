@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models.models &mdash; QSPRpred 3.0.2a2.dev28+gdb815672 documentation</title>
+  <title>qsprpred.models.models &mdash; QSPRpred 3.0.2a3.dev11+g06079a5a documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=4c3b5d92"></script>
+        <script src="../../../_static/documentation_options.js?v=fe80501d"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2a2.dev28+gdb815672
+                v3.0.2a3.dev11+g06079a5a
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -480,16 +480,22 @@
 
 <div class="viewcode-block" id="QSPRModel.setParams">
 <a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.setParams">[docs]</a>
-    <span class="k">def</span> <span class="nf">setParams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set model parameters.</span>
+    <span class="k">def</span> <span class="nf">setParams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">reset_estimator</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set model parameters. The estimator is also</span>
+<span class="sd">        updated with the new parameters if &#39;reload_estimator&#39; is `True`.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            params (dict): dictionary of model parameters</span>
+<span class="sd">            params (dict):</span>
+<span class="sd">                dictionary of model parameters or `None` to reset the parameters</span>
+<span class="sd">            reset_estimator (bool):</span>
+<span class="sd">                if `True`, the estimator is reinitialized with the new parameters</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">params</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="k">if</span> <span class="n">reset_estimator</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadEstimator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="QSPRModel.checkData">
@@ -788,14 +794,28 @@
 
 <div class="viewcode-block" id="QSPRModel.save">
 <a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.save">[docs]</a>
-    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_estimator</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Save model to file.</span>
 
+<span class="sd">        Args:</span>
+<span class="sd">            save_estimator (bool):</span>
+<span class="sd">                Explicitly save the estimator to file, if `True`.</span>
+<span class="sd">                Note that some models may save the estimator by default</span>
+<span class="sd">                even if this argument is `False`.</span>
+
 <span class="sd">        Returns:</span>
-<span class="sd">            str: absolute path to the saved model</span>
+<span class="sd">            str:</span>
+<span class="sd">                absolute path to the metafile of the saved model</span>
+<span class="sd">            str:</span>
+<span class="sd">                absolute path to the saved estimator, if `include_estimator` is `True`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outDir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">toFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span></div>
+        <span class="n">meta_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">toFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_estimator</span><span class="p">:</span>
+            <span class="n">est_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveEstimator</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">meta_path</span><span class="p">,</span> <span class="n">est_path</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">meta_path</span></div>
 
 
 <div class="viewcode-block" id="QSPRModel.fromFile">
