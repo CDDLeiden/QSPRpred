@@ -17,6 +17,13 @@ From v3.0.1 to v3.0.2
 
 ## Changes
 
+
+- Restrictions on `numpy` versions were removed to allow for more flexibility in
+  package installations. However, the `BorutaFilter` feature selection method does not
+  function with `numpy` versions 1.24.0 and above. Therefore, this functionality now
+  requires a downgrade to `numpy` version 1.23.0 or lower. This was reflected in the
+  documentation and `numpy` itself outputs a reasonable error message if the version is
+  incompatible.
 - Data type in `MlChemADWrapper` is now set to `float64` by default, instead of `float32`.
 
 ## New Features
@@ -25,6 +32,7 @@ From v3.0.1 to v3.0.2
   custom descriptor sets.
 - Added the `prepMols` method to `DescriptorSet` to allow separated customization of
   molecule preparation before descriptor calculation.
+- The package can now be installed from the PyPI repository 🐍📦.
 
 ## Removed Features
 

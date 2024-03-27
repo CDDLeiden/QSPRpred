@@ -7,7 +7,7 @@ Run unit and other tests for in GPU-enabled Docker containers.
 export NVIDIA_VISIBLE_DEVICES=0 # ids of the GPUs to use
 export BASE_IMAGE_TAG="12.0.1-cudnn8-runtime-ubuntu22.04" # cuda base image tag, translated to nvidia/cuda:12.0.1-cudnn8-runtime-ubuntu22.04
 export PYTHON_VERSION="3.10" # python version for the conda base environment
-export QSPRPRED_REPO="https://<username>:<access-token>@your_hosting_service.com/QSPRPred.git"
+export QSPRPRED_REPO="https://<username>:<access-token>@your_hosting_service.com/QSPRpred.git"
 export QSPRPRED_REVISION="main" # can be branch, commit ID or a tag
 
 # spawn a runner with the given settings
