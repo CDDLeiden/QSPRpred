@@ -1,8 +1,6 @@
-[**Main
-**](https://github.com/CDDLeiden/QSPRpred/) [![Build and Deploy Documentation](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml/badge.svg?branch=main)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml)[![Multi-OS Complete Test](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml/badge.svg?branch=main)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml)
+[**Main**](https://github.com/CDDLeiden/QSPRpred/) [![Build and Deploy Documentation](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml/badge.svg?branch=main)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml)[![Multi-OS Complete Test](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml/badge.svg?branch=main)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml) ![PyPI - Version](https://img.shields.io/pypi/v/qsprpred?label=PyPI&link=https%3A%2F%2Fpypi.org%2Fproject%2Fqsprpred%2F) ![Documentation](https://img.shields.io/badge/Sphinx-Documentation-blue?link=https%3A%2F%2Fcddleiden.github.io%2FQSPRpred%2Fdocs%2F)
 
-[**Dev
-**](https://github.com/CDDLeiden/QSPRpred/tree/dev) [![Build and Deploy Documentation](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml/badge.svg?branch=dev)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml)[![Multi-OS Complete Test](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml/badge.svg?branch=dev)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml)
+[**Dev**](https://github.com/CDDLeiden/QSPRpred/tree/dev) [![Build and Deploy Documentation](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml/badge.svg?branch=dev)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml)[![Multi-OS Complete Test](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml/badge.svg?branch=dev)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml) ![Documentation](https://img.shields.io/badge/Sphinx-Documentation-blue?link=https%3A%2F%2Fcddleiden.github.io%2FQSPRpred%2Fdocs-dev%2F)
 
 QSPRpred
 ====================
