@@ -309,7 +309,7 @@ class OptunaOptimization(HyperparameterOptimization):
         score = self.scoreAggregation(scores)
         logger.info(bayesian_params)
         logger.info(f"Score: {score}, std: {np.std(scores)}")
-        self.monitor.onIterationEnd(score, scores)
+        self.monitor.onIterationEnd(score, list(scores))
         return score
 
 
