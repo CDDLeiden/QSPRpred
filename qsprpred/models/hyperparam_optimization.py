@@ -57,15 +57,46 @@ class HyperparameterOptimization(ABC):
         }
 
     @abstractmethod
-    def optimize(self, model: QSPRModel, ds: QSPRDataset) -> dict:
+    def optimize(
+        self, model: QSPRModel, ds: QSPRDataset, refit_optimal: bool = False
+    ) -> dict:
         """Optimize the model hyperparameters.
 
         Args:
-            model (QSPRModel): model to optimize
-            ds (QSPRDataset): dataset to use for the optimization
+            model (QSPRModel):
+                model to optimize
+            ds (QSPRDataset):
+                dataset to use for the optimization
+            refit_optimal (bool):
+                whether to refit the model with the optimal parameters
+                on the entire training set after optimization
         Returns:
             dict: dictionary of best parameters
         """
+
+    def saveResults(
+        self, model: QSPRModel, ds: QSPRDataset, save_params: bool, refit_optimal: bool
+    ):
+        """Handles saving of optimization results.
+
+        Args:
+            model (QSPRModel):
+                model that was optimized
+            ds (QSPRDataset):
+                dataset used in the optimization
+            save_params (bool):
+                whether to re-initialize the model with the best parameters
+            refit_optimal (bool):
+                same as 'save_params', but also refits
+                the model on the entire training set
+        """
+        if save_params:
+            model.setParams(self.bestParams, reset_estimator=True)
+            model.save()
+        if refit_optimal:
+            model.setParams(self.bestParams)
+            model.fit(ds.getFeatures()[0], ds.getTargetPropertiesValues()[0])
+            model.save()
 
 
 class OptunaOptimization(HyperparameterOptimization):
@@ -170,7 +201,12 @@ class OptunaOptimization(HyperparameterOptimization):
         )
 
     def optimize(
-        self, model: QSPRModel, ds: QSPRDataset, save_params: bool = True, **kwargs
+        self,
+        model: QSPRModel,
+        ds: QSPRDataset,
+        save_params: bool = True,
+        refit_optimal: bool = False,
+        **kwargs,
     ) -> dict:
         """Bayesian optimization of hyperparameters using optuna.
 
@@ -180,6 +216,9 @@ class OptunaOptimization(HyperparameterOptimization):
             save_params (bool):
                 whether to set and save the best parameters to the model
                 after optimization
+            refit_optimal (bool):
+                Whether to refit the model with the optimal parameters on the
+                entire training set after optimization. This implies 'save_params=True'.
             **kwargs: additional arguments for the assessment method
 
         Returns:
@@ -221,9 +260,7 @@ class OptunaOptimization(HyperparameterOptimization):
 
         self.monitor.onOptimizationEnd(self.bestScore, self.bestParams)
         # save the best parameters to the model if requested
-        if save_params:
-            model.setParams(self.bestParams)
-            model.save()
+        self.saveResults(model, ds, save_params, refit_optimal)
         return self.bestParams
 
     def objective(
@@ -272,7 +309,7 @@ class OptunaOptimization(HyperparameterOptimization):
         score = self.scoreAggregation(scores)
         logger.info(bayesian_params)
         logger.info(f"Score: {score}, std: {np.std(scores)}")
-        self.monitor.onIterationEnd(score, scores)
+        self.monitor.onIterationEnd(score, list(scores))
         return score
 
 
@@ -305,7 +342,12 @@ class GridSearchOptimization(HyperparameterOptimization):
             self.monitor = BaseMonitor()
 
     def optimize(
-        self, model: QSPRModel, ds: QSPRDataset, save_params: bool = True, **kwargs
+        self,
+        model: QSPRModel,
+        ds: QSPRDataset,
+        save_params: bool = True,
+        refit_optimal: bool = False,
+        **kwargs,
     ) -> dict:
         """Optimize the hyperparameters of the model.
 
@@ -317,6 +359,9 @@ class GridSearchOptimization(HyperparameterOptimization):
             save_params (bool):
                 whether to set and save the best parameters to the model
                 after optimization
+            refit_optimal (bool):
+                whether to refit the model with the optimal parameters on the
+                entire training set after optimization. This implies 'save_params=True'.
             **kwargs: additional arguments for the assessment method
 
         Returns:
@@ -349,8 +394,6 @@ class GridSearchOptimization(HyperparameterOptimization):
             % (self.bestParams, self.bestScore)
         )
         # save the best parameters to the model if requested
-        if save_params:
-            model.setParams(self.bestParams)
-            model.save()
+        self.saveResults(model, ds, save_params, refit_optimal)
         self.monitor.onOptimizationEnd(self.bestScore, self.bestParams)
         return self.bestParams

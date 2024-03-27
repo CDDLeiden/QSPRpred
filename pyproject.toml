@@ -40,7 +40,7 @@ classifiers = [
 dependencies = [
     "parameterized",
     "pebble",
-    "numpy >= 1.19, <1.24.0",
+    "numpy",
     "scikit-learn >= 1.0.2",
     "pandas >= 1.2.2",
     "matplotlib >= 2.0",
@@ -51,10 +51,10 @@ dependencies = [
     "xgboost",
     "boruta",
     "tqdm",
-    "ml2json @ git+https://github.com/HellevdM/ml2json.git",
+    "ml2json",
     "jsonpickle",
-    "papyrus_scripts @ git+https://github.com/OlivierBeq/Papyrus-scripts.git",
-    "gbmt-splits @ git+https://github.com/sohviluukkonen/gbmt-splits@0.0.4",
+    "papyrus_scripts",
+    "gbmtsplits",
     "mlchemad",
     "mols2grid"
 ]
@@ -62,7 +62,7 @@ dependencies = [
 [project.optional-dependencies]
 
 extra = [
-    "mold2-pywrapper @ git+https://github.com/OlivierBeq/Mold2_pywrapper.git@master",
+    "mold2-pywrapper",
     "padel-pywrapper >= 1.0.2.post1", "Mordred", "biopython", "prodec", "Signature-pywrapper",
 ]
 pyboost = ["py-boost"]
@@ -74,9 +74,9 @@ dev = ["qsprpred[full]", "pre-commit", "isort", "yapf", "ruff", "pytest"]
 where = ["."]
 
 [project.urls]
-homepage = "https://github.com/CDDLeiden/QSPRPred"
-repository = "https://github.com/CDDLeiden/QSPRPred"
-documentation = "https://cddleiden.github.io/QSPRPred/docs/"
+homepage = "https://github.com/CDDLeiden/QSPRpred"
+repository = "https://github.com/CDDLeiden/QSPRpred"
+documentation = "https://cddleiden.github.io/QSPRpred/docs/"
 
 [tool.setuptools]
 include-package-data = true

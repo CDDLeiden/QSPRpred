@@ -1,6 +1,8 @@
-[**Main**](https://github.com/CDDLeiden/QSPRpred/) [![Build and Deploy Documentation](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml/badge.svg?branch=main)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml)[![Multi-OS Complete Test](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml/badge.svg?branch=main)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml)
+[**Main
+**](https://github.com/CDDLeiden/QSPRpred/) [![Build and Deploy Documentation](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml/badge.svg?branch=main)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml)[![Multi-OS Complete Test](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml/badge.svg?branch=main)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml)
 
-[**Dev**](https://github.com/CDDLeiden/QSPRpred/tree/dev) [![Build and Deploy Documentation](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml/badge.svg?branch=dev)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml)[![Multi-OS Complete Test](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml/badge.svg?branch=dev)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml)
+[**Dev
+**](https://github.com/CDDLeiden/QSPRpred/tree/dev) [![Build and Deploy Documentation](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml/badge.svg?branch=dev)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/docs_ci.yml)[![Multi-OS Complete Test](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml/badge.svg?branch=dev)](https://github.com/CDDLeiden/QSPRpred/actions/workflows/dev_ci.yml)
 
 QSPRpred
 ====================
@@ -42,7 +44,7 @@ Quick Start
 QSPRpred can be installed with pip like so (with python >= 3.10):
 
 ```bash
-pip install git+https://github.com/CDDLeiden/QSPRpred.git@main
+pip install qsprpred
 ```
 
 Note that this will install the basic dependencies, but not the optional dependencies.
@@ -50,7 +52,7 @@ If you want to use the optional dependencies, you can install the package with a
 option:
 
 ```bash
-pip install git+https://github.com/CDDLeiden/QSPRpred.git@main#egg=qsprpred[<option>]
+pip install qsprpred[<option>]
 ```
 
 The following options are available:
@@ -66,7 +68,7 @@ The following options are available:
 
 ### Note on PCM Modelling
 
-If you plan to optionally use QSPRPred to calculate protein descriptors for PCM, make
+If you plan to optionally use QSPRpred to calculate protein descriptors for PCM, make
 sure to also install Clustal Omega. You can get it via `conda` (**for Linux and MacOS
 only**):
 

@@ -118,7 +118,7 @@ Overview of available features
 
                 * :class:`~qsprpred.data.processing.feature_filters.HighCorrelationFilter`: HighCorrelationFilter
                 * :class:`~qsprpred.data.processing.feature_filters.LowVarianceFilter`: LowVarianceFilter
-                * :class:`~qsprpred.data.processing.feature_filters.BorutaFilter`: BorutaFilter
+                * :class:`~qsprpred.data.processing.feature_filters.BorutaFilter`: BorutaFilter (:code:`numpy` version restricted to :code:`numpy<1.24.0`)
 
     .. dropdown:: Models
 

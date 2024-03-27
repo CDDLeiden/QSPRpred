@@ -9,6 +9,7 @@ import scipy as sp
 
 from qsprpred.models.early_stopping import EarlyStoppingMode
 from qsprpred.models.monitors import FitMonitor
+
 from ...data.tables.qspr import QSPRDataset
 from ...models.model import QSPRModel
 
@@ -36,17 +37,28 @@ class RandomDistributionAlgorithm(ABC):
 
 
 class RatioDistributionAlgorithm(RandomDistributionAlgorithm):
-    """
-    Categorical distribution using ratio of categories as probabilities
+    """Categorical distribution using ratio of categories as probabilities
+    
     Values of X are irrelevant, only distribution of y is used
+    
+    Attributes:
+        ratios (pd.DataFrame): ratio of each category in y
+        random_state (int): random state for reproducibility
     """
     def __init__(self, random_state=None):
         self.ratios = None
         self.random_state = random_state
 
     def __call__(self, X_test: np.ndarray):
+        """Generate random samples from the distribution of y"""
         rng = np.random.default_rng(seed=self.random_state)
-        y_list = [rng.choice(len(self.ratios.values), len(X_test), p=[r[col] for r in self.ratios.values]) for col in range(len(self.ratios.values[0]))]
+        y_list = [
+            rng.choice(
+                len(self.ratios.values),
+                len(X_test),
+                p=[r[col] for r in self.ratios.values],
+            ) for col in range(len(self.ratios.values[0]))
+        ]
         y = np.column_stack(y_list)
         if y.ndim == 1:
             y = y.reshape(-1, 1)
@@ -54,20 +66,32 @@ class RatioDistributionAlgorithm(RandomDistributionAlgorithm):
         return y
 
     def get_probas(self, X_test: np.ndarray):
-        y_list = [np.array([[r[col] for r in self.ratios.values] for _ in range(len(X_test))]) for col in range(len(self.ratios.values[0]))]
+        """Get probabilities of each category for each sample in X_test"""
+        y_list = [
+            np.array(
+                [[ratio[col] for ratio in self.ratios.values] for _ in range(len(X_test))]
+            ) for col in range(len(self.ratios.values[0]))
+        ]
         return y_list
 
     def fit(self, y_df: pd.DataFrame):
-        self.ratios = pd.DataFrame.from_dict({col: y_df[col].value_counts() / y_df.shape[0] for col in list(y_df)})
+        """Calculate ratio of each category in y_df and store as probability distribution"""
+        self.ratios = pd.DataFrame.from_dict(
+            {col: y_df[col].value_counts() / y_df.shape[0]
+             for col in list(y_df)}
+        ).sort_index()
 
     def from_dict(self, loaded_dict):
-        self.ratios = pd.DataFrame(json.loads(loaded_dict["ratios"])) if loaded_dict[
-                                                "ratios"] is not None else None
+        self.ratios = (
+            pd.DataFrame(json.loads(loaded_dict["ratios"]))
+            if loaded_dict["ratios"] is not None else None
+        )
 
     def to_dict(self):
-        param_dictionary = {"parameters": {},
-                "ratios": self.ratios.to_json() if self.ratios is not None else None,
-                }
+        param_dictionary = {
+            "parameters": {},
+            "ratios": self.ratios.to_json() if self.ratios is not None else None,
+        }
         return param_dictionary
 
 
@@ -76,7 +100,10 @@ class MedianDistributionAlgorithm(RandomDistributionAlgorithm):
         self.median = None
 
     def __call__(self, X_test: np.ndarray):
-        y_list = [np.full(len(X_test), self.median.values[col]) for col in range(len(self.median))]
+        y_list = [
+            np.full(len(X_test), self.median.values[col])
+            for col in range(len(self.median))
+        ]
         y = np.column_stack(y_list)
         if y.ndim == 1:
             y = y.reshape(-1, 1)
@@ -90,25 +117,39 @@ class MedianDistributionAlgorithm(RandomDistributionAlgorithm):
         self.median = y_df.median()
 
     def from_dict(self, loaded_dict):
-        self.median = pd.DataFrame({"median": json.loads(loaded_dict["median"])}) if loaded_dict[
-                                                "median"] is not None else None
+        self.median = (
+            pd.DataFrame({"median": json.loads(loaded_dict["median"])})
+            if loaded_dict["median"] is not None else None
+        )
 
     def to_dict(self):
-        param_dictionary = {"parameters": {},
-                "median": self.median.to_json() if self.median is not None else None,
-                }
+        param_dictionary = {
+            "parameters": {},
+            "median": self.median.to_json() if self.median is not None else None,
+        }
         return param_dictionary
 
 
 class ScipyDistributionAlgorithm(RandomDistributionAlgorithm):
-    def __init__(self, distribution: sp.stats.rv_continuous=sp.stats.norm, params={}, random_state=None):
+    def __init__(
+        self,
+        distribution: sp.stats.rv_continuous = sp.stats.norm,
+        params={},
+        random_state=None,
+    ):
         self.fitted_parameters = None
         self.distribution = distribution
         self.params = params
         self.random_state = random_state
 
     def __call__(self, X_test: np.ndarray):
-        y_list = [self.distribution.rvs(*(tuple(self.fitted_parameters.values.T[col])), size=len(X_test), random_state=self.random_state) for col in range(len(self.fitted_parameters.values.T))]
+        y_list = [
+            self.distribution.rvs(
+                *(tuple(self.fitted_parameters.values.T[col])),
+                size=len(X_test),
+                random_state=self.random_state,
+            ) for col in range(len(self.fitted_parameters.values.T))
+        ]
         y = np.column_stack(y_list)
         if y.ndim == 1:
             y = y.reshape(-1, 1)
@@ -119,16 +160,24 @@ class ScipyDistributionAlgorithm(RandomDistributionAlgorithm):
         raise Exception("No probas supported for this algorithm.")
 
     def fit(self, y_df: pd.DataFrame):
-        self.fitted_parameters = pd.DataFrame.from_dict({col: self.distribution.fit(y_df[col], *self.params) for col in list(y_df)})
+        self.fitted_parameters = pd.DataFrame.from_dict(
+            {col: self.distribution.fit(y_df[col], *self.params)
+             for col in list(y_df)}
+        )
 
     def from_dict(self, loaded_dict):
-        self.fitted_parameters = pd.DataFrame(json.loads(loaded_dict["fitted_parameters"])) if loaded_dict[
-                                                "fitted_parameters"] is not None else None
+        self.fitted_parameters = (
+            pd.DataFrame(json.loads(loaded_dict["fitted_parameters"]))
+            if loaded_dict["fitted_parameters"] is not None else None
+        )
 
     def to_dict(self):
-        param_dictionary = {"parameters": {},
-                "fitted_parameters": self.fitted_parameters.to_json() if self.fitted_parameters is not None else None,
-                }
+        param_dictionary = {
+            "parameters": {},
+            "fitted_parameters":
+                self.fitted_parameters.to_json()
+                if self.fitted_parameters is not None else None,
+        }
         return param_dictionary
 
 
@@ -140,7 +189,7 @@ class RandomModel(QSPRModel):
         name: Optional[str] = None,
         parameters: Optional[dict] = None,
         autoload=True,
-        random_state: int | None = None
+        random_state: int | None = None,
     ):
         """Initialize a QSPR model instance.
 
@@ -157,25 +206,27 @@ class RandomModel(QSPRModel):
                 if `True`, the estimator is loaded from the serialized file
                 if it exists, otherwise a new instance of alg is created
         """
-        super().__init__(base_dir, alg, name, parameters, autoload, random_state=random_state)
+        super().__init__(
+            base_dir, alg, name, parameters, autoload, random_state=random_state
+        )
 
     @property
     def supportsEarlyStopping(self) -> bool:
         """Check if the model supports early stopping.
-        
+
         Returns:
             (bool): whether the model supports early stopping or not
         """
         return False
-    
+
     def fit(
-            self,
-            X: pd.DataFrame | np.ndarray | QSPRDataset,
-            y: pd.DataFrame | np.ndarray | QSPRDataset,
-            estimator: Type[RandomDistributionAlgorithm] = None,
-            mode: EarlyStoppingMode = None,
-            monitor: FitMonitor | None = None,
-            **kwargs
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        y: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Type[RandomDistributionAlgorithm] = None,
+        mode: EarlyStoppingMode = None,
+        monitor: FitMonitor | None = None,
+        **kwargs,
     ) -> RandomDistributionAlgorithm:
         """Fit the model to the given data matrix or `QSPRDataset`.
 
@@ -201,11 +252,11 @@ class RandomModel(QSPRModel):
         estimator.fit(y_df)
 
         return estimator
-    
+
     def predict(
-            self,
-            X: pd.DataFrame | np.ndarray | QSPRDataset,
-            estimator: Any = None
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataset,
+        estimator: Any = None
     ) -> np.ndarray:
         """Make predictions for the given data matrix or `QSPRDataset`.
 
@@ -222,13 +273,11 @@ class RandomModel(QSPRModel):
         return estimator(X)
 
     def predictProba(
-            self,
-            X: pd.DataFrame | np.ndarray | QSPRDataset,
-            estimator: Any = None
+        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
     ):
         estimator = self.estimator if estimator is None else estimator
         return estimator.get_probas(X)
-    
+
     def loadEstimator(self, params: Optional[dict] = None) -> object:
         """Initialize estimator instance with the given parameters.
 
@@ -241,14 +290,16 @@ class RandomModel(QSPRModel):
             object: initialized estimator instance
         """
         new_parameters = self.getParameters(
-            params)  # combine self.parameters and params
+            params
+        )  # combine self.parameters and params
         if new_parameters is not None:
             return self.alg(**new_parameters)
         else:
             return self.alg()
-        
-    def loadEstimatorFromFile(self, params: Optional[dict] = None,
-                              fallback_load=True) -> object:
+
+    def loadEstimatorFromFile(
+        self, params: Optional[dict] = None, fallback_load=True
+    ) -> object:
         """Load estimator instance from file and apply the given parameters.
 
         Args:

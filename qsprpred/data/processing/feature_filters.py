@@ -89,7 +89,9 @@ class HighCorrelationFilter(FeatureFilter):
 class BorutaFilter(FeatureFilter, Randomized):
     """Boruta filter from BorutaPy: Boruta all-relevant feature selection.
 
-    Uses BorutaPy implementation from https://github.com/scikit-learn-contrib/boruta_py
+    Uses BorutaPy implementation from https://github.com/scikit-learn-contrib/boruta_py.
+    Note that the `boruta` package is not compatible with numpy 1.24.0 and above.
+    Therefore, make sure to downgrade numpy to 1.23.0 or older before using this filter.
 
     Attributes:
         featSelector (BorutaPy): BorutaPy feature selector

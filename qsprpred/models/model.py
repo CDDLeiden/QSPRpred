@@ -365,16 +365,22 @@ class QSPRModel(JSONSerializable, ABC):
         """
         self._optimalEpochs = value
 
-    def setParams(self, params: dict):
-        """Set model parameters.
+    def setParams(self, params: dict | None, reset_estimator: bool = True):
+        """Set model parameters. The estimator is also
+        updated with the new parameters if 'reload_estimator' is `True`.
 
         Args:
-            params (dict): dictionary of model parameters
+            params (dict):
+                dictionary of model parameters or `None` to reset the parameters
+            reset_estimator (bool):
+                if `True`, the estimator is reinitialized with the new parameters
         """
         if self.parameters is not None:
             self.parameters.update(params)
         else:
             self.parameters = params
+        if reset_estimator:
+            self.estimator = self.loadEstimator(self.parameters)
 
     def checkData(self, ds: QSPRDataset, exception: bool = True) -> bool:
         """Check if the model has a data set.
@@ -563,9 +569,10 @@ class QSPRModel(JSONSerializable, ABC):
         if hasattr(self, "applicabilityDomain") and use_applicability_domain:
             in_domain = self.applicabilityDomain.contains(
                 dataset.getFeatures(concat=True, ordered=True, refit_standardizer=False)
-            )
+            ).values
             in_domain = self.handleInvalidsInPredictions(mols, in_domain, failed_mask)
-            return predictions, in_domain.values
+            
+            return predictions, in_domain
 
         return predictions
 
@@ -642,16 +649,28 @@ class QSPRModel(JSONSerializable, ABC):
         o_dict["py/state"]["alg"] = f"{self.alg.__module__}.{self.alg.__name__}"
         return json.dumps(o_dict, indent=4)
 
-    def save(self):
+    def save(self, save_estimator=False):
         """Save model to file.
 
+        Args:
+            save_estimator (bool):
+                Explicitly save the estimator to file, if `True`.
+                Note that some models may save the estimator by default
+                even if this argument is `False`.
+
         Returns:
-            str: absolute path to the metafile of the saved model
+            str:
+                absolute path to the metafile of the saved model
+            str:
+                absolute path to the saved estimator, if `include_estimator` is `True`
         """
         os.makedirs(self.outDir, exist_ok=True)
         meta_path = self.toFile(self.metaFile)
-        self.saveEstimator()
-        return meta_path
+        if save_estimator:
+            est_path = self.saveEstimator()
+            return meta_path, est_path
+        else:
+            return meta_path
 
     @classmethod
     def fromFile(cls, filename: str) -> "QSPRModel":
