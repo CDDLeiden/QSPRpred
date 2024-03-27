@@ -197,17 +197,13 @@ class DNNModel(QSPRModel):
             str: path to the saved model
         """
         path = f"{self.outPrefix}_weights.pkg"
-        torch.save(self.estimator.state_dict(), path)
+        if not isinstance(self.estimator, str):
+            torch.save(self.estimator.state_dict(), path)
+        else:
+            # just save the estimator message
+            with open(path, "w") as f:
+                f.write(self.estimator)
         return path
-
-    def setParams(self, params: dict):
-        """Set parameters of the model.
-
-        Args:
-            params (dict): parameters
-        """
-        super().setParams(params)
-        self.estimator = self.loadEstimator(self.parameters)
 
     @early_stopping
     def fit(
