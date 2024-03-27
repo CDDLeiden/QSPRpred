@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.processing package &mdash; QSPRpred 3.0.2.dev47+ga98097fe documentation</title>
+  <title>qsprpred.data.processing package &mdash; QSPRpred 3.0.2a2.dev28+gdb815672 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=75d5cbf0"></script>
+        <script src="../_static/documentation_options.js?v=4c3b5d92"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2.dev47+ga98097fe
+                v3.0.2a2.dev28+gdb815672
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -503,7 +503,9 @@ are not removed. Defaults to [].</p></li>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.processing.feature_filters.</span></span><span class="sig-name descname"><span class="pre">BorutaFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">boruta_feat_selector</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BorutaPy</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/processing/feature_filters.html#BorutaFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.processing.feature_filters.BorutaFilter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qsprpred.data.processing.feature_filters.FeatureFilter" title="qsprpred.data.processing.feature_filters.FeatureFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FeatureFilter</span></code></a>, <a class="reference internal" href="qsprpred.utils.interfaces.html#qsprpred.utils.interfaces.randomized.Randomized" title="qsprpred.utils.interfaces.randomized.Randomized"><code class="xref py py-class docutils literal notranslate"><span class="pre">Randomized</span></code></a></p>
 <p>Boruta filter from BorutaPy: Boruta all-relevant feature selection.</p>
-<p>Uses BorutaPy implementation from <a class="reference external" href="https://github.com/scikit-learn-contrib/boruta_py">https://github.com/scikit-learn-contrib/boruta_py</a></p>
+<p>Uses BorutaPy implementation from <a class="reference external" href="https://github.com/scikit-learn-contrib/boruta_py">https://github.com/scikit-learn-contrib/boruta_py</a>.
+Note that the <code class="xref any docutils literal notranslate"><span class="pre">boruta</span></code> package is not compatible with numpy 1.24.0 and above.
+Therefore, make sure to downgrade numpy to 1.23.0 or older before using this filter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2232,14 +2234,14 @@ block, allowing further test code to be executed.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter_0">
 <span class="sig-name descname"><span class="pre">testBorutaFilter_0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter_0" title="Link to this definition"></a></dt>
-<dd><p>Test the Boruta filter, which removes the features which are statistically as [with use_index_cols=True]
+<dd><p>Test the Boruta filter, which removes the features which are statistically as [with <a href="#id3"><span class="problematic" id="id4">*</span></a>args=(True,)]
 relevant as random features.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter_1">
 <span class="sig-name descname"><span class="pre">testBorutaFilter_1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.processing.tests.TestFeatureFilters.testBorutaFilter_1" title="Link to this definition"></a></dt>
-<dd><p>Test the Boruta filter, which removes the features which are statistically as [with use_index_cols=False]
+<dd><p>Test the Boruta filter, which removes the features which are statistically as [with <a href="#id5"><span class="problematic" id="id6">*</span></a>args=(False,)]
 relevant as random features.</p>
 </dd></dl>
 
@@ -2995,7 +2997,7 @@ calculator combinations.</p>
 to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id3"><span class="problematic" id="id4">`</span></a>list`s of all possible combinations of preparation</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id7"><span class="problematic" id="id8">`</span></a>list`s of all possible combinations of preparation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
@@ -3837,7 +3839,7 @@ calculator combinations.</p>
 to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id5"><span class="problematic" id="id6">`</span></a>list`s of all possible combinations of preparation</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id9"><span class="problematic" id="id10">`</span></a>list`s of all possible combinations of preparation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
@@ -5144,7 +5146,7 @@ calculator combinations.</p>
 to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id7"><span class="problematic" id="id8">`</span></a>list`s of all possible combinations of preparation</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id11"><span class="problematic" id="id12">`</span></a>list`s of all possible combinations of preparation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>

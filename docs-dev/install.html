@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Installation &mdash; QSPRpred 3.0.2.dev47+ga98097fe documentation</title>
+  <title>Installation &mdash; QSPRpred 3.0.2a2.dev28+gdb815672 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -17,7 +17,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=75d5cbf0"></script>
+        <script src="_static/documentation_options.js?v=4c3b5d92"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2.dev47+ga98097fe
+                v3.0.2a2.dev28+gdb815672
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -101,14 +101,14 @@
   <section id="installation">
 <span id="installation-guide"></span><h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
 <p>You do not need anything special to install the package . Just run the following (with python &gt;= 3.10) to get the latest version and all basic dependencies:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">git</span><span class="o">+</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">CDDLeiden</span><span class="o">/</span><span class="n">QSPRpred</span><span class="o">.</span><span class="n">git</span><span class="nd">@main</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">qsprpred</span>
 </pre></div>
 </div>
 <p>You can also get tags and development snapshots by varying the <code class="code docutils literal notranslate"><span class="pre">&#64;main</span></code> part (i.e. <code class="code docutils literal notranslate"><span class="pre">&#64;1.0.0</span></code>). After that you can start building models (see <a class="reference internal" href="cli_usage.html#cli-usage"><span class="std std-ref">Command Line Interface Usage</span></a>).</p>
 <p>Note that this will install the basic dependencies, but not the optional dependencies.
 If you want to use the optional dependencies, you can install the package with an
 option:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">git</span><span class="o">+</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">CDDLeiden</span><span class="o">/</span><span class="n">QSPRpred</span><span class="o">.</span><span class="n">git</span><span class="nd">@main</span><span class="c1">#egg=qsprpred[&lt;option&gt;]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">qsprpred</span><span class="p">[</span><span class="o">&lt;</span><span class="n">option</span><span class="o">&gt;</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>The following options are available:</p>
@@ -123,7 +123,12 @@ cude toolkit from Anaconda as well: <code class="docutils literal notranslate"><
 replace X with your <a class="reference external" href="https://docs.cupy.dev/en/stable/install.html">cuda version</a>)</p></li>
 </ul>
 <p>You can test the installation by running the unit test suite:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">unittest</span> <span class="n">discover</span> <span class="n">qsprpred</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>unittest<span class="w"> </span>discover<span class="w"> </span>qsprpred
+</pre></div>
+</div>
+<p>Note that this can potentially take a long time and some tests may require you to have
+additional dependencies installed. However, you can also test each module separately:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>unittest<span class="w"> </span>qsprpred.data.tables.tests
 </pre></div>
 </div>
 </section>
