@@ -17,7 +17,7 @@ option:
 
 ..  code-block::
     
-    pip install git+https://github.com/CDDLeiden/QSPRpred.git@main#egg=qsprpred[<option>]
+    pip install qsprpred[<option>]
 
 The following options are available:
 
