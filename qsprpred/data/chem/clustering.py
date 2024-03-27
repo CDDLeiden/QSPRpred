@@ -6,7 +6,7 @@ import pandas as pd
 from rdkit import Chem, DataStructs
 from rdkit.SimDivFilters import rdSimDivPickers
 
-from .scaffolds import Murcko, Scaffold
+from .scaffolds import BemisMurckoRDKit, Scaffold
 from .. import MoleculeTable
 from ..descriptors.fingerprints import Fingerprint, MorganFP
 from ...logs import logger
@@ -89,7 +89,7 @@ class ScaffoldClusters(MoleculeClusters):
         scaffold (Scaffold): scaffold generator
     """
 
-    def __init__(self, scaffold: Scaffold = Murcko()):
+    def __init__(self, scaffold: Scaffold = BemisMurckoRDKit()):
         super().__init__()
         self.scaffold = scaffold
 
