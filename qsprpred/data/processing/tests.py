@@ -1,5 +1,6 @@
 import copy
 import itertools
+from unittest import skipIf
 
 import numpy as np
 import pandas as pd
@@ -222,6 +223,10 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
             (True,),
             (False,),
         ]
+    )
+    @skipIf(
+        int(np.__version__.split(".")[1]) >= 24,
+        "numpy 1.24.0 not compatible with boruta",
     )
     def testBorutaFilter(self, use_index_cols):
         """Test the Boruta filter, which removes the features which are statistically as

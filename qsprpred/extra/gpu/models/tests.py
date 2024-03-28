@@ -134,21 +134,20 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             name=alg_name, base_dir=model.baseDir, random_state=random_state[0]
         )
 
+        # test if the results are (not) equal if the random state is the (not) same
+        # and check if the output is the same before and after saving and loading
         if random_state[0] is not None:
             model.cleanFiles()
-            model = self.getModel(
+            comparison_model = self.getModel(
                 name=alg_name,
                 alg=alg,
                 random_state=random_state[1],
             )
-            self.fitTest(model, dataset)
-            predictor_new = DNNModel(
-                name=alg_name, base_dir=model.baseDir, random_state=random_state[1]
-            )
+            self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor,
+                predictor, # model loaded from file
                 dataset=dataset,
-                comparison_model=predictor_new,
+                comparison_model=comparison_model, # model not loaded from file
                 expect_equal_result=random_state[0] == random_state[1],
             )
         else:
@@ -252,18 +251,18 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         self.predictorTest(predictor, dataset=dataset)
 
         # make predictions with the trained model and check if the results are (not)
-        # equal if the random state is the (not) same
+        # equal if the random state is the (not) same and check if the output is the
+        # same before and after saving and loading
         if random_state[0] is not None:
-            model = self.getModel(
+            comparison_model = self.getModel(
                 name=alg_name,
                 random_state=random_state[1],
             )
-            self.fitTest(model, dataset)
-            new_predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
+            self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor,
+                predictor, # model loaded from file
                 dataset=dataset,
-                comparison_model=new_predictor,
+                comparison_model=comparison_model,  # model not loaded from file
                 expect_equal_result=random_state[0] == random_state[1],
             )
         else:
@@ -335,18 +334,18 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         self.predictorTest(predictor, dataset=dataset)
 
         # make predictions with the trained model and check if the results are (not)
-        # equal if the random state is the (not) same
+        # equal if the random state is the (not) same and check if the output is the
+        # same before and after saving and loading
         if random_state[0] is not None:
-            model = self.getModel(
+            comparison_model = self.getModel(
                 name=alg_name,
                 random_state=random_state[1],
             )
-            self.fitTest(model, dataset)
-            new_predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
+            self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor,
+                predictor, # model loaded from file
                 dataset=dataset,
-                comparison_model=new_predictor,
+                comparison_model=comparison_model, # model not loaded from file
                 expect_equal_result=random_state[0] == random_state[1],
             )
         else:
@@ -533,22 +532,20 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         self.predictorTest(predictor, dataset=dataset)
 
         # make predictions with the trained model and check if the results are (not)
-        # equal if the random state is the (not) same
+        # equal if the random state is the (not) same and check if the output is the
+        # same before and after saving and loading
         if random_state[0] is not None:
-            model = self.getModel(
+            comparison_model = self.getModel(
                 name=f"{model_name}_{task}",
                 dataset=dataset,
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(model)
-            new_predictor = import_module("..pyboost", __name__).PyBoostModel(
-                name=f"{model_name}_{task}", base_dir=model.baseDir
-            )
+            self.fitTest(comparison_model)
             self.predictorTest(
                 predictor,
                 dataset=dataset,
-                comparison_model=new_predictor,
+                comparison_model=comparison_model,
                 expect_equal_result=random_state[0] == random_state[1],
             )
         else:

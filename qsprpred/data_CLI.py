@@ -15,6 +15,10 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
+from qsprpred.data.chem.clustering import (
+    FPSimilarityMaxMinClusters,
+    FPSimilarityLeaderPickerClusters,
+)
 from qsprpred.data.descriptors.fingerprints import (
     MorganFP,
     RDKitMACCSFP,
@@ -23,10 +27,6 @@ from qsprpred.data.descriptors.fingerprints import (
     PatternFP,
     RDKitFP,
     AvalonFP,
-)
-from qsprpred.data.chem.clustering import (
-    FPSimilarityMaxMinClusters,
-    FPSimilarityLeaderPickerClusters
 )
 from qsprpred.data.descriptors.sets import (
     DrugExPhyschem,
@@ -49,7 +49,7 @@ from qsprpred.data.sampling.splits import (
 )
 from qsprpred.data.tables.qspr import QSPRDataset
 from qsprpred.tasks import TargetTasks
-from .data.chem.scaffolds import Murcko
+from .data.chem.scaffolds import BemisMurckoRDKit
 from .extra.gpu.models.dnn import DNNModel
 from .logs.utils import backup_files, enable_file_logger
 from .models.scikit_learn import SklearnModel
@@ -363,7 +363,7 @@ def QSPR_dataprep(args):
                         else None,
                         "imputer": SimpleImputer(strategy=args.imputation[prop])
                         if prop in args.imputation
-                        else None
+                        else None,
                     }
                 )
             dataset_name = (
@@ -391,7 +391,7 @@ def QSPR_dataprep(args):
             if args.split == "scaffold":
                 split = ScaffoldSplit(
                     test_fraction=args.split_fraction,
-                    scaffold=Murcko(),
+                    scaffold=BemisMurckoRDKit(),
                     dataset=mydataset,
                 )
             elif args.split == "time":
@@ -525,11 +525,14 @@ if __name__ == "__main__":
         os.makedirs(args.output_dir)
 
     # get a list of all the folders in the output directory
-    folders = [f for f in os.listdir(args.output_dir) if os.path.isdir(f"{args.output_dir}/{f}")]
+    folders = [
+        f
+        for f in os.listdir(args.output_dir)
+        if os.path.isdir(f"{args.output_dir}/{f}")
+    ]
 
     # remove folders that start with backup
     folders = [f for f in folders if not f.startswith("backup")]
-
 
     if not args.skip_backup:
         backup_msg = backup_files(

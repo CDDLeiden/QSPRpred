@@ -10,7 +10,7 @@ from .hyperparam_optimization import (
     HyperparameterOptimization,
 )
 from .metrics import SklearnMetrics
-from .models import QSPRModel
+from .model import QSPRModel
 
 from .monitors import (
     BaseMonitor,

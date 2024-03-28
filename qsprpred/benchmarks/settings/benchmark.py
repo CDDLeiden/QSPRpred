@@ -6,7 +6,7 @@ from .data_prep import DataPrepSettings
 from ...data.descriptors.sets import DescriptorSet
 from ...data.sources.data_source import DataSource
 from ...models.hyperparam_optimization import HyperparameterOptimization
-from ...models.models import QSPRModel
+from ...models.model import QSPRModel
 from ...tasks import TargetProperty
 from ...utils.serialization import JSONSerializable
 

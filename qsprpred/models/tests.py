@@ -118,22 +118,20 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
         predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
 
         # make predictions with the trained model and check if the results are (not)
-        # equal if the random state is the (not) same
+        # equal if the random state is the (not) same and at the same time
+        # check if the output is the same before and after saving and loading
         if random_state[0] is not None:
-            model = self.getModel(
+            comparison_model = self.getModel(
                 name=f"{model_name}_{task}",
                 alg=model_class,
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(model, dataset)
-            new_predictor = SklearnModel(
-                name=f"{model_name}_{task}", base_dir=model.baseDir
-            )
+            self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor,
+                predictor, # model loaded from file
                 dataset=dataset,
-                comparison_model=new_predictor,
+                comparison_model=comparison_model, # comparison model not saved/loaded
                 expect_equal_result=random_state[0] == random_state[1],
             )
         else:
@@ -220,21 +218,19 @@ class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
         )
 
         # make predictions with the trained model and check if the results are (not)
-        # equal if the random state is the (not) same
+        # equal if the random state is the (not) same and at the same time
+        # check if the output is the same before and after saving and loading
         if random_state[0] is not None and model_name in ["RFR"]:
-            model = self.getModel(
+            comparison_model = self.getModel(
                 name=f"{model_name}_multitask_regression",
                 alg=model_class,
                 random_state=random_state[1],
             )
-            self.fitTest(model, dataset)
-            predictor_new = SklearnModel(
-                name=f"{model_name}_multitask_regression", base_dir=model.baseDir
-            )
+            self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor,
+                predictor, # model loaded from file
                 dataset=dataset,
-                comparison_model=predictor_new,
+                comparison_model=comparison_model, # comparison model not saved/loaded
                 expect_equal_result=random_state[0] == random_state[1],
             )
         else:
@@ -338,22 +334,20 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
         predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
 
         # make predictions with the trained model and check if the results are (not)
-        # equal if the random state is the (not) same
+        # equal if the random state is the (not) same and at the same time
+        # check if the output is the same before and after saving and loading
         if random_state[0] is not None:
-            model = self.getModel(
+            comparison_model = self.getModel(
                 name=f"{model_name}_{task}",
                 alg=model_class,
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(model, dataset)
-            new_predictor = SklearnModel(
-                name=f"{model_name}_{task}", base_dir=model.baseDir
-            )
+            self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor,
+                predictor, # model loaded from file
                 dataset=dataset,
-                comparison_model=new_predictor,
+                comparison_model=comparison_model, # comparison model not saved/loaded
                 expect_equal_result=random_state[0] == random_state[1],
             )
         else:
@@ -452,22 +446,20 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
         )
 
         # make predictions with the trained model and check if the results are (not)
-        # equal if the random state is the (not) same
+        # equal if the random state is the (not) same and at the same time
+        # check if the output is the same before and after saving and loading
         if random_state[0] is not None:
-            model = self.getModel(
+            comparison_model = self.getModel(
                 name=f"{model_name}_multitask_classification",
                 alg=model_class,
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(model, dataset)
-            new_predictor = SklearnModel(
-                name=f"{model_name}_multitask_classification", base_dir=model.baseDir
-            )
+            self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor,
+                predictor, # model loaded from file
                 dataset=dataset,
-                comparison_model=new_predictor,
+                comparison_model=comparison_model, # comparison model not saved/loaded
                 expect_equal_result=random_state[0] == random_state[1],
             )
         else:

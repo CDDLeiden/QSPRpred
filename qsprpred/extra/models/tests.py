@@ -143,25 +143,25 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
             name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
         )
 
+        # make predictions with the trained model and check if the results are (not)
+        # equal if the random state is the (not) same and at the same time
+        # check if the output is the same before and after saving and loading
         for protein_id in sorted(set(dataset.getProperty(dataset.proteinCol))):
             subset = dataset.searchOnProperty(
                 dataset.proteinCol, [protein_id], exact=True
             )
             if random_state[0] is not None:
-                model = self.getModel(
+                comparison_model = self.getModel(
                     name=f"{model_name}_{props[0]['task']}",
                     alg=model_class,
                     parameters=parameters,
                     random_state=random_state[1],
                 )
-                self.fitTest(model, dataset)
-                predictor_new = SklearnPCMModel(
-                    name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
-                )
+                self.fitTest(comparison_model, dataset)
                 self.predictorTest(
-                    predictor,
+                    predictor, # model loaded from file
                     subset,
-                    comparison_model=predictor_new,
+                    comparison_model=comparison_model, # model not loaded from file
                     protein_id=protein_id,
                     expect_equal_result=random_state[0] == random_state[1],
                 )
@@ -226,25 +226,27 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
             random_state=random_state[0],
         )
         self.fitTest(model, dataset)
-        predictor = RandomModel(name=f"{model_name}_{task}", base_dir=model.baseDir, alg=MedianDistributionAlgorithm)
-        # pred_use_probas, pred_not_use_probas = self.predictorTest(predictor, dataset)
+        # load model from file
+        predictor = RandomModel(
+            name=f"{model_name}_{task}",
+            base_dir=model.baseDir,
+            alg=MedianDistributionAlgorithm
+        )
         self.predictorTest(predictor, dataset)
 
+        # test if the results are (not) equal if the random state is the (not) same
+        # and check if the output is the same before and after saving and loading
         if random_state[0] is not None:
-            model = self.getModel(
+            comparison_model = self.getModel(
                 name=f"{model_name}_{task}",
                 random_state=random_state[1],
             )
-            self.fitTest(model, dataset)
-            predictor = RandomModel(
-                name=f"{model_name}_{task}", base_dir=model.baseDir, alg=MedianDistributionAlgorithm
-            )
+            self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor,
+                predictor, # model loaded from file
                 dataset,
+                comparison_model, # model not loaded from file
                 expect_equal_result=random_state[0] == random_state[1],
-                # expected_pred_use_probas=pred_use_probas,
-                # expected_pred_not_use_probas=pred_not_use_probas,
             )
 
     @parameterized.expand(
@@ -279,25 +281,25 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
         )
         self.fitTest(model, dataset)
         predictor = RandomModel(
-            name=f"{model_name}_multitask_regression", base_dir=model.baseDir, alg=MedianDistributionAlgorithm
+            name=f"{model_name}_multitask_regression",
+            base_dir=model.baseDir,
+            alg=MedianDistributionAlgorithm
         )
-        # pred_use_probas, pred_not_use_probas = self.predictorTest(predictor, dataset)
         self.predictorTest(predictor, dataset)
+        
+        # test if the results are (not) equal if the random state is the (not) same
+        # and check if the output is the same before and after saving and loading
         if random_state[0] is not None:
-            model = self.getModel(
+            comparison_model = self.getModel(
                 name=f"{model_name}_multitask_regression",
                 random_state=random_state[1],
             )
-            self.fitTest(model, dataset)
-            predictor = RandomModel(
-                name=f"{model_name}_multitask_regression", base_dir=model.baseDir, alg=MedianDistributionAlgorithm
-            )
+            self.fitTest(comparison_model, dataset)
             self.predictorTest(
                 predictor,
                 dataset,
+                comparison_model,
                 expect_equal_result=random_state[0] == random_state[1],
-                # expected_pred_use_probas=pred_use_probas,
-                # expected_pred_not_use_probas=pred_not_use_probas,
             )
 
 
@@ -336,26 +338,29 @@ class TestRandomModelClassification(RandomBaseModelTestCase):
             random_state=random_state[0],
         )
         self.fitTest(model, dataset)
-        predictor = RandomModel(name=f"{model_name}_{task}", base_dir=model.baseDir, alg=RatioDistributionAlgorithm)
-        # pred_use_probas, pred_not_use_probas = self.predictorTest(predictor, dataset)
+        predictor = RandomModel(
+            name=f"{model_name}_{task}",
+            base_dir=model.baseDir,
+            alg=RatioDistributionAlgorithm
+        )
+
         self.predictorTest(predictor, dataset)
+        
+        # test if the results are (not) equal if the random state is the (not) same
+        # and check if the output is the same before and after saving and loading
         if random_state[0] is not None:
-            model = self.getModel(
+            comparison_model = self.getModel(
                 name=f"{model_name}_{task}",
                 alg=model_class,
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(model, dataset)
-            predictor = RandomModel(
-                name=f"{model_name}_{task}", base_dir=model.baseDir, alg=RatioDistributionAlgorithm
-            )
+            self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor,
+                predictor, # model loaded from file
                 dataset,
+                comparison_model, # model not loaded from file
                 expect_equal_result=random_state[0] == random_state[1],
-                # expected_pred_use_probas=pred_use_probas,
-                # expected_pred_not_use_probas=pred_not_use_probas,
             )
 
 
@@ -401,25 +406,26 @@ class TestRandomModelClassificationMultiTask(RandomBaseModelTestCase):
         )
         self.fitTest(model, dataset)
         predictor = RandomModel(
-            name=f"{model_name}_multitask_classification", base_dir=model.baseDir, alg=RatioDistributionAlgorithm
+            name=f"{model_name}_multitask_classification",
+            base_dir=model.baseDir,
+            alg=RatioDistributionAlgorithm
         )
-        # pred_use_probas, pred_not_use_probas = self.predictorTest(predictor, dataset)
+
         self.predictorTest(predictor, dataset)
+        
+        # test if the results are (not) equal if the random state is the (not) same
+        # and check if the output is the same before and after saving and loading
         if random_state[0] is not None:
-            model = self.getModel(
+            comparison_model = self.getModel(
                 name=f"{model_name}_multitask_classification",
                 alg=model_class,
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(model, dataset)
-            predictor = RandomModel(
-                name=f"{model_name}_multitask_classification", base_dir=model.baseDir, alg=RatioDistributionAlgorithm
-            )
+            self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor,
+                predictor, # model loaded from file
                 dataset,
+                comparison_model, # model not loaded from file
                 expect_equal_result=random_state[0] == random_state[1],
-                # expected_pred_use_probas=pred_use_probas,
-                # expected_pred_not_use_probas=pred_not_use_probas,
             )

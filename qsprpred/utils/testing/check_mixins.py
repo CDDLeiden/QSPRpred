@@ -26,6 +26,7 @@ from ...models import (
     FitMonitor,
     BaseMonitor,
     FileMonitor,
+    HyperparameterOptimization,
 )
 from ...models.monitors import ListMonitor
 from ...tasks import TargetProperty
@@ -234,6 +235,25 @@ class ModelCheckMixIn:
         grid_params = model.__class__.loadParamsGrid(self.gridFile, grid, mname)
         return grid_params[grid_params[:, 0] == mname, 1][0]
 
+    def checkOptimization(
+        self, model: QSPRModel, ds: QSPRDataset, optimizer: HyperparameterOptimization
+    ):
+        model_path, est_path = model.save(save_estimator=True)
+        # get last modified time stamp of the model file
+        model_last_modified = os.path.getmtime(est_path)
+        best_params = optimizer.optimize(model, ds)
+        for param in best_params:
+            self.assertEqual(best_params[param], model.parameters[param])
+        new_time_modified = os.path.getmtime(est_path)
+        self.assertTrue(model_last_modified < new_time_modified)
+        optimizer.optimize(model, ds, refit_optimal=True)
+        model_last_modified = new_time_modified
+        new_time_modified = os.path.getmtime(est_path)
+        self.assertTrue(model_last_modified < new_time_modified)
+        model_new = model.__class__.fromFile(model.metaFile)
+        for param in model.parameters:
+            self.assertEqual(model_new.parameters[param], model.parameters[param])
+
     def fitTest(self, model: QSPRModel, ds: QSPRDataset):
         """Test model fitting, optimization and evaluation.
 
@@ -252,12 +272,8 @@ class ModelCheckMixIn:
                 scoring=score_func, mode=EarlyStoppingMode.NOT_RECORDING
             ),
         )
-        best_params = bayesoptimizer.optimize(model, ds)
-        model.setParams(best_params)
-        model.save()
-        model_new = model.__class__.fromFile(model.metaFile)
-        for param in best_params:
-            self.assertEqual(model_new.parameters[param], best_params[param])
+        self.checkOptimization(model, ds, bayesoptimizer)
+        model.cleanFiles()
         # perform grid search
         search_space_gs = self.getParamGrid(model, "grid")
         if model.task.isClassification():
@@ -271,10 +287,7 @@ class ModelCheckMixIn:
                 mode=EarlyStoppingMode.NOT_RECORDING,
             ),
         )
-        best_params = gridsearcher.optimize(model, ds)
-        model_new = model.__class__.fromFile(model.metaFile)
-        for param in best_params:
-            self.assertEqual(model_new.parameters[param], best_params[param])
+        self.checkOptimization(model, ds, gridsearcher)
         model.cleanFiles()
         # perform crossvalidation
         score_func = "r2" if model.task.isRegression() else "roc_auc_ovr"

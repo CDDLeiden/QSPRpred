@@ -540,7 +540,7 @@ class PredictorDesc(DescriptorSet):
         """
         super().__init__()
         if isinstance(model, str):
-            from ...models.models import QSPRModel
+            from ...models.model import QSPRModel
 
             self.model = QSPRModel.fromFile(model)
         else:
@@ -555,7 +555,7 @@ class PredictorDesc(DescriptorSet):
 
     def __setstate__(self, state):
         super().__setstate__(state)
-        from ...models.models import QSPRModel
+        from ...models.model import QSPRModel
 
         self.model = QSPRModel.fromFile(self.model)
 
