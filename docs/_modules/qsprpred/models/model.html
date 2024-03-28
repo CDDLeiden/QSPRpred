@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models.models &mdash; QSPRpred 3.0.0 documentation</title>
+  <title>qsprpred.models.model &mdash; QSPRpred 3.0.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="../../../_static/documentation_options.js?v=3f474186"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0
+                v3.0.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -87,7 +87,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
-      <li class="breadcrumb-item active">qsprpred.models.models</li>
+      <li class="breadcrumb-item active">qsprpred.models.model</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -96,7 +96,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for qsprpred.models.models</h1><div class="highlight"><pre>
+  <h1>Source code for qsprpred.models.model</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;This module holds the base class for QSPRmodels, model types should be a subclass.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">copy</span>
@@ -125,7 +125,7 @@
 
 
 <div class="viewcode-block" id="QSPRModel">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel">[docs]</a>
 <span class="k">class</span> <span class="nc">QSPRModel</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The definition of the common model interface for the package.</span>
 
@@ -158,7 +158,7 @@
     <span class="n">_notJSON</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">ClassVar</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;estimator&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">JSONSerializable</span><span class="o">.</span><span class="n">_notJSON</span><span class="p">]</span>
 
 <div class="viewcode-block" id="QSPRModel.handleInvalidsInPredictions">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.handleInvalidsInPredictions">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.handleInvalidsInPredictions">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">handleInvalidsInPredictions</span><span class="p">(</span>
         <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
@@ -192,7 +192,7 @@
 
 
 <div class="viewcode-block" id="QSPRModel.loadParamsGrid">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.loadParamsGrid">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.loadParamsGrid">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">loadParamsGrid</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">fname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">optim_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model_types</span><span class="p">:</span> <span class="nb">str</span>
@@ -325,7 +325,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadEstimator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
 
 <div class="viewcode-block" id="QSPRModel.initFromDataset">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.initFromDataset">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.initFromDataset">[docs]</a>
     <span class="k">def</span> <span class="nf">initFromDataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">QSPRDataset</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">targetProperties</span>
@@ -342,7 +342,7 @@
 
 
 <div class="viewcode-block" id="QSPRModel.initRandomState">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.initRandomState">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.initRandomState">[docs]</a>
     <span class="k">def</span> <span class="nf">initRandomState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">random_state</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set random state if applicable.</span>
 <span class="sd">        Defaults to random state of dataset if no random state is provided,</span>
@@ -352,7 +352,7 @@
 <span class="sd">                Random state to use for shuffling and other random operations.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">random_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">32</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">31</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">))</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="s2">&quot;No random state supplied.&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;Setting random state to: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">randomState</span><span class="si">}</span><span class="s2">.&quot;</span>
@@ -479,21 +479,27 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_optimalEpochs</span> <span class="o">=</span> <span class="n">value</span>
 
 <div class="viewcode-block" id="QSPRModel.setParams">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.setParams">[docs]</a>
-    <span class="k">def</span> <span class="nf">setParams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set model parameters.</span>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.setParams">[docs]</a>
+    <span class="k">def</span> <span class="nf">setParams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">reset_estimator</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set model parameters. The estimator is also</span>
+<span class="sd">        updated with the new parameters if &#39;reload_estimator&#39; is `True`.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            params (dict): dictionary of model parameters</span>
+<span class="sd">            params (dict):</span>
+<span class="sd">                dictionary of model parameters or `None` to reset the parameters</span>
+<span class="sd">            reset_estimator (bool):</span>
+<span class="sd">                if `True`, the estimator is reinitialized with the new parameters</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">params</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">params</span>
+        <span class="k">if</span> <span class="n">reset_estimator</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadEstimator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="QSPRModel.checkData">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.checkData">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.checkData">[docs]</a>
     <span class="k">def</span> <span class="nf">checkData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">exception</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the model has a data set.</span>
 
@@ -515,7 +521,7 @@
 
 
 <div class="viewcode-block" id="QSPRModel.convertToNumpy">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.convertToNumpy">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.convertToNumpy">[docs]</a>
     <span class="k">def</span> <span class="nf">convertToNumpy</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">QSPRDataset</span><span class="p">,</span>
@@ -545,7 +551,7 @@
 
 
 <div class="viewcode-block" id="QSPRModel.getParameters">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.getParameters">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.getParameters">[docs]</a>
     <span class="k">def</span> <span class="nf">getParameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_parameters</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the model parameters combined with the given parameters.</span>
 
@@ -567,7 +573,7 @@
 
 
 <div class="viewcode-block" id="QSPRModel.createPredictionDatasetFromMols">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.createPredictionDatasetFromMols">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.createPredictionDatasetFromMols">[docs]</a>
     <span class="k">def</span> <span class="nf">createPredictionDatasetFromMols</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Mol</span><span class="p">],</span>
@@ -622,7 +628,7 @@
 
 
 <div class="viewcode-block" id="QSPRModel.predictDataset">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.predictDataset">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.predictDataset">[docs]</a>
     <span class="k">def</span> <span class="nf">predictDataset</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">use_probas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
@@ -650,7 +656,7 @@
 
 
 <div class="viewcode-block" id="QSPRModel.predictMols">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.predictMols">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.predictMols">[docs]</a>
     <span class="k">def</span> <span class="nf">predictMols</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">mols</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Mol</span><span class="p">],</span>
@@ -695,16 +701,17 @@
         <span class="c1"># return predictions and if mols are within applicability domain if requested</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;applicabilityDomain&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">use_applicability_domain</span><span class="p">:</span>
             <span class="n">in_domain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span>
-                <span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">(</span><span class="n">concat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="p">)</span>
+                <span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">(</span><span class="n">concat</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ordered</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">refit_standardizer</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">values</span>
             <span class="n">in_domain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">handleInvalidsInPredictions</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="n">in_domain</span><span class="p">,</span> <span class="n">failed_mask</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">predictions</span><span class="p">,</span> <span class="n">in_domain</span><span class="o">.</span><span class="n">values</span>
+            
+            <span class="k">return</span> <span class="n">predictions</span><span class="p">,</span> <span class="n">in_domain</span>
 
         <span class="k">return</span> <span class="n">predictions</span></div>
 
 
 <div class="viewcode-block" id="QSPRModel.cleanFiles">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.cleanFiles">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.cleanFiles">[docs]</a>
     <span class="k">def</span> <span class="nf">cleanFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Clean up the model files.</span>
 
@@ -715,7 +722,7 @@
 
 
 <div class="viewcode-block" id="QSPRModel.fitDataset">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.fitDataset">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.fitDataset">[docs]</a>
     <span class="k">def</span> <span class="nf">fitDataset</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span>
@@ -774,7 +781,7 @@
 
 
 <div class="viewcode-block" id="QSPRModel.toJSON">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.toJSON">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.toJSON">[docs]</a>
     <span class="k">def</span> <span class="nf">toJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">o_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">toJSON</span><span class="p">())</span>
         <span class="n">estimator_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveEstimator</span><span class="p">()</span>
@@ -786,19 +793,33 @@
 
 
 <div class="viewcode-block" id="QSPRModel.save">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.save">[docs]</a>
-    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.save">[docs]</a>
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_estimator</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Save model to file.</span>
 
+<span class="sd">        Args:</span>
+<span class="sd">            save_estimator (bool):</span>
+<span class="sd">                Explicitly save the estimator to file, if `True`.</span>
+<span class="sd">                Note that some models may save the estimator by default</span>
+<span class="sd">                even if this argument is `False`.</span>
+
 <span class="sd">        Returns:</span>
-<span class="sd">            str: absolute path to the saved model</span>
+<span class="sd">            str:</span>
+<span class="sd">                absolute path to the metafile of the saved model</span>
+<span class="sd">            str:</span>
+<span class="sd">                absolute path to the saved estimator, if `include_estimator` is `True`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outDir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">toFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span></div>
+        <span class="n">meta_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">toFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_estimator</span><span class="p">:</span>
+            <span class="n">est_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveEstimator</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">meta_path</span><span class="p">,</span> <span class="n">est_path</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">meta_path</span></div>
 
 
 <div class="viewcode-block" id="QSPRModel.fromFile">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.fromFile">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.fromFile">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">fromFile</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;QSPRModel&quot;</span><span class="p">:</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -809,7 +830,7 @@
 
 
 <div class="viewcode-block" id="QSPRModel.fit">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.fit">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.fit">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -849,7 +870,7 @@
 
 
 <div class="viewcode-block" id="QSPRModel.predict">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.predict">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.predict">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">estimator</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
@@ -874,7 +895,7 @@
 
 
 <div class="viewcode-block" id="QSPRModel.predictProba">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.predictProba">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.predictProba">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">predictProba</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">estimator</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
@@ -902,7 +923,7 @@
 
 
 <div class="viewcode-block" id="QSPRModel.loadEstimator">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.loadEstimator">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.loadEstimator">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">loadEstimator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize estimator instance with the given parameters.</span>
@@ -918,7 +939,7 @@
 
 
 <div class="viewcode-block" id="QSPRModel.loadEstimatorFromFile">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.loadEstimatorFromFile">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.loadEstimatorFromFile">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">loadEstimatorFromFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load estimator instance from file and apply the given parameters.</span>
@@ -932,7 +953,7 @@
 
 
 <div class="viewcode-block" id="QSPRModel.saveEstimator">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.models.QSPRModel.saveEstimator">[docs]</a>
+<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.model.QSPRModel.saveEstimator">[docs]</a>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">saveEstimator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the underlying estimator to file.</span>

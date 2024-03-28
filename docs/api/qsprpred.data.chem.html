@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.chem package &mdash; QSPRpred 3.0.0 documentation</title>
+  <title>qsprpred.data.chem package &mdash; QSPRpred 3.0.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="../_static/documentation_options.js?v=3f474186"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0
+                v3.0.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -297,7 +297,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.data.chem.clustering.ScaffoldClusters">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.chem.clustering.</span></span><span class="sig-name descname"><span class="pre">ScaffoldClusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaffold:</span> <span class="pre">~qsprpred.data.chem.scaffolds.Scaffold</span> <span class="pre">=</span> <span class="pre">&lt;qsprpred.data.chem.scaffolds.Murcko</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/chem/clustering.html#ScaffoldClusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.clustering.ScaffoldClusters" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.chem.clustering.</span></span><span class="sig-name descname"><span class="pre">ScaffoldClusters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaffold:</span> <span class="pre">~qsprpred.data.chem.scaffolds.Scaffold</span> <span class="pre">=</span> <span class="pre">&lt;qsprpred.data.chem.scaffolds.BemisMurckoRDKit</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/chem/clustering.html#ScaffoldClusters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.clustering.ScaffoldClusters" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qsprpred.data.chem.clustering.MoleculeClusters" title="qsprpred.data.chem.clustering.MoleculeClusters"><code class="xref py py-class docutils literal notranslate"><span class="pre">MoleculeClusters</span></code></a></p>
 <p>Cluster molecules based on scaffolds.</p>
 <dl class="field-list simple">
@@ -411,10 +411,12 @@ that the processor requires certain properties to be passed to the
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="qsprpred.data.chem.scaffolds.Murcko">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.chem.scaffolds.</span></span><span class="sig-name descname"><span class="pre">Murcko</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_prop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/chem/scaffolds.html#Murcko"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.scaffolds.Murcko" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qsprpred.data.chem.scaffolds.BemisMurckoRDKit">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.chem.scaffolds.</span></span><span class="sig-name descname"><span class="pre">BemisMurckoRDKit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_prop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/chem/scaffolds.html#BemisMurckoRDKit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.scaffolds.BemisMurckoRDKit" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qsprpred.data.chem.scaffolds.Scaffold" title="qsprpred.data.chem.scaffolds.Scaffold"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scaffold</span></code></a></p>
-<p>Class for calculating Murcko scaffolds of a given molecule.</p>
+<p>Class for calculating Murcko scaffolds of a given molecule
+using the default implementation in RDKit. If you want, an implementation
+closer to the original paper, see the <a class="reference internal" href="#qsprpred.data.chem.scaffolds.BemisMurcko" title="qsprpred.data.chem.scaffolds.BemisMurcko"><code class="xref any py py-class docutils literal notranslate"><span class="pre">BemisMurcko</span></code></a> class.</p>
 <p>Initialize the processor with the name of the property that contains the
 molecule’s unique identifier.</p>
 <dl class="field-list simple">
@@ -424,16 +426,16 @@ Defaults to “QSPRID”.</p>
 </dd>
 </dl>
 <dl class="py property">
-<dt class="sig sig-object py" id="qsprpred.data.chem.scaffolds.Murcko.requiredProps">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">requiredProps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qsprpred.data.chem.scaffolds.Murcko.requiredProps" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qsprpred.data.chem.scaffolds.BemisMurckoRDKit.requiredProps">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">requiredProps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qsprpred.data.chem.scaffolds.BemisMurckoRDKit.requiredProps" title="Link to this definition"></a></dt>
 <dd><p>The properties required by the processor. This is to inform the caller
 that the processor requires certain properties to be passed to the
 <code class="xref any docutils literal notranslate"><span class="pre">__call__</span></code> method. By default, no properties are required.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.data.chem.scaffolds.Murcko.supportsParallel">
-<span class="sig-name descname"><span class="pre">supportsParallel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#qsprpred.data.chem.scaffolds.Murcko.supportsParallel" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qsprpred.data.chem.scaffolds.BemisMurckoRDKit.supportsParallel">
+<span class="sig-name descname"><span class="pre">supportsParallel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#qsprpred.data.chem.scaffolds.BemisMurckoRDKit.supportsParallel" title="Link to this definition"></a></dt>
 <dd><p>Whether the processor supports parallel processing.</p>
 </dd></dl>
 
@@ -1378,31 +1380,31 @@ block, allowing further test code to be executed.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.chem.tests.TestScaffolds.testScaffoldAdd_0_Murcko">
 <span class="sig-name descname"><span class="pre">testScaffoldAdd_0_Murcko</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.chem.tests.TestScaffolds.testScaffoldAdd_0_Murcko" title="Link to this definition"></a></dt>
-<dd><p>Test the adding and getting of scaffolds [with _=’Murcko’, scaffold=&lt;qsprpred.data.chem.scaffolds.Murcko object at 0x7fd875a6ee60&gt;].</p>
+<dd><p>Test the adding and getting of scaffolds [with _=’Murcko’, scaffold=&lt;qsprpred.data.chem.scaffolds.Be…oRDKit object at 0x7f6c3a9108e0&gt;].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.chem.tests.TestScaffolds.testScaffoldAdd_1_BemisMurcko">
 <span class="sig-name descname"><span class="pre">testScaffoldAdd_1_BemisMurcko</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.chem.tests.TestScaffolds.testScaffoldAdd_1_BemisMurcko" title="Link to this definition"></a></dt>
-<dd><p>Test the adding and getting of scaffolds [with _=’BemisMurcko’, scaffold=&lt;qsprpred.data.chem.scaffolds.Be…Murcko object at 0x7fd875a6ef50&gt;].</p>
+<dd><p>Test the adding and getting of scaffolds [with _=’BemisMurcko’, scaffold=&lt;qsprpred.data.chem.scaffolds.Be…Murcko object at 0x7f6c3a910a60&gt;].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.chem.tests.TestScaffolds.testScaffoldAdd_2_BemisMurckoCSK">
 <span class="sig-name descname"><span class="pre">testScaffoldAdd_2_BemisMurckoCSK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.chem.tests.TestScaffolds.testScaffoldAdd_2_BemisMurckoCSK" title="Link to this definition"></a></dt>
-<dd><p>Test the adding and getting of scaffolds [with _=’BemisMurckoCSK’, scaffold=&lt;qsprpred.data.chem.scaffolds.Be…Murcko object at 0x7fd875a6ef20&gt;].</p>
+<dd><p>Test the adding and getting of scaffolds [with _=’BemisMurckoCSK’, scaffold=&lt;qsprpred.data.chem.scaffolds.Be…Murcko object at 0x7f6c3a910970&gt;].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.chem.tests.TestScaffolds.testScaffoldAdd_3_BemisMurckoJustCSK">
 <span class="sig-name descname"><span class="pre">testScaffoldAdd_3_BemisMurckoJustCSK</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.chem.tests.TestScaffolds.testScaffoldAdd_3_BemisMurckoJustCSK" title="Link to this definition"></a></dt>
-<dd><p>Test the adding and getting of scaffolds [with _=’BemisMurckoJustCSK’, scaffold=&lt;qsprpred.data.chem.scaffolds.Be…Murcko object at 0x7fd875adf940&gt;].</p>
+<dd><p>Test the adding and getting of scaffolds [with _=’BemisMurckoJustCSK’, scaffold=&lt;qsprpred.data.chem.scaffolds.Be…Murcko object at 0x7f6c3a910af0&gt;].</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.chem.tests.TestScaffolds.testScaffoldAdd_4_BemisMurckoOff">
 <span class="sig-name descname"><span class="pre">testScaffoldAdd_4_BemisMurckoOff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.chem.tests.TestScaffolds.testScaffoldAdd_4_BemisMurckoOff" title="Link to this definition"></a></dt>
-<dd><p>Test the adding and getting of scaffolds [with _=’BemisMurckoOff’, scaffold=&lt;qsprpred.data.chem.scaffolds.Be…Murcko object at 0x7fd875add900&gt;].</p>
+<dd><p>Test the adding and getting of scaffolds [with _=’BemisMurckoOff’, scaffold=&lt;qsprpred.data.chem.scaffolds.Be…Murcko object at 0x7f6c3a910ca0&gt;].</p>
 </dd></dl>
 
 <dl class="py method">

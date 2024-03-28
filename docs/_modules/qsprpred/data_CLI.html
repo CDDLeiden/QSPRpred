@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data_CLI &mdash; QSPRpred 3.0.0 documentation</title>
+  <title>qsprpred.data_CLI &mdash; QSPRpred 3.0.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="../../_static/documentation_options.js?v=3f474186"></script>
         <script src="../../_static/doctools.js?v=888ff710"></script>
         <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0
+                v3.0.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -114,6 +114,10 @@
 <span class="kn">from</span> <span class="nn">sklearn.impute</span> <span class="kn">import</span> <span class="n">SimpleImputer</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
 
+<span class="kn">from</span> <span class="nn">qsprpred.data.chem.clustering</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">FPSimilarityMaxMinClusters</span><span class="p">,</span>
+    <span class="n">FPSimilarityLeaderPickerClusters</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">qsprpred.data.descriptors.fingerprints</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">MorganFP</span><span class="p">,</span>
     <span class="n">RDKitMACCSFP</span><span class="p">,</span>
@@ -122,10 +126,6 @@
     <span class="n">PatternFP</span><span class="p">,</span>
     <span class="n">RDKitFP</span><span class="p">,</span>
     <span class="n">AvalonFP</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.chem.clustering</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">FPSimilarityMaxMinClusters</span><span class="p">,</span>
-    <span class="n">FPSimilarityLeaderPickerClusters</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">qsprpred.data.descriptors.sets</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">DrugExPhyschem</span><span class="p">,</span>
@@ -148,7 +148,7 @@
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">qsprpred.data.tables.qspr</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
 <span class="kn">from</span> <span class="nn">qsprpred.tasks</span> <span class="kn">import</span> <span class="n">TargetTasks</span>
-<span class="kn">from</span> <span class="nn">.data.chem.scaffolds</span> <span class="kn">import</span> <span class="n">Murcko</span>
+<span class="kn">from</span> <span class="nn">.data.chem.scaffolds</span> <span class="kn">import</span> <span class="n">BemisMurckoRDKit</span>
 <span class="kn">from</span> <span class="nn">.extra.gpu.models.dnn</span> <span class="kn">import</span> <span class="n">DNNModel</span>
 <span class="kn">from</span> <span class="nn">.logs.utils</span> <span class="kn">import</span> <span class="n">backup_files</span><span class="p">,</span> <span class="n">enable_file_logger</span>
 <span class="kn">from</span> <span class="nn">.models.scikit_learn</span> <span class="kn">import</span> <span class="n">SklearnModel</span>
@@ -467,7 +467,7 @@
                         <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
                         <span class="s2">&quot;imputer&quot;</span><span class="p">:</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">imputation</span><span class="p">[</span><span class="n">prop</span><span class="p">])</span>
                         <span class="k">if</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">imputation</span>
-                        <span class="k">else</span> <span class="kc">None</span>
+                        <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="p">}</span>
                 <span class="p">)</span>
             <span class="n">dataset_name</span> <span class="o">=</span> <span class="p">(</span>
@@ -495,7 +495,7 @@
             <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">split</span> <span class="o">==</span> <span class="s2">&quot;scaffold&quot;</span><span class="p">:</span>
                 <span class="n">split</span> <span class="o">=</span> <span class="n">ScaffoldSplit</span><span class="p">(</span>
                     <span class="n">test_fraction</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">split_fraction</span><span class="p">,</span>
-                    <span class="n">scaffold</span><span class="o">=</span><span class="n">Murcko</span><span class="p">(),</span>
+                    <span class="n">scaffold</span><span class="o">=</span><span class="n">BemisMurckoRDKit</span><span class="p">(),</span>
                     <span class="n">dataset</span><span class="o">=</span><span class="n">mydataset</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">split</span> <span class="o">==</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span>
@@ -630,11 +630,14 @@
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span>
 
     <span class="c1"># get a list of all the folders in the output directory</span>
-    <span class="n">folders</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)]</span>
+    <span class="n">folders</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">f</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="p">]</span>
 
     <span class="c1"># remove folders that start with backup</span>
     <span class="n">folders</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">folders</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;backup&quot;</span><span class="p">)]</span>
-
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">skip_backup</span><span class="p">:</span>
         <span class="n">backup_msg</span> <span class="o">=</span> <span class="n">backup_files</span><span class="p">(</span>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.tables.qspr &mdash; QSPRpred 3.0.0 documentation</title>
+  <title>qsprpred.data.tables.qspr &mdash; QSPRpred 3.0.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=acc74ff5"></script>
+        <script src="../../../../_static/documentation_options.js?v=3f474186"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.0
+                v3.0.2
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -389,7 +389,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            list[str]: list of feature names</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDescriptors</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDescriptors</span><span class="p">():</span>
             <span class="k">return</span> <span class="p">[]</span>
         <span class="n">features</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">:</span>
@@ -608,6 +608,8 @@
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">ds</span><span class="o">.</span><span class="n">descriptors</span> <span class="o">=</span> <span class="n">mol_table</span><span class="o">.</span><span class="n">descriptors</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">featureNames</span> <span class="o">=</span> <span class="n">mol_table</span><span class="o">.</span><span class="n">getDescriptorNames</span><span class="p">()</span>
+        <span class="n">ds</span><span class="o">.</span><span class="n">loadDescriptorsToSplits</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">ds</span></div>
 
 
@@ -778,10 +780,6 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: if no descriptors are available</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDescriptors</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;No descriptors available. Cannot load descriptors to splits.&quot;</span>
-            <span class="p">)</span>
         <span class="n">descriptors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDescriptors</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">descriptors</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="p">:]</span>
@@ -841,7 +839,7 @@
 <span class="sd">        shuffle (bool): whether to shuffle the training and test sets</span>
 <span class="sd">        random_state (int): random state for shuffling</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDescriptors</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasFeatures</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDescriptors</span><span class="p">()</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasFeatures</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">loadDescriptorsToSplits</span><span class="p">(</span>
                 <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span>
             <span class="p">)</span>
@@ -1054,9 +1052,9 @@
         <span class="k">if</span> <span class="n">split</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">split</span><span class="p">)</span>
         <span class="c1"># apply feature filters on training set</span>
-        <span class="k">if</span> <span class="n">feature_filters</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDescriptors</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">feature_filters</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDescriptors</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">filterFeatures</span><span class="p">(</span><span class="n">feature_filters</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDescriptors</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDescriptors</span><span class="p">():</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No descriptors present, feature filters will be skipped.&quot;</span><span class="p">)</span>
         <span class="c1"># set feature standardizers</span>
         <span class="k">if</span> <span class="n">feature_standardizer</span><span class="p">:</span>
@@ -1256,14 +1254,20 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">restoreTrainingData</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="QSPRDataset.transform">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.transform">[docs]</a>
-    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">transformer</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">add_as</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">transformer</span><span class="p">,</span> <span class="n">add_as</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">add_as</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">targets</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetPropertyNames</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">restoreTrainingData</span><span class="p">()</span></div>
+<div class="viewcode-block" id="QSPRDataset.transformProperties">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset.transformProperties">[docs]</a>
+    <span class="k">def</span> <span class="nf">transformProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">transformer</span><span class="p">:</span> <span class="n">Callable</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform the target properties using the given transformer.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            targets (list[str]): list of target properties names to transform</span>
+<span class="sd">            transformer (Callable): transformer function</span>
+<span class="sd">            add_as (list[str] | None, optional): list of names to add the transformed</span>
+<span class="sd">                target properties as. If `None`, the original target properties will be</span>
+<span class="sd">                overwritten. Defaults to `None`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">transformProperties</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="n">transformer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restoreTrainingData</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="QSPRDataset.imputeProperties">
@@ -1304,10 +1308,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">imputeProperties</span><span class="p">([</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">],</span> <span class="n">prop</span><span class="o">.</span><span class="n">imputer</span><span class="p">)</span>
         <span class="c1"># transform the property</span>
         <span class="k">if</span> <span class="n">prop</span><span class="o">.</span><span class="n">transformer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
-                <span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
-                <span class="n">prop</span><span class="o">.</span><span class="n">transformer</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">transformProperties</span><span class="p">([</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">],</span> <span class="n">prop</span><span class="o">.</span><span class="n">transformer</span><span class="p">)</span>
         <span class="c1"># drop rows with missing smiles/no target property for any of</span>
         <span class="c1"># the target properties</span>
         <span class="k">if</span> <span class="n">drop_empty</span><span class="p">:</span>
