@@ -122,7 +122,7 @@ Overview of available features
 
     .. dropdown:: Models
 
-        :class:`~qsprpred.models.models.QSPRModel`: Base class for models.
+        :class:`~qsprpred.models.model.QSPRModel`: Base class for models.
 
         Models are used to predict properties of molecules.
         A general example can be found in the `quick start tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/quick_start.ipynb>`_.

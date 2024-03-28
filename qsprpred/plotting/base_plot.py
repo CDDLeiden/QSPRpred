@@ -3,7 +3,7 @@ import os
 from abc import ABC, abstractmethod
 from typing import Any
 
-from ..models.models import QSPRModel
+from ..models.model import QSPRModel
 
 
 class ModelPlot(ABC):
@@ -21,6 +21,7 @@ class ModelPlot(ABC):
         indPaths (dict[QSPRModel, str]):
             dictionary of models mapped to their independent test set results paths
     """
+
     def __init__(self, models: list[QSPRModel]):
         """Initialize the base class for all model plots.
 
@@ -55,13 +56,10 @@ class ModelPlot(ABC):
         ind_path = f"{self.modelOuts[model]}.ind.tsv"
         if model.task not in self.getSupportedTasks():
             raise ValueError("Unsupported model type: %s" % model.task)
-        if not os.path.exists(
-            model.metaFile
-        ):
+        if not os.path.exists(model.metaFile):
             raise ValueError(
                 "Model output file does not exist: %s. "
-                "Have you evaluated and saved the model, yet?" %
-                model.metaFile
+                "Have you evaluated and saved the model, yet?" % model.metaFile
             )
         if not os.path.exists(cv_path):
             raise ValueError(

@@ -24,7 +24,7 @@ from sklearn.model_selection import ShuffleSplit
 from ....data.sampling.splits import DataSplit
 from ....data.tables.qspr import QSPRDataset
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
-from ....models.models import QSPRModel
+from ....models.model import QSPRModel
 from ....models.monitors import BaseMonitor, FitMonitor
 from ....tasks import ModelTasks
 
