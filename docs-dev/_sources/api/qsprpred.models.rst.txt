@@ -36,10 +36,10 @@ qsprpred.models.metrics module
    :undoc-members:
    :show-inheritance:
 
-qsprpred.models.models module
------------------------------
+qsprpred.models.model module
+----------------------------
 
-.. automodule:: qsprpred.models.models
+.. automodule:: qsprpred.models.model
    :members:
    :undoc-members:
    :show-inheritance:
