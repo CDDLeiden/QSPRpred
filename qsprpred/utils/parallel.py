@@ -106,7 +106,7 @@ def parallel_jit_generator(
                         kwargs
                     ))
             except StopIteration:
-                # no more data, clear out the slice generator
+                # no more data, full_removal out the slice generator
                 done = True
             # wait for a free worker or until all remaining workers finish
             logger.debug(f"Waiting for {len(queue)} workers to finish...")

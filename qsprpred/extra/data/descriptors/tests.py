@@ -173,7 +173,7 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         self.assertTrue(len(dataset_new.featureNames) == len(self.sampleDescSet))
         self.assertTrue(all(mol_id in dataset_new.X_ind.index for mol_id in test_ids))
         self.assertTrue(all(mol_id in dataset_new.y_ind.index for mol_id in train_ids))
-        # clear files and try saving again
+        # full_removal files and try saving again
         dataset_new.clearFiles()
         dataset_new.save()
 

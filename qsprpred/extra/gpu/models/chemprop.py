@@ -605,9 +605,9 @@ class ChempropModel(QSPRModel):
         # find which column contains the SMILES strings
         prev_len = 0
         for calc in self.featureCalculators:
-            names = calc.descriptors
-            if "SMILES" in names:
-                smiles_column = names.index("SMILES") + prev_len
+            names = calc.transformToFeatureNames()
+            if f"{calc}_SMILES" in names:
+                smiles_column = names.index(f"{calc}_SMILES") + prev_len
                 break
             else:
                 prev_len += len(names)
