@@ -13,7 +13,7 @@ from qsprpred.data.sampling.splits import DataSplit
 from qsprpred.logs import logger
 from qsprpred.models.early_stopping import EarlyStoppingMode
 from qsprpred.models.metrics import SklearnMetrics
-from qsprpred.models.models import QSPRModel
+from qsprpred.models.model import QSPRModel
 from qsprpred.models.monitors import AssessorMonitor, BaseMonitor
 
 

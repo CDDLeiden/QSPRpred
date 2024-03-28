@@ -76,16 +76,16 @@ class DNNModel(QSPRModelPyTorchGPU):
             self.estimator.device = self.device
 
     def __init__(
-        self,
-        base_dir: str,
-        alg: Type = STFullyConnected,
-        name: str | None = None,
-        parameters: dict | None = None,
-        random_state: int | None = None,
-        autoload: bool = True,
-        gpus: list[int] = DEFAULT_TORCH_GPUS,
-        patience: int = 50,
-        tol: float = 0,
+            self,
+            base_dir: str,
+            alg: Type = STFullyConnected,
+            name: str | None = None,
+            parameters: dict | None = None,
+            random_state: int | None = None,
+            autoload: bool = True,
+            gpus: list[int] = DEFAULT_TORCH_GPUS,
+            patience: int = 50,
+            tol: float = 0,
     ):
         """Initialize a DNNModel model.
 
@@ -181,7 +181,7 @@ class DNNModel(QSPRModelPyTorchGPU):
         return estimator
 
     def loadEstimatorFromFile(
-        self, params: dict | None = None, fallback_load: bool = True
+            self, params: dict | None = None, fallback_load: bool = True
     ) -> object:
         """Load estimator from file.
 
@@ -215,32 +215,24 @@ class DNNModel(QSPRModelPyTorchGPU):
             str: path to the saved model
         """
         path = f"{self.outPrefix}_weights.pkg"
-        if self.estimator != "Uninitialized model.":
+        if not isinstance(self.estimator, str):
             torch.save(self.estimator.state_dict(), path)
-            return path
         else:
-            open(path, "w").close()
-            return path
-
-    def setParams(self, params: dict):
-        """Set parameters of the model.
-
-        Args:
-            params (dict): parameters
-        """
-        super().setParams(params)
-        self.estimator = self.loadEstimator(self.parameters)
+            # just save the estimator message
+            with open(path, "w") as f:
+                f.write(self.estimator)
+        return path
 
     @early_stopping
     def fit(
-        self,
-        X: pd.DataFrame | np.ndarray,
-        y: pd.DataFrame | np.ndarray,
-        estimator: Any | None = None,
-        mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
-        split: DataSplit | None = None,
-        monitor: FitMonitor | None = None,
-        **kwargs,
+            self,
+            X: pd.DataFrame | np.ndarray,
+            y: pd.DataFrame | np.ndarray,
+            estimator: Any | None = None,
+            mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+            split: DataSplit | None = None,
+            monitor: FitMonitor | None = None,
+            **kwargs,
     ):
         """Fit the model to the given data matrix or `QSPRDataset`.
 
@@ -297,7 +289,7 @@ class DNNModel(QSPRModelPyTorchGPU):
         return estimator_fit
 
     def predict(
-        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
+            self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
     ) -> np.ndarray:
         """See `QSPRModel.predict`."""
         estimator = self.estimator if estimator is None else estimator
@@ -311,7 +303,7 @@ class DNNModel(QSPRModelPyTorchGPU):
             return scores[0]
 
     def predictProba(
-        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
+            self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
     ) -> np.ndarray:
         """See `QSPRModel.predictProba`."""
         estimator = self.estimator if estimator is None else estimator

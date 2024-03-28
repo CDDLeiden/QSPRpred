@@ -118,11 +118,11 @@ Overview of available features
 
                 * :class:`~qsprpred.data.processing.feature_filters.HighCorrelationFilter`: HighCorrelationFilter
                 * :class:`~qsprpred.data.processing.feature_filters.LowVarianceFilter`: LowVarianceFilter
-                * :class:`~qsprpred.data.processing.feature_filters.BorutaFilter`: BorutaFilter
+                * :class:`~qsprpred.data.processing.feature_filters.BorutaFilter`: BorutaFilter (:code:`numpy` version restricted to :code:`numpy<1.24.0`)
 
     .. dropdown:: Models
 
-        :class:`~qsprpred.models.models.QSPRModel`: Base class for models.
+        :class:`~qsprpred.models.model.QSPRModel`: Base class for models.
 
         Models are used to predict properties of molecules.
         A general example can be found in the `quick start tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/quick_start.ipynb>`_.

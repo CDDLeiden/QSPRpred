@@ -782,7 +782,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             df_descriptors = pd.concat(df_descriptors, axis=0)
             df_descriptors[self.indexCols] = None
             df_descriptors.loc[self.df.index, self.indexCols] = self.df[self.indexCols]
-            self.attachDescriptors(calculator, df_descriptors, self.indexCols)
+            self.attachDescriptors(calculator, df_descriptors, [self.idProp])
 
     def getDescriptors(self):
         """Get the calculated descriptors as a pandas data frame.
@@ -790,17 +790,18 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         Returns:
             pd.DataFrame: Data frame containing only descriptors.
         """
-        join_cols = set()
-        for descriptors in self.descriptors:
-            join_cols.update(set(descriptors.indexCols))
-        join_cols = list(join_cols)
-        ret = self.df[join_cols].copy()
-        ret.reset_index(drop=True, inplace=True)
+        # join_cols = set()
+        # for descriptors in self.descriptors:
+        #     join_cols.update(set(descriptors.indexCols))
+        # join_cols = list(join_cols)
+        # ret = self.df[join_cols].copy()
+        # ret.reset_index(drop=True, inplace=True)
+        ret = pd.DataFrame(index=pd.Index(self.df.index.values, name=self.idProp))
         for descriptors in self.descriptors:
             df_descriptors = descriptors.getDescriptors()
-            ret = ret.join(df_descriptors, on=descriptors.indexCols, how="left")
-        ret.set_index(self.df.index, inplace=True)
-        ret.drop(columns=join_cols, inplace=True)
+            ret = ret.join(df_descriptors, how="left")
+        # ret.set_index(self.df.index, inplace=True)
+        # ret.drop(columns=join_cols, inplace=True)
         return ret
 
     def getDescriptorNames(self):

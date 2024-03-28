@@ -1,12 +1,10 @@
 # Change Log
 
-From v3.0.2 to v3.0.3
+From v3.0.2 to v3.1.0
 
 ## Fixes
 
-- Fixed a bug where an attached standardizer would be refit when calling
-  `QSPRModel.predictMols` with `use_applicability_domain=True`.
-- Fixed random seed not set in `FoldsFromDataSplit.iterFolds` for `ClusterSplit`.
+None.
 
 ## Changes
 
@@ -14,8 +12,7 @@ None.
 
 ## New Features
 
-- Added the `prepMols` method to `DescriptorSet` to allow separated customization of
-  molecule preparation before descriptor calculation.
+None.
 
 ## Removed Features
 

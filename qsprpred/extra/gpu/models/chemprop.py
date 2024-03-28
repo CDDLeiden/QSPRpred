@@ -20,7 +20,7 @@ from .base_torch import QSPRModelPyTorchGPU, DEFAULT_TORCH_GPUS
 from ....data.tables.qspr import QSPRDataset
 from ....logs import logger
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
-from ....models.models import QSPRModel
+from ....models.model import QSPRModel
 from ....models.monitors import BaseMonitor, FitMonitor
 
 
@@ -265,7 +265,7 @@ class ChempropModel(QSPRModelPyTorchGPU):
         if self.earlyStopping:
             total_data_size += len(val_data)
             self.chempropLogger.debug(
-                f"train size = {len(train_data):,}" f" | val size = {len(val_data):,}"
+                f"train size = {len(train_data):,} | val size = {len(val_data):,}"
             )
         self.chempropLogger.debug(f"Total size = {total_data_size:,}")
 
@@ -339,7 +339,7 @@ class ChempropModel(QSPRModelPyTorchGPU):
         )
         if not n_epochs:
             raise ValueError(
-                f"Number of epochs must be greater " f"than 0. Got: {n_epochs}"
+                f"Number of epochs must be greater than 0. Got: {n_epochs}"
             )
         best_estimator = estimator
         best_found = False
@@ -376,7 +376,7 @@ class ChempropModel(QSPRModelPyTorchGPU):
                         scores, metric=metric
                     )
                     self.chempropLogger.debug(
-                        f"Validation {metric} = " f"{mean_val_score:.6f}"
+                        f"Validation {metric} = {mean_val_score:.6f}"
                     )
                     writer.add_scalar(f"validation_{metric}", mean_val_score, n_iter)
 
@@ -384,7 +384,7 @@ class ChempropModel(QSPRModelPyTorchGPU):
                         # Individual validation scores
                         for task_name, val_score in zip(args.task_names, scores):
                             self.chempropLogger.debug(
-                                f"Validation {task_name} {metric}" f" = {val_score:.6f}"
+                                f"Validation {task_name} {metric} = {val_score:.6f}"
                             )
                             writer.add_scalar(
                                 f"validation_{task_name}_{metric}", val_score, n_iter
@@ -600,7 +600,7 @@ class ChempropModel(QSPRModelPyTorchGPU):
         Returns:
             path (str): path to the saved estimator
         """
-        if self.estimator != "Unititialized estimator, no target properties found yet.":
+        if not isinstance(self.estimator, str):
             chemprop.utils.save_checkpoint(
                 f"{self.outPrefix}.pt",
                 self.estimator,
@@ -609,9 +609,10 @@ class ChempropModel(QSPRModelPyTorchGPU):
             )
             return f"{self.outPrefix}.pt"
         else:
-            out = f"{self.outPrefix}.pt"
-            open(out, "w").close()
-            return out
+            # just save a file with the estimator message
+            with open(f"{self.outPrefix}.pt", "w") as f:
+                f.write(self.estimator)
+        return f"{self.outPrefix}.pt"
 
     def convertToMoleculeDataset(
         self,
@@ -810,12 +811,3 @@ class ChempropModel(QSPRModelPyTorchGPU):
             name="chemprop_logger", save_dir=ret.outDir, quiet=ret.quietLogger
         )
         return ret
-
-    def setParams(self, params: dict):
-        """Set parameters of the model.
-
-        Args:
-            params (dict): parameters
-        """
-        super().setParams(params)
-        self.estimator = self.loadEstimator(self.parameters)

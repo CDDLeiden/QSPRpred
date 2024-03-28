@@ -177,15 +177,66 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
 class DataFrameDescriptorSet(DescriptorSet):
     """`DescriptorSet` that uses a `pandas.DataFrame` of precalculated descriptors."""
 
-    def __init__(self, df: pd.DataFrame):
+    @staticmethod
+    def setIndex(df: pd.DataFrame, cols: list[str]):
+        """Create a multi-index from several columns of the data set.
+
+        Args:
+            df (pd.DataFrame): DataFrame to set index for.
+            cols (list[str]): List of columns to use as the new multi-index.
+        """
+        df_index_tuples = df[cols].values
+        df_index_tuples = tuple(map(tuple, df_index_tuples))
+        df_index = pd.MultiIndex.from_tuples(df_index_tuples, names=cols)
+        df.index = df_index
+        return df
+
+    def __init__(
+        self,
+        df: pd.DataFrame,
+        joining_cols: list[str] | None = None,
+        suffix="",
+        source_is_multi_index=False,
+    ):
         """Initialize the descriptor set with a dataframe of descriptors.
 
         Args:
-            df: dataframe of descriptors
+            df:
+                dataframe of descriptors
+            joining_cols:
+                list of columns to use as joining index,
+                properties of the same name must exist in the data set
+                this descriptor is added to
+            suffix:
+                suffix to add to the descriptor name
+            source_is_multi_index:
+                assume that a multi-index is already present in the supplied dataframe.
+                If `True`, the `joining_cols` argument must
+                also be specified to indicate which properties should
+                be used to create the multi-index in the destination.
         """
         super().__init__()
+        if source_is_multi_index and not joining_cols:
+            raise ValueError(
+                "When 'source_is_multi_index=True', 'joining_cols' must be specified."
+            )
         self._df = df
+        if joining_cols and not source_is_multi_index:
+            self._df = self.setIndex(self._df, joining_cols)
+        self._cols = joining_cols
         self._descriptors = df.columns.tolist() if df is not None else []
+        if joining_cols:
+            self._descriptors = [
+                col for col in self._descriptors if col not in joining_cols
+            ]
+        self.suffix = suffix
+
+    @property
+    def requiredProps(self) -> list[str]:
+        """Return the required properties for the dataframe."""
+        prior = super().requiredProps
+        new = prior + self._cols if self._cols is not None else prior
+        return list(set(new))  # remove duplicates
 
     def getDF(self):
         """Return the dataframe of descriptors."""
@@ -194,6 +245,10 @@ class DataFrameDescriptorSet(DescriptorSet):
     def getIndex(self):
         """Return the index of the dataframe."""
         return self._df.index if self._df is not None else None
+
+    def getIndexCols(self):
+        """Return the index columns of the dataframe."""
+        return self._cols if self._df is not None else None
 
     def getDescriptors(
         self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
@@ -210,11 +265,25 @@ class DataFrameDescriptorSet(DescriptorSet):
         Returns:
             numpy array of descriptor values of shape (n_mols, n_descriptors)
         """
-        index = pd.Index(props[self.idProp], name=self.idProp)
-        if self._df is None:
-            raise ValueError("No dataframe set.")
-        ret = pd.DataFrame(index=index)
-        ret = ret.merge(self._df, how="left", left_index=True, right_index=True)
+        # create a return data frame with the desired columns as index
+        index_cols = self.getIndexCols()
+        if index_cols:
+            ret = pd.DataFrame(
+                # fetch the join columns from our required props
+                {col: props[col] for col in index_cols}
+            )
+            ret = self.setIndex(ret, index_cols)  # set our multi-index
+            ret.drop(columns=index_cols, inplace=True)  # only keep the index
+        else:
+            ret = pd.DataFrame(index=pd.Index(props[self.idProp], name=self.idProp))
+        ret = ret.join(
+            # join in our descriptors
+            # each molecule gets the correct descriptors from the data frame
+            self._df,
+            how="left",
+            on=index_cols,
+        )
+        # ret is in the same order as the input mols, so we can just return the values
         return ret[self.descriptors].values
 
     @property
@@ -226,7 +295,7 @@ class DataFrameDescriptorSet(DescriptorSet):
         self._descriptors = value
 
     def __str__(self):
-        return "DataFrame"
+        return "DataFrame" if not self.suffix else f"{self.suffix}_DataFrame"
 
 
 class DrugExPhyschem(DescriptorSet):
@@ -460,7 +529,7 @@ class PredictorDesc(DescriptorSet):
         """
         super().__init__()
         if isinstance(model, str):
-            from ...models.models import QSPRModel
+            from ...models.model import QSPRModel
 
             self.model = QSPRModel.fromFile(model)
         else:
@@ -475,7 +544,7 @@ class PredictorDesc(DescriptorSet):
 
     def __setstate__(self, state):
         super().__setstate__(state)
-        from ...models.models import QSPRModel
+        from ...models.model import QSPRModel
 
         self.model = QSPRModel.fromFile(self.model)
 

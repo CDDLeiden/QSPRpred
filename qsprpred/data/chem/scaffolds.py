@@ -33,20 +33,14 @@ class Scaffold(MolProcessorWithID, ABC):
         return True
 
 
-class Murcko(Scaffold):
-    """Class for calculating Murcko scaffolds of a given molecule."""
+class BemisMurckoRDKit(Scaffold):
+    """Class for calculating Murcko scaffolds of a given molecule
+    using the default implementation in RDKit. If you want, an implementation
+    closer to the original paper, see the `BemisMurcko` class.
+
+    """
 
     def __call__(self, mols, props, *args, **kwargs):
-        """
-        Calculate the Murcko scaffold for a molecule as implemented
-        in RDKit.
-
-        Args:
-            mol: SMILES as `str` or an instance of `Mol`
-
-        Returns:
-            SMILES of the Murcko scaffold as `str`
-        """
         res = []
         for mol in mols:
             mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
@@ -55,7 +49,7 @@ class Murcko(Scaffold):
         return pd.Series(res, index=props[self.idProp])
 
     def __str__(self):
-        return "Murcko"
+        return "BemisMurckoRDKit"
 
 
 class BemisMurcko(Scaffold):
@@ -114,15 +108,6 @@ class BemisMurcko(Scaffold):
         return res
 
     def __call__(self, mols, props, *args, **kwargs):
-        """
-        Calculate the Bemis-Murcko scaffold for a molecule.
-
-        Args:
-            mol: SMILES as `str` or an instance of `Mol`
-
-        Returns:
-            SMILES of the Bemis-Murcko scaffold as `str`
-        """
         res = []
         for mol in mols:
             mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
