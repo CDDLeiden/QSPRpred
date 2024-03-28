@@ -6,14 +6,14 @@ from abc import ABC
 from typing import Callable
 
 import numpy as np
+from rdkit import Chem
+from rdkit.Chem import Mol
 
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 from ..data.descriptors.sets import ProteinDescriptorSet
 from ...data.tables.mol import MoleculeTable
-from ...models.models import QSPRModel
+from ...models.model import QSPRModel
 from ...models.scikit_learn import SklearnModel
-from rdkit import Chem
-from rdkit.Chem import Mol
 
 
 class PCMModel(QSPRModel, ABC):

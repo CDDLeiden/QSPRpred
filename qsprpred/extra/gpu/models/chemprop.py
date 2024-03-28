@@ -18,7 +18,7 @@ from qsprpred.tasks import ModelTasks
 from ....data.tables.qspr import QSPRDataset
 from ....logs import logger
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
-from ....models.models import QSPRModel
+from ....models.model import QSPRModel
 from ....models.monitors import BaseMonitor, FitMonitor
 
 

@@ -16,7 +16,7 @@ from ....data.sampling.splits import DataSplit
 from ....data.tables.qspr import QSPRDataset
 from ....extra.gpu.models.neural_network import STFullyConnected
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
-from ....models.models import QSPRModel
+from ....models.model import QSPRModel
 from ....models.monitors import BaseMonitor, FitMonitor
 
 

@@ -18,6 +18,8 @@ From v3.0.1 to v3.0.2
 
 ## Changes
 
+- The module containing the sole model base class (`QSPRModel`) was renamed
+  from `models` to `model`.
 - Restrictions on `numpy` versions were removed to allow for more flexibility in
   package installations. However, the `BorutaFilter` feature selection method does not
   function with `numpy` versions 1.24.0 and above. Therefore, this functionality now
