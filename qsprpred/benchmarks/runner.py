@@ -4,17 +4,16 @@ import os
 import queue
 import random
 import sys
-import time
 import traceback
 from threading import Lock as TLock, Thread
-from typing import Generator, Literal
+from typing import Generator, Any
 
 import pandas as pd
 
 from .replica import Replica
 from .settings.benchmark import BenchmarkSettings
 from ..logs import logger
-from ..utils.parallel import parallel_jit_generator
+from ..utils.parallel import MultiprocessingPoolGenerator, ParallelGenerator
 
 
 class ExcThread(Thread):
@@ -58,6 +57,7 @@ class BenchmarkRunner:
 
     """
 
+    # default locks for threads
     lock_data_t = TLock()
     lock_report_t = TLock()
 
@@ -86,51 +86,41 @@ class BenchmarkRunner:
     logLevel = logging.DEBUG
 
     def __init__(
-        self,
-        settings: BenchmarkSettings,
-        n_proc: int | None = None,
-        data_dir: str = "./data",
-        results_file: str | None = None,
-        gpus: list[int] | None = None,
-        models_per_gpu: int = 1,
-        gpu_proces_pool_type: Literal[
-            "torch", "multiprocessing", "threading"
-        ] = "torch",
+            self,
+            settings: BenchmarkSettings,
+            data_dir: str = "./data",
+            results_file: str | None = None,
+            parallel_generator_cpu: ParallelGenerator | None = None,
+            parallel_generator_gpu: ParallelGenerator | None = None,
     ):
         """Initialize the runner.
 
         Args:
             settings (BenchmarkSettings):
                 Benchmark settings.
-            n_proc (int, optional):
-                Number of processes to use. Defaults to os.cpu_count().
             data_dir (str, optional):
                 Path to the directory to store data. Defaults to "./data".
                 If the directory does not exist, it will be created.
             results_file (str, optional):
                 Path to the results file. Defaults to "{data_dir}/data/results.tsv".
-            gpus (list[int], optional):
-                List of GPU IDs to use. This will make the runner exectute replicas
-                that have `requiresGpu` property set to `True` on the given GPUs.
-            models_per_gpu (int, optional):
-                Number of models to run on each GPU. Defaults to 1.
-            gpu_proces_pool_type (Literal["torch", "multiprocessing", "threading"], optional):
-                The type of process pool to use for running replicas on the GPUs.
-                Defaults to "torch". Set to "threading" to use threads
-                instead of processes.
+            parallel_generator_cpu (ParallelGenerator, optional):
+                Parallel generator for CPU replicas.
+                Defaults to `MultiprocessingPoolGenerator` on all available CPUs.
+            parallel_generator_gpu (ParallelGenerator, optional):
+                Parallel generator for GPU replicas. Defaults to `None`.
         """
         logger.debug("Initializing BenchmarkRunner...")
         self.settings = settings
-        self.nProc = n_proc or os.cpu_count()
+        self.parallelGeneratorCPU = (parallel_generator_cpu or
+                                     MultiprocessingPoolGenerator(
+                                         os.cpu_count()
+                                     ))
+        self.parallelGeneratorGPU = parallel_generator_gpu
         self.dataDir = data_dir
         self.resultsFile = results_file if results_file else f"{data_dir}/results.tsv"
         os.makedirs(self.dataDir, exist_ok=True)
         logger.debug(f"Saving settings to: {self.dataDir}/settings.json")
         self.settings.toFile(f"{self.dataDir}/settings.json")
-        self.gpuIds = gpus
-        self.modelsPerGpu = models_per_gpu if self.gpuIds is not None else None
-        self.poolType = gpu_proces_pool_type
-        logger.debug(f"Setting pool type to: {self.poolType}")
 
     @property
     def nRuns(self) -> int:
@@ -145,86 +135,53 @@ class BenchmarkRunner:
         benchmark_settings = self.settings
         benchmark_settings.checkConsistency()
         ret = (
-            benchmark_settings.n_replicas
-            * len(benchmark_settings.data_sources)
-            * len(benchmark_settings.descriptors)
-            * len(benchmark_settings.target_props)
-            * len(benchmark_settings.prep_settings)
-            * len(benchmark_settings.models)
+                benchmark_settings.n_replicas
+                * len(benchmark_settings.data_sources)
+                * len(benchmark_settings.descriptors)
+                * len(benchmark_settings.target_props)
+                * len(benchmark_settings.prep_settings)
+                * len(benchmark_settings.models)
         )
         if len(benchmark_settings.optimizers) > 0:
             ret *= len(benchmark_settings.optimizers)
         return ret
 
-    def processReplicasGPUThreads(self, gpu_replicas: Generator[Replica, None, None]):
-        gpu_pool = []
-        if self.modelsPerGpu is not None:
-            for gpu in self.gpuIds:
-                gpu_pool.extend([gpu] * self.modelsPerGpu)
-        else:
-            gpu_pool = list(self.gpuIds)
-        thread_pool = {}
-        current = next(gpu_replicas, None)
-        if not current:
-            logger.warning("No GPU replicas found. Exiting without results...")
-            return
-        replica_logger = self.getLoggerForReplica(current, self.logLevel)
-        while thread_pool or current is not None:
-            if len(gpu_pool) > 0 and current is not None:
-                gpu = gpu_pool.pop(0)
-                logger.debug(f"Setting GPU {gpu} for replica {current.id}.")
-                current.setGPUs([gpu])
-                # make a thread and run the replica in that thread
-                thread = ExcThread(
-                    target=self.runReplica,
-                    args=(
-                        current,
-                        self.resultsFile,
-                        self.lock_data_t,
-                        self.lock_report_t,
-                    ),
-                )
-                thread.start()
-                replica_logger.debug(f"Started thread for GPU replica {current.id}.")
-                thread_pool[thread] = current
-                current = next(gpu_replicas, None)
-            else:
-                while len(thread_pool) > 0:
-                    time.sleep(1)
-                    for thread in thread_pool:
-                        if not thread.is_alive():
-                            rep = thread_pool.pop(thread)
-                            gpu_pool.extend(rep.getGPUs())
-                            thread.join()
-                            replica_logger.debug("Thread for GPU replica finished.")
-                            replica_logger.debug(f"GPU pool: {gpu_pool}")
-                            break
-                    if len(gpu_pool) > 0:
-                        break
-        logger.debug("Thread pool for GPU replicas finished.")
-
-    def processReplicas(
-        self,
-        replicas: Generator[Replica, None, None],
-        raise_errors=False,
-        pool_type="multiprocessing",
-    ):
-        if pool_type == "torch":
+    def createLocks(self, generator: ParallelGenerator):
+        if isinstance(generator,
+                      MultiprocessingPoolGenerator) and generator.poolType == "torch":
             import torch.multiprocessing
 
             manager = torch.multiprocessing.Manager()
-        else:
+        elif isinstance(generator,
+                        MultiprocessingPoolGenerator) and generator.poolType in [
+            "multiprocessing", "pebble"]:
             import multiprocessing
 
             manager = multiprocessing.Manager()
-        lock_data = manager.Lock()
-        lock_report = manager.Lock()
-        for result in parallel_jit_generator(
-            replicas,
-            self.runReplica,
-            self.nProc,
-            args=(self.resultsFile, lock_data, lock_report),
-            pool_type=pool_type,
+        elif isinstance(generator,
+                        MultiprocessingPoolGenerator) and generator.poolType == "threads":
+            return self.lock_data_t, self.lock_report_t
+        else:
+            raise ValueError(
+                f"Unknown generator type: {generator}. "
+                f"Cannot create locks. "
+                f"Override this method to create locks for this generator."
+            )
+        return manager.Lock(), manager.Lock()
+
+    def processReplicas(
+            self,
+            generator: ParallelGenerator,
+            replicas: Generator[Replica, None, None],
+            raise_errors=False,
+    ):
+        lock_data, lock_report = self.createLocks(generator)
+        for result in generator(
+                replicas,
+                self.runReplica,
+                self.resultsFile,
+                lock_data,
+                lock_report
         ):
             if isinstance(result, self.ReplicaException):
                 if raise_errors:
@@ -253,7 +210,7 @@ class BenchmarkRunner:
                 Results from the benchmarking experiments.
         """
         logger.debug(f"Performing {self.nRuns} replica runs...")
-        if self.gpuIds is not None:
+        if self.parallelGeneratorGPU is not None:
             gpu_replicas = (
                 replica for replica in self.iterReplicas() if replica.requiresGpu
             )
@@ -266,22 +223,15 @@ class BenchmarkRunner:
         # run gpu replicas if there are any
         gpu_thread = None
         if gpu_replicas is not None:
-            if self.poolType == "threading":
-                gpu_thread = ExcThread(
-                    target=self.processReplicasGPUThreads,
-                    args=(gpu_replicas,),
-                )
-                gpu_thread.start()
-            else:
-                gpu_thread = ExcThread(
-                    target=self.processReplicas,
-                    args=(gpu_replicas, raise_errors, "torch"),
-                )
-                gpu_thread.start()
+            gpu_thread = ExcThread(
+                target=self.processReplicas,
+                args=(self.parallelGeneratorGPU, gpu_replicas, raise_errors),
+            )
+            gpu_thread.start()
             logger.debug("Started GPU replicas thread...")
         # run cpu replicas
         logger.debug("Starting CPU replicas...")
-        self.processReplicas(cpu_replicas, raise_errors, "multiprocessing")
+        self.processReplicas(self.parallelGeneratorCPU, cpu_replicas, raise_errors)
         logger.debug("Finished CPU replicas.")
         # wait for gpu replicas to finish
         if gpu_thread is not None:
@@ -321,7 +271,7 @@ class BenchmarkRunner:
         """
         seed = seed or self.settings.random_seed
         random.seed(seed)
-        return random.sample(range(2**31), self.nRuns)
+        return random.sample(range(2 ** 31), self.nRuns)
 
     def iterReplicas(self) -> Generator[Replica, None, None]:
         """Generator that yields `Replica` objects for each benchmarking run.
@@ -463,11 +413,12 @@ class BenchmarkRunner:
 
     @classmethod
     def runReplica(
-        cls,
-        replica: Replica,
-        results_file: str,
-        lock_data,
-        lock_report,
+            cls,
+            replica: Replica,
+            results_file: str,
+            lock_data: Any,
+            lock_report: Any,
+            gpu: int | None = None,
     ) -> str | ReplicaException:
         """Runs a single replica. This is executed in parallel by the `run` method.
         It is a classmethod so that it can be pickled and executed in parallel
@@ -478,16 +429,18 @@ class BenchmarkRunner:
                 Replica to run.
             results_file (str):
                 Path to the results file.
-            caller (Literal["process", "thread"], optional):
-                Whether the caller is a process or a thread.
+            lock_data (Any):
+                Lock for data operations.
+            lock_report (Any):
+                Lock for report operations.
 
         Returns:
             str | ReplicaException:
                 ID of the replica that was run or a `ReplicaException` if an error
                 was encountered.
         """
-        # lock_data = lock_data_mp if caller == "process" else cls.lock_data_t
-        # lock_report = lock_report_mp if caller == "process" else cls.lock_report_t
+        if gpu is not None:
+            replica.setGPUs([gpu])
         logger = cls.getLoggerForReplica(replica, cls.logLevel)
         logger.debug(f"Starting replica: {replica.id}")
         try:

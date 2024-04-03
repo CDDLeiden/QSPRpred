@@ -799,7 +799,7 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
             train_loss (float): loss of the current epoch
             val_loss (float | None): validation loss of the current epoch
         """
-        self.fitLog.loc[epoch] = [epoch, train_loss, val_loss]
+        self.fitLog.loc[epoch, :] = [epoch, train_loss, val_loss]
 
     def onBatchStart(self, batch: int):
         """Called before each batch of the training.
@@ -816,7 +816,7 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
             batch (int): index of the current batch
             loss (float): loss of the current batch
         """
-        self.batchLog.loc[len(self.batchLog)] = [self.currentEpoch, batch, loss]
+        self.batchLog.loc[len(self.batchLog), :] = [self.currentEpoch, batch, loss]
 
     def _clearFit(self):
         self.fitLog = pd.DataFrame(columns=["epoch", "train_loss", "val_loss"])

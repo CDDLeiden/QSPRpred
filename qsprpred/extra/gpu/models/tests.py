@@ -24,12 +24,18 @@ from ....extra.gpu.models.neural_network import STFullyConnected
 from ....models import CrossValAssessor, SklearnModel
 from ....models.metrics import SklearnMetrics
 from ....models.monitors import BaseMonitor, FileMonitor, ListMonitor
+from ....utils.parallel import MultiprocessingPoolGenerator
 from ....utils.testing.check_mixins import ModelCheckMixIn, MonitorsCheckMixIn
 from ....utils.testing.path_mixins import ModelDataSetsPathMixIn
 
 GPUS = list(range(torch.cuda.device_count()))
 
 
+@skipIf(
+    len(GPUS) == 0,
+    "No GPU is available. "
+    "Skipping benchmarking tests that require a GPU to run swiftly. "
+)
 class BenchMarkTest(BenchMarkTestCase):
     """Test GPU models with benchmarks."""
 
@@ -56,19 +62,18 @@ class BenchMarkTest(BenchMarkTestCase):
             self.settings,
             data_dir=f"{self.generatedPath}/benchmarks",
             results_file=f"{self.generatedPath}/benchmarks/results.tsv",
-            gpus=GPUS,
+            parallel_generator_gpu=MultiprocessingPoolGenerator(
+                worker_type="gpu",
+                jobs_per_gpu=os.cpu_count(),
+                use_gpus=GPUS,
+                pool_type="torch",
+            ),
         )
         self.checkSettings()
         results = self.benchmark.run(raise_errors=True)
         self.checkRunResults(results)
         self.checkSettings()
 
-    @skipIf(
-        len(GPUS) == 0,
-        "No GPU is available. "
-        "Skipping Chemprop benchmark test "
-        "since it is too time-consuming on CPU.",
-    )
     def testChemProp(self):
         """Run single task tests for classification."""
         self.settings.models = [
@@ -85,9 +90,12 @@ class BenchMarkTest(BenchMarkTestCase):
             self.settings,
             data_dir=f"{self.generatedPath}/benchmarks",
             results_file=f"{self.generatedPath}/benchmarks/results.tsv",
-            gpus=GPUS,
-            models_per_gpu=os.cpu_count(),
-            gpu_proces_pool_type="threading",
+            parallel_generator_gpu=MultiprocessingPoolGenerator(
+                worker_type="gpu",
+                use_gpus=GPUS,
+                jobs_per_gpu=os.cpu_count(),
+                pool_type="threads",
+            ),
         )
         results = self.benchmark.run(raise_errors=True)
         self.checkRunResults(results)
@@ -160,7 +168,8 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             )
             for alg, alg_name, task, th in (
                     (
-                    STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None),
+                            STFullyConnected, "STFullyConnected",
+                            TargetTasks.REGRESSION, None),
             )
             for random_state in ([None], [1, 42], [42, 42])
         ]

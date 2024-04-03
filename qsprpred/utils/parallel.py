@@ -1,4 +1,5 @@
 import multiprocessing
+from abc import ABC, abstractmethod
 from concurrent import futures
 from typing import Iterable, Callable, Literal, Generator
 
@@ -7,7 +8,7 @@ from qsprpred.logs import logger
 
 def batched_generator(iterable: Iterable, batch_size: int) -> Generator:
     """
-    A simple generator that batches inputs from a supplied iterable.
+    A simple helper generator that batches inputs from a supplied `Iterable`.
 
     Args:
         iterable: An iterable object to batch with the generator.
@@ -26,133 +27,296 @@ def batched_generator(iterable: Iterable, batch_size: int) -> Generator:
         yield batch
 
 
-def parallel_jit_generator(
-    generator: Generator,
-    process_func: Callable,
-    n_cpus: int,
-    pool_type: Literal["pebble", "multiprocessing", "torch"] = "multiprocessing",
-    timeout: int | None = None,
-    args: tuple | None = None,
-    kwargs: dict | None = None,
-    pool_initializer: Callable | None = None,
-    pool_initargs: tuple | None = None,
-) -> Generator:
+class ParallelGenerator(ABC):
     """
-    A parallel 'JIT (Just In Time)' generator that yields the results of a function
-    applied in parallel to each item of a supplied generator. The advantage of this JIT
-    implementation is that it only evaluates the next item in the input generator
-    as soon as it is needed for the calculation. This means that only one item from
-    the iterable is loaded into memory at a time.
-
-    The generator also supports timeout for each job. The 'pebble'
-    pool_type can be used to support this feature. In all other cases,
-    the 'multiprocessing' pool_type is sufficient.
-
-    Args:
-        generator(SupportsNext):
-            An iterable object to apply the function to.
-        process_func(Callable):
-            The function to apply to each item in the iterable.
-        n_cpus(int):
-            Number of CPUs to use.
-        pool_type(Literal["pebble", "multiprocessing"]):
-            The type of pool to use.
-        timeout(int | None):
-            A timeout threshold in seconds. Processes that exceed this threshold will
-            be terminated and a `TimeoutError` will be returned.
-        args(tuple | None):
-            Additional positional arguments to pass to the function.
-        kwargs(dict | None):
-            Additional keyword arguments to pass to the function.
-
-    Returns:
-        A generator that yields the results of the function applied to each item in the
-        iterable. If a timeout is specified, a `TimeoutError` will be returned instead.
+    An abstract class to facilitate parallel processing of an arbitrary generator.
+    This is meant for situations where the generator is too large to fit into memory,
+    but can also be used for any situation where parallel distribution over a pool
+    of workers (GPUs or CPUs) is needed.
     """
-    args = args or ()
-    kwargs = kwargs or {}
-    if pool_type not in ["pebble", "multiprocessing", "torch"]:
-        raise ValueError(f"The 'pool_type' must be one of 'pebble' "
-                         f"or 'multiprocessing', got {pool_type} instead.")
-    if pool_type != "pebble" and timeout is not None:
-        raise ValueError(f"The 'timeout' argument is only supported "
-                         f"for 'pebble' pools, got {pool_type} instead.")
-    pool_type_to_pool = {
-        "multiprocessing": multiprocessing.Pool(processes=n_cpus, initializer=pool_initializer, initargs=pool_initargs)
-    }
-    if pool_type == "pebble":
-        try:
-            from pebble import ProcessPool
-            pool_type_to_pool["pebble"] = ProcessPool(max_workers=n_cpus)
-        except ImportError:
-            raise ImportError("Failed to import pool type 'pebble'. Install it first.")
-    if pool_type == "torch":
-        from torch.multiprocessing import Pool, set_start_method
-        set_start_method("spawn", force=True)
-        pool_type_to_pool["torch"] = Pool(n_cpus, initializer=pool_initializer, initargs=pool_initargs)
-    with pool_type_to_pool[pool_type] as pool:
-        queue = []
-        done = False
-        while not done or queue:
+
+    @abstractmethod
+    def make(
+            self,
+            generator: Generator,
+            process_func: Callable,
+            *args,
+            **kwargs
+    ) -> Generator:
+        """
+        This method is used to wrap an input generator or an iterable
+        (needs to support `next()`). The method should evaluate one item of
+        the generator at a time and apply the `process_func` to it. This
+        is done in parallel over a pool of workers. The method should return
+        a generator that yields the results of the function applied in parallel
+        as soon as the results are available. Therefore, the user can simply
+        iterate over the generator to get the results.
+
+        Args:
+            generator: An iterable object to apply the function to.
+            process_func: The function to apply to each item in the iterable.
+
+        Returns:
+            A generator that yields the results of the function applied to each item
+            in the iterable in parallel.
+        """
+
+    def __call__(
+            self,
+            generator: Generator,
+            process_func: Callable,
+            *args,
+            **kwargs
+    ) -> Generator:
+        """
+        This method is used to wrap the `make` method and call it with the
+        supplied arguments. This is a convenience method to make the class
+        callable.
+
+        Args:
+            generator: An iterable object to apply the function to.
+            process_func: The function to apply to each item in the iterable.
+
+        Returns:
+            A generator that yields the results of the function applied to each item
+            in the iterable in parallel.
+        """
+        return self.make(generator, process_func, *args, **kwargs)
+
+
+class MultiprocessingPoolGenerator(ParallelGenerator):
+    """
+    A parallel generator that uses the `multiprocessing` module to parallelize
+    the processing of an input generator. This is useful when the input generator
+    is too large to fit into memory and needs to be processed in parallel over
+    a pool of workers.
+    """
+
+    def __init__(
+            self,
+            n_workers: int | None = None,
+            pool_type: Literal[
+                "pebble", "multiprocessing", "torch", "threads"] = "multiprocessing",
+            timeout: int | None = None,
+            worker_type: Literal["cpu", "gpu"] = "cpu",
+            use_gpus: list[int] | None = None,
+            jobs_per_gpu: int = 1
+    ):
+        """Configures the multiprocessing pool generator.
+
+        Args:
+            n_workers(int):
+                Number of workers to use.
+            pool_type(Literal["pebble", "multiprocessing", "torch", "threads"]):
+                The type of pool to use.
+            timeout(int | None):
+                A timeout threshold in seconds. Processes that exceed this threshold will
+                be terminated and a `TimeoutError` will be returned.
+            worker_type(Literal["cpu", "gpu"]):
+                The type of worker to use.
+            use_gpus(list[int] | None):
+                A list of GPU indices to use. Only applicable if `worker_type` is 'gpu'.
+                If None, all available GPUs will be used.
+            jobs_per_gpu(int):
+                Number of jobs to run on each GPU.
+        """
+        self.poolType = pool_type
+        self.timeout = timeout
+        if self.poolType not in ["pebble", "multiprocessing", "torch", "threads"]:
+            raise ValueError(f"The 'pool_type' must be one of 'pebble' "
+                             f"or 'multiprocessing', got {self.poolType} instead.")
+        if self.poolType not in ["pebble"] and self.timeout is not None:
+            raise ValueError(f"The 'timeout' argument is only supported "
+                             f"for 'pebble' pool, "
+                             f"got {self.poolType} instead.")
+        self.workerType = worker_type
+        if self.workerType not in ["cpu", "gpu"]:
+            raise ValueError(f"The 'worker_type' must be one of 'cpu' "
+                             f"or 'gpu', got {self.workerType} instead.")
+        if self.workerType == "gpu" and n_workers is not None:
+            logger.warning(
+                "The 'n_workers' argument is ignored when 'worker_type' is 'gpu'."
+                "The number of workers is determined by 'use_gpus' and 'jobs_per_gpu'."
+            )
+        if self.workerType == "gpu":
+            self.jobsPerGpu = jobs_per_gpu
+            if use_gpus is not None:
+                self.useGpus = sorted(set(use_gpus))
+                self.useGpus = self.useGpus * self.jobsPerGpu
+            else:
+                logger.warning(
+                    "No GPUs specified. Using only the first gpu with index 0."
+                    "Only one job will be run on this GPU at a time."
+                    "If you want to use multiple GPUs, specify them using 'use_gpus' "
+                    "or run more jobs per GPU with 'jobs_per_gpu'."
+                )
+                self.useGpus = [0] * self.jobsPerGpu
+            self.nWorkers = len(self.useGpus)
+        else:
+            self.useGpus = []
+            self.jobsPerGpu = None
+            self.nWorkers = n_workers or multiprocessing.cpu_count()
+
+    def getPool(self):
+        """Get the pool object based on the pool type.
+
+
+        Returns:
+            A process pool object or a thread pool object.
+        """
+        if self.poolType == "pebble":
             try:
-                # take a slice of the generator
-                input_args = [next(generator), *list(args)]
-                # add our next slice to the pool
-                if pool_type == "pebble":
-                    queue.append(pool.schedule(
-                        process_func,
-                        args=input_args,
-                        kwargs=kwargs,
-                        timeout=timeout
-                    ))
-                else:
-                    queue.append(pool.apply_async(
-                        process_func,
-                        input_args,
-                        kwargs
-                    ))
-            except StopIteration:
-                # no more data, clear out the slice generator
-                done = True
-            # wait for a free worker or until all remaining workers finish
-            logger.debug(f"Waiting for {len(queue)} workers to finish...")
-            while queue and ((len(queue) >= n_cpus) or done):
-                # grab a process response from the top
-                process = queue.pop(0)
-                # check if job timed out and return the exception as a result
-                if pool_type == "pebble" \
-                        and process.done() \
-                        and type(process._exception ) in [
-                            TimeoutError,
-                            futures.TimeoutError
-                        ]:
-                    yield process._exception
-                    # make sure to pop the next item from the generator
-                    break
-                # check if result available
+                from pebble import ProcessPool
+                return ProcessPool(max_workers=self.nWorkers)
+            except ImportError:
+                raise ImportError(
+                    "Failed to import pool type 'pebble'. Install it first.")
+        elif self.poolType == "torch":
+            from torch.multiprocessing import Pool, set_start_method
+            set_start_method("spawn", force=True)
+            return Pool(self.nWorkers)
+        elif self.poolType == "threads":
+            from concurrent.futures import ThreadPoolExecutor
+            return ThreadPoolExecutor(max_workers=self.nWorkers)
+        else:
+            return multiprocessing.Pool(
+                processes=self.nWorkers
+            )
+
+    def make(
+            self,
+            generator: Generator,
+            process_func: Callable,
+            *args,
+            **kwargs
+    ) -> Generator:
+        """A parallel 'JIT (Just In Time)' generator that
+        yields the results of a function
+        applied in parallel to each item of a supplied generator.
+        The advantage of this JIT
+        implementation is that it only evaluates the next item in the input generator
+        as soon as it is needed for the calculation. This means that only one item from
+        the iterable is loaded into memory at a time.
+
+        The generator also supports timeout for each job. The 'pebble'
+        pool_type can be used to support this feature. In all other cases,
+        the 'multiprocessing' pool_type is sufficient.
+
+        Args:
+            generator(SupportsNext):
+                An iterable object to apply the function to.
+            process_func(Callable):
+                The function to apply to each item in the iterable.
+            args(tuple | None):
+                Additional positional arguments to pass to the function.
+            kwargs(dict | None):
+                Additional keyword arguments to pass to the function.
+
+        Returns:
+            A generator that yields the results of the function applied to each item in the
+            iterable. If a timeout is specified, a `TimeoutError` will be returned instead.
+        """
+        args = args or ()
+        kwargs = kwargs or {}
+        gpu_pool = self.useGpus
+        pool = self.getPool()
+        with pool as pool:
+            queue = []
+            gpus_to_jobs = {}
+            done = False
+            while not done or queue:
                 try:
-                    if pool_type == "pebble":
-                        # get the result, timeout error if not result yet available
-                        result = process.result(timeout=0.1)
-                        yield result
+                    # take a slice of the generator
+                    input_args = [next(generator), *list(args)]
+                    # add our next slice to the pool
+                    gpu = None
+                    if self.workerType == "gpu":
+                        # get the next free GPU
+                        gpu = gpu_pool.pop(0)
+                    if self.poolType == "pebble":
+                        job = pool.schedule(
+                            process_func,
+                            args=input_args,
+                            kwargs=dict(**kwargs,
+                                        gpu=gpu) if gpu is not None else kwargs,
+                            timeout=self.timeout
+                        )
+                    elif self.poolType == "threads":
+                        job = pool.submit(
+                            process_func,
+                            *input_args,
+                            **dict(**kwargs,
+                                   gpu=gpu) if gpu is not None else kwargs
+                        )
                     else:
-                        process.wait(0.1)
-                        # check if process is done
-                        if not process.ready():
-                            # not finished, add it back to queue
-                            queue.append(process)
-                        else:
-                            # finished, yield the result
-                            yield process.get()
-                except (futures.TimeoutError, TimeoutError):
-                    # not done yet, add it back to the queue
-                    queue.append(process)
-                except Exception as exp:
-                    # something went wrong, log and yield the exception
-                    logger.error(type(exp))
-                    logger.error(repr(process))
-                    if pool_type == "pebble":
+                        job = pool.apply_async(
+                            process_func,
+                            input_args,
+                            dict(**kwargs,
+                                 gpu=gpu) if gpu is not None else kwargs
+                        )
+                    queue.append(job)
+                    if self.workerType == "gpu":
+                        gpus_to_jobs[job] = gpu
+                except StopIteration:
+                    # no more data, clear out the slice generator
+                    done = True
+                # wait for a free worker or until all remaining workers finish
+                logger.debug(f"Waiting for {len(queue)} workers to finish...")
+                while queue and ((len(queue) >= self.nWorkers) or done):
+                    # grab a process response from the top
+                    process = queue.pop(0)
+                    # check if job timed out and return the exception as a result
+                    if self.poolType == "pebble" \
+                            and process.done() \
+                            and type(process._exception) in [
+                        TimeoutError,
+                        futures.TimeoutError
+                    ]:
                         yield process._exception
-                    else:
-                        yield exp
-                    break  # make sure to pop the next item from the generator
+                        # make sure to pop the next item from the generator
+                        break
+                    # check if result available
+                    try:
+                        if self.poolType in ("pebble", "threads"):
+                            # get the result, timeout error if not result yet available
+                            yield process.result(timeout=0.1)
+                            if self.workerType == "gpu":
+                                gpu_pool.append(gpus_to_jobs[process])
+                                logger.debug(f"GPU {gpus_to_jobs[process]} is free.")
+                                logger.debug(f"Free GPUs now: {gpu_pool}")
+                                logger.debug(
+                                    f"Deleting job {process} from gpus_to_jobs."
+                                )
+                                del gpus_to_jobs[process]
+                        else:
+                            process.wait(0.1)
+                            # check if process is done
+                            if not process.ready():
+                                # not finished, add it back to queue
+                                queue.append(process)
+                            else:
+                                # finished, yield the result
+                                yield process.get()
+                                if self.workerType == "gpu":
+                                    gpu_pool.append(gpus_to_jobs[process])
+                                    logger.debug(
+                                        f"GPU {gpus_to_jobs[process]} is free.")
+                                    logger.debug(f"Free GPUs now: {gpu_pool}")
+                                    logger.debug(
+                                        f"Deleting job {process} from gpus_to_jobs.")
+                                    del gpus_to_jobs[process]
+                    except (futures.TimeoutError, TimeoutError):
+                        # not done yet, add it back to the queue
+                        queue.append(process)
+                    except Exception as exp:
+                        # something went wrong, log and yield the exception
+                        logger.error(repr(exp))
+                        if self.workerType == "gpu":
+                            gpu_pool.append(gpus_to_jobs[process])
+                            del gpus_to_jobs[process]
+                        if self.poolType == "pebble":
+                            yield process._exception
+                        else:
+                            yield exp
+                        break  # make sure to pop the next item from the generator
