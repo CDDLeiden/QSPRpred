@@ -17,6 +17,8 @@ from ..utils.parallel import MultiprocessingPoolGenerator, ParallelGenerator
 
 
 class ExcThread(Thread):
+    """Thread that can catch exceptions from the target function."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.bucket = queue.Queue()
@@ -147,6 +149,25 @@ class BenchmarkRunner:
         return ret
 
     def createLocks(self, generator: ParallelGenerator):
+        """Creates locks for input and output operations done in `runReplica`.
+        This method should be
+        overridden if the generator uses a different multiprocessing library
+        or threading implementation. At the moment, this method can only provide locks
+        for the `MultiprocessingPoolGenerator`.
+
+        Args:
+            generator (ParallelGenerator):
+                Parallel generator to use.
+        Returns:
+            Any:
+                Lock for data set operations.
+            Any:
+                Lock for final report file operations.
+        Raises:
+            ValueError:
+                If the generator is not a `MultiprocessingPoolGenerator` and
+                lock types cannot be determined automatically.
+        """
         if isinstance(generator,
                       MultiprocessingPoolGenerator) and generator.poolType == "torch":
             import torch.multiprocessing
@@ -175,6 +196,22 @@ class BenchmarkRunner:
             replicas: Generator[Replica, None, None],
             raise_errors=False,
     ):
+        """Processes replicas in parallel using the given `ParallelGenerator`.
+        Each generated replica is run by the `runReplica` method, which
+        is executed in parallel by the parallel generator according to its
+        implementation.
+
+        Args:
+            generator (ParallelGenerator):
+                Parallel generator to use.
+            replicas (Generator[Replica, None, None]):
+                Generator that yields `Replica` objects.
+            raise_errors (bool, optional):
+                Whether to raise the first encountered `ReplicaException`
+                and stop the benchmarking run. Defaults to `False`,
+                in which case replicas that raise an exception are skipped
+                and errors are logged.
+        """
         lock_data, lock_report = self.createLocks(generator)
         for result in generator(
                 replicas,
