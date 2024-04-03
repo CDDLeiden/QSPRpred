@@ -156,7 +156,7 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         self.descriptors = self.dataset.featureNames
 
     def recalculateWithMultiIndex(self):
-        self.dataset.dropDescriptors(self.dataset.descriptorSets)
+        self.dataset.dropDescriptorSets(self.dataset.descriptorSets, full_removal=True)
         self.df_descriptors["ID_COL1"] = (
             self.dataset.getProperty(self.dataset.idProp)
             .apply(lambda x: x.split("_")[0])
@@ -178,13 +178,12 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
             ]
         )
 
-    # def testDefaultDescriptorAdd(self):
-    #     """Test adding without index columns."""
-    #     # TODO: issue 88 needs to be solved for this to work
-    #     self.dataset.nJobs = 1
-    #     df_new = self.dataset.getFeatures(concat=True).copy()
-    #     calc = DataFrameDescriptorSet(df_new, suffix="new_df_desc")
-    #     self.dataset.addDescriptors([calc])
+    def testDefaultDescriptorAdd(self):
+        """Test adding without index columns."""
+        self.dataset.nJobs = 1
+        df_new = self.dataset.getFeatures(concat=True).copy()
+        calc = DataFrameDescriptorSet(df_new, suffix="new_df_desc")
+        self.dataset.addDescriptors([calc])
 
     @parameterized.expand(
         [

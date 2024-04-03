@@ -135,9 +135,17 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
         Returns:
             data frame of descriptor values of shape (n_mols, n_descriptors)
         """
+        mols = self.iterMols(mols, to_list=True)
         values = self.getDescriptors(self.prepMols(mols), props, *args, **kwargs)
-        df = pd.DataFrame(values, index=props[self.idProp])
-        df.columns = self.descriptors
+        # check if descriptors have unique names
+        assert len(set(self.descriptors)) == len(
+            self.descriptors
+        ), f"Descriptor names are not unique for set '{self}': {self.descriptors}"
+        df = pd.DataFrame(
+            values,
+            index=props[self.idProp],
+            columns=self.transformToFeatureNames(),
+        )
         try:
             df = df.astype(self.dtype)
         except ValueError as exp:
@@ -152,6 +160,9 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
                 f"Could not treat infinite values because of type mismatch: {exp}"
             )
         return df
+
+    def transformToFeatureNames(self):
+        return [f"{self}_{x}" for x in self.descriptors]
 
     @abstractmethod
     def getDescriptors(
