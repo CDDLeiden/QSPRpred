@@ -63,12 +63,31 @@ dependencies = [
 
 extra = [
     "mold2-pywrapper",
-    "padel-pywrapper >= 1.0.2.post1", "Mordred", "biopython", "prodec", "Signature-pywrapper",
+    "dask[distributed]",
+    "padel-pywrapper >= 1.0.2.post1",
+    "Mordred",
+    "biopython",
+    "prodec",
+    "Signature-pywrapper",
 ]
 pyboost = ["py-boost"]
-deep = ["torch >= 1.7.0", "chemprop >= 1.6.0"]
-full = ["qsprpred[pyboost]", "qsprpred[deep]", "qsprpred[extra]"]
-dev = ["qsprpred[full]", "pre-commit", "isort", "yapf", "ruff", "pytest"]
+deep = [
+    "torch >= 1.7.0",
+    "chemprop >= 1.6.0"
+]
+full = [
+    "qsprpred[pyboost]",
+    "qsprpred[deep]",
+    "qsprpred[extra]"
+]
+dev = [
+    "qsprpred[full]",
+    "pre-commit",
+    "isort",
+    "yapf",
+    "ruff",
+    "pytest"
+]
 
 [tool.setuptools.packages.find]
 where = ["."]
