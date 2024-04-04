@@ -107,11 +107,10 @@ class DescriptorTable(PandasDataTable):
                 the current descriptor set. Defaults to `True`.
 
         """
-        all_descs = self.df.columns[~self.df.columns.isin(self.indexCols)].tolist()
         if active_only:
-            return [x for x in all_descs if x in self.calculator.descriptors]
+            return self.calculator.transformToFeatureNames()
         else:
-            return all_descs
+            return self.df.columns[~self.df.columns.isin(self.indexCols)].tolist()
 
     def fillMissing(self, fill_value, names):
         """Fill missing values in the descriptor table.
@@ -138,8 +137,20 @@ class DescriptorTable(PandasDataTable):
         """
         all_descs = self.getDescriptorNames(active_only=False)
         to_keep = set(all_descs) & set(descriptors)
+        prefix = str(self.calculator) + "_"
         self.calculator.descriptors = [
-            x for x in self.calculator.descriptors if x in to_keep
+            x.replace(prefix, "", 1)  # remove prefix
+            for x in self.calculator.transformToFeatureNames()
+            if x in to_keep
+        ]
+        return self.getDescriptorNames()
+
+    def restoreDescriptors(self) -> list[str]:
+        """Restore all descriptors to active in this set."""
+        all_descs = self.getDescriptorNames(active_only=False)
+        prefix = str(self.calculator) + "_"
+        self.calculator.descriptors = [
+            x.replace(prefix, "", 1) for x in all_descs  # remove prefix
         ]
         return self.getDescriptorNames()
 
@@ -649,17 +660,37 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         """Generate a descriptor set name from a descriptor set."""
         return f"Descriptors_{self.name}_{ds_set}"
 
-    def dropDescriptors(
-        self,
-        descriptors: list[DescriptorSet] | list[str],
-    ):
-        """
-        Drop descriptors from the data frame
-        that were calculated with a specific calculator.
+    def dropDescriptors(self, descriptors: list[str]):
+        """Drop descriptors by name. Performs a simple feature selection by removing
+        the given descriptor names from the data set.
 
         Args:
-            descriptors (list): list of `DescriptorSet` objects or prefixes of
-                descriptors to drop.
+            descriptors (list[str]): List of descriptor names to drop.
+        """
+        for ds in self.descriptors:
+            calc = ds.calculator
+            ds_names = calc.transformToFeatureNames()
+            to_keep = [x for x in ds_names if x not in descriptors]
+            ds.keepDescriptors(to_keep)
+
+    def dropDescriptorSets(
+        self,
+        descriptors: list[DescriptorSet | str],
+        full_removal: bool = False,
+    ):
+        """
+        Drop descriptors from the given sets from the data frame.
+
+        Args:
+            descriptors (list[DescriptorSet | str]):
+                List of `DescriptorSet` objects or their names. Name of a descriptor
+                set corresponds to the result returned by its `__str__` method.
+            full_removal (bool):
+                Whether to remove the descriptor data (will perform full removal).
+                By default, a soft removal is performed by just rendering the
+                descriptors inactive. A full removal will remove the descriptorSet from the
+                dataset, including the saved files. It is not possible to restore a
+                descriptorSet after a full removal.
         """
         # sanity check
         assert (
@@ -670,17 +701,38 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 "No descriptors specified to drop. All descriptors will be retained."
             )
             return
-        # convert descriptors to descriptor set names
-        descriptors = [self.generateDescriptorDataSetName(x) for x in descriptors]
-        # drop the descriptors
+        if not isinstance(descriptors[0], str):
+            descriptors = [str(x) for x in descriptors]
+        # remove the descriptors
         to_remove = []
-        for idx, ds in enumerate(self.descriptors):
-            if ds.name in descriptors:
-                logger.info(f"Removing descriptor set: {ds.name}")
-                to_remove.append(idx)
+        to_drop = []
+        for name in descriptors:
+            for idx, ds in enumerate(self.descriptors):
+                calc = ds.calculator
+                if name == str(calc):
+                    to_drop.extend(ds.getDescriptorNames())
+                    if full_removal:
+                        to_remove.append(idx)
+        self.dropDescriptors(to_drop)
         for idx in reversed(to_remove):
             self.descriptors[idx].clearFiles()
             self.descriptors.pop(idx)
+
+    def restoreDescriptorSets(self, descriptors: list[DescriptorSet | str]):
+        """Restore descriptors that were previously removed.
+
+        Args:
+            descriptors (list[DescriptorSet | str]):
+                List of `DescriptorSet` objects or their names. Name of a descriptor
+                set corresponds to the result returned by its `__str__` method.
+        """
+        if not isinstance(descriptors[0], str):
+            descriptors = [str(x) for x in descriptors]
+        for name in descriptors:
+            for ds in self.descriptors:
+                calc = ds.calculator
+                if name == str(calc):
+                    ds.restoreDescriptors()
 
     def dropEmptySmiles(self):
         """Drop rows with empty SMILES from the data set."""
@@ -742,7 +794,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 Additional keyword arguments to pass to each descriptor set.
         """
         if recalculate and self.hasDescriptors():
-            self.dropDescriptors(descriptors)
+            self.dropDescriptorSets(descriptors, full_removal=True)
         to_calculate = []
         for desc_set, exists in zip(descriptors, self.hasDescriptors(descriptors)):
             if exists:
@@ -784,24 +836,16 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             df_descriptors.loc[self.df.index, self.indexCols] = self.df[self.indexCols]
             self.attachDescriptors(calculator, df_descriptors, [self.idProp])
 
-    def getDescriptors(self):
+    def getDescriptors(self, active_only=False):
         """Get the calculated descriptors as a pandas data frame.
 
         Returns:
             pd.DataFrame: Data frame containing only descriptors.
         """
-        # join_cols = set()
-        # for descriptors in self.descriptors:
-        #     join_cols.update(set(descriptors.indexCols))
-        # join_cols = list(join_cols)
-        # ret = self.df[join_cols].copy()
-        # ret.reset_index(drop=True, inplace=True)
         ret = pd.DataFrame(index=pd.Index(self.df.index.values, name=self.idProp))
         for descriptors in self.descriptors:
-            df_descriptors = descriptors.getDescriptors()
+            df_descriptors = descriptors.getDescriptors(active_only=active_only)
             ret = ret.join(df_descriptors, how="left")
-        # ret.set_index(self.df.index, inplace=True)
-        # ret.drop(columns=join_cols, inplace=True)
         return ret
 
     def getDescriptorNames(self):
