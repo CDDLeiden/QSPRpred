@@ -8,8 +8,8 @@ import pandas as pd
 
 from .base import DataTable
 from ...logs import logger
-from ...utils.parallel import batched_generator, MultiprocessingPoolGenerator, \
-    ParallelGenerator
+from ...utils.parallel import batched_generator, ParallelGenerator, \
+    MultiprocessingJITGenerator
 from ...utils.serialization import JSONSerializable
 from ...utils.stringops import generate_padded_index
 
@@ -156,7 +156,7 @@ class PandasDataTable(DataTable, JSONSerializable):
         # parallel settings
         self.nJobs = n_jobs
         self.chunkSize = chunk_size
-        self.parallelGenerator = parallel_generator or MultiprocessingPoolGenerator(
+        self.parallelGenerator = parallel_generator or MultiprocessingJITGenerator(
             self.nJobs
         )
 
@@ -197,7 +197,7 @@ class PandasDataTable(DataTable, JSONSerializable):
     def nJobs(self, value: int | None):
         self._nJobs = value if value is not None and value > 0 else os.cpu_count()
         self.chunkSize = None
-        self.parallelGenerator = MultiprocessingPoolGenerator(self.nJobs)
+        self.parallelGenerator = MultiprocessingJITGenerator(self.nJobs)
 
     @property
     def baseDir(self) -> str:

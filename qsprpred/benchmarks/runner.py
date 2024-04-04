@@ -13,7 +13,8 @@ import pandas as pd
 from .replica import Replica
 from .settings.benchmark import BenchmarkSettings
 from ..logs import logger
-from ..utils.parallel import MultiprocessingPoolGenerator, ParallelGenerator
+from ..utils.parallel import ParallelGenerator, MultiprocessingJITGenerator, \
+    TorchJITGenerator, PebbleJITGenerator, ThreadsJITGenerator
 
 
 class ExcThread(Thread):
@@ -114,7 +115,7 @@ class BenchmarkRunner:
         logger.debug("Initializing BenchmarkRunner...")
         self.settings = settings
         self.parallelGeneratorCPU = (parallel_generator_cpu or
-                                     MultiprocessingPoolGenerator(
+                                     MultiprocessingJITGenerator(
                                          os.cpu_count()
                                      ))
         self.parallelGeneratorGPU = parallel_generator_gpu
@@ -168,19 +169,13 @@ class BenchmarkRunner:
                 If the generator is not a `MultiprocessingPoolGenerator` and
                 lock types cannot be determined automatically.
         """
-        if isinstance(generator,
-                      MultiprocessingPoolGenerator) and generator.poolType == "torch":
+        if isinstance(generator, TorchJITGenerator):
             import torch.multiprocessing
-
             manager = torch.multiprocessing.Manager()
-        elif isinstance(generator,
-                        MultiprocessingPoolGenerator) and generator.poolType in [
-            "multiprocessing", "pebble"]:
+        elif isinstance(generator, (MultiprocessingJITGenerator, PebbleJITGenerator)):
             import multiprocessing
-
             manager = multiprocessing.Manager()
-        elif isinstance(generator,
-                        MultiprocessingPoolGenerator) and generator.poolType == "threads":
+        elif isinstance(generator, ThreadsJITGenerator):
             return self.lock_data_t, self.lock_report_t
         else:
             raise ValueError(

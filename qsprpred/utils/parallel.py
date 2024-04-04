@@ -1,7 +1,7 @@
 import multiprocessing
 from abc import ABC, abstractmethod
 from concurrent import futures
-from typing import Iterable, Callable, Literal, Generator
+from typing import Iterable, Callable, Literal, Generator, Any
 
 from qsprpred.logs import logger
 
@@ -84,20 +84,11 @@ class ParallelGenerator(ABC):
         return self.make(generator, process_func, *args, **kwargs)
 
 
-class MultiprocessingPoolGenerator(ParallelGenerator):
-    """
-    A parallel generator that uses the `multiprocessing` module to parallelize
-    the processing of an input generator. This is useful when the input generator
-    is too large to fit into memory and needs to be processed in parallel over
-    a pool of workers.
-    """
+class JITParallelGenerator(ParallelGenerator, ABC):
 
     def __init__(
             self,
             n_workers: int | None = None,
-            pool_type: Literal[
-                "pebble", "multiprocessing", "torch", "threads"] = "multiprocessing",
-            timeout: int | None = None,
             worker_type: Literal["cpu", "gpu"] = "cpu",
             use_gpus: list[int] | None = None,
             jobs_per_gpu: int = 1
@@ -107,11 +98,6 @@ class MultiprocessingPoolGenerator(ParallelGenerator):
         Args:
             n_workers(int):
                 Number of workers to use.
-            pool_type(Literal["pebble", "multiprocessing", "torch", "threads"]):
-                The type of pool to use.
-            timeout(int | None):
-                A timeout threshold in seconds. Processes that exceed this threshold will
-                be terminated and a `TimeoutError` will be returned.
             worker_type(Literal["cpu", "gpu"]):
                 The type of worker to use.
             use_gpus(list[int] | None):
@@ -120,15 +106,6 @@ class MultiprocessingPoolGenerator(ParallelGenerator):
             jobs_per_gpu(int):
                 Number of jobs to run on each GPU.
         """
-        self.poolType = pool_type
-        self.timeout = timeout
-        if self.poolType not in ["pebble", "multiprocessing", "torch", "threads"]:
-            raise ValueError(f"The 'pool_type' must be one of 'pebble' "
-                             f"or 'multiprocessing', got {self.poolType} instead.")
-        if self.poolType not in ["pebble"] and self.timeout is not None:
-            raise ValueError(f"The 'timeout' argument is only supported "
-                             f"for 'pebble' pool, "
-                             f"got {self.poolType} instead.")
         self.workerType = worker_type
         if self.workerType not in ["cpu", "gpu"]:
             raise ValueError(f"The 'worker_type' must be one of 'cpu' "
@@ -157,86 +134,78 @@ class MultiprocessingPoolGenerator(ParallelGenerator):
             self.jobsPerGpu = None
             self.nWorkers = n_workers or multiprocessing.cpu_count()
 
-    def getPool(self):
-        """Get the pool object based on the pool type.
-
+    @abstractmethod
+    def getPool(self) -> Any:
+        """Create the pool of workers consuming the generator.
 
         Returns:
-            A process pool object or a thread pool object.
+            A pool object that can be used to apply the function
+            to the generator items in parallel.
         """
-        if self.poolType == "pebble":
-            try:
-                from pebble import ProcessPool
-                return ProcessPool(max_workers=self.nWorkers)
-            except ImportError:
-                raise ImportError(
-                    "Failed to import pool type 'pebble'. Install it first.")
-        elif self.poolType == "torch":
-            from torch.multiprocessing import Pool, set_start_method
-            set_start_method("spawn", force=True)
-            return Pool(self.nWorkers)
-        elif self.poolType == "threads":
-            from concurrent.futures import ThreadPoolExecutor
-            return ThreadPoolExecutor(max_workers=self.nWorkers)
-        else:
-            return multiprocessing.Pool(
-                processes=self.nWorkers
-            )
 
-    def checkResultAvailable(self, process):
-        try:
-            if self.poolType in ("pebble", "threads"):
-                # get the result, timeout error if not result yet available
-                return process.result(timeout=0.1)
-            else:
-                process.wait(0.1)
-                # check if process is done
-                if not process.ready():
-                    # not finished, return nothing
-                    return
-                else:
-                    # finished, yield the result
-                    return process.get()
-        except (futures.TimeoutError, TimeoutError):
-            # not done yet, return nothing
-            return
+    @abstractmethod
+    def checkResultAvailable(self, process: Any):
+        """Check if the result of a process is available.
 
-    def checkProcess(self, process):
-        # check if job timed out and return the exception as a result
-        if self.poolType == "pebble" \
-                and process.done() \
-                and type(process._exception) in [
-            TimeoutError,
-            futures.TimeoutError
-        ]:
-            raise process._exception
+        Args:
+            process(Any):
+                The process object or a future to check for a result.
 
-    def handleException(self, process, exception):
-        if self.poolType == "pebble":
-            return process._exception
-        else:
-            return exception
+        Returns:
+            The result of the process if available, otherwise None.
+        """
 
-    def createJob(self, pool, process_func, args, kwargs):
-        if self.poolType == "pebble":
-            return pool.schedule(
-                process_func,
-                args=args,
-                kwargs=kwargs,
-                timeout=self.timeout
-            )
-        elif self.poolType == "threads":
-            return pool.submit(
-                process_func,
-                *args,
-                **kwargs
-            )
-        else:
-            return pool.apply_async(
-                process_func,
-                args,
-                kwargs
-            )
+    @abstractmethod
+    def checkProcess(self, process: Any):
+        """A simple check of a process or future before a result
+        is attempted to be retrieved.
+
+        Args:
+            process(Any):
+                The process object or a future to check.
+
+        Returns:
+            `None` if the process is OK, otherwise raises an exception.
+
+        Raises:
+            Exception: If the process has a problem.
+        """
+
+    @abstractmethod
+    def handleException(self, process: Any, exception: Exception) -> Any:
+        """Handle an exception raised by a process. This is executed
+        when the process raises an unexpected exception or the `checkProcess`
+        method raises an exception.
+
+        Args:
+            process(Any):
+                The process object or a future that raised the exception.
+            exception(Exception):
+                The exception raised by the process.
+
+        Returns:
+            The result to yield instead of the result of the process.
+        """
+
+    @abstractmethod
+    def createJob(self, pool: Any, process_func: Callable, *args,
+                  **kwargs) -> Any:
+        """Submit a job to the pool that applies the function to a generator item.
+
+        Args:
+            pool(Any):
+                The pool object to submit the job to.
+            process_func(Callable):
+                The function to apply to the input arguments.
+            args(tuple):
+                Positional arguments to pass to the function.
+                The first argument should be the item from the generator.
+            kwargs(dict):
+                Additional keyword arguments to pass to the function.
+
+        Returns:
+            The process object or future that was submitted to the pool.
+        """
 
     def make(
             self,
@@ -245,7 +214,7 @@ class MultiprocessingPoolGenerator(ParallelGenerator):
             *args,
             **kwargs
     ) -> Generator:
-        """A parallel 'JIT (Just In Time)' generator that
+        """A parallel "JIT (Just In Time)" generator that
         yields the results of a function
         applied in parallel to each item of a supplied generator.
         The advantage of this JIT
@@ -253,9 +222,9 @@ class MultiprocessingPoolGenerator(ParallelGenerator):
         as soon as it is needed for the calculation. This means that only one item from
         the iterable is loaded into memory at a time.
 
-        The generator also supports timeout for each job. The 'pebble'
+        The generator also supports timeout for each job. The "pebble"
         pool_type can be used to support this feature. In all other cases,
-        the 'multiprocessing' pool_type is sufficient.
+        the "multiprocessing" pool_type is sufficient.
 
         Args:
             generator(SupportsNext):
@@ -291,8 +260,8 @@ class MultiprocessingPoolGenerator(ParallelGenerator):
                     job = self.createJob(
                         pool,
                         process_func,
-                        input_args,
-                        dict(**kwargs, gpu=gpu) if gpu is not None else kwargs
+                        *input_args,
+                        **dict(**kwargs, gpu=gpu) if gpu is not None else kwargs
                     )
                     queue.append(job)
                     if self.workerType == "gpu":
@@ -335,3 +304,165 @@ class MultiprocessingPoolGenerator(ParallelGenerator):
                             gpu_pool.append(gpus_to_jobs[process])
                             del gpus_to_jobs[process]
                         break  # make sure to pop the next item from the generator
+
+
+class PebbleJITGenerator(JITParallelGenerator):
+    """Uses the `pebble` library to parallelize the processing of an input generator.
+    The main benefit of using `pebble` is that it supports timeouts for each job,
+    which makes it easy to handle jobs that take too long to process.
+    """
+
+    def __init__(
+            self,
+            n_workers: int | None = None,
+            worker_type: Literal["cpu", "gpu"] = "cpu",
+            use_gpus: list[int] | None = None,
+            jobs_per_gpu: int = 1,
+            timeout: int | None = None
+    ):
+        """Configures the multiprocessing pool generator.
+
+        Args:
+            n_workers(int):
+                Number of workers to use.
+            worker_type(Literal["cpu", "gpu"]):
+                The type of worker to use.
+            use_gpus(list[int] | None):
+                A list of GPU indices to use. Only applicable if `worker_type` is 'gpu'.
+                If None, all available GPUs will be used.
+            jobs_per_gpu(int):
+                Number of jobs to run on each GPU.
+            timeout(int | None):
+                A timeout threshold in seconds. Processes that exceed this threshold will
+                be terminated and a `TimeoutError` will be returned.
+        """
+        super().__init__(
+            n_workers=n_workers,
+            worker_type=worker_type,
+            use_gpus=use_gpus,
+            jobs_per_gpu=jobs_per_gpu
+        )
+        self.timeout = timeout
+
+    def getPool(self) -> Any:
+        try:
+            from pebble import ProcessPool
+            return ProcessPool(max_workers=self.nWorkers)
+        except ImportError:
+            raise ImportError(
+                "Failed to import pool type 'pebble'. Install it first.")
+
+    def checkResultAvailable(self, process: Any):
+        try:
+            return process.result(timeout=0.1)
+        except (futures.TimeoutError, TimeoutError):
+            # not done yet, return nothing
+            return
+
+    def checkProcess(self, process: Any):
+        # check if job timed out
+        if process.done() and type(process._exception) in [
+            TimeoutError,
+            futures.TimeoutError
+        ]:
+            raise process._exception
+
+    def handleException(self, process: Any, exception: Exception) -> Any:
+        return process._exception
+
+    def createJob(self, pool: Any, process_func: Callable, *args, **kwargs) -> Any:
+        return pool.schedule(
+            process_func,
+            args=args,
+            kwargs=kwargs,
+            timeout=self.timeout
+        )
+
+
+class ThreadsJITGenerator(JITParallelGenerator):
+    """This class uses the `concurrent.futures.ThreadPoolExecutor` to parallelize
+    the processing of an input generator. Note that threads in Python are not
+    truly parallel due to the Global Interpreter Lock (GIL). However, this can
+    still be useful for I/O-bound tasks or tasks that are not CPU-bound downstream.
+    """
+
+    def getPool(self) -> Any:
+        from concurrent.futures import ThreadPoolExecutor
+        return ThreadPoolExecutor(max_workers=self.nWorkers)
+
+    def checkResultAvailable(self, process: Any):
+        try:
+            return process.result(timeout=0.1)
+        except futures.TimeoutError:
+            return
+
+    def checkProcess(self, process: Any):
+        pass
+
+    def handleException(self, process: Any, exception: Exception) -> Any:
+        return exception
+
+    def createJob(self, pool: Any, process_func: Callable, *args,
+                  **kwargs) -> Any:
+        return pool.submit(
+            process_func,
+            *args,
+            **kwargs
+        )
+
+
+class MultiprocessingJITGenerator(JITParallelGenerator):
+    """
+    A parallel generator that uses the `multiprocessing` module to parallelize
+    the processing of an input generator. This is useful when the input generator
+    is too large to fit into memory and needs to be processed in parallel over
+    a pool of workers.
+    """
+
+    def getPool(self):
+        return multiprocessing.Pool(
+            processes=self.nWorkers
+        )
+
+    def checkResultAvailable(self, process):
+        try:
+            process.wait(0.1)
+            # check if process is done
+            if not process.ready():
+                # not finished, return nothing
+                return
+            else:
+                # finished, yield the result
+                return process.get()
+        except (futures.TimeoutError, TimeoutError):
+            # not done yet, return nothing
+            return
+
+    def checkProcess(self, process):
+        pass
+
+    def handleException(self, process, exception):
+        return exception
+
+    def createJob(self, pool, process_func, *args, **kwargs):
+        return pool.apply_async(
+            process_func,
+            args,
+            kwargs
+        )
+
+
+class TorchJITGenerator(MultiprocessingJITGenerator):
+    """A variant of the `MultiprocessingPoolGenerator`
+    that uses the `torch.multiprocessing.Pool`
+    instead of the standard `multiprocessing.Pool`.
+    This is needed when the parallel
+    processing is done with PyTorch tensors or models,
+    which require the `torch.multiprocessing` and using the
+    `spawn` start method.
+    """
+
+    def getPool(self):
+        from torch.multiprocessing import Pool, set_start_method
+        set_start_method("spawn", force=True)
+        return Pool(self.nWorkers)
