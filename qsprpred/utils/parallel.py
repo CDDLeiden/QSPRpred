@@ -183,6 +183,61 @@ class MultiprocessingPoolGenerator(ParallelGenerator):
                 processes=self.nWorkers
             )
 
+    def checkResultAvailable(self, process):
+        try:
+            if self.poolType in ("pebble", "threads"):
+                # get the result, timeout error if not result yet available
+                return process.result(timeout=0.1)
+            else:
+                process.wait(0.1)
+                # check if process is done
+                if not process.ready():
+                    # not finished, return nothing
+                    return
+                else:
+                    # finished, yield the result
+                    return process.get()
+        except (futures.TimeoutError, TimeoutError):
+            # not done yet, return nothing
+            return
+
+    def checkProcess(self, process):
+        # check if job timed out and return the exception as a result
+        if self.poolType == "pebble" \
+                and process.done() \
+                and type(process._exception) in [
+            TimeoutError,
+            futures.TimeoutError
+        ]:
+            raise process._exception
+
+    def handleException(self, process, exception):
+        if self.poolType == "pebble":
+            return process._exception
+        else:
+            return exception
+
+    def createJob(self, pool, process_func, args, kwargs):
+        if self.poolType == "pebble":
+            return pool.schedule(
+                process_func,
+                args=args,
+                kwargs=kwargs,
+                timeout=self.timeout
+            )
+        elif self.poolType == "threads":
+            return pool.submit(
+                process_func,
+                *args,
+                **kwargs
+            )
+        else:
+            return pool.apply_async(
+                process_func,
+                args,
+                kwargs
+            )
+
     def make(
             self,
             generator: Generator,
@@ -233,28 +288,12 @@ class MultiprocessingPoolGenerator(ParallelGenerator):
                     if self.workerType == "gpu":
                         # get the next free GPU
                         gpu = gpu_pool.pop(0)
-                    if self.poolType == "pebble":
-                        job = pool.schedule(
-                            process_func,
-                            args=input_args,
-                            kwargs=dict(**kwargs,
-                                        gpu=gpu) if gpu is not None else kwargs,
-                            timeout=self.timeout
-                        )
-                    elif self.poolType == "threads":
-                        job = pool.submit(
-                            process_func,
-                            *input_args,
-                            **dict(**kwargs,
-                                   gpu=gpu) if gpu is not None else kwargs
-                        )
-                    else:
-                        job = pool.apply_async(
-                            process_func,
-                            input_args,
-                            dict(**kwargs,
-                                 gpu=gpu) if gpu is not None else kwargs
-                        )
+                    job = self.createJob(
+                        pool,
+                        process_func,
+                        input_args,
+                        dict(**kwargs, gpu=gpu) if gpu is not None else kwargs
+                    )
                     queue.append(job)
                     if self.workerType == "gpu":
                         gpus_to_jobs[job] = gpu
@@ -266,57 +305,33 @@ class MultiprocessingPoolGenerator(ParallelGenerator):
                 while queue and ((len(queue) >= self.nWorkers) or done):
                     # grab a process response from the top
                     process = queue.pop(0)
-                    # check if job timed out and return the exception as a result
-                    if self.poolType == "pebble" \
-                            and process.done() \
-                            and type(process._exception) in [
-                        TimeoutError,
-                        futures.TimeoutError
-                    ]:
-                        yield process._exception
-                        # make sure to pop the next item from the generator
-                        break
-                    # check if result available
                     try:
-                        if self.poolType in ("pebble", "threads"):
-                            # get the result, timeout error if not result yet available
-                            yield process.result(timeout=0.1)
+                        # check process status
+                        self.checkProcess(process)
+                        # check if result available
+                        result = self.checkResultAvailable(process)
+                        if result is not None:
+                            logger.debug(
+                                f"Yielding result: {result} for process: {process}"
+                            )
+                            yield result
                             if self.workerType == "gpu":
                                 gpu_pool.append(gpus_to_jobs[process])
-                                logger.debug(f"GPU {gpus_to_jobs[process]} is free.")
+                                logger.debug(
+                                    f"GPU {gpus_to_jobs[process]} is free.")
                                 logger.debug(f"Free GPUs now: {gpu_pool}")
                                 logger.debug(
-                                    f"Deleting job {process} from gpus_to_jobs."
-                                )
+                                    f"Deleting job {process} from gpus_to_jobs.")
                                 del gpus_to_jobs[process]
+                            break  # make sure to pop the next item from the generator
                         else:
-                            process.wait(0.1)
-                            # check if process is done
-                            if not process.ready():
-                                # not finished, add it back to queue
-                                queue.append(process)
-                            else:
-                                # finished, yield the result
-                                yield process.get()
-                                if self.workerType == "gpu":
-                                    gpu_pool.append(gpus_to_jobs[process])
-                                    logger.debug(
-                                        f"GPU {gpus_to_jobs[process]} is free.")
-                                    logger.debug(f"Free GPUs now: {gpu_pool}")
-                                    logger.debug(
-                                        f"Deleting job {process} from gpus_to_jobs.")
-                                    del gpus_to_jobs[process]
-                    except (futures.TimeoutError, TimeoutError):
-                        # not done yet, add it back to the queue
-                        queue.append(process)
+                            # result not available yet, put process back in the queue
+                            queue.append(process)
                     except Exception as exp:
                         # something went wrong, log and yield the exception
-                        logger.error(repr(exp))
+                        logger.exception(repr(exp))
+                        yield self.handleException(process, exp)
                         if self.workerType == "gpu":
                             gpu_pool.append(gpus_to_jobs[process])
                             del gpus_to_jobs[process]
-                        if self.poolType == "pebble":
-                            yield process._exception
-                        else:
-                            yield exp
                         break  # make sure to pop the next item from the generator
