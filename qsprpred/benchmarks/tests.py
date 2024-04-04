@@ -32,10 +32,10 @@ class DataSourceTesting(DataSetsPathMixIn, DataSource):
         return self.createLargeTestDataSet(name)
 
     def getDataSet(
-        self,
-        target_props: list[TargetProperty | dict],
-        name: str | None = None,
-        **kwargs,
+            self,
+            target_props: list[TargetProperty | dict],
+            name: str | None = None,
+            **kwargs,
     ) -> QSPRDataset:
         name = name or self.name
         return self.createLargeTestDataSet(name, target_props=target_props)
@@ -132,7 +132,7 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
                     (results["ScoreFunc"] == score)
                     & (results["Assessor"] == assessor.__class__.__name__)
                     & (results["TargetProperty"].isin([tp.name for tp in tps]))
-                ]
+                    ]
                 self.assertTrue(len(score_results) > 0)
 
     def checkSettings(self):

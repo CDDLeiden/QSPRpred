@@ -15,6 +15,7 @@ from sklearn.model_selection import ShuffleSplit
 
 from qsprpred.data.descriptors.sets import SmilesDesc
 from qsprpred.data.sampling.splits import RandomSplit
+from qsprpred.extra.gpu.utils.parallel import TorchJITGenerator
 from qsprpred.tasks import ModelTasks, TargetTasks
 from ....benchmarks import BenchmarkRunner
 from ....benchmarks.tests import BenchMarkTestCase
@@ -24,7 +25,7 @@ from ....extra.gpu.models.neural_network import STFullyConnected
 from ....models import CrossValAssessor, SklearnModel
 from ....models.metrics import SklearnMetrics
 from ....models.monitors import BaseMonitor, FileMonitor, ListMonitor
-from ....utils.parallel import TorchJITGenerator, ThreadsJITGenerator
+from ....utils.parallel import ThreadsJITGenerator
 from ....utils.testing.check_mixins import ModelCheckMixIn, MonitorsCheckMixIn
 from ....utils.testing.path_mixins import ModelDataSetsPathMixIn
 

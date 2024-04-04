@@ -10,11 +10,12 @@ from typing import Generator, Any
 
 import pandas as pd
 
+from qsprpred.extra.gpu.utils.parallel import TorchJITGenerator
 from .replica import Replica
 from .settings.benchmark import BenchmarkSettings
 from ..logs import logger
 from ..utils.parallel import ParallelGenerator, MultiprocessingJITGenerator, \
-    TorchJITGenerator, PebbleJITGenerator, ThreadsJITGenerator
+    ThreadsJITGenerator, PebbleJITGenerator
 
 
 class ExcThread(Thread):

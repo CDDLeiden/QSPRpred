@@ -28,12 +28,7 @@ def batched_generator(iterable: Iterable, batch_size: int) -> Generator:
 
 
 class ParallelGenerator(ABC):
-    """
-    An abstract class to facilitate parallel processing of an arbitrary generator.
-    This is meant for situations where the generator is too large to fit into memory,
-    but can also be used for any situation where parallel distribution over a pool
-    of workers (GPUs or CPUs) is needed.
-    """
+    """An abstract class to facilitate parallel processing of an arbitrary generator."""
 
     @abstractmethod
     def make(
@@ -85,6 +80,12 @@ class ParallelGenerator(ABC):
 
 
 class JITParallelGenerator(ParallelGenerator, ABC):
+    """An abstract class to facilitate JIT (Just In Time)
+    parallel processing of an arbitrary generator.
+    This is meant for situations where the result of the generator
+    is too large to fit into memory or not yet known. Parallelization can be done
+    over a pool of CPU or GPU workers. The generator will yield the results of the
+    """
 
     def __init__(
             self,
@@ -306,79 +307,6 @@ class JITParallelGenerator(ParallelGenerator, ABC):
                         break  # make sure to pop the next item from the generator
 
 
-class PebbleJITGenerator(JITParallelGenerator):
-    """Uses the `pebble` library to parallelize the processing of an input generator.
-    The main benefit of using `pebble` is that it supports timeouts for each job,
-    which makes it easy to handle jobs that take too long to process.
-    """
-
-    def __init__(
-            self,
-            n_workers: int | None = None,
-            worker_type: Literal["cpu", "gpu"] = "cpu",
-            use_gpus: list[int] | None = None,
-            jobs_per_gpu: int = 1,
-            timeout: int | None = None
-    ):
-        """Configures the multiprocessing pool generator.
-
-        Args:
-            n_workers(int):
-                Number of workers to use.
-            worker_type(Literal["cpu", "gpu"]):
-                The type of worker to use.
-            use_gpus(list[int] | None):
-                A list of GPU indices to use. Only applicable if `worker_type` is 'gpu'.
-                If None, all available GPUs will be used.
-            jobs_per_gpu(int):
-                Number of jobs to run on each GPU.
-            timeout(int | None):
-                A timeout threshold in seconds. Processes that exceed this threshold will
-                be terminated and a `TimeoutError` will be returned.
-        """
-        super().__init__(
-            n_workers=n_workers,
-            worker_type=worker_type,
-            use_gpus=use_gpus,
-            jobs_per_gpu=jobs_per_gpu
-        )
-        self.timeout = timeout
-
-    def getPool(self) -> Any:
-        try:
-            from pebble import ProcessPool
-            return ProcessPool(max_workers=self.nWorkers)
-        except ImportError:
-            raise ImportError(
-                "Failed to import pool type 'pebble'. Install it first.")
-
-    def checkResultAvailable(self, process: Any):
-        try:
-            return process.result(timeout=0.1)
-        except (futures.TimeoutError, TimeoutError):
-            # not done yet, return nothing
-            return
-
-    def checkProcess(self, process: Any):
-        # check if job timed out
-        if process.done() and type(process._exception) in [
-            TimeoutError,
-            futures.TimeoutError
-        ]:
-            raise process._exception
-
-    def handleException(self, process: Any, exception: Exception) -> Any:
-        return process._exception
-
-    def createJob(self, pool: Any, process_func: Callable, *args, **kwargs) -> Any:
-        return pool.schedule(
-            process_func,
-            args=args,
-            kwargs=kwargs,
-            timeout=self.timeout
-        )
-
-
 class ThreadsJITGenerator(JITParallelGenerator):
     """This class uses the `concurrent.futures.ThreadPoolExecutor` to parallelize
     the processing of an input generator. Note that threads in Python are not
@@ -452,17 +380,74 @@ class MultiprocessingJITGenerator(JITParallelGenerator):
         )
 
 
-class TorchJITGenerator(MultiprocessingJITGenerator):
-    """A variant of the `MultiprocessingPoolGenerator`
-    that uses the `torch.multiprocessing.Pool`
-    instead of the standard `multiprocessing.Pool`.
-    This is needed when the parallel
-    processing is done with PyTorch tensors or models,
-    which require the `torch.multiprocessing` and using the
-    `spawn` start method.
+class PebbleJITGenerator(JITParallelGenerator):
+    """Uses the `pebble` library to parallelize the processing of an input generator.
+    The main benefit of using `pebble` is that it supports timeouts for each job,
+    which makes it easy to handle jobs that take too long to process.
     """
 
-    def getPool(self):
-        from torch.multiprocessing import Pool, set_start_method
-        set_start_method("spawn", force=True)
-        return Pool(self.nWorkers)
+    def __init__(
+            self,
+            n_workers: int | None = None,
+            worker_type: Literal["cpu", "gpu"] = "cpu",
+            use_gpus: list[int] | None = None,
+            jobs_per_gpu: int = 1,
+            timeout: int | None = None
+    ):
+        """Configures the multiprocessing pool generator.
+
+        Args:
+            n_workers(int):
+                Number of workers to use.
+            worker_type(Literal["cpu", "gpu"]):
+                The type of worker to use.
+            use_gpus(list[int] | None):
+                A list of GPU indices to use. Only applicable if `worker_type` is 'gpu'.
+                If None, all available GPUs will be used.
+            jobs_per_gpu(int):
+                Number of jobs to run on each GPU.
+            timeout(int | None):
+                A timeout threshold in seconds. Processes that exceed this threshold will
+                be terminated and a `TimeoutError` will be returned.
+        """
+        super().__init__(
+            n_workers=n_workers,
+            worker_type=worker_type,
+            use_gpus=use_gpus,
+            jobs_per_gpu=jobs_per_gpu
+        )
+        self.timeout = timeout
+
+    def getPool(self) -> Any:
+        try:
+            from pebble import ProcessPool
+            return ProcessPool(max_workers=self.nWorkers)
+        except ImportError:
+            raise ImportError(
+                "Failed to import pool type 'pebble'. Install it first.")
+
+    def checkResultAvailable(self, process: Any):
+        try:
+            return process.result(timeout=0.1)
+        except (futures.TimeoutError, TimeoutError):
+            # not done yet, return nothing
+            return
+
+    def checkProcess(self, process: Any):
+        # check if job timed out
+        if process.done() and type(process._exception) in [
+            TimeoutError,
+            futures.TimeoutError
+        ]:
+            raise process._exception
+
+    def handleException(self, process: Any, exception: Exception) -> Any:
+        return process._exception
+
+    def createJob(self, pool: Any, process_func: Callable, *args, **kwargs) -> Any:
+        return pool.schedule(
+            process_func,
+            args=args,
+            kwargs=kwargs,
+            timeout=self.timeout
+        )
