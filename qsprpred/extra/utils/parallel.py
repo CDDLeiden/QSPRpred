@@ -17,21 +17,19 @@ class DaskJITGenerator(JITParallelGenerator):
 
     def checkResultAvailable(self, process: Future):
         time.sleep(0.1)
-        if process.done():
-            return process.result()
-        elif process.status == "error":
-            raise process.exception
-        else:
-            return
+        return process.done()
 
-    def checkProcess(self, process: Any):
+    def getResult(self, process: Future) -> Any:
+        return process.result()
+
+    def checkProcess(self, process: Future):
         if process.status == "error":
             raise process.exception
 
-    def handleException(self, process: Any, exception: Exception) -> Any:
+    def handleException(self, process: Future, exception: Exception) -> Any:
         return exception
 
-    def createJob(self, pool: Any, process_func: Callable, *args, **kwargs) -> Any:
+    def createJob(self, pool: Client, process_func: Callable, *args, **kwargs) -> Any:
         return pool.submit(
             process_func,
             *args,

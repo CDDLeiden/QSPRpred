@@ -1,7 +1,11 @@
 import multiprocessing
+import time
 from abc import ABC, abstractmethod
 from concurrent import futures
+from concurrent.futures import Future
 from typing import Iterable, Callable, Literal, Generator, Any
+
+from pebble import ProcessFuture
 
 from qsprpred.logs import logger
 
@@ -145,7 +149,7 @@ class JITParallelGenerator(ParallelGenerator, ABC):
         """
 
     @abstractmethod
-    def checkResultAvailable(self, process: Any):
+    def checkResultAvailable(self, process: Any) -> bool:
         """Check if the result of a process is available.
 
         Args:
@@ -153,7 +157,19 @@ class JITParallelGenerator(ParallelGenerator, ABC):
                 The process object or a future to check for a result.
 
         Returns:
-            The result of the process if available, otherwise None.
+            `True` if the result is available, otherwise `False`.
+        """
+
+    @abstractmethod
+    def getResult(self, process: Any) -> Any:
+        """Get the result of a process.
+
+        Args:
+            process(Any):
+                The process object or a future to get the result from.
+
+        Returns:
+            The result of the process.
         """
 
     @abstractmethod
@@ -279,8 +295,9 @@ class JITParallelGenerator(ParallelGenerator, ABC):
                         # check process status
                         self.checkProcess(process)
                         # check if result available
-                        result = self.checkResultAvailable(process)
-                        if result is not None:
+                        is_ready = self.checkResultAvailable(process)
+                        if is_ready:
+                            result = self.getResult(process)
                             logger.debug(
                                 f"Yielding result: {result} for process: {process}"
                             )
@@ -318,11 +335,12 @@ class ThreadsJITGenerator(JITParallelGenerator):
         from concurrent.futures import ThreadPoolExecutor
         return ThreadPoolExecutor(max_workers=self.nWorkers)
 
-    def checkResultAvailable(self, process: Any):
-        try:
-            return process.result(timeout=0.1)
-        except futures.TimeoutError:
-            return
+    def checkResultAvailable(self, process: Future):
+        time.sleep(0.1)
+        return process.done()
+
+    def getResult(self, process: Any):
+        return process.result()
 
     def checkProcess(self, process: Any):
         pass
@@ -358,13 +376,15 @@ class MultiprocessingJITGenerator(JITParallelGenerator):
             # check if process is done
             if not process.ready():
                 # not finished, return nothing
-                return
+                return False
             else:
-                # finished, yield the result
-                return process.get()
+                return True
         except (futures.TimeoutError, TimeoutError):
             # not done yet, return nothing
-            return
+            return False
+
+    def getResult(self, process):
+        return process.get()
 
     def checkProcess(self, process):
         pass
@@ -426,12 +446,12 @@ class PebbleJITGenerator(JITParallelGenerator):
             raise ImportError(
                 "Failed to import pool type 'pebble'. Install it first.")
 
-    def checkResultAvailable(self, process: Any):
-        try:
-            return process.result(timeout=0.1)
-        except (futures.TimeoutError, TimeoutError):
-            # not done yet, return nothing
-            return
+    def checkResultAvailable(self, process: ProcessFuture):
+        time.sleep(0.1)
+        return process.done()
+
+    def getResult(self, process: Any):
+        return process.result()
 
     def checkProcess(self, process: Any):
         # check if job timed out
