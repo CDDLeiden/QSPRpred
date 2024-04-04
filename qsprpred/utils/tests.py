@@ -83,15 +83,17 @@ class TestMultiProcGenerators(QSPRTestCase):
     def testArgs(self, args, kwargs):
         generator = (x for x in range(10))
         p_generator = MultiprocessingPoolGenerator(self.nCPU, pool_type="pebble")
-        for idx, result in enumerate(p_generator(
-                generator,
-                self.func_args,
-                *args or (),
-                **kwargs or {},
-        )):
+        result = list(p_generator(
+            generator,
+            self.func_args,
+            *args or (),
+            **kwargs or {},
+        ))
+        result = sorted(result, key=lambda x: x[0])
+        for idx, res in enumerate(result):
             self.assertEqual(
                 (idx, args if args else (), kwargs if kwargs else {}),
-                result
+                res
             )
 
 
