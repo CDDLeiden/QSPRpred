@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.tables.base &mdash; QSPRpred 3.0.2a4.dev5+gf96049df documentation</title>
+  <title>qsprpred.data.tables.base &mdash; QSPRpred 3.1.1a2.dev2+g9e0d4b7e documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -16,9 +16,9 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=ce784b25"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=505af335"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="../../../../_static/design-tabs.js?v=36754332"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2a4.dev5+gf96049df
+                v3.1.1a2.dev2+g9e0d4b7e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -105,35 +105,22 @@
 <span class="kn">from</span> <span class="nn">qsprpred.data.descriptors.sets</span> <span class="kn">import</span> <span class="n">DescriptorSet</span>
 
 
-<div class="viewcode-block" id="StoredTable">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.StoredTable">[docs]</a>
-<span class="k">class</span> <span class="nc">StoredTable</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="StoredTable"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.StoredTable">[docs]</a><span class="k">class</span> <span class="nc">StoredTable</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for tables that are stored in a file.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="StoredTable.save">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.StoredTable.save">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="StoredTable.save"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.StoredTable.save">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the table to a file.&quot;&quot;&quot;</span></div>
 
-
-<div class="viewcode-block" id="StoredTable.reload">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.StoredTable.reload">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="StoredTable.reload"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.StoredTable.reload">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">reload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reload the table from a file.&quot;&quot;&quot;</span></div>
 
-
-<div class="viewcode-block" id="StoredTable.clearFiles">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.StoredTable.clearFiles">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="StoredTable.clearFiles"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.StoredTable.clearFiles">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">clearFiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Delete the files associated with the table.&quot;&quot;&quot;</span></div>
 
-
-<div class="viewcode-block" id="StoredTable.fromFile">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.StoredTable.fromFile">[docs]</a>
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="StoredTable.fromFile"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.StoredTable.fromFile">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">fromFile</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;StoredTable&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load a `StoredTable` object from a file.</span>
@@ -143,35 +130,23 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            The `StoredTable` object itself.</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
-</div>
+<span class="sd">        &quot;&quot;&quot;</span></div></div>
 
 
-
-<div class="viewcode-block" id="DataTable">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable">[docs]</a>
-<span class="k">class</span> <span class="nc">DataTable</span><span class="p">(</span><span class="n">StoredTable</span><span class="p">):</span>
+<div class="viewcode-block" id="DataTable"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable">[docs]</a><span class="k">class</span> <span class="nc">DataTable</span><span class="p">(</span><span class="n">StoredTable</span><span class="p">):</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
-<div class="viewcode-block" id="DataTable.getProperty">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.getProperty">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="DataTable.getProperty"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.getProperty">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get values of a given property.&quot;&quot;&quot;</span></div>
 
-
-<div class="viewcode-block" id="DataTable.getProperties">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.getProperties">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="DataTable.getProperties"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.getProperties">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">getProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the property names contained in the dataset.&quot;&quot;&quot;</span></div>
 
-
-<div class="viewcode-block" id="DataTable.addProperty">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.addProperty">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="DataTable.addProperty"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.addProperty">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">addProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a property to the dataset.</span>
 
@@ -180,10 +155,7 @@
 <span class="sd">            data (list): The data of the property.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-
-<div class="viewcode-block" id="DataTable.removeProperty">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.removeProperty">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="DataTable.removeProperty"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.removeProperty">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">removeProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove a property from the dataset.</span>
 
@@ -191,10 +163,7 @@
 <span class="sd">            name (str): The name of the property.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-
-<div class="viewcode-block" id="DataTable.transformProperties">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.transformProperties">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="DataTable.transformProperties"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.transformProperties">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">transformProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">transformers</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform property values using a transformer function.</span>
 
@@ -204,10 +173,7 @@
 <span class="sd">                to a new representation.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-
-<div class="viewcode-block" id="DataTable.getSubset">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.getSubset">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="DataTable.getSubset"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.getSubset">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">getSubset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a subset of the dataset.</span>
 
@@ -215,10 +181,7 @@
 <span class="sd">            prefix (str): The prefix of the subset.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-
-<div class="viewcode-block" id="DataTable.apply">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.apply">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="DataTable.apply"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.apply">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">func</span><span class="p">:</span> <span class="nb">callable</span><span class="p">,</span>
@@ -236,26 +199,17 @@
 <span class="sd">            func_kwargs (dict, optional): The keyword arguments of the function.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-
-<div class="viewcode-block" id="DataTable.filter">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.filter">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="DataTable.filter"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataTable.filter">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_filters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter the dataset.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            table_filters (List[Callable]): The filters to apply.</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
-</div>
+<span class="sd">        &quot;&quot;&quot;</span></div></div>
 
 
-
-<div class="viewcode-block" id="MoleculeDataTable">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.MoleculeDataTable">[docs]</a>
-<span class="k">class</span> <span class="nc">MoleculeDataTable</span><span class="p">(</span><span class="n">DataTable</span><span class="p">):</span>
-<div class="viewcode-block" id="MoleculeDataTable.addDescriptors">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.MoleculeDataTable.addDescriptors">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="MoleculeDataTable"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.MoleculeDataTable">[docs]</a><span class="k">class</span> <span class="nc">MoleculeDataTable</span><span class="p">(</span><span class="n">DataTable</span><span class="p">):</span>
+<div class="viewcode-block" id="MoleculeDataTable.addDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.MoleculeDataTable.addDescriptors">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">addDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptors</span><span class="p">:</span> <span class="n">DescriptorSet</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add descriptors to the dataset.</span>
@@ -266,10 +220,7 @@
 <span class="sd">            kwargs: Additional keyword arguments to be passed to each descriptor set.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-
-<div class="viewcode-block" id="MoleculeDataTable.getDescriptors">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.MoleculeDataTable.getDescriptors">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="MoleculeDataTable.getDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.MoleculeDataTable.getDescriptors">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the table of descriptors that are currently in the dataset.</span>
@@ -278,10 +229,7 @@
 <span class="sd">            a pd.DataFrame with the descriptors</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-
-<div class="viewcode-block" id="MoleculeDataTable.getDescriptorNames">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.MoleculeDataTable.getDescriptorNames">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="MoleculeDataTable.getDescriptorNames"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.MoleculeDataTable.getDescriptorNames">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">getDescriptorNames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the names of the descriptors that are currently in the dataset.</span>
@@ -290,13 +238,9 @@
 <span class="sd">            a `list` of descriptor names</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-
-<div class="viewcode-block" id="MoleculeDataTable.hasDescriptors">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.MoleculeDataTable.hasDescriptors">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="MoleculeDataTable.hasDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.MoleculeDataTable.hasDescriptors">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">hasDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Indicates if the dataset has descriptors.&quot;&quot;&quot;</span></div>
-
 
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
@@ -308,29 +252,21 @@
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
 
-
-<div class="viewcode-block" id="DataSetDependant">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataSetDependant">[docs]</a>
-<span class="k">class</span> <span class="nc">DataSetDependant</span><span class="p">:</span>
+<div class="viewcode-block" id="DataSetDependant"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataSetDependant">[docs]</a><span class="k">class</span> <span class="nc">DataSetDependant</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Classes that need a data set to operate have to implement this.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">MoleculeDataTable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span> <span class="o">=</span> <span class="n">dataset</span>
 
-<div class="viewcode-block" id="DataSetDependant.setDataSet">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataSetDependant.setDataSet">[docs]</a>
-    <span class="k">def</span> <span class="nf">setDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">MoleculeDataTable</span><span class="p">):</span>
+<div class="viewcode-block" id="DataSetDependant.setDataSet"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataSetDependant.setDataSet">[docs]</a>    <span class="k">def</span> <span class="nf">setDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">MoleculeDataTable</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span> <span class="o">=</span> <span class="n">dataset</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">hasDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Indicates if this object has a data set attached to it.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="DataSetDependant.getDataSet">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataSetDependant.getDataSet">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="DataSetDependant.getDataSet"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.base.DataSetDependant.getDataSet">[docs]</a>    <span class="k">def</span> <span class="nf">getDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the data set attached to this object.</span>
 
 <span class="sd">        Raises:</span>
@@ -339,9 +275,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDataSet</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data set not set.&quot;</span><span class="p">)</span></div>
-</div>
-
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data set not set.&quot;</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

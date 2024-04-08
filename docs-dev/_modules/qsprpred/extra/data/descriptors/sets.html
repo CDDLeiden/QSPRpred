@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.data.descriptors.sets &mdash; QSPRpred 3.0.2a4.dev5+gf96049df documentation</title>
+  <title>qsprpred.extra.data.descriptors.sets &mdash; QSPRpred 3.1.1a2.dev2+g9e0d4b7e documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -16,9 +16,9 @@
   
         <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../../_static/documentation_options.js?v=ce784b25"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=505af335"></script>
         <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="../../../../../_static/design-tabs.js?v=36754332"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2a4.dev5+gf96049df
+                v3.1.1a2.dev2+g9e0d4b7e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -125,9 +125,7 @@
 <span class="kn">from</span> <span class="nn">qsprpred.extra.data.utils.msa_calculator</span> <span class="kn">import</span> <span class="n">MSAProvider</span><span class="p">,</span> <span class="n">ClustalMSA</span>
 
 
-<div class="viewcode-block" id="Mordred">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.Mordred">[docs]</a>
-<span class="k">class</span> <span class="nc">Mordred</span><span class="p">(</span><span class="n">DescriptorSet</span><span class="p">):</span>
+<div class="viewcode-block" id="Mordred"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.Mordred">[docs]</a><span class="k">class</span> <span class="nc">Mordred</span><span class="p">(</span><span class="n">DescriptorSet</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Descriptors from molecular descriptor calculation software Mordred.</span>
 
 <span class="sd">    From https://github.com/mordred-descriptor/mordred.</span>
@@ -178,15 +176,12 @@
         <span class="c1"># convert to list of descriptor names if descriptor instances are passed</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">descs</span><span class="p">]</span>
 
-<div class="viewcode-block" id="Mordred.getDescriptors">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.Mordred.getDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+<div class="viewcode-block" id="Mordred.getDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.Mordred.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mordred</span><span class="o">.</span><span class="n">pandas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iterMols</span><span class="p">(</span><span class="n">mols</span><span class="p">),</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nproc</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;coerce&quot;</span><span class="p">)</span>  <span class="c1"># replace errors by nan values</span>
         <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">values</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -215,10 +210,7 @@
         <span class="k">return</span> <span class="s2">&quot;Mordred&quot;</span></div>
 
 
-
-<div class="viewcode-block" id="Mold2">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.Mold2">[docs]</a>
-<span class="k">class</span> <span class="nc">Mold2</span><span class="p">(</span><span class="n">DescriptorSet</span><span class="p">):</span>
+<div class="viewcode-block" id="Mold2"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.Mold2">[docs]</a><span class="k">class</span> <span class="nc">Mold2</span><span class="p">(</span><span class="n">DescriptorSet</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Descriptors from molecular descriptor calculation software Mold2.</span>
 
 <span class="sd">    From https://github.com/OlivierBeq/Mold2_pywrapper.</span>
@@ -249,16 +241,13 @@
     <span class="k">def</span> <span class="nf">supportsParallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-<div class="viewcode-block" id="Mold2.getDescriptors">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.Mold2.getDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+<div class="viewcode-block" id="Mold2.getDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.Mold2.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mold2</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iterMols</span><span class="p">(</span><span class="n">mols</span><span class="p">),</span> <span class="n">show_banner</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="c1"># Drop columns</span>
         <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
         <span class="k">return</span> <span class="n">values</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -295,10 +284,7 @@
         <span class="k">return</span> <span class="s2">&quot;Mold2&quot;</span></div>
 
 
-
-<div class="viewcode-block" id="PaDEL">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.PaDEL">[docs]</a>
-<span class="k">class</span> <span class="nc">PaDEL</span><span class="p">(</span><span class="n">DescriptorSet</span><span class="p">):</span>
+<div class="viewcode-block" id="PaDEL"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.PaDEL">[docs]</a><span class="k">class</span> <span class="nc">PaDEL</span><span class="p">(</span><span class="n">DescriptorSet</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Descriptors from molecular descriptor calculation software PaDEL.</span>
 
 <span class="sd">    From https://github.com/OlivierBeq/PaDEL_pywrapper.</span>
@@ -352,9 +338,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_initMapping</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;_keep&quot;</span><span class="p">]</span>
 
-<div class="viewcode-block" id="PaDEL.getDescriptors">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.PaDEL.getDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+<div class="viewcode-block" id="PaDEL.getDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.PaDEL.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="n">mols</span> <span class="o">=</span> <span class="p">[</span><span class="n">Chem</span><span class="o">.</span><span class="n">AddHs</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterMols</span><span class="p">(</span><span class="n">mols</span><span class="p">)]</span>
@@ -362,7 +346,6 @@
         <span class="n">intersection</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_keep</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">intersection</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">values</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -402,10 +385,7 @@
         <span class="k">return</span> <span class="s2">&quot;PaDEL&quot;</span></div>
 
 
-
-<div class="viewcode-block" id="ExtendedValenceSignature">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ExtendedValenceSignature">[docs]</a>
-<span class="k">class</span> <span class="nc">ExtendedValenceSignature</span><span class="p">(</span><span class="n">DescriptorSet</span><span class="p">):</span>
+<div class="viewcode-block" id="ExtendedValenceSignature"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ExtendedValenceSignature">[docs]</a><span class="k">class</span> <span class="nc">ExtendedValenceSignature</span><span class="p">(</span><span class="n">DescriptorSet</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;SMILES signature based on extended valence sequence from</span>
 
 <span class="sd">    The Signature Molecular Descriptor.</span>
@@ -433,9 +413,7 @@
     <span class="k">def</span> <span class="nf">supportsParallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-<div class="viewcode-block" id="ExtendedValenceSignature.getDescriptors">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ExtendedValenceSignature.getDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+<div class="viewcode-block" id="ExtendedValenceSignature.getDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ExtendedValenceSignature.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="n">mols</span> <span class="o">=</span> <span class="p">[</span><span class="n">Chem</span><span class="o">.</span><span class="n">AddHs</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterMols</span><span class="p">(</span><span class="n">mols</span><span class="p">)]</span>
@@ -449,7 +427,6 @@
             <span class="n">intersection</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">intersection</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">values</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -467,15 +444,10 @@
         <span class="k">return</span> <span class="s2">&quot;ExtendedValenceSignature&quot;</span></div>
 
 
-
-<div class="viewcode-block" id="ProteinDescriptorSet">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProteinDescriptorSet">[docs]</a>
-<span class="k">class</span> <span class="nc">ProteinDescriptorSet</span><span class="p">(</span><span class="n">DescriptorSet</span><span class="p">):</span>
+<div class="viewcode-block" id="ProteinDescriptorSet"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProteinDescriptorSet">[docs]</a><span class="k">class</span> <span class="nc">ProteinDescriptorSet</span><span class="p">(</span><span class="n">DescriptorSet</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for protein descriptor sets.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ProteinDescriptorSet.getProteinDescriptors">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProteinDescriptorSet.getProteinDescriptors">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="ProteinDescriptorSet.getProteinDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProteinDescriptorSet.getProteinDescriptors">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">getProteinDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">acc_keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">sequences</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -497,10 +469,7 @@
 <span class="sd">                indexed by `acc_keys`</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-
-<div class="viewcode-block" id="ProteinDescriptorSet.getDescriptors">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProteinDescriptorSet.getDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+<div class="viewcode-block" id="ProteinDescriptorSet.getDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProteinDescriptorSet.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span>
         <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]],</span>
@@ -526,27 +495,21 @@
         <span class="c1"># create a data frame with the same order of acc_keys as in props</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">&quot;acc_keys&quot;</span><span class="p">:</span> <span class="n">props</span><span class="p">[</span><span class="s2">&quot;acc_keys&quot;</span><span class="p">]})</span>
         <span class="c1"># merge the calculated values with the data frame to attach them to the rows</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="s2">&quot;acc_keys&quot;</span><span class="p">,</span> <span class="n">right_on</span><span class="o">=</span><span class="s2">&quot;acc_keys&quot;</span><span class="p">,</span>
-                      <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;acc_keys&quot;</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+            <span class="n">values</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="s2">&quot;acc_keys&quot;</span><span class="p">,</span> <span class="n">right_on</span><span class="o">=</span><span class="s2">&quot;acc_keys&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;acc_keys&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">values</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">requiredProps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="n">existing</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">requiredProps</span>
         <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;acc_keys&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">existing</span><span class="p">]</span>
 
-<div class="viewcode-block" id="ProteinDescriptorSet.supportsParallel">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProteinDescriptorSet.supportsParallel">[docs]</a>
-    <span class="k">def</span> <span class="nf">supportsParallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">False</span></div>
-</div>
+<div class="viewcode-block" id="ProteinDescriptorSet.supportsParallel"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProteinDescriptorSet.supportsParallel">[docs]</a>    <span class="k">def</span> <span class="nf">supportsParallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div></div>
 
 
-
-<div class="viewcode-block" id="ProDec">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProDec">[docs]</a>
-<span class="k">class</span> <span class="nc">ProDec</span><span class="p">(</span><span class="n">ProteinDescriptorSet</span><span class="p">):</span>
+<div class="viewcode-block" id="ProDec"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProDec">[docs]</a><span class="k">class</span> <span class="nc">ProDec</span><span class="p">(</span><span class="n">ProteinDescriptorSet</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Protein descriptors from the ProDec package.</span>
 
 <span class="sd">    See https://github.com/OlivierBeq/ProDEC.</span>
@@ -586,9 +549,7 @@
         <span class="c1"># Add factory to state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">factory</span> <span class="o">=</span> <span class="n">prodec</span><span class="o">.</span><span class="n">ProteinDescriptors</span><span class="p">()</span>
 
-<div class="viewcode-block" id="ProDec.calculateDescriptor">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProDec.calculateDescriptor">[docs]</a>
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ProDec.calculateDescriptor"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProDec.calculateDescriptor">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">calculateDescriptor</span><span class="p">(</span>
         <span class="n">factory</span><span class="p">:</span> <span class="n">prodec</span><span class="o">.</span><span class="n">ProteinDescriptors</span><span class="p">,</span> <span class="n">msa</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">descriptor</span><span class="p">:</span> <span class="nb">str</span>
     <span class="p">):</span>
@@ -616,10 +577,7 @@
         <span class="n">protein_features</span> <span class="o">=</span> <span class="n">prodec_descriptor</span><span class="o">.</span><span class="n">pandas_get</span><span class="p">(</span><span class="n">msa</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">ids</span><span class="o">=</span><span class="n">msa</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">protein_features</span></div>
 
-
-<div class="viewcode-block" id="ProDec.getProteinDescriptors">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProDec.getProteinDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">getProteinDescriptors</span><span class="p">(</span>
+<div class="viewcode-block" id="ProDec.getProteinDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProDec.getProteinDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getProteinDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">acc_keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">sequences</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -658,7 +616,6 @@
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">df</span></div>
 
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_descriptors</span><span class="p">)</span>
@@ -669,7 +626,6 @@
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;ProDec_&quot;</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sets</span><span class="p">)</span></div>
-
 </pre></div>
 
            </div>

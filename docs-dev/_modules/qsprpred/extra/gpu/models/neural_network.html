@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.gpu.models.neural_network &mdash; QSPRpred 3.0.2a4.dev5+gf96049df documentation</title>
+  <title>qsprpred.extra.gpu.models.neural_network &mdash; QSPRpred 3.1.1a2.dev2+g9e0d4b7e documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -16,9 +16,9 @@
   
         <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../../_static/documentation_options.js?v=ce784b25"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=505af335"></script>
         <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="../../../../../_static/design-tabs.js?v=36754332"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2a4.dev5+gf96049df
+                v3.1.1a2.dev2+g9e0d4b7e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -115,9 +115,7 @@
 <span class="kn">from</span> <span class="nn">....models.monitors</span> <span class="kn">import</span> <span class="n">BaseMonitor</span><span class="p">,</span> <span class="n">FitMonitor</span>
 
 
-<div class="viewcode-block" id="Base">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.Base">[docs]</a>
-<span class="k">class</span> <span class="nc">Base</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<div class="viewcode-block" id="Base"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.Base">[docs]</a><span class="k">class</span> <span class="nc">Base</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base structure for all classification/regression DNN models.</span>
 
 <span class="sd">    Mainly, it provides the general methods for training, evaluating model and</span>
@@ -189,9 +187,7 @@
                 <span class="sa">f</span><span class="s2">&quot;running DNN on gpu: </span><span class="si">{</span><span class="n">gpus</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">.&quot;</span>
             <span class="p">)</span>
 
-<div class="viewcode-block" id="Base.fit">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.Base.fit">[docs]</a>
-    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
+<div class="viewcode-block" id="Base.fit"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.Base.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">X_train</span><span class="p">,</span>
         <span class="n">y_train</span><span class="p">,</span>
@@ -285,10 +281,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">best_weights</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">,</span> <span class="n">last_save</span></div>
 
-
-<div class="viewcode-block" id="Base.evaluate">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.Base.evaluate">[docs]</a>
-    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<div class="viewcode-block" id="Base.evaluate"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.Base.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loader</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate the performance of the DNN model.</span>
 
 <span class="sd">        Args:</span>
@@ -319,10 +312,7 @@
         <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">loader</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">loss</span></div>
 
-
-<div class="viewcode-block" id="Base.predict">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.Base.predict">[docs]</a>
-    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_test</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<div class="viewcode-block" id="Base.predict"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.Base.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_test</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Predicting the probability of each sample in the given dataset.</span>
 
 <span class="sd">        Args:</span>
@@ -345,7 +335,6 @@
         <span class="n">score</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">score</span></div>
 
-
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_get_param_names</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the class parameter names.</span>
@@ -363,9 +352,7 @@
         <span class="p">]</span>
         <span class="k">return</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">])</span>
 
-<div class="viewcode-block" id="Base.get_params">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.Base.get_params">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<div class="viewcode-block" id="Base.get_params"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.Base.get_params">[docs]</a>    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get parameters for this estimator.</span>
 
 <span class="sd">        Function copied from sklearn.base_estimator!</span>
@@ -385,10 +372,7 @@
             <span class="n">out</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">return</span> <span class="n">out</span></div>
 
-
-<div class="viewcode-block" id="Base.set_params">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.Base.set_params">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Base&quot;</span><span class="p">:</span>
+<div class="viewcode-block" id="Base.set_params"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.Base.set_params">[docs]</a>    <span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Base&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the parameters of this estimator.</span>
 
 <span class="sd">        Function copied from sklearn.base_estimator!</span>
@@ -426,10 +410,7 @@
             <span class="n">valid_params</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">set_params</span><span class="p">(</span><span class="o">**</span><span class="n">sub_params</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
-
-<div class="viewcode-block" id="Base.getDataLoader">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.Base.getDataLoader">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDataLoader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Base.getDataLoader"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.Base.getDataLoader">[docs]</a>    <span class="k">def</span> <span class="nf">getDataLoader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert data to tensors and get generator over dataset with dataloader.</span>
 
 <span class="sd">        Args:</span>
@@ -445,14 +426,10 @@
             <span class="n">tensordataset</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">tensordataset</span> <span class="o">=</span> <span class="n">TensorDataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">tensordataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span></div>
-</div>
+        <span class="k">return</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">tensordataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span><span class="p">)</span></div></div>
 
 
-
-<div class="viewcode-block" id="STFullyConnected">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.STFullyConnected">[docs]</a>
-<span class="k">class</span> <span class="nc">STFullyConnected</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+<div class="viewcode-block" id="STFullyConnected"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.STFullyConnected">[docs]</a><span class="k">class</span> <span class="nc">STFullyConnected</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Single task DNN classification/regression model.</span>
 
 <span class="sd">    It contains four fully connected layers between which are</span>
@@ -560,9 +537,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">criterion</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initModel</span><span class="p">()</span>
 
-<div class="viewcode-block" id="STFullyConnected.initModel">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.STFullyConnected.initModel">[docs]</a>
-    <span class="k">def</span> <span class="nf">initModel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="STFullyConnected.initModel"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.STFullyConnected.initModel">[docs]</a>    <span class="k">def</span> <span class="nf">initModel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Define the layers of the model.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout_frac</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fc0</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_dim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">neurons_h1</span><span class="p">)</span>
@@ -583,10 +558,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">activation</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Softmax</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="STFullyConnected.set_params">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.STFullyConnected.set_params">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;STFullyConnected&quot;</span><span class="p">:</span>
+<div class="viewcode-block" id="STFullyConnected.set_params"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.STFullyConnected.set_params">[docs]</a>    <span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;STFullyConnected&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set parameters and re-initialize model.</span>
 
 <span class="sd">        Args:</span>
@@ -599,10 +571,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">initModel</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
-
-<div class="viewcode-block" id="STFullyConnected.forward">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.STFullyConnected.forward">[docs]</a>
-    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">is_train</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="STFullyConnected.forward"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.neural_network.STFullyConnected.forward">[docs]</a>    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">is_train</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Invoke the class directly as a function.</span>
 
 <span class="sd">        Args:</span>
@@ -630,9 +599,7 @@
             <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc3</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc3</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">y</span></div>
-</div>
-
+        <span class="k">return</span> <span class="n">y</span></div></div>
 </pre></div>
 
            </div>

@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.plotting.tests &mdash; QSPRpred 3.0.2a4.dev5+gf96049df documentation</title>
+  <title>qsprpred.plotting.tests &mdash; QSPRpred 3.1.1a2.dev2+g9e0d4b7e documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -16,9 +16,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=ce784b25"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=505af335"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="../../../_static/design-tabs.js?v=36754332"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2a4.dev5+gf96049df
+                v3.1.1a2.dev2+g9e0d4b7e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -119,19 +119,12 @@
 <span class="kn">from</span> <span class="nn">..utils.testing.path_mixins</span> <span class="kn">import</span> <span class="n">ModelDataSetsPathMixIn</span>
 
 
-<div class="viewcode-block" id="PlottingTest">
-<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.PlottingTest">[docs]</a>
-<span class="k">class</span> <span class="nc">PlottingTest</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
-<div class="viewcode-block" id="PlottingTest.setUp">
-<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.PlottingTest.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PlottingTest"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.PlottingTest">[docs]</a><span class="k">class</span> <span class="nc">PlottingTest</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="PlottingTest.setUp"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.PlottingTest.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="PlottingTest.getModel">
-<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.PlottingTest.getModel">[docs]</a>
-    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SklearnModel</span><span class="p">:</span>
+<div class="viewcode-block" id="PlottingTest.getModel"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.PlottingTest.getModel">[docs]</a>    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SklearnModel</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a model for testing.</span>
 
 <span class="sd">        Args:</span>
@@ -151,26 +144,17 @@
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
             <span class="n">alg</span><span class="o">=</span><span class="n">alg</span><span class="p">,</span>
-        <span class="p">)</span></div>
-</div>
+        <span class="p">)</span></div></div>
 
 
-
-<div class="viewcode-block" id="ROCPlotTest">
-<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ROCPlotTest">[docs]</a>
-<span class="k">class</span> <span class="nc">ROCPlotTest</span><span class="p">(</span><span class="n">PlottingTest</span><span class="p">):</span>
+<div class="viewcode-block" id="ROCPlotTest"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ROCPlotTest">[docs]</a><span class="k">class</span> <span class="nc">ROCPlotTest</span><span class="p">(</span><span class="n">PlottingTest</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test ROC curve plotting class.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ROCPlotTest.setUp">
-<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ROCPlotTest.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ROCPlotTest.setUp"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ROCPlotTest.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="ROCPlotTest.testPlotSingle">
-<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ROCPlotTest.testPlotSingle">[docs]</a>
-    <span class="k">def</span> <span class="nf">testPlotSingle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ROCPlotTest.testPlotSingle"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ROCPlotTest.testPlotSingle">[docs]</a>    <span class="k">def</span> <span class="nf">testPlotSingle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test plotting ROC curve for single task.&quot;&quot;&quot;</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
             <span class="s2">&quot;test_roc_plot_single_data&quot;</span><span class="p">,</span>
@@ -191,22 +175,15 @@
         <span class="c1"># independent test set plot</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">validation</span><span class="o">=</span><span class="s2">&quot;ind&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">Figure</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">.ind.png&quot;</span><span class="p">))</span></div>
-</div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">.ind.png&quot;</span><span class="p">))</span></div></div>
 
 
-
-<div class="viewcode-block" id="MetricsPlotTest">
-<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.MetricsPlotTest">[docs]</a>
-<span class="k">class</span> <span class="nc">MetricsPlotTest</span><span class="p">(</span><span class="n">PlottingTest</span><span class="p">):</span>
+<div class="viewcode-block" id="MetricsPlotTest"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.MetricsPlotTest">[docs]</a><span class="k">class</span> <span class="nc">MetricsPlotTest</span><span class="p">(</span><span class="n">PlottingTest</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test metrics plotting class.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="MetricsPlotTest.setUp">
-<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.MetricsPlotTest.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MetricsPlotTest.setUp"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.MetricsPlotTest.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
-
 
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
@@ -246,22 +223,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_precision.png&quot;</span><span class="p">))</span></div>
 
 
-
-<div class="viewcode-block" id="CorrPlotTest">
-<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.CorrPlotTest">[docs]</a>
-<span class="k">class</span> <span class="nc">CorrPlotTest</span><span class="p">(</span><span class="n">PlottingTest</span><span class="p">):</span>
+<div class="viewcode-block" id="CorrPlotTest"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.CorrPlotTest">[docs]</a><span class="k">class</span> <span class="nc">CorrPlotTest</span><span class="p">(</span><span class="n">PlottingTest</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test correlation plotting class.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="CorrPlotTest.setUp">
-<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.CorrPlotTest.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CorrPlotTest.setUp"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.CorrPlotTest.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="CorrPlotTest.testPlotSingle">
-<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.CorrPlotTest.testPlotSingle">[docs]</a>
-    <span class="k">def</span> <span class="nf">testPlotSingle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CorrPlotTest.testPlotSingle"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.CorrPlotTest.testPlotSingle">[docs]</a>    <span class="k">def</span> <span class="nf">testPlotSingle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test plotting correlation for single task.&quot;&quot;&quot;</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
             <span class="s2">&quot;test_corr_plot_single_data&quot;</span><span class="p">,</span> <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">()</span>
@@ -277,26 +246,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">summary</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span>
         <span class="c1"># assert g is sns.FacetGrid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">sns</span><span class="o">.</span><span class="n">FacetGrid</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_correlation.png&quot;</span><span class="p">))</span></div>
-</div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_correlation.png&quot;</span><span class="p">))</span></div></div>
 
 
-
-<div class="viewcode-block" id="WilliamsPlotTest">
-<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.WilliamsPlotTest">[docs]</a>
-<span class="k">class</span> <span class="nc">WilliamsPlotTest</span><span class="p">(</span><span class="n">PlottingTest</span><span class="p">):</span>
+<div class="viewcode-block" id="WilliamsPlotTest"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.WilliamsPlotTest">[docs]</a><span class="k">class</span> <span class="nc">WilliamsPlotTest</span><span class="p">(</span><span class="n">PlottingTest</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test plotting Williams plot for single task.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="WilliamsPlotTest.setUp">
-<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.WilliamsPlotTest.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="WilliamsPlotTest.setUp"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.WilliamsPlotTest.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="WilliamsPlotTest.testPlotSingle">
-<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.WilliamsPlotTest.testPlotSingle">[docs]</a>
-    <span class="k">def</span> <span class="nf">testPlotSingle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="WilliamsPlotTest.testPlotSingle"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.WilliamsPlotTest.testPlotSingle">[docs]</a>    <span class="k">def</span> <span class="nf">testPlotSingle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test plotting Williams plot for single task.&quot;&quot;&quot;</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
             <span class="s2">&quot;test_williams_plot_single_data&quot;</span><span class="p">,</span> <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">()</span>
@@ -318,22 +278,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">hstar</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
         <span class="c1"># assert g is sns.FacetGrid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">sns</span><span class="o">.</span><span class="n">FacetGrid</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_williamsplot.png&quot;</span><span class="p">))</span></div>
-</div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_williamsplot.png&quot;</span><span class="p">))</span></div></div>
 
 
-
-<div class="viewcode-block" id="ConfusionMatrixPlotTest">
-<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ConfusionMatrixPlotTest">[docs]</a>
-<span class="k">class</span> <span class="nc">ConfusionMatrixPlotTest</span><span class="p">(</span><span class="n">PlottingTest</span><span class="p">):</span>
+<div class="viewcode-block" id="ConfusionMatrixPlotTest"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ConfusionMatrixPlotTest">[docs]</a><span class="k">class</span> <span class="nc">ConfusionMatrixPlotTest</span><span class="p">(</span><span class="n">PlottingTest</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test confusion matrix plotting class.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ConfusionMatrixPlotTest.setUp">
-<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ConfusionMatrixPlotTest.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ConfusionMatrixPlotTest.setUp"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.tests.ConfusionMatrixPlotTest.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
-
 
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
@@ -391,7 +344,6 @@
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_CL_Independent Test_confusion_matrix.png&quot;</span>
             <span class="p">)</span>
         <span class="p">)</span></div>
-
 </pre></div>
 
            </div>

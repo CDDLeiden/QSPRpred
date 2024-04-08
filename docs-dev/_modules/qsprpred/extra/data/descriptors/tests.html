@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.data.descriptors.tests &mdash; QSPRpred 3.0.2a4.dev5+gf96049df documentation</title>
+  <title>qsprpred.extra.data.descriptors.tests &mdash; QSPRpred 3.1.1a2.dev2+g9e0d4b7e documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -16,9 +16,9 @@
   
         <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../../_static/documentation_options.js?v=ce784b25"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=505af335"></script>
         <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="../../../../../_static/design-tabs.js?v=36754332"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2a4.dev5+gf96049df
+                v3.1.1a2.dev2+g9e0d4b7e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -141,27 +141,20 @@
 <span class="kn">from</span> <span class="nn">qsprpred.utils.testing.check_mixins</span> <span class="kn">import</span> <span class="n">DescriptorInDataCheckMixIn</span>
 
 
-<div class="viewcode-block" id="TestDescriptorSetsExtra">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorSetsExtra">[docs]</a>
-<span class="k">class</span> <span class="nc">TestDescriptorSetsExtra</span><span class="p">(</span><span class="n">DataSetsMixInExtras</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestDescriptorSetsExtra"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorSetsExtra">[docs]</a><span class="k">class</span> <span class="nc">TestDescriptorSetsExtra</span><span class="p">(</span><span class="n">DataSetsMixInExtras</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test descriptor sets with extra features.</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        dataset (QSPRDataset): dataset for testing, shuffled</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="TestDescriptorSetsExtra.setUp">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorSetsExtra.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestDescriptorSetsExtra.setUp"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorSetsExtra.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createSmallTestDataSet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">shuffle</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="TestDescriptorSetsExtra.testMold2">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorSetsExtra.testMold2">[docs]</a>
-    <span class="nd">@skipIf</span><span class="p">(</span><span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Darwin&quot;</span><span class="p">,</span> <span class="s2">&quot;Mold2 not supported on Mac OS&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="TestDescriptorSetsExtra.testMold2"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorSetsExtra.testMold2">[docs]</a>    <span class="nd">@skipIf</span><span class="p">(</span><span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;Darwin&quot;</span><span class="p">,</span> <span class="s2">&quot;Mold2 not supported on Mac OS&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">testMold2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the Mold2 descriptor calculator.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">([</span><span class="n">Mold2</span><span class="p">()])</span>
@@ -169,16 +162,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="TestDescriptorSetsExtra.testPaDELDescriptors">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorSetsExtra.testPaDELDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">testPaDELDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestDescriptorSetsExtra.testPaDELDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorSetsExtra.testPaDELDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">testPaDELDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the PaDEL descriptor calculator.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">([</span><span class="n">PaDEL</span><span class="p">()])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">),</span> <span class="mi">1444</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span></div>
-
 
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
@@ -200,9 +189,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
 
-<div class="viewcode-block" id="TestDescriptorSetsExtra.testMordred">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorSetsExtra.testMordred">[docs]</a>
-    <span class="k">def</span> <span class="nf">testMordred</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestDescriptorSetsExtra.testMordred"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorSetsExtra.testMordred">[docs]</a>    <span class="k">def</span> <span class="nf">testMordred</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the Mordred descriptor calculator.&quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">mordred</span>
         <span class="kn">from</span> <span class="nn">mordred</span> <span class="kn">import</span> <span class="n">descriptors</span>
@@ -218,24 +205,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="TestDescriptorSetsExtra.testExtendedValenceSignature">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorSetsExtra.testExtendedValenceSignature">[docs]</a>
-    <span class="k">def</span> <span class="nf">testExtendedValenceSignature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestDescriptorSetsExtra.testExtendedValenceSignature"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorSetsExtra.testExtendedValenceSignature">[docs]</a>    <span class="k">def</span> <span class="nf">testExtendedValenceSignature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the SMILES based signature descriptor calculator.&quot;&quot;&quot;</span>
         <span class="n">desc_set</span> <span class="o">=</span> <span class="n">ExtendedValenceSignature</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">([</span><span class="n">desc_set</span><span class="p">],</span> <span class="n">recalculate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">featurize</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">desc_set</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span></div>
-</div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span></div></div>
 
 
-
-<div class="viewcode-block" id="TestPCMDataSet">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestPCMDataSet">[docs]</a>
-<span class="k">class</span> <span class="nc">TestPCMDataSet</span><span class="p">(</span><span class="n">DataSetsMixInExtras</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPCMDataSet"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestPCMDataSet">[docs]</a><span class="k">class</span> <span class="nc">TestPCMDataSet</span><span class="p">(</span><span class="n">DataSetsMixInExtras</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the PCM data set features.</span>
 
 <span class="sd">    Attributes:</span>
@@ -244,9 +224,7 @@
 <span class="sd">        defaultMSA (BioPythonMSA): MSA provider for testing</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="TestPCMDataSet.setUp">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestPCMDataSet.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPCMDataSet.setUp"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestPCMDataSet.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the test Dataframe.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span>
@@ -255,7 +233,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">sampleDescSet</span> <span class="o">=</span> <span class="n">ProDec</span><span class="p">(</span>
             <span class="n">sets</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Zscale Hellberg&quot;</span><span class="p">],</span> <span class="n">msa_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultMSA</span>
         <span class="p">)</span></div>
-
 
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
@@ -295,13 +272,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset_new</span><span class="o">.</span><span class="n">featureNames</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampleDescSet</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">mol_id</span> <span class="ow">in</span> <span class="n">dataset_new</span><span class="o">.</span><span class="n">X_ind</span><span class="o">.</span><span class="n">index</span> <span class="k">for</span> <span class="n">mol_id</span> <span class="ow">in</span> <span class="n">test_ids</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">mol_id</span> <span class="ow">in</span> <span class="n">dataset_new</span><span class="o">.</span><span class="n">y_ind</span><span class="o">.</span><span class="n">index</span> <span class="k">for</span> <span class="n">mol_id</span> <span class="ow">in</span> <span class="n">train_ids</span><span class="p">))</span>
-        <span class="c1"># clear files and try saving again</span>
+        <span class="c1"># full_removal files and try saving again</span>
         <span class="n">dataset_new</span><span class="o">.</span><span class="n">clearFiles</span><span class="p">()</span>
         <span class="n">dataset_new</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
-<div class="viewcode-block" id="TestPCMDataSet.testSwitching">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestPCMDataSet.testSwitching">[docs]</a>
-    <span class="k">def</span> <span class="nf">testSwitching</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPCMDataSet.testSwitching"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestPCMDataSet.testSwitching">[docs]</a>    <span class="k">def</span> <span class="nf">testSwitching</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test if the feature calculator can be switched to a new dataset.&quot;&quot;&quot;</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createPCMDataSet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="n">split</span> <span class="o">=</span> <span class="n">RandomSplit</span><span class="p">(</span><span class="n">test_fraction</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
@@ -338,10 +313,7 @@
             <span class="n">dataset_next</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">ndata</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampleDescSet</span><span class="p">))</span>
         <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="TestPCMDataSet.testWithMolDescriptors">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestPCMDataSet.testWithMolDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">testWithMolDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPCMDataSet.testWithMolDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestPCMDataSet.testWithMolDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">testWithMolDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the calculation of protein and molecule descriptors.&quot;&quot;&quot;</span>
         <span class="n">calcs</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">ProDec</span><span class="p">(</span><span class="n">sets</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Zscale Hellberg&quot;</span><span class="p">],</span> <span class="n">msa_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultMSA</span><span class="p">),</span>
@@ -367,7 +339,6 @@
         <span class="n">dataset_new</span> <span class="o">=</span> <span class="n">PCMDataSet</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">dataset_new</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">feats_left</span><span class="p">)</span></div>
 
-
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
             <span class="p">(</span><span class="s2">&quot;MAFFT&quot;</span><span class="p">,</span> <span class="n">MAFFT</span><span class="p">),</span>
@@ -383,18 +354,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">any</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="TestDescriptorsExtra">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorsExtra">[docs]</a>
-<span class="k">class</span> <span class="nc">TestDescriptorsExtra</span><span class="p">(</span>
+<div class="viewcode-block" id="TestDescriptorsExtra"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorsExtra">[docs]</a><span class="k">class</span> <span class="nc">TestDescriptorsExtra</span><span class="p">(</span>
     <span class="n">DataSetsMixInExtras</span><span class="p">,</span> <span class="n">DescriptorInDataCheckMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span>
 <span class="p">):</span>
-<div class="viewcode-block" id="TestDescriptorsExtra.setUp">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorsExtra.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestDescriptorsExtra.setUp"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorsExtra.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
-
 
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
@@ -424,23 +389,17 @@
         <span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="TestDescriptorsPCM">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorsPCM">[docs]</a>
-<span class="k">class</span> <span class="nc">TestDescriptorsPCM</span><span class="p">(</span><span class="n">DataSetsMixInExtras</span><span class="p">,</span> <span class="n">DescriptorInDataCheckMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestDescriptorsPCM"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorsPCM">[docs]</a><span class="k">class</span> <span class="nc">TestDescriptorsPCM</span><span class="p">(</span><span class="n">DataSetsMixInExtras</span><span class="p">,</span> <span class="n">DescriptorInDataCheckMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the calculation of PCM descriptors with data preparation.</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        defaultMSA (MSAProvider): Default MSA provider.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="TestDescriptorsPCM.setUp">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorsPCM.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestDescriptorsPCM.setUp"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.tests.TestDescriptorsPCM.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">defaultMSA</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getMSAProvider</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">)</span></div>
-
 
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
@@ -502,7 +461,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">checkDataSetContainsDescriptorSet</span><span class="p">(</span>
             <span class="n">dataset</span><span class="p">,</span> <span class="n">desc_set</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span> <span class="n">target_props</span>
         <span class="p">)</span></div>
-
 </pre></div>
 
            </div>

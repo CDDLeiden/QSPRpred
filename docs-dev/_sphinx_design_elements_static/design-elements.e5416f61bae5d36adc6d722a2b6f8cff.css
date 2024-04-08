@@ -5,6 +5,21 @@
 
 /* General */
 
+/* Display paragraphs inline (side by side) */
+.inline p {
+  display: inline;
+}
+
+/* No borders */
+.no-margin {
+  margin: 0;
+}
+
+hr.docutils {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
 /* Very small text size */
 .text-small {
   font-size: small;
@@ -56,8 +71,20 @@
   margin: unset;
 }
 
+/* Shield: Inside a grid table, code blocks in neighbouring cells did not have any margins to each other. */
+.col-compact * {
+  margin-bottom: 0.3em;
+}
+.sd-col .highlight {
+  margin-bottom: 0.3em !important;
+}
+
 /* Info card: Fix grid item formatting. */
 .sd-col > div.line-block {
   margin-top: unset;
   margin-bottom: unset;
+}
+
+.bottom-margin-generous {
+  margin-bottom: 2em !important;
 }

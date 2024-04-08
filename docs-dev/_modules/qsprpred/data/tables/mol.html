@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.tables.mol &mdash; QSPRpred 3.0.2a4.dev5+gf96049df documentation</title>
+  <title>qsprpred.data.tables.mol &mdash; QSPRpred 3.1.1a2.dev2+g9e0d4b7e documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -16,9 +16,9 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=ce784b25"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=505af335"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="../../../../_static/design-tabs.js?v=36754332"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2a4.dev5+gf96049df
+                v3.1.1a2.dev2+g9e0d4b7e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -122,9 +122,7 @@
 <span class="kn">from</span> <span class="nn">...utils.interfaces.summarizable</span> <span class="kn">import</span> <span class="n">Summarizable</span>
 
 
-<div class="viewcode-block" id="DescriptorTable">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.DescriptorTable">[docs]</a>
-<span class="k">class</span> <span class="nc">DescriptorTable</span><span class="p">(</span><span class="n">PandasDataTable</span><span class="p">):</span>
+<div class="viewcode-block" id="DescriptorTable"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.DescriptorTable">[docs]</a><span class="k">class</span> <span class="nc">DescriptorTable</span><span class="p">(</span><span class="n">PandasDataTable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Pandas table that holds descriptor data for modelling and other analyses.</span>
 
 <span class="sd">    Attributes:</span>
@@ -194,16 +192,11 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span> <span class="o">=</span> <span class="n">calculator</span>
 
-<div class="viewcode-block" id="DescriptorTable.getDescriptors">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.DescriptorTable.getDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">active_only</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="DescriptorTable.getDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.DescriptorTable.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">active_only</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the descriptors stored in this table.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">getDescriptorNames</span><span class="p">(</span><span class="n">active_only</span><span class="o">=</span><span class="n">active_only</span><span class="p">)]</span></div>
 
-
-<div class="viewcode-block" id="DescriptorTable.getDescriptorNames">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.DescriptorTable.getDescriptorNames">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDescriptorNames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">active_only</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="DescriptorTable.getDescriptorNames"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.DescriptorTable.getDescriptorNames">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptorNames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">active_only</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the names of the descriptors in this represented by this table.</span>
 <span class="sd">        By default, only active descriptors are returned. You can use active_only=False</span>
 <span class="sd">        to get all descriptors saved in the table.</span>
@@ -213,16 +206,12 @@
 <span class="sd">                the current descriptor set. Defaults to `True`.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">all_descs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indexCols</span><span class="p">)]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">active_only</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_descs</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">descriptors</span><span class="p">]</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">transformToFeatureNames</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">all_descs</span></div>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indexCols</span><span class="p">)]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="DescriptorTable.fillMissing">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.DescriptorTable.fillMissing">[docs]</a>
-    <span class="k">def</span> <span class="nf">fillMissing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fill_value</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+<div class="viewcode-block" id="DescriptorTable.fillMissing"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.DescriptorTable.fillMissing">[docs]</a>    <span class="k">def</span> <span class="nf">fillMissing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fill_value</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fill missing values in the descriptor table.</span>
 
 <span class="sd">        Args:</span>
@@ -233,10 +222,7 @@
         <span class="n">columns</span> <span class="o">=</span> <span class="n">names</span> <span class="k">if</span> <span class="n">names</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDescriptorNames</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">columns</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">columns</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">fill_value</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="DescriptorTable.keepDescriptors">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.DescriptorTable.keepDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">keepDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="DescriptorTable.keepDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.DescriptorTable.keepDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">keepDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Mark only the given descriptors as active in this set.</span>
 
 <span class="sd">        Args:</span>
@@ -250,17 +236,25 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">all_descs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDescriptorNames</span><span class="p">(</span><span class="n">active_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">to_keep</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">all_descs</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">descriptors</span><span class="p">)</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">descriptors</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">descriptors</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">to_keep</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># remove prefix</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">transformToFeatureNames</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">to_keep</span>
         <span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDescriptorNames</span><span class="p">()</span></div>
-</div>
+
+<div class="viewcode-block" id="DescriptorTable.restoreDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.DescriptorTable.restoreDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">restoreDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Restore all descriptors to active in this set.&quot;&quot;&quot;</span>
+        <span class="n">all_descs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDescriptorNames</span><span class="p">(</span><span class="n">active_only</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">prefix</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculator</span><span class="o">.</span><span class="n">descriptors</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">x</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_descs</span>  <span class="c1"># remove prefix</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDescriptorNames</span><span class="p">()</span></div></div>
 
 
-
-<div class="viewcode-block" id="MoleculeTable">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable">[docs]</a>
-<span class="k">class</span> <span class="nc">MoleculeTable</span><span class="p">(</span><span class="n">PandasDataTable</span><span class="p">,</span> <span class="n">SearchableMolTable</span><span class="p">,</span> <span class="n">Summarizable</span><span class="p">):</span>
+<div class="viewcode-block" id="MoleculeTable"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable">[docs]</a><span class="k">class</span> <span class="nc">MoleculeTable</span><span class="p">(</span><span class="n">PandasDataTable</span><span class="p">,</span> <span class="n">SearchableMolTable</span><span class="p">,</span> <span class="n">Summarizable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class that holds and prepares molecule data for modelling and other analyses.</span>
 
 <span class="sd">    Attributes:</span>
@@ -355,9 +349,7 @@
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">includesRdkit</span> <span class="o">=</span> <span class="kc">True</span>
 
-<div class="viewcode-block" id="MoleculeTable.searchWithIndex">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.searchWithIndex">[docs]</a>
-    <span class="k">def</span> <span class="nf">searchWithIndex</span><span class="p">(</span>
+<div class="viewcode-block" id="MoleculeTable.searchWithIndex"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.searchWithIndex">[docs]</a>    <span class="k">def</span> <span class="nf">searchWithIndex</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;MoleculeTable&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Search in this table using a pandas index. The return values</span>
@@ -407,10 +399,7 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.searchOnProperty">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.searchOnProperty">[docs]</a>
-    <span class="k">def</span> <span class="nf">searchOnProperty</span><span class="p">(</span>
+<div class="viewcode-block" id="MoleculeTable.searchOnProperty"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.searchOnProperty">[docs]</a>    <span class="k">def</span> <span class="nf">searchOnProperty</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">prop_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">exact</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;MoleculeTable&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Search in this table using a property name and a list of values. It is</span>
@@ -449,10 +438,7 @@
         <span class="n">matches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchWithIndex</span><span class="p">(</span><span class="n">matches</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.searchWithSMARTS">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.searchWithSMARTS">[docs]</a>
-    <span class="k">def</span> <span class="nf">searchWithSMARTS</span><span class="p">(</span>
+<div class="viewcode-block" id="MoleculeTable.searchWithSMARTS"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.searchWithSMARTS">[docs]</a>    <span class="k">def</span> <span class="nf">searchWithSMARTS</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">patterns</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">operator</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;or&quot;</span><span class="p">,</span> <span class="s2">&quot;and&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;or&quot;</span><span class="p">,</span>
@@ -490,10 +476,7 @@
             <span class="n">matches</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_smarts_searched&quot;</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">name</span>
         <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.getSummary">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.getSummary">[docs]</a>
-    <span class="k">def</span> <span class="nf">getSummary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MoleculeTable.getSummary"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.getSummary">[docs]</a>    <span class="k">def</span> <span class="nf">getSummary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Make a summary with some statistics about the molecules in this table.</span>
 <span class="sd">        The summary contains the number of molecules per target and the number of</span>
@@ -515,10 +498,7 @@
         <span class="p">}</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.sample">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.sample">[docs]</a>
-    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span>
+<div class="viewcode-block" id="MoleculeTable.sample"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;MoleculeTable&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -541,7 +521,6 @@
         <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span><span class="o">.</span><span class="n">index</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchWithIndex</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
 
-
     <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">o_dict</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__getstate__</span><span class="p">()</span>
         <span class="n">o_dict</span><span class="p">[</span><span class="s2">&quot;descriptors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -556,23 +535,18 @@
             <span class="n">desc</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storeDir</span><span class="p">,</span> <span class="n">desc</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s2">_meta.json&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DescriptorTable</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">desc</span><span class="p">))</span>
 
-<div class="viewcode-block" id="MoleculeTable.toFile">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.toFile">[docs]</a>
-    <span class="k">def</span> <span class="nf">toFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="MoleculeTable.toFile"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.toFile">[docs]</a>    <span class="k">def</span> <span class="nf">toFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">toFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">desc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">:</span>
             <span class="n">desc</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">ret</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">descriptorSets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the descriptor calculators for this table.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">calculator</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">]</span>
 
-<div class="viewcode-block" id="MoleculeTable.fromSMILES">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.fromSMILES">[docs]</a>
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="MoleculeTable.fromSMILES"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.fromSMILES">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">fromSMILES</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">smiles</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a `MoleculeTable` instance from a list of SMILES sequences.</span>
 
@@ -587,10 +561,7 @@
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">smilescol</span><span class="p">:</span> <span class="n">smiles</span><span class="p">})</span>
         <span class="k">return</span> <span class="n">MoleculeTable</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">smiles_col</span><span class="o">=</span><span class="n">smilescol</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.fromTableFile">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.fromTableFile">[docs]</a>
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="MoleculeTable.fromTableFile"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.fromTableFile">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">fromTableFile</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a `MoleculeTable` instance from a file containing a table of molecules</span>
 <span class="sd">        (i.e. a CSV file).</span>
@@ -605,10 +576,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">MoleculeTable</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="n">sep</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.fromSDF">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.fromSDF">[docs]</a>
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="MoleculeTable.fromSDF"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.fromSDF">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">fromSDF</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">smiles_prop</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a `MoleculeTable` instance from an SDF file.</span>
 
@@ -630,10 +598,7 @@
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.runMolProcess">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.runMolProcess">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="MoleculeTable.runMolProcess"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.runMolProcess">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">runMolProcess</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
@@ -673,10 +638,7 @@
             <span class="n">mols</span> <span class="o">=</span> <span class="n">props</span><span class="p">[</span><span class="n">smiles_col</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.processMols">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.processMols">[docs]</a>
-    <span class="k">def</span> <span class="nf">processMols</span><span class="p">(</span>
+<div class="viewcode-block" id="MoleculeTable.processMols"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.processMols">[docs]</a>    <span class="k">def</span> <span class="nf">processMols</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">processor</span><span class="p">:</span> <span class="n">MolProcessor</span><span class="p">,</span>
         <span class="n">proc_args</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -772,10 +734,7 @@
                     <span class="o">**</span><span class="n">proc_kwargs</span><span class="p">,</span>
                 <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.checkMols">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.checkMols">[docs]</a>
-    <span class="k">def</span> <span class="nf">checkMols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">throw</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="MoleculeTable.checkMols"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.checkMols">[docs]</a>    <span class="k">def</span> <span class="nf">checkMols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">throw</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns a boolean array indicating whether each molecule is valid or not.</span>
 <span class="sd">        If `throw` is `True`, an exception is thrown if any molecule is invalid.</span>
@@ -793,27 +752,41 @@
             <span class="n">mask</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">result</span><span class="o">.</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">values</span>
         <span class="k">return</span> <span class="n">mask</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.generateDescriptorDataSetName">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.generateDescriptorDataSetName">[docs]</a>
-    <span class="k">def</span> <span class="nf">generateDescriptorDataSetName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_set</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">DescriptorSet</span><span class="p">):</span>
+<div class="viewcode-block" id="MoleculeTable.generateDescriptorDataSetName"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.generateDescriptorDataSetName">[docs]</a>    <span class="k">def</span> <span class="nf">generateDescriptorDataSetName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds_set</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">DescriptorSet</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate a descriptor set name from a descriptor set.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Descriptors_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">ds_set</span><span class="si">}</span><span class="s2">&quot;</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.dropDescriptors">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.dropDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">dropDescriptors</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">descriptors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorSet</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-    <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Drop descriptors from the data frame</span>
-<span class="sd">        that were calculated with a specific calculator.</span>
+<div class="viewcode-block" id="MoleculeTable.dropDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.dropDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">dropDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Drop descriptors by name. Performs a simple feature selection by removing</span>
+<span class="sd">        the given descriptor names from the data set.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            descriptors (list): list of `DescriptorSet` objects or prefixes of</span>
-<span class="sd">                descriptors to drop.</span>
+<span class="sd">            descriptors (list[str]): List of descriptor names to drop.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">:</span>
+            <span class="n">calc</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">calculator</span>
+            <span class="n">ds_names</span> <span class="o">=</span> <span class="n">calc</span><span class="o">.</span><span class="n">transformToFeatureNames</span><span class="p">()</span>
+            <span class="n">to_keep</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ds_names</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">descriptors</span><span class="p">]</span>
+            <span class="n">ds</span><span class="o">.</span><span class="n">keepDescriptors</span><span class="p">(</span><span class="n">to_keep</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="MoleculeTable.dropDescriptorSets"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.dropDescriptorSets">[docs]</a>    <span class="k">def</span> <span class="nf">dropDescriptorSets</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">descriptors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorSet</span> <span class="o">|</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">full_removal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Drop descriptors from the given sets from the data frame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            descriptors (list[DescriptorSet | str]):</span>
+<span class="sd">                List of `DescriptorSet` objects or their names. Name of a descriptor</span>
+<span class="sd">                set corresponds to the result returned by its `__str__` method.</span>
+<span class="sd">            full_removal (bool):</span>
+<span class="sd">                Whether to remove the descriptor data (will perform full removal).</span>
+<span class="sd">                By default, a soft removal is performed by just rendering the</span>
+<span class="sd">                descriptors inactive. A full removal will remove the descriptorSet from the</span>
+<span class="sd">                dataset, including the saved files. It is not possible to restore a</span>
+<span class="sd">                descriptorSet after a full removal.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># sanity check</span>
         <span class="k">assert</span> <span class="p">(</span>
@@ -824,29 +797,44 @@
                 <span class="s2">&quot;No descriptors specified to drop. All descriptors will be retained.&quot;</span>
             <span class="p">)</span>
             <span class="k">return</span>
-        <span class="c1"># convert descriptors to descriptor set names</span>
-        <span class="n">descriptors</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">generateDescriptorDataSetName</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">descriptors</span><span class="p">]</span>
-        <span class="c1"># drop the descriptors</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">descriptors</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">descriptors</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">descriptors</span><span class="p">]</span>
+        <span class="c1"># remove the descriptors</span>
         <span class="n">to_remove</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">ds</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">descriptors</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Removing descriptor set: </span><span class="si">{</span><span class="n">ds</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="n">to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="n">to_drop</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">descriptors</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">):</span>
+                <span class="n">calc</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">calculator</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc</span><span class="p">):</span>
+                    <span class="n">to_drop</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">getDescriptorNames</span><span class="p">())</span>
+                    <span class="k">if</span> <span class="n">full_removal</span><span class="p">:</span>
+                        <span class="n">to_remove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dropDescriptors</span><span class="p">(</span><span class="n">to_drop</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">to_remove</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">clearFiles</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="MoleculeTable.restoreDescriptorSets"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.restoreDescriptorSets">[docs]</a>    <span class="k">def</span> <span class="nf">restoreDescriptorSets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorSet</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Restore descriptors that were previously removed.</span>
 
-<div class="viewcode-block" id="MoleculeTable.dropEmptySmiles">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.dropEmptySmiles">[docs]</a>
-    <span class="k">def</span> <span class="nf">dropEmptySmiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="sd">        Args:</span>
+<span class="sd">            descriptors (list[DescriptorSet | str]):</span>
+<span class="sd">                List of `DescriptorSet` objects or their names. Name of a descriptor</span>
+<span class="sd">                set corresponds to the result returned by its `__str__` method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">descriptors</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">descriptors</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">descriptors</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">descriptors</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">:</span>
+                <span class="n">calc</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">calculator</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">calc</span><span class="p">):</span>
+                    <span class="n">ds</span><span class="o">.</span><span class="n">restoreDescriptors</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MoleculeTable.dropEmptySmiles"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.dropEmptySmiles">[docs]</a>    <span class="k">def</span> <span class="nf">dropEmptySmiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Drop rows with empty SMILES from the data set.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesCol</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.attachDescriptors">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.attachDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">attachDescriptors</span><span class="p">(</span>
+<div class="viewcode-block" id="MoleculeTable.attachDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.attachDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">attachDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">calculator</span><span class="p">:</span> <span class="n">DescriptorSet</span><span class="p">,</span>
         <span class="n">descriptors</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
@@ -875,10 +863,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.addDescriptors">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.addDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">addDescriptors</span><span class="p">(</span>
+<div class="viewcode-block" id="MoleculeTable.addDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.addDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">addDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">descriptors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorSet</span><span class="p">],</span>
         <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -905,7 +890,7 @@
 <span class="sd">                Additional keyword arguments to pass to each descriptor set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">recalculate</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDescriptors</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dropDescriptors</span><span class="p">(</span><span class="n">descriptors</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dropDescriptorSets</span><span class="p">(</span><span class="n">descriptors</span><span class="p">,</span> <span class="n">full_removal</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">to_calculate</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">desc_set</span><span class="p">,</span> <span class="n">exists</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">descriptors</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDescriptors</span><span class="p">(</span><span class="n">descriptors</span><span class="p">)):</span>
             <span class="k">if</span> <span class="n">exists</span><span class="p">:</span>
@@ -947,33 +932,19 @@
             <span class="n">df_descriptors</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexCols</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indexCols</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">attachDescriptors</span><span class="p">(</span><span class="n">calculator</span><span class="p">,</span> <span class="n">df_descriptors</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">])</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.getDescriptors">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.getDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MoleculeTable.getDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">active_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the calculated descriptors as a pandas data frame.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            pd.DataFrame: Data frame containing only descriptors.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># join_cols = set()</span>
-        <span class="c1"># for descriptors in self.descriptors:</span>
-        <span class="c1">#     join_cols.update(set(descriptors.indexCols))</span>
-        <span class="c1"># join_cols = list(join_cols)</span>
-        <span class="c1"># ret = self.df[join_cols].copy()</span>
-        <span class="c1"># ret.reset_index(drop=True, inplace=True)</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">descriptors</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">:</span>
-            <span class="n">df_descriptors</span> <span class="o">=</span> <span class="n">descriptors</span><span class="o">.</span><span class="n">getDescriptors</span><span class="p">()</span>
+            <span class="n">df_descriptors</span> <span class="o">=</span> <span class="n">descriptors</span><span class="o">.</span><span class="n">getDescriptors</span><span class="p">(</span><span class="n">active_only</span><span class="o">=</span><span class="n">active_only</span><span class="p">)</span>
             <span class="n">ret</span> <span class="o">=</span> <span class="n">ret</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">df_descriptors</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
-        <span class="c1"># ret.set_index(self.df.index, inplace=True)</span>
-        <span class="c1"># ret.drop(columns=join_cols, inplace=True)</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.getDescriptorNames">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.getDescriptorNames">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDescriptorNames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MoleculeTable.getDescriptorNames"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.getDescriptorNames">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptorNames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the names of the descriptors present for  molecules  in  this data  set.</span>
 
 <span class="sd">        Returns:</span>
@@ -984,10 +955,7 @@
             <span class="n">names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">getDescriptorNames</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">names</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.hasDescriptors">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.hasDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">hasDescriptors</span><span class="p">(</span>
+<div class="viewcode-block" id="MoleculeTable.hasDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.hasDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">hasDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">descriptors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorSet</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check whether the data frame contains given descriptors.</span>
@@ -1014,7 +982,6 @@
                     <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">ret</span></div>
 
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">smiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the SMILES strings of the molecules in the data frame.</span>
@@ -1024,9 +991,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesCol</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
 
-<div class="viewcode-block" id="MoleculeTable.addScaffolds">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.addScaffolds">[docs]</a>
-    <span class="k">def</span> <span class="nf">addScaffolds</span><span class="p">(</span>
+<div class="viewcode-block" id="MoleculeTable.addScaffolds"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.addScaffolds">[docs]</a>    <span class="k">def</span> <span class="nf">addScaffolds</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">scaffolds</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Scaffold</span><span class="p">],</span>
         <span class="n">add_rdkit_scaffold</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -1057,10 +1022,7 @@
                     <span class="n">molCol</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Scaffold_</span><span class="si">{</span><span class="n">scaffold</span><span class="si">}</span><span class="s2">_RDMol&quot;</span><span class="p">,</span>
                 <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.getScaffoldNames">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.getScaffoldNames">[docs]</a>
-    <span class="k">def</span> <span class="nf">getScaffoldNames</span><span class="p">(</span>
+<div class="viewcode-block" id="MoleculeTable.getScaffoldNames"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.getScaffoldNames">[docs]</a>    <span class="k">def</span> <span class="nf">getScaffoldNames</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">scaffolds</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Scaffold</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">include_mols</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the names of the scaffolds in the data frame.</span>
@@ -1083,10 +1045,7 @@
             <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_names</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">wanted</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">all_names</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.getScaffolds">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.getScaffolds">[docs]</a>
-    <span class="k">def</span> <span class="nf">getScaffolds</span><span class="p">(</span>
+<div class="viewcode-block" id="MoleculeTable.getScaffolds"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.getScaffolds">[docs]</a>    <span class="k">def</span> <span class="nf">getScaffolds</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">scaffolds</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Scaffold</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">include_mols</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the subset of the data frame that contains only scaffolds.</span>
@@ -1100,7 +1059,6 @@
         <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getScaffoldNames</span><span class="p">(</span><span class="n">scaffolds</span><span class="p">,</span> <span class="n">include_mols</span><span class="o">=</span><span class="n">include_mols</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">names</span><span class="p">]</span></div>
 
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">hasScaffolds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check whether the data frame contains scaffolds.</span>
@@ -1110,9 +1068,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getScaffoldNames</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span>
 
-<div class="viewcode-block" id="MoleculeTable.createScaffoldGroups">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.createScaffoldGroups">[docs]</a>
-    <span class="k">def</span> <span class="nf">createScaffoldGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols_per_group</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
+<div class="viewcode-block" id="MoleculeTable.createScaffoldGroups"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.createScaffoldGroups">[docs]</a>    <span class="k">def</span> <span class="nf">createScaffoldGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols_per_group</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create scaffold groups.</span>
 
 <span class="sd">        A scaffold group is a list of molecules that share the same scaffold. New</span>
@@ -1134,10 +1090,7 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">scaffold</span><span class="p">],</span>
                 <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.getScaffoldGroups">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.getScaffoldGroups">[docs]</a>
-    <span class="k">def</span> <span class="nf">getScaffoldGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaffold_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mol_per_group</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
+<div class="viewcode-block" id="MoleculeTable.getScaffoldGroups"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.getScaffoldGroups">[docs]</a>    <span class="k">def</span> <span class="nf">getScaffoldGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaffold_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mol_per_group</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the scaffold groups for a given combination of scaffold and number of</span>
 <span class="sd">        molecules per scaffold group.</span>
 
@@ -1156,7 +1109,6 @@
             <span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="p">]</span></div>
 
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">hasScaffoldGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check whether the data frame contains scaffold groups.</span>
@@ -1169,9 +1121,7 @@
             <span class="o">&gt;</span> <span class="mi">0</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="MoleculeTable.standardizeSmiles">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.standardizeSmiles">[docs]</a>
-    <span class="k">def</span> <span class="nf">standardizeSmiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smiles_standardizer</span><span class="p">,</span> <span class="n">drop_invalid</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="MoleculeTable.standardizeSmiles"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.standardizeSmiles">[docs]</a>    <span class="k">def</span> <span class="nf">standardizeSmiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smiles_standardizer</span><span class="p">,</span> <span class="n">drop_invalid</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply smiles_standardizer to the compounds in parallel</span>
 
 <span class="sd">        Args:</span>
@@ -1211,10 +1161,7 @@
         <span class="k">if</span> <span class="n">drop_invalid</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dropInvalids</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="MoleculeTable.dropInvalids">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.dropInvalids">[docs]</a>
-    <span class="k">def</span> <span class="nf">dropInvalids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="MoleculeTable.dropInvalids"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.dropInvalids">[docs]</a>    <span class="k">def</span> <span class="nf">dropInvalids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Drops invalid molecules from the data set.</span>
 
@@ -1227,9 +1174,7 @@
         <span class="n">invalids</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">invalid_mask</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">invalids</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dropped </span><span class="si">{</span><span class="n">invalids</span><span class="si">}</span><span class="s2"> invalid molecules from the data set.&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="o">~</span><span class="n">invalid_mask</span></div>
-</div>
-
+        <span class="k">return</span> <span class="o">~</span><span class="n">invalid_mask</span></div></div>
 </pre></div>
 
            </div>

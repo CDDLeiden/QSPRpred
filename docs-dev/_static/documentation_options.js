@@ -1,5 +1,6 @@
-const DOCUMENTATION_OPTIONS = {
-    VERSION: '3.0.2a4.dev5+gf96049df',
+var DOCUMENTATION_OPTIONS = {
+    URL_ROOT: document.getElementById("documentation_options").getAttribute('data-url_root'),
+    VERSION: '3.1.1a2.dev2+g9e0d4b7e',
     LANGUAGE: 'en',
     COLLAPSE_INDEX: false,
     BUILDER: 'html',

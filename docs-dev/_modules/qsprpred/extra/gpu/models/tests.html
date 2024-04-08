@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.gpu.models.tests &mdash; QSPRpred 3.0.2a4.dev5+gf96049df documentation</title>
+  <title>qsprpred.extra.gpu.models.tests &mdash; QSPRpred 3.1.1a2.dev2+g9e0d4b7e documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -16,9 +16,9 @@
   
         <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../../_static/documentation_options.js?v=ce784b25"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=505af335"></script>
         <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="../../../../../_static/design-tabs.js?v=36754332"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2a4.dev5+gf96049df
+                v3.1.1a2.dev2+g9e0d4b7e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -126,18 +126,13 @@
 <span class="n">GPUS</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">device_count</span><span class="p">()))</span>
 
 
-<div class="viewcode-block" id="NeuralNet">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.NeuralNet">[docs]</a>
-<span class="k">class</span> <span class="nc">NeuralNet</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">ModelCheckMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="NeuralNet"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.NeuralNet">[docs]</a><span class="k">class</span> <span class="nc">NeuralNet</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">ModelCheckMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the tests for the DNNModel class.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="NeuralNet.setUp">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.NeuralNet.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="NeuralNet.setUp"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.NeuralNet.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the test case.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">gridFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -146,9 +141,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/search_space_test.json&quot;</span>
 
-<div class="viewcode-block" id="NeuralNet.getModel">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.NeuralNet.getModel">[docs]</a>
-    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
+<div class="viewcode-block" id="NeuralNet.getModel"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.NeuralNet.getModel">[docs]</a>    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -174,7 +167,6 @@
             <span class="n">tol</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
             <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
         <span class="p">)</span></div>
-
 
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
@@ -261,18 +253,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="ChemPropTest">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.ChemPropTest">[docs]</a>
-<span class="k">class</span> <span class="nc">ChemPropTest</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">ModelCheckMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="ChemPropTest"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.ChemPropTest">[docs]</a><span class="k">class</span> <span class="nc">ChemPropTest</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">ModelCheckMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the tests for the DNNModel class.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ChemPropTest.setUp">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.ChemPropTest.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ChemPropTest.setUp"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.ChemPropTest.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">gridFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -281,9 +267,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/search_space_test.json&quot;</span>
 
-<div class="viewcode-block" id="ChemPropTest.getModel">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.ChemPropTest.getModel">[docs]</a>
-    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
+<div class="viewcode-block" id="ChemPropTest.getModel"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.ChemPropTest.getModel">[docs]</a>    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -308,7 +292,6 @@
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
             <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
         <span class="p">)</span></div>
-
 
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
@@ -467,9 +450,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ChemPropTest.testConsistency">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.ChemPropTest.testConsistency">[docs]</a>
-    <span class="k">def</span> <span class="nf">testConsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ChemPropTest.testConsistency"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.ChemPropTest.testConsistency">[docs]</a>    <span class="k">def</span> <span class="nf">testConsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test if QSPRpred Chemprop and Chemprop models are consistent.&quot;&quot;&quot;</span>
         <span class="c1"># initialize dataset</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
@@ -522,7 +503,7 @@
         <span class="p">)</span>
 
         <span class="n">df_test</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">assessor</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">foldData</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;X_test&quot;</span><span class="p">])</span>
-        <span class="n">df_test</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Descriptor_SmilesDesc_SMILES&quot;</span><span class="p">:</span> <span class="s2">&quot;SMILES&quot;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df_test</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;SmilesDesc_SMILES&quot;</span><span class="p">:</span> <span class="s2">&quot;SMILES&quot;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">df_test</span><span class="p">[</span><span class="s2">&quot;pchembl_value_Mean&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">assessor</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">foldData</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;y_test&quot;</span><span class="p">]</span>
         <span class="n">df_test</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="si">}</span><span class="s2">/consistency_data_test.csv&quot;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span>
@@ -559,27 +540,18 @@
         <span class="c1"># compare the scores</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;QSPRpred score: </span><span class="si">{</span><span class="n">qsprpred_score</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Chemprop score: </span><span class="si">{</span><span class="n">chemprop_score</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">qsprpred_score</span><span class="p">,</span> <span class="n">chemprop_score</span><span class="p">,</span> <span class="n">places</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span></div>
-</div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span><span class="n">qsprpred_score</span><span class="p">,</span> <span class="n">chemprop_score</span><span class="p">,</span> <span class="n">places</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span></div></div>
 
 
-
-<div class="viewcode-block" id="TestPyBoostModel">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestPyBoostModel">[docs]</a>
-<span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">skipif</span><span class="p">((</span><span class="n">spec</span> <span class="o">:=</span> <span class="n">util</span><span class="o">.</span><span class="n">find_spec</span><span class="p">(</span><span class="s2">&quot;cupy&quot;</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;requires cupy&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="TestPyBoostModel"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestPyBoostModel">[docs]</a><span class="nd">@pytest</span><span class="o">.</span><span class="n">mark</span><span class="o">.</span><span class="n">skipif</span><span class="p">((</span><span class="n">spec</span> <span class="o">:=</span> <span class="n">util</span><span class="o">.</span><span class="n">find_spec</span><span class="p">(</span><span class="s2">&quot;cupy&quot;</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;requires cupy&quot;</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">TestPyBoostModel</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">ModelCheckMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the tests for the PyBoostModel class.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="TestPyBoostModel.setUp">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestPyBoostModel.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPyBoostModel.setUp"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestPyBoostModel.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="TestPyBoostModel.getModel">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestPyBoostModel.getModel">[docs]</a>
-    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
+<div class="viewcode-block" id="TestPyBoostModel.getModel"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestPyBoostModel.getModel">[docs]</a>    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -606,7 +578,6 @@
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
             <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
         <span class="p">)</span></div>
-
 
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
@@ -756,7 +727,6 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span></div>
 
-
     <span class="c1"># FIXME: This test fails because the PyBoost default auc does not handle</span>
     <span class="c1"># mutlitask data and the custom NaN AUC metric is not JSON serializable.</span>
 
@@ -812,17 +782,12 @@
     <span class="c1">#     self.predictorTest(predictor)</span>
 
 
-<div class="viewcode-block" id="TestNNMonitoring">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestNNMonitoring">[docs]</a>
-<span class="k">class</span> <span class="nc">TestNNMonitoring</span><span class="p">(</span><span class="n">MonitorsCheckMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestNNMonitoring"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestNNMonitoring">[docs]</a><span class="k">class</span> <span class="nc">TestNNMonitoring</span><span class="p">(</span><span class="n">MonitorsCheckMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the tests for the monitoring classes.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="TestNNMonitoring.setUp">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestNNMonitoring.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestNNMonitoring.setUp"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestNNMonitoring.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">gridFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -831,9 +796,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/search_space_test.json&quot;</span>
 
-<div class="viewcode-block" id="TestNNMonitoring.testBaseMonitor">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestNNMonitoring.testBaseMonitor">[docs]</a>
-    <span class="k">def</span> <span class="nf">testBaseMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestNNMonitoring.testBaseMonitor"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestNNMonitoring.testBaseMonitor">[docs]</a>    <span class="k">def</span> <span class="nf">testBaseMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">DNNModel</span><span class="p">(</span>
             <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;STFullyConnected&quot;</span><span class="p">,</span>
@@ -850,10 +813,7 @@
             <span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="TestNNMonitoring.testFileMonitor">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestNNMonitoring.testFileMonitor">[docs]</a>
-    <span class="k">def</span> <span class="nf">testFileMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestNNMonitoring.testFileMonitor"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestNNMonitoring.testFileMonitor">[docs]</a>    <span class="k">def</span> <span class="nf">testFileMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">DNNModel</span><span class="p">(</span>
             <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;STFullyConnected&quot;</span><span class="p">,</span>
@@ -870,10 +830,7 @@
             <span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="TestNNMonitoring.testListMonitor">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestNNMonitoring.testListMonitor">[docs]</a>
-    <span class="k">def</span> <span class="nf">testListMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestNNMonitoring.testListMonitor"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestNNMonitoring.testListMonitor">[docs]</a>    <span class="k">def</span> <span class="nf">testListMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the list monitor&quot;&quot;&quot;</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">DNNModel</span><span class="p">(</span>
             <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
@@ -890,9 +847,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">listMonitorTest</span><span class="p">,</span>
             <span class="kc">True</span><span class="p">,</span>
             <span class="p">[</span><span class="n">BaseMonitor</span><span class="p">(),</span> <span class="n">FileMonitor</span><span class="p">()],</span>
-        <span class="p">)</span></div>
-</div>
-
+        <span class="p">)</span></div></div>
 </pre></div>
 
            </div>

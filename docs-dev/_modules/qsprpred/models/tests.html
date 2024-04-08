@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models.tests &mdash; QSPRpred 3.0.2a4.dev5+gf96049df documentation</title>
+  <title>qsprpred.models.tests &mdash; QSPRpred 3.1.1a2.dev2+g9e0d4b7e documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -16,9 +16,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=ce784b25"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=505af335"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="../../../_static/design-tabs.js?v=36754332"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2a4.dev5+gf96049df
+                v3.1.1a2.dev2+g9e0d4b7e
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -136,20 +136,13 @@
 <span class="kn">from</span> <span class="nn">.assessment.regression</span> <span class="kn">import</span> <span class="n">create_correlation_summary</span>
 
 
-<div class="viewcode-block" id="SklearnBaseModelTestCase">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.SklearnBaseModelTestCase">[docs]</a>
-<span class="k">class</span> <span class="nc">SklearnBaseModelTestCase</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">ModelCheckMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="SklearnBaseModelTestCase"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.SklearnBaseModelTestCase">[docs]</a><span class="k">class</span> <span class="nc">SklearnBaseModelTestCase</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">ModelCheckMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the tests for the SklearnModel class.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="SklearnBaseModelTestCase.setUp">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.SklearnBaseModelTestCase.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SklearnBaseModelTestCase.setUp"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.SklearnBaseModelTestCase.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="SklearnBaseModelTestCase.getModel">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.SklearnBaseModelTestCase.getModel">[docs]</a>
-    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
+<div class="viewcode-block" id="SklearnBaseModelTestCase.getModel"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.SklearnBaseModelTestCase.getModel">[docs]</a>    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -176,14 +169,10 @@
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
             <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
-        <span class="p">)</span></div>
-</div>
+        <span class="p">)</span></div></div>
 
 
-
-<div class="viewcode-block" id="TestSklearnRegression">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnRegression">[docs]</a>
-<span class="k">class</span> <span class="nc">TestSklearnRegression</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestSklearnRegression"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnRegression">[docs]</a><span class="k">class</span> <span class="nc">TestSklearnRegression</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the SklearnModel class for regression models.&quot;&quot;&quot;</span>
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
@@ -247,9 +236,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span>
 
-<div class="viewcode-block" id="TestSklearnRegression.testPLSRegressionSummaryWithSeed">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnRegression.testPLSRegressionSummaryWithSeed">[docs]</a>
-    <span class="k">def</span> <span class="nf">testPLSRegressionSummaryWithSeed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestSklearnRegression.testPLSRegressionSummaryWithSeed"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnRegression.testPLSRegressionSummaryWithSeed">[docs]</a>    <span class="k">def</span> <span class="nf">testPLSRegressionSummaryWithSeed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model training for regression models.&quot;&quot;&quot;</span>
         <span class="n">task</span> <span class="o">=</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
         <span class="n">model_name</span> <span class="o">=</span> <span class="s2">&quot;PLSR&quot;</span>
@@ -282,14 +269,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;ModelName&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;ModelName&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;R2&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;R2&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;RMSE&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;RMSE&quot;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">])</span></div>
-</div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">])</span></div></div>
 
 
-
-<div class="viewcode-block" id="TestSklearnRegressionMultiTask">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnRegressionMultiTask">[docs]</a>
-<span class="k">class</span> <span class="nc">TestSklearnRegressionMultiTask</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestSklearnRegressionMultiTask"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnRegressionMultiTask">[docs]</a><span class="k">class</span> <span class="nc">TestSklearnRegressionMultiTask</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the SklearnModel class for multi-task regression models.&quot;&quot;&quot;</span>
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
@@ -353,13 +336,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="TestSklearnSerialization">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnSerialization">[docs]</a>
-<span class="k">class</span> <span class="nc">TestSklearnSerialization</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
-<div class="viewcode-block" id="TestSklearnSerialization.testJSON">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnSerialization.testJSON">[docs]</a>
-    <span class="k">def</span> <span class="nf">testJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestSklearnSerialization"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnSerialization">[docs]</a><span class="k">class</span> <span class="nc">TestSklearnSerialization</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestSklearnSerialization.testJSON"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnSerialization.testJSON">[docs]</a>    <span class="k">def</span> <span class="nf">testJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
             <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
                 <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
@@ -388,14 +366,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">metaFile</span><span class="p">,</span> <span class="n">model4</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">toJSON</span><span class="p">(),</span> <span class="n">model2</span><span class="o">.</span><span class="n">toJSON</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">toJSON</span><span class="p">(),</span> <span class="n">model3</span><span class="o">.</span><span class="n">toJSON</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">toJSON</span><span class="p">(),</span> <span class="n">model4</span><span class="o">.</span><span class="n">toJSON</span><span class="p">())</span></div>
-</div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">toJSON</span><span class="p">(),</span> <span class="n">model4</span><span class="o">.</span><span class="n">toJSON</span><span class="p">())</span></div></div>
 
 
-
-<div class="viewcode-block" id="TestSklearnClassification">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnClassification">[docs]</a>
-<span class="k">class</span> <span class="nc">TestSklearnClassification</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestSklearnClassification"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnClassification">[docs]</a><span class="k">class</span> <span class="nc">TestSklearnClassification</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the SklearnModel class for classification models.&quot;&quot;&quot;</span>
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
@@ -478,9 +452,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span>
 
-<div class="viewcode-block" id="TestSklearnClassification.testRandomForestClassifierFitWithSeed">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnClassification.testRandomForestClassifierFitWithSeed">[docs]</a>
-    <span class="k">def</span> <span class="nf">testRandomForestClassifierFitWithSeed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestSklearnClassification.testRandomForestClassifierFitWithSeed"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnClassification.testRandomForestClassifierFitWithSeed">[docs]</a>    <span class="k">def</span> <span class="nf">testRandomForestClassifierFitWithSeed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">,</span>
         <span class="p">}</span>
@@ -515,14 +487,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Metric&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Metric&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;TestSet&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;TestSet&quot;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">])</span></div>
-</div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">])</span></div></div>
 
 
-
-<div class="viewcode-block" id="TestSklearnClassificationMultiTask">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnClassificationMultiTask">[docs]</a>
-<span class="k">class</span> <span class="nc">TestSklearnClassificationMultiTask</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestSklearnClassificationMultiTask"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnClassificationMultiTask">[docs]</a><span class="k">class</span> <span class="nc">TestSklearnClassificationMultiTask</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the SklearnModel class for multi-task classification models.&quot;&quot;&quot;</span>
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
@@ -597,14 +565,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="TestMetrics">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics">[docs]</a>
-<span class="k">class</span> <span class="nc">TestMetrics</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMetrics"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics">[docs]</a><span class="k">class</span> <span class="nc">TestMetrics</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the SklearnMetrics from the metrics module.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="TestMetrics.test_SklearnMetrics">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_SklearnMetrics">[docs]</a>
-    <span class="k">def</span> <span class="nf">test_SklearnMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMetrics.test_SklearnMetrics"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_SklearnMetrics">[docs]</a>    <span class="k">def</span> <span class="nf">test_SklearnMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the sklearn metrics wrapper.&quot;&quot;&quot;</span>
 
         <span class="c1"># test regression metrics</span>
@@ -702,24 +665,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
             <span class="n">qsprpred_scorer</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span>
             <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span>
-        <span class="p">)</span></div>
-</div>
+        <span class="p">)</span></div></div>
 
 
-
-<div class="viewcode-block" id="TestEarlyStopping">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping">[docs]</a>
-<span class="k">class</span> <span class="nc">TestEarlyStopping</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
-<div class="viewcode-block" id="TestEarlyStopping.setUp">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestEarlyStopping"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping">[docs]</a><span class="k">class</span> <span class="nc">TestEarlyStopping</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestEarlyStopping.setUp"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="TestEarlyStopping.test_earlyStoppingMode">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.test_earlyStoppingMode">[docs]</a>
-    <span class="k">def</span> <span class="nf">test_earlyStoppingMode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestEarlyStopping.test_earlyStoppingMode"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.test_earlyStoppingMode">[docs]</a>    <span class="k">def</span> <span class="nf">test_earlyStoppingMode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the early stopping mode enum.&quot;&quot;&quot;</span>
         <span class="c1"># get the enum values</span>
         <span class="n">recording</span> <span class="o">=</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">RECORDING</span>
@@ -738,10 +692,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s2">&quot;FIXED&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">fixed</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s2">&quot;OPTIMAL&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">optimal</span><span class="p">))</span></div>
 
-
-<div class="viewcode-block" id="TestEarlyStopping.test_EarlyStopping">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.test_EarlyStopping">[docs]</a>
-    <span class="k">def</span> <span class="nf">test_EarlyStopping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestEarlyStopping.test_EarlyStopping"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.test_EarlyStopping">[docs]</a>    <span class="k">def</span> <span class="nf">test_EarlyStopping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the early stopping class.&quot;&quot;&quot;</span>
 
         <span class="n">earlystopping</span> <span class="o">=</span> <span class="n">EarlyStopping</span><span class="p">(</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">RECORDING</span><span class="p">)</span>
@@ -791,10 +742,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">earlystopping2</span><span class="o">.</span><span class="n">optimalEpochs</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">earlystopping</span><span class="o">.</span><span class="n">numEpochs</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="TestEarlyStopping.test_early_stopping_decorator">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.test_early_stopping_decorator">[docs]</a>
-    <span class="k">def</span> <span class="nf">test_early_stopping_decorator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestEarlyStopping.test_early_stopping_decorator"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.test_early_stopping_decorator">[docs]</a>    <span class="k">def</span> <span class="nf">test_early_stopping_decorator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the early stopping decorator.&quot;&quot;&quot;</span>
         <span class="k">class</span> <span class="nc">test_class</span><span class="p">:</span>
             <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">support</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -843,24 +791,15 @@
         <span class="c1"># check decorator raises error when early stopping is not supported</span>
         <span class="n">test_obj</span> <span class="o">=</span> <span class="n">test_class</span><span class="p">(</span><span class="n">support</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">):</span>
-            <span class="n">_</span> <span class="o">=</span> <span class="n">test_obj</span><span class="o">.</span><span class="n">test_func</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">best_epoch</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span></div>
-</div>
+            <span class="n">_</span> <span class="o">=</span> <span class="n">test_obj</span><span class="o">.</span><span class="n">test_func</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">best_epoch</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span></div></div>
 
 
-
-<div class="viewcode-block" id="TestMonitors">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors">[docs]</a>
-<span class="k">class</span> <span class="nc">TestMonitors</span><span class="p">(</span><span class="n">MonitorsCheckMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
-<div class="viewcode-block" id="TestMonitors.setUp">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMonitors"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors">[docs]</a><span class="k">class</span> <span class="nc">TestMonitors</span><span class="p">(</span><span class="n">MonitorsCheckMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMonitors.setUp"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="TestMonitors.testBaseMonitor">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors.testBaseMonitor">[docs]</a>
-    <span class="k">def</span> <span class="nf">testBaseMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMonitors.testBaseMonitor"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors.testBaseMonitor">[docs]</a>    <span class="k">def</span> <span class="nf">testBaseMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the base monitor&quot;&quot;&quot;</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="p">(</span>
             <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
@@ -876,10 +815,7 @@
             <span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="TestMonitors.testFileMonitor">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors.testFileMonitor">[docs]</a>
-    <span class="k">def</span> <span class="nf">testFileMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMonitors.testFileMonitor"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors.testFileMonitor">[docs]</a>    <span class="k">def</span> <span class="nf">testFileMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the file monitor&quot;&quot;&quot;</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="p">(</span>
             <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
@@ -895,10 +831,7 @@
             <span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="TestMonitors.testListMonitor">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors.testListMonitor">[docs]</a>
-    <span class="k">def</span> <span class="nf">testListMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMonitors.testListMonitor"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors.testListMonitor">[docs]</a>    <span class="k">def</span> <span class="nf">testListMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the list monitor&quot;&quot;&quot;</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="p">(</span>
             <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
@@ -913,24 +846,15 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">listMonitorTest</span><span class="p">,</span>
             <span class="kc">False</span><span class="p">,</span>
             <span class="p">[</span><span class="n">BaseMonitor</span><span class="p">(),</span> <span class="n">FileMonitor</span><span class="p">()],</span>
-        <span class="p">)</span></div>
-</div>
+        <span class="p">)</span></div></div>
 
 
-
-<div class="viewcode-block" id="TestAttachedApplicabilityDomain">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestAttachedApplicabilityDomain">[docs]</a>
-<span class="k">class</span> <span class="nc">TestAttachedApplicabilityDomain</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
-<div class="viewcode-block" id="TestAttachedApplicabilityDomain.setUp">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestAttachedApplicabilityDomain.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestAttachedApplicabilityDomain"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestAttachedApplicabilityDomain">[docs]</a><span class="k">class</span> <span class="nc">TestAttachedApplicabilityDomain</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestAttachedApplicabilityDomain.setUp"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestAttachedApplicabilityDomain.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
 
-
-<div class="viewcode-block" id="TestAttachedApplicabilityDomain.testAttachedApplicabilityDomain">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestAttachedApplicabilityDomain.testAttachedApplicabilityDomain">[docs]</a>
-    <span class="k">def</span> <span class="nf">testAttachedApplicabilityDomain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestAttachedApplicabilityDomain.testAttachedApplicabilityDomain"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestAttachedApplicabilityDomain.testAttachedApplicabilityDomain">[docs]</a>    <span class="k">def</span> <span class="nf">testAttachedApplicabilityDomain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the attached applicability domain class.&quot;&quot;&quot;</span>
 
         <span class="c1"># initialize test dataset with attached applicability domain</span>
@@ -986,9 +910,7 @@
         <span class="n">_</span><span class="p">,</span> <span class="n">ap_preds_model2</span> <span class="o">=</span> <span class="n">model2</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span>
             <span class="n">dataset</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;SMILES&quot;</span><span class="p">],</span> <span class="n">use_applicability_domain</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">ap_pred</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">ap_preds_model2</span><span class="p">))</span></div>
-</div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array_equal</span><span class="p">(</span><span class="n">ap_pred</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">ap_preds_model2</span><span class="p">))</span></div></div>
 </pre></div>
 
            </div>
