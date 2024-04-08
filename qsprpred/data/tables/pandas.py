@@ -8,7 +8,8 @@ import pandas as pd
 
 from .base import DataTable
 from ...logs import logger
-from ...utils.parallel import batched_generator, parallel_jit_generator
+from ...utils.parallel import batched_generator, ParallelGenerator, \
+    MultiprocessingJITGenerator
 from ...utils.serialization import JSONSerializable
 from ...utils.stringops import generate_padded_index
 
@@ -49,8 +50,8 @@ class PandasDataTable(DataTable, JSONSerializable):
             'pkl' and 'csv' are supported. Defaults to 'pkl' because it is faster.
             However, 'csv' is more portable and can be opened in other programs.
         parallelGenerator (Callable):
-            A parallel generator function to use for parallel processing.
-            Defaults to `qsprpred.utils.parallel.parallel_jit_generator`.
+            A `ParallelGenerator` to use for parallel processing of chunks of data.
+            Defaults to `qsprpred.utils.parallel.MultiprocessingPoolGenerator`.
             You can replace this with your own parallel generator function if you
             want to use a different parallelization strategy (i.e. utilize
             remote servers instead of local processes).
@@ -59,17 +60,18 @@ class PandasDataTable(DataTable, JSONSerializable):
     _notJSON: ClassVar = [*JSONSerializable._notJSON, "df"]
 
     def __init__(
-        self,
-        name: str,
-        df: Optional[pd.DataFrame] = None,
-        store_dir: str = ".",
-        overwrite: bool = False,
-        index_cols: Optional[list[str]] = None,
-        n_jobs: int = 1,
-        chunk_size: int | None = None,
-        autoindex_name: str = "QSPRID",
-        random_state: int | None = None,
-        store_format: str = "pkl",
+            self,
+            name: str,
+            df: pd.DataFrame | None = None,
+            store_dir: str = ".",
+            overwrite: bool = False,
+            index_cols: list[str] | None = None,
+            n_jobs: int = 1,
+            chunk_size: int | None = None,
+            autoindex_name: str = "QSPRID",
+            random_state: int | None = None,
+            store_format: str = "pkl",
+            parallel_generator: ParallelGenerator | None = None,
     ):
         """Initialize a `PandasDataTable` object.
         Args
@@ -107,12 +109,18 @@ class PandasDataTable(DataTable, JSONSerializable):
             store_format (str):
                 Format to use for storing the data frame.
                 Currently only 'pkl' and 'csv' are supported.
+            parallel_generator (ParallelGenerator | None):
+                A `ParallelGenerator` to use for parallel processing of chunks of data.
+                Defaults to `qsprpred.utils.parallel.MultiprocessingPoolGenerator`.
+                You can replace this with your own parallel generator function if you
+                want to use a different parallelization strategy (i.e. utilize
+                remote servers instead of local processes).
         """
         self.idProp = autoindex_name
         self.storeFormat = store_format
         self.randomState = None
         self.setRandomState(
-            random_state or int(np.random.randint(0, 2**31-1, dtype=np.int64))
+            random_state or int(np.random.randint(0, 2 ** 31 - 1, dtype=np.int64))
         )
         self.name = name
         self.indexCols = index_cols
@@ -148,7 +156,9 @@ class PandasDataTable(DataTable, JSONSerializable):
         # parallel settings
         self.nJobs = n_jobs
         self.chunkSize = chunk_size
-        self.parallelGenerator = parallel_jit_generator
+        self.parallelGenerator = parallel_generator or MultiprocessingJITGenerator(
+            self.nJobs
+        )
 
     def __len__(self) -> int:
         """Get the number of rows in the data frame."""
@@ -187,6 +197,7 @@ class PandasDataTable(DataTable, JSONSerializable):
     def nJobs(self, value: int | None):
         self._nJobs = value if value is not None and value > 0 else os.cpu_count()
         self.chunkSize = None
+        self.parallelGenerator = MultiprocessingJITGenerator(self.nJobs)
 
     @property
     def baseDir(self) -> str:
@@ -336,10 +347,10 @@ class PandasDataTable(DataTable, JSONSerializable):
             return self.df[self.df.columns[self.df.columns.str.startswith(prefix)]]
 
     def iterChunks(
-        self,
-        include_props: list[str] | None = None,
-        as_dict: bool = False,
-        chunk_size: int | None = None,
+            self,
+            include_props: list[str] | None = None,
+            as_dict: bool = False,
+            chunk_size: int | None = None,
     ) -> Generator[pd.DataFrame | dict, None, None]:
         """Batch a data frame into chunks of the given size.
 
@@ -373,14 +384,14 @@ class PandasDataTable(DataTable, JSONSerializable):
             yield ret if as_dict else df_batch
 
     def apply(
-        self,
-        func: Callable[[dict[str, list[Any]] | pd.DataFrame, ...], Any],
-        func_args: list | None = None,
-        func_kwargs: dict | None = None,
-        on_props: list[str] | None = None,
-        as_df: bool = False,
-        chunk_size: int | None = None,
-        n_jobs: int | None = None,
+            self,
+            func: Callable[[dict[str, list[Any]] | pd.DataFrame, ...], Any],
+            func_args: tuple[Any] | None = None,
+            func_kwargs: dict[str, Any] | None = None,
+            on_props: list[str] | None = None,
+            as_df: bool = False,
+            chunk_size: int | None = None,
+            n_jobs: int | None = None,
     ) -> Generator:
         """Apply a function to the data frame. The properties of the data set
         are passed as the first positional argument to the function. This
@@ -425,18 +436,19 @@ class PandasDataTable(DataTable, JSONSerializable):
         n_jobs = self.nJobs if n_jobs is None else n_jobs
         chunk_size = chunk_size if chunk_size is not None else self.chunkSize
         if n_jobs > 1:
+            args = func_args or []
+            kwargs = func_kwargs or {}
             logger.debug(
                 f"Applying function '{func!r}' in parallel on {n_jobs} CPUs, "
-                f"using chunk size: {chunk_size}."
+                f"using chunk size: {chunk_size} and parameters: {args}, {kwargs}"
             )
             for result in self.parallelGenerator(
-                self.iterChunks(
-                    include_props=on_props, as_dict=not as_df, chunk_size=chunk_size
-                ),
-                func,
-                n_jobs,
-                args=func_args,
-                kwargs=func_kwargs,
+                    self.iterChunks(
+                        include_props=on_props, as_dict=not as_df, chunk_size=chunk_size
+                    ),
+                    func,
+                    *args,
+                    **kwargs,
             ):
                 logger.debug(f"Result for chunk returned: {result!r}")
                 if not isinstance(result, Exception):
@@ -446,7 +458,7 @@ class PandasDataTable(DataTable, JSONSerializable):
         else:
             logger.debug(f"Applying function '{func!r}' in serial.")
             for props in self.iterChunks(
-                include_props=on_props, as_dict=not as_df, chunk_size=len(self)
+                    include_props=on_props, as_dict=not as_df, chunk_size=len(self)
             ):
                 result = func(props, *func_args, **func_kwargs)
                 logger.debug(f"Result for chunk returned: {result!r}")

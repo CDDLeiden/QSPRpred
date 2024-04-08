@@ -44,6 +44,7 @@ class PathMixIn:
             created before and cleared after each test
 
     """
+
     def setUpPaths(self):
         """Create the directories that are used for testing."""
         self.generatedPath = tempfile.mkdtemp(prefix="qsprpred_test_")
@@ -64,6 +65,7 @@ class PathMixIn:
 class DataSetsPathMixIn(PathMixIn):
     """Mix-in class that provides a small and large testing data set and some common
     preparation settings to use in tests."""
+
     def setUpPaths(self):
         """Create the directories that are used for testing."""
         super().setUpPaths()
@@ -78,10 +80,9 @@ class DataSetsPathMixIn(PathMixIn):
         """Return a dictionary with default preparation settings."""
         return {
             "feature_calculators": [MorganFP(radius=2, nBits=128)],
-            "split": RandomSplit(test_fraction=0.1),
+            "split": RandomSplit(test_fraction=0.2),
             "feature_standardizer": StandardScaler(),
-            "feature_filters": [LowVarianceFilter(0.05),
-                                HighCorrelationFilter(0.8)],
+            "feature_filters": [LowVarianceFilter(0.05), HighCorrelationFilter(0.8)],
         }
 
     @classmethod
@@ -175,7 +176,8 @@ class DataSetsPathMixIn(PathMixIn):
         # All combinations of the above preparation settings (passed to prepareDataset)
         return (
             # deep copy to avoid conflicts cayed by operating on one instance twice
-            copy.deepcopy(combo) for combo in itertools.product(
+            copy.deepcopy(combo)
+            for combo in itertools.product(
                 descriptor_calculators,
                 splits,
                 feature_standardizers,
@@ -195,6 +197,7 @@ class DataSetsPathMixIn(PathMixIn):
         Returns:
             list: `list` of `list`s of all possible combinations of preparation
         """
+
         def get_name(obj: object):
             """
             Get the name of a data preparation object,
@@ -253,10 +256,7 @@ class DataSetsPathMixIn(PathMixIn):
     def createLargeTestDataSet(
         self,
         name="QSPRDataset_test_large",
-        target_props=[{
-            "name": "CL",
-            "task": TargetTasks.REGRESSION
-        }],
+        target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
         preparation_settings=None,
         random_state=42,
         n_jobs=1,
@@ -286,10 +286,7 @@ class DataSetsPathMixIn(PathMixIn):
     def createSmallTestDataSet(
         self,
         name="QSPRDataset_test_small",
-        target_props=[{
-            "name": "CL",
-            "task": TargetTasks.REGRESSION
-        }],
+        target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
         preparation_settings=None,
         random_state=42,
     ):
@@ -316,10 +313,7 @@ class DataSetsPathMixIn(PathMixIn):
         self,
         df,
         name="QSPRDataset_test",
-        target_props=[{
-            "name": "CL",
-            "task": TargetTasks.REGRESSION
-        }],
+        target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
         random_state=None,
         prep=None,
         n_jobs=1,
@@ -354,15 +348,8 @@ class DataSetsPathMixIn(PathMixIn):
         self,
         name="QSPRDataset_multi_test",
         target_props=[
-            {
-                "name": "HBD",
-                "task": TargetTasks.MULTICLASS,
-                "th": [-1, 1, 2, 100]
-            },
-            {
-                "name": "CL",
-                "task": TargetTasks.REGRESSION
-            },
+            {"name": "HBD", "task": TargetTasks.MULTICLASS, "th": [-1, 1, 2, 100]},
+            {"name": "CL", "task": TargetTasks.REGRESSION},
         ],
         preparation_settings=None,
         random_state=42,
@@ -396,6 +383,7 @@ class DataSetsPathMixIn(PathMixIn):
 
 class ModelDataSetsPathMixIn(DataSetsPathMixIn):
     """This class sets up the datasets for the model tests."""
+
     def setUpPaths(self):
         """Set up the test environment."""
         super().setUpPaths()

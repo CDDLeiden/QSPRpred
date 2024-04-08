@@ -1,4 +1,5 @@
 """QSPRPpred wrapper for chemprop models."""
+
 import os
 import shutil
 from copy import deepcopy
@@ -15,6 +16,7 @@ from tqdm import trange
 
 from qsprpred.data.sampling.splits import DataSplit
 from qsprpred.tasks import ModelTasks
+from .base_torch import QSPRModelPyTorchGPU, DEFAULT_TORCH_GPUS
 from ....data.tables.qspr import QSPRDataset
 from ....logs import logger
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
@@ -32,9 +34,9 @@ class ChempropMoleculeModel(chemprop.models.MoleculeModel):
     """
 
     def __init__(
-        self,
-        args: chemprop.args.TrainArgs,
-        scaler: chemprop.data.scaler.StandardScaler | None = None,
+            self,
+            args: chemprop.args.TrainArgs,
+            scaler: chemprop.data.scaler.StandardScaler | None = None,
     ):
         """Initialize a MoleculeModel instance.
 
@@ -98,12 +100,11 @@ class ChempropMoleculeModel(chemprop.models.MoleculeModel):
         return train_args
 
 
-class ChempropModel(QSPRModel):
+class ChempropModel(QSPRModelPyTorchGPU):
     """QSPRpred implementation of Chemprop model.
 
     Attributes:
         name (str): name of the model
-        data (QSPRDataset): data set used to train the model
         alg (Type): estimator class
         parameters (dict): dictionary of algorithm specific parameters
         estimator (Any):
@@ -120,16 +121,32 @@ class ChempropModel(QSPRModel):
             the model files are stored in a subdirectory `{baseDir}/{outDir}/`
     """
 
+    def getGPUs(self):
+        return self.gpus
+
+    def setGPUs(self, gpus: list[int]):
+        self.gpus = gpus
+        if torch.cuda.is_available() and gpus:
+            self.setDevice(f"cuda:{gpus[0]}")
+        else:
+            self.setDevice("cpu")
+
+    def getDevice(self) -> torch.device:
+        return torch.device(self.device)
+
+    def setDevice(self, device: str):
+        self.device = device
+
     _notJSON = [*QSPRModel._notJSON, "chempropLogger"]
 
     def __init__(
-        self,
-        base_dir: str,
-        name: str | None = None,
-        parameters: dict | None = None,
-        autoload=True,
-        random_state: int | None = None,
-        quiet_logger: bool = True,
+            self,
+            base_dir: str,
+            name: str | None = None,
+            parameters: dict | None = None,
+            autoload=True,
+            random_state: int | None = None,
+            quiet_logger: bool = True,
     ):
         """Initialize a Chemprop instance.
 
@@ -154,6 +171,8 @@ class ChempropModel(QSPRModel):
         self.chempropLogger = chemprop.utils.create_logger(
             name="chemprop_logger", save_dir=self.outDir, quiet=quiet_logger
         )
+        self.gpus = None
+        self.setGPUs(DEFAULT_TORCH_GPUS)
 
     def supportsEarlyStopping(self) -> bool:
         """Return if the model supports early stopping.
@@ -165,14 +184,14 @@ class ChempropModel(QSPRModel):
 
     @early_stopping
     def fit(
-        self,
-        X: pd.DataFrame | np.ndarray,
-        y: pd.DataFrame | np.ndarray,
-        estimator: Any = None,
-        mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
-        split: DataSplit | None = None,
-        monitor: FitMonitor | None = None,
-        keep_logs: bool = False,
+            self,
+            X: pd.DataFrame | np.ndarray,
+            y: pd.DataFrame | np.ndarray,
+            estimator: Any = None,
+            mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+            split: DataSplit | None = None,
+            monitor: FitMonitor | None = None,
+            keep_logs: bool = False,
     ) -> Any | tuple[ChempropMoleculeModel, int | None]:
         """Fit the model to the given data matrix or `QSPRDataset`.
 
@@ -205,8 +224,8 @@ class ChempropModel(QSPRModel):
         X, y = self.convertToNumpy(X, y)
         if self.earlyStopping:
             train_index, val_index = next(split.split(X, y))
-            train_data = X[train_index, :], y[train_index]
-            val_data = X[val_index, :], y[val_index]
+            train_data = X[train_index, :], y[train_index].astype(float)
+            val_data = X[val_index, :], y[val_index].astype(float)
             monitor.onFitStart(self, *train_data, *val_data)
             train_data = self.convertToMoleculeDataset(*train_data)
             val_data = self.convertToMoleculeDataset(*val_data)
@@ -217,8 +236,11 @@ class ChempropModel(QSPRModel):
             monitor.onFitStart(self, X, y)
 
         args = estimator.args
+        if args.cuda:
+            args.gpu = self.gpus[0]
+            args.device = torch.device(self.device)
 
-        # set task names
+        # set task namesargs
         args.task_names = [prop.name for prop in self.targetProperties]
 
         # Get number of molecules per class in training data
@@ -243,7 +265,7 @@ class ChempropModel(QSPRModel):
         if self.earlyStopping:
             total_data_size += len(val_data)
             self.chempropLogger.debug(
-                f"train size = {len(train_data):,}" f" | val size = {len(val_data):,}"
+                f"train size = {len(train_data):,} | val size = {len(val_data):,}"
             )
         self.chempropLogger.debug(f"Total size = {total_data_size:,}")
 
@@ -298,7 +320,7 @@ class ChempropModel(QSPRModel):
         )
 
         if args.cuda:
-            self.chempropLogger.debug("Moving model to cuda")
+            self.chempropLogger.debug("Moving trained model to cuda")
         estimator = estimator.to(args.device)
 
         # Optimizers
@@ -317,7 +339,7 @@ class ChempropModel(QSPRModel):
         )
         if not n_epochs:
             raise ValueError(
-                f"Number of epochs must be greater " f"than 0. Got: {n_epochs}"
+                f"Number of epochs must be greater than 0. Got: {n_epochs}"
             )
         best_estimator = estimator
         best_found = False
@@ -354,7 +376,7 @@ class ChempropModel(QSPRModel):
                         scores, metric=metric
                     )
                     self.chempropLogger.debug(
-                        f"Validation {metric} = " f"{mean_val_score:.6f}"
+                        f"Validation {metric} = {mean_val_score:.6f}"
                     )
                     writer.add_scalar(f"validation_{metric}", mean_val_score, n_iter)
 
@@ -362,7 +384,7 @@ class ChempropModel(QSPRModel):
                         # Individual validation scores
                         for task_name, val_score in zip(args.task_names, scores):
                             self.chempropLogger.debug(
-                                f"Validation {task_name} {metric}" f" = {val_score:.6f}"
+                                f"Validation {task_name} {metric} = {val_score:.6f}"
                             )
                             writer.add_scalar(
                                 f"validation_{task_name}_{metric}", val_score, n_iter
@@ -374,10 +396,10 @@ class ChempropModel(QSPRModel):
                 )
                 monitor.onEpochEnd(epoch, mean_val_score)
                 if (
-                    args.minimize_score
-                    and mean_val_score < best_score
-                    or not args.minimize_score
-                    and mean_val_score > best_score
+                        args.minimize_score
+                        and mean_val_score < best_score
+                        or not args.minimize_score
+                        and mean_val_score > best_score
                 ):
                     best_score, best_epoch = mean_val_score, epoch
                     best_estimator = deepcopy(estimator)
@@ -402,9 +424,9 @@ class ChempropModel(QSPRModel):
         return estimator, None
 
     def predict(
-        self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: ChempropMoleculeModel | None = None,
+            self,
+            X: pd.DataFrame | np.ndarray | QSPRDataset,
+            estimator: ChempropMoleculeModel | None = None,
     ) -> np.ndarray:
         """Make predictions for the given data matrix or `QSPRDataset`.
 
@@ -429,9 +451,9 @@ class ChempropModel(QSPRModel):
         return self.predictProba(X, estimator)
 
     def predictProba(
-        self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: ChempropMoleculeModel | None = None,
+            self,
+            X: pd.DataFrame | np.ndarray | QSPRDataset,
+            estimator: ChempropMoleculeModel | None = None,
     ) -> list[np.ndarray]:
         """Make predictions for the given data matrix or `QSPRDataset`,
         but use probabilities for classification models.
@@ -452,19 +474,23 @@ class ChempropModel(QSPRModel):
         estimator = self.estimator if estimator is None else estimator
         X = self.convertToMoleculeDataset(X)
         args = estimator.args
+        if args.cuda:
+            args.gpu = self.gpus[0]
+            args.device = torch.device(self.device)
+            estimator = estimator.to(args.device)
+            logger.debug("Moving prediction model to cuda")
 
         X_loader = chemprop.data.MoleculeDataLoader(
             dataset=X, batch_size=args.batch_size
         )
-
         # Make predictions
+        scaler = estimator.scaler
         preds = chemprop.train.predict(
             model=estimator,
             data_loader=X_loader,
-            scaler=estimator.scaler,
+            scaler=scaler,
             disable_progress_bar=True,
         )
-
         # change list of lists to 2D array
         preds = np.array(preds)
 
@@ -499,6 +525,10 @@ class ChempropModel(QSPRModel):
         Returns:
             object: initialized estimator instance
         """
+        if not hasattr(self, "chempropLogger"):
+            self.chempropLogger = chemprop.utils.create_logger(
+                name="chemprop_logger", save_dir=self.outDir, quiet=self.quietLogger
+            )
         if not self.targetProperties:
             return "Unititialized estimator, no target properties found yet."
         # set torch random seed if applicable
@@ -510,11 +540,13 @@ class ChempropModel(QSPRModel):
 
         # set task names
         args.task_names = [prop.name for prop in self.targetProperties]
-
+        # set devices
+        args.gpu = self.gpus[0]
+        args.device = torch.device(self.device)
         return self.alg(args)
 
     def loadEstimatorFromFile(
-        self, params: dict | None = None, fallback_load=True
+            self, params: dict | None = None, fallback_load=True
     ) -> object:
         """Load estimator instance from file and apply the given parameters.
 
@@ -535,7 +567,8 @@ class ChempropModel(QSPRModel):
                 self.chempropLogger = chemprop.utils.create_logger(
                     name="chemprop_logger", save_dir=self.outDir, quiet=self.quietLogger
                 )
-
+            if not self.targetProperties:
+                return "Unititialized estimator, no target properties found yet."
             estimator = ChempropMoleculeModel.cast(
                 chemprop.utils.load_checkpoint(path, logger=self.chempropLogger)
             )
@@ -574,6 +607,7 @@ class ChempropModel(QSPRModel):
                 scaler=self.estimator.scaler,
                 args=self.estimator.args,
             )
+            return f"{self.outPrefix}.pt"
         else:
             # just save a file with the estimator message
             with open(f"{self.outPrefix}.pt", "w") as f:
@@ -581,9 +615,9 @@ class ChempropModel(QSPRModel):
         return f"{self.outPrefix}.pt"
 
     def convertToMoleculeDataset(
-        self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        y: pd.DataFrame | np.ndarray | QSPRDataset | None = None,
+            self,
+            X: pd.DataFrame | np.ndarray | QSPRDataset,
+            y: pd.DataFrame | np.ndarray | QSPRDataset | None = None,
     ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
         """Convert the given data matrix and target matrix to chemprop Molecule Dataset.
 
@@ -734,21 +768,21 @@ class ChempropModel(QSPRModel):
             "num_workers": "Number of workers for the parallel data loading (0 means sequential).",
             "batch_size": "Batch size.",
             "no_cache_mol": "Whether to not cache the RDKit molecule for each SMILES string to "
-            "reduce memory usage (cached by default).",
+                            "reduce memory usage (cached by default).",
             "empty_cache": "Whether to empty all caches before training or predicting. This is "
-            "necessary if multiple jobs are run within a single script and the "
-            "atom or bond features change.",
+                           "necessary if multiple jobs are run within a single script and the "
+                           "atom or bond features change.",
             "loss_function": "Choice of loss function. Loss functions are limited to compatible "
-            "dataset types.",
+                             "dataset types.",
             "metric": "Metric to use with the validation set for early stopping. Defaults "
-            "to 'auc' for classification, 'rmse' for regression. Note. In Chemprop "
-            "this metric is also used for test-set evaluation, but in QSPRpred "
-            "this is determined by the scoring parameter in assessment.",
+                      "to 'auc' for classification, 'rmse' for regression. Note. In Chemprop "
+                      "this metric is also used for test-set evaluation, but in QSPRpred "
+                      "this is determined by the scoring parameter in assessment.",
             "bias": "Whether to add bias to linear layers.",
             "hidden_size": "Dimensionality of hidden layers in MPN.",
             "depth": "Number of message passing steps.",
             "mpn_shared": "Whether to use the same message passing neural network for all input "
-            "molecule Only relevant if 'number_of_molecules > 1'",
+                          "molecule Only relevant if 'number_of_molecules > 1'",
             "dropout": "Dropout probability.",
             "activation": "Activation function.",
             "atom_messages": "Centers messages on atoms instead of on bonds.",
@@ -757,17 +791,17 @@ class ChempropModel(QSPRModel):
             "ffn_num_layers": "Number of layers in FFN after MPN encoding.",
             "epochs": "Number of epochs to run.",
             "warmup_epochs": "Number of epochs during which learning rate increases linearly from "
-            "'init_lr' to 'max_lr'. Afterwards, learning rate decreases "
-            "exponentially from 'max_lr' to 'final_lr'.",
+                             "'init_lr' to 'max_lr'. Afterwards, learning rate decreases "
+                             "exponentially from 'max_lr' to 'final_lr'.",
             "init_lr": "Initial learning rate.",
             "max_lr": "Maximum learning rate.",
             "final_lr": "Final learning rate.",
             "grad_clip": "Maximum magnitude of gradient during training.",
             "class_balance": "Trains with an equal number of positives and negatives in each batch.",
             "evidential_regularization": "Value used in regularization for evidential loss function. The "
-            "default value recommended by Soleimany et al.(2021) is 0.2. Optimal "
-            "value is dataset-dependent; it is recommended that users test "
-            "different values to find the best value for their model.",
+                                         "default value recommended by Soleimany et al.(2021) is 0.2. Optimal "
+                                         "value is dataset-dependent; it is recommended that users test "
+                                         "different values to find the best value for their model.",
         }
 
     @classmethod

@@ -77,8 +77,6 @@ class Replica(JSONSerializable):
         self.ds = None
         self.results = None
         self.model = deepcopy(model)
-        self.model.name = self.id
-        self.model.save()
 
     def __getstate__(self):
         o_dict = super().__getstate__()
@@ -95,6 +93,40 @@ class Replica(JSONSerializable):
 
     def __str__(self):
         return self.id
+
+    @property
+    def requiresGpu(self) -> bool:
+        """Whether the model requires a GPU.
+
+        Returns:
+            bool:
+                Whether the model requires a GPU.
+        """
+        return hasattr(self.model, "setGPUs")
+
+    def setGPUs(self, gpus: list[int]):
+        """Sets the GPUs to use for the model.
+
+        Args:
+            gpus (list[int]):
+                List of GPU indices to use.
+        """
+        if hasattr(self.model, "setGPUs"):
+            self.model.setGPUs(gpus)
+        else:
+            raise ValueError("Model does not support GPU usage.")
+
+    def getGPUs(self) -> list[int]:
+        """Gets the GPUs to use for the model.
+
+        Returns:
+            list[int]:
+                List of GPU indices to use.
+        """
+        if hasattr(self.model, "getGPUs"):
+            return self.model.getGPUs()
+        else:
+            return []
 
     @property
     def id(self) -> str:
@@ -119,6 +151,7 @@ class Replica(JSONSerializable):
             overwrite=reload,
             random_state=self.randomSeed,
         )
+        self.ds.dropInvalids()
 
     def addDescriptors(self, reload: bool = False):
         """Adds descriptors to the current data set. Make sure to call
@@ -137,6 +170,8 @@ class Replica(JSONSerializable):
             raise ValueError("Data set not initialized. Call initData first.")
         desc_id = "_".join(sorted([str(d) for d in self.descriptors]))
         self.ds.name = f"{self.ds.name}_{desc_id}"
+        if self.requiresGpu:
+            self.ds.name = f"{self.ds.name}_gpu"
         # attempt to load the data set with descriptors
         if os.path.exists(self.ds.metaFile) and not reload:
             logger.info(f"Reloading existing {self.ds.name} from cache...")
@@ -176,6 +211,7 @@ class Replica(JSONSerializable):
         """
         if self.ds is None:
             raise ValueError("Data set not initialized. Call initData first.")
+        self.model.name = f"{self.id}_{self.ds.name}"
         self.model.initFromDataset(self.ds)
         self.model.initRandomState(self.randomSeed)
         if self.optimizer is not None:
@@ -213,7 +249,13 @@ class Replica(JSONSerializable):
                     score_df = pd.DataFrame(
                         {
                             "Assessor": [assessor.__class__.__name__],
-                            "ScoreFunc": [assessor.scoreFunc.name],
+                            "ScoreFunc": [
+                                (
+                                    assessor.scoreFunc.name
+                                    if hasattr(assessor.scoreFunc, "name")
+                                    else assessor.scoreFunc.__name__
+                                )
+                            ],
                             "Score": [fold_score],
                             "TargetProperty": [tp.name],
                             "TargetTask": [tp.task.name],
@@ -225,7 +267,13 @@ class Replica(JSONSerializable):
                         score_df = pd.DataFrame(
                             {
                                 "Assessor": [assessor.__class__.__name__],
-                                "ScoreFunc": [assessor.scoreFunc.name],
+                                "ScoreFunc": [
+                                    (
+                                        assessor.scoreFunc.name
+                                        if hasattr(assessor.scoreFunc, "name")
+                                        else assessor.scoreFunc.__name__
+                                    )
+                                ],
                                 "Score": [tp_score],
                                 "TargetProperty": [tp.name],
                                 "TargetTask": [tp.task.name],

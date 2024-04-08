@@ -1,7 +1,7 @@
 {
     "py/object": "qsprpred.models.scikit_learn.SklearnModel",
     "py/state": {
-        "name": "ConsistencyChecksCLS_478163327",
+        "name": "ConsistencyChecksCLS_478163327_ConsistencyChecks_MorganFP_RDkit",
         "baseDir": ".",
         "targetProperties": [
             {
@@ -1571,6 +1571,6 @@
         },
         "alg": "sklearn.ensemble._forest.ExtraTreesClassifier",
         "randomState": 478163327,
-        "estimator": "./ConsistencyChecksCLS_478163327/ConsistencyChecksCLS_478163327.json"
+        "estimator": "./ConsistencyChecksCLS_478163327_ConsistencyChecks_MorganFP_RDkit/ConsistencyChecksCLS_478163327_ConsistencyChecks_MorganFP_RDkit.json"
     }
 }

@@ -236,10 +236,13 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         self.smilesCol = smiles_col
         self.includesRdkit = add_rdkit
         # drop invalid columns
+        self.invalidsRemoved = False
         if drop_invalids:
             self.dropInvalids()
             # update chunk size if count changed
             self.chunkSize = chunk_size
+            # label invalids removed
+            self.invalidsRemoved = True
         # add rdkit molecules if requested
         if self.includesRdkit and "RDMol" not in self.df.columns:
             PandasTools.AddMoleculeColumnToFrame(
@@ -1031,7 +1034,9 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 and standardizes smiles.
             drop_invalid (bool): whether to drop invalid SMILES from the data set.
                 Defaults to `True`. If `False`, invalid SMILES will be retained in
-                their original form.
+                their original form. If `self.invalidsRemoved` is `True`, there will be
+                no effect even if `drop_invalid` is `True`. Set `self.invalidsRemoved`
+                to `False` on this instance to force the removal of invalid SMILES.
 
         Raises:
             ValueError: when smiles_standardizer is not a callable or one of the
@@ -1059,7 +1064,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             with Pool(std_jobs) as pool:
                 std_smi = pool.map(std_func, self.df[self.smilesCol].values)
         self.df[self.smilesCol] = std_smi
-        if drop_invalid:
+        if drop_invalid and not self.invalidsRemoved:
             self.dropInvalids()
 
     def dropInvalids(self):

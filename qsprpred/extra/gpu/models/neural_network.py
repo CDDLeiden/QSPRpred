@@ -11,7 +11,6 @@ from torch import nn, optim
 from torch.nn import functional as f
 from torch.utils.data import DataLoader, TensorDataset
 
-from ....extra.gpu import DEFAULT_TORCH_DEVICE, DEFAULT_TORCH_GPUS
 from ....logs import logger
 from ....models.monitors import BaseMonitor, FitMonitor
 
@@ -43,8 +42,8 @@ class Base(nn.Module):
 
     def __init__(
         self,
-        device: torch.device = DEFAULT_TORCH_DEVICE,
-        gpus: list[int] = DEFAULT_TORCH_GPUS,
+        device: str,
+        gpus: list[int],
         n_epochs: int = 1000,
         lr: float = 1e-4,
         batch_size: int = 256,
@@ -54,7 +53,7 @@ class Base(nn.Module):
         """Initialize the DNN model.
 
         Args:
-            device (torch.device):
+            device (str):
                 device to run the model on
             gpus (list):
                 list of gpus to run the model on
@@ -77,10 +76,7 @@ class Base(nn.Module):
         self.batch_size = batch_size
         self.patience = patience
         self.tol = tol
-        if device.type == "cuda":
-            self.device = torch.device(f"cuda:{gpus[0]}")
-        else:
-            self.device = device
+        self.device = torch.device(device)
         self.gpus = gpus
         if len(self.gpus) > 1:
             logger.warning(
@@ -120,6 +116,7 @@ class Base(nn.Module):
             int:
                 the epoch number when the optimal model is saved
         """
+        self.to(self.device)
         monitor = BaseMonitor() if monitor is None else monitor
         train_loader = self.getDataLoader(X_train, y_train)
         valid_loader = None
@@ -197,6 +194,7 @@ class Base(nn.Module):
                 the average loss value based on the calculation of loss
                 function with given test set.
         """
+        self.to(self.device)
         loss = 0
         for Xb, yb in loader:
             Xb, yb = Xb.to(self.device), yb.to(self.device)
@@ -227,6 +225,7 @@ class Base(nn.Module):
                 it is an m X l FloatTensor (m is the No. of sample, l is the
                 No. of classes or tasks.)
         """
+        self.to(self.device)
         loader = self.getDataLoader(X_test)
         score = []
         for X_b in loader:
@@ -363,9 +362,9 @@ class STFullyConnected(Base):
     def __init__(
         self,
         n_dim,
-        n_class=1,
-        device=DEFAULT_TORCH_DEVICE,
-        gpus=DEFAULT_TORCH_GPUS,
+        n_class,
+        device,
+        gpus,
         n_epochs=100,
         lr=None,
         batch_size=256,
@@ -457,7 +456,6 @@ class STFullyConnected(Base):
             # loss and activation function of output layer for multiple classification
             self.criterion = nn.CrossEntropyLoss()
             self.activation = nn.Softmax(dim=1)
-        self.to(self.device)
 
     def set_params(self, **params) -> "STFullyConnected":
         """Set parameters and re-initialize model.

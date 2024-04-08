@@ -1,20 +1,35 @@
 import itertools
 import logging
 import os
+import queue
 import random
+import sys
 import traceback
-from concurrent.futures import ProcessPoolExecutor
-from multiprocessing import Lock
-from typing import Generator
+from threading import Lock as TLock, Thread
+from typing import Generator, Any
 
 import pandas as pd
 
+from qsprpred.extra.gpu.utils.parallel import TorchJITGenerator
 from .replica import Replica
 from .settings.benchmark import BenchmarkSettings
 from ..logs import logger
+from ..utils.parallel import ParallelGenerator, MultiprocessingJITGenerator, \
+    ThreadsJITGenerator, PebbleJITGenerator
 
-lock_data = Lock()
-lock_report = Lock()
+
+class ExcThread(Thread):
+    """Thread that can catch exceptions from the target function."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.bucket = queue.Queue()
+
+    def run(self):
+        try:
+            super().run()
+        except Exception:
+            self.bucket.put(sys.exc_info())
 
 
 class BenchmarkRunner:
@@ -46,6 +61,10 @@ class BenchmarkRunner:
 
     """
 
+    # default locks for threads
+    lock_data_t = TLock()
+    lock_report_t = TLock()
+
     class ReplicaException(Exception):
         """Custom exception for errors in a replica.
 
@@ -68,31 +87,39 @@ class BenchmarkRunner:
             self.replicaID = replica_id
             self.exception = exception
 
-    logLevel = logging.WARNING
+    logLevel = logging.DEBUG
 
     def __init__(
-        self,
-        settings: BenchmarkSettings,
-        n_proc: int | None = None,
-        data_dir: str = "./data",
-        results_file: str | None = None,
+            self,
+            settings: BenchmarkSettings,
+            data_dir: str = "./data",
+            results_file: str | None = None,
+            parallel_generator_cpu: ParallelGenerator | None = None,
+            parallel_generator_gpu: ParallelGenerator | None = None,
     ):
         """Initialize the runner.
 
         Args:
             settings (BenchmarkSettings):
                 Benchmark settings.
-            n_proc (int, optional):
-                Number of processes to use. Defaults to os.cpu_count().
             data_dir (str, optional):
                 Path to the directory to store data. Defaults to "./data".
                 If the directory does not exist, it will be created.
             results_file (str, optional):
                 Path to the results file. Defaults to "{data_dir}/data/results.tsv".
+            parallel_generator_cpu (ParallelGenerator, optional):
+                Parallel generator for CPU replicas.
+                Defaults to `MultiprocessingPoolGenerator` on all available CPUs.
+            parallel_generator_gpu (ParallelGenerator, optional):
+                Parallel generator for GPU replicas. Defaults to `None`.
         """
         logger.debug("Initializing BenchmarkRunner...")
         self.settings = settings
-        self.nProc = n_proc or os.cpu_count()
+        self.parallelGeneratorCPU = (parallel_generator_cpu or
+                                     MultiprocessingJITGenerator(
+                                         os.cpu_count()
+                                     ))
+        self.parallelGeneratorGPU = parallel_generator_gpu
         self.dataDir = data_dir
         self.resultsFile = results_file if results_file else f"{data_dir}/results.tsv"
         os.makedirs(self.dataDir, exist_ok=True)
@@ -112,16 +139,94 @@ class BenchmarkRunner:
         benchmark_settings = self.settings
         benchmark_settings.checkConsistency()
         ret = (
-            benchmark_settings.n_replicas
-            * len(benchmark_settings.data_sources)
-            * len(benchmark_settings.descriptors)
-            * len(benchmark_settings.target_props)
-            * len(benchmark_settings.prep_settings)
-            * len(benchmark_settings.models)
+                benchmark_settings.n_replicas
+                * len(benchmark_settings.data_sources)
+                * len(benchmark_settings.descriptors)
+                * len(benchmark_settings.target_props)
+                * len(benchmark_settings.prep_settings)
+                * len(benchmark_settings.models)
         )
         if len(benchmark_settings.optimizers) > 0:
             ret *= len(benchmark_settings.optimizers)
         return ret
+
+    def createLocks(self, generator: ParallelGenerator):
+        """Creates locks for input and output operations done in `runReplica`.
+        This method should be
+        overridden if the generator uses a different multiprocessing library
+        or threading implementation. At the moment, this method can only provide locks
+        for the `MultiprocessingPoolGenerator`.
+
+        Args:
+            generator (ParallelGenerator):
+                Parallel generator to use.
+        Returns:
+            Any:
+                Lock for data set operations.
+            Any:
+                Lock for final report file operations.
+        Raises:
+            ValueError:
+                If the generator is not a `MultiprocessingPoolGenerator` and
+                lock types cannot be determined automatically.
+        """
+        if isinstance(generator, TorchJITGenerator):
+            import torch.multiprocessing
+            manager = torch.multiprocessing.Manager()
+        elif isinstance(generator, (MultiprocessingJITGenerator, PebbleJITGenerator)):
+            import multiprocessing
+            manager = multiprocessing.Manager()
+        elif isinstance(generator, ThreadsJITGenerator):
+            return self.lock_data_t, self.lock_report_t
+        else:
+            raise ValueError(
+                f"Unknown generator type: {generator}. "
+                f"Cannot create locks. "
+                f"Override this method to create locks for this generator."
+            )
+        return manager.Lock(), manager.Lock()
+
+    def processReplicas(
+            self,
+            generator: ParallelGenerator,
+            replicas: Generator[Replica, None, None],
+            raise_errors=False,
+    ):
+        """Processes replicas in parallel using the given `ParallelGenerator`.
+        Each generated replica is run by the `runReplica` method, which
+        is executed in parallel by the parallel generator according to its
+        implementation.
+
+        Args:
+            generator (ParallelGenerator):
+                Parallel generator to use.
+            replicas (Generator[Replica, None, None]):
+                Generator that yields `Replica` objects.
+            raise_errors (bool, optional):
+                Whether to raise the first encountered `ReplicaException`
+                and stop the benchmarking run. Defaults to `False`,
+                in which case replicas that raise an exception are skipped
+                and errors are logged.
+        """
+        lock_data, lock_report = self.createLocks(generator)
+        for result in generator(
+                replicas,
+                self.runReplica,
+                self.resultsFile,
+                lock_data,
+                lock_report
+        ):
+            if isinstance(result, self.ReplicaException):
+                if raise_errors:
+                    raise result.exception
+                else:
+                    logger.error(
+                        f"Error in replica {result.replicaID}: {result.exception}"
+                    )
+            elif isinstance(result, Exception):
+                raise result
+            else:
+                logger.debug(f"Return success from replica: {result}")
 
     def run(self, raise_errors=False) -> pd.DataFrame:
         """Runs the benchmarking experiments.
@@ -138,19 +243,37 @@ class BenchmarkRunner:
                 Results from the benchmarking experiments.
         """
         logger.debug(f"Performing {self.nRuns} replica runs...")
-        with ProcessPoolExecutor(max_workers=self.nProc) as executor:
-            for result in executor.map(
-                self.runReplica, self.iterReplicas(), itertools.repeat(self.resultsFile)
-            ):
-                if isinstance(result, self.ReplicaException):
-                    if raise_errors:
-                        raise result.exception
-                    else:
-                        logger.error(
-                            f"Error in replica {result.replicaID}: {result.exception}"
-                        )
-                else:
-                    logger.debug(f"Return success from replica: {result}")
+        if self.parallelGeneratorGPU is not None:
+            gpu_replicas = (
+                replica for replica in self.iterReplicas() if replica.requiresGpu
+            )
+            cpu_replicas = (
+                replica for replica in self.iterReplicas() if not replica.requiresGpu
+            )
+        else:
+            cpu_replicas = self.iterReplicas()
+            gpu_replicas = None
+        # run gpu replicas if there are any
+        gpu_thread = None
+        if gpu_replicas is not None:
+            gpu_thread = ExcThread(
+                target=self.processReplicas,
+                args=(self.parallelGeneratorGPU, gpu_replicas, raise_errors),
+            )
+            gpu_thread.start()
+            logger.debug("Started GPU replicas thread...")
+        # run cpu replicas
+        logger.debug("Starting CPU replicas...")
+        self.processReplicas(self.parallelGeneratorCPU, cpu_replicas, raise_errors)
+        logger.debug("Finished CPU replicas.")
+        # wait for gpu replicas to finish
+        if gpu_thread is not None:
+            logger.debug("Waiting for GPU replicas to finish...")
+            gpu_thread.join()
+            if gpu_thread.bucket.qsize() > 0:
+                raise gpu_thread.bucket.get()[1]
+            else:
+                logger.debug("Finished GPU replicas.")
         logger.debug("Finished all replica runs.")
         return pd.read_table(self.resultsFile)
 
@@ -181,7 +304,7 @@ class BenchmarkRunner:
         """
         seed = seed or self.settings.random_seed
         random.seed(seed)
-        return random.sample(range(2**31), self.nRuns)
+        return random.sample(range(2 ** 31), self.nRuns)
 
     def iterReplicas(self) -> Generator[Replica, None, None]:
         """Generator that yields `Replica` objects for each benchmarking run.
@@ -322,7 +445,14 @@ class BenchmarkRunner:
         logger.debug("Done.")
 
     @classmethod
-    def runReplica(cls, replica: Replica, results_file: str) -> str | ReplicaException:
+    def runReplica(
+            cls,
+            replica: Replica,
+            results_file: str,
+            lock_data: Any,
+            lock_report: Any,
+            gpu: int | None = None,
+    ) -> str | ReplicaException:
         """Runs a single replica. This is executed in parallel by the `run` method.
         It is a classmethod so that it can be pickled and executed in parallel
         more easily.
@@ -332,12 +462,18 @@ class BenchmarkRunner:
                 Replica to run.
             results_file (str):
                 Path to the results file.
+            lock_data (Any):
+                Lock for data operations.
+            lock_report (Any):
+                Lock for report operations.
 
         Returns:
             str | ReplicaException:
                 ID of the replica that was run or a `ReplicaException` if an error
                 was encountered.
         """
+        if gpu is not None:
+            replica.setGPUs([gpu])
         logger = cls.getLoggerForReplica(replica, cls.logLevel)
         logger.debug(f"Starting replica: {replica.id}")
         try:

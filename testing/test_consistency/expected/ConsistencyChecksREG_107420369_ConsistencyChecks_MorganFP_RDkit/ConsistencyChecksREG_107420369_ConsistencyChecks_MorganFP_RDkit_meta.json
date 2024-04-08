@@ -1,7 +1,7 @@
 {
     "py/object": "qsprpred.models.scikit_learn.SklearnModel",
     "py/state": {
-        "name": "ConsistencyChecksREG_107420369",
+        "name": "ConsistencyChecksREG_107420369_ConsistencyChecks_MorganFP_RDkit",
         "baseDir": ".",
         "targetProperties": [
             {
@@ -1597,6 +1597,6 @@
         },
         "alg": "xgboost.sklearn.XGBRegressor",
         "randomState": 107420369,
-        "estimator": "./ConsistencyChecksREG_107420369/ConsistencyChecksREG_107420369.json"
+        "estimator": "./ConsistencyChecksREG_107420369_ConsistencyChecks_MorganFP_RDkit/ConsistencyChecksREG_107420369_ConsistencyChecks_MorganFP_RDkit.json"
     }
 }

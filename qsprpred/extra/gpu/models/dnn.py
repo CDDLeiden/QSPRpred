@@ -2,6 +2,7 @@
 
 At the moment this contains a class for fully-connected DNNs.
 """
+
 import os
 from typing import Any, Type
 
@@ -11,16 +12,15 @@ import torch
 from sklearn.model_selection import ShuffleSplit
 
 from qsprpred.tasks import ModelTasks
-from .. import DEFAULT_TORCH_DEVICE, DEFAULT_TORCH_GPUS
+from .base_torch import QSPRModelPyTorchGPU, DEFAULT_TORCH_GPUS
 from ....data.sampling.splits import DataSplit
 from ....data.tables.qspr import QSPRDataset
-from ....extra.gpu.models.neural_network import STFullyConnected
+from ....extra.gpu.models.neural_network import STFullyConnected, Base
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
-from ....models.model import QSPRModel
 from ....models.monitors import BaseMonitor, FitMonitor
 
 
-class DNNModel(QSPRModel):
+class DNNModel(QSPRModelPyTorchGPU):
     """This class holds the methods for training and fitting a
     Deep Neural Net QSPR model initialization.
 
@@ -42,8 +42,6 @@ class DNNModel(QSPRModel):
         baseDir (str):
             base directory of the model, the model files
             are stored in a subdirectory `{baseDir}/{outDir}/`
-        device (cuda device): cuda device
-        gpus (int/ list of ints): gpu number(s) to use for model fitting
         patience (int):
             number of epochs to wait before early stop if no progress
             on validation set score
@@ -52,25 +50,42 @@ class DNNModel(QSPRModel):
             progress on best validation score
         nClass (int): number of classes
         nDim (int): number of features
-        device (torch.device): cuda device, cpu or gpu
-        gpus (list[int]): gpu number(s) to use for model fitting
         patience (int):
             number of epochs to wait before early stop
             if no progress on validation set score
     """
 
+    def getGPUs(self):
+        return self.gpus
+
+    def setGPUs(self, gpus: list[int]):
+        self.gpus = gpus
+        if not isinstance(self.estimator, str):
+            self.estimator.gpus = gpus
+        if torch.cuda.is_available() and gpus:
+            self.setDevice(f"cuda:{gpus[0]}")
+        else:
+            self.setDevice("cpu")
+
+    def getDevice(self) -> torch.device:
+        return self.device
+
+    def setDevice(self, device: str):
+        self.device = torch.device(device)
+        if isinstance(self.estimator, Base):
+            self.estimator.device = self.device
+
     def __init__(
-        self,
-        base_dir: str,
-        alg: Type = STFullyConnected,
-        name: str | None = None,
-        parameters: dict | None = None,
-        random_state: int | None = None,
-        autoload: bool = True,
-        device: torch.device = DEFAULT_TORCH_DEVICE,
-        gpus: list[int] = DEFAULT_TORCH_GPUS,
-        patience: int = 50,
-        tol: float = 0,
+            self,
+            base_dir: str,
+            alg: Type = STFullyConnected,
+            name: str | None = None,
+            parameters: dict | None = None,
+            random_state: int | None = None,
+            autoload: bool = True,
+            gpus: list[int] = DEFAULT_TORCH_GPUS,
+            patience: int = 50,
+            tol: float = 0,
     ):
         """Initialize a DNNModel model.
 
@@ -97,8 +112,8 @@ class DNNModel(QSPRModel):
                 minimum absolute improvement of loss necessary to count as progress
                 on best validation score. Defaults to 0.
         """
-        self.device = device
-        self.gpus = gpus
+        self.device = None
+        self.gpus = None
         self.patience = patience
         self.tol = tol
         self.nClass = None
@@ -111,6 +126,7 @@ class DNNModel(QSPRModel):
             autoload=autoload,
             random_state=random_state,
         )
+        self.setGPUs(gpus)
 
     def initRandomState(self, random_state):
         """Set random state if applicable.
@@ -152,7 +168,7 @@ class DNNModel(QSPRModel):
         estimator = self.alg(
             n_dim=self.nDim,
             n_class=self.nClass,
-            device=self.device,
+            device=str(self.device),
             gpus=self.gpus,
             is_reg=self.task == ModelTasks.REGRESSION,
             patience=self.patience,
@@ -165,7 +181,7 @@ class DNNModel(QSPRModel):
         return estimator
 
     def loadEstimatorFromFile(
-        self, params: dict | None = None, fallback_load: bool = True
+            self, params: dict | None = None, fallback_load: bool = True
     ) -> object:
         """Load estimator from file.
 
@@ -180,6 +196,8 @@ class DNNModel(QSPRModel):
         """
         path = f"{self.outPrefix}_weights.pkg"
         estimator = self.loadEstimator(params)
+        if estimator == "Uninitialized model.":
+            return estimator
         # load states if available
         if os.path.exists(path):
             estimator.load_state_dict(torch.load(path))
@@ -207,14 +225,14 @@ class DNNModel(QSPRModel):
 
     @early_stopping
     def fit(
-        self,
-        X: pd.DataFrame | np.ndarray,
-        y: pd.DataFrame | np.ndarray,
-        estimator: Any | None = None,
-        mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
-        split: DataSplit | None = None,
-        monitor: FitMonitor | None = None,
-        **kwargs,
+            self,
+            X: pd.DataFrame | np.ndarray,
+            y: pd.DataFrame | np.ndarray,
+            estimator: Any | None = None,
+            mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+            split: DataSplit | None = None,
+            monitor: FitMonitor | None = None,
+            **kwargs,
     ):
         """Fit the model to the given data matrix or `QSPRDataset`.
 
@@ -239,6 +257,8 @@ class DNNModel(QSPRModel):
             )
         monitor = BaseMonitor() if monitor is None else monitor
         estimator = self.estimator if estimator is None else estimator
+        estimator.device = self.device
+        estimator.gpus = self.gpus
         split = split or ShuffleSplit(
             n_splits=1, test_size=0.1, random_state=self.randomState
         )
@@ -269,10 +289,12 @@ class DNNModel(QSPRModel):
         return estimator_fit
 
     def predict(
-        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
+            self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
     ) -> np.ndarray:
         """See `QSPRModel.predict`."""
         estimator = self.estimator if estimator is None else estimator
+        estimator.device = self.device
+        estimator.gpus = self.gpus
         scores = self.predictProba(X, estimator)
         # return class labels for classification
         if self.task.isClassification():
@@ -281,10 +303,12 @@ class DNNModel(QSPRModel):
             return scores[0]
 
     def predictProba(
-        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
+            self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
     ) -> np.ndarray:
         """See `QSPRModel.predictProba`."""
         estimator = self.estimator if estimator is None else estimator
+        estimator.device = self.device
+        estimator.gpus = self.gpus
         X = self.convertToNumpy(X)
 
         return [estimator.predict(X)]

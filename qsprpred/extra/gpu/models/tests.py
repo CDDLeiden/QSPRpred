@@ -1,7 +1,7 @@
 import os
 from importlib import import_module, util
 from typing import Type
-from unittest import TestCase
+from unittest import TestCase, skipIf
 
 import chemprop
 import pandas as pd
@@ -9,22 +9,96 @@ import pytest
 import torch
 from parameterized import parameterized
 from sklearn import metrics
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import ShuffleSplit
 
 from qsprpred.data.descriptors.sets import SmilesDesc
 from qsprpred.data.sampling.splits import RandomSplit
+from qsprpred.extra.gpu.utils.parallel import TorchJITGenerator
 from qsprpred.tasks import ModelTasks, TargetTasks
+from ....benchmarks import BenchmarkRunner
+from ....benchmarks.tests import BenchMarkTestCase
 from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
-from ....models import CrossValAssessor
+from ....models import CrossValAssessor, SklearnModel
 from ....models.metrics import SklearnMetrics
 from ....models.monitors import BaseMonitor, FileMonitor, ListMonitor
+from ....utils.parallel import ThreadsJITGenerator
 from ....utils.testing.check_mixins import ModelCheckMixIn, MonitorsCheckMixIn
 from ....utils.testing.path_mixins import ModelDataSetsPathMixIn
 
 GPUS = list(range(torch.cuda.device_count()))
+
+
+@skipIf(
+    len(GPUS) == 0,
+    "No GPU is available. "
+    "Skipping benchmarking tests that require a GPU to run swiftly. "
+)
+class BenchMarkTest(BenchMarkTestCase):
+    """Test GPU models with benchmarks."""
+
+    def testBasicTorchExecution(self):
+        """Run single task tests for classification."""
+        self.settings.models = [
+            DNNModel(
+                name="STFullyConnected",
+                alg=STFullyConnected,
+                base_dir=f"{self.generatedPath}/models",
+                gpus=GPUS,
+                patience=3,
+                tol=0.02,
+                random_state=42,
+            ),
+            SklearnModel(
+                name="RandomForestClassifier",
+                alg=RandomForestClassifier,
+                base_dir=f"{self.generatedPath}/models",
+                random_state=42,
+            ),
+        ]
+        self.benchmark = BenchmarkRunner(
+            self.settings,
+            data_dir=f"{self.generatedPath}/benchmarks",
+            results_file=f"{self.generatedPath}/benchmarks/results.tsv",
+            parallel_generator_gpu=TorchJITGenerator(
+                worker_type="gpu",
+                jobs_per_gpu=os.cpu_count(),
+                use_gpus=GPUS,
+            ),
+        )
+        self.checkSettings()
+        results = self.benchmark.run(raise_errors=True)
+        self.checkRunResults(results)
+        self.checkSettings()
+
+    def testChemProp(self):
+        """Run single task tests for classification."""
+        self.settings.models = [
+            ChempropModel(
+                name="ChempropModel",
+                base_dir=f"{self.generatedPath}/models",
+                random_state=42,
+            )
+        ]
+        self.settings.descriptors = [[SmilesDesc()]]
+        self.settings.prep_settings[0].feature_standardizer = None
+        self.checkSettings()
+        self.benchmark = BenchmarkRunner(
+            self.settings,
+            data_dir=f"{self.generatedPath}/benchmarks",
+            results_file=f"{self.generatedPath}/benchmarks/results.tsv",
+            parallel_generator_gpu=ThreadsJITGenerator(
+                worker_type="gpu",
+                use_gpus=GPUS,
+                jobs_per_gpu=os.cpu_count(),
+            ),
+        )
+        results = self.benchmark.run(raise_errors=True)
+        self.checkRunResults(results)
+        self.checkSettings()
 
 
 class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
@@ -43,11 +117,11 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         return f"{os.path.dirname(__file__)}/test_files/search_space_test.json"
 
     def getModel(
-        self,
-        name: str,
-        alg: Type | None = None,
-        parameters: dict | None = None,
-        random_state: int | None = None,
+            self,
+            name: str,
+            alg: Type | None = None,
+            parameters: dict | None = None,
+            random_state: int | None = None,
     ):
         """Initialize model with data set.
 
@@ -75,36 +149,38 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             for alg, alg_name, task, th in (
                 (STFullyConnected, "STFullyConnected", TargetTasks.SINGLECLASS, [6.5]),
                 (
-                    STFullyConnected,
-                    "STFullyConnected",
-                    TargetTasks.MULTICLASS,
-                    [0, 1, 10, 1100],
+                        STFullyConnected,
+                        "STFullyConnected",
+                        TargetTasks.MULTICLASS,
+                        [0, 1, 10, 1100],
                 ),
-            )
+        )
         ]
         + [
             (
-                f"{alg_name}_{task}_{'_'.join(map(str, random_state))}",
-                task,
-                alg_name,
-                alg,
-                th,
-                random_state,
+                    f"{alg_name}_{task}_{'_'.join(map(str, random_state))}",
+                    task,
+                    alg_name,
+                    alg,
+                    th,
+                    random_state,
             )
             for alg, alg_name, task, th in (
-                (STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None),
+                    (
+                            STFullyConnected, "STFullyConnected",
+                            TargetTasks.REGRESSION, None),
             )
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
     def testSingleTaskModel(
-        self,
-        _,
-        task: TargetTasks,
-        alg_name: str,
-        alg: Type,
-        th: float,
-        random_state: list[int] | None,
+            self,
+            _,
+            task: TargetTasks,
+            alg_name: str,
+            alg: Type,
+            th: float,
+            random_state: list[int] | None,
     ):
         """Test the DNNModel model in one configuration.
 
@@ -145,9 +221,9 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             )
             self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor, # model loaded from file
+                predictor,  # model loaded from file
                 dataset=dataset,
-                comparison_model=comparison_model, # model not loaded from file
+                comparison_model=comparison_model,  # model not loaded from file
                 expect_equal_result=random_state[0] == random_state[1],
             )
         else:
@@ -169,10 +245,10 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         return f"{os.path.dirname(__file__)}/test_files/search_space_test.json"
 
     def getModel(
-        self,
-        name: str,
-        parameters: dict | None = None,
-        random_state: int | None = None,
+            self,
+            name: str,
+            parameters: dict | None = None,
+            random_state: int | None = None,
     ):
         """Initialize model with data set.
 
@@ -200,27 +276,27 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             for alg_name, task, th in (
                 ("MoleculeModel", TargetTasks.SINGLECLASS, [6.5]),
                 ("MoleculeModel", TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
-            )
+        )
         ]
         + [
             (
-                f"{alg_name}_{task}_{'_'.join(map(str, random_state))}",
-                task,
-                alg_name,
-                th,
-                random_state,
+                    f"{alg_name}_{task}_{'_'.join(map(str, random_state))}",
+                    task,
+                    alg_name,
+                    th,
+                    random_state,
             )
             for alg_name, task, th in (("MoleculeModel", TargetTasks.REGRESSION, None),)
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
     def testSingleTaskModel(
-        self,
-        _,
-        task: TargetTasks,
-        alg_name: str,
-        th: float,
-        random_state: list[int | None],
+            self,
+            _,
+            task: TargetTasks,
+            alg_name: str,
+            th: float,
+            random_state: list[int | None],
     ):
         """Test the DNNModel model in one configuration.
 
@@ -260,7 +336,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             )
             self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor, # model loaded from file
+                predictor,  # model loaded from file
                 dataset=dataset,
                 comparison_model=comparison_model,  # model not loaded from file
                 expect_equal_result=random_state[0] == random_state[1],
@@ -275,17 +351,17 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         ]
         + [
             (
-                f"{alg_name}_{task}_{'_'.join(map(str, random_state))}",
-                task,
-                alg_name,
-                random_state,
+                    f"{alg_name}_{task}_{'_'.join(map(str, random_state))}",
+                    task,
+                    alg_name,
+                    random_state,
             )
             for alg_name, task in (("MoleculeModel", ModelTasks.MULTITASK_SINGLECLASS),)
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
     def testMultiTaskmodel(
-        self, _, task: TargetTasks, alg_name: str, random_state: list[int | None]
+            self, _, task: TargetTasks, alg_name: str, random_state: list[int | None]
     ):
         """Test the DNNModel model in one configuration.
 
@@ -343,9 +419,9 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             )
             self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor, # model loaded from file
+                predictor,  # model loaded from file
                 dataset=dataset,
-                comparison_model=comparison_model, # model not loaded from file
+                comparison_model=comparison_model,  # model not loaded from file
                 expect_equal_result=random_state[0] == random_state[1],
             )
         else:
@@ -453,10 +529,10 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         self.setUpPaths()
 
     def getModel(
-        self,
-        name: str,
-        parameters: dict | None = None,
-        random_state: int | None = None,
+            self,
+            name: str,
+            parameters: dict | None = None,
+            random_state: int | None = None,
     ):
         """Create a PyBoostModel model.
 
@@ -483,31 +559,31 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     @parameterized.expand(
         [
             (
-                f"PyBoost_{'_'.join(map(str, random_state))}",
-                TargetTasks.REGRESSION,
-                "PyBoost",
-                params,
-                random_state,
+                    f"PyBoost_{'_'.join(map(str, random_state))}",
+                    TargetTasks.REGRESSION,
+                    "PyBoost",
+                    params,
+                    random_state,
             )
             for params in [
-                {
-                    "loss": "mse",
-                    "metric": "r2_score",
-                    "colsample": 0.5,  # introduce more randomness in the model
-                },
-                # {
-                #     "loss": import_module("..custom_loss", __name__).MSEwithNaNLoss(),
-                #     "metric": "r2_score"
-                # },
-                # {
-                #     "loss": "mse",
-                #     "metric": import_module("..custom_metrics", __name__).NaNR2Score()
-                # },
-                # {
-                #     "loss": "mse",
-                #     "metric":import_module("..custom_metrics",__name__).NaNRMSEScore()
-                # },
-            ]
+            {
+                "loss": "mse",
+                "metric": "r2_score",
+                "colsample": 0.5,  # introduce more randomness in the model
+            },
+            # {
+            #     "loss": import_module("..custom_loss", __name__).MSEwithNaNLoss(),
+            #     "metric": "r2_score"
+            # },
+            # {
+            #     "loss": "mse",
+            #     "metric": import_module("..custom_metrics", __name__).NaNR2Score()
+            # },
+            # {
+            #     "loss": "mse",
+            #     "metric":import_module("..custom_metrics",__name__).NaNRMSEScore()
+            # },
+        ]
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
@@ -537,11 +613,10 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         if random_state[0] is not None:
             comparison_model = self.getModel(
                 name=f"{model_name}_{task}",
-                dataset=dataset,
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(comparison_model)
+            self.fitTest(comparison_model, dataset)
             self.predictorTest(
                 predictor,
                 dataset=dataset,
@@ -557,7 +632,7 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             for params, task, th in (
                 ({"loss": "bce", "metric": "auc"}, TargetTasks.SINGLECLASS, [6.5]),
                 ({"loss": "crossentropy"}, TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
-            )
+        )
         ]
     )
     def testClassificationPyBoostFit(self, _, task, th, model_name, parameters):
@@ -571,7 +646,6 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # test classifier
         # initialize model for training from class
         model = self.getModel(
-            base_dir=self.generatedModelsPath,
             name=f"{model_name}_{task}",
             parameters=parameters,
         )
@@ -585,16 +659,16 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         [
             ("PyBoost", "PyBoost", params)
             for params in [
-                {"loss": "mse", "metric": "r2_score"},
-                # {
-                #     "loss": import_module("..custom_loss", __name__).MSEwithNaNLoss(),
-                #     "metric": "r2_score"
-                # },
-                # {
-                #     "loss": "mse",
-                #     "metric": import_module("..custom_metrics",__name__).NaNR2Score()
-                # },
-            ]
+            {"loss": "mse", "metric": "r2_score"},
+            # {
+            #     "loss": import_module("..custom_loss", __name__).MSEwithNaNLoss(),
+            #     "metric": "r2_score"
+            # },
+            # {
+            #     "loss": "mse",
+            #     "metric": import_module("..custom_metrics",__name__).NaNR2Score()
+            # },
+        ]
         ]
     )
     def testRegressionMultiTaskFit(self, _, model_name, parameters):
@@ -624,7 +698,7 @@ class TestPyBoostModel(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         )
         self.fitTest(model, dataset)
         predictor = import_module("..pyboost", __name__).PyBoostModel(
-            name=f"{model_name}_multitask_regression",
+            name=f"{model_name}_multitask_regression", base_dir=model.baseDir
         )
         self.predictorTest(predictor, dataset=dataset)
 

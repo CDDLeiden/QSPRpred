@@ -471,12 +471,18 @@ class QSPRDataset(MoleculeTable):
             if "store_format" not in kwargs
             else kwargs["store_format"]
         )
+        if mol_table.invalidsRemoved and "drop_invalids" not in kwargs:
+            kwargs["drop_invalids"] = False
+        else:
+            kwargs["drop_invalids"] = True
         ds = QSPRDataset(
             name,
             target_props,
             mol_table.getDF(),
             **kwargs,
         )
+        if mol_table.invalidsRemoved or kwargs["drop_invalids"]:
+            ds.invalidsRemoved = True
         ds.descriptors = mol_table.descriptors
         ds.featureNames = mol_table.getDescriptorNames()
         ds.loadDescriptorsToSplits()
@@ -827,9 +833,9 @@ class QSPRDataset(MoleculeTable):
         feature_filters: list | None = None,
         feature_standardizer: SKLearnStandardizer | None = None,
         feature_fill_value: float = np.nan,
-        applicability_domain: ApplicabilityDomain
-        | MLChemADApplicabilityDomain
-        | None = None,
+        applicability_domain: (
+            ApplicabilityDomain | MLChemADApplicabilityDomain | None
+        ) = None,
         drop_outliers: bool = False,
         recalculate_features: bool = False,
         shuffle: bool = True,

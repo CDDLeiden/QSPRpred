@@ -34,6 +34,8 @@ From v3.0.2 to v3.1.0
       descriptor sets and properties.
     - All drop actions are restorable with `restoreDescriptorSets` unless explicitly
       cleared from the data set with the `clear` parameter of `dropDescriptorSets`.
+- Added a proper API for parallelization backend selection and configuration (see
+  documentation of `ParallelGenerator` and `JITParallelGenerator` for more information).
 
 ## Removed Features
 

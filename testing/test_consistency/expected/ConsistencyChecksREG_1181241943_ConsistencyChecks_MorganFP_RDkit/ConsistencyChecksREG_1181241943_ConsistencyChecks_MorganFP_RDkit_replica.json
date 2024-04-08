@@ -2,7 +2,7 @@
     "py/object": "qsprpred.benchmarks.replica.Replica",
     "py/state": {
         "idx": 1,
-        "name": "ConsistencyChecksCLS",
+        "name": "ConsistencyChecksREG",
         "dataSource": {
             "py/object": "__main__.DataSourceTesting",
             "name": "ConsistencyChecks",
@@ -978,15 +978,11 @@
                             },
                             {
                                 "py/tuple": [
-                                    "SINGLECLASS"
+                                    "REGRESSION"
                                 ]
                             }
                         ]
                     },
-                    "_th": [
-                        6.5
-                    ],
-                    "_nClasses": 2,
                     "imputer": null,
                     "transformer": null
                 }
@@ -1043,18 +1039,13 @@
                     "scorer": {
                         "py/object": "sklearn.metrics._scorer._Scorer",
                         "_score_func": {
-                            "py/function": "sklearn.metrics._ranking.roc_auc_score"
+                            "py/function": "sklearn.metrics._regression.r2_score"
                         },
                         "_sign": 1,
                         "_kwargs": {},
-                        "_response_method": {
-                            "py/tuple": [
-                                "decision_function",
-                                "predict_proba"
-                            ]
-                        }
+                        "_response_method": "predict"
                     },
-                    "name": "roc_auc_score"
+                    "name": "r2_score"
                 },
                 "splitMultitaskScores": false,
                 "split": null,
@@ -1065,20 +1056,20 @@
                 "monitor": {
                     "py/object": "qsprpred.models.monitors.NullMonitor"
                 },
-                "useProba": false,
+                "useProba": true,
                 "mode": null,
                 "scoreFunc": {
                     "py/object": "qsprpred.models.metrics.SklearnMetrics",
                     "scorer": {
                         "py/object": "sklearn.metrics._scorer._Scorer",
                         "_score_func": {
-                            "py/function": "sklearn.metrics._classification.matthews_corrcoef"
+                            "py/function": "sklearn.metrics._regression.root_mean_squared_error"
                         },
-                        "_sign": 1,
+                        "_sign": -1,
                         "_kwargs": {},
                         "_response_method": "predict"
                     },
-                    "name": "matthews_corrcoef"
+                    "name": "root_mean_squared_error"
                 },
                 "splitMultitaskScores": false,
                 "split": null,
@@ -1096,18 +1087,13 @@
                     "scorer": {
                         "py/object": "sklearn.metrics._scorer._Scorer",
                         "_score_func": {
-                            "py/function": "sklearn.metrics._ranking.roc_auc_score"
+                            "py/function": "sklearn.metrics._regression.r2_score"
                         },
                         "_sign": 1,
                         "_kwargs": {},
-                        "_response_method": {
-                            "py/tuple": [
-                                "decision_function",
-                                "predict_proba"
-                            ]
-                        }
+                        "_response_method": "predict"
                     },
-                    "name": "roc_auc_score"
+                    "name": "r2_score"
                 },
                 "splitMultitaskScores": false,
                 "round": 5
@@ -1117,27 +1103,27 @@
                 "monitor": {
                     "py/object": "qsprpred.models.monitors.NullMonitor"
                 },
-                "useProba": false,
+                "useProba": true,
                 "mode": null,
                 "scoreFunc": {
                     "py/object": "qsprpred.models.metrics.SklearnMetrics",
                     "scorer": {
                         "py/object": "sklearn.metrics._scorer._Scorer",
                         "_score_func": {
-                            "py/function": "sklearn.metrics._classification.matthews_corrcoef"
+                            "py/function": "sklearn.metrics._regression.root_mean_squared_error"
                         },
-                        "_sign": 1,
+                        "_sign": -1,
                         "_kwargs": {},
                         "_response_method": "predict"
                     },
-                    "name": "matthews_corrcoef"
+                    "name": "root_mean_squared_error"
                 },
                 "splitMultitaskScores": false,
                 "round": 5
             }
         ],
-        "randomSeed": 107420369,
-        "model": "/zfsdata/data/helle/01_MainProjects/03_QSPRpred/Scripts/QSPRpred/testing/test_consistency/data/models/ConsistencyChecksCLS_107420369/ConsistencyChecksCLS_107420369_meta.json",
+        "randomSeed": 1181241943,
+        "model": "/home/sichom/projects/QSPRpred/testing/test_consistency/data/models/ConsistencyChecksREG_1181241943_ConsistencyChecks_MorganFP_RDkit/ConsistencyChecksREG_1181241943_ConsistencyChecks_MorganFP_RDkit_meta.json",
         "ds": null,
         "results": null
     }
