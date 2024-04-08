@@ -37,7 +37,6 @@ jobs:
 
       - name: Set Up Dependencies
         run: |
-          python -m pip cache purge
           source .github/setup.sh ${{ runner.os }} $env
           python -m pip install -r docs/requirements.txt
 
