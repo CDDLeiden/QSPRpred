@@ -89,6 +89,7 @@ class JITParallelGenerator(ParallelGenerator, ABC):
     This is meant for situations where the result of the generator
     is too large to fit into memory or not yet known. Parallelization can be done
     over a pool of CPU or GPU workers. The generator will yield the results of the
+    function applied in parallel to each item of a supplied generator.
     """
 
     def __init__(
