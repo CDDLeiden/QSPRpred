@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 import numpy as np
 import pandas as pd
 from rdkit import Chem, DataStructs
-from rdkit.Chem import Mol
 from rdkit.SimDivFilters import rdSimDivPickers
 
 from .scaffolds import BemisMurckoRDKit, Scaffold
@@ -12,39 +11,14 @@ from .. import MoleculeTable
 from ..descriptors.fingerprints import Fingerprint, MorganFP
 from ...logs import logger
 
-from qsprpred.data.processing.mol_processor import MolProcessorWithID
 
-
-class MoleculeClusters(MolProcessorWithID, ABC):
+class MoleculeClusters(ABC):
     """
     Abstract base class for clustering molecules.
 
     Attributes:
         nClusters (int): number of clusters
     """
-    
-    def __call__(self, mols: list[str | Mol], props, *args, **kwargs):
-        """
-        Calculate the clusters for a list of  molecules.
-
-        Args:
-            mol (str | Mol): SMILES or RDKit molecule to calculate the cluster for.
-
-        Returns:
-            list of cluster index for each molecule
-        """
-        if isinstance(mols[0], Mol):
-            mols = [Chem.MolToSmiles(mol) for mol in mols]
-
-        clusters = self.get_clusters(mols)
-        
-        # map clusters to molecules
-        output = np.array([-1]*len(mols))
-        for cluster_idx, molecule_idxs in clusters.items():
-            output[molecule_idxs] = cluster_idx
-        
-        return pd.Series(output, index=props[self.idProp])
-
 
     @abstractmethod
     def get_clusters(self, smiles_list: list[str]) -> dict:
@@ -67,13 +41,6 @@ class MoleculeClusters(MolProcessorWithID, ABC):
                 f"Number of initial clusters is too small to combine them well,\
                 it has set to {self.nClusters}"
             )
-            
-    def supportsParallel(self) -> bool:
-        return False
-    
-    @abstractmethod
-    def __str__(self):
-        pass
 
 
 class RandomClusters(MoleculeClusters):
@@ -83,13 +50,9 @@ class RandomClusters(MoleculeClusters):
     Attributes:
         seed (int): random seed
         nClusters (int): number of clusters
-        id_prop (str): name of the property to be used as ID
     """
 
-    def __init__(
-        self, seed: int = 42, n_clusters: int | None = None, id_prop: str | None = None
-        ):
-        super().__init__(id_prop=id_prop)
+    def __init__(self, seed: int = 42, n_clusters: int | None = None):
         self.seed = seed
         self.nClusters = n_clusters
 
@@ -116,9 +79,6 @@ class RandomClusters(MoleculeClusters):
             clusters[i % self.nClusters].append(index)
 
         return clusters
-    
-    def __str__(self):
-        return "RandomClusters"
 
 
 class ScaffoldClusters(MoleculeClusters):
@@ -127,13 +87,10 @@ class ScaffoldClusters(MoleculeClusters):
 
     Attributes:
         scaffold (Scaffold): scaffold generator
-        id_prop (str): name of the property to be used as ID
     """
 
-    def __init__(
-        self, scaffold: Scaffold = BemisMurckoRDKit(), id_prop: str | None = None
-    ):
-        super().__init__(id_prop=id_prop)
+    def __init__(self, scaffold: Scaffold = BemisMurckoRDKit()):
+        super().__init__()
         self.scaffold = scaffold
 
     def get_clusters(self, smiles_list: list[str]) -> dict:
@@ -169,18 +126,14 @@ class ScaffoldClusters(MoleculeClusters):
             clusters[unique_scaffolds.index(scaffold)].append(i)
 
         return clusters
-    
-    def __str__(self):
-        return f"ScaffoldClusters_{self.scaffold}"
 
 
 class FPSimilarityClusters(MoleculeClusters):
     def __init__(
         self,
         fp_calculator: Fingerprint = MorganFP(radius=3, nBits=2048),
-        id_prop: str | None = None,
     ) -> None:
-        super().__init__(id_prop=id_prop)
+        super().__init__()
         self.fp_calculator = fp_calculator
 
     def get_clusters(self, smiles_list: list[str]) -> dict:
@@ -234,7 +187,6 @@ class FPSimilarityMaxMinClusters(FPSimilarityClusters):
         nClusters (int): number of clusters
         seed (int): random seed
         initialCentroids (list): list of indices of initial cluster centroids
-        id_prop (str): name of the property to be used as ID
     """
 
     def __init__(
@@ -243,9 +195,8 @@ class FPSimilarityMaxMinClusters(FPSimilarityClusters):
         seed: int | None = None,
         initial_centroids: list[str] | None = None,
         fp_calculator: Fingerprint = MorganFP(radius=3, nBits=2048),
-        id_prop: str | None = None,
     ):
-        super().__init__(fp_calculator=fp_calculator, id_prop=id_prop)
+        super().__init__(fp_calculator=fp_calculator)
         self.nClusters = n_clusters
         self.seed = seed
         self.initialCentroids = initial_centroids
@@ -271,9 +222,6 @@ class FPSimilarityMaxMinClusters(FPSimilarityClusters):
         )
 
         return self.centroid_indices
-    
-    def __str__(self):
-        return "FPSimilarityMaxMinClusters"
 
 
 class FPSimilarityLeaderPickerClusters(FPSimilarityClusters):
@@ -283,16 +231,14 @@ class FPSimilarityLeaderPickerClusters(FPSimilarityClusters):
     Attributes:
         fp_calculator (FingerprintSet): fingerprint calculator
         similarity_threshold (float): similarity threshold
-        id_prop (str): name of the property to be used as ID
     """
 
     def __init__(
         self,
         similarity_threshold: float = 0.7,
         fp_calculator: Fingerprint = MorganFP(radius=3, nBits=2048),
-        id_prop: str | None = None,
     ):
-        super().__init__(fp_calculator=fp_calculator, id_prop=id_prop)
+        super().__init__(fp_calculator=fp_calculator)
         self.similarityThreshold = similarity_threshold
         self.fpCalculator = fp_calculator
 
@@ -306,6 +252,3 @@ class FPSimilarityLeaderPickerClusters(FPSimilarityClusters):
         )
 
         return self.centroid_indices
-    
-    def __str__(self):
-        return "FPSimilarityLeaderPickerClusters"
