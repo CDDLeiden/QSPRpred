@@ -213,7 +213,7 @@ class FPSimilarityMaxMinClusters(FPSimilarityClusters):
         """
         self._set_nClusters(len(fps))
         picker = rdSimDivPickers.MaxMinPicker()
-        centroid_indices = picker.LazyBitVectorPick(
+        self.centroid_indices = picker.LazyBitVectorPick(
             fps,
             len(fps),
             self.nClusters,
@@ -221,7 +221,7 @@ class FPSimilarityMaxMinClusters(FPSimilarityClusters):
             seed=self.seed if self.seed is not None else -1,
         )
 
-        return centroid_indices
+        return self.centroid_indices
 
 
 class FPSimilarityLeaderPickerClusters(FPSimilarityClusters):
@@ -247,8 +247,8 @@ class FPSimilarityLeaderPickerClusters(FPSimilarityClusters):
         Get cluster centroids with LeaderPicker algorithm.
         """
         picker = rdSimDivPickers.LeaderPicker()
-        centroid_indices = picker.LazyBitVectorPick(
+        self.centroid_indices = picker.LazyBitVectorPick(
             fps, len(fps), self.similarityThreshold
         )
 
-        return centroid_indices
+        return self.centroid_indices
