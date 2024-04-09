@@ -980,7 +980,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         size.
 
         Args:
-            mols_per_group (int): Number of molecules per scaffold group.
+            mols_per_group (int): number of molecules per scaffold group.
         """
         scaffolds = self.getScaffolds(include_mols=False)
         for scaffold in scaffolds.columns:
@@ -1024,6 +1024,66 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             len([col for col in self.df.columns if col.startswith("ScaffoldGroup_")])
             > 0
         )
+
+    def addClusters(
+        self,
+        clusters: list["MoleculeClusters"],
+        recalculate: bool = False,
+    ):
+        """Add clusters to the data frame.
+
+        A new column is created that contains the identifier of the corresponding
+        cluster calculator.
+
+        Args:
+            clusters (list): list of `MoleculeClusters` calculators.
+            recalculate (bool): Whether to recalculate clusters even if they are
+                already present in the data frame.
+        """
+        for cluster in clusters:
+            if not recalculate and f"Cluster_{cluster}" in self.df.columns:
+                continue
+            for clusters in self.processMols(cluster):
+                self.df.loc[clusters.index, f"Cluster_{cluster}"] = clusters.values
+
+
+    def getClusterNames(
+        self, clusters: list["MoleculeClusters"] | None = None
+    ):
+        """Get the names of the clusters in the data frame.
+
+        Returns:
+            list: List of cluster names.
+        """
+        all_names = [
+            col
+            for col in self.df.columns
+            if col.startswith("Cluster_")
+        ]
+        if clusters:
+            wanted = [str(x) for x in clusters]
+            return [x for x in all_names if x.split("_", 1)[1] in wanted]
+        return all_names
+
+    def getClusters(
+        self, clusters: list["MoleculeClusters"] | None = None
+    ):
+        """Get the subset of the data frame that contains only clusters.
+
+        Returns:
+            pd.DataFrame: Data frame containing only clusters.
+        """
+        names = self.getClusterNames(clusters)
+        return self.df[names]
+
+    @property
+    def hasClusters(self):
+        """Check whether the data frame contains clusters.
+
+        Returns:
+            bool: Whether the data frame contains clusters.
+        """
+        return len(self.getClusterNames()) > 0
 
     def standardizeSmiles(self, smiles_standardizer, drop_invalid=True):
         """Apply smiles_standardizer to the compounds in parallel
