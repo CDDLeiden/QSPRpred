@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra package &mdash; QSPRpred 3.1.1a2.dev3+g094aa3c8 documentation</title>
+  <title>qsprpred.extra package &mdash; QSPRpred 3.1.1a2.dev51+gffcd60bc documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=e27debfc"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=70410e1b"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.1a2.dev3+g094aa3c8
+                v3.1.1a2.dev51+gffcd60bc
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -167,12 +167,21 @@
 <li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.gpu.html#subpackages">Subpackages</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.gpu.models.html">qsprpred.extra.gpu.models package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.models.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.models.html#module-qsprpred.extra.gpu.models.base">qsprpred.extra.gpu.models.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.models.html#module-qsprpred.extra.gpu.models.base_torch">qsprpred.extra.gpu.models.base_torch module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.models.html#module-qsprpred.extra.gpu.models.chemprop">qsprpred.extra.gpu.models.chemprop module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.models.html#module-qsprpred.extra.gpu.models.dnn">qsprpred.extra.gpu.models.dnn module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.models.html#module-qsprpred.extra.gpu.models.neural_network">qsprpred.extra.gpu.models.neural_network module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.models.html#qsprpred-extra-gpu-models-pyboost-module">qsprpred.extra.gpu.models.pyboost module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.models.html#module-qsprpred.extra.gpu.models.tests">qsprpred.extra.gpu.models.tests module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.models.html#module-qsprpred.extra.gpu.models">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.gpu.utils.html">qsprpred.extra.gpu.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.utils.html#module-qsprpred.extra.gpu.utils.parallel">qsprpred.extra.gpu.utils.parallel module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.utils.html#module-qsprpred.extra.gpu.utils.tests">qsprpred.extra.gpu.utils.tests module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.gpu.utils.html#module-qsprpred.extra.gpu.utils">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -868,6 +877,104 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.models.html#module-qsprpred.extra.models">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qsprpred.extra.utils.html">qsprpred.extra.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.utils.html#module-qsprpred.extra.utils.parallel">qsprpred.extra.utils.parallel module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.parallel.DaskJITGenerator"><code class="docutils literal notranslate"><span class="pre">DaskJITGenerator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.parallel.DaskJITGenerator.checkProcess"><code class="docutils literal notranslate"><span class="pre">DaskJITGenerator.checkProcess()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.parallel.DaskJITGenerator.checkResultAvailable"><code class="docutils literal notranslate"><span class="pre">DaskJITGenerator.checkResultAvailable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.parallel.DaskJITGenerator.createJob"><code class="docutils literal notranslate"><span class="pre">DaskJITGenerator.createJob()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.parallel.DaskJITGenerator.getPool"><code class="docutils literal notranslate"><span class="pre">DaskJITGenerator.getPool()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.parallel.DaskJITGenerator.getResult"><code class="docutils literal notranslate"><span class="pre">DaskJITGenerator.getResult()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.parallel.DaskJITGenerator.handleException"><code class="docutils literal notranslate"><span class="pre">DaskJITGenerator.handleException()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.parallel.DaskJITGenerator.make"><code class="docutils literal notranslate"><span class="pre">DaskJITGenerator.make()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.utils.html#module-qsprpred.extra.utils.tests">qsprpred.extra.utils.tests module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.addClassCleanup"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.addClassCleanup()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.addCleanup"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.addCleanup()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.addTypeEqualityFunc"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.addTypeEqualityFunc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertAlmostEqual"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertAlmostEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertAlmostEquals"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertAlmostEquals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertCountEqual"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertCountEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertDictContainsSubset"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertDictContainsSubset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertDictEqual"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertDictEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertEqual"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertEquals"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertEquals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertFalse"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertFalse()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertGreater"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertGreater()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertGreaterEqual"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertGreaterEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertIn"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertIn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertIs"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertIs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertIsInstance"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertIsInstance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertIsNone"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertIsNone()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertIsNot"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertIsNot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertIsNotNone"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertIsNotNone()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertLess"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertLess()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertLessEqual"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertLessEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertListEqual"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertListEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertLogs"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertLogs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertMultiLineEqual"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertMultiLineEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertNoLogs"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertNoLogs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertNotAlmostEqual"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertNotAlmostEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertNotAlmostEquals"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertNotAlmostEquals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertNotEqual"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertNotEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertNotEquals"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertNotEquals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertNotIn"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertNotIn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertNotIsInstance"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertNotIsInstance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertNotRegex"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertNotRegex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertNotRegexpMatches"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertNotRegexpMatches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertRaises"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertRaises()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertRaisesRegex"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertRaisesRegex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertRaisesRegexp"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertRaisesRegexp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertRegex"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertRegex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertRegexpMatches"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertRegexpMatches()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertSequenceEqual"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertSequenceEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertSetEqual"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertSetEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertTrue"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertTrue()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertTupleEqual"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertTupleEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertWarns"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertWarns()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assertWarnsRegex"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assertWarnsRegex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.assert_"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.assert_()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.countTestCases"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.countTestCases()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.debug"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.debug()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.defaultTestResult"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.defaultTestResult()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.doClassCleanups"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.doClassCleanups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.doCleanups"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.doCleanups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.fail"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.fail()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.failIf"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.failIf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.failIfAlmostEqual"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.failIfAlmostEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.failIfEqual"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.failIfEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.failUnless"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.failUnless()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.failUnlessAlmostEqual"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.failUnlessAlmostEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.failUnlessEqual"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.failUnlessEqual()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.failUnlessRaises"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.failUnlessRaises()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.failureException"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.failureException</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.func"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.func()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.func_batched"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.func_batched()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.id"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.id()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.longMessage"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.longMessage</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.maxDiff"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.maxDiff</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.run"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.setUp"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.setUp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.setUpClass"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.setUpClass()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.shortDescription"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.shortDescription()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.skipTest"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.skipTest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.subTest"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.subTest()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.tearDown"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.tearDown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.tearDownClass"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.tearDownClass()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.testBatched"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.testBatched()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.utils.html#qsprpred.extra.utils.tests.TestDaskGenerator.testSimple"><code class="docutils literal notranslate"><span class="pre">TestDaskGenerator.testSimple()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.utils.html#module-qsprpred.extra.utils">Module contents</a></li>
 </ul>
 </li>
 </ul>

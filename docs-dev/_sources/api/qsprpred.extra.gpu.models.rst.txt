@@ -4,6 +4,22 @@ qsprpred.extra.gpu.models package
 Submodules
 ----------
 
+qsprpred.extra.gpu.models.base module
+-------------------------------------
+
+.. automodule:: qsprpred.extra.gpu.models.base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.extra.gpu.models.base\_torch module
+--------------------------------------------
+
+.. automodule:: qsprpred.extra.gpu.models.base_torch
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 qsprpred.extra.gpu.models.chemprop module
 -----------------------------------------
 

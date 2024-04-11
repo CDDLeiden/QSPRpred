@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.benchmarks.runner &mdash; QSPRpred 3.1.1a2.dev3+g094aa3c8 documentation</title>
+  <title>qsprpred.benchmarks.runner &mdash; QSPRpred 3.1.1a2.dev51+gffcd60bc documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=e27debfc"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=70410e1b"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.1a2.dev3+g094aa3c8
+                v3.1.1a2.dev51+gffcd60bc
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -100,20 +100,35 @@
 <span></span><span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">queue</span>
 <span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
-<span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ProcessPoolExecutor</span>
-<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Lock</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Generator</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Lock</span> <span class="k">as</span> <span class="n">TLock</span><span class="p">,</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Any</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
+<span class="kn">from</span> <span class="nn">qsprpred.extra.gpu.utils.parallel</span> <span class="kn">import</span> <span class="n">TorchJITGenerator</span>
 <span class="kn">from</span> <span class="nn">.replica</span> <span class="kn">import</span> <span class="n">Replica</span>
 <span class="kn">from</span> <span class="nn">.settings.benchmark</span> <span class="kn">import</span> <span class="n">BenchmarkSettings</span>
 <span class="kn">from</span> <span class="nn">..logs</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">..utils.parallel</span> <span class="kn">import</span> <span class="n">ParallelGenerator</span><span class="p">,</span> <span class="n">MultiprocessingJITGenerator</span><span class="p">,</span> \
+    <span class="n">ThreadsJITGenerator</span><span class="p">,</span> <span class="n">PebbleJITGenerator</span>
 
-<span class="n">lock_data</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
-<span class="n">lock_report</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ExcThread"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.ExcThread">[docs]</a><span class="k">class</span> <span class="nc">ExcThread</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Thread that can catch exceptions from the target function.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bucket</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ExcThread.run"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.ExcThread.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bucket</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span></div></div>
 
 
 <div class="viewcode-block" id="BenchmarkRunner"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner">[docs]</a><span class="k">class</span> <span class="nc">BenchmarkRunner</span><span class="p">:</span>
@@ -145,6 +160,10 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1"># default locks for threads</span>
+    <span class="n">lock_data_t</span> <span class="o">=</span> <span class="n">TLock</span><span class="p">()</span>
+    <span class="n">lock_report_t</span> <span class="o">=</span> <span class="n">TLock</span><span class="p">()</span>
+
 <div class="viewcode-block" id="BenchmarkRunner.ReplicaException"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.ReplicaException">[docs]</a>    <span class="k">class</span> <span class="nc">ReplicaException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Custom exception for errors in a replica.</span>
 
@@ -167,31 +186,39 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">replicaID</span> <span class="o">=</span> <span class="n">replica_id</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="n">exception</span></div>
 
-    <span class="n">logLevel</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span>
+    <span class="n">logLevel</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">settings</span><span class="p">:</span> <span class="n">BenchmarkSettings</span><span class="p">,</span>
-        <span class="n">n_proc</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">data_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./data&quot;</span><span class="p">,</span>
-        <span class="n">results_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">settings</span><span class="p">:</span> <span class="n">BenchmarkSettings</span><span class="p">,</span>
+            <span class="n">data_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./data&quot;</span><span class="p">,</span>
+            <span class="n">results_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">parallel_generator_cpu</span><span class="p">:</span> <span class="n">ParallelGenerator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">parallel_generator_gpu</span><span class="p">:</span> <span class="n">ParallelGenerator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the runner.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            settings (BenchmarkSettings):</span>
 <span class="sd">                Benchmark settings.</span>
-<span class="sd">            n_proc (int, optional):</span>
-<span class="sd">                Number of processes to use. Defaults to os.cpu_count().</span>
 <span class="sd">            data_dir (str, optional):</span>
 <span class="sd">                Path to the directory to store data. Defaults to &quot;./data&quot;.</span>
 <span class="sd">                If the directory does not exist, it will be created.</span>
 <span class="sd">            results_file (str, optional):</span>
 <span class="sd">                Path to the results file. Defaults to &quot;{data_dir}/data/results.tsv&quot;.</span>
+<span class="sd">            parallel_generator_cpu (ParallelGenerator, optional):</span>
+<span class="sd">                Parallel generator for CPU replicas.</span>
+<span class="sd">                Defaults to `MultiprocessingPoolGenerator` on all available CPUs.</span>
+<span class="sd">            parallel_generator_gpu (ParallelGenerator, optional):</span>
+<span class="sd">                Parallel generator for GPU replicas. Defaults to `None`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Initializing BenchmarkRunner...&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">settings</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nProc</span> <span class="o">=</span> <span class="n">n_proc</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parallelGeneratorCPU</span> <span class="o">=</span> <span class="p">(</span><span class="n">parallel_generator_cpu</span> <span class="ow">or</span>
+                                     <span class="n">MultiprocessingJITGenerator</span><span class="p">(</span>
+                                         <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+                                     <span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parallelGeneratorGPU</span> <span class="o">=</span> <span class="n">parallel_generator_gpu</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataDir</span> <span class="o">=</span> <span class="n">data_dir</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">resultsFile</span> <span class="o">=</span> <span class="n">results_file</span> <span class="k">if</span> <span class="n">results_file</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">data_dir</span><span class="si">}</span><span class="s2">/results.tsv&quot;</span>
         <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataDir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -211,16 +238,94 @@
         <span class="n">benchmark_settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span>
         <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">checkConsistency</span><span class="p">()</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">n_replicas</span>
-            <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">data_sources</span><span class="p">)</span>
-            <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">descriptors</span><span class="p">)</span>
-            <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">target_props</span><span class="p">)</span>
-            <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">prep_settings</span><span class="p">)</span>
-            <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
+                <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">n_replicas</span>
+                <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">data_sources</span><span class="p">)</span>
+                <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">descriptors</span><span class="p">)</span>
+                <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">target_props</span><span class="p">)</span>
+                <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">prep_settings</span><span class="p">)</span>
+                <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">optimizers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">ret</span> <span class="o">*=</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">optimizers</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
+
+<div class="viewcode-block" id="BenchmarkRunner.createLocks"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.createLocks">[docs]</a>    <span class="k">def</span> <span class="nf">createLocks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generator</span><span class="p">:</span> <span class="n">ParallelGenerator</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates locks for input and output operations done in `runReplica`.</span>
+<span class="sd">        This method should be</span>
+<span class="sd">        overridden if the generator uses a different multiprocessing library</span>
+<span class="sd">        or threading implementation. At the moment, this method can only provide locks</span>
+<span class="sd">        for the `MultiprocessingPoolGenerator`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            generator (ParallelGenerator):</span>
+<span class="sd">                Parallel generator to use.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            Any:</span>
+<span class="sd">                Lock for data set operations.</span>
+<span class="sd">            Any:</span>
+<span class="sd">                Lock for final report file operations.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError:</span>
+<span class="sd">                If the generator is not a `MultiprocessingPoolGenerator` and</span>
+<span class="sd">                lock types cannot be determined automatically.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">TorchJITGenerator</span><span class="p">):</span>
+            <span class="kn">import</span> <span class="nn">torch.multiprocessing</span>
+            <span class="n">manager</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">multiprocessing</span><span class="o">.</span><span class="n">Manager</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="p">(</span><span class="n">MultiprocessingJITGenerator</span><span class="p">,</span> <span class="n">PebbleJITGenerator</span><span class="p">)):</span>
+            <span class="kn">import</span> <span class="nn">multiprocessing</span>
+            <span class="n">manager</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Manager</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">ThreadsJITGenerator</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock_data_t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock_report_t</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unknown generator type: </span><span class="si">{</span><span class="n">generator</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Cannot create locks. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Override this method to create locks for this generator.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">manager</span><span class="o">.</span><span class="n">Lock</span><span class="p">(),</span> <span class="n">manager</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="BenchmarkRunner.processReplicas"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.processReplicas">[docs]</a>    <span class="k">def</span> <span class="nf">processReplicas</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">generator</span><span class="p">:</span> <span class="n">ParallelGenerator</span><span class="p">,</span>
+            <span class="n">replicas</span><span class="p">:</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Replica</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+            <span class="n">raise_errors</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Processes replicas in parallel using the given `ParallelGenerator`.</span>
+<span class="sd">        Each generated replica is run by the `runReplica` method, which</span>
+<span class="sd">        is executed in parallel by the parallel generator according to its</span>
+<span class="sd">        implementation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            generator (ParallelGenerator):</span>
+<span class="sd">                Parallel generator to use.</span>
+<span class="sd">            replicas (Generator[Replica, None, None]):</span>
+<span class="sd">                Generator that yields `Replica` objects.</span>
+<span class="sd">            raise_errors (bool, optional):</span>
+<span class="sd">                Whether to raise the first encountered `ReplicaException`</span>
+<span class="sd">                and stop the benchmarking run. Defaults to `False`,</span>
+<span class="sd">                in which case replicas that raise an exception are skipped</span>
+<span class="sd">                and errors are logged.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lock_data</span><span class="p">,</span> <span class="n">lock_report</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLocks</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">generator</span><span class="p">(</span>
+                <span class="n">replicas</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">runReplica</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">resultsFile</span><span class="p">,</span>
+                <span class="n">lock_data</span><span class="p">,</span>
+                <span class="n">lock_report</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ReplicaException</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">raise_errors</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">result</span><span class="o">.</span><span class="n">exception</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Error in replica </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">replicaID</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">exception</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">result</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Return success from replica: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BenchmarkRunner.run"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raise_errors</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Runs the benchmarking experiments.</span>
@@ -237,19 +342,37 @@
 <span class="sd">                Results from the benchmarking experiments.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Performing </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nRuns</span><span class="si">}</span><span class="s2"> replica runs...&quot;</span><span class="p">)</span>
-        <span class="k">with</span> <span class="n">ProcessPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nProc</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">executor</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">runReplica</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterReplicas</span><span class="p">(),</span> <span class="n">itertools</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resultsFile</span><span class="p">)</span>
-            <span class="p">):</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ReplicaException</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">raise_errors</span><span class="p">:</span>
-                        <span class="k">raise</span> <span class="n">result</span><span class="o">.</span><span class="n">exception</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;Error in replica </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">replicaID</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">exception</span><span class="si">}</span><span class="s2">&quot;</span>
-                        <span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Return success from replica: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallelGeneratorGPU</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">gpu_replicas</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">replica</span> <span class="k">for</span> <span class="n">replica</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterReplicas</span><span class="p">()</span> <span class="k">if</span> <span class="n">replica</span><span class="o">.</span><span class="n">requiresGpu</span>
+            <span class="p">)</span>
+            <span class="n">cpu_replicas</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">replica</span> <span class="k">for</span> <span class="n">replica</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterReplicas</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">replica</span><span class="o">.</span><span class="n">requiresGpu</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cpu_replicas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterReplicas</span><span class="p">()</span>
+            <span class="n">gpu_replicas</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># run gpu replicas if there are any</span>
+        <span class="n">gpu_thread</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">gpu_replicas</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">gpu_thread</span> <span class="o">=</span> <span class="n">ExcThread</span><span class="p">(</span>
+                <span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">processReplicas</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parallelGeneratorGPU</span><span class="p">,</span> <span class="n">gpu_replicas</span><span class="p">,</span> <span class="n">raise_errors</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">gpu_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Started GPU replicas thread...&quot;</span><span class="p">)</span>
+        <span class="c1"># run cpu replicas</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Starting CPU replicas...&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processReplicas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parallelGeneratorCPU</span><span class="p">,</span> <span class="n">cpu_replicas</span><span class="p">,</span> <span class="n">raise_errors</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Finished CPU replicas.&quot;</span><span class="p">)</span>
+        <span class="c1"># wait for gpu replicas to finish</span>
+        <span class="k">if</span> <span class="n">gpu_thread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Waiting for GPU replicas to finish...&quot;</span><span class="p">)</span>
+            <span class="n">gpu_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">gpu_thread</span><span class="o">.</span><span class="n">bucket</span><span class="o">.</span><span class="n">qsize</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">gpu_thread</span><span class="o">.</span><span class="n">bucket</span><span class="o">.</span><span class="n">get</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Finished GPU replicas.&quot;</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Finished all replica runs.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resultsFile</span><span class="p">)</span></div>
 
@@ -280,7 +403,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">random_seed</span>
         <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">31</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">nRuns</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="mi">31</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">nRuns</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BenchmarkRunner.iterReplicas"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.iterReplicas">[docs]</a>    <span class="k">def</span> <span class="nf">iterReplicas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Replica</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generator that yields `Replica` objects for each benchmarking run.</span>
@@ -421,7 +544,14 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BenchmarkRunner.runReplica"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.runReplica">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">runReplica</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">replica</span><span class="p">:</span> <span class="n">Replica</span><span class="p">,</span> <span class="n">results_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">ReplicaException</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">runReplica</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span>
+            <span class="n">replica</span><span class="p">:</span> <span class="n">Replica</span><span class="p">,</span>
+            <span class="n">results_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">lock_data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+            <span class="n">lock_report</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+            <span class="n">gpu</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">ReplicaException</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Runs a single replica. This is executed in parallel by the `run` method.</span>
 <span class="sd">        It is a classmethod so that it can be pickled and executed in parallel</span>
 <span class="sd">        more easily.</span>
@@ -431,12 +561,18 @@
 <span class="sd">                Replica to run.</span>
 <span class="sd">            results_file (str):</span>
 <span class="sd">                Path to the results file.</span>
+<span class="sd">            lock_data (Any):</span>
+<span class="sd">                Lock for data operations.</span>
+<span class="sd">            lock_report (Any):</span>
+<span class="sd">                Lock for report operations.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            str | ReplicaException:</span>
 <span class="sd">                ID of the replica that was run or a `ReplicaException` if an error</span>
 <span class="sd">                was encountered.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">gpu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">replica</span><span class="o">.</span><span class="n">setGPUs</span><span class="p">([</span><span class="n">gpu</span><span class="p">])</span>
         <span class="n">logger</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">getLoggerForReplica</span><span class="p">(</span><span class="n">replica</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">logLevel</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting replica: </span><span class="si">{</span><span class="n">replica</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.tables.pandas &mdash; QSPRpred 3.1.1a2.dev3+g094aa3c8 documentation</title>
+  <title>qsprpred.data.tables.pandas &mdash; QSPRpred 3.1.1a2.dev51+gffcd60bc documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=e27debfc"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=70410e1b"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.1a2.dev3+g094aa3c8
+                v3.1.1a2.dev51+gffcd60bc
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -107,7 +107,8 @@
 
 <span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">DataTable</span>
 <span class="kn">from</span> <span class="nn">...logs</span> <span class="kn">import</span> <span class="n">logger</span>
-<span class="kn">from</span> <span class="nn">...utils.parallel</span> <span class="kn">import</span> <span class="n">batched_generator</span><span class="p">,</span> <span class="n">parallel_jit_generator</span>
+<span class="kn">from</span> <span class="nn">...utils.parallel</span> <span class="kn">import</span> <span class="n">batched_generator</span><span class="p">,</span> <span class="n">ParallelGenerator</span><span class="p">,</span> \
+    <span class="n">MultiprocessingJITGenerator</span>
 <span class="kn">from</span> <span class="nn">...utils.serialization</span> <span class="kn">import</span> <span class="n">JSONSerializable</span>
 <span class="kn">from</span> <span class="nn">...utils.stringops</span> <span class="kn">import</span> <span class="n">generate_padded_index</span>
 
@@ -148,8 +149,8 @@
 <span class="sd">            &#39;pkl&#39; and &#39;csv&#39; are supported. Defaults to &#39;pkl&#39; because it is faster.</span>
 <span class="sd">            However, &#39;csv&#39; is more portable and can be opened in other programs.</span>
 <span class="sd">        parallelGenerator (Callable):</span>
-<span class="sd">            A parallel generator function to use for parallel processing.</span>
-<span class="sd">            Defaults to `qsprpred.utils.parallel.parallel_jit_generator`.</span>
+<span class="sd">            A `ParallelGenerator` to use for parallel processing of chunks of data.</span>
+<span class="sd">            Defaults to `qsprpred.utils.parallel.MultiprocessingPoolGenerator`.</span>
 <span class="sd">            You can replace this with your own parallel generator function if you</span>
 <span class="sd">            want to use a different parallelization strategy (i.e. utilize</span>
 <span class="sd">            remote servers instead of local processes).</span>
@@ -158,17 +159,18 @@
     <span class="n">_notJSON</span><span class="p">:</span> <span class="n">ClassVar</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">JSONSerializable</span><span class="o">.</span><span class="n">_notJSON</span><span class="p">,</span> <span class="s2">&quot;df&quot;</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">df</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">store_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
-        <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">index_cols</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">autoindex_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;QSPRID&quot;</span><span class="p">,</span>
-        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">store_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pkl&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">store_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+            <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">index_cols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">autoindex_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;QSPRID&quot;</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">store_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pkl&quot;</span><span class="p">,</span>
+            <span class="n">parallel_generator</span><span class="p">:</span> <span class="n">ParallelGenerator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a `PandasDataTable` object.</span>
 <span class="sd">        Args</span>
@@ -206,12 +208,18 @@
 <span class="sd">            store_format (str):</span>
 <span class="sd">                Format to use for storing the data frame.</span>
 <span class="sd">                Currently only &#39;pkl&#39; and &#39;csv&#39; are supported.</span>
+<span class="sd">            parallel_generator (ParallelGenerator | None):</span>
+<span class="sd">                A `ParallelGenerator` to use for parallel processing of chunks of data.</span>
+<span class="sd">                Defaults to `qsprpred.utils.parallel.MultiprocessingPoolGenerator`.</span>
+<span class="sd">                You can replace this with your own parallel generator function if you</span>
+<span class="sd">                want to use a different parallelization strategy (i.e. utilize</span>
+<span class="sd">                remote servers instead of local processes).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">idProp</span> <span class="o">=</span> <span class="n">autoindex_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">storeFormat</span> <span class="o">=</span> <span class="n">store_format</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setRandomState</span><span class="p">(</span>
-            <span class="n">random_state</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">31</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">))</span>
+            <span class="n">random_state</span> <span class="ow">or</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">31</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">))</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">indexCols</span> <span class="o">=</span> <span class="n">index_cols</span>
@@ -247,7 +255,9 @@
         <span class="c1"># parallel settings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span> <span class="o">=</span> <span class="n">n_jobs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span> <span class="o">=</span> <span class="n">chunk_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parallelGenerator</span> <span class="o">=</span> <span class="n">parallel_jit_generator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parallelGenerator</span> <span class="o">=</span> <span class="n">parallel_generator</span> <span class="ow">or</span> <span class="n">MultiprocessingJITGenerator</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of rows in the data frame.&quot;&quot;&quot;</span>
@@ -286,6 +296,7 @@
     <span class="k">def</span> <span class="nf">nJobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nJobs</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parallelGenerator</span> <span class="o">=</span> <span class="n">MultiprocessingJITGenerator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">baseDir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -435,10 +446,10 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)]]</span></div>
 
 <div class="viewcode-block" id="PandasDataTable.iterChunks"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.iterChunks">[docs]</a>    <span class="k">def</span> <span class="nf">iterChunks</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">include_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">as_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">include_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">as_dict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Batch a data frame into chunks of the given size.</span>
 
@@ -472,14 +483,14 @@
             <span class="k">yield</span> <span class="n">ret</span> <span class="k">if</span> <span class="n">as_dict</span> <span class="k">else</span> <span class="n">df_batch</span></div>
 
 <div class="viewcode-block" id="PandasDataTable.apply"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.PandasDataTable.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span>
-        <span class="n">func_args</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">func_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">on_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">as_df</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span>
+            <span class="n">func_args</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">func_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">on_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">as_df</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a function to the data frame. The properties of the data set</span>
 <span class="sd">        are passed as the first positional argument to the function. This</span>
@@ -524,18 +535,19 @@
         <span class="n">n_jobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span> <span class="k">if</span> <span class="n">n_jobs</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">n_jobs</span>
         <span class="n">chunk_size</span> <span class="o">=</span> <span class="n">chunk_size</span> <span class="k">if</span> <span class="n">chunk_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span>
         <span class="k">if</span> <span class="n">n_jobs</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="n">func_args</span> <span class="ow">or</span> <span class="p">[]</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="n">func_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Applying function &#39;</span><span class="si">{</span><span class="n">func</span><span class="si">!r}</span><span class="s2">&#39; in parallel on </span><span class="si">{</span><span class="n">n_jobs</span><span class="si">}</span><span class="s2"> CPUs, &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;using chunk size: </span><span class="si">{</span><span class="n">chunk_size</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;using chunk size: </span><span class="si">{</span><span class="n">chunk_size</span><span class="si">}</span><span class="s2"> and parameters: </span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">kwargs</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallelGenerator</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">iterChunks</span><span class="p">(</span>
-                    <span class="n">include_props</span><span class="o">=</span><span class="n">on_props</span><span class="p">,</span> <span class="n">as_dict</span><span class="o">=</span><span class="ow">not</span> <span class="n">as_df</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="n">chunk_size</span>
-                <span class="p">),</span>
-                <span class="n">func</span><span class="p">,</span>
-                <span class="n">n_jobs</span><span class="p">,</span>
-                <span class="n">args</span><span class="o">=</span><span class="n">func_args</span><span class="p">,</span>
-                <span class="n">kwargs</span><span class="o">=</span><span class="n">func_kwargs</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">iterChunks</span><span class="p">(</span>
+                        <span class="n">include_props</span><span class="o">=</span><span class="n">on_props</span><span class="p">,</span> <span class="n">as_dict</span><span class="o">=</span><span class="ow">not</span> <span class="n">as_df</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="n">chunk_size</span>
+                    <span class="p">),</span>
+                    <span class="n">func</span><span class="p">,</span>
+                    <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
             <span class="p">):</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Result for chunk returned: </span><span class="si">{</span><span class="n">result</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">):</span>
@@ -545,7 +557,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Applying function &#39;</span><span class="si">{</span><span class="n">func</span><span class="si">!r}</span><span class="s2">&#39; in serial.&quot;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">props</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterChunks</span><span class="p">(</span>
-                <span class="n">include_props</span><span class="o">=</span><span class="n">on_props</span><span class="p">,</span> <span class="n">as_dict</span><span class="o">=</span><span class="ow">not</span> <span class="n">as_df</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                    <span class="n">include_props</span><span class="o">=</span><span class="n">on_props</span><span class="p">,</span> <span class="n">as_dict</span><span class="o">=</span><span class="ow">not</span> <span class="n">as_df</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="p">):</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">props</span><span class="p">,</span> <span class="o">*</span><span class="n">func_args</span><span class="p">,</span> <span class="o">**</span><span class="n">func_kwargs</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Result for chunk returned: </span><span class="si">{</span><span class="n">result</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>

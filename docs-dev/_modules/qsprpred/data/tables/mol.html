@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.tables.mol &mdash; QSPRpred 3.1.1a2.dev3+g094aa3c8 documentation</title>
+  <title>qsprpred.data.tables.mol &mdash; QSPRpred 3.1.1a2.dev51+gffcd60bc documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=e27debfc"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=70410e1b"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.1a2.dev3+g094aa3c8
+                v3.1.1a2.dev51+gffcd60bc
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -335,10 +335,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">smilesCol</span> <span class="o">=</span> <span class="n">smiles_col</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">includesRdkit</span> <span class="o">=</span> <span class="n">add_rdkit</span>
         <span class="c1"># drop invalid columns</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">invalidsRemoved</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">drop_invalids</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dropInvalids</span><span class="p">()</span>
             <span class="c1"># update chunk size if count changed</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span> <span class="o">=</span> <span class="n">chunk_size</span>
+            <span class="c1"># label invalids removed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">invalidsRemoved</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="c1"># add rdkit molecules if requested</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">includesRdkit</span> <span class="ow">and</span> <span class="s2">&quot;RDMol&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="n">PandasTools</span><span class="o">.</span><span class="n">AddMoleculeColumnToFrame</span><span class="p">(</span>
@@ -1130,7 +1133,9 @@
 <span class="sd">                and standardizes smiles.</span>
 <span class="sd">            drop_invalid (bool): whether to drop invalid SMILES from the data set.</span>
 <span class="sd">                Defaults to `True`. If `False`, invalid SMILES will be retained in</span>
-<span class="sd">                their original form.</span>
+<span class="sd">                their original form. If `self.invalidsRemoved` is `True`, there will be</span>
+<span class="sd">                no effect even if `drop_invalid` is `True`. Set `self.invalidsRemoved`</span>
+<span class="sd">                to `False` on this instance to force the removal of invalid SMILES.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: when smiles_standardizer is not a callable or one of the</span>
@@ -1158,7 +1163,7 @@
             <span class="k">with</span> <span class="n">Pool</span><span class="p">(</span><span class="n">std_jobs</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
                 <span class="n">std_smi</span> <span class="o">=</span> <span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">std_func</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesCol</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesCol</span><span class="p">]</span> <span class="o">=</span> <span class="n">std_smi</span>
-        <span class="k">if</span> <span class="n">drop_invalid</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">drop_invalid</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">invalidsRemoved</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dropInvalids</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="MoleculeTable.dropInvalids"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.dropInvalids">[docs]</a>    <span class="k">def</span> <span class="nf">dropInvalids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

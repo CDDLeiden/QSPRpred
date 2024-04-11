@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.benchmarks.replica &mdash; QSPRpred 3.1.1a2.dev3+g094aa3c8 documentation</title>
+  <title>qsprpred.benchmarks.replica &mdash; QSPRpred 3.1.1a2.dev51+gffcd60bc documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=e27debfc"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=70410e1b"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.1a2.dev3+g094aa3c8
+                v3.1.1a2.dev51+gffcd60bc
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -176,8 +176,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ds</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">o_dict</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__getstate__</span><span class="p">()</span>
@@ -194,6 +192,40 @@
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">requiresGpu</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether the model requires a GPU.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool:</span>
+<span class="sd">                Whether the model requires a GPU.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;setGPUs&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Replica.setGPUs"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica.setGPUs">[docs]</a>    <span class="k">def</span> <span class="nf">setGPUs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gpus</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the GPUs to use for the model.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            gpus (list[int]):</span>
+<span class="sd">                List of GPU indices to use.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;setGPUs&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">setGPUs</span><span class="p">(</span><span class="n">gpus</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Model does not support GPU usage.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Replica.getGPUs"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica.getGPUs">[docs]</a>    <span class="k">def</span> <span class="nf">getGPUs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the GPUs to use for the model.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[int]:</span>
+<span class="sd">                List of GPU indices to use.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;getGPUs&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">getGPUs</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -217,7 +249,8 @@
             <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetProps</span><span class="p">),</span>
             <span class="n">overwrite</span><span class="o">=</span><span class="n">reload</span><span class="p">,</span>
             <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">randomSeed</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">dropInvalids</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Replica.addDescriptors"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica.addDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">addDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reload</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds descriptors to the current data set. Make sure to call</span>
@@ -236,6 +269,8 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data set not initialized. Call initData first.&quot;</span><span class="p">)</span>
         <span class="n">desc_id</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">]))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">desc_id</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">requiresGpu</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_gpu&quot;</span>
         <span class="c1"># attempt to load the data set with descriptors</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">reload</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reloading existing </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> from cache...&quot;</span><span class="p">)</span>
@@ -275,6 +310,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data set not initialized. Call initData first.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">initFromDataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">initRandomState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">randomSeed</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -312,7 +348,13 @@
                     <span class="n">score_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
                         <span class="p">{</span>
                             <span class="s2">&quot;Assessor&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">assessor</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">],</span>
-                            <span class="s2">&quot;ScoreFunc&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">assessor</span><span class="o">.</span><span class="n">scoreFunc</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
+                            <span class="s2">&quot;ScoreFunc&quot;</span><span class="p">:</span> <span class="p">[</span>
+                                <span class="p">(</span>
+                                    <span class="n">assessor</span><span class="o">.</span><span class="n">scoreFunc</span><span class="o">.</span><span class="n">name</span>
+                                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">assessor</span><span class="o">.</span><span class="n">scoreFunc</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span>
+                                    <span class="k">else</span> <span class="n">assessor</span><span class="o">.</span><span class="n">scoreFunc</span><span class="o">.</span><span class="vm">__name__</span>
+                                <span class="p">)</span>
+                            <span class="p">],</span>
                             <span class="s2">&quot;Score&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">fold_score</span><span class="p">],</span>
                             <span class="s2">&quot;TargetProperty&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">tp</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
                             <span class="s2">&quot;TargetTask&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">tp</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
@@ -324,7 +366,13 @@
                         <span class="n">score_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
                             <span class="p">{</span>
                                 <span class="s2">&quot;Assessor&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">assessor</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">],</span>
-                                <span class="s2">&quot;ScoreFunc&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">assessor</span><span class="o">.</span><span class="n">scoreFunc</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
+                                <span class="s2">&quot;ScoreFunc&quot;</span><span class="p">:</span> <span class="p">[</span>
+                                    <span class="p">(</span>
+                                        <span class="n">assessor</span><span class="o">.</span><span class="n">scoreFunc</span><span class="o">.</span><span class="n">name</span>
+                                        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">assessor</span><span class="o">.</span><span class="n">scoreFunc</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span>
+                                        <span class="k">else</span> <span class="n">assessor</span><span class="o">.</span><span class="n">scoreFunc</span><span class="o">.</span><span class="vm">__name__</span>
+                                    <span class="p">)</span>
+                                <span class="p">],</span>
                                 <span class="s2">&quot;Score&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">tp_score</span><span class="p">],</span>
                                 <span class="s2">&quot;TargetProperty&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">tp</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
                                 <span class="s2">&quot;TargetTask&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">tp</span><span class="o">.</span><span class="n">task</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>

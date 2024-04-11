@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.benchmarks package &mdash; QSPRpred 3.1.1a2.dev3+g094aa3c8 documentation</title>
+  <title>qsprpred.benchmarks package &mdash; QSPRpred 3.1.1a2.dev51+gffcd60bc documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=e27debfc"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=70410e1b"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.1a2.dev3+g094aa3c8
+                v3.1.1a2.dev51+gffcd60bc
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -266,6 +266,20 @@ reinitialize from scratch. Defaults to <a class="reference external" href="https
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.replica.Replica.getGPUs">
+<span class="sig-name descname"><span class="pre">getGPUs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsprpred/benchmarks/replica.html#Replica.getGPUs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.replica.Replica.getGPUs" title="Permalink to this definition"></a></dt>
+<dd><p>Gets the GPUs to use for the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of GPU indices to use.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a>[<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)">int</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="qsprpred.benchmarks.replica.Replica.id">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></em><a class="headerlink" href="#qsprpred.benchmarks.replica.Replica.id" title="Permalink to this definition"></a></dt>
@@ -316,6 +330,20 @@ the hyperparameters if an optimizer is specified.</p>
 </dl>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.replica.Replica.requiresGpu">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">requiresGpu</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#qsprpred.benchmarks.replica.Replica.requiresGpu" title="Permalink to this definition"></a></dt>
+<dd><p>Whether the model requires a GPU.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether the model requires a GPU.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.benchmarks.replica.Replica.runAssessment">
 <span class="sig-name descname"><span class="pre">runAssessment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/benchmarks/replica.html#Replica.runAssessment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.replica.Replica.runAssessment" title="Permalink to this definition"></a></dt>
@@ -327,6 +355,17 @@ from the replica and the results into one <code class="xref any docutils literal
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – If the model has not been initialized.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.replica.Replica.setGPUs">
+<span class="sig-name descname"><span class="pre">setGPUs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gpus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/benchmarks/replica.html#Replica.setGPUs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.replica.Replica.setGPUs" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the GPUs to use for the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gpus</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>]</em>) – List of GPU indices to use.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -373,7 +412,7 @@ contain all  data necessary to reconstruct the object.</p>
 <span id="qsprpred-benchmarks-runner-module"></span><h2>qsprpred.benchmarks.runner module<a class="headerlink" href="#module-qsprpred.benchmarks.runner" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.benchmarks.runner.BenchmarkRunner">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.benchmarks.runner.</span></span><span class="sig-name descname"><span class="pre">BenchmarkRunner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.benchmarks.settings.html#qsprpred.benchmarks.settings.benchmark.BenchmarkSettings" title="qsprpred.benchmarks.settings.benchmark.BenchmarkSettings"><span class="pre">BenchmarkSettings</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_proc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'./data'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/benchmarks/runner.html#BenchmarkRunner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.runner.BenchmarkRunner" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.benchmarks.runner.</span></span><span class="sig-name descname"><span class="pre">BenchmarkRunner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.benchmarks.settings.html#qsprpred.benchmarks.settings.benchmark.BenchmarkSettings" title="qsprpred.benchmarks.settings.benchmark.BenchmarkSettings"><span class="pre">BenchmarkSettings</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'./data'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel_generator_cpu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.utils.html#qsprpred.utils.parallel.ParallelGenerator" title="qsprpred.utils.parallel.ParallelGenerator"><span class="pre">ParallelGenerator</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel_generator_gpu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.utils.html#qsprpred.utils.parallel.ParallelGenerator" title="qsprpred.utils.parallel.ParallelGenerator"><span class="pre">ParallelGenerator</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/benchmarks/runner.html#BenchmarkRunner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.runner.BenchmarkRunner" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class that runs benchmarking experiments as defined by
 <a class="reference internal" href="qsprpred.benchmarks.settings.html#qsprpred.benchmarks.settings.benchmark.BenchmarkSettings" title="qsprpred.benchmarks.settings.benchmark.BenchmarkSettings"><code class="xref any py py-class docutils literal notranslate"><span class="pre">BenchmarkSettings</span></code></a>. It translates the settings into
@@ -405,10 +444,12 @@ a list of seeds from this ‘master’ seed. There are some caveats to this meth
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>settings</strong> (<a class="reference internal" href="qsprpred.benchmarks.settings.html#qsprpred.benchmarks.settings.benchmark.BenchmarkSettings" title="qsprpred.benchmarks.settings.benchmark.BenchmarkSettings"><em>BenchmarkSettings</em></a>) – Benchmark settings.</p></li>
-<li><p><strong>n_proc</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Number of processes to use. Defaults to os.cpu_count().</p></li>
 <li><p><strong>data_dir</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) – Path to the directory to store data. Defaults to “./data”.
 If the directory does not exist, it will be created.</p></li>
 <li><p><strong>results_file</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) – Path to the results file. Defaults to “{data_dir}/data/results.tsv”.</p></li>
+<li><p><strong>parallel_generator_cpu</strong> (<a class="reference internal" href="qsprpred.utils.html#qsprpred.utils.parallel.ParallelGenerator" title="qsprpred.utils.parallel.ParallelGenerator"><em>ParallelGenerator</em></a><em>, </em><em>optional</em>) – Parallel generator for CPU replicas.
+Defaults to <code class="xref any docutils literal notranslate"><span class="pre">MultiprocessingPoolGenerator</span></code> on all available CPUs.</p></li>
+<li><p><strong>parallel_generator_gpu</strong> (<a class="reference internal" href="qsprpred.utils.html#qsprpred.utils.parallel.ParallelGenerator" title="qsprpred.utils.parallel.ParallelGenerator"><em>ParallelGenerator</em></a><em>, </em><em>optional</em>) – Parallel generator for GPU replicas. Defaults to <a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -479,6 +520,36 @@ This method is thread-safe.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.runner.BenchmarkRunner.createLocks">
+<span class="sig-name descname"><span class="pre">createLocks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.utils.html#qsprpred.utils.parallel.ParallelGenerator" title="qsprpred.utils.parallel.ParallelGenerator"><span class="pre">ParallelGenerator</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/benchmarks/runner.html#BenchmarkRunner.createLocks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.runner.BenchmarkRunner.createLocks" title="Permalink to this definition"></a></dt>
+<dd><p>Creates locks for input and output operations done in <a class="reference internal" href="#qsprpred.benchmarks.runner.BenchmarkRunner.runReplica" title="qsprpred.benchmarks.runner.BenchmarkRunner.runReplica"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">runReplica</span></code></a>.
+This method should be
+overridden if the generator uses a different multiprocessing library
+or threading implementation. At the moment, this method can only provide locks
+for the <code class="xref any docutils literal notranslate"><span class="pre">MultiprocessingPoolGenerator</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>generator</strong> (<a class="reference internal" href="qsprpred.utils.html#qsprpred.utils.parallel.ParallelGenerator" title="qsprpred.utils.parallel.ParallelGenerator"><em>ParallelGenerator</em></a>) – Parallel generator to use.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>Lock for data set operations.
+Any:</p>
+<blockquote>
+<div><p>Lock for final report file operations.</p>
+</div></blockquote>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – If the generator is not a <code class="xref any docutils literal notranslate"><span class="pre">MultiprocessingPoolGenerator</span></code> and
+    lock types cannot be determined automatically.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -555,8 +626,18 @@ the <a class="reference internal" href="#qsprpred.benchmarks.runner.BenchmarkRun
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.runner.BenchmarkRunner.lock_data_t">
+<span class="sig-name descname"><span class="pre">lock_data_t</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;unlocked</span> <span class="pre">_thread.lock</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qsprpred.benchmarks.runner.BenchmarkRunner.lock_data_t" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.runner.BenchmarkRunner.lock_report_t">
+<span class="sig-name descname"><span class="pre">lock_report_t</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;unlocked</span> <span class="pre">_thread.lock</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qsprpred.benchmarks.runner.BenchmarkRunner.lock_report_t" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.benchmarks.runner.BenchmarkRunner.logLevel">
-<span class="sig-name descname"><span class="pre">logLevel</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">30</span></em><a class="headerlink" href="#qsprpred.benchmarks.runner.BenchmarkRunner.logLevel" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">logLevel</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#qsprpred.benchmarks.runner.BenchmarkRunner.logLevel" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -586,6 +667,27 @@ data preparation settings and models as defined in the <a class="reference inter
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.runner.BenchmarkRunner.processReplicas">
+<span class="sig-name descname"><span class="pre">processReplicas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">generator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.utils.html#qsprpred.utils.parallel.ParallelGenerator" title="qsprpred.utils.parallel.ParallelGenerator"><span class="pre">ParallelGenerator</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">replicas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Generator" title="(in Python v3.9)"><span class="pre">Generator</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qsprpred.benchmarks.replica.Replica" title="qsprpred.benchmarks.replica.Replica"><span class="pre">Replica</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raise_errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/benchmarks/runner.html#BenchmarkRunner.processReplicas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.runner.BenchmarkRunner.processReplicas" title="Permalink to this definition"></a></dt>
+<dd><p>Processes replicas in parallel using the given <a class="reference internal" href="qsprpred.utils.html#qsprpred.utils.parallel.ParallelGenerator" title="qsprpred.utils.parallel.ParallelGenerator"><code class="xref any py py-class docutils literal notranslate"><span class="pre">ParallelGenerator</span></code></a>.
+Each generated replica is run by the <a class="reference internal" href="#qsprpred.benchmarks.runner.BenchmarkRunner.runReplica" title="qsprpred.benchmarks.runner.BenchmarkRunner.runReplica"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">runReplica</span></code></a> method, which
+is executed in parallel by the parallel generator according to its
+implementation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>generator</strong> (<a class="reference internal" href="qsprpred.utils.html#qsprpred.utils.parallel.ParallelGenerator" title="qsprpred.utils.parallel.ParallelGenerator"><em>ParallelGenerator</em></a>) – Parallel generator to use.</p></li>
+<li><p><strong>replicas</strong> (<em>Generator</em><em>[</em><a class="reference internal" href="#qsprpred.benchmarks.replica.Replica" title="qsprpred.benchmarks.replica.Replica"><em>Replica</em></a><em>, </em><em>None</em><em>, </em><em>None</em><em>]</em>) – Generator that yields <a class="reference internal" href="#qsprpred.benchmarks.replica.Replica" title="qsprpred.benchmarks.replica.Replica"><code class="xref any py py-class docutils literal notranslate"><span class="pre">Replica</span></code></a> objects.</p></li>
+<li><p><strong>raise_errors</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to raise the first encountered <a class="reference internal" href="#qsprpred.benchmarks.runner.BenchmarkRunner.ReplicaException" title="qsprpred.benchmarks.runner.BenchmarkRunner.ReplicaException"><code class="xref any py py-exc docutils literal notranslate"><span class="pre">ReplicaException</span></code></a>
+and stop the benchmarking run. Defaults to <a class="reference external" href="https://docs.python.org/3.9/library/constants.html#False" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">False</span></code></a>,
+in which case replicas that raise an exception are skipped
+and errors are logged.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -629,7 +731,7 @@ and errors are logged.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.benchmarks.runner.BenchmarkRunner.runReplica">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">runReplica</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">replica</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qsprpred.benchmarks.replica.Replica" title="qsprpred.benchmarks.replica.Replica"><span class="pre">Replica</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#qsprpred.benchmarks.runner.BenchmarkRunner.ReplicaException" title="qsprpred.benchmarks.runner.BenchmarkRunner.ReplicaException"><span class="pre">ReplicaException</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/benchmarks/runner.html#BenchmarkRunner.runReplica"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.runner.BenchmarkRunner.runReplica" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">runReplica</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">replica</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qsprpred.benchmarks.replica.Replica" title="qsprpred.benchmarks.replica.Replica"><span class="pre">Replica</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">lock_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">lock_report</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#qsprpred.benchmarks.runner.BenchmarkRunner.ReplicaException" title="qsprpred.benchmarks.runner.BenchmarkRunner.ReplicaException"><span class="pre">ReplicaException</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/benchmarks/runner.html#BenchmarkRunner.runReplica"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.runner.BenchmarkRunner.runReplica" title="Permalink to this definition"></a></dt>
 <dd><p>Runs a single replica. This is executed in parallel by the <a class="reference internal" href="#qsprpred.benchmarks.runner.BenchmarkRunner.run" title="qsprpred.benchmarks.runner.BenchmarkRunner.run"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">run</span></code></a> method.
 It is a classmethod so that it can be pickled and executed in parallel
 more easily.</p>
@@ -638,6 +740,8 @@ more easily.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>replica</strong> (<a class="reference internal" href="#qsprpred.benchmarks.replica.Replica" title="qsprpred.benchmarks.replica.Replica"><em>Replica</em></a>) – Replica to run.</p></li>
 <li><p><strong>results_file</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Path to the results file.</p></li>
+<li><p><strong>lock_data</strong> (<em>Any</em>) – Lock for data operations.</p></li>
+<li><p><strong>lock_report</strong> (<em>Any</em>) – Lock for report operations.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -652,12 +756,146 @@ was encountered.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.runner.ExcThread">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.benchmarks.runner.</span></span><span class="sig-name descname"><span class="pre">ExcThread</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/benchmarks/runner.html#ExcThread"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.runner.ExcThread" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/threading.html#threading.Thread" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></a></p>
+<p>Thread that can catch exceptions from the target function.</p>
+<p>This constructor should always be called with keyword arguments. Arguments are:</p>
+<p><em>group</em> should be None; reserved for future extension when a ThreadGroup
+class is implemented.</p>
+<p><em>target</em> is the callable object to be invoked by the run()
+method. Defaults to None, meaning nothing is called.</p>
+<p><em>name</em> is the thread name. By default, a unique name is constructed of
+the form “Thread-N” where N is a small decimal number.</p>
+<p><em>args</em> is the argument tuple for the target invocation. Defaults to ().</p>
+<p><em>kwargs</em> is a dictionary of keyword arguments for the target
+invocation. Defaults to {}.</p>
+<p>If a subclass overrides the constructor, it must make sure to invoke
+the base class constructor (Thread.__init__()) before doing anything
+else to the thread.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.runner.ExcThread.daemon">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">daemon</span></span><a class="headerlink" href="#qsprpred.benchmarks.runner.ExcThread.daemon" title="Permalink to this definition"></a></dt>
+<dd><p>A boolean value indicating whether this thread is a daemon thread.</p>
+<p>This must be set before start() is called, otherwise RuntimeError is
+raised. Its initial value is inherited from the creating thread; the
+main thread is not a daemon thread and therefore all threads created in
+the main thread default to daemon = False.</p>
+<p>The entire Python program exits when only daemon threads are left.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.runner.ExcThread.getName">
+<span class="sig-name descname"><span class="pre">getName</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.runner.ExcThread.getName" title="Permalink to this definition"></a></dt>
+<dd><p>Return a string used for identification purposes only.</p>
+<p>This method is deprecated, use the name attribute instead.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.runner.ExcThread.ident">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ident</span></span><a class="headerlink" href="#qsprpred.benchmarks.runner.ExcThread.ident" title="Permalink to this definition"></a></dt>
+<dd><p>Thread identifier of this thread or None if it has not been started.</p>
+<p>This is a nonzero integer. See the get_ident() function. Thread
+identifiers may be recycled when a thread exits and another thread is
+created. The identifier is available even after the thread has exited.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.runner.ExcThread.isDaemon">
+<span class="sig-name descname"><span class="pre">isDaemon</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.runner.ExcThread.isDaemon" title="Permalink to this definition"></a></dt>
+<dd><p>Return whether this thread is a daemon.</p>
+<p>This method is deprecated, use the daemon attribute instead.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.runner.ExcThread.is_alive">
+<span class="sig-name descname"><span class="pre">is_alive</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.runner.ExcThread.is_alive" title="Permalink to this definition"></a></dt>
+<dd><p>Return whether the thread is alive.</p>
+<p>This method returns True just before the run() method starts until just
+after the run() method terminates. See also the module function
+enumerate().</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.runner.ExcThread.join">
+<span class="sig-name descname"><span class="pre">join</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.runner.ExcThread.join" title="Permalink to this definition"></a></dt>
+<dd><p>Wait until the thread terminates.</p>
+<p>This blocks the calling thread until the thread whose join() method is
+called terminates – either normally or through an unhandled exception
+or until the optional timeout occurs.</p>
+<p>When the timeout argument is present and not None, it should be a
+floating point number specifying a timeout for the operation in seconds
+(or fractions thereof). As join() always returns None, you must call
+is_alive() after join() to decide whether a timeout happened – if the
+thread is still alive, the join() call timed out.</p>
+<p>When the timeout argument is not present or None, the operation will
+block until the thread terminates.</p>
+<p>A thread can be join()ed many times.</p>
+<p>join() raises a RuntimeError if an attempt is made to join the current
+thread as that would cause a deadlock. It is also an error to join() a
+thread before it has been started and attempts to do so raises the same
+exception.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.runner.ExcThread.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#qsprpred.benchmarks.runner.ExcThread.name" title="Permalink to this definition"></a></dt>
+<dd><p>A string used for identification purposes only.</p>
+<p>It has no semantics. Multiple threads may be given the same name. The
+initial name is set by the constructor.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.runner.ExcThread.native_id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">native_id</span></span><a class="headerlink" href="#qsprpred.benchmarks.runner.ExcThread.native_id" title="Permalink to this definition"></a></dt>
+<dd><p>Native integral thread ID of this thread, or None if it has not been started.</p>
+<p>This is a non-negative integer. See the get_native_id() function.
+This represents the Thread ID as reported by the kernel.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.runner.ExcThread.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/benchmarks/runner.html#ExcThread.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.runner.ExcThread.run" title="Permalink to this definition"></a></dt>
+<dd><p>Method representing the thread’s activity.</p>
+<p>You may override this method in a subclass. The standard run() method
+invokes the callable object passed to the object’s constructor as the
+target argument, if any, with sequential and keyword arguments taken
+from the args and kwargs arguments, respectively.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.runner.ExcThread.setDaemon">
+<span class="sig-name descname"><span class="pre">setDaemon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daemonic</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.runner.ExcThread.setDaemon" title="Permalink to this definition"></a></dt>
+<dd><p>Set whether this thread is a daemon.</p>
+<p>This method is deprecated, use the .daemon property instead.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.runner.ExcThread.setName">
+<span class="sig-name descname"><span class="pre">setName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.runner.ExcThread.setName" title="Permalink to this definition"></a></dt>
+<dd><p>Set the name string for this thread.</p>
+<p>This method is deprecated, use the name attribute instead.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.runner.ExcThread.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.runner.ExcThread.start" title="Permalink to this definition"></a></dt>
+<dd><p>Start the thread’s activity.</p>
+<p>It must be called at most once per thread object. It arranges for the
+object’s run() method to be invoked in a separate thread of control.</p>
+<p>This method will raise a RuntimeError if called more than once on the
+same thread object.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="module-qsprpred.benchmarks.tests">
 <span id="qsprpred-benchmarks-tests-module"></span><h2>qsprpred.benchmarks.tests module<a class="headerlink" href="#module-qsprpred.benchmarks.tests" title="Permalink to this heading"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchmarkingTest">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.benchmarks.tests.</span></span><span class="sig-name descname"><span class="pre">BenchmarkingTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/benchmarks/tests.html#BenchmarkingTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchmarkingTest" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.benchmarks.tests.</span></span><span class="sig-name descname"><span class="pre">BenchMarkTestCase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/benchmarks/tests.html#BenchMarkTestCase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSetsPathMixIn</span></code></a>, <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.base.QSPRTestCase" title="qsprpred.utils.testing.base.QSPRTestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSPRTestCase</span></code></a></p>
 <p>Test benchmarking functionality on the test data set.</p>
 <dl class="field-list simple">
@@ -668,6 +906,832 @@ was encountered.</p>
 </ul>
 </dd>
 </dl>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.addClassCleanup">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">addClassCleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.addClassCleanup" title="Permalink to this definition"></a></dt>
+<dd><p>Same as addCleanup, except the cleanup items are called even if
+setUpClass fails (unlike tearDownClass).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.addCleanup">
+<span class="sig-name descname"><span class="pre">addCleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.addCleanup" title="Permalink to this definition"></a></dt>
+<dd><p>Add a function, with arguments, to be called when the test is
+completed. Functions added are called on a LIFO basis and are
+called after tearDown on test failure or success.</p>
+<p>Cleanup items are called even if setUp fails (unlike tearDown).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.addTypeEqualityFunc">
+<span class="sig-name descname"><span class="pre">addTypeEqualityFunc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typeobj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.addTypeEqualityFunc" title="Permalink to this definition"></a></dt>
+<dd><p>Add a type specific assertEqual style function to compare a type.</p>
+<p>This method is for use by TestCase subclasses that need to register
+their own type equality functions to provide nicer error messages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>typeobj</strong> – The data type to call this function on when both values
+are of the same type in assertEqual().</p></li>
+<li><p><strong>function</strong> – The callable taking two arguments and an optional
+msg= argument that raises self.failureException with a
+useful error message when the two arguments are not equal.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertAlmostEqual">
+<span class="sig-name descname"><span class="pre">assertAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">places</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertAlmostEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Fail if the two objects are unequal as determined by their
+difference rounded to the given number of decimal places
+(default 7) and comparing to zero, or by comparing that the
+difference between the two objects is more than the given
+delta.</p>
+<p>Note that decimal places (from zero) are usually not the same
+as significant digits (measured from the most significant digit).</p>
+<p>If the two objects compare equal then they will automatically
+compare almost equal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertAlmostEquals">
+<span class="sig-name descname"><span class="pre">assertAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertAlmostEquals" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertCountEqual">
+<span class="sig-name descname"><span class="pre">assertCountEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertCountEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Asserts that two iterables have the same elements, the same number of
+times, without regard to order.</p>
+<blockquote>
+<div><blockquote>
+<div><dl class="simple">
+<dt>self.assertEqual(Counter(list(first)),</dt><dd><p>Counter(list(second)))</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="simple">
+<dt>Example:</dt><dd><ul class="simple">
+<li><p>[0, 1, 1] and [1, 0, 1] compare equal.</p></li>
+<li><p>[0, 0, 1] and [0, 1] compare unequal.</p></li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertDictContainsSubset">
+<span class="sig-name descname"><span class="pre">assertDictContainsSubset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertDictContainsSubset" title="Permalink to this definition"></a></dt>
+<dd><p>Checks whether dictionary is a superset of subset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertDictEqual">
+<span class="sig-name descname"><span class="pre">assertDictEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertDictEqual" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertEqual">
+<span class="sig-name descname"><span class="pre">assertEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Fail if the two objects are unequal as determined by the ‘==’
+operator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertEquals">
+<span class="sig-name descname"><span class="pre">assertEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertEquals" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertFalse">
+<span class="sig-name descname"><span class="pre">assertFalse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertFalse" title="Permalink to this definition"></a></dt>
+<dd><p>Check that the expression is false.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertGreater">
+<span class="sig-name descname"><span class="pre">assertGreater</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertGreater" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &gt; b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertGreaterEqual">
+<span class="sig-name descname"><span class="pre">assertGreaterEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertGreaterEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &gt;= b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertIn">
+<span class="sig-name descname"><span class="pre">assertIn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">member</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertIn" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a in b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertIs">
+<span class="sig-name descname"><span class="pre">assertIs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertIs" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a is b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertIsInstance">
+<span class="sig-name descname"><span class="pre">assertIsInstance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertIsInstance" title="Permalink to this definition"></a></dt>
+<dd><p>Same as self.assertTrue(isinstance(obj, cls)), with a nicer
+default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertIsNone">
+<span class="sig-name descname"><span class="pre">assertIsNone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertIsNone" title="Permalink to this definition"></a></dt>
+<dd><p>Same as self.assertTrue(obj is None), with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertIsNot">
+<span class="sig-name descname"><span class="pre">assertIsNot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertIsNot" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a is not b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertIsNotNone">
+<span class="sig-name descname"><span class="pre">assertIsNotNone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertIsNotNone" title="Permalink to this definition"></a></dt>
+<dd><p>Included for symmetry with assertIsNone.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertLess">
+<span class="sig-name descname"><span class="pre">assertLess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertLess" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &lt; b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertLessEqual">
+<span class="sig-name descname"><span class="pre">assertLessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertLessEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &lt;= b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertListEqual">
+<span class="sig-name descname"><span class="pre">assertListEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertListEqual" title="Permalink to this definition"></a></dt>
+<dd><p>A list-specific equality assertion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>list1</strong> – The first list to compare.</p></li>
+<li><p><strong>list2</strong> – The second list to compare.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertLogs">
+<span class="sig-name descname"><span class="pre">assertLogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertLogs" title="Permalink to this definition"></a></dt>
+<dd><p>Fail unless a log message of level <em>level</em> or higher is emitted
+on <em>logger_name</em> or its children.  If omitted, <em>level</em> defaults to
+INFO and <em>logger</em> defaults to the root logger.</p>
+<p>This method must be used as a context manager, and will yield
+a recording object with two attributes: <code class="xref any docutils literal notranslate"><span class="pre">output</span></code> and <code class="xref any docutils literal notranslate"><span class="pre">records</span></code>.
+At the end of the context manager, the <code class="xref any docutils literal notranslate"><span class="pre">output</span></code> attribute will
+be a list of the matching formatted log messages and the
+<code class="xref any docutils literal notranslate"><span class="pre">records</span></code> attribute will be a list of the corresponding LogRecord
+objects.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertLogs</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INFO&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cm</span><span class="p">:</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;first message&#39;</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;foo.bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;second message&#39;</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;INFO:foo:first message&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;ERROR:foo.bar:second message&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertMultiLineEqual">
+<span class="sig-name descname"><span class="pre">assertMultiLineEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertMultiLineEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Assert that two multi-line strings are equal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertNoLogs">
+<span class="sig-name descname"><span class="pre">assertNoLogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertNoLogs" title="Permalink to this definition"></a></dt>
+<dd><p>Fail unless no log messages of level <em>level</em> or higher are emitted
+on <em>logger_name</em> or its children.</p>
+<p>This method must be used as a context manager.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertNotAlmostEqual">
+<span class="sig-name descname"><span class="pre">assertNotAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">places</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertNotAlmostEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Fail if the two objects are equal as determined by their
+difference rounded to the given number of decimal places
+(default 7) and comparing to zero, or by comparing that the
+difference between the two objects is less than the given delta.</p>
+<p>Note that decimal places (from zero) are usually not the same
+as significant digits (measured from the most significant digit).</p>
+<p>Objects that are equal automatically fail.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertNotAlmostEquals">
+<span class="sig-name descname"><span class="pre">assertNotAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertNotAlmostEquals" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertNotEqual">
+<span class="sig-name descname"><span class="pre">assertNotEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertNotEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Fail if the two objects are equal as determined by the ‘!=’
+operator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertNotEquals">
+<span class="sig-name descname"><span class="pre">assertNotEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertNotEquals" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertNotIn">
+<span class="sig-name descname"><span class="pre">assertNotIn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">member</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertNotIn" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a not in b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertNotIsInstance">
+<span class="sig-name descname"><span class="pre">assertNotIsInstance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertNotIsInstance" title="Permalink to this definition"></a></dt>
+<dd><p>Included for symmetry with assertIsInstance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertNotRegex">
+<span class="sig-name descname"><span class="pre">assertNotRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unexpected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertNotRegex" title="Permalink to this definition"></a></dt>
+<dd><p>Fail the test if the text matches the regular expression.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertNotRegexpMatches">
+<span class="sig-name descname"><span class="pre">assertNotRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertNotRegexpMatches" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertRaises">
+<span class="sig-name descname"><span class="pre">assertRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_exception</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertRaises" title="Permalink to this definition"></a></dt>
+<dd><p>Fail unless an exception of class expected_exception is raised
+by the callable when invoked with specified positional and
+keyword arguments. If a different type of exception is
+raised, it will not be caught, and the test case will be
+deemed to have suffered an error, exactly as for an
+unexpected exception.</p>
+<p>If called with the callable and arguments omitted, will return a
+context object used like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">SomeException</span><span class="p">):</span>
+    <span class="n">do_something</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>An optional keyword argument ‘msg’ can be provided when assertRaises
+is used as a context object.</p>
+<p>The context manager keeps a reference to the exception as
+the ‘exception’ attribute. This allows you to inspect the
+exception after the assertion:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">SomeException</span><span class="p">)</span> <span class="k">as</span> <span class="n">cm</span><span class="p">:</span>
+    <span class="n">do_something</span><span class="p">()</span>
+<span class="n">the_exception</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">exception</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">the_exception</span><span class="o">.</span><span class="n">error_code</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertRaisesRegex">
+<span class="sig-name descname"><span class="pre">assertRaisesRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_exception</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertRaisesRegex" title="Permalink to this definition"></a></dt>
+<dd><p>Asserts that the message in a raised exception matches a regex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expected_exception</strong> – Exception class expected to be raised.</p></li>
+<li><p><strong>expected_regex</strong> – Regex (re.Pattern object or string) expected
+to be found in error message.</p></li>
+<li><p><strong>args</strong> – Function to be called and extra positional args.</p></li>
+<li><p><strong>kwargs</strong> – Extra kwargs.</p></li>
+<li><p><strong>msg</strong> – Optional message used in case of failure. Can only be used
+when assertRaisesRegex is used as a context manager.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertRaisesRegexp">
+<span class="sig-name descname"><span class="pre">assertRaisesRegexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertRaisesRegexp" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertRegex">
+<span class="sig-name descname"><span class="pre">assertRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertRegex" title="Permalink to this definition"></a></dt>
+<dd><p>Fail the test unless the text matches the regular expression.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertRegexpMatches">
+<span class="sig-name descname"><span class="pre">assertRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertRegexpMatches" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertSequenceEqual">
+<span class="sig-name descname"><span class="pre">assertSequenceEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertSequenceEqual" title="Permalink to this definition"></a></dt>
+<dd><p>An equality assertion for ordered sequences (like lists and tuples).</p>
+<p>For the purposes of this function, a valid ordered sequence type is one
+which can be indexed, has a length, and has an equality operator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq1</strong> – The first sequence to compare.</p></li>
+<li><p><strong>seq2</strong> – The second sequence to compare.</p></li>
+<li><p><strong>seq_type</strong> – The expected datatype of the sequences, or None if no
+datatype should be enforced.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertSetEqual">
+<span class="sig-name descname"><span class="pre">assertSetEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertSetEqual" title="Permalink to this definition"></a></dt>
+<dd><p>A set-specific equality assertion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>set1</strong> – The first set to compare.</p></li>
+<li><p><strong>set2</strong> – The second set to compare.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+<p>assertSetEqual uses ducktyping to support different types of sets, and
+is optimized for sets specifically (parameters must support a
+difference method).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertTrue">
+<span class="sig-name descname"><span class="pre">assertTrue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertTrue" title="Permalink to this definition"></a></dt>
+<dd><p>Check that the expression is true.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertTupleEqual">
+<span class="sig-name descname"><span class="pre">assertTupleEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tuple1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tuple2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertTupleEqual" title="Permalink to this definition"></a></dt>
+<dd><p>A tuple-specific equality assertion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tuple1</strong> – The first tuple to compare.</p></li>
+<li><p><strong>tuple2</strong> – The second tuple to compare.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertWarns">
+<span class="sig-name descname"><span class="pre">assertWarns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_warning</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertWarns" title="Permalink to this definition"></a></dt>
+<dd><p>Fail unless a warning of class warnClass is triggered
+by the callable when invoked with specified positional and
+keyword arguments.  If a different type of warning is
+triggered, it will not be handled: depending on the other
+warning filtering rules in effect, it might be silenced, printed
+out, or raised as an exception.</p>
+<p>If called with the callable and arguments omitted, will return a
+context object used like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertWarns</span><span class="p">(</span><span class="n">SomeWarning</span><span class="p">):</span>
+    <span class="n">do_something</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>An optional keyword argument ‘msg’ can be provided when assertWarns
+is used as a context object.</p>
+<p>The context manager keeps a reference to the first matching
+warning as the ‘warning’ attribute; similarly, the ‘filename’
+and ‘lineno’ attributes give you information about the line
+of Python code from which the warning was triggered.
+This allows you to inspect the warning after the assertion:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertWarns</span><span class="p">(</span><span class="n">SomeWarning</span><span class="p">)</span> <span class="k">as</span> <span class="n">cm</span><span class="p">:</span>
+    <span class="n">do_something</span><span class="p">()</span>
+<span class="n">the_warning</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">warning</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">the_warning</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">,</span> <span class="mi">147</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assertWarnsRegex">
+<span class="sig-name descname"><span class="pre">assertWarnsRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_warning</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assertWarnsRegex" title="Permalink to this definition"></a></dt>
+<dd><p>Asserts that the message in a triggered warning matches a regexp.
+Basic functioning is similar to assertWarns() with the addition
+that only warnings whose messages also match the regular expression
+are considered successful matches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expected_warning</strong> – Warning class expected to be triggered.</p></li>
+<li><p><strong>expected_regex</strong> – Regex (re.Pattern object or string) expected
+to be found in error message.</p></li>
+<li><p><strong>args</strong> – Function to be called and extra positional args.</p></li>
+<li><p><strong>kwargs</strong> – Extra kwargs.</p></li>
+<li><p><strong>msg</strong> – Optional message used in case of failure. Can only be used
+when assertWarnsRegex is used as a context manager.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.assert_">
+<span class="sig-name descname"><span class="pre">assert_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.assert_" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.checkRunResults">
+<span class="sig-name descname"><span class="pre">checkRunResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/benchmarks/tests.html#BenchMarkTestCase.checkRunResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.checkRunResults" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.checkSettings">
+<span class="sig-name descname"><span class="pre">checkSettings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/benchmarks/tests.html#BenchMarkTestCase.checkSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.checkSettings" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.clearGenerated">
+<span class="sig-name descname"><span class="pre">clearGenerated</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.clearGenerated" title="Permalink to this definition"></a></dt>
+<dd><p>Remove the directories that are used for testing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.countTestCases">
+<span class="sig-name descname"><span class="pre">countTestCases</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.countTestCases" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.createLargeMultitaskDataSet">
+<span class="sig-name descname"><span class="pre">createLargeMultitaskDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">name='QSPRDataset_multi_test',</span> <span class="pre">target_props=[{'name':</span> <span class="pre">'HBD',</span> <span class="pre">'task':</span> <span class="pre">&lt;TargetTasks.MULTICLASS:</span> <span class="pre">'MULTICLASS'&gt;,</span> <span class="pre">'th':</span> <span class="pre">[-1,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">100]},</span> <span class="pre">{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">&lt;TargetTasks.REGRESSION:</span> <span class="pre">'REGRESSION'&gt;}],</span> <span class="pre">preparation_settings=None,</span> <span class="pre">random_state=42</span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.createLargeMultitaskDataSet" title="Permalink to this definition"></a></dt>
+<dd><p>Create a large dataset for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
+<li><p><strong>preparation_settings</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.createLargeTestDataSet">
+<span class="sig-name descname"><span class="pre">createLargeTestDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">name='QSPRDataset_test_large',</span> <span class="pre">target_props=[{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">&lt;TargetTasks.REGRESSION:</span> <span class="pre">'REGRESSION'&gt;}],</span> <span class="pre">preparation_settings=None,</span> <span class="pre">random_state=42,</span> <span class="pre">n_jobs=1,</span> <span class="pre">chunk_size=None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.createLargeTestDataSet" title="Permalink to this definition"></a></dt>
+<dd><p>Create a large dataset for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>preparation_settings</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.createSmallTestDataSet">
+<span class="sig-name descname"><span class="pre">createSmallTestDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">name='QSPRDataset_test_small',</span> <span class="pre">target_props=[{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">&lt;TargetTasks.REGRESSION:</span> <span class="pre">'REGRESSION'&gt;}],</span> <span class="pre">preparation_settings=None,</span> <span class="pre">random_state=42</span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.createSmallTestDataSet" title="Permalink to this definition"></a></dt>
+<dd><p>Create a small dataset for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>preparation_settings</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.createTestDataSetFromFrame">
+<span class="sig-name descname"><span class="pre">createTestDataSetFromFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">df,</span> <span class="pre">name='QSPRDataset_test',</span> <span class="pre">target_props=[{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">&lt;TargetTasks.REGRESSION:</span> <span class="pre">'REGRESSION'&gt;}],</span> <span class="pre">random_state=None,</span> <span class="pre">prep=None,</span> <span class="pre">n_jobs=1,</span> <span class="pre">chunk_size=None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.createTestDataSetFromFrame" title="Permalink to this definition"></a></dt>
+<dd><p>Create a dataset for testing purposes from the given data frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – data frame containing the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>prep</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.debug">
+<span class="sig-name descname"><span class="pre">debug</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.debug" title="Permalink to this definition"></a></dt>
+<dd><p>Run the test without collecting errors in a TestResult</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.defaultTestResult">
+<span class="sig-name descname"><span class="pre">defaultTestResult</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.defaultTestResult" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.doClassCleanups">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">doClassCleanups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.doClassCleanups" title="Permalink to this definition"></a></dt>
+<dd><p>Execute all class cleanup functions. Normally called for you after
+tearDownClass.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.doCleanups">
+<span class="sig-name descname"><span class="pre">doCleanups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.doCleanups" title="Permalink to this definition"></a></dt>
+<dd><p>Execute all cleanup functions. Normally called for you after
+tearDown.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.fail">
+<span class="sig-name descname"><span class="pre">fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.fail" title="Permalink to this definition"></a></dt>
+<dd><p>Fail immediately, with the given message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.failIf">
+<span class="sig-name descname"><span class="pre">failIf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.failIf" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.failIfAlmostEqual">
+<span class="sig-name descname"><span class="pre">failIfAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.failIfAlmostEqual" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.failIfEqual">
+<span class="sig-name descname"><span class="pre">failIfEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.failIfEqual" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.failUnless">
+<span class="sig-name descname"><span class="pre">failUnless</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.failUnless" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.failUnlessAlmostEqual">
+<span class="sig-name descname"><span class="pre">failUnlessAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.failUnlessAlmostEqual" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.failUnlessEqual">
+<span class="sig-name descname"><span class="pre">failUnlessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.failUnlessEqual" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.failUnlessRaises">
+<span class="sig-name descname"><span class="pre">failUnlessRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.failUnlessRaises" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.failureException">
+<span class="sig-name descname"><span class="pre">failureException</span></span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.failureException" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#AssertionError" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AssertionError</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.getAllDescriptors">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getAllDescriptors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.getAllDescriptors" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of (ideally) all available descriptor sets. For now
+they need to be added manually to the list below.</p>
+<p>TODO: would be nice to create the list automatically by implementing a
+descriptor set registry that would hold all installed descriptor sets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.getBigDF">
+<span class="sig-name descname"><span class="pre">getBigDF</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.getBigDF" title="Permalink to this definition"></a></dt>
+<dd><p>Get a large data frame for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a <code class="xref any docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> containing the dataset</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.getDataPrepGrid">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDataPrepGrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.getDataPrepGrid" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of many possible combinations of descriptor calculators,
+splits, feature standardizers, feature filters and data filters. Again, this is
+not exhaustive, but should cover a lot of cases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a generator that yields tuples of all possible combinations as stated
+above, each tuple is defined as: (descriptor_calculator, split,
+feature_standardizer, feature_filters, data_filters)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>grid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.getDefaultCalculatorCombo">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDefaultCalculatorCombo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.getDefaultCalculatorCombo" title="Permalink to this definition"></a></dt>
+<dd><p>Makes a list of default descriptor calculators that can be used in tests.
+It creates a calculator with only morgan fingerprints and rdkit descriptors,
+but also one with them both to test behaviour with multiple descriptor sets.
+Override this method if you want to test with other descriptor sets and
+calculator combinations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of created <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.getDefaultPrep">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDefaultPrep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.getDefaultPrep" title="Permalink to this definition"></a></dt>
+<dd><p>Return a dictionary with default preparation settings.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.getPrepCombos">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getPrepCombos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.getPrepCombos" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of all possible preparation combinations as generated by
+<a class="reference internal" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.getDataPrepGrid" title="qsprpred.benchmarks.tests.BenchMarkTestCase.getDataPrepGrid"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">getDataPrepGrid</span></code></a> as well as their names. The generated list can be used
+to parameterize tests with the given named combinations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id1"><span class="problematic" id="id2">`</span></a>list`s of all possible combinations of preparation</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.getSmallDF">
+<span class="sig-name descname"><span class="pre">getSmallDF</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.getSmallDF" title="Permalink to this definition"></a></dt>
+<dd><p>Get a small data frame for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a <code class="xref any docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> containing the dataset</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.id">
+<span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.longMessage">
+<span class="sig-name descname"><span class="pre">longMessage</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.longMessage" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.maxDiff">
+<span class="sig-name descname"><span class="pre">maxDiff</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">640</span></em><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.maxDiff" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.run" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.setUp">
+<span class="sig-name descname"><span class="pre">setUp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/benchmarks/tests.html#BenchMarkTestCase.setUp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.setUp" title="Permalink to this definition"></a></dt>
+<dd><p>Hook method for setting up the test fixture before exercising it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.setUpClass">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setUpClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.setUpClass" title="Permalink to this definition"></a></dt>
+<dd><p>Hook method for setting up class fixture before running tests in the class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.setUpPaths">
+<span class="sig-name descname"><span class="pre">setUpPaths</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.setUpPaths" title="Permalink to this definition"></a></dt>
+<dd><p>Create the directories that are used for testing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.shortDescription">
+<span class="sig-name descname"><span class="pre">shortDescription</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.shortDescription" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a one-line description of the test, or None if no
+description has been provided.</p>
+<p>The default implementation of this method returns the first line of
+the specified test method’s docstring.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.skipTest">
+<span class="sig-name descname"><span class="pre">skipTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reason</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.skipTest" title="Permalink to this definition"></a></dt>
+<dd><p>Skip this test.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.subTest">
+<span class="sig-name descname"><span class="pre">subTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg=&lt;object</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.subTest" title="Permalink to this definition"></a></dt>
+<dd><p>Return a context manager that will return the enclosed block
+of code in a subtest identified by the optional message and
+keyword parameters.  A failure in the subtest marks the test
+case as failed but resumes execution at the end of the enclosed
+block, allowing further test code to be executed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.tearDown">
+<span class="sig-name descname"><span class="pre">tearDown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.tearDown" title="Permalink to this definition"></a></dt>
+<dd><p>Remove all files and directories that are used for testing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.tearDownClass">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tearDownClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.tearDownClass" title="Permalink to this definition"></a></dt>
+<dd><p>Hook method for deconstructing the class fixture after running all tests in the class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchMarkTestCase.validate_split">
+<span class="sig-name descname"><span class="pre">validate_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchMarkTestCase.validate_split" title="Permalink to this definition"></a></dt>
+<dd><p>Check if the split has the data it should have after splitting.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchmarkingTest">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.benchmarks.tests.</span></span><span class="sig-name descname"><span class="pre">BenchmarkingTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/benchmarks/tests.html#BenchmarkingTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchmarkingTest" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.benchmarks.tests.BenchMarkTestCase" title="qsprpred.benchmarks.tests.BenchMarkTestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">BenchMarkTestCase</span></code></a></p>
 <p>Create an instance of the class that will use the named test
 method when executed. Raises a ValueError if the instance does
 not have a method with the specified name.</p>
@@ -1124,12 +2188,12 @@ when assertWarnsRegex is used as a context manager.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchmarkingTest.checkRunResults">
-<span class="sig-name descname"><span class="pre">checkRunResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/benchmarks/tests.html#BenchmarkingTest.checkRunResults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchmarkingTest.checkRunResults" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">checkRunResults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchmarkingTest.checkRunResults" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchmarkingTest.checkSettings">
-<span class="sig-name descname"><span class="pre">checkSettings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/benchmarks/tests.html#BenchmarkingTest.checkSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchmarkingTest.checkSettings" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">checkSettings</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchmarkingTest.checkSettings" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1385,7 +2449,7 @@ calculator combinations.</p>
 to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id1"><span class="problematic" id="id2">`</span></a>list`s of all possible combinations of preparation</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id3"><span class="problematic" id="id4">`</span></a>list`s of all possible combinations of preparation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
@@ -1429,7 +2493,7 @@ to parameterize tests with the given named combinations.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.benchmarks.tests.BenchmarkingTest.setUp">
-<span class="sig-name descname"><span class="pre">setUp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/benchmarks/tests.html#BenchmarkingTest.setUp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchmarkingTest.setUp" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">setUp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.benchmarks.tests.BenchmarkingTest.setUp" title="Permalink to this definition"></a></dt>
 <dd><p>Hook method for setting up the test fixture before exercising it.</p>
 </dd></dl>
 
@@ -1704,7 +2768,7 @@ calculator combinations.</p>
 to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id3"><span class="problematic" id="id4">`</span></a>list`s of all possible combinations of preparation</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id5"><span class="problematic" id="id6">`</span></a>list`s of all possible combinations of preparation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
