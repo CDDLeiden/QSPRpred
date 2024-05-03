@@ -8,6 +8,8 @@ From v3.0.2 to v3.1.0
 - Fixed a bug where an attached standardizer would be refit when calling
   `QSPRModel.predictMols` with `use_applicability_domain=True`.
 - Fixed random seed not set in `FoldsFromDataSplit.iterFolds` for `ClusterSplit`.
+- Fixed a problem with PandasTools in `rdkit-2023.9.6`. As a result the `add_rdkit`
+  option for molecule tables temporarily might not work.
 
 ## Changes
 
