@@ -47,7 +47,7 @@ dependencies = [
     "pandas >= 1.2.2",
     "matplotlib >= 2.0",
     "chembl_structure_pipeline >= 1.2.0",
-    "rdkit < 2023.9.6",
+    "rdkit",
     "optuna",
     "gitpython",
     "xgboost",
@@ -74,11 +74,15 @@ extra = [
 ]
 deep = [
     "torch >= 1.7.0",
+]
+chemprop = [
+    "rdkit < 2023.9.6",
     "chemprop >= 1.6.0, < 2.0.0",
 ]
 full = [
     "qsprpred[deep]",
-    "qsprpred[extra]"
+    "qsprpred[extra]",
+    "qsprpred[chemprop]",
 ]
 dev = [
     "qsprpred[full]",
