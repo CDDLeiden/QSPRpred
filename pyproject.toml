@@ -30,9 +30,11 @@ maintainers = [{ name = "Helle van den Maagdenberg", email = "h.w.van.den.maagde
     { name = "Gerard van Westen", email = "gerard@lacdr.leidenuniv.nl" }]
 classifiers = [
     "Development Status :: 4 - Beta",
-    "Operating System :: OS Independent", # We tested it on Mac and Windows as well?
+    "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3 :: Only",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Topic :: Scientific/Engineering :: Chemistry",
@@ -70,15 +72,17 @@ extra = [
     "prodec",
     "Signature-pywrapper",
 ]
-pyboost = ["py-boost"]
 deep = [
     "torch >= 1.7.0",
-    "chemprop >= 1.6.0"
+]
+chemprop = [
+    "rdkit < 2023.9.6",
+    "chemprop >= 1.6.0, < 2.0.0",
 ]
 full = [
-    "qsprpred[pyboost]",
     "qsprpred[deep]",
-    "qsprpred[extra]"
+    "qsprpred[extra]",
+    "qsprpred[chemprop]",
 ]
 dev = [
     "qsprpred[full]",

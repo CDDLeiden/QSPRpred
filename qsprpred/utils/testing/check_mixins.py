@@ -138,7 +138,7 @@ class DataPrepCheckMixIn(DescriptorCheckMixIn):
             split.setDataSet(None)
             self.assertRaises(ValueError, split.getDataSet)
             split.setDataSet(dataset)
-            self.assertEquals(dataset, split.getDataSet())
+            self.assertEqual(dataset, split.getDataSet())
 
         # prepare the dataset and check consistency
         dataset.prepareDataset(
