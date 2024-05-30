@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.data.tables package &mdash; QSPRpred 3.1.1a2.dev51+gffcd60bc documentation</title>
+  <title>qsprpred.extra.data.tables package &mdash; QSPRpred 3.1.1a2.dev59+ge430e991 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=70410e1b"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=fc0d3f83"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.1a2.dev51+gffcd60bc
+                v3.1.1a2.dev59+ge430e991
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -1118,7 +1118,7 @@ Defaults to None.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.pcm.PCMDataSet.prepareDataset">
-<span class="sig-name descname"><span class="pre">prepareDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles_standardizer:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~typing.Callable</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">'chembl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_filters:</span> <span class="pre">list</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">(&lt;qsprpred.data.processing.data_filters.RepeatsFilter</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_calculators:</span> <span class="pre">list['DescriptorSet']</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_filters:</span> <span class="pre">list</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_standardizer:</span> <span class="pre">~qsprpred.data.processing.feature_standardizers.SKLearnStandardizer</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_fill_value:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">applicability_domain:</span> <span class="pre">~qsprpred.data.processing.applicability_domain.ApplicabilityDomain</span> <span class="pre">|</span> <span class="pre">~mlchemad.base.ApplicabilityDomain</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_outliers:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalculate_features:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.pcm.PCMDataSet.prepareDataset" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">prepareDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles_standardizer:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~typing.Callable</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">'chembl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_filters:</span> <span class="pre">list</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">(&lt;qsprpred.data.processing.data_filters.RepeatsFilter</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_calculators:</span> <span class="pre">list[qsprpred.data.descriptors.sets.DescriptorSet]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_filters:</span> <span class="pre">list</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_standardizer:</span> <span class="pre">~qsprpred.data.processing.feature_standardizers.SKLearnStandardizer</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_fill_value:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">applicability_domain:</span> <span class="pre">~qsprpred.data.processing.applicability_domain.ApplicabilityDomain</span> <span class="pre">|</span> <span class="pre">~mlchemad.base.ApplicabilityDomain</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_outliers:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recalculate_features:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state:</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.pcm.PCMDataSet.prepareDataset" title="Permalink to this definition"></a></dt>
 <dd><p>Prepare the dataset for use in QSPR model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1671,11 +1671,6 @@ compare almost equal.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertCountEqual">
 <span class="sig-name descname"><span class="pre">assertCountEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertCountEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Asserts that two iterables have the same elements, the same number of
@@ -1698,12 +1693,6 @@ times, without regard to order.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertDictContainsSubset">
-<span class="sig-name descname"><span class="pre">assertDictContainsSubset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertDictContainsSubset" title="Permalink to this definition"></a></dt>
-<dd><p>Checks whether dictionary is a superset of subset.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertDictEqual">
 <span class="sig-name descname"><span class="pre">assertDictEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertDictEqual" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -1714,11 +1703,6 @@ times, without regard to order.</p>
 <dd><p>Fail if the two objects are unequal as determined by the ‘==’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertEquals">
-<span class="sig-name descname"><span class="pre">assertEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertFalse">
@@ -1852,21 +1836,11 @@ as significant digits (measured from the most significant digit).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertNotAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertNotAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertNotAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertNotEqual">
 <span class="sig-name descname"><span class="pre">assertNotEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertNotEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Fail if the two objects are equal as determined by the ‘!=’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertNotEquals">
-<span class="sig-name descname"><span class="pre">assertNotEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertNotEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertNotIn">
@@ -1885,11 +1859,6 @@ operator.</p>
 <span class="sig-name descname"><span class="pre">assertNotRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unexpected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertNotRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test if the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertNotRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertNotRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertNotRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertRaises">
@@ -1939,20 +1908,10 @@ when assertRaisesRegex is used as a context manager.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertRaisesRegexp">
-<span class="sig-name descname"><span class="pre">assertRaisesRegexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertRaisesRegexp" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertRegex">
 <span class="sig-name descname"><span class="pre">assertRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test unless the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assertSequenceEqual">
@@ -2066,11 +2025,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assert_">
-<span class="sig-name descname"><span class="pre">assert_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.assert_" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.checkDescriptors">
@@ -2264,45 +2218,24 @@ tearDown.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.enterClassContext">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enterClassContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.enterClassContext" title="Permalink to this definition"></a></dt>
+<dd><p>Same as enterContext, but class-wide.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.enterContext">
+<span class="sig-name descname"><span class="pre">enterContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.enterContext" title="Permalink to this definition"></a></dt>
+<dd><p>Enters the supplied context manager.</p>
+<p>If successful, also adds its __exit__ method as a cleanup
+function and returns the result of the __enter__ method.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.fail">
 <span class="sig-name descname"><span class="pre">fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.fail" title="Permalink to this definition"></a></dt>
 <dd><p>Fail immediately, with the given message.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.failIf">
-<span class="sig-name descname"><span class="pre">failIf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.failIf" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.failIfAlmostEqual">
-<span class="sig-name descname"><span class="pre">failIfAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.failIfAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.failIfEqual">
-<span class="sig-name descname"><span class="pre">failIfEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.failIfEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.failUnless">
-<span class="sig-name descname"><span class="pre">failUnless</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.failUnless" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.failUnlessAlmostEqual">
-<span class="sig-name descname"><span class="pre">failUnlessAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.failUnlessAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.failUnlessEqual">
-<span class="sig-name descname"><span class="pre">failUnlessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.failUnlessEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.failUnlessRaises">
-<span class="sig-name descname"><span class="pre">failUnlessRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.failUnlessRaises" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.failureException">
@@ -2559,7 +2492,7 @@ block, allowing further test code to be executed.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_00_MorganFP_ProDec_None_None_None_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_00_MorganFP_ProDec_None_None_None_None_None</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_00_MorganFP_ProDec_None_None_None_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_None_None_None_None’, name=’MorganFP_ProDec_None_None_None_None_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cca485cc0&gt;), split=None, feature_standardizer=None, feature_filter=None, data_filter=None, applicability_domain=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_None_None_None_None’, name=’MorganFP_ProDec_None_None_None_None_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f06256bc410&gt;), split=None, feature_standardizer=None, feature_filter=None, data_filter=None, applicability_domain=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2580,7 +2513,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_01_MorganFP_ProDec_None_None_None_None_TopKatApplicabilityDomain">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_01_MorganFP_ProDec_None_None_None_None_TopKatApplicabilityDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_01_MorganFP_ProDec_None_None_None_None_TopKatApplicabilityDomain" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_None_None_None_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_None_None_None_None_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cca369840&gt;), split=None, feature_standardizer=None, feature_filter=None, data_filter=None, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f1cca368640&gt;].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_None_None_None_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_None_None_None_None_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f06256bc440&gt;), split=None, feature_standardizer=None, feature_filter=None, data_filter=None, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f062617fa10&gt;].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2601,7 +2534,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_02_MorganFP_ProDec_None_None_None_RepeatsFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_02_MorganFP_ProDec_None_None_None_RepeatsFilter_None</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_02_MorganFP_ProDec_None_None_None_RepeatsFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_None_None_RepeatsFilter_None’, name=’MorganFP_ProDec_None_None_None_RepeatsFilter_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cca288160&gt;), split=None, feature_standardizer=None, feature_filter=None, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f1cca3698d0&gt;, applicability_domain=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_None_None_RepeatsFilter_None’, name=’MorganFP_ProDec_None_None_None_RepeatsFilter_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0626024bf0&gt;), split=None, feature_standardizer=None, feature_filter=None, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f06252e4740&gt;, applicability_domain=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2622,7 +2555,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_03_MorganFP_ProDec_None_None_None_RepeatsFilter_TopKatApplicabilityDomain">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_03_MorganFP_ProDec_None_None_None_RepeatsFilter_TopKatApplicabilityDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_03_MorganFP_ProDec_None_None_None_RepeatsFilter_TopKatApplicabilityDomain" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’<a href="#id5"><span class="problematic" id="id6">MorganFP_ProDec_None_None_None_</span></a>…ilter_TopKatApplicabilityDomain’, name=’<a href="#id7"><span class="problematic" id="id8">MorganFP_ProDec_None_None_None_</span></a>…ilter_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cca28a710&gt;), split=None, feature_standardizer=None, feature_filter=None, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f1cca28a5f0&gt;, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f1cca174be0&gt;].</p>
+<dd><p>Test the preparation of the dataset [with _=’<a href="#id5"><span class="problematic" id="id6">MorganFP_ProDec_None_None_None_</span></a>…ilter_TopKatApplicabilityDomain’, name=’<a href="#id7"><span class="problematic" id="id8">MorganFP_ProDec_None_None_None_</span></a>…ilter_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f06252e47d0&gt;), split=None, feature_standardizer=None, feature_filter=None, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f06260260c0&gt;, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f0625361820&gt;].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2643,7 +2576,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_04_MorganFP_ProDec_None_None_HighCorrelationFilter_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_04_MorganFP_ProDec_None_None_HighCorrelationFilter_None_None</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_04_MorganFP_ProDec_None_None_HighCorrelationFilter_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_None_HighCorrelationFilter_None_None’, name=’MorganFP_ProDec_None_None_HighCorrelationFilter_None_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cca174d60&gt;), split=None, feature_standardizer=None, feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f1cca174c10&gt;, data_filter=None, applicability_domain=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_None_HighCorrelationFilter_None_None’, name=’MorganFP_ProDec_None_None_HighCorrelationFilter_None_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f06252e4830&gt;), split=None, feature_standardizer=None, feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f06261a8d70&gt;, data_filter=None, applicability_domain=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2664,7 +2597,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_05_MorganFP_ProDec_None_None_HighCorrelationFilter_None_TopKatApplicabilityDomain">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_05_MorganFP_ProDec_None_None_HighCorrelationFilter_None_TopKatApplicabilityDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_05_MorganFP_ProDec_None_None_HighCorrelationFilter_None_TopKatApplicabilityDomain" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_None_HighC…_None_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_None_None_HighC…_None_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cca177310&gt;), split=None, feature_standardizer=None, feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f1cca1771f0&gt;, data_filter=None, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f1cca0517e0&gt;].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_None_HighC…_None_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_None_None_HighC…_None_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f06252e47a0&gt;), split=None, feature_standardizer=None, feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f0627162570&gt;, data_filter=None, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f06252578f0&gt;].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2685,7 +2618,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_06_MorganFP_ProDec_None_None_HighCorrelationFilter_RepeatsFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_06_MorganFP_ProDec_None_None_HighCorrelationFilter_RepeatsFilter_None</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_06_MorganFP_ProDec_None_None_HighCorrelationFilter_RepeatsFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_None_HighC…lationFilter_RepeatsFilter_None’, name=’MorganFP_ProDec_None_None_HighC…lationFilter_RepeatsFilter_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cca051960&gt;), split=None, feature_standardizer=None, feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f1cca051810&gt;, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f1cca053df0&gt;, applicability_domain=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_None_HighC…lationFilter_RepeatsFilter_None’, name=’MorganFP_ProDec_None_None_HighC…lationFilter_RepeatsFilter_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0625361910&gt;), split=None, feature_standardizer=None, feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f06252e4890&gt;, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f06251049b0&gt;, applicability_domain=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2706,7 +2639,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_07_MorganFP_ProDec_None_None_HighCorrelationFilter_RepeatsFilter_TopKatApplicabilityDomain">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_07_MorganFP_ProDec_None_None_HighCorrelationFilter_RepeatsFilter_TopKatApplicabilityDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_07_MorganFP_ProDec_None_None_HighCorrelationFilter_RepeatsFilter_TopKatApplicabilityDomain" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_None_HighC…ilter_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_None_None_HighC…ilter_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cca053f70&gt;), split=None, feature_standardizer=None, feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f1cca053e20&gt;, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f1cc9f56440&gt;, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f1cc9f56470&gt;].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_None_HighC…ilter_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_None_None_HighC…ilter_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0625257980&gt;), split=None, feature_standardizer=None, feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f06253618b0&gt;, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f0625181a30&gt;, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f0625181a00&gt;].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2727,7 +2660,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_08_MorganFP_ProDec_None_StandardScaler_None_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_08_MorganFP_ProDec_None_StandardScaler_None_None_None</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_08_MorganFP_ProDec_None_StandardScaler_None_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_StandardScaler_None_None_None’, name=’MorganFP_ProDec_None_StandardScaler_None_None_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc9f56620&gt;), split=None, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None, applicability_domain=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_StandardScaler_None_None_None’, name=’MorganFP_ProDec_None_StandardScaler_None_None_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0625104aa0&gt;), split=None, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None, applicability_domain=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2748,7 +2681,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_09_MorganFP_ProDec_None_StandardScaler_None_None_TopKatApplicabilityDomain">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_09_MorganFP_ProDec_None_StandardScaler_None_None_TopKatApplicabilityDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_09_MorganFP_ProDec_None_StandardScaler_None_None_TopKatApplicabilityDomain" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_StandardSc…_None_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_None_StandardSc…_None_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc9e3cc40&gt;), split=None, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f1cc9e3f0a0&gt;].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_StandardSc…_None_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_None_StandardSc…_None_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0625181b50&gt;), split=None, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f0625077b30&gt;].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2769,7 +2702,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_10_MorganFP_ProDec_None_StandardScaler_None_RepeatsFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_10_MorganFP_ProDec_None_StandardScaler_None_RepeatsFilter_None</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_10_MorganFP_ProDec_None_StandardScaler_None_RepeatsFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_StandardScaler_None_RepeatsFilter_None’, name=’MorganFP_ProDec_None_StandardScaler_None_RepeatsFilter_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc9e3f280&gt;), split=None, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f1cc9d31720&gt;, applicability_domain=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_StandardScaler_None_RepeatsFilter_None’, name=’MorganFP_ProDec_None_StandardScaler_None_RepeatsFilter_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f06251de960&gt;), split=None, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f0624f24c20&gt;, applicability_domain=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2790,7 +2723,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_11_MorganFP_ProDec_None_StandardScaler_None_RepeatsFilter_TopKatApplicabilityDomain">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_11_MorganFP_ProDec_None_StandardScaler_None_RepeatsFilter_TopKatApplicabilityDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_11_MorganFP_ProDec_None_StandardScaler_None_RepeatsFilter_TopKatApplicabilityDomain" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_StandardSc…ilter_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_None_StandardSc…ilter_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc9d31900&gt;), split=None, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f1cc9d33d60&gt;, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f1cc9d33df0&gt;].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_StandardSc…ilter_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_None_StandardSc…ilter_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0625077c20&gt;), split=None, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f0624f9dcd0&gt;, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f0624f9dd30&gt;].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2811,7 +2744,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_12_MorganFP_ProDec_None_StandardScaler_HighCorrelationFilter_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_12_MorganFP_ProDec_None_StandardScaler_HighCorrelationFilter_None_None</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_12_MorganFP_ProDec_None_StandardScaler_HighCorrelationFilter_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_StandardSc…HighCorrelationFilter_None_None’, name=’MorganFP_ProDec_None_StandardSc…HighCorrelationFilter_None_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc9d33fa0&gt;), split=None, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f1cc9c1e440&gt;, data_filter=None, applicability_domain=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_StandardSc…HighCorrelationFilter_None_None’, name=’MorganFP_ProDec_None_StandardSc…HighCorrelationFilter_None_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0624f24d70&gt;), split=None, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f0624e22db0&gt;, data_filter=None, applicability_domain=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2832,7 +2765,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_13_MorganFP_ProDec_None_StandardScaler_HighCorrelationFilter_None_TopKatApplicabilityDomain">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_13_MorganFP_ProDec_None_StandardScaler_HighCorrelationFilter_None_TopKatApplicabilityDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_13_MorganFP_ProDec_None_StandardScaler_HighCorrelationFilter_None_TopKatApplicabilityDomain" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_StandardSc…_None_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_None_StandardSc…_None_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc9c1e620&gt;), split=None, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f1cc9b08ac0&gt;, data_filter=None, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f1cc9b08b50&gt;].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_StandardSc…_None_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_None_StandardSc…_None_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0624ffebd0&gt;), split=None, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f0624e9be60&gt;, data_filter=None, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f0624e9bec0&gt;].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2853,7 +2786,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_14_MorganFP_ProDec_None_StandardScaler_HighCorrelationFilter_RepeatsFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_14_MorganFP_ProDec_None_StandardScaler_HighCorrelationFilter_RepeatsFilter_None</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_14_MorganFP_ProDec_None_StandardScaler_HighCorrelationFilter_RepeatsFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_StandardSc…lationFilter_RepeatsFilter_None’, name=’MorganFP_ProDec_None_StandardSc…lationFilter_RepeatsFilter_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc9b08d00&gt;), split=None, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f1cc9b0b160&gt;, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f1cc9b0b1f0&gt;, applicability_domain=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_StandardSc…lationFilter_RepeatsFilter_None’, name=’MorganFP_ProDec_None_StandardSc…lationFilter_RepeatsFilter_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0624e22f00&gt;), split=None, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f0624d44f80&gt;, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f0624d44fe0&gt;, applicability_domain=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2874,7 +2807,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_15_MorganFP_ProDec_None_StandardScaler_HighCorrelationFilter_RepeatsFilter_TopKatApplicabilityDomain">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_15_MorganFP_ProDec_None_StandardScaler_HighCorrelationFilter_RepeatsFilter_TopKatApplicabilityDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_15_MorganFP_ProDec_None_StandardScaler_HighCorrelationFilter_RepeatsFilter_TopKatApplicabilityDomain" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_StandardSc…ilter_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_None_StandardSc…ilter_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc9b0b3a0&gt;), split=None, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f1cc99d5840&gt;, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f1cc99d58d0&gt;, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f1cc99d5930&gt;].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_None_StandardSc…ilter_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_None_StandardSc…ilter_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0624e9bfe0&gt;), split=None, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f0624dbe060&gt;, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f0624dbe0c0&gt;, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f0624dbe0f0&gt;].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2895,7 +2828,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_16_MorganFP_ProDec_RandomSplit_None_None_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_16_MorganFP_ProDec_RandomSplit_None_None_None_None</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_16_MorganFP_ProDec_RandomSplit_None_None_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_None_None_None_None’, name=’MorganFP_ProDec_RandomSplit_None_None_None_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc99d5ae0&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f1cc99d5990&gt;, feature_standardizer=None, feature_filter=None, data_filter=None, applicability_domain=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_None_None_None_None’, name=’MorganFP_ProDec_RandomSplit_None_None_None_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0624f9de50&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f0624e9bf80&gt;, feature_standardizer=None, feature_filter=None, data_filter=None, applicability_domain=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2916,7 +2849,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_17_MorganFP_ProDec_RandomSplit_None_None_None_TopKatApplicabilityDomain">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_17_MorganFP_ProDec_RandomSplit_None_None_None_TopKatApplicabilityDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_17_MorganFP_ProDec_RandomSplit_None_None_None_TopKatApplicabilityDomain" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Non…_None_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_RandomSplit_Non…_None_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc98e00d0&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f1cc99d5a50&gt;, feature_standardizer=None, feature_filter=None, data_filter=None, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f1cc98e2560&gt;].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Non…_None_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_RandomSplit_Non…_None_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0624d450a0&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f0624f9ddf0&gt;, feature_standardizer=None, feature_filter=None, data_filter=None, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f0624aec230&gt;].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2937,7 +2870,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_18_MorganFP_ProDec_RandomSplit_None_None_RepeatsFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_18_MorganFP_ProDec_RandomSplit_None_None_RepeatsFilter_None</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_18_MorganFP_ProDec_RandomSplit_None_None_RepeatsFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_None_None_RepeatsFilter_None’, name=’MorganFP_ProDec_RandomSplit_None_None_RepeatsFilter_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc98e26e0&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f1cc98e2590&gt;, feature_standardizer=None, feature_filter=None, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f1cc97d0bb0&gt;, applicability_domain=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_None_None_RepeatsFilter_None’, name=’MorganFP_ProDec_RandomSplit_None_None_RepeatsFilter_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0624dbe210&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f0625181af0&gt;, feature_standardizer=None, feature_filter=None, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f0624b692b0&gt;, applicability_domain=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2958,7 +2891,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_19_MorganFP_ProDec_RandomSplit_None_None_RepeatsFilter_TopKatApplicabilityDomain">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_19_MorganFP_ProDec_RandomSplit_None_None_RepeatsFilter_TopKatApplicabilityDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_19_MorganFP_ProDec_RandomSplit_None_None_RepeatsFilter_TopKatApplicabilityDomain" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Non…ilter_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_RandomSplit_Non…ilter_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc97d0d30&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f1cc97d0be0&gt;, feature_standardizer=None, feature_filter=None, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f1cc97d31c0&gt;, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f1cc97d31f0&gt;].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Non…ilter_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_RandomSplit_Non…ilter_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0624aec2c0&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f0624dbe1b0&gt;, feature_standardizer=None, feature_filter=None, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f06249de330&gt;, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f06249de300&gt;].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -2979,7 +2912,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_20_MorganFP_ProDec_RandomSplit_None_HighCorrelationFilter_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_20_MorganFP_ProDec_RandomSplit_None_HighCorrelationFilter_None_None</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_20_MorganFP_ProDec_RandomSplit_None_HighCorrelationFilter_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Non…HighCorrelationFilter_None_None’, name=’MorganFP_ProDec_RandomSplit_Non…HighCorrelationFilter_None_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc97d33a0&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f1cc97d3250&gt;, feature_standardizer=None, feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f1cc9891870&gt;, data_filter=None, applicability_domain=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Non…HighCorrelationFilter_None_None’, name=’MorganFP_ProDec_RandomSplit_Non…HighCorrelationFilter_None_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0624b693a0&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f0624d45100&gt;, feature_standardizer=None, feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f0624a5f3e0&gt;, data_filter=None, applicability_domain=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -3000,7 +2933,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_21_MorganFP_ProDec_RandomSplit_None_HighCorrelationFilter_None_TopKatApplicabilityDomain">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_21_MorganFP_ProDec_RandomSplit_None_HighCorrelationFilter_None_TopKatApplicabilityDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_21_MorganFP_ProDec_RandomSplit_None_HighCorrelationFilter_None_TopKatApplicabilityDomain" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Non…_None_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_RandomSplit_Non…_None_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc98919f0&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f1cc98918a0&gt;, feature_standardizer=None, feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f1cc9893e80&gt;, data_filter=None, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f1cc9893eb0&gt;].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Non…_None_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_RandomSplit_Non…_None_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0624c3f260&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f0624b69340&gt;, feature_standardizer=None, feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f062490c4a0&gt;, data_filter=None, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f062490c470&gt;].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -3021,7 +2954,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_22_MorganFP_ProDec_RandomSplit_None_HighCorrelationFilter_RepeatsFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_22_MorganFP_ProDec_RandomSplit_None_HighCorrelationFilter_RepeatsFilter_None</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_22_MorganFP_ProDec_RandomSplit_None_HighCorrelationFilter_RepeatsFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Non…lationFilter_RepeatsFilter_None’, name=’MorganFP_ProDec_RandomSplit_Non…lationFilter_RepeatsFilter_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc97a80a0&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f1cc9893f10&gt;, feature_standardizer=None, feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f1cc97aa530&gt;, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f1cc97aa560&gt;, applicability_domain=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Non…lationFilter_RepeatsFilter_None’, name=’MorganFP_ProDec_RandomSplit_Non…lationFilter_RepeatsFilter_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0624a5f4d0&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f0624c3f200&gt;, feature_standardizer=None, feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f062498d550&gt;, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f062498d520&gt;, applicability_domain=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -3042,7 +2975,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_23_MorganFP_ProDec_RandomSplit_None_HighCorrelationFilter_RepeatsFilter_TopKatApplicabilityDomain">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_23_MorganFP_ProDec_RandomSplit_None_HighCorrelationFilter_RepeatsFilter_TopKatApplicabilityDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_23_MorganFP_ProDec_RandomSplit_None_HighCorrelationFilter_RepeatsFilter_TopKatApplicabilityDomain" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Non…ilter_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_RandomSplit_Non…ilter_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc97aa710&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f1cc97aa5c0&gt;, feature_standardizer=None, feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f1cc9694be0&gt;, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f1cc9694c10&gt;, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f1cc9694c70&gt;].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Non…ilter_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_RandomSplit_Non…ilter_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f062490c5c0&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f0624a5f470&gt;, feature_standardizer=None, feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f06247fe600&gt;, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f06247fe5d0&gt;, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f06247fe630&gt;].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -3063,7 +2996,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_24_MorganFP_ProDec_RandomSplit_StandardScaler_None_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_24_MorganFP_ProDec_RandomSplit_StandardScaler_None_None_None</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_24_MorganFP_ProDec_RandomSplit_StandardScaler_None_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_StandardScaler_None_None_None’, name=’MorganFP_ProDec_RandomSplit_StandardScaler_None_None_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc9694e20&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f1cc9694cd0&gt;, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None, applicability_domain=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_StandardScaler_None_None_None’, name=’MorganFP_ProDec_RandomSplit_StandardScaler_None_None_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f06249de450&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f062490c560&gt;, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None, applicability_domain=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -3084,7 +3017,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_25_MorganFP_ProDec_RandomSplit_StandardScaler_None_None_TopKatApplicabilityDomain">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_25_MorganFP_ProDec_RandomSplit_StandardScaler_None_None_TopKatApplicabilityDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_25_MorganFP_ProDec_RandomSplit_StandardScaler_None_None_TopKatApplicabilityDomain" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Sta…_None_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_RandomSplit_Sta…_None_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc9697460&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f1cc9697310&gt;, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f1cc9565990&gt;].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Sta…_None_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_RandomSplit_Sta…_None_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f06247fe6f0&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f062498d670&gt;, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=None, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f0624730800&gt;].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -3105,7 +3038,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_26_MorganFP_ProDec_RandomSplit_StandardScaler_None_RepeatsFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_26_MorganFP_ProDec_RandomSplit_StandardScaler_None_RepeatsFilter_None</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_26_MorganFP_ProDec_RandomSplit_StandardScaler_None_RepeatsFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Sta…dScaler_None_RepeatsFilter_None’, name=’MorganFP_ProDec_RandomSplit_Sta…dScaler_None_RepeatsFilter_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc9565b40&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f1cc95659f0&gt;, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f1cc9470070&gt;, applicability_domain=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Sta…dScaler_None_RepeatsFilter_None’, name=’MorganFP_ProDec_RandomSplit_Sta…dScaler_None_RepeatsFilter_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0624883800&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f0624aec320&gt;, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f06247ad8e0&gt;, applicability_domain=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -3126,7 +3059,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_27_MorganFP_ProDec_RandomSplit_StandardScaler_None_RepeatsFilter_TopKatApplicabilityDomain">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_27_MorganFP_ProDec_RandomSplit_StandardScaler_None_RepeatsFilter_TopKatApplicabilityDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_27_MorganFP_ProDec_RandomSplit_StandardScaler_None_RepeatsFilter_TopKatApplicabilityDomain" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Sta…ilter_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_RandomSplit_Sta…ilter_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc9470220&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f1cc94700d0&gt;, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f1cc9472710&gt;, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f1cc9472770&gt;].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Sta…ilter_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_RandomSplit_Sta…ilter_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0624730920&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f06248837a0&gt;, feature_standardizer=StandardScaler(), feature_filter=None, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f06246229c0&gt;, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f06246229f0&gt;].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -3147,7 +3080,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_28_MorganFP_ProDec_RandomSplit_StandardScaler_HighCorrelationFilter_None_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_28_MorganFP_ProDec_RandomSplit_StandardScaler_HighCorrelationFilter_None_None</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_28_MorganFP_ProDec_RandomSplit_StandardScaler_HighCorrelationFilter_None_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Sta…HighCorrelationFilter_None_None’, name=’MorganFP_ProDec_RandomSplit_Sta…HighCorrelationFilter_None_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc9472920&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f1cc94727d0&gt;, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f1cc9344e50&gt;, data_filter=None, applicability_domain=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Sta…HighCorrelationFilter_None_None’, name=’MorganFP_ProDec_RandomSplit_Sta…HighCorrelationFilter_None_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f06247fe750&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f06247308c0&gt;, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f06246a3ad0&gt;, data_filter=None, applicability_domain=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -3168,7 +3101,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_29_MorganFP_ProDec_RandomSplit_StandardScaler_HighCorrelationFilter_None_TopKatApplicabilityDomain">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_29_MorganFP_ProDec_RandomSplit_StandardScaler_HighCorrelationFilter_None_TopKatApplicabilityDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_29_MorganFP_ProDec_RandomSplit_StandardScaler_HighCorrelationFilter_None_TopKatApplicabilityDomain" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Sta…_None_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_RandomSplit_Sta…_None_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc9345000&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f1cc9344eb0&gt;, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f1cc93474f0&gt;, data_filter=None, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f1cc9347550&gt;].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Sta…_None_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_RandomSplit_Sta…_None_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0624622b10&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f06247ada00&gt;, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f0624550bf0&gt;, data_filter=None, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f0624550c20&gt;].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -3189,7 +3122,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_30_MorganFP_ProDec_RandomSplit_StandardScaler_HighCorrelationFilter_RepeatsFilter_None">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_30_MorganFP_ProDec_RandomSplit_StandardScaler_HighCorrelationFilter_RepeatsFilter_None</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_30_MorganFP_ProDec_RandomSplit_StandardScaler_HighCorrelationFilter_RepeatsFilter_None" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Sta…lationFilter_RepeatsFilter_None’, name=’MorganFP_ProDec_RandomSplit_Sta…lationFilter_RepeatsFilter_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc9347700&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f1cc93475b0&gt;, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f1cc9229c30&gt;, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f1cc9229c90&gt;, applicability_domain=None].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Sta…lationFilter_RepeatsFilter_None’, name=’MorganFP_ProDec_RandomSplit_Sta…lationFilter_RepeatsFilter_None’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f0625077c80&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f0624622ab0&gt;, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f06243c9d00&gt;, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f06243c9d30&gt;, applicability_domain=None].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">
@@ -3210,7 +3143,7 @@ feature calculators, feature standardizers, feature filters and data filters.</p
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_31_MorganFP_ProDec_RandomSplit_StandardScaler_HighCorrelationFilter_RepeatsFilter_TopKatApplicabilityDomain">
 <span class="sig-name descname"><span class="pre">testPrepCombinations_31_MorganFP_ProDec_RandomSplit_StandardScaler_HighCorrelationFilter_RepeatsFilter_TopKatApplicabilityDomain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.testPrepCombinations_31_MorganFP_ProDec_RandomSplit_StandardScaler_HighCorrelationFilter_RepeatsFilter_TopKatApplicabilityDomain" title="Permalink to this definition"></a></dt>
-<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Sta…ilter_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_RandomSplit_Sta…ilter_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f1cc9229e40&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f1cc9229cf0&gt;, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f1cc9120370&gt;, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f1cc91203d0&gt;, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f1cc9120430&gt;].</p>
+<dd><p>Test the preparation of the dataset [with _=’MorganFP_ProDec_RandomSplit_Sta…ilter_TopKatApplicabilityDomain’, name=’MorganFP_ProDec_RandomSplit_Sta…ilter_TopKatApplicabilityDomain’, feature_calculators=(&lt;qsprpred.data.descriptors.fing…roDec object at 0x7f062498d610&gt;), split=&lt;qsprpred.data.sampling.splits.R…mSplit object at 0x7f06246a3bf0&gt;, feature_standardizer=StandardScaler(), feature_filter=&lt;qsprpred.data.processing.featur…Filter object at 0x7f0624452e10&gt;, data_filter=&lt;qsprpred.data.processing.data_f…Filter object at 0x7f0624452e40&gt;, applicability_domain=&lt;mlchemad.applicability_domains….Domain object at 0x7f0624452e70&gt;].</p>
 <p>Use different combinations of
 feature calculators, feature standardizers, feature filters and data filters.</p>
 <dl class="field-list simple">

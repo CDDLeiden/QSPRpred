@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models package &mdash; QSPRpred 3.1.1a2.dev51+gffcd60bc documentation</title>
+  <title>qsprpred.models package &mdash; QSPRpred 3.1.1a2.dev59+ge430e991 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=70410e1b"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=fc0d3f83"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.1a2.dev51+gffcd60bc
+                v3.1.1a2.dev59+ge430e991
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -310,7 +310,7 @@ contain all  data necessary to reconstruct the object.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.models.early_stopping.EarlyStoppingMode">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.early_stopping.</span></span><span class="sig-name descname"><span class="pre">EarlyStoppingMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/early_stopping.html#EarlyStoppingMode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.early_stopping.EarlyStoppingMode" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.early_stopping.</span></span><span class="sig-name descname"><span class="pre">EarlyStoppingMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=&lt;not</span> <span class="pre">given&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/early_stopping.html#EarlyStoppingMode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.early_stopping.EarlyStoppingMode" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/enum.html#enum.Enum" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
 <p>Enum representing the type of early stopping to use.</p>
 <dl class="field-list simple">
@@ -1106,7 +1106,7 @@ the model files are stored in this directory (<code class="xref any docutils lit
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.model.QSPRModel.predict">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/qsprpred/models/model.html#QSPRModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.model.QSPRModel.predict" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="../_modules/qsprpred/models/model.html#QSPRModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.model.QSPRModel.predict" title="Permalink to this definition"></a></dt>
 <dd><p>Make predictions for the given data matrix or <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a>.</p>
 <p>Note. convertToNumpy can be called here, to convert the input data to
 np.ndarray format.</p>
@@ -1186,7 +1186,7 @@ molecule is within the applicability domain of the model.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.model.QSPRModel.predictProba">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">predictProba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsprpred/models/model.html#QSPRModel.predictProba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.model.QSPRModel.predictProba" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">predictProba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsprpred/models/model.html#QSPRModel.predictProba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.model.QSPRModel.predictProba" title="Permalink to this definition"></a></dt>
 <dd><p>Make predictions for the given data matrix or <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a>,
 but use probabilities for classification models. Does not work with
 regression models.</p>
@@ -3523,7 +3523,7 @@ indicating which molecules failed to be processed</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.scikit_learn.SklearnModel.fit">
-<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/scikit_learn.html#SklearnModel.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.scikit_learn.SklearnModel.fit" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/scikit_learn.html#SklearnModel.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.scikit_learn.SklearnModel.fit" title="Permalink to this definition"></a></dt>
 <dd><p>Fit the model to the given data matrix or <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a>.</p>
 <dl class="simple">
 <dt>Note. convertToNumpy can be called here, to convert the input data to</dt><dd><p>np.ndarray format.</p>
@@ -3800,7 +3800,7 @@ the model files are stored in this directory (<code class="xref any docutils lit
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.scikit_learn.SklearnModel.predict">
-<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/scikit_learn.html#SklearnModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.scikit_learn.SklearnModel.predict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/scikit_learn.html#SklearnModel.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.scikit_learn.SklearnModel.predict" title="Permalink to this definition"></a></dt>
 <dd><p>See <a class="reference internal" href="#qsprpred.models.model.QSPRModel.predict" title="qsprpred.models.model.QSPRModel.predict"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">QSPRModel.predict</span></code></a>.</p>
 </dd></dl>
 
@@ -3859,7 +3859,7 @@ molecule is within the applicability domain of the model.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.scikit_learn.SklearnModel.predictProba">
-<span class="sig-name descname"><span class="pre">predictProba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/scikit_learn.html#SklearnModel.predictProba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.scikit_learn.SklearnModel.predictProba" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">predictProba</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Any" title="(in Python v3.9)"><span class="pre">Any</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/scikit_learn.html#SklearnModel.predictProba"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.scikit_learn.SklearnModel.predictProba" title="Permalink to this definition"></a></dt>
 <dd><p>See <a class="reference internal" href="#qsprpred.models.model.QSPRModel.predictProba" title="qsprpred.models.model.QSPRModel.predictProba"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">QSPRModel.predictProba</span></code></a>.</p>
 </dd></dl>
 
@@ -4028,11 +4028,6 @@ compare almost equal.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.assertAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.assertAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.assertCountEqual">
 <span class="sig-name descname"><span class="pre">assertCountEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.assertCountEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Asserts that two iterables have the same elements, the same number of
@@ -4055,12 +4050,6 @@ times, without regard to order.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.assertDictContainsSubset">
-<span class="sig-name descname"><span class="pre">assertDictContainsSubset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.assertDictContainsSubset" title="Permalink to this definition"></a></dt>
-<dd><p>Checks whether dictionary is a superset of subset.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.assertDictEqual">
 <span class="sig-name descname"><span class="pre">assertDictEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.assertDictEqual" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -4071,11 +4060,6 @@ times, without regard to order.</p>
 <dd><p>Fail if the two objects are unequal as determined by the ‘==’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.assertEquals">
-<span class="sig-name descname"><span class="pre">assertEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.assertEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.assertFalse">
@@ -4209,21 +4193,11 @@ as significant digits (measured from the most significant digit).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.assertNotAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertNotAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.assertNotAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.assertNotEqual">
 <span class="sig-name descname"><span class="pre">assertNotEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.assertNotEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Fail if the two objects are equal as determined by the ‘!=’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.assertNotEquals">
-<span class="sig-name descname"><span class="pre">assertNotEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.assertNotEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.assertNotIn">
@@ -4242,11 +4216,6 @@ operator.</p>
 <span class="sig-name descname"><span class="pre">assertNotRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unexpected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.assertNotRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test if the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.assertNotRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertNotRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.assertNotRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.assertRaises">
@@ -4296,20 +4265,10 @@ when assertRaisesRegex is used as a context manager.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.assertRaisesRegexp">
-<span class="sig-name descname"><span class="pre">assertRaisesRegexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.assertRaisesRegexp" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.assertRegex">
 <span class="sig-name descname"><span class="pre">assertRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.assertRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test unless the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.assertRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.assertRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.assertSequenceEqual">
@@ -4423,11 +4382,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.assert_">
-<span class="sig-name descname"><span class="pre">assert_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.assert_" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.checkOptimization">
@@ -4560,45 +4514,24 @@ tearDown.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.enterClassContext">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enterClassContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.enterClassContext" title="Permalink to this definition"></a></dt>
+<dd><p>Same as enterContext, but class-wide.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.enterContext">
+<span class="sig-name descname"><span class="pre">enterContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.enterContext" title="Permalink to this definition"></a></dt>
+<dd><p>Enters the supplied context manager.</p>
+<p>If successful, also adds its __exit__ method as a cleanup
+function and returns the result of the __enter__ method.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.fail">
 <span class="sig-name descname"><span class="pre">fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.fail" title="Permalink to this definition"></a></dt>
 <dd><p>Fail immediately, with the given message.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.failIf">
-<span class="sig-name descname"><span class="pre">failIf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.failIf" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.failIfAlmostEqual">
-<span class="sig-name descname"><span class="pre">failIfAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.failIfAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.failIfEqual">
-<span class="sig-name descname"><span class="pre">failIfEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.failIfEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.failUnless">
-<span class="sig-name descname"><span class="pre">failUnless</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.failUnless" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.failUnlessAlmostEqual">
-<span class="sig-name descname"><span class="pre">failUnlessAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.failUnlessAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.failUnlessEqual">
-<span class="sig-name descname"><span class="pre">failUnlessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.failUnlessEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.failUnlessRaises">
-<span class="sig-name descname"><span class="pre">failUnlessRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.SklearnBaseModelTestCase.failUnlessRaises" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.models.tests.SklearnBaseModelTestCase.failureException">
@@ -4934,11 +4867,6 @@ compare almost equal.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertCountEqual">
 <span class="sig-name descname"><span class="pre">assertCountEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertCountEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Asserts that two iterables have the same elements, the same number of
@@ -4961,12 +4889,6 @@ times, without regard to order.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertDictContainsSubset">
-<span class="sig-name descname"><span class="pre">assertDictContainsSubset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertDictContainsSubset" title="Permalink to this definition"></a></dt>
-<dd><p>Checks whether dictionary is a superset of subset.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertDictEqual">
 <span class="sig-name descname"><span class="pre">assertDictEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertDictEqual" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -4977,11 +4899,6 @@ times, without regard to order.</p>
 <dd><p>Fail if the two objects are unequal as determined by the ‘==’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertEquals">
-<span class="sig-name descname"><span class="pre">assertEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertFalse">
@@ -5115,21 +5032,11 @@ as significant digits (measured from the most significant digit).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertNotAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotEqual">
 <span class="sig-name descname"><span class="pre">assertNotEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Fail if the two objects are equal as determined by the ‘!=’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotEquals">
-<span class="sig-name descname"><span class="pre">assertNotEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotIn">
@@ -5148,11 +5055,6 @@ operator.</p>
 <span class="sig-name descname"><span class="pre">assertNotRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unexpected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test if the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertNotRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertNotRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertRaises">
@@ -5202,20 +5104,10 @@ when assertRaisesRegex is used as a context manager.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertRaisesRegexp">
-<span class="sig-name descname"><span class="pre">assertRaisesRegexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertRaisesRegexp" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertRegex">
 <span class="sig-name descname"><span class="pre">assertRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test unless the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assertRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assertSequenceEqual">
@@ -5329,11 +5221,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.assert_">
-<span class="sig-name descname"><span class="pre">assert_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.assert_" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.clearGenerated">
@@ -5461,45 +5348,24 @@ tearDown.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.enterClassContext">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enterClassContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.enterClassContext" title="Permalink to this definition"></a></dt>
+<dd><p>Same as enterContext, but class-wide.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.enterContext">
+<span class="sig-name descname"><span class="pre">enterContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.enterContext" title="Permalink to this definition"></a></dt>
+<dd><p>Enters the supplied context manager.</p>
+<p>If successful, also adds its __exit__ method as a cleanup
+function and returns the result of the __enter__ method.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.fail">
 <span class="sig-name descname"><span class="pre">fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.fail" title="Permalink to this definition"></a></dt>
 <dd><p>Fail immediately, with the given message.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.failIf">
-<span class="sig-name descname"><span class="pre">failIf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.failIf" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.failIfAlmostEqual">
-<span class="sig-name descname"><span class="pre">failIfAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.failIfAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.failIfEqual">
-<span class="sig-name descname"><span class="pre">failIfEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.failIfEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.failUnless">
-<span class="sig-name descname"><span class="pre">failUnless</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.failUnless" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.failUnlessAlmostEqual">
-<span class="sig-name descname"><span class="pre">failUnlessAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.failUnlessAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.failUnlessEqual">
-<span class="sig-name descname"><span class="pre">failUnlessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.failUnlessEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.failUnlessRaises">
-<span class="sig-name descname"><span class="pre">failUnlessRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestAttachedApplicabilityDomain.failUnlessRaises" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestAttachedApplicabilityDomain.failureException">
@@ -5756,11 +5622,6 @@ compare almost equal.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.assertAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.assertAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.assertCountEqual">
 <span class="sig-name descname"><span class="pre">assertCountEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.assertCountEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Asserts that two iterables have the same elements, the same number of
@@ -5783,12 +5644,6 @@ times, without regard to order.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.assertDictContainsSubset">
-<span class="sig-name descname"><span class="pre">assertDictContainsSubset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.assertDictContainsSubset" title="Permalink to this definition"></a></dt>
-<dd><p>Checks whether dictionary is a superset of subset.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.assertDictEqual">
 <span class="sig-name descname"><span class="pre">assertDictEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.assertDictEqual" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -5799,11 +5654,6 @@ times, without regard to order.</p>
 <dd><p>Fail if the two objects are unequal as determined by the ‘==’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.assertEquals">
-<span class="sig-name descname"><span class="pre">assertEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.assertEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.assertFalse">
@@ -5937,21 +5787,11 @@ as significant digits (measured from the most significant digit).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.assertNotAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertNotAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.assertNotAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.assertNotEqual">
 <span class="sig-name descname"><span class="pre">assertNotEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.assertNotEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Fail if the two objects are equal as determined by the ‘!=’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.assertNotEquals">
-<span class="sig-name descname"><span class="pre">assertNotEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.assertNotEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.assertNotIn">
@@ -5970,11 +5810,6 @@ operator.</p>
 <span class="sig-name descname"><span class="pre">assertNotRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unexpected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.assertNotRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test if the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.assertNotRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertNotRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.assertNotRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.assertRaises">
@@ -6024,20 +5859,10 @@ when assertRaisesRegex is used as a context manager.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.assertRaisesRegexp">
-<span class="sig-name descname"><span class="pre">assertRaisesRegexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.assertRaisesRegexp" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.assertRegex">
 <span class="sig-name descname"><span class="pre">assertRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.assertRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test unless the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.assertRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.assertRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.assertSequenceEqual">
@@ -6151,11 +5976,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.assert_">
-<span class="sig-name descname"><span class="pre">assert_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.assert_" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.clearGenerated">
@@ -6283,45 +6103,24 @@ tearDown.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.enterClassContext">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enterClassContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.enterClassContext" title="Permalink to this definition"></a></dt>
+<dd><p>Same as enterContext, but class-wide.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.enterContext">
+<span class="sig-name descname"><span class="pre">enterContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.enterContext" title="Permalink to this definition"></a></dt>
+<dd><p>Enters the supplied context manager.</p>
+<p>If successful, also adds its __exit__ method as a cleanup
+function and returns the result of the __enter__ method.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.fail">
 <span class="sig-name descname"><span class="pre">fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.fail" title="Permalink to this definition"></a></dt>
 <dd><p>Fail immediately, with the given message.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.failIf">
-<span class="sig-name descname"><span class="pre">failIf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.failIf" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.failIfAlmostEqual">
-<span class="sig-name descname"><span class="pre">failIfAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.failIfAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.failIfEqual">
-<span class="sig-name descname"><span class="pre">failIfEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.failIfEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.failUnless">
-<span class="sig-name descname"><span class="pre">failUnless</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.failUnless" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.failUnlessAlmostEqual">
-<span class="sig-name descname"><span class="pre">failUnlessAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.failUnlessAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.failUnlessEqual">
-<span class="sig-name descname"><span class="pre">failUnlessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.failUnlessEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.failUnlessRaises">
-<span class="sig-name descname"><span class="pre">failUnlessRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestEarlyStopping.failUnlessRaises" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestEarlyStopping.failureException">
@@ -6591,11 +6390,6 @@ compare almost equal.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.assertAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.assertAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.assertCountEqual">
 <span class="sig-name descname"><span class="pre">assertCountEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.assertCountEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Asserts that two iterables have the same elements, the same number of
@@ -6618,12 +6412,6 @@ times, without regard to order.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.assertDictContainsSubset">
-<span class="sig-name descname"><span class="pre">assertDictContainsSubset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.assertDictContainsSubset" title="Permalink to this definition"></a></dt>
-<dd><p>Checks whether dictionary is a superset of subset.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.assertDictEqual">
 <span class="sig-name descname"><span class="pre">assertDictEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.assertDictEqual" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -6634,11 +6422,6 @@ times, without regard to order.</p>
 <dd><p>Fail if the two objects are unequal as determined by the ‘==’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.assertEquals">
-<span class="sig-name descname"><span class="pre">assertEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.assertEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.assertFalse">
@@ -6772,21 +6555,11 @@ as significant digits (measured from the most significant digit).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.assertNotAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertNotAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.assertNotAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.assertNotEqual">
 <span class="sig-name descname"><span class="pre">assertNotEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.assertNotEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Fail if the two objects are equal as determined by the ‘!=’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.assertNotEquals">
-<span class="sig-name descname"><span class="pre">assertNotEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.assertNotEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.assertNotIn">
@@ -6805,11 +6578,6 @@ operator.</p>
 <span class="sig-name descname"><span class="pre">assertNotRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unexpected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.assertNotRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test if the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.assertNotRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertNotRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.assertNotRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.assertRaises">
@@ -6859,20 +6627,10 @@ when assertRaisesRegex is used as a context manager.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.assertRaisesRegexp">
-<span class="sig-name descname"><span class="pre">assertRaisesRegexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.assertRaisesRegexp" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.assertRegex">
 <span class="sig-name descname"><span class="pre">assertRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.assertRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test unless the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.assertRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.assertRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.assertSequenceEqual">
@@ -6988,11 +6746,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.assert_">
-<span class="sig-name descname"><span class="pre">assert_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.assert_" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.countTestCases">
 <span class="sig-name descname"><span class="pre">countTestCases</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.countTestCases" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -7023,45 +6776,24 @@ tearDown.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.enterClassContext">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enterClassContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.enterClassContext" title="Permalink to this definition"></a></dt>
+<dd><p>Same as enterContext, but class-wide.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.enterContext">
+<span class="sig-name descname"><span class="pre">enterContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.enterContext" title="Permalink to this definition"></a></dt>
+<dd><p>Enters the supplied context manager.</p>
+<p>If successful, also adds its __exit__ method as a cleanup
+function and returns the result of the __enter__ method.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.fail">
 <span class="sig-name descname"><span class="pre">fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.fail" title="Permalink to this definition"></a></dt>
 <dd><p>Fail immediately, with the given message.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.failIf">
-<span class="sig-name descname"><span class="pre">failIf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.failIf" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.failIfAlmostEqual">
-<span class="sig-name descname"><span class="pre">failIfAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.failIfAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.failIfEqual">
-<span class="sig-name descname"><span class="pre">failIfEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.failIfEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.failUnless">
-<span class="sig-name descname"><span class="pre">failUnless</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.failUnless" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.failUnlessAlmostEqual">
-<span class="sig-name descname"><span class="pre">failUnlessAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.failUnlessAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.failUnlessEqual">
-<span class="sig-name descname"><span class="pre">failUnlessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.failUnlessEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.failUnlessRaises">
-<span class="sig-name descname"><span class="pre">failUnlessRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.failUnlessRaises" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.failureException">
@@ -7203,11 +6935,6 @@ compare almost equal.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.assertAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.assertAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.assertCountEqual">
 <span class="sig-name descname"><span class="pre">assertCountEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.assertCountEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Asserts that two iterables have the same elements, the same number of
@@ -7230,12 +6957,6 @@ times, without regard to order.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.assertDictContainsSubset">
-<span class="sig-name descname"><span class="pre">assertDictContainsSubset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.assertDictContainsSubset" title="Permalink to this definition"></a></dt>
-<dd><p>Checks whether dictionary is a superset of subset.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.assertDictEqual">
 <span class="sig-name descname"><span class="pre">assertDictEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.assertDictEqual" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -7246,11 +6967,6 @@ times, without regard to order.</p>
 <dd><p>Fail if the two objects are unequal as determined by the ‘==’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.assertEquals">
-<span class="sig-name descname"><span class="pre">assertEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.assertEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.assertFalse">
@@ -7384,21 +7100,11 @@ as significant digits (measured from the most significant digit).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.assertNotAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertNotAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.assertNotAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.assertNotEqual">
 <span class="sig-name descname"><span class="pre">assertNotEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.assertNotEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Fail if the two objects are equal as determined by the ‘!=’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.assertNotEquals">
-<span class="sig-name descname"><span class="pre">assertNotEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.assertNotEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.assertNotIn">
@@ -7417,11 +7123,6 @@ operator.</p>
 <span class="sig-name descname"><span class="pre">assertNotRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unexpected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.assertNotRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test if the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.assertNotRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertNotRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.assertNotRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.assertRaises">
@@ -7471,20 +7172,10 @@ when assertRaisesRegex is used as a context manager.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.assertRaisesRegexp">
-<span class="sig-name descname"><span class="pre">assertRaisesRegexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.assertRaisesRegexp" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.assertRegex">
 <span class="sig-name descname"><span class="pre">assertRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.assertRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test unless the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.assertRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.assertRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.assertSequenceEqual">
@@ -7598,11 +7289,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.assert_">
-<span class="sig-name descname"><span class="pre">assert_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.assert_" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.baseMonitorTest">
@@ -7741,45 +7427,24 @@ tearDown.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.enterClassContext">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enterClassContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.enterClassContext" title="Permalink to this definition"></a></dt>
+<dd><p>Same as enterContext, but class-wide.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.enterContext">
+<span class="sig-name descname"><span class="pre">enterContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.enterContext" title="Permalink to this definition"></a></dt>
+<dd><p>Enters the supplied context manager.</p>
+<p>If successful, also adds its __exit__ method as a cleanup
+function and returns the result of the __enter__ method.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.fail">
 <span class="sig-name descname"><span class="pre">fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.fail" title="Permalink to this definition"></a></dt>
 <dd><p>Fail immediately, with the given message.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.failIf">
-<span class="sig-name descname"><span class="pre">failIf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.failIf" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.failIfAlmostEqual">
-<span class="sig-name descname"><span class="pre">failIfAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.failIfAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.failIfEqual">
-<span class="sig-name descname"><span class="pre">failIfEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.failIfEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.failUnless">
-<span class="sig-name descname"><span class="pre">failUnless</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.failUnless" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.failUnlessAlmostEqual">
-<span class="sig-name descname"><span class="pre">failUnlessAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.failUnlessAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.failUnlessEqual">
-<span class="sig-name descname"><span class="pre">failUnlessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.failUnlessEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.failUnlessRaises">
-<span class="sig-name descname"><span class="pre">failUnlessRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMonitors.failUnlessRaises" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMonitors.failureException">
@@ -8131,11 +7796,6 @@ compare almost equal.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.assertAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.assertAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.assertCountEqual">
 <span class="sig-name descname"><span class="pre">assertCountEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.assertCountEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Asserts that two iterables have the same elements, the same number of
@@ -8158,12 +7818,6 @@ times, without regard to order.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.assertDictContainsSubset">
-<span class="sig-name descname"><span class="pre">assertDictContainsSubset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.assertDictContainsSubset" title="Permalink to this definition"></a></dt>
-<dd><p>Checks whether dictionary is a superset of subset.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.assertDictEqual">
 <span class="sig-name descname"><span class="pre">assertDictEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.assertDictEqual" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -8174,11 +7828,6 @@ times, without regard to order.</p>
 <dd><p>Fail if the two objects are unequal as determined by the ‘==’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.assertEquals">
-<span class="sig-name descname"><span class="pre">assertEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.assertEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.assertFalse">
@@ -8312,21 +7961,11 @@ as significant digits (measured from the most significant digit).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.assertNotAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertNotAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.assertNotAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.assertNotEqual">
 <span class="sig-name descname"><span class="pre">assertNotEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.assertNotEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Fail if the two objects are equal as determined by the ‘!=’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.assertNotEquals">
-<span class="sig-name descname"><span class="pre">assertNotEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.assertNotEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.assertNotIn">
@@ -8345,11 +7984,6 @@ operator.</p>
 <span class="sig-name descname"><span class="pre">assertNotRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unexpected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.assertNotRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test if the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.assertNotRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertNotRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.assertNotRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.assertRaises">
@@ -8399,20 +8033,10 @@ when assertRaisesRegex is used as a context manager.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.assertRaisesRegexp">
-<span class="sig-name descname"><span class="pre">assertRaisesRegexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.assertRaisesRegexp" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.assertRegex">
 <span class="sig-name descname"><span class="pre">assertRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.assertRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test unless the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.assertRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.assertRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.assertSequenceEqual">
@@ -8526,11 +8150,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.assert_">
-<span class="sig-name descname"><span class="pre">assert_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.assert_" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.checkOptimization">
@@ -8663,45 +8282,24 @@ tearDown.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.enterClassContext">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enterClassContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.enterClassContext" title="Permalink to this definition"></a></dt>
+<dd><p>Same as enterContext, but class-wide.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.enterContext">
+<span class="sig-name descname"><span class="pre">enterContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.enterContext" title="Permalink to this definition"></a></dt>
+<dd><p>Enters the supplied context manager.</p>
+<p>If successful, also adds its __exit__ method as a cleanup
+function and returns the result of the __enter__ method.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.fail">
 <span class="sig-name descname"><span class="pre">fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.fail" title="Permalink to this definition"></a></dt>
 <dd><p>Fail immediately, with the given message.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.failIf">
-<span class="sig-name descname"><span class="pre">failIf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.failIf" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.failIfAlmostEqual">
-<span class="sig-name descname"><span class="pre">failIfAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.failIfAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.failIfEqual">
-<span class="sig-name descname"><span class="pre">failIfEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.failIfEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.failUnless">
-<span class="sig-name descname"><span class="pre">failUnless</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.failUnless" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.failUnlessAlmostEqual">
-<span class="sig-name descname"><span class="pre">failUnlessAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.failUnlessAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.failUnlessEqual">
-<span class="sig-name descname"><span class="pre">failUnlessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.failUnlessEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.failUnlessRaises">
-<span class="sig-name descname"><span class="pre">failUnlessRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassification.failUnlessRaises" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassification.failureException">
@@ -9156,11 +8754,6 @@ compare almost equal.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.assertAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.assertAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.assertCountEqual">
 <span class="sig-name descname"><span class="pre">assertCountEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.assertCountEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Asserts that two iterables have the same elements, the same number of
@@ -9183,12 +8776,6 @@ times, without regard to order.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.assertDictContainsSubset">
-<span class="sig-name descname"><span class="pre">assertDictContainsSubset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.assertDictContainsSubset" title="Permalink to this definition"></a></dt>
-<dd><p>Checks whether dictionary is a superset of subset.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.assertDictEqual">
 <span class="sig-name descname"><span class="pre">assertDictEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.assertDictEqual" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -9199,11 +8786,6 @@ times, without regard to order.</p>
 <dd><p>Fail if the two objects are unequal as determined by the ‘==’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.assertEquals">
-<span class="sig-name descname"><span class="pre">assertEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.assertEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.assertFalse">
@@ -9337,21 +8919,11 @@ as significant digits (measured from the most significant digit).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.assertNotAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertNotAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.assertNotAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.assertNotEqual">
 <span class="sig-name descname"><span class="pre">assertNotEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.assertNotEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Fail if the two objects are equal as determined by the ‘!=’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.assertNotEquals">
-<span class="sig-name descname"><span class="pre">assertNotEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.assertNotEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.assertNotIn">
@@ -9370,11 +8942,6 @@ operator.</p>
 <span class="sig-name descname"><span class="pre">assertNotRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unexpected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.assertNotRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test if the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.assertNotRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertNotRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.assertNotRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.assertRaises">
@@ -9424,20 +8991,10 @@ when assertRaisesRegex is used as a context manager.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.assertRaisesRegexp">
-<span class="sig-name descname"><span class="pre">assertRaisesRegexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.assertRaisesRegexp" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.assertRegex">
 <span class="sig-name descname"><span class="pre">assertRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.assertRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test unless the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.assertRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.assertRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.assertSequenceEqual">
@@ -9551,11 +9108,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.assert_">
-<span class="sig-name descname"><span class="pre">assert_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.assert_" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.checkOptimization">
@@ -9688,45 +9240,24 @@ tearDown.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.enterClassContext">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enterClassContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.enterClassContext" title="Permalink to this definition"></a></dt>
+<dd><p>Same as enterContext, but class-wide.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.enterContext">
+<span class="sig-name descname"><span class="pre">enterContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.enterContext" title="Permalink to this definition"></a></dt>
+<dd><p>Enters the supplied context manager.</p>
+<p>If successful, also adds its __exit__ method as a cleanup
+function and returns the result of the __enter__ method.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.fail">
 <span class="sig-name descname"><span class="pre">fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.fail" title="Permalink to this definition"></a></dt>
 <dd><p>Fail immediately, with the given message.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.failIf">
-<span class="sig-name descname"><span class="pre">failIf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.failIf" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.failIfAlmostEqual">
-<span class="sig-name descname"><span class="pre">failIfAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.failIfAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.failIfEqual">
-<span class="sig-name descname"><span class="pre">failIfEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.failIfEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.failUnless">
-<span class="sig-name descname"><span class="pre">failUnless</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.failUnless" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.failUnlessAlmostEqual">
-<span class="sig-name descname"><span class="pre">failUnlessAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.failUnlessAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.failUnlessEqual">
-<span class="sig-name descname"><span class="pre">failUnlessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.failUnlessEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.failUnlessRaises">
-<span class="sig-name descname"><span class="pre">failUnlessRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnClassificationMultiTask.failUnlessRaises" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnClassificationMultiTask.failureException">
@@ -10092,11 +9623,6 @@ compare almost equal.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.assertAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.assertAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.assertCountEqual">
 <span class="sig-name descname"><span class="pre">assertCountEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.assertCountEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Asserts that two iterables have the same elements, the same number of
@@ -10119,12 +9645,6 @@ times, without regard to order.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.assertDictContainsSubset">
-<span class="sig-name descname"><span class="pre">assertDictContainsSubset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.assertDictContainsSubset" title="Permalink to this definition"></a></dt>
-<dd><p>Checks whether dictionary is a superset of subset.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.assertDictEqual">
 <span class="sig-name descname"><span class="pre">assertDictEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.assertDictEqual" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -10135,11 +9655,6 @@ times, without regard to order.</p>
 <dd><p>Fail if the two objects are unequal as determined by the ‘==’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.assertEquals">
-<span class="sig-name descname"><span class="pre">assertEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.assertEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.assertFalse">
@@ -10273,21 +9788,11 @@ as significant digits (measured from the most significant digit).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.assertNotAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertNotAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.assertNotAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.assertNotEqual">
 <span class="sig-name descname"><span class="pre">assertNotEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.assertNotEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Fail if the two objects are equal as determined by the ‘!=’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.assertNotEquals">
-<span class="sig-name descname"><span class="pre">assertNotEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.assertNotEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.assertNotIn">
@@ -10306,11 +9811,6 @@ operator.</p>
 <span class="sig-name descname"><span class="pre">assertNotRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unexpected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.assertNotRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test if the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.assertNotRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertNotRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.assertNotRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.assertRaises">
@@ -10360,20 +9860,10 @@ when assertRaisesRegex is used as a context manager.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.assertRaisesRegexp">
-<span class="sig-name descname"><span class="pre">assertRaisesRegexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.assertRaisesRegexp" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.assertRegex">
 <span class="sig-name descname"><span class="pre">assertRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.assertRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test unless the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.assertRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.assertRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.assertSequenceEqual">
@@ -10487,11 +9977,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.assert_">
-<span class="sig-name descname"><span class="pre">assert_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.assert_" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.checkOptimization">
@@ -10624,45 +10109,24 @@ tearDown.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.enterClassContext">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enterClassContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.enterClassContext" title="Permalink to this definition"></a></dt>
+<dd><p>Same as enterContext, but class-wide.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.enterContext">
+<span class="sig-name descname"><span class="pre">enterContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.enterContext" title="Permalink to this definition"></a></dt>
+<dd><p>Enters the supplied context manager.</p>
+<p>If successful, also adds its __exit__ method as a cleanup
+function and returns the result of the __enter__ method.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.fail">
 <span class="sig-name descname"><span class="pre">fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.fail" title="Permalink to this definition"></a></dt>
 <dd><p>Fail immediately, with the given message.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.failIf">
-<span class="sig-name descname"><span class="pre">failIf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.failIf" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.failIfAlmostEqual">
-<span class="sig-name descname"><span class="pre">failIfAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.failIfAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.failIfEqual">
-<span class="sig-name descname"><span class="pre">failIfEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.failIfEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.failUnless">
-<span class="sig-name descname"><span class="pre">failUnless</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.failUnless" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.failUnlessAlmostEqual">
-<span class="sig-name descname"><span class="pre">failUnlessAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.failUnlessAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.failUnlessEqual">
-<span class="sig-name descname"><span class="pre">failUnlessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.failUnlessEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.failUnlessRaises">
-<span class="sig-name descname"><span class="pre">failUnlessRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegression.failUnlessRaises" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegression.failureException">
@@ -11064,11 +10528,6 @@ compare almost equal.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.assertAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.assertAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.assertCountEqual">
 <span class="sig-name descname"><span class="pre">assertCountEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.assertCountEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Asserts that two iterables have the same elements, the same number of
@@ -11091,12 +10550,6 @@ times, without regard to order.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.assertDictContainsSubset">
-<span class="sig-name descname"><span class="pre">assertDictContainsSubset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.assertDictContainsSubset" title="Permalink to this definition"></a></dt>
-<dd><p>Checks whether dictionary is a superset of subset.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.assertDictEqual">
 <span class="sig-name descname"><span class="pre">assertDictEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.assertDictEqual" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -11107,11 +10560,6 @@ times, without regard to order.</p>
 <dd><p>Fail if the two objects are unequal as determined by the ‘==’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.assertEquals">
-<span class="sig-name descname"><span class="pre">assertEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.assertEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.assertFalse">
@@ -11245,21 +10693,11 @@ as significant digits (measured from the most significant digit).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.assertNotAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertNotAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.assertNotAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.assertNotEqual">
 <span class="sig-name descname"><span class="pre">assertNotEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.assertNotEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Fail if the two objects are equal as determined by the ‘!=’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.assertNotEquals">
-<span class="sig-name descname"><span class="pre">assertNotEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.assertNotEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.assertNotIn">
@@ -11278,11 +10716,6 @@ operator.</p>
 <span class="sig-name descname"><span class="pre">assertNotRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unexpected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.assertNotRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test if the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.assertNotRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertNotRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.assertNotRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.assertRaises">
@@ -11332,20 +10765,10 @@ when assertRaisesRegex is used as a context manager.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.assertRaisesRegexp">
-<span class="sig-name descname"><span class="pre">assertRaisesRegexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.assertRaisesRegexp" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.assertRegex">
 <span class="sig-name descname"><span class="pre">assertRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.assertRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test unless the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.assertRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.assertRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.assertSequenceEqual">
@@ -11459,11 +10882,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.assert_">
-<span class="sig-name descname"><span class="pre">assert_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.assert_" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.checkOptimization">
@@ -11596,45 +11014,24 @@ tearDown.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.enterClassContext">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enterClassContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.enterClassContext" title="Permalink to this definition"></a></dt>
+<dd><p>Same as enterContext, but class-wide.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.enterContext">
+<span class="sig-name descname"><span class="pre">enterContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.enterContext" title="Permalink to this definition"></a></dt>
+<dd><p>Enters the supplied context manager.</p>
+<p>If successful, also adds its __exit__ method as a cleanup
+function and returns the result of the __enter__ method.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.fail">
 <span class="sig-name descname"><span class="pre">fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.fail" title="Permalink to this definition"></a></dt>
 <dd><p>Fail immediately, with the given message.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.failIf">
-<span class="sig-name descname"><span class="pre">failIf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.failIf" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.failIfAlmostEqual">
-<span class="sig-name descname"><span class="pre">failIfAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.failIfAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.failIfEqual">
-<span class="sig-name descname"><span class="pre">failIfEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.failIfEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.failUnless">
-<span class="sig-name descname"><span class="pre">failUnless</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.failUnless" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.failUnlessAlmostEqual">
-<span class="sig-name descname"><span class="pre">failUnlessAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.failUnlessAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.failUnlessEqual">
-<span class="sig-name descname"><span class="pre">failUnlessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.failUnlessEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.failUnlessRaises">
-<span class="sig-name descname"><span class="pre">failUnlessRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnRegressionMultiTask.failUnlessRaises" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnRegressionMultiTask.failureException">
@@ -11999,11 +11396,6 @@ compare almost equal.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.assertAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.assertAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.assertCountEqual">
 <span class="sig-name descname"><span class="pre">assertCountEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.assertCountEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Asserts that two iterables have the same elements, the same number of
@@ -12026,12 +11418,6 @@ times, without regard to order.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.assertDictContainsSubset">
-<span class="sig-name descname"><span class="pre">assertDictContainsSubset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.assertDictContainsSubset" title="Permalink to this definition"></a></dt>
-<dd><p>Checks whether dictionary is a superset of subset.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.assertDictEqual">
 <span class="sig-name descname"><span class="pre">assertDictEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.assertDictEqual" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -12042,11 +11428,6 @@ times, without regard to order.</p>
 <dd><p>Fail if the two objects are unequal as determined by the ‘==’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.assertEquals">
-<span class="sig-name descname"><span class="pre">assertEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.assertEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.assertFalse">
@@ -12180,21 +11561,11 @@ as significant digits (measured from the most significant digit).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.assertNotAlmostEquals">
-<span class="sig-name descname"><span class="pre">assertNotAlmostEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.assertNotAlmostEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.assertNotEqual">
 <span class="sig-name descname"><span class="pre">assertNotEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.assertNotEqual" title="Permalink to this definition"></a></dt>
 <dd><p>Fail if the two objects are equal as determined by the ‘!=’
 operator.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.assertNotEquals">
-<span class="sig-name descname"><span class="pre">assertNotEquals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.assertNotEquals" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.assertNotIn">
@@ -12213,11 +11584,6 @@ operator.</p>
 <span class="sig-name descname"><span class="pre">assertNotRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unexpected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.assertNotRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test if the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.assertNotRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertNotRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.assertNotRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.assertRaises">
@@ -12267,20 +11633,10 @@ when assertRaisesRegex is used as a context manager.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.assertRaisesRegexp">
-<span class="sig-name descname"><span class="pre">assertRaisesRegexp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.assertRaisesRegexp" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.assertRegex">
 <span class="sig-name descname"><span class="pre">assertRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.assertRegex" title="Permalink to this definition"></a></dt>
 <dd><p>Fail the test unless the text matches the regular expression.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.assertRegexpMatches">
-<span class="sig-name descname"><span class="pre">assertRegexpMatches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.assertRegexpMatches" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.assertSequenceEqual">
@@ -12394,11 +11750,6 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.assert_">
-<span class="sig-name descname"><span class="pre">assert_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.assert_" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.checkOptimization">
@@ -12531,45 +11882,24 @@ tearDown.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.enterClassContext">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enterClassContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.enterClassContext" title="Permalink to this definition"></a></dt>
+<dd><p>Same as enterContext, but class-wide.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.enterContext">
+<span class="sig-name descname"><span class="pre">enterContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.enterContext" title="Permalink to this definition"></a></dt>
+<dd><p>Enters the supplied context manager.</p>
+<p>If successful, also adds its __exit__ method as a cleanup
+function and returns the result of the __enter__ method.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.fail">
 <span class="sig-name descname"><span class="pre">fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.fail" title="Permalink to this definition"></a></dt>
 <dd><p>Fail immediately, with the given message.</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.failIf">
-<span class="sig-name descname"><span class="pre">failIf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.failIf" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.failIfAlmostEqual">
-<span class="sig-name descname"><span class="pre">failIfAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.failIfAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.failIfEqual">
-<span class="sig-name descname"><span class="pre">failIfEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.failIfEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.failUnless">
-<span class="sig-name descname"><span class="pre">failUnless</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.failUnless" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.failUnlessAlmostEqual">
-<span class="sig-name descname"><span class="pre">failUnlessAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.failUnlessAlmostEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.failUnlessEqual">
-<span class="sig-name descname"><span class="pre">failUnlessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.failUnlessEqual" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.failUnlessRaises">
-<span class="sig-name descname"><span class="pre">failUnlessRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestSklearnSerialization.failUnlessRaises" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestSklearnSerialization.failureException">

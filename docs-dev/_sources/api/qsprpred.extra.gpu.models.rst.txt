@@ -44,14 +44,6 @@ qsprpred.extra.gpu.models.neural\_network module
    :undoc-members:
    :show-inheritance:
 
-qsprpred.extra.gpu.models.pyboost module
-----------------------------------------
-
-.. automodule:: qsprpred.extra.gpu.models.pyboost
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 qsprpred.extra.gpu.models.tests module
 --------------------------------------
 
