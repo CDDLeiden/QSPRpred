@@ -6,7 +6,6 @@ from typing import Optional, ClassVar, Generator, Literal, Callable, Any
 import numpy as np
 import pandas as pd
 from rdkit import Chem
-from rdkit.Chem import PandasTools
 
 from qsprpred.data.tables.searchable import SearchableMolTable
 from .pandas import PandasDataTable
@@ -32,18 +31,18 @@ class DescriptorTable(PandasDataTable):
     """
 
     def __init__(
-        self,
-        calculator: DescriptorSet,
-        name: str,
-        df: Optional[pd.DataFrame] = None,
-        store_dir: str = ".",
-        overwrite: bool = False,
-        key_cols: list | None = None,
-        n_jobs: int = 1,
-        chunk_size: int = 1000,
-        autoindex_name: str = "QSPRID",
-        random_state: int | None = None,
-        store_format: str = "pkl",
+            self,
+            calculator: DescriptorSet,
+            name: str,
+            df: Optional[pd.DataFrame] = None,
+            store_dir: str = ".",
+            overwrite: bool = False,
+            key_cols: list | None = None,
+            n_jobs: int = 1,
+            chunk_size: int = 1000,
+            autoindex_name: str = "QSPRID",
+            random_state: int | None = None,
+            store_format: str = "pkl",
     ):
         """Initialize a `DescriptorTable` object.
 
@@ -173,20 +172,20 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
     _notJSON: ClassVar = PandasDataTable._notJSON + ["descriptors"]
 
     def __init__(
-        self,
-        name: str,
-        df: Optional[pd.DataFrame] = None,
-        smiles_col: str = "SMILES",
-        add_rdkit: bool = False,
-        store_dir: str = ".",
-        overwrite: bool = False,
-        n_jobs: int | None = 1,
-        chunk_size: int | None = None,
-        drop_invalids: bool = True,
-        index_cols: Optional[list[str]] = None,
-        autoindex_name: str = "QSPRID",
-        random_state: int | None = None,
-        store_format: str = "pkl",
+            self,
+            name: str,
+            df: Optional[pd.DataFrame] = None,
+            smiles_col: str = "SMILES",
+            add_rdkit: bool = False,
+            store_dir: str = ".",
+            overwrite: bool = False,
+            n_jobs: int | None = 1,
+            chunk_size: int | None = None,
+            drop_invalids: bool = True,
+            index_cols: Optional[list[str]] = None,
+            autoindex_name: str = "QSPRID",
+            random_state: int | None = None,
+            store_format: str = "pkl",
     ):
         """Initialize a `MoleculeTable` object.
 
@@ -245,6 +244,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             self.invalidsRemoved = True
         # add rdkit molecules if requested
         if self.includesRdkit and "RDMol" not in self.df.columns:
+            from rdkit.Chem import PandasTools
             PandasTools.AddMoleculeColumnToFrame(
                 self.df,
                 smilesCol=self.smilesCol,
@@ -254,7 +254,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             self.includesRdkit = True
 
     def searchWithIndex(
-        self, index: pd.Index, name: str | None = None
+            self, index: pd.Index, name: str | None = None
     ) -> "MoleculeTable":
         """Search in this table using a pandas index. The return values
         is a new table with the molecules from the old table with the given indices.
@@ -304,7 +304,8 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         return ret
 
     def searchOnProperty(
-        self, prop_name: str, values: list[str], name: str | None = None, exact=False
+            self, prop_name: str, values: list[str], name: str | None = None,
+            exact=False
     ) -> "MoleculeTable":
         """Search in this table using a property name and a list of values. It is
         assumed that the property is searchable with string matching. Either an
@@ -343,12 +344,12 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         return self.searchWithIndex(matches, name)
 
     def searchWithSMARTS(
-        self,
-        patterns: list[str],
-        operator: Literal["or", "and"] = "or",
-        use_chirality: bool = False,
-        name: str | None = None,
-        match_function: Callable = match_mol_to_smarts,
+            self,
+            patterns: list[str],
+            operator: Literal["or", "and"] = "or",
+            use_chirality: bool = False,
+            name: str | None = None,
+            match_function: Callable = match_mol_to_smarts,
     ) -> "MoleculeTable":
         """Search the molecules in the table with a SMARTS pattern.
 
@@ -403,7 +404,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         return pd.DataFrame(summary)
 
     def sample(
-        self, n: int, name: str | None = None, random_state: int | None = None
+            self, n: int, name: str | None = None, random_state: int | None = None
     ) -> "MoleculeTable":
         """
         Sample n molecules from the table.
@@ -504,13 +505,13 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
 
     @classmethod
     def runMolProcess(
-        cls,
-        props: dict[str, list] | pd.DataFrame,
-        func: MolProcessor,
-        add_rdkit: bool,
-        smiles_col: str,
-        *args,
-        **kwargs,
+            cls,
+            props: dict[str, list] | pd.DataFrame,
+            func: MolProcessor,
+            add_rdkit: bool,
+            smiles_col: str,
+            *args,
+            **kwargs,
     ):
         """A helper method to run a `MolProcessor` on a list of molecules via `apply`.
         It converts the SMILES to RDKit molecules if required and then applies the
@@ -543,14 +544,14 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         return func(mols, props, *args, **kwargs)
 
     def processMols(
-        self,
-        processor: MolProcessor,
-        proc_args: tuple[Any] | None = None,
-        proc_kwargs: dict[str, Any] | None = None,
-        add_props: list[str] | None = None,
-        as_rdkit: bool = False,
-        chunk_size: int | None = None,
-        n_jobs: int | None = None,
+            self,
+            processor: MolProcessor,
+            proc_args: tuple[Any] | None = None,
+            proc_kwargs: dict[str, Any] | None = None,
+            add_props: list[str] | None = None,
+            as_rdkit: bool = False,
+            chunk_size: int | None = None,
+            n_jobs: int | None = None,
     ) -> Generator:
         """Apply a function to the molecules in the data frame.
         The SMILES  or an RDKit molecule will be supplied as the first
@@ -613,13 +614,13 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 f"Applying processor '{processor}' to '{self.name}' in parallel."
             )
             for result in self.apply(
-                self.runMolProcess,
-                func_args=[processor, as_rdkit, self.smilesCol, *proc_args],
-                func_kwargs=proc_kwargs,
-                on_props=add_props,
-                as_df=False,
-                chunk_size=chunk_size,
-                n_jobs=n_jobs,
+                    self.runMolProcess,
+                    func_args=[processor, as_rdkit, self.smilesCol, *proc_args],
+                    func_kwargs=proc_kwargs,
+                    on_props=add_props,
+                    as_df=False,
+                    chunk_size=chunk_size,
+                    n_jobs=n_jobs,
             ):
                 yield result
         else:
@@ -627,7 +628,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 f"Applying processor '{processor}' to '{self.name}' in serial."
             )
             for result in self.iterChunks(
-                include_props=add_props, as_dict=True, chunk_size=len(self)
+                    include_props=add_props, as_dict=True, chunk_size=len(self)
             ):
                 yield self.runMolProcess(
                     result,
@@ -651,7 +652,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         """
         mask = pd.Series([False] * len(self), index=self.df.index, dtype=bool)
         for result in self.processMols(
-            CheckSmilesValid(id_prop=self.idProp), proc_kwargs={"throw": throw}
+                CheckSmilesValid(id_prop=self.idProp), proc_kwargs={"throw": throw}
         ):
             mask.loc[result.index] = result.values
         return mask
@@ -674,9 +675,9 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             ds.keepDescriptors(to_keep)
 
     def dropDescriptorSets(
-        self,
-        descriptors: list[DescriptorSet | str],
-        full_removal: bool = False,
+            self,
+            descriptors: list[DescriptorSet | str],
+            full_removal: bool = False,
     ):
         """
         Drop descriptors from the given sets from the data frame.
@@ -694,7 +695,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         """
         # sanity check
         assert (
-            len(self.descriptors) != 0
+                len(self.descriptors) != 0
         ), "Cannot drop descriptors because the data set does not contain any."
         if len(descriptors) == 0:
             logger.warning(
@@ -739,10 +740,10 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         self.df.dropna(subset=[self.smilesCol], inplace=True)
 
     def attachDescriptors(
-        self,
-        calculator: DescriptorSet,
-        descriptors: pd.DataFrame,
-        index_cols: list,
+            self,
+            calculator: DescriptorSet,
+            descriptors: pd.DataFrame,
+            index_cols: list,
     ):
         """Attach descriptors to the data frame.
 
@@ -768,12 +769,12 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         )
 
     def addDescriptors(
-        self,
-        descriptors: list[DescriptorSet],
-        recalculate: bool = False,
-        fail_on_invalid: bool = True,
-        *args,
-        **kwargs,
+            self,
+            descriptors: list[DescriptorSet],
+            recalculate: bool = False,
+            fail_on_invalid: bool = True,
+            *args,
+            **kwargs,
     ):
         """Add descriptors to the data frame with the given descriptor calculators.
 
@@ -828,7 +829,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         for calculator in to_calculate:
             df_descriptors = []
             for result in self.processMols(
-                calculator, proc_args=args, proc_kwargs=kwargs
+                    calculator, proc_args=args, proc_kwargs=kwargs
             ):
                 df_descriptors.append(result)
             df_descriptors = pd.concat(df_descriptors, axis=0)
@@ -860,7 +861,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         return names
 
     def hasDescriptors(
-        self, descriptors: list[DescriptorSet | str] | None = None
+            self, descriptors: list[DescriptorSet | str] | None = None
     ) -> bool | list[bool]:
         """Check whether the data frame contains given descriptors.
 
@@ -896,10 +897,10 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         return iter(self.df[self.smilesCol].values)
 
     def addScaffolds(
-        self,
-        scaffolds: list[Scaffold],
-        add_rdkit_scaffold: bool = False,
-        recalculate: bool = False,
+            self,
+            scaffolds: list[Scaffold],
+            add_rdkit_scaffold: bool = False,
+            recalculate: bool = False,
     ):
         """Add scaffolds to the data frame.
 
@@ -920,6 +921,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             for scaffolds in self.processMols(scaffold):
                 self.df.loc[scaffolds.index, f"Scaffold_{scaffold}"] = scaffolds.values
             if add_rdkit_scaffold:
+                from rdkit.Chem import PandasTools
                 PandasTools.AddMoleculeColumnToFrame(
                     self.df,
                     smilesCol=f"Scaffold_{scaffold}",
@@ -927,7 +929,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
                 )
 
     def getScaffoldNames(
-        self, scaffolds: list[Scaffold] | None = None, include_mols: bool = False
+            self, scaffolds: list[Scaffold] | None = None, include_mols: bool = False
     ):
         """Get the names of the scaffolds in the data frame.
 
@@ -942,7 +944,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             col
             for col in self.df.columns
             if col.startswith("Scaffold_")
-            and (include_mols or not col.endswith("_RDMol"))
+               and (include_mols or not col.endswith("_RDMol"))
         ]
         if scaffolds:
             wanted = [str(x) for x in scaffolds]
@@ -950,7 +952,7 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
         return all_names
 
     def getScaffolds(
-        self, scaffolds: list[Scaffold] | None = None, include_mols: bool = False
+            self, scaffolds: list[Scaffold] | None = None, include_mols: bool = False
     ):
         """Get the subset of the data frame that contains only scaffolds.
 
@@ -1021,8 +1023,9 @@ class MoleculeTable(PandasDataTable, SearchableMolTable, Summarizable):
             bool: Whether the data frame contains scaffold groups.
         """
         return (
-            len([col for col in self.df.columns if col.startswith("ScaffoldGroup_")])
-            > 0
+                len([col for col in self.df.columns if
+                     col.startswith("ScaffoldGroup_")])
+                > 0
         )
 
     def addClusters(
