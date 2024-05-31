@@ -41,6 +41,8 @@ From v3.0.2 to v3.1.0
       cleared from the data set with the `clear` parameter of `dropDescriptorSets`.
 - Added a proper API for parallelization backend selection and configuration (see
   documentation of `ParallelGenerator` and `JITParallelGenerator` for more information).
+- Clusters can now be added to a `MoleculeTable` with `addClusters` and retrieved with
+  `getClusters`, similar to scaffolds.
 
 ## Removed Features
 
