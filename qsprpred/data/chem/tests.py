@@ -3,6 +3,7 @@ from parameterized import parameterized
 from ... import TargetTasks
 from ...data import QSPRDataset
 from ...data.chem.scaffolds import BemisMurckoRDKit, BemisMurcko
+from ...data.chem.clustering import RandomClusters, FPSimilarityMaxMinClusters, FPSimilarityLeaderPickerClusters, ScaffoldClusters
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn
 
@@ -39,6 +40,31 @@ class TestScaffolds(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(scaffs.shape, (len(self.dataset), 1))
         # for mol in scaffs[f"Scaffold_{scaffold}_RDMol"]:
         #     self.assertTrue(isinstance(mol, Chem.rdchem.Mol))
+
+class TestClusters(DataSetsPathMixIn, QSPRTestCase):
+    """Test calculation of clusters."""
+
+    def setUp(self):
+        """Create a test dataset."""
+        super().setUp()
+        self.setUpPaths()
+        self.dataset = self.createLargeTestDataSet(self.__class__.__name__)
+
+    @parameterized.expand(
+        [
+            ("Random", RandomClusters()),
+            ("FPSimilarityMaxMin", FPSimilarityMaxMinClusters()),
+            ("FPSimilarityLeaderPicker", FPSimilarityLeaderPickerClusters()),
+            ("Scaffold", ScaffoldClusters(BemisMurckoRDKit())),
+        ]
+    )
+    def testClusterAdd(self, _, cluster):
+        """Test the adding and getting of clusters."""
+        self.dataset.addClusters([cluster])
+        clusters = self.dataset.getClusters()
+        self.assertEqual(clusters.shape, (len(self.dataset), 1))
+        self.dataset.addClusters([cluster], recalculate=True)
+        self.assertEqual(clusters.shape, (len(self.dataset), 1))
 
 
 class TestStandardizers(DataSetsPathMixIn, QSPRTestCase):
