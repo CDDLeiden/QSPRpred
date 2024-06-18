@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.data package &mdash; QSPRpred 3.1.1a2.dev59+ge430e991 documentation</title>
+  <title>qsprpred.extra.data package &mdash; QSPRpred 3.1.1a2.dev65+g047ce537 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=fc0d3f83"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=e9e99ed7"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.1a2.dev59+ge430e991
+                v3.1.1a2.dev65+g047ce537
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -905,6 +905,7 @@
 <li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.data.tables.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="qsprpred.extra.data.tables.html#module-qsprpred.extra.data.tables.pcm">qsprpred.extra.data.tables.pcm module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet"><code class="docutils literal notranslate"><span class="pre">PCMDataSet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.addClusters"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.addClusters()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.addDescriptors"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.addDescriptors()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.addFeatures"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.addFeatures()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.addProperty"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.addProperty()</span></code></a></li>
@@ -937,6 +938,8 @@
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.fromTableFile"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.fromTableFile()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.generateDescriptorDataSetName"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.generateDescriptorDataSetName()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.generateIndex"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.generateIndex()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.getClusterNames"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.getClusterNames()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.getClusters"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.getClusters()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.getDF"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.getDF()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.getDescriptorNames"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.getDescriptorNames()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.getDescriptors"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.getDescriptors()</span></code></a></li>
@@ -953,6 +956,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.getSummary"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.getSummary()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.getTargetProperties"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.getTargetProperties()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.getTargetPropertiesValues"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.getTargetPropertiesValues()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.hasClusters"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.hasClusters</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.hasDescriptors"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.hasDescriptors()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.hasFeatures"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.hasFeatures</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.pcm.PCMDataSet.hasProperty"><code class="docutils literal notranslate"><span class="pre">PCMDataSet.hasProperty()</span></code></a></li>

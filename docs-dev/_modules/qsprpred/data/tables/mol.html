@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.tables.mol &mdash; QSPRpred 3.1.1a2.dev59+ge430e991 documentation</title>
+  <title>qsprpred.data.tables.mol &mdash; QSPRpred 3.1.1a2.dev65+g047ce537 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=fc0d3f83"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=e9e99ed7"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.1a2.dev59+ge430e991
+                v3.1.1a2.dev65+g047ce537
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -1081,7 +1081,7 @@
 <span class="sd">        size.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            mols_per_group (int): Number of molecules per scaffold group.</span>
+<span class="sd">            mols_per_group (int): number of molecules per scaffold group.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">scaffolds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getScaffolds</span><span class="p">(</span><span class="n">include_mols</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">scaffold</span> <span class="ow">in</span> <span class="n">scaffolds</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
@@ -1126,6 +1126,66 @@
                      <span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;ScaffoldGroup_&quot;</span><span class="p">)])</span>
                 <span class="o">&gt;</span> <span class="mi">0</span>
         <span class="p">)</span>
+
+<div class="viewcode-block" id="MoleculeTable.addClusters"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.addClusters">[docs]</a>    <span class="k">def</span> <span class="nf">addClusters</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">clusters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="s2">&quot;MoleculeClusters&quot;</span><span class="p">],</span>
+        <span class="n">recalculate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add clusters to the data frame.</span>
+
+<span class="sd">        A new column is created that contains the identifier of the corresponding</span>
+<span class="sd">        cluster calculator.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            clusters (list): list of `MoleculeClusters` calculators.</span>
+<span class="sd">            recalculate (bool): Whether to recalculate clusters even if they are</span>
+<span class="sd">                already present in the data frame.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">cluster</span> <span class="ow">in</span> <span class="n">clusters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">recalculate</span> <span class="ow">and</span> <span class="sa">f</span><span class="s2">&quot;Cluster_</span><span class="si">{</span><span class="n">cluster</span><span class="si">}</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">for</span> <span class="n">clusters</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">processMols</span><span class="p">(</span><span class="n">cluster</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">clusters</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Cluster_</span><span class="si">{</span><span class="n">cluster</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clusters</span><span class="o">.</span><span class="n">values</span></div>
+
+
+<div class="viewcode-block" id="MoleculeTable.getClusterNames"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.getClusterNames">[docs]</a>    <span class="k">def</span> <span class="nf">getClusterNames</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">clusters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="s2">&quot;MoleculeClusters&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the names of the clusters in the data frame.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: List of cluster names.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">all_names</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">col</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span>
+            <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;Cluster_&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">clusters</span><span class="p">:</span>
+            <span class="n">wanted</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">clusters</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_names</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">wanted</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">all_names</span></div>
+
+<div class="viewcode-block" id="MoleculeTable.getClusters"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.getClusters">[docs]</a>    <span class="k">def</span> <span class="nf">getClusters</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">clusters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="s2">&quot;MoleculeClusters&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the subset of the data frame that contains only clusters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Data frame containing only clusters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getClusterNames</span><span class="p">(</span><span class="n">clusters</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="n">names</span><span class="p">]</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hasClusters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check whether the data frame contains clusters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: Whether the data frame contains clusters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getClusterNames</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span>
 
 <div class="viewcode-block" id="MoleculeTable.standardizeSmiles"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.standardizeSmiles">[docs]</a>    <span class="k">def</span> <span class="nf">standardizeSmiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smiles_standardizer</span><span class="p">,</span> <span class="n">drop_invalid</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply smiles_standardizer to the compounds in parallel</span>
