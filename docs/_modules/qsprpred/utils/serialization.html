@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.utils.serialization &mdash; QSPRpred 3.0.2 documentation</title>
+  <title>qsprpred.utils.serialization &mdash; QSPRpred 3.1.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -16,9 +16,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=3f474186"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=5b1057fd"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="../../../_static/design-tabs.js?v=36754332"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2
+                v3.1.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -114,15 +114,11 @@
 <span class="n">jsonpickle</span><span class="o">.</span><span class="n">set_encoder_options</span><span class="p">(</span><span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="FileSerializable">
-<a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.FileSerializable">[docs]</a>
-<span class="k">class</span> <span class="nc">FileSerializable</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="FileSerializable"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.FileSerializable">[docs]</a><span class="k">class</span> <span class="nc">FileSerializable</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A class that can be serialized to a file and reconstructed from a file.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="FileSerializable.toFile">
-<a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.FileSerializable.toFile">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="FileSerializable.toFile"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.FileSerializable.toFile">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">toFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Serialize object to a metafile. This metafile should contain all</span>
 <span class="sd">        data necessary to reconstruct the object.</span>
@@ -134,10 +130,7 @@
 <span class="sd">            filename (str): absolute path to the saved metafile of the object</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-
-<div class="viewcode-block" id="FileSerializable.fromFile">
-<a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.FileSerializable.fromFile">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="FileSerializable.fromFile"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.FileSerializable.fromFile">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">fromFile</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reconstruct object from a metafile.</span>
@@ -147,14 +140,10 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            obj (object): reconstructed object</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
-</div>
+<span class="sd">        &quot;&quot;&quot;</span></div></div>
 
 
-
-<div class="viewcode-block" id="JSONSerializable">
-<a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.JSONSerializable">[docs]</a>
-<span class="k">class</span> <span class="nc">JSONSerializable</span><span class="p">(</span><span class="n">FileSerializable</span><span class="p">):</span>
+<div class="viewcode-block" id="JSONSerializable"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.JSONSerializable">[docs]</a><span class="k">class</span> <span class="nc">JSONSerializable</span><span class="p">(</span><span class="n">FileSerializable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A class that can be serialized to JSON and reconstructed from JSON.</span>
 
 <span class="sd">    Attributes:</span>
@@ -190,9 +179,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
 
-<div class="viewcode-block" id="JSONSerializable.toFile">
-<a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.JSONSerializable.toFile">[docs]</a>
-    <span class="k">def</span> <span class="nf">toFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="JSONSerializable.toFile"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.JSONSerializable.toFile">[docs]</a>    <span class="k">def</span> <span class="nf">toFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Serialize object to a JSON file. This JSON file should</span>
 <span class="sd">        contain all  data necessary to reconstruct the object.</span>
 
@@ -207,10 +194,7 @@
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="JSONSerializable.fromFile">
-<a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.JSONSerializable.fromFile">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="JSONSerializable.fromFile"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.JSONSerializable.fromFile">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">fromFile</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize a new instance from a JSON file.</span>
 
@@ -224,10 +208,7 @@
             <span class="n">json</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">fromJSON</span><span class="p">(</span><span class="n">json</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="JSONSerializable.toJSON">
-<a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.JSONSerializable.toJSON">[docs]</a>
-    <span class="k">def</span> <span class="nf">toJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="JSONSerializable.toJSON"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.JSONSerializable.toJSON">[docs]</a>    <span class="k">def</span> <span class="nf">toJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Serialize object to a JSON string. This JSON string should</span>
 <span class="sd">         contain all data necessary to reconstruct the object.</span>
 
@@ -236,10 +217,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">jsonpickle</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unpicklable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="JSONSerializable.fromJSON">
-<a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.JSONSerializable.fromJSON">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="JSONSerializable.fromJSON"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.JSONSerializable.fromJSON">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">fromJSON</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">json</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reconstruct object from a JSON string.</span>
 
@@ -249,14 +227,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            obj (object): reconstructed object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">jsonpickle</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">json</span><span class="p">)</span></div>
-</div>
+        <span class="k">return</span> <span class="n">jsonpickle</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">json</span><span class="p">)</span></div></div>
 
 
-
-<div class="viewcode-block" id="function_as_string">
-<a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.function_as_string">[docs]</a>
-<span class="k">def</span> <span class="nf">function_as_string</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="function_as_string"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.function_as_string">[docs]</a><span class="k">def</span> <span class="nf">function_as_string</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a function to a string.</span>
 
 <span class="sd">    Args:</span>
@@ -275,10 +249,7 @@
         <span class="k">return</span> <span class="n">json_form</span><span class="p">[</span><span class="s2">&quot;py/object&quot;</span><span class="p">]</span></div>
 
 
-
-<div class="viewcode-block" id="function_from_string">
-<a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.function_from_string">[docs]</a>
-<span class="k">def</span> <span class="nf">function_from_string</span><span class="p">(</span><span class="n">func_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<div class="viewcode-block" id="function_from_string"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.serialization.function_from_string">[docs]</a><span class="k">def</span> <span class="nf">function_from_string</span><span class="p">(</span><span class="n">func_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a function from a string. Conversion from encoded bytecode is</span>
 <span class="sd">    attempted first. If that fails, the string is assumed to be a fully</span>
 <span class="sd">    qualified name of the function.</span>
@@ -298,7 +269,6 @@
         <span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">dynamic_import</span><span class="p">(</span><span class="n">func_str</span><span class="p">)</span></div>
-
 </pre></div>
 
            </div>

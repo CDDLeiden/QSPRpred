@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.data.descriptors.fingerprints &mdash; QSPRpred 3.0.2 documentation</title>
+  <title>qsprpred.extra.data.descriptors.fingerprints &mdash; QSPRpred 3.1.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -16,9 +16,9 @@
   
         <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../../_static/documentation_options.js?v=3f474186"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=5b1057fd"></script>
         <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="../../../../../_static/design-tabs.js?v=36754332"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2
+                v3.1.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -121,9 +121,7 @@
 <span class="kn">from</span> <span class="nn">qsprpred.data.descriptors.fingerprints</span> <span class="kn">import</span> <span class="n">Fingerprint</span>
 
 
-<div class="viewcode-block" id="CDKFP">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKFP">[docs]</a>
-<span class="k">class</span> <span class="nc">CDKFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
+<div class="viewcode-block" id="CDKFP"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKFP">[docs]</a><span class="k">class</span> <span class="nc">CDKFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The CDK fingerprint.</span>
 
 <span class="sd">    Attributes:</span>
@@ -144,9 +142,7 @@
         <span class="n">fp</span> <span class="o">=</span> <span class="n">cdk_fps</span><span class="o">.</span><span class="n">FP</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">searchDepth</span><span class="o">=</span><span class="n">search_depth</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span> <span class="o">=</span> <span class="n">PaDEL_calculator</span><span class="p">([</span><span class="n">fp</span><span class="p">])</span>
 
-<div class="viewcode-block" id="CDKFP.getDescriptors">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKFP.getDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+<div class="viewcode-block" id="CDKFP.getDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKFP.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the CDK fingerprint for the input molecules.</span>
@@ -161,7 +157,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="n">show_banner</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">values</span></div>
 
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="s2">&quot;search_depth&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchDepth</span><span class="p">}</span>
@@ -173,10 +168,7 @@
         <span class="k">return</span> <span class="s2">&quot;CDKFP&quot;</span></div>
 
 
-
-<div class="viewcode-block" id="CDKExtendedFP">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKExtendedFP">[docs]</a>
-<span class="k">class</span> <span class="nc">CDKExtendedFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
+<div class="viewcode-block" id="CDKExtendedFP"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKExtendedFP">[docs]</a><span class="k">class</span> <span class="nc">CDKExtendedFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;CDK extended fingerprint with 25 additional ring features and isotopic masses.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -184,9 +176,7 @@
         <span class="n">fp</span> <span class="o">=</span> <span class="n">cdk_fps</span><span class="o">.</span><span class="n">ExtendedFP</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span> <span class="o">=</span> <span class="n">PaDEL_calculator</span><span class="p">([</span><span class="n">fp</span><span class="p">])</span>
 
-<div class="viewcode-block" id="CDKExtendedFP.getDescriptors">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKExtendedFP.getDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+<div class="viewcode-block" id="CDKExtendedFP.getDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKExtendedFP.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the CDK extended fingerprint for the input molecules.</span>
@@ -200,7 +190,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="n">show_banner</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">values</span></div>
 
-
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">1024</span>
 
@@ -208,10 +197,7 @@
         <span class="k">return</span> <span class="s2">&quot;CDKExtendedFP&quot;</span></div>
 
 
-
-<div class="viewcode-block" id="CDKEStateFP">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKEStateFP">[docs]</a>
-<span class="k">class</span> <span class="nc">CDKEStateFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
+<div class="viewcode-block" id="CDKEStateFP"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKEStateFP">[docs]</a><span class="k">class</span> <span class="nc">CDKEStateFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;CDK EState fingerprint.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -219,9 +205,7 @@
         <span class="n">fp</span> <span class="o">=</span> <span class="n">cdk_fps</span><span class="o">.</span><span class="n">EStateFP</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span> <span class="o">=</span> <span class="n">PaDEL_calculator</span><span class="p">([</span><span class="n">fp</span><span class="p">])</span>
 
-<div class="viewcode-block" id="CDKEStateFP.getDescriptors">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKEStateFP.getDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+<div class="viewcode-block" id="CDKEStateFP.getDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKEStateFP.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the CDK estate fingerprint for the input molecules.</span>
@@ -235,7 +219,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="n">show_banner</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">values</span></div>
 
-
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">79</span>
 
@@ -243,10 +226,7 @@
         <span class="k">return</span> <span class="s2">&quot;CDKEStateFP&quot;</span></div>
 
 
-
-<div class="viewcode-block" id="CDKGraphOnlyFP">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKGraphOnlyFP">[docs]</a>
-<span class="k">class</span> <span class="nc">CDKGraphOnlyFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
+<div class="viewcode-block" id="CDKGraphOnlyFP"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKGraphOnlyFP">[docs]</a><span class="k">class</span> <span class="nc">CDKGraphOnlyFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;CDK fingerprint ignoring bond orders.</span>
 
 <span class="sd">    Attributes:</span>
@@ -261,9 +241,7 @@
         <span class="n">fp</span> <span class="o">=</span> <span class="n">cdk_fps</span><span class="o">.</span><span class="n">GraphOnlyFP</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">searchDepth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">searchDepth</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span> <span class="o">=</span> <span class="n">PaDEL_calculator</span><span class="p">([</span><span class="n">fp</span><span class="p">])</span>
 
-<div class="viewcode-block" id="CDKGraphOnlyFP.getDescriptors">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKGraphOnlyFP.getDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+<div class="viewcode-block" id="CDKGraphOnlyFP.getDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKGraphOnlyFP.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the CDK graph only fingerprint for the input molecules.</span>
@@ -277,7 +255,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="n">show_banner</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">values</span></div>
 
-
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span>
 
@@ -285,10 +262,7 @@
         <span class="k">return</span> <span class="s2">&quot;CDKGraphOnlyFP&quot;</span></div>
 
 
-
-<div class="viewcode-block" id="CDKMACCSFP">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKMACCSFP">[docs]</a>
-<span class="k">class</span> <span class="nc">CDKMACCSFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
+<div class="viewcode-block" id="CDKMACCSFP"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKMACCSFP">[docs]</a><span class="k">class</span> <span class="nc">CDKMACCSFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;CDK MACCS fingerprint.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -296,9 +270,7 @@
         <span class="n">fp</span> <span class="o">=</span> <span class="n">cdk_fps</span><span class="o">.</span><span class="n">MACCSFP</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span> <span class="o">=</span> <span class="n">PaDEL_calculator</span><span class="p">([</span><span class="n">fp</span><span class="p">])</span>
 
-<div class="viewcode-block" id="CDKMACCSFP.getDescriptors">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKMACCSFP.getDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+<div class="viewcode-block" id="CDKMACCSFP.getDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKMACCSFP.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the CDK MACCS fingerprint for the input molecules.</span>
@@ -312,7 +284,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="n">show_banner</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">values</span></div>
 
-
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">166</span>
 
@@ -320,10 +291,7 @@
         <span class="k">return</span> <span class="s2">&quot;CDKMACCSFP&quot;</span></div>
 
 
-
-<div class="viewcode-block" id="CDKPubchemFP">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKPubchemFP">[docs]</a>
-<span class="k">class</span> <span class="nc">CDKPubchemFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
+<div class="viewcode-block" id="CDKPubchemFP"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKPubchemFP">[docs]</a><span class="k">class</span> <span class="nc">CDKPubchemFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;CDK PubChem fingerprint.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -331,9 +299,7 @@
         <span class="n">fp</span> <span class="o">=</span> <span class="n">cdk_fps</span><span class="o">.</span><span class="n">PubchemFP</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span> <span class="o">=</span> <span class="n">PaDEL_calculator</span><span class="p">([</span><span class="n">fp</span><span class="p">])</span>
 
-<div class="viewcode-block" id="CDKPubchemFP.getDescriptors">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKPubchemFP.getDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+<div class="viewcode-block" id="CDKPubchemFP.getDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKPubchemFP.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the CDK PubChem fingerprint for the input molecules.</span>
@@ -346,7 +312,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="n">show_banner</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">values</span></div>
 
-
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">881</span>
 
@@ -354,10 +319,7 @@
         <span class="k">return</span> <span class="s2">&quot;CDKPubchemFP&quot;</span></div>
 
 
-
-<div class="viewcode-block" id="CDKSubstructureFP">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKSubstructureFP">[docs]</a>
-<span class="k">class</span> <span class="nc">CDKSubstructureFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
+<div class="viewcode-block" id="CDKSubstructureFP"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKSubstructureFP">[docs]</a><span class="k">class</span> <span class="nc">CDKSubstructureFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;CDK Substructure fingerprint.</span>
 
 <span class="sd">    Based on SMARTS patterns for functional group classification by Christian Laggner.</span>
@@ -376,9 +338,7 @@
             <span class="n">fp</span> <span class="o">=</span> <span class="n">cdk_fps</span><span class="o">.</span><span class="n">SubstructureFP</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span> <span class="o">=</span> <span class="n">PaDEL_calculator</span><span class="p">([</span><span class="n">fp</span><span class="p">])</span>
 
-<div class="viewcode-block" id="CDKSubstructureFP.getDescriptors">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKSubstructureFP.getDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+<div class="viewcode-block" id="CDKSubstructureFP.getDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKSubstructureFP.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the CDK Substructure fingerprint for the input molecules.</span>
@@ -392,7 +352,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="n">show_banner</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">values</span></div>
 
-
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">307</span>
 
@@ -402,10 +361,7 @@
         <span class="k">return</span> <span class="s2">&quot;CDKSubstructureFP&quot;</span></div>
 
 
-
-<div class="viewcode-block" id="CDKKlekotaRothFP">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKKlekotaRothFP">[docs]</a>
-<span class="k">class</span> <span class="nc">CDKKlekotaRothFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
+<div class="viewcode-block" id="CDKKlekotaRothFP"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKKlekotaRothFP">[docs]</a><span class="k">class</span> <span class="nc">CDKKlekotaRothFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;CDK Klekota &amp; Roth fingerprint.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_counts</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
@@ -423,9 +379,7 @@
             <span class="n">fp</span> <span class="o">=</span> <span class="n">cdk_fps</span><span class="o">.</span><span class="n">KlekotaRothFP</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span> <span class="o">=</span> <span class="n">PaDEL_calculator</span><span class="p">([</span><span class="n">fp</span><span class="p">])</span>
 
-<div class="viewcode-block" id="CDKKlekotaRothFP.getDescriptors">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKKlekotaRothFP.getDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+<div class="viewcode-block" id="CDKKlekotaRothFP.getDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKKlekotaRothFP.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the CDK Klekota &amp; Roth fingerprint for the input molecules.</span>
@@ -439,7 +393,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="n">show_banner</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">values</span></div>
 
-
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">4860</span>
 
@@ -449,10 +402,7 @@
         <span class="k">return</span> <span class="s2">&quot;CDKKlekotaRothFP&quot;</span></div>
 
 
-
-<div class="viewcode-block" id="CDKAtomPairs2DFP">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKAtomPairs2DFP">[docs]</a>
-<span class="k">class</span> <span class="nc">CDKAtomPairs2DFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
+<div class="viewcode-block" id="CDKAtomPairs2DFP"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKAtomPairs2DFP">[docs]</a><span class="k">class</span> <span class="nc">CDKAtomPairs2DFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;CDK atom pairs and topological fingerprint.</span>
 
 <span class="sd">    Attributes:</span>
@@ -476,9 +426,7 @@
             <span class="n">fp</span> <span class="o">=</span> <span class="n">cdk_fps</span><span class="o">.</span><span class="n">AtomPairs2DFP</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span> <span class="o">=</span> <span class="n">PaDEL_calculator</span><span class="p">([</span><span class="n">fp</span><span class="p">])</span>
 
-<div class="viewcode-block" id="CDKAtomPairs2DFP.getDescriptors">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKAtomPairs2DFP.getDescriptors">[docs]</a>
-    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
+<div class="viewcode-block" id="CDKAtomPairs2DFP.getDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKAtomPairs2DFP.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -493,7 +441,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_padel</span><span class="o">.</span><span class="n">calculate</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="n">show_banner</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">values</span></div>
 
-
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">780</span>
 
@@ -501,7 +448,6 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">useCounts</span><span class="p">:</span>
             <span class="k">return</span> <span class="s2">&quot;CDKAtomPairs2DFPCount&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;CDKAtomPairs2DFP&quot;</span></div>
-
 </pre></div>
 
            </div>

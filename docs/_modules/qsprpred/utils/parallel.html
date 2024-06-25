@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.utils.parallel &mdash; QSPRpred 3.0.2 documentation</title>
+  <title>qsprpred.utils.parallel &mdash; QSPRpred 3.1.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -16,9 +16,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=3f474186"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=5b1057fd"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="../../../_static/design-tabs.js?v=36754332"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2
+                v3.1.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -98,17 +98,20 @@
              
   <h1>Source code for qsprpred.utils.parallel</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">concurrent</span> <span class="kn">import</span> <span class="n">futures</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Generator</span>
+<span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">Future</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Any</span>
+
+<span class="kn">from</span> <span class="nn">pebble</span> <span class="kn">import</span> <span class="n">ProcessFuture</span>
 
 <span class="kn">from</span> <span class="nn">qsprpred.logs</span> <span class="kn">import</span> <span class="n">logger</span>
 
 
-<div class="viewcode-block" id="batched_generator">
-<a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.batched_generator">[docs]</a>
-<span class="k">def</span> <span class="nf">batched_generator</span><span class="p">(</span><span class="n">iterable</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
+<div class="viewcode-block" id="batched_generator"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.batched_generator">[docs]</a><span class="k">def</span> <span class="nf">batched_generator</span><span class="p">(</span><span class="n">iterable</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A simple generator that batches inputs from a supplied iterable.</span>
+<span class="sd">    A simple helper generator that batches inputs from a supplied `Iterable`.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        iterable: An iterable object to batch with the generator.</span>
@@ -127,134 +130,447 @@
         <span class="k">yield</span> <span class="n">batch</span></div>
 
 
+<div class="viewcode-block" id="ParallelGenerator"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.ParallelGenerator">[docs]</a><span class="k">class</span> <span class="nc">ParallelGenerator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An abstract class to facilitate parallel processing of an arbitrary generator.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="parallel_jit_generator">
-<a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.parallel_jit_generator">[docs]</a>
-<span class="k">def</span> <span class="nf">parallel_jit_generator</span><span class="p">(</span>
-        <span class="n">generator</span><span class="p">:</span> <span class="n">Generator</span><span class="p">,</span>
-        <span class="n">process_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
-        <span class="n">n_cpus</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">pool_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;pebble&quot;</span><span class="p">,</span> <span class="s2">&quot;multiprocessing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;multiprocessing&quot;</span><span class="p">,</span>
-        <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A parallel &#39;JIT (Just In Time)&#39; generator that yields the results of a function</span>
-<span class="sd">    applied in parallel to each item of a supplied generator. The advantage of this JIT</span>
-<span class="sd">    implementation is that it only evaluates the next item in the input generator</span>
-<span class="sd">    as soon as it is needed for the calculation. This means that only one item from</span>
-<span class="sd">    the iterable is loaded into memory at a time.</span>
+<div class="viewcode-block" id="ParallelGenerator.make"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.ParallelGenerator.make">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">generator</span><span class="p">:</span> <span class="n">Generator</span><span class="p">,</span>
+            <span class="n">process_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is used to wrap an input generator or an iterable</span>
+<span class="sd">        (needs to support `next()`). The method should evaluate one item of</span>
+<span class="sd">        the generator at a time and apply the `process_func` to it. This</span>
+<span class="sd">        is done in parallel over a pool of workers. The method should return</span>
+<span class="sd">        a generator that yields the results of the function applied in parallel</span>
+<span class="sd">        as soon as the results are available. Therefore, the user can simply</span>
+<span class="sd">        iterate over the generator to get the results.</span>
 
-<span class="sd">    The generator also supports timeout for each job. The &#39;pebble&#39;</span>
-<span class="sd">    pool_type can be used to support this feature. In all other cases,</span>
-<span class="sd">    the &#39;multiprocessing&#39; pool_type is sufficient.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            generator: An iterable object to apply the function to.</span>
+<span class="sd">            process_func: The function to apply to each item in the iterable.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        generator(SupportsNext):</span>
-<span class="sd">            An iterable object to apply the function to.</span>
-<span class="sd">        process_func(Callable):</span>
-<span class="sd">            The function to apply to each item in the iterable.</span>
-<span class="sd">        n_cpus(int):</span>
-<span class="sd">            Number of CPUs to use.</span>
-<span class="sd">        pool_type(Literal[&quot;pebble&quot;, &quot;multiprocessing&quot;]):</span>
-<span class="sd">            The type of pool to use.</span>
-<span class="sd">        timeout(int | None):</span>
-<span class="sd">            A timeout threshold in seconds. Processes that exceed this threshold will</span>
-<span class="sd">            be terminated and a `TimeoutError` will be returned.</span>
-<span class="sd">        args(tuple | None):</span>
-<span class="sd">            Additional positional arguments to pass to the function.</span>
-<span class="sd">        kwargs(dict | None):</span>
-<span class="sd">            Additional keyword arguments to pass to the function.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            A generator that yields the results of the function applied to each item</span>
+<span class="sd">            in the iterable in parallel.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
 
-<span class="sd">    Returns:</span>
-<span class="sd">        A generator that yields the results of the function applied to each item in the</span>
-<span class="sd">        iterable. If a timeout is specified, a `TimeoutError` will be returned instead.</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">generator</span><span class="p">:</span> <span class="n">Generator</span><span class="p">,</span>
+            <span class="n">process_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is used to wrap the `make` method and call it with the</span>
+<span class="sd">        supplied arguments. This is a convenience method to make the class</span>
+<span class="sd">        callable.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            generator: An iterable object to apply the function to.</span>
+<span class="sd">            process_func: The function to apply to each item in the iterable.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A generator that yields the results of the function applied to each item</span>
+<span class="sd">            in the iterable in parallel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">process_func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="JITParallelGenerator"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.JITParallelGenerator">[docs]</a><span class="k">class</span> <span class="nc">JITParallelGenerator</span><span class="p">(</span><span class="n">ParallelGenerator</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An abstract class to facilitate JIT (Just In Time)</span>
+<span class="sd">    parallel processing of an arbitrary generator.</span>
+<span class="sd">    This is meant for situations where the result of the generator</span>
+<span class="sd">    is too large to fit into memory or not yet known. Parallelization can be done</span>
+<span class="sd">    over a pool of CPU or GPU workers. The generator will yield the results of the</span>
+<span class="sd">    function applied in parallel to each item of a supplied generator.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">args</span> <span class="o">=</span> <span class="n">args</span> <span class="ow">or</span> <span class="p">()</span>
-    <span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="n">pool_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;pebble&quot;</span><span class="p">,</span> <span class="s2">&quot;multiprocessing&quot;</span><span class="p">]:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The &#39;pool_type&#39; must be one of &#39;pebble&#39; &quot;</span>
-                         <span class="sa">f</span><span class="s2">&quot;or &#39;multiprocessing&#39;, got </span><span class="si">{</span><span class="n">pool_type</span><span class="si">}</span><span class="s2"> instead.&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">pool_type</span> <span class="o">!=</span> <span class="s2">&quot;pebble&quot;</span> <span class="ow">and</span> <span class="n">timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The &#39;timeout&#39; argument is only supported &quot;</span>
-                         <span class="sa">f</span><span class="s2">&quot;for &#39;pebble&#39; pools, got </span><span class="si">{</span><span class="n">pool_type</span><span class="si">}</span><span class="s2"> instead.&quot;</span><span class="p">)</span>
-    <span class="n">pool_type_to_pool</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;multiprocessing&quot;</span><span class="p">:</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">n_cpus</span><span class="p">)</span>
-    <span class="p">}</span>
-    <span class="k">if</span> <span class="n">pool_type</span> <span class="o">==</span> <span class="s2">&quot;pebble&quot;</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">n_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">worker_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="s2">&quot;gpu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+            <span class="n">use_gpus</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">jobs_per_gpu</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configures the multiprocessing pool generator.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n_workers(int):</span>
+<span class="sd">                Number of workers to use.</span>
+<span class="sd">            worker_type(Literal[&quot;cpu&quot;, &quot;gpu&quot;]):</span>
+<span class="sd">                The type of worker to use.</span>
+<span class="sd">            use_gpus(list[int] | None):</span>
+<span class="sd">                A list of GPU indices to use. Only applicable if `worker_type` is &#39;gpu&#39;.</span>
+<span class="sd">                If None, all available GPUs will be used.</span>
+<span class="sd">            jobs_per_gpu(int):</span>
+<span class="sd">                Number of jobs to run on each GPU.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workerType</span> <span class="o">=</span> <span class="n">worker_type</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workerType</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="s2">&quot;gpu&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The &#39;worker_type&#39; must be one of &#39;cpu&#39; &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;or &#39;gpu&#39;, got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">workerType</span><span class="si">}</span><span class="s2"> instead.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workerType</span> <span class="o">==</span> <span class="s2">&quot;gpu&quot;</span> <span class="ow">and</span> <span class="n">n_workers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;The &#39;n_workers&#39; argument is ignored when &#39;worker_type&#39; is &#39;gpu&#39;.&quot;</span>
+                <span class="s2">&quot;The number of workers is determined by &#39;use_gpus&#39; and &#39;jobs_per_gpu&#39;.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workerType</span> <span class="o">==</span> <span class="s2">&quot;gpu&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">jobsPerGpu</span> <span class="o">=</span> <span class="n">jobs_per_gpu</span>
+            <span class="k">if</span> <span class="n">use_gpus</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">useGpus</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">use_gpus</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">useGpus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">useGpus</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobsPerGpu</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;No GPUs specified. Using only the first gpu with index 0.&quot;</span>
+                    <span class="s2">&quot;Only one job will be run on this GPU at a time.&quot;</span>
+                    <span class="s2">&quot;If you want to use multiple GPUs, specify them using &#39;use_gpus&#39; &quot;</span>
+                    <span class="s2">&quot;or run more jobs per GPU with &#39;jobs_per_gpu&#39;.&quot;</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">useGpus</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobsPerGpu</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nWorkers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">useGpus</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">useGpus</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">jobsPerGpu</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nWorkers</span> <span class="o">=</span> <span class="n">n_workers</span> <span class="ow">or</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+
+<div class="viewcode-block" id="JITParallelGenerator.getPool"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.JITParallelGenerator.getPool">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">getPool</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the pool of workers consuming the generator.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A pool object that can be used to apply the function</span>
+<span class="sd">            to the generator items in parallel.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="JITParallelGenerator.checkResultAvailable"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.JITParallelGenerator.checkResultAvailable">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">checkResultAvailable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the result of a process is available.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            process(Any):</span>
+<span class="sd">                The process object or a future to check for a result.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            `True` if the result is available, otherwise `False`.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="JITParallelGenerator.getResult"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.JITParallelGenerator.getResult">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">getResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the result of a process.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            process(Any):</span>
+<span class="sd">                The process object or a future to get the result from.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The result of the process.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="JITParallelGenerator.checkProcess"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.JITParallelGenerator.checkProcess">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">checkProcess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A simple check of a process or future before a result</span>
+<span class="sd">        is attempted to be retrieved.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            process(Any):</span>
+<span class="sd">                The process object or a future to check.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            `None` if the process is OK, otherwise raises an exception.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            Exception: If the process has a problem.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="JITParallelGenerator.handleException"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.JITParallelGenerator.handleException">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">handleException</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">exception</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle an exception raised by a process. This is executed</span>
+<span class="sd">        when the process raises an unexpected exception or the `checkProcess`</span>
+<span class="sd">        method raises an exception.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            process(Any):</span>
+<span class="sd">                The process object or a future that raised the exception.</span>
+<span class="sd">            exception(Exception):</span>
+<span class="sd">                The exception raised by the process.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The result to yield instead of the result of the process.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="JITParallelGenerator.createJob"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.JITParallelGenerator.createJob">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">createJob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pool</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">process_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                  <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Submit a job to the pool that applies the function to a generator item.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pool(Any):</span>
+<span class="sd">                The pool object to submit the job to.</span>
+<span class="sd">            process_func(Callable):</span>
+<span class="sd">                The function to apply to the input arguments.</span>
+<span class="sd">            args(tuple):</span>
+<span class="sd">                Positional arguments to pass to the function.</span>
+<span class="sd">                The first argument should be the item from the generator.</span>
+<span class="sd">            kwargs(dict):</span>
+<span class="sd">                Additional keyword arguments to pass to the function.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The process object or future that was submitted to the pool.</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="JITParallelGenerator.make"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.JITParallelGenerator.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">generator</span><span class="p">:</span> <span class="n">Generator</span><span class="p">,</span>
+            <span class="n">process_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;A parallel &quot;JIT (Just In Time)&quot; generator that</span>
+<span class="sd">        yields the results of a function</span>
+<span class="sd">        applied in parallel to each item of a supplied generator.</span>
+<span class="sd">        The advantage of this JIT</span>
+<span class="sd">        implementation is that it only evaluates the next item in the input generator</span>
+<span class="sd">        as soon as it is needed for the calculation. This means that only one item from</span>
+<span class="sd">        the iterable is loaded into memory at a time.</span>
+
+<span class="sd">        The generator also supports timeout for each job. The &quot;pebble&quot;</span>
+<span class="sd">        pool_type can be used to support this feature. In all other cases,</span>
+<span class="sd">        the &quot;multiprocessing&quot; pool_type is sufficient.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            generator(SupportsNext):</span>
+<span class="sd">                An iterable object to apply the function to.</span>
+<span class="sd">            process_func(Callable):</span>
+<span class="sd">                The function to apply to each item in the iterable.</span>
+<span class="sd">            args(tuple | None):</span>
+<span class="sd">                Additional positional arguments to pass to the function.</span>
+<span class="sd">            kwargs(dict | None):</span>
+<span class="sd">                Additional keyword arguments to pass to the function.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            A generator that yields the results of the function applied to each item in the</span>
+<span class="sd">            iterable. If a timeout is specified, a `TimeoutError` will be returned instead.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">args</span> <span class="ow">or</span> <span class="p">()</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">gpu_pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">useGpus</span>
+        <span class="n">pool</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getPool</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">pool</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
+            <span class="n">queue</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">gpus_to_jobs</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span> <span class="ow">or</span> <span class="n">queue</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># take a slice of the generator</span>
+                    <span class="n">input_args</span> <span class="o">=</span> <span class="p">[</span><span class="nb">next</span><span class="p">(</span><span class="n">generator</span><span class="p">),</span> <span class="o">*</span><span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)]</span>
+                    <span class="c1"># add our next slice to the pool</span>
+                    <span class="n">gpu</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workerType</span> <span class="o">==</span> <span class="s2">&quot;gpu&quot;</span><span class="p">:</span>
+                        <span class="c1"># get the next free GPU</span>
+                        <span class="n">gpu</span> <span class="o">=</span> <span class="n">gpu_pool</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">job</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createJob</span><span class="p">(</span>
+                        <span class="n">pool</span><span class="p">,</span>
+                        <span class="n">process_func</span><span class="p">,</span>
+                        <span class="o">*</span><span class="n">input_args</span><span class="p">,</span>
+                        <span class="o">**</span><span class="nb">dict</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">gpu</span><span class="o">=</span><span class="n">gpu</span><span class="p">)</span> <span class="k">if</span> <span class="n">gpu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">kwargs</span>
+                    <span class="p">)</span>
+                    <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workerType</span> <span class="o">==</span> <span class="s2">&quot;gpu&quot;</span><span class="p">:</span>
+                        <span class="n">gpus_to_jobs</span><span class="p">[</span><span class="n">job</span><span class="p">]</span> <span class="o">=</span> <span class="n">gpu</span>
+                <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                    <span class="c1"># no more data, clear out the slice generator</span>
+                    <span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># wait for a free worker or until all remaining workers finish</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Waiting for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">queue</span><span class="p">)</span><span class="si">}</span><span class="s2"> workers to finish...&quot;</span><span class="p">)</span>
+                <span class="k">while</span> <span class="n">queue</span> <span class="ow">and</span> <span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">queue</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nWorkers</span><span class="p">)</span> <span class="ow">or</span> <span class="n">done</span><span class="p">):</span>
+                    <span class="c1"># grab a process response from the top</span>
+                    <span class="n">process</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># check process status</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">checkProcess</span><span class="p">(</span><span class="n">process</span><span class="p">)</span>
+                        <span class="c1"># check if result available</span>
+                        <span class="n">is_ready</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkResultAvailable</span><span class="p">(</span><span class="n">process</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">is_ready</span><span class="p">:</span>
+                            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getResult</span><span class="p">(</span><span class="n">process</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                                <span class="sa">f</span><span class="s2">&quot;Yielding result: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2"> for process: </span><span class="si">{</span><span class="n">process</span><span class="si">}</span><span class="s2">&quot;</span>
+                            <span class="p">)</span>
+                            <span class="k">yield</span> <span class="n">result</span>
+                            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workerType</span> <span class="o">==</span> <span class="s2">&quot;gpu&quot;</span><span class="p">:</span>
+                                <span class="n">gpu_pool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gpus_to_jobs</span><span class="p">[</span><span class="n">process</span><span class="p">])</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                                    <span class="sa">f</span><span class="s2">&quot;GPU </span><span class="si">{</span><span class="n">gpus_to_jobs</span><span class="p">[</span><span class="n">process</span><span class="p">]</span><span class="si">}</span><span class="s2"> is free.&quot;</span><span class="p">)</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Free GPUs now: </span><span class="si">{</span><span class="n">gpu_pool</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                                    <span class="sa">f</span><span class="s2">&quot;Deleting job </span><span class="si">{</span><span class="n">process</span><span class="si">}</span><span class="s2"> from gpus_to_jobs.&quot;</span><span class="p">)</span>
+                                <span class="k">del</span> <span class="n">gpus_to_jobs</span><span class="p">[</span><span class="n">process</span><span class="p">]</span>
+                            <span class="k">break</span>  <span class="c1"># make sure to pop the next item from the generator</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="c1"># result not available yet, put process back in the queue</span>
+                            <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">process</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exp</span><span class="p">:</span>
+                        <span class="c1"># something went wrong, log and yield the exception</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">exp</span><span class="p">))</span>
+                        <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">handleException</span><span class="p">(</span><span class="n">process</span><span class="p">,</span> <span class="n">exp</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">workerType</span> <span class="o">==</span> <span class="s2">&quot;gpu&quot;</span><span class="p">:</span>
+                            <span class="n">gpu_pool</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gpus_to_jobs</span><span class="p">[</span><span class="n">process</span><span class="p">])</span>
+                            <span class="k">del</span> <span class="n">gpus_to_jobs</span><span class="p">[</span><span class="n">process</span><span class="p">]</span>
+                        <span class="k">break</span>  <span class="c1"># make sure to pop the next item from the generator</span></div></div>
+
+
+<div class="viewcode-block" id="ThreadsJITGenerator"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.ThreadsJITGenerator">[docs]</a><span class="k">class</span> <span class="nc">ThreadsJITGenerator</span><span class="p">(</span><span class="n">JITParallelGenerator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class uses the `concurrent.futures.ThreadPoolExecutor` to parallelize</span>
+<span class="sd">    the processing of an input generator. Note that threads in Python are not</span>
+<span class="sd">    truly parallel due to the Global Interpreter Lock (GIL). However, this can</span>
+<span class="sd">    still be useful for I/O-bound tasks or tasks that are not CPU-bound downstream.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ThreadsJITGenerator.getPool"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.ThreadsJITGenerator.getPool">[docs]</a>    <span class="k">def</span> <span class="nf">getPool</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">concurrent.futures</span> <span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
+        <span class="k">return</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nWorkers</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ThreadsJITGenerator.checkResultAvailable"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.ThreadsJITGenerator.checkResultAvailable">[docs]</a>    <span class="k">def</span> <span class="nf">checkResultAvailable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">:</span> <span class="n">Future</span><span class="p">):</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">process</span><span class="o">.</span><span class="n">done</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ThreadsJITGenerator.getResult"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.ThreadsJITGenerator.getResult">[docs]</a>    <span class="k">def</span> <span class="nf">getResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">process</span><span class="o">.</span><span class="n">result</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ThreadsJITGenerator.checkProcess"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.ThreadsJITGenerator.checkProcess">[docs]</a>    <span class="k">def</span> <span class="nf">checkProcess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="ThreadsJITGenerator.handleException"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.ThreadsJITGenerator.handleException">[docs]</a>    <span class="k">def</span> <span class="nf">handleException</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">exception</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">exception</span></div>
+
+<div class="viewcode-block" id="ThreadsJITGenerator.createJob"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.ThreadsJITGenerator.createJob">[docs]</a>    <span class="k">def</span> <span class="nf">createJob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pool</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">process_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+                  <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pool</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
+            <span class="n">process_func</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="MultiprocessingJITGenerator"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.MultiprocessingJITGenerator">[docs]</a><span class="k">class</span> <span class="nc">MultiprocessingJITGenerator</span><span class="p">(</span><span class="n">JITParallelGenerator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A parallel generator that uses the `multiprocessing` module to parallelize</span>
+<span class="sd">    the processing of an input generator. This is useful when the input generator</span>
+<span class="sd">    is too large to fit into memory and needs to be processed in parallel over</span>
+<span class="sd">    a pool of workers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="MultiprocessingJITGenerator.getPool"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.MultiprocessingJITGenerator.getPool">[docs]</a>    <span class="k">def</span> <span class="nf">getPool</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span>
+            <span class="n">processes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nWorkers</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="MultiprocessingJITGenerator.checkResultAvailable"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.MultiprocessingJITGenerator.checkResultAvailable">[docs]</a>    <span class="k">def</span> <span class="nf">checkResultAvailable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">process</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+            <span class="c1"># check if process is done</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">process</span><span class="o">.</span><span class="n">ready</span><span class="p">():</span>
+                <span class="c1"># not finished, return nothing</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">futures</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">,</span> <span class="ne">TimeoutError</span><span class="p">):</span>
+            <span class="c1"># not done yet, return nothing</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="MultiprocessingJITGenerator.getResult"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.MultiprocessingJITGenerator.getResult">[docs]</a>    <span class="k">def</span> <span class="nf">getResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">process</span><span class="o">.</span><span class="n">get</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="MultiprocessingJITGenerator.checkProcess"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.MultiprocessingJITGenerator.checkProcess">[docs]</a>    <span class="k">def</span> <span class="nf">checkProcess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="MultiprocessingJITGenerator.handleException"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.MultiprocessingJITGenerator.handleException">[docs]</a>    <span class="k">def</span> <span class="nf">handleException</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="n">exception</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">exception</span></div>
+
+<div class="viewcode-block" id="MultiprocessingJITGenerator.createJob"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.MultiprocessingJITGenerator.createJob">[docs]</a>    <span class="k">def</span> <span class="nf">createJob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pool</span><span class="p">,</span> <span class="n">process_func</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span>
+            <span class="n">process_func</span><span class="p">,</span>
+            <span class="n">args</span><span class="p">,</span>
+            <span class="n">kwargs</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="PebbleJITGenerator"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.PebbleJITGenerator">[docs]</a><span class="k">class</span> <span class="nc">PebbleJITGenerator</span><span class="p">(</span><span class="n">JITParallelGenerator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Uses the `pebble` library to parallelize the processing of an input generator.</span>
+<span class="sd">    The main benefit of using `pebble` is that it supports timeouts for each job,</span>
+<span class="sd">    which makes it easy to handle jobs that take too long to process.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">n_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">worker_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;cpu&quot;</span><span class="p">,</span> <span class="s2">&quot;gpu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;cpu&quot;</span><span class="p">,</span>
+            <span class="n">use_gpus</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">jobs_per_gpu</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Configures the multiprocessing pool generator.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            n_workers(int):</span>
+<span class="sd">                Number of workers to use.</span>
+<span class="sd">            worker_type(Literal[&quot;cpu&quot;, &quot;gpu&quot;]):</span>
+<span class="sd">                The type of worker to use.</span>
+<span class="sd">            use_gpus(list[int] | None):</span>
+<span class="sd">                A list of GPU indices to use. Only applicable if `worker_type` is &#39;gpu&#39;.</span>
+<span class="sd">                If None, all available GPUs will be used.</span>
+<span class="sd">            jobs_per_gpu(int):</span>
+<span class="sd">                Number of jobs to run on each GPU.</span>
+<span class="sd">            timeout(int | None):</span>
+<span class="sd">                A timeout threshold in seconds. Processes that exceed this threshold will</span>
+<span class="sd">                be terminated and a `TimeoutError` will be returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">n_workers</span><span class="o">=</span><span class="n">n_workers</span><span class="p">,</span>
+            <span class="n">worker_type</span><span class="o">=</span><span class="n">worker_type</span><span class="p">,</span>
+            <span class="n">use_gpus</span><span class="o">=</span><span class="n">use_gpus</span><span class="p">,</span>
+            <span class="n">jobs_per_gpu</span><span class="o">=</span><span class="n">jobs_per_gpu</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span>
+
+<div class="viewcode-block" id="PebbleJITGenerator.getPool"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.PebbleJITGenerator.getPool">[docs]</a>    <span class="k">def</span> <span class="nf">getPool</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">pebble</span> <span class="kn">import</span> <span class="n">ProcessPool</span>
-            <span class="n">pool_type_to_pool</span><span class="p">[</span><span class="s2">&quot;pebble&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ProcessPool</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="n">n_cpus</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ProcessPool</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nWorkers</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Failed to import pool type &#39;pebble&#39;. Install it first.&quot;</span><span class="p">)</span>
-    <span class="k">with</span> <span class="n">pool_type_to_pool</span><span class="p">[</span><span class="n">pool_type</span><span class="p">]</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
-        <span class="n">queue</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span> <span class="ow">or</span> <span class="n">queue</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="c1"># take a slice of the generator</span>
-                <span class="n">input_args</span> <span class="o">=</span> <span class="p">[</span><span class="nb">next</span><span class="p">(</span><span class="n">generator</span><span class="p">),</span> <span class="o">*</span><span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)]</span>
-                <span class="c1"># add our next slice to the pool</span>
-                <span class="k">if</span> <span class="n">pool_type</span> <span class="o">==</span> <span class="s2">&quot;pebble&quot;</span><span class="p">:</span>
-                    <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span>
-                        <span class="n">process_func</span><span class="p">,</span>
-                        <span class="n">args</span><span class="o">=</span><span class="n">input_args</span><span class="p">,</span>
-                        <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
-                        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span>
-                    <span class="p">))</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">apply_async</span><span class="p">(</span>
-                        <span class="n">process_func</span><span class="p">,</span>
-                        <span class="n">input_args</span><span class="p">,</span>
-                        <span class="n">kwargs</span>
-                    <span class="p">))</span>
-            <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
-                <span class="c1"># no more data, clear out the slice generator</span>
-                <span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="c1"># wait for a free worker or until all remaining workers finish</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Waiting for </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">queue</span><span class="p">)</span><span class="si">}</span><span class="s2"> workers to finish...&quot;</span><span class="p">)</span>
-            <span class="k">while</span> <span class="n">queue</span> <span class="ow">and</span> <span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">queue</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">n_cpus</span><span class="p">)</span> <span class="ow">or</span> <span class="n">done</span><span class="p">):</span>
-                <span class="c1"># grab a process response from the top</span>
-                <span class="n">process</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-                <span class="c1"># check if job timed out and return the exception as a result</span>
-                <span class="k">if</span> <span class="n">pool_type</span> <span class="o">==</span> <span class="s2">&quot;pebble&quot;</span> \
-                        <span class="ow">and</span> <span class="n">process</span><span class="o">.</span><span class="n">done</span><span class="p">()</span> \
-                        <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">_exception</span> <span class="p">)</span> <span class="ow">in</span> <span class="p">[</span>
-                            <span class="ne">TimeoutError</span><span class="p">,</span>
-                            <span class="n">futures</span><span class="o">.</span><span class="n">TimeoutError</span>
-                        <span class="p">]:</span>
-                    <span class="k">yield</span> <span class="n">process</span><span class="o">.</span><span class="n">_exception</span>
-                    <span class="c1"># make sure to pop the next item from the generator</span>
-                    <span class="k">break</span>
-                <span class="c1"># check if result available</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">pool_type</span> <span class="o">==</span> <span class="s2">&quot;pebble&quot;</span><span class="p">:</span>
-                        <span class="c1"># get the result, timeout error if not result yet available</span>
-                        <span class="n">result</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">result</span><span class="p">(</span><span class="n">timeout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
-                        <span class="k">yield</span> <span class="n">result</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">process</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
-                        <span class="c1"># check if process is done</span>
-                        <span class="k">if</span> <span class="ow">not</span> <span class="n">process</span><span class="o">.</span><span class="n">ready</span><span class="p">():</span>
-                            <span class="c1"># not finished, add it back to queue</span>
-                            <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">process</span><span class="p">)</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="c1"># finished, yield the result</span>
-                            <span class="k">yield</span> <span class="n">process</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-                <span class="k">except</span> <span class="p">(</span><span class="n">futures</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">,</span> <span class="ne">TimeoutError</span><span class="p">):</span>
-                    <span class="c1"># not done yet, add it back to the queue</span>
-                    <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">process</span><span class="p">)</span>
-                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exp</span><span class="p">:</span>
-                    <span class="c1"># something went wrong, log and yield the exception</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">exp</span><span class="p">))</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">process</span><span class="p">))</span>
-                    <span class="k">if</span> <span class="n">pool_type</span> <span class="o">==</span> <span class="s2">&quot;pebble&quot;</span><span class="p">:</span>
-                        <span class="k">yield</span> <span class="n">process</span><span class="o">.</span><span class="n">_exception</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="k">yield</span> <span class="n">exp</span>
-                    <span class="k">break</span>  <span class="c1"># make sure to pop the next item from the generator</span></div>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+                <span class="s2">&quot;Failed to import pool type &#39;pebble&#39;. Install it first.&quot;</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="PebbleJITGenerator.checkResultAvailable"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.PebbleJITGenerator.checkResultAvailable">[docs]</a>    <span class="k">def</span> <span class="nf">checkResultAvailable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">:</span> <span class="n">ProcessFuture</span><span class="p">):</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">process</span><span class="o">.</span><span class="n">done</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PebbleJITGenerator.getResult"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.PebbleJITGenerator.getResult">[docs]</a>    <span class="k">def</span> <span class="nf">getResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">process</span><span class="o">.</span><span class="n">result</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PebbleJITGenerator.checkProcess"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.PebbleJITGenerator.checkProcess">[docs]</a>    <span class="k">def</span> <span class="nf">checkProcess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+        <span class="c1"># check if job timed out</span>
+        <span class="k">if</span> <span class="n">process</span><span class="o">.</span><span class="n">done</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">_exception</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="ne">TimeoutError</span><span class="p">,</span>
+            <span class="n">futures</span><span class="o">.</span><span class="n">TimeoutError</span>
+        <span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">process</span><span class="o">.</span><span class="n">_exception</span></div>
+
+<div class="viewcode-block" id="PebbleJITGenerator.handleException"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.PebbleJITGenerator.handleException">[docs]</a>    <span class="k">def</span> <span class="nf">handleException</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">exception</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">process</span><span class="o">.</span><span class="n">_exception</span></div>
+
+<div class="viewcode-block" id="PebbleJITGenerator.createJob"><a class="viewcode-back" href="../../../api/qsprpred.utils.html#qsprpred.utils.parallel.PebbleJITGenerator.createJob">[docs]</a>    <span class="k">def</span> <span class="nf">createJob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pool</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">process_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pool</span><span class="o">.</span><span class="n">schedule</span><span class="p">(</span>
+            <span class="n">process_func</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+            <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span>
+        <span class="p">)</span></div></div>
 </pre></div>
 
            </div>

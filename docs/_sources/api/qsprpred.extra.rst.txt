@@ -10,6 +10,7 @@ Subpackages
    qsprpred.extra.data
    qsprpred.extra.gpu
    qsprpred.extra.models
+   qsprpred.extra.utils
 
 Module contents
 ---------------

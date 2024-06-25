@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models.hyperparam_optimization &mdash; QSPRpred 3.0.2 documentation</title>
+  <title>qsprpred.models.hyperparam_optimization &mdash; QSPRpred 3.1.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -16,9 +16,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../_static/documentation_options.js?v=3f474186"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=5b1057fd"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="../../../_static/design-tabs.js?v=36754332"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2
+                v3.1.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -114,9 +114,7 @@
 <span class="kn">from</span> <span class="nn">..models.monitors</span> <span class="kn">import</span> <span class="n">BaseMonitor</span><span class="p">,</span> <span class="n">HyperparameterOptimizationMonitor</span>
 
 
-<div class="viewcode-block" id="HyperparameterOptimization">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.hyperparam_optimization.HyperparameterOptimization">[docs]</a>
-<span class="k">class</span> <span class="nc">HyperparameterOptimization</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="HyperparameterOptimization"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.hyperparam_optimization.HyperparameterOptimization">[docs]</a><span class="k">class</span> <span class="nc">HyperparameterOptimization</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for hyperparameter optimization.</span>
 
 <span class="sd">    Attributes:</span>
@@ -157,9 +155,7 @@
             <span class="s2">&quot;score_aggregation&quot;</span><span class="p">:</span> <span class="n">score_aggregation</span><span class="p">,</span>
         <span class="p">}</span>
 
-<div class="viewcode-block" id="HyperparameterOptimization.optimize">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.hyperparam_optimization.HyperparameterOptimization.optimize">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="HyperparameterOptimization.optimize"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.hyperparam_optimization.HyperparameterOptimization.optimize">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">refit_optimal</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
@@ -177,10 +173,7 @@
 <span class="sd">            dict: dictionary of best parameters</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-
-<div class="viewcode-block" id="HyperparameterOptimization.saveResults">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.hyperparam_optimization.HyperparameterOptimization.saveResults">[docs]</a>
-    <span class="k">def</span> <span class="nf">saveResults</span><span class="p">(</span>
+<div class="viewcode-block" id="HyperparameterOptimization.saveResults"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.hyperparam_optimization.HyperparameterOptimization.saveResults">[docs]</a>    <span class="k">def</span> <span class="nf">saveResults</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="n">save_params</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">refit_optimal</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Handles saving of optimization results.</span>
@@ -202,14 +195,10 @@
         <span class="k">if</span> <span class="n">refit_optimal</span><span class="p">:</span>
             <span class="n">model</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bestParams</span><span class="p">)</span>
             <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ds</span><span class="o">.</span><span class="n">getTargetPropertiesValues</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
-</div>
+            <span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div></div>
 
 
-
-<div class="viewcode-block" id="OptunaOptimization">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.hyperparam_optimization.OptunaOptimization">[docs]</a>
-<span class="k">class</span> <span class="nc">OptunaOptimization</span><span class="p">(</span><span class="n">HyperparameterOptimization</span><span class="p">):</span>
+<div class="viewcode-block" id="OptunaOptimization"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.hyperparam_optimization.OptunaOptimization">[docs]</a><span class="k">class</span> <span class="nc">OptunaOptimization</span><span class="p">(</span><span class="n">HyperparameterOptimization</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for hyperparameter optimization of QSPRModels using Optuna.</span>
 
 <span class="sd">    Attributes:</span>
@@ -310,9 +299,7 @@
             <span class="p">}</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="OptunaOptimization.optimize">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.hyperparam_optimization.OptunaOptimization.optimize">[docs]</a>
-    <span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span>
+<div class="viewcode-block" id="OptunaOptimization.optimize"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.hyperparam_optimization.OptunaOptimization.optimize">[docs]</a>    <span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
         <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span>
@@ -375,10 +362,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">saveResults</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">save_params</span><span class="p">,</span> <span class="n">refit_optimal</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bestParams</span></div>
 
-
-<div class="viewcode-block" id="OptunaOptimization.objective">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.hyperparam_optimization.OptunaOptimization.objective">[docs]</a>
-    <span class="k">def</span> <span class="nf">objective</span><span class="p">(</span>
+<div class="viewcode-block" id="OptunaOptimization.objective"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.hyperparam_optimization.OptunaOptimization.objective">[docs]</a>    <span class="k">def</span> <span class="nf">objective</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">trial</span><span class="p">:</span> <span class="n">optuna</span><span class="o">.</span><span class="n">trial</span><span class="o">.</span><span class="n">Trial</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Objective for bayesian optimization.</span>
@@ -425,14 +409,10 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">bayesian_params</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Score: </span><span class="si">{</span><span class="n">score</span><span class="si">}</span><span class="s2">, std: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">onIterationEnd</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">scores</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">score</span></div>
-</div>
+        <span class="k">return</span> <span class="n">score</span></div></div>
 
 
-
-<div class="viewcode-block" id="GridSearchOptimization">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.hyperparam_optimization.GridSearchOptimization">[docs]</a>
-<span class="k">class</span> <span class="nc">GridSearchOptimization</span><span class="p">(</span><span class="n">HyperparameterOptimization</span><span class="p">):</span>
+<div class="viewcode-block" id="GridSearchOptimization"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.hyperparam_optimization.GridSearchOptimization">[docs]</a><span class="k">class</span> <span class="nc">GridSearchOptimization</span><span class="p">(</span><span class="n">HyperparameterOptimization</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for hyperparameter optimization of QSPRModels using GridSearch.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -460,9 +440,7 @@
         <span class="k">if</span> <span class="n">monitor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span> <span class="o">=</span> <span class="n">BaseMonitor</span><span class="p">()</span>
 
-<div class="viewcode-block" id="GridSearchOptimization.optimize">
-<a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.hyperparam_optimization.GridSearchOptimization.optimize">[docs]</a>
-    <span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span>
+<div class="viewcode-block" id="GridSearchOptimization.optimize"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.hyperparam_optimization.GridSearchOptimization.optimize">[docs]</a>    <span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
         <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span>
@@ -517,9 +495,7 @@
         <span class="c1"># save the best parameters to the model if requested</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">saveResults</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">save_params</span><span class="p">,</span> <span class="n">refit_optimal</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span><span class="o">.</span><span class="n">onOptimizationEnd</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bestScore</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bestParams</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bestParams</span></div>
-</div>
-
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bestParams</span></div></div>
 </pre></div>
 
            </div>

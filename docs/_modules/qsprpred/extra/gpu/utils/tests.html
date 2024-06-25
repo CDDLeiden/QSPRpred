@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.extra.gpu.utils.tests &mdash; QSPRpred 3.1.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=5b1057fd"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script>
+    </script>
+        <script src="../../../../../_static/design-tabs.js?v=36754332"></script>
+        <script src="../../../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.1.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../features.html">Overview of available features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.extra.gpu.utils.tests</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.extra.gpu.utils.tests</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">skipIf</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">parameterized</span> <span class="kn">import</span> <span class="n">parameterized</span>
+
+<span class="kn">from</span> <span class="nn">qsprpred.extra.gpu.utils.parallel</span> <span class="kn">import</span> <span class="n">TorchJITGenerator</span>
+<span class="kn">from</span> <span class="nn">qsprpred.utils.parallel</span> <span class="kn">import</span> <span class="n">batched_generator</span><span class="p">,</span> <span class="n">ThreadsJITGenerator</span>
+<span class="kn">from</span> <span class="nn">qsprpred.utils.testing.base</span> <span class="kn">import</span> <span class="n">QSPRTestCase</span>
+
+
+<div class="viewcode-block" id="TestMultiGPUGenerators"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.utils.html#qsprpred.extra.gpu.utils.tests.TestMultiGPUGenerators">[docs]</a><span class="nd">@skipIf</span><span class="p">(</span><span class="ow">not</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">(),</span> <span class="s2">&quot;CUDA not available. Skipping...&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">TestMultiGPUGenerators</span><span class="p">(</span><span class="n">QSPRTestCase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestMultiGPUGenerators.func"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.utils.html#qsprpred.extra.gpu.utils.tests.TestMultiGPUGenerators.func">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">gpu</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">gpu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cuda:</span><span class="si">{</span><span class="n">gpu</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">x</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+<div class="viewcode-block" id="TestMultiGPUGenerators.func_batched"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.utils.html#qsprpred.extra.gpu.utils.tests.TestMultiGPUGenerators.func_batched">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">func_batched</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">gpu</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">gpu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cuda:</span><span class="si">{</span><span class="n">gpu</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span></div>
+
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">([</span>
+        <span class="p">(</span><span class="mi">1</span><span class="p">,),</span>
+        <span class="p">(</span><span class="mi">2</span><span class="p">,),</span>
+    <span class="p">])</span>
+    <span class="k">def</span> <span class="nf">testSimple</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jobs_per_gpu</span><span class="p">):</span>
+        <span class="n">generator</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+        <span class="n">p_generator</span> <span class="o">=</span> <span class="n">TorchJITGenerator</span><span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GPUs</span><span class="p">),</span>
+            <span class="n">use_gpus</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">GPUs</span><span class="p">,</span>
+            <span class="n">jobs_per_gpu</span><span class="o">=</span><span class="n">jobs_per_gpu</span><span class="p">,</span>
+            <span class="n">worker_type</span><span class="o">=</span><span class="s2">&quot;gpu&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)],</span>
+            <span class="nb">sorted</span><span class="p">(</span><span class="n">p_generator</span><span class="p">(</span>
+                <span class="n">generator</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">,</span>
+            <span class="p">))</span>
+        <span class="p">)</span>
+
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">([</span>
+        <span class="p">(</span><span class="mi">1</span><span class="p">,),</span>
+        <span class="p">(</span><span class="mi">2</span><span class="p">,),</span>
+    <span class="p">])</span>
+    <span class="k">def</span> <span class="nf">testBatched</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jobs_per_gpu</span><span class="p">):</span>
+        <span class="n">generator</span> <span class="o">=</span> <span class="n">batched_generator</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">p_generator</span> <span class="o">=</span> <span class="n">TorchJITGenerator</span><span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GPUs</span><span class="p">),</span>
+            <span class="n">use_gpus</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">GPUs</span><span class="p">,</span>
+            <span class="n">jobs_per_gpu</span><span class="o">=</span><span class="n">jobs_per_gpu</span><span class="p">,</span>
+            <span class="n">worker_type</span><span class="o">=</span><span class="s2">&quot;gpu&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span>
+            <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">25</span><span class="p">],</span> <span class="p">[</span><span class="mi">36</span><span class="p">,</span> <span class="mi">49</span><span class="p">],</span> <span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">81</span><span class="p">]],</span>
+            <span class="nb">sorted</span><span class="p">(</span><span class="n">p_generator</span><span class="p">(</span>
+                <span class="n">generator</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">func_batched</span>
+            <span class="p">))</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TestThreadedGeneratorsGPU"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.utils.html#qsprpred.extra.gpu.utils.tests.TestThreadedGeneratorsGPU">[docs]</a><span class="k">class</span> <span class="nc">TestThreadedGeneratorsGPU</span><span class="p">(</span><span class="n">QSPRTestCase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Test processing using a pool of threads.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestThreadedGeneratorsGPU.gpu_func"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.utils.html#qsprpred.extra.gpu.utils.tests.TestThreadedGeneratorsGPU.gpu_func">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">gpu_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">gpu</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">gpu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cuda:</span><span class="si">{</span><span class="n">gpu</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="n">x</span><span class="p">],</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
+<div class="viewcode-block" id="TestThreadedGeneratorsGPU.gpu_func_batched"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.utils.html#qsprpred.extra.gpu.utils.tests.TestThreadedGeneratorsGPU.gpu_func_batched">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">gpu_func_batched</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">gpu</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">gpu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;cuda:</span><span class="si">{</span><span class="n">gpu</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">device</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="TestThreadedGeneratorsGPU.testSimpleGPU"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.utils.html#qsprpred.extra.gpu.utils.tests.TestThreadedGeneratorsGPU.testSimpleGPU">[docs]</a>    <span class="nd">@skipIf</span><span class="p">(</span><span class="ow">not</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">(),</span> <span class="s2">&quot;CUDA not available. Skipping...&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">testSimpleGPU</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">generator</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+        <span class="n">p_generator</span> <span class="o">=</span> <span class="n">ThreadsJITGenerator</span><span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GPUs</span><span class="p">),</span>
+            <span class="n">use_gpus</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">GPUs</span><span class="p">,</span>
+            <span class="n">worker_type</span><span class="o">=</span><span class="s2">&quot;gpu&quot;</span><span class="p">,</span>
+            <span class="n">jobs_per_gpu</span><span class="o">=</span><span class="mi">2</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)],</span>
+            <span class="nb">sorted</span><span class="p">(</span><span class="n">p_generator</span><span class="p">(</span>
+                <span class="n">generator</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">gpu_func</span><span class="p">,</span>
+            <span class="p">))</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="TestThreadedGeneratorsGPU.testBatchedGPU"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.utils.html#qsprpred.extra.gpu.utils.tests.TestThreadedGeneratorsGPU.testBatchedGPU">[docs]</a>    <span class="nd">@skipIf</span><span class="p">(</span><span class="ow">not</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">(),</span> <span class="s2">&quot;CUDA not available. Skipping...&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">testBatchedGPU</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">generator</span> <span class="o">=</span> <span class="n">batched_generator</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">p_generator</span> <span class="o">=</span> <span class="n">ThreadsJITGenerator</span><span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GPUs</span><span class="p">),</span>
+            <span class="n">use_gpus</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">GPUs</span><span class="p">,</span>
+            <span class="n">worker_type</span><span class="o">=</span><span class="s2">&quot;gpu&quot;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span>
+            <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">],</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">25</span><span class="p">],</span> <span class="p">[</span><span class="mi">36</span><span class="p">,</span> <span class="mi">49</span><span class="p">],</span> <span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">81</span><span class="p">]],</span>
+            <span class="nb">sorted</span><span class="p">(</span><span class="n">p_generator</span><span class="p">(</span>
+                <span class="n">generator</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">gpu_func_batched</span>
+            <span class="p">))</span>
+        <span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

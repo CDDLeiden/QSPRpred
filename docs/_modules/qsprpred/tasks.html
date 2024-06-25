@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.tasks &mdash; QSPRpred 3.0.2 documentation</title>
+  <title>qsprpred.tasks &mdash; QSPRpred 3.1.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -16,9 +16,9 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../_static/documentation_options.js?v=3f474186"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=5b1057fd"></script>
         <script src="../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="../../_static/design-tabs.js?v=36754332"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2
+                v3.1.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -107,9 +107,7 @@
 <span class="p">)</span>
 
 
-<div class="viewcode-block" id="TargetTasks">
-<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetTasks">[docs]</a>
-<span class="k">class</span> <span class="nc">TargetTasks</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<div class="viewcode-block" id="TargetTasks"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetTasks">[docs]</a><span class="k">class</span> <span class="nc">TargetTasks</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Enum representing the type of task the model</span>
 <span class="sd">    is supposed to perform for a single target property.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -118,29 +116,20 @@
     <span class="n">SINGLECLASS</span> <span class="o">=</span> <span class="s2">&quot;SINGLECLASS&quot;</span>
     <span class="n">MULTICLASS</span> <span class="o">=</span> <span class="s2">&quot;MULTICLASS&quot;</span>
 
-<div class="viewcode-block" id="TargetTasks.isClassification">
-<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetTasks.isClassification">[docs]</a>
-    <span class="k">def</span> <span class="nf">isClassification</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TargetTasks.isClassification"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetTasks.isClassification">[docs]</a>    <span class="k">def</span> <span class="nf">isClassification</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the task is a classification task.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">]</span></div>
 
-
-<div class="viewcode-block" id="TargetTasks.isRegression">
-<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetTasks.isRegression">[docs]</a>
-    <span class="k">def</span> <span class="nf">isRegression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TargetTasks.isRegression"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetTasks.isRegression">[docs]</a>    <span class="k">def</span> <span class="nf">isRegression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the task is a regression task.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">]</span></div>
-
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the task.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
 
 
-
-<div class="viewcode-block" id="ModelTasks">
-<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.ModelTasks">[docs]</a>
-<span class="k">class</span> <span class="nc">ModelTasks</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelTasks"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.ModelTasks">[docs]</a><span class="k">class</span> <span class="nc">ModelTasks</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Enum representing the general type of task the</span>
 <span class="sd">    model is supposed to perform for all target properties.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -153,9 +142,7 @@
     <span class="n">MULTITASK_MULTICLASS</span> <span class="o">=</span> <span class="s2">&quot;MULTITASK_MULTICLASS&quot;</span>
     <span class="n">MULTITASK_MIXED</span> <span class="o">=</span> <span class="s2">&quot;MULTITASK_MIXED&quot;</span>
 
-<div class="viewcode-block" id="ModelTasks.isClassification">
-<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.ModelTasks.isClassification">[docs]</a>
-    <span class="k">def</span> <span class="nf">isClassification</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelTasks.isClassification"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.ModelTasks.isClassification">[docs]</a>    <span class="k">def</span> <span class="nf">isClassification</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the task is a classification task.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
@@ -164,24 +151,15 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_MULTICLASS</span><span class="p">,</span>
         <span class="p">]</span></div>
 
-
-<div class="viewcode-block" id="ModelTasks.isRegression">
-<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.ModelTasks.isRegression">[docs]</a>
-    <span class="k">def</span> <span class="nf">isRegression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelTasks.isRegression"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.ModelTasks.isRegression">[docs]</a>    <span class="k">def</span> <span class="nf">isRegression</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the task is a regression task.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_REGRESSION</span><span class="p">]</span></div>
 
-
-<div class="viewcode-block" id="ModelTasks.isMixed">
-<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.ModelTasks.isMixed">[docs]</a>
-    <span class="k">def</span> <span class="nf">isMixed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelTasks.isMixed"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.ModelTasks.isMixed">[docs]</a>    <span class="k">def</span> <span class="nf">isMixed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the task is a mixed task.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_MIXED</span><span class="p">]</span></div>
 
-
-<div class="viewcode-block" id="ModelTasks.isMultiTask">
-<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.ModelTasks.isMultiTask">[docs]</a>
-    <span class="k">def</span> <span class="nf">isMultiTask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelTasks.isMultiTask"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.ModelTasks.isMultiTask">[docs]</a>    <span class="k">def</span> <span class="nf">isMultiTask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the task is a multitask task.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span> <span class="ow">in</span> <span class="p">[</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_REGRESSION</span><span class="p">,</span>
@@ -190,14 +168,11 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">MULTITASK_MIXED</span><span class="p">,</span>
         <span class="p">]</span></div>
 
-
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the task.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
-<div class="viewcode-block" id="ModelTasks.getModelTask">
-<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.ModelTasks.getModelTask">[docs]</a>
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ModelTasks.getModelTask"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.ModelTasks.getModelTask">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">getModelTask</span><span class="p">(</span><span class="n">target_properties</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the model type for a given list of target properties.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_properties</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -218,14 +193,10 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_MULTICLASS</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_MIXED</span></div>
-</div>
+            <span class="k">return</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_MIXED</span></div></div>
 
 
-
-<div class="viewcode-block" id="TargetProperty">
-<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetProperty">[docs]</a>
-<span class="k">class</span> <span class="nc">TargetProperty</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
+<div class="viewcode-block" id="TargetProperty"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetProperty">[docs]</a><span class="k">class</span> <span class="nc">TargetProperty</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Target property for QSPRmodelling class.</span>
 
 <span class="sd">    Attributes:</span>
@@ -357,9 +328,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return string identifier of the TargetProperty object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
-<div class="viewcode-block" id="TargetProperty.fromDict">
-<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetProperty.fromDict">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="TargetProperty.fromDict"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetProperty.fromDict">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">fromDict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a TargetProperty object from a dictionary.</span>
 
@@ -385,10 +354,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">TargetProperty</span><span class="p">(</span><span class="o">**</span><span class="n">d</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="TargetProperty.fromList">
-<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetProperty.fromList">[docs]</a>
-    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="TargetProperty.fromList"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetProperty.fromList">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">fromList</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a list of TargetProperty objects from a list of dictionaries.</span>
 
@@ -401,10 +367,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">_list</span><span class="p">]</span></div>
 
-
-<div class="viewcode-block" id="TargetProperty.toList">
-<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetProperty.toList">[docs]</a>
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TargetProperty.toList"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetProperty.toList">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">toList</span><span class="p">(</span><span class="n">_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">task_as_str</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">drop_transformer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a list of TargetProperty objects to a list of dictionaries.</span>
 
@@ -431,10 +394,7 @@
                 <span class="n">target_props</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;transformer&quot;</span><span class="p">:</span> <span class="n">target_prop</span><span class="o">.</span><span class="n">transformer</span><span class="p">})</span>
         <span class="k">return</span> <span class="n">target_props</span></div>
 
-
-<div class="viewcode-block" id="TargetProperty.selectFromList">
-<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetProperty.selectFromList">[docs]</a>
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TargetProperty.selectFromList"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetProperty.selectFromList">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">selectFromList</span><span class="p">(</span><span class="n">_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Select a subset of TargetProperty objects from a list of TargetProperty</span>
 <span class="sd">        objects.</span>
@@ -450,10 +410,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">_list</span> <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span></div>
 
-
-<div class="viewcode-block" id="TargetProperty.getNames">
-<a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetProperty.getNames">[docs]</a>
-    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="TargetProperty.getNames"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.tasks.TargetProperty.getNames">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">getNames</span><span class="p">(</span><span class="n">_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the names of the target properties from a list of TargetProperty objects.</span>
 
@@ -463,9 +420,7 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            list[str]: list of names of the target properties</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">_list</span><span class="p">]</span></div>
-</div>
-
+        <span class="k">return</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">_list</span><span class="p">]</span></div></div>
 </pre></div>
 
            </div>

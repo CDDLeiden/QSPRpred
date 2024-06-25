@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="./">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Command Line Interface Usage &mdash; QSPRpred 3.0.2 documentation</title>
+  <title>Command Line Interface Usage &mdash; QSPRpred 3.1.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -17,9 +17,9 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=3f474186"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=5b1057fd"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="_static/design-tabs.js?v=36754332"></script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2
+                v3.1.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -119,7 +119,7 @@
            <div itemprop="articleBody">
              
   <section id="command-line-interface-usage">
-<span id="cli-usage"></span><h1>Command Line Interface Usage<a class="headerlink" href="#command-line-interface-usage" title="Link to this heading"></a></h1>
+<span id="cli-usage"></span><h1>Command Line Interface Usage<a class="headerlink" href="#command-line-interface-usage" title="Permalink to this heading"></a></h1>
 <p>You can use the command-line interface to preprocess data and build models.
 The description of the functionality can be displayed with the <code class="code docutils literal notranslate"><span class="pre">--help</span></code> argument,
 e.g. the help message for the <code class="code docutils literal notranslate"><span class="pre">QSPRpred.data_CLI</span></code> script can be shown as follows:</p>
@@ -130,7 +130,7 @@ e.g. the help message for the <code class="code docutils literal notranslate"><s
 <p>If you want more control over the inputs and outputs or want to customize QSPRpred for your purpose,
 you can also use the Python API directly (see <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/tree/main/tutorials">tutorials</a>).</p>
 <section id="cli-example">
-<h2>CLI Example<a class="headerlink" href="#cli-example" title="Link to this heading"></a></h2>
+<h2>CLI Example<a class="headerlink" href="#cli-example" title="Permalink to this heading"></a></h2>
 <p>In this example, we will use the command line utilities of QSPRpred to train a QSAR model for the A2A and A2B receptor.
 We will use the Adenosine dataset from the API tutorial. The data is available through <a class="reference external" href="https://1drv.ms/u/s!AtzWqu0inkjX3QRxXOkTFNv7IV7u?e=PPj0O2">OneDrive</a>
 (just unzip and place the two datasets <strong>A2A_LIGANDS.tsv</strong> and <strong>AR_LIGANDS.tsv</strong> in the ‘tutorial_data’ folder) or recreate the dataset yourself by running ‘tutorial_data/create_tutorial_data.py’.</p>
@@ -154,9 +154,9 @@ To create this pivot table, we can use the pandas library in Python as follows:<
 Our example dataset now contains a SMILES column and two columns with the properties <strong>P29274</strong> (A2AR) and <strong>P29275</strong> (A2BR)
 (as well as a columns for A1 and A3, which we will not use in this example).</p>
 <section id="preparing-data">
-<h3>Preparing Data<a class="headerlink" href="#preparing-data" title="Link to this heading"></a></h3>
+<h3>Preparing Data<a class="headerlink" href="#preparing-data" title="Permalink to this heading"></a></h3>
 <section id="basics">
-<span id="data-basics"></span><h4>Basics<a class="headerlink" href="#basics" title="Link to this heading"></a></h4>
+<span id="data-basics"></span><h4>Basics<a class="headerlink" href="#basics" title="Permalink to this heading"></a></h4>
 <p>We will now use the QSPRpred <code class="code docutils literal notranslate"><span class="pre">QSPRpred.data_CLI</span></code> script for data preparation.
 In the CLI we need to indicate which property/ies we are interested in predicting (here P29274 and P29275, the A2A and A2B receptor respectively),
 this should be equal to the column names (should not contain spaces) containing the values to be predicted.
@@ -221,9 +221,9 @@ will contain the following files:</p>
 </table>
 </section>
 <section id="more">
-<span id="data-more"></span><h4>More<a class="headerlink" href="#more" title="Link to this heading"></a></h4>
+<span id="data-more"></span><h4>More<a class="headerlink" href="#more" title="Permalink to this heading"></a></h4>
 <section id="run-settings-arguments">
-<span id="data-run-settings-arguments"></span><h5>Run settings arguments<a class="headerlink" href="#run-settings-arguments" title="Link to this heading"></a></h5>
+<span id="data-run-settings-arguments"></span><h5>Run settings arguments<a class="headerlink" href="#run-settings-arguments" title="Permalink to this heading"></a></h5>
 <p>Apart from the the input file name, there are a few other base options that can be set.
 Including <code class="docutils literal notranslate"><span class="pre">-d</span></code>, will print debug information to the log file. The random
 seed (<code class="docutils literal notranslate"><span class="pre">-ran</span></code>) can also be set manually, which should guarantee identical results while keeping the same random seed.
@@ -235,7 +235,7 @@ can be indicated with <code class="docutils literal notranslate"><span class="pr
 </div>
 </section>
 <section id="transform-target-property">
-<h5>Transform target property<a class="headerlink" href="#transform-target-property" title="Link to this heading"></a></h5>
+<h5>Transform target property<a class="headerlink" href="#transform-target-property" title="Permalink to this heading"></a></h5>
 <p>To apply (<code class="docutils literal notranslate"><span class="pre">-tr</span></code>) transformations to target properties, indicate this in the CLI as follows:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Log transform data for P29274</span>
     <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">data_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="o">./</span><span class="n">tutorial_data</span><span class="o">/</span><span class="n">AR_LIGANDS_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">o</span> <span class="o">./</span><span class="n">tutorial_output</span><span class="o">/</span><span class="n">data</span> <span class="o">-</span><span class="n">pr</span> <span class="n">P29274</span> <span class="o">-</span><span class="n">pr</span> <span class="n">P29275</span> <span class="o">-</span><span class="n">tr</span> <span class="s1">&#39;{&quot;P29274&quot;:&quot;log&quot;}&#39;</span> <span class="o">-</span><span class="n">r</span> <span class="n">REG</span> <span class="o">-</span><span class="n">sp</span> <span class="n">random</span> <span class="o">-</span><span class="n">sf</span> <span class="mf">0.15</span> <span class="o">-</span><span class="n">fe</span> <span class="n">Morgan</span>
@@ -244,7 +244,7 @@ can be indicated with <code class="docutils literal notranslate"><span class="pr
 <p>note. on windows remove the single quotes around the dictionary and add backslashes before the double quotes, e.g. <code class="docutils literal notranslate"><span class="pre">-tr</span> <span class="pre">{\&quot;P29274\&quot;:\&quot;log\&quot;}</span></code></p>
 </section>
 <section id="train-test-split">
-<h5>Train-test split<a class="headerlink" href="#train-test-split" title="Link to this heading"></a></h5>
+<h5>Train-test split<a class="headerlink" href="#train-test-split" title="Permalink to this heading"></a></h5>
 <p>In the base example we use a random split to create the train and test set. There are several more options,
 One is a scaffold split, where the data is split into a test and train set randomly but keeping molecules with the same
 (Murcko) scaffold in the same set.</p>
@@ -274,7 +274,7 @@ NOTE. this example will not work on the example set as it does not contain a <st
 </div>
 </section>
 <section id="data-for-classification-models">
-<h5>Data for classification models<a class="headerlink" href="#data-for-classification-models" title="Link to this heading"></a></h5>
+<h5>Data for classification models<a class="headerlink" href="#data-for-classification-models" title="Permalink to this heading"></a></h5>
 <p>You can set whether to prepare data for regression, classification or both.
 The default setting is to run both, but you can run either by setting the
 regression argument to true/REG for regression or false/CLS for classification.
@@ -289,7 +289,7 @@ the bins need to be given. For binary classification only give 1 threshold per p
 <p>note. on windows remove the single quotes around the dictionary and add backslashes before the double quotes, e.g. <code class="docutils literal notranslate"><span class="pre">-th</span> <span class="pre">{\&quot;P29274\&quot;:[6.5],\&quot;P29275\&quot;:[0,4,6,10]}</span></code>.</p>
 </section>
 <section id="feature-calculation">
-<h5>Feature calculation<a class="headerlink" href="#feature-calculation" title="Link to this heading"></a></h5>
+<h5>Feature calculation<a class="headerlink" href="#feature-calculation" title="Permalink to this heading"></a></h5>
 <p>There are many different descriptor sets that can be calculated from the CLI,
 such as Morgan fingerprints, rdkit, Mordred, Mold2 and Padel descriptors.
 Check the help message for the full list of available descriptor sets.
@@ -301,7 +301,7 @@ For more control over the descriptor settings use the python API.</p>
 </div>
 </section>
 <section id="feature-filtering">
-<h5>Feature filtering<a class="headerlink" href="#feature-filtering" title="Link to this heading"></a></h5>
+<h5>Feature filtering<a class="headerlink" href="#feature-filtering" title="Permalink to this heading"></a></h5>
 <p>The calculated features can also be filtered. Three different filters are implemented in
 QSPRpred, namely a high correlation filter, a low variance filter and the boruta filter.
 The high correlation filter and low variance filter need to be set with a threshold
@@ -313,13 +313,13 @@ and real features.</p>
 </div>
 </section>
 <section id="papyrus-low-quality-filter">
-<h5>Papyrus Low quality filter<a class="headerlink" href="#papyrus-low-quality-filter" title="Link to this heading"></a></h5>
+<h5>Papyrus Low quality filter<a class="headerlink" href="#papyrus-low-quality-filter" title="Permalink to this heading"></a></h5>
 <p>Specifically for use with a dataset from the <a class="reference external" href="https://chemrxiv.org/engage/chemrxiv/article-details/617aa2467a002162403d71f0">Papyrus dataset</a>,
 an option is included for filtering low quality data from the dataset (All data is removed with value ‘Low’ in column ‘Quality’).
 To apply this filter include <code class="docutils literal notranslate"><span class="pre">-lq</span></code> or <code class="docutils literal notranslate"><span class="pre">--low_quality</span></code> in your command.</p>
 </section>
 <section id="multitask-data">
-<h5>Multitask data<a class="headerlink" href="#multitask-data" title="Link to this heading"></a></h5>
+<h5>Multitask data<a class="headerlink" href="#multitask-data" title="Permalink to this heading"></a></h5>
 <p>Multitask modelling is possible by passing multiple properties to the <code class="docutils literal notranslate"><span class="pre">-pr</span></code> argument. Furthermore, missing data can be
 imputed using the <code class="docutils literal notranslate"><span class="pre">-im</span></code> argument. You can combine any number of targets and combination of regression and classification
 tasks for the data preparation, however currently the DNN models do not support multitask modelling and only the random
@@ -335,9 +335,9 @@ a combination of regression and classification tasks, the multitask modelling is
 </section>
 </section>
 <section id="model-training">
-<h3>Model Training<a class="headerlink" href="#model-training" title="Link to this heading"></a></h3>
+<h3>Model Training<a class="headerlink" href="#model-training" title="Permalink to this heading"></a></h3>
 <section id="model-basics">
-<span id="id1"></span><h4>Basics<a class="headerlink" href="#model-basics" title="Link to this heading"></a></h4>
+<span id="id1"></span><h4>Basics<a class="headerlink" href="#model-basics" title="Permalink to this heading"></a></h4>
 <p>Finally, we need to indicate what models we want to train and which steps to take in the training.
 In this example, we will build regression random forest models through passing the prepared regression datasets files
 <strong>P29274_REGRESSION</strong> and <strong>P29275_REGRESSION</strong> to the <code class="docutils literal notranslate"><span class="pre">-dp</span></code> argument. If you wish to train classification models, you
@@ -398,12 +398,12 @@ will contain the following files:</p>
 </table>
 </section>
 <section id="model-more">
-<span id="id2"></span><h4>More<a class="headerlink" href="#model-more" title="Link to this heading"></a></h4>
+<span id="id2"></span><h4>More<a class="headerlink" href="#model-more" title="Permalink to this heading"></a></h4>
 <p>The model training can be further customized with several CLI arguments.
 For more control over the model training settings use the python API.
 Here you can find a short overview.</p>
 <section id="model-run-settings-arguments">
-<span id="id3"></span><h5>Run settings arguments<a class="headerlink" href="#model-run-settings-arguments" title="Link to this heading"></a></h5>
+<span id="id3"></span><h5>Run settings arguments<a class="headerlink" href="#model-run-settings-arguments" title="Permalink to this heading"></a></h5>
 <p>As with the data preparation including <code class="docutils literal notranslate"><span class="pre">-de</span></code>, will print debug information to the log file. The random
 seed can also be set manually (although identical results are not guaranteed while keeping
 the same random seed). Furthermore, the number of cpu’s used for model training and the
@@ -414,7 +414,7 @@ gpu number for training pytorch models can be set.</p>
 </div>
 </section>
 <section id="model-types">
-<h5>model types<a class="headerlink" href="#model-types" title="Link to this heading"></a></h5>
+<h5>model types<a class="headerlink" href="#model-types" title="Permalink to this heading"></a></h5>
 <p>You also need to indicate which models you want to run, out of the following model types:
 ‘RF’ (Random Forest), ‘XGB’ (XGboost), ‘SVM’ (Support Vector Machine), ‘PLS’ (partial least squares regression),
 ‘KNN’ (k-nearest neighbours), NB’ (Naive Bayes) and/or ‘DNN’ (pytorch fully connected neural net).
@@ -425,7 +425,7 @@ The default is to run all the different model types.</p>
 </div>
 </section>
 <section id="defining-model-parameters">
-<h5>Defining model parameters<a class="headerlink" href="#defining-model-parameters" title="Link to this heading"></a></h5>
+<h5>Defining model parameters<a class="headerlink" href="#defining-model-parameters" title="Permalink to this heading"></a></h5>
 <p>Specific model parameters can be set with the parameters argument by passing a json file.</p>
 <p>./myparams.json
 ..  code-block:</p>
@@ -449,7 +449,7 @@ patience is the number of training epochs without improvement in loss to stop th
 </div>
 </section>
 <section id="hyperparameter-optimization">
-<h5>Hyperparameter optimization<a class="headerlink" href="#hyperparameter-optimization" title="Link to this heading"></a></h5>
+<h5>Hyperparameter optimization<a class="headerlink" href="#hyperparameter-optimization" title="Permalink to this heading"></a></h5>
 <p>In addition to setting model parameters manually, a hyperparameter search can be performed.
 In QSPRpred, two methods of hyperparameter optimization are implemented: grid search and
 bayesian optimization. For baysian optimization also give the number of trials.
@@ -479,7 +479,7 @@ as third list item. The search space file should always include all models to be
 </div>
 </section>
 <section id="multitask-modelling">
-<h5>Multitask modelling<a class="headerlink" href="#multitask-modelling" title="Link to this heading"></a></h5>
+<h5>Multitask modelling<a class="headerlink" href="#multitask-modelling" title="Permalink to this heading"></a></h5>
 <p>Multitask modelling is also possible. This means that the models are trained on multiple targets at once.
 The modelling arguments are the same as for single task modelling, you just need to specifiy a multitask
 dataset data prefix (see multitask data preparation).</p>
@@ -487,10 +487,10 @@ dataset data prefix (see multitask data preparation).</p>
 </section>
 </section>
 <section id="prediction">
-<h3>Prediction<a class="headerlink" href="#prediction" title="Link to this heading"></a></h3>
+<h3>Prediction<a class="headerlink" href="#prediction" title="Permalink to this heading"></a></h3>
 <p>Furthermore, trained QSPRpred models can be used to predict values from SMILES from the command line interface <code class="code docutils literal notranslate"><span class="pre">predict_CLI.py</span></code>.</p>
 <section id="prediction-basics">
-<span id="id4"></span><h4>Basics<a class="headerlink" href="#prediction-basics" title="Link to this heading"></a></h4>
+<span id="id4"></span><h4>Basics<a class="headerlink" href="#prediction-basics" title="Permalink to this heading"></a></h4>
 <p>Here we will predict activity values for the A1 (P29274) and A3 receptor (P29275) on the SMILES in the
 dataset used in the previous examples using the models from the previous examples. The input <code class="docutils literal notranslate"><span class="pre">-i</span></code> here is the
 set of SMILES for which we want to predict activity values. The argument <code class="docutils literal notranslate"><span class="pre">-mp</span></code>, is the paths to the meta files of the
@@ -501,11 +501,11 @@ models we want to use for prediction relative to the base-directory subfolder qs
 </div>
 </section>
 <section id="prediction-more">
-<span id="id5"></span><h4>More<a class="headerlink" href="#prediction-more" title="Link to this heading"></a></h4>
+<span id="id5"></span><h4>More<a class="headerlink" href="#prediction-more" title="Permalink to this heading"></a></h4>
 <p>The predictions can be further customized with several CLI arguments.
 Here you can find a short overview.</p>
 <section id="prediction-run-settings-arguments">
-<span id="id6"></span><h5>Run settings arguments<a class="headerlink" href="#prediction-run-settings-arguments" title="Link to this heading"></a></h5>
+<span id="id6"></span><h5>Run settings arguments<a class="headerlink" href="#prediction-run-settings-arguments" title="Permalink to this heading"></a></h5>
 <p>As with the data preparation including <code class="docutils literal notranslate"><span class="pre">-de</span></code>, will print debug information to the log file. The random
 seed can also be set manually. Furthermore, the number of cpu’s used for model prediction and the
 gpu number for prediction with pytorch models can be set.</p>
@@ -515,7 +515,7 @@ gpu number for prediction with pytorch models can be set.</p>
 </div>
 </section>
 <section id="adding-probability-predictions">
-<h5>Adding probability predictions<a class="headerlink" href="#adding-probability-predictions" title="Link to this heading"></a></h5>
+<h5>Adding probability predictions<a class="headerlink" href="#adding-probability-predictions" title="Permalink to this heading"></a></h5>
 <p>When using a classification model, the probability of the predicted class can be added to the output file using the <code class="docutils literal notranslate"><span class="pre">-pr</span></code> flag.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Adding probability predictions</span>
 <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">predict_CLI</span> <span class="o">-</span><span class="n">i</span> <span class="o">./</span><span class="n">tutorial_data</span><span class="o">/</span><span class="n">AR_LIGANDS_pivot</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">o</span> <span class="o">./</span><span class="n">tutorial_output</span><span class="o">/</span><span class="n">predictions</span><span class="o">/</span><span class="n">AR_LIGANDS_preds</span><span class="o">.</span><span class="n">tsv</span> <span class="o">-</span><span class="n">mp</span> <span class="o">./</span><span class="n">tutorial_output</span><span class="o">/</span><span class="n">models</span><span class="o">/</span><span class="n">RF_P29274_SINGLECLASS</span><span class="o">/</span><span class="n">RF_P29274_SINGLECLASS_meta</span><span class="o">.</span><span class="n">json</span> <span class="o">./</span><span class="n">tutorial_output</span><span class="o">/</span><span class="n">models</span><span class="o">/</span><span class="n">RF_P29275_MULTICLASS</span><span class="o">/</span><span class="n">RF_P29275_MULTICLASS_meta</span><span class="o">.</span><span class="n">json</span> <span class="o">-</span><span class="n">pr</span>

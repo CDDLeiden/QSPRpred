@@ -1,0 +1,29 @@
+qsprpred.extra.utils package
+============================
+
+Submodules
+----------
+
+qsprpred.extra.utils.parallel module
+------------------------------------
+
+.. automodule:: qsprpred.extra.utils.parallel
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.extra.utils.tests module
+---------------------------------
+
+.. automodule:: qsprpred.extra.utils.tests
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: qsprpred.extra.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.data.sampling.splits &mdash; QSPRpred 3.0.2 documentation</title>
+  <title>qsprpred.extra.data.sampling.splits &mdash; QSPRpred 3.1.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -16,9 +16,9 @@
   
         <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../../_static/documentation_options.js?v=3f474186"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=5b1057fd"></script>
         <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="../../../../../_static/design-tabs.js?v=36754332"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2
+                v3.1.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -118,9 +118,7 @@
 <span class="kn">from</span> <span class="nn">qsprpred.tasks</span> <span class="kn">import</span> <span class="n">TargetProperty</span>
 
 
-<div class="viewcode-block" id="PCMSplit">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.splits.PCMSplit">[docs]</a>
-<span class="k">class</span> <span class="nc">PCMSplit</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">):</span>
+<div class="viewcode-block" id="PCMSplit"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.splits.PCMSplit">[docs]</a><span class="k">class</span> <span class="nc">PCMSplit</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Splits a dataset into train and test set such that the subsets are balanced with</span>
 <span class="sd">    respect to each of the protein targets.</span>
@@ -145,9 +143,7 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="p">,</span> <span class="p">(</span><span class="n">RandomSplit</span><span class="p">,</span> <span class="n">ClusterSplit</span><span class="p">)):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">splitter</span><span class="o">.</span><span class="n">setSeed</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">randomState</span> <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
 
-<div class="viewcode-block" id="PCMSplit.split">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.splits.PCMSplit.split">[docs]</a>
-    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
+<div class="viewcode-block" id="PCMSplit.split"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.splits.PCMSplit.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Split the PCM dataset into train and test set such that the subsets are balanced</span>
 <span class="sd">        with respect to the protein targets and there is not data leakage between the</span>
@@ -216,14 +212,10 @@
                     <span class="c1"># Convert to numeric index</span>
                     <span class="n">test_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">indices</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">ds_idx</span><span class="p">))</span>
         <span class="n">train_indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">test_indices</span><span class="p">]</span>
-        <span class="k">return</span> <span class="nb">iter</span><span class="p">([(</span><span class="n">train_indices</span><span class="p">,</span> <span class="n">test_indices</span><span class="p">)])</span></div>
-</div>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">([(</span><span class="n">train_indices</span><span class="p">,</span> <span class="n">test_indices</span><span class="p">)])</span></div></div>
 
 
-
-<div class="viewcode-block" id="LeaveTargetsOut">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.splits.LeaveTargetsOut">[docs]</a>
-<span class="k">class</span> <span class="nc">LeaveTargetsOut</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">):</span>
+<div class="viewcode-block" id="LeaveTargetsOut"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.splits.LeaveTargetsOut">[docs]</a><span class="k">class</span> <span class="nc">LeaveTargetsOut</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">PCMDataSet</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a leave target out splitter.</span>
 
@@ -235,9 +227,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">targets</span><span class="p">))</span>
 
-<div class="viewcode-block" id="LeaveTargetsOut.split">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.splits.LeaveTargetsOut.split">[docs]</a>
-    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<div class="viewcode-block" id="LeaveTargetsOut.split"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.splits.LeaveTargetsOut.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDataSet</span><span class="p">()</span>
         <span class="n">ds_targets</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">getProteinKeys</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">:</span>
@@ -247,14 +237,10 @@
         <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">))))</span>
         <span class="n">train</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
         <span class="n">test</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span>
-        <span class="k">return</span> <span class="nb">iter</span><span class="p">([(</span><span class="n">train</span><span class="p">,</span> <span class="n">test</span><span class="p">)])</span></div>
-</div>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">([(</span><span class="n">train</span><span class="p">,</span> <span class="n">test</span><span class="p">)])</span></div></div>
 
 
-
-<div class="viewcode-block" id="TemporalPerTarget">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.splits.TemporalPerTarget">[docs]</a>
-<span class="k">class</span> <span class="nc">TemporalPerTarget</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">):</span>
+<div class="viewcode-block" id="TemporalPerTarget"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.splits.TemporalPerTarget">[docs]</a><span class="k">class</span> <span class="nc">TemporalPerTarget</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">year_col</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -282,9 +268,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">yearCol</span> <span class="o">=</span> <span class="n">year_col</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">firstYearPerCompound</span> <span class="o">=</span> <span class="n">firts_year_per_compound</span>
 
-<div class="viewcode-block" id="TemporalPerTarget.split">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.splits.TemporalPerTarget.split">[docs]</a>
-    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
+<div class="viewcode-block" id="TemporalPerTarget.split"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.splits.TemporalPerTarget.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
         <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDataSet</span><span class="p">()</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">getDF</span><span class="p">()</span>
         <span class="n">indices</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
@@ -321,9 +305,7 @@
             <span class="n">ds</span>
         <span class="p">),</span> <span class="s2">&quot;Train and test set do not cover the whole dataset!&quot;</span>
 
-        <span class="k">return</span> <span class="nb">iter</span><span class="p">([(</span><span class="n">train_indices</span><span class="p">,</span> <span class="n">test_indices</span><span class="p">)])</span></div>
-</div>
-
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">([(</span><span class="n">train_indices</span><span class="p">,</span> <span class="n">test_indices</span><span class="p">)])</span></div></div>
 </pre></div>
 
            </div>

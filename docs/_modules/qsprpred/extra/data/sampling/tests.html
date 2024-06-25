@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.data.sampling.tests &mdash; QSPRpred 3.0.2 documentation</title>
+  <title>qsprpred.extra.data.sampling.tests &mdash; QSPRpred 3.1.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -16,9 +16,9 @@
   
         <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../../_static/documentation_options.js?v=3f474186"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=5b1057fd"></script>
         <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="../../../../../_static/design-tabs.js?v=36754332"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2
+                v3.1.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -113,19 +113,14 @@
 <span class="kn">from</span> <span class="nn">qsprpred.extra.data.utils.testing.path_mixins</span> <span class="kn">import</span> <span class="n">DataSetsMixInExtras</span>
 
 
-<div class="viewcode-block" id="TestPCMSplitters">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.tests.TestPCMSplitters">[docs]</a>
-<span class="k">class</span> <span class="nc">TestPCMSplitters</span><span class="p">(</span><span class="n">DataSetsMixInExtras</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
-<div class="viewcode-block" id="TestPCMSplitters.setUp">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.tests.TestPCMSplitters.setUp">[docs]</a>
-    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPCMSplitters"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.tests.TestPCMSplitters">[docs]</a><span class="k">class</span> <span class="nc">TestPCMSplitters</span><span class="p">(</span><span class="n">DataSetsMixInExtras</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPCMSplitters.setUp"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.tests.TestPCMSplitters.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">msaProvider</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getMSAProvider</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createPCMDataSet</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">_test&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">([</span><span class="n">ProDec</span><span class="p">([</span><span class="s2">&quot;Zscale Hellberg&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">msaProvider</span><span class="p">)])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">([</span><span class="n">RDKitDescs</span><span class="p">()])</span></div>
-
 
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">([(</span><span class="n">RandomSplit</span><span class="p">(),),</span> <span class="p">(</span><span class="n">ScaffoldSplit</span><span class="p">(),),</span> <span class="p">(</span><span class="n">ClusterSplit</span><span class="p">(),)])</span>
     <span class="k">def</span> <span class="nf">testPCMSplit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">splitter</span><span class="p">):</span>
@@ -143,9 +138,7 @@
             <span class="nb">set</span><span class="p">(</span><span class="n">test_smiles</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">train_smiles</span><span class="o">.</span><span class="n">unique</span><span class="p">()))</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="TestPCMSplitters.testPCMSplitRandomShuffle">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.tests.TestPCMSplitters.testPCMSplitRandomShuffle">[docs]</a>
-    <span class="k">def</span> <span class="nf">testPCMSplitRandomShuffle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPCMSplitters.testPCMSplitRandomShuffle"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.tests.TestPCMSplitters.testPCMSplitRandomShuffle">[docs]</a>    <span class="k">def</span> <span class="nf">testPCMSplitRandomShuffle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">seed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">randomState</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
         <span class="n">splitter</span> <span class="o">=</span> <span class="n">PCMSplit</span><span class="p">(</span><span class="n">RandomSplit</span><span class="p">(),</span> <span class="n">dataset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
@@ -162,10 +155,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">train</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">train_order</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">test_order</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="TestPCMSplitters.testLeaveTargetOut">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.tests.TestPCMSplitters.testLeaveTargetOut">[docs]</a>
-    <span class="k">def</span> <span class="nf">testLeaveTargetOut</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPCMSplitters.testLeaveTargetOut"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.tests.TestPCMSplitters.testLeaveTargetOut">[docs]</a>    <span class="k">def</span> <span class="nf">testLeaveTargetOut</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProteinKeys</span><span class="p">()[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
         <span class="n">splitter</span> <span class="o">=</span> <span class="n">LeaveTargetsOut</span><span class="p">(</span><span class="n">targets</span><span class="o">=</span><span class="n">target</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span> <span class="n">featurize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -179,10 +169,7 @@
             <span class="nb">set</span><span class="p">(</span><span class="n">test_targets</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">train_targets</span><span class="o">.</span><span class="n">unique</span><span class="p">()))</span>
         <span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="TestPCMSplitters.testPerTargetTemporal">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.tests.TestPCMSplitters.testPerTargetTemporal">[docs]</a>
-    <span class="k">def</span> <span class="nf">testPerTargetTemporal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPCMSplitters.testPerTargetTemporal"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.tests.TestPCMSplitters.testPerTargetTemporal">[docs]</a>    <span class="k">def</span> <span class="nf">testPerTargetTemporal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">year_col</span> <span class="o">=</span> <span class="s2">&quot;Year&quot;</span>
         <span class="n">year</span> <span class="o">=</span> <span class="mi">2015</span>
         <span class="n">splitter</span> <span class="o">=</span> <span class="n">TemporalPerTarget</span><span class="p">(</span>
@@ -192,9 +179,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span> <span class="n">featurize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getDF</span><span class="p">()[</span><span class="n">year_col</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train</span><span class="o">.</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">year</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getDF</span><span class="p">()[</span><span class="n">year_col</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">test</span><span class="o">.</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">year</span><span class="p">)</span></div>
-</div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getDF</span><span class="p">()[</span><span class="n">year_col</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">test</span><span class="o">.</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">year</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>

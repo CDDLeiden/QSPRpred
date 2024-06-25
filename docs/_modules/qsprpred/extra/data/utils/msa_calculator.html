@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.data.utils.msa_calculator &mdash; QSPRpred 3.0.2 documentation</title>
+  <title>qsprpred.extra.data.utils.msa_calculator &mdash; QSPRpred 3.1.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -16,9 +16,9 @@
   
         <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../../_static/documentation_options.js?v=3f474186"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=5b1057fd"></script>
         <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="../../../../../_static/design-tabs.js?v=36754332"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2
+                v3.1.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -115,9 +115,7 @@
 <span class="kn">from</span> <span class="nn">qsprpred.utils.serialization</span> <span class="kn">import</span> <span class="n">FileSerializable</span><span class="p">,</span> <span class="n">JSONSerializable</span>
 
 
-<div class="viewcode-block" id="MSAProvider">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.msa_calculator.MSAProvider">[docs]</a>
-<span class="k">class</span> <span class="nc">MSAProvider</span><span class="p">(</span><span class="n">FileSerializable</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="MSAProvider"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.msa_calculator.MSAProvider">[docs]</a><span class="k">class</span> <span class="nc">MSAProvider</span><span class="p">(</span><span class="n">FileSerializable</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Interface for multiple sequence alignment providers.</span>
 
 <span class="sd">    This interface defines how calculation and storage of</span>
@@ -161,10 +159,7 @@
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
 
-
-<div class="viewcode-block" id="BioPythonMSA">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA">[docs]</a>
-<span class="k">class</span> <span class="nc">BioPythonMSA</span><span class="p">(</span><span class="n">MSAProvider</span><span class="p">,</span> <span class="n">JSONSerializable</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="BioPythonMSA"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA">[docs]</a><span class="k">class</span> <span class="nc">BioPythonMSA</span><span class="p">(</span><span class="n">MSAProvider</span><span class="p">,</span> <span class="n">JSONSerializable</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Common functionality for MSA providers using BioPython command line wrappers.</span>
 
@@ -199,9 +194,7 @@
 <span class="sd">            cmd (str): the command to run the alignment algorithm</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="BioPythonMSA.getFromCache">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.getFromCache">[docs]</a>
-    <span class="k">def</span> <span class="nf">getFromCache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">:</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="BioPythonMSA.getFromCache"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.getFromCache">[docs]</a>    <span class="k">def</span> <span class="nf">getFromCache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">:</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets the alignment from the cache if it exists for a `list` of sequence IDs.</span>
 <span class="sd">        Args:</span>
@@ -217,10 +210,7 @@
         <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
 
-
-<div class="viewcode-block" id="BioPythonMSA.saveToCache">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.saveToCache">[docs]</a>
-    <span class="k">def</span> <span class="nf">saveToCache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">alignment</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">:</span><span class="nb">str</span><span class="p">]):</span>
+<div class="viewcode-block" id="BioPythonMSA.saveToCache"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.saveToCache">[docs]</a>    <span class="k">def</span> <span class="nf">saveToCache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">alignment</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">:</span><span class="nb">str</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Saves the alignment to the cache for a `list` of sequence IDs.</span>
 
 <span class="sd">        Args:</span>
@@ -233,14 +223,11 @@
         <span class="n">key</span> <span class="o">=</span> <span class="s2">&quot;~&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">target_ids</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">alignment</span></div>
 
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">current</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current</span>
 
-<div class="viewcode-block" id="BioPythonMSA.parseSequences">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.parseSequences">[docs]</a>
-    <span class="k">def</span> <span class="nf">parseSequences</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequences</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<div class="viewcode-block" id="BioPythonMSA.parseSequences"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.parseSequences">[docs]</a>    <span class="k">def</span> <span class="nf">parseSequences</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequences</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create object with sequences and the passed metadata.</span>
 
 <span class="sd">        Saves the sequences to a file that will serve</span>
@@ -270,10 +257,7 @@
         <span class="c1"># Write sequences as .fasta file</span>
         <span class="k">return</span> <span class="n">sequences_path</span><span class="p">,</span> <span class="n">Bio_SeqIO</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">sequences_path</span><span class="p">,</span> <span class="s2">&quot;fasta&quot;</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="BioPythonMSA.parseAlignment">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.parseAlignment">[docs]</a>
-    <span class="k">def</span> <span class="nf">parseAlignment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequences</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">:</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="BioPythonMSA.parseAlignment"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.parseAlignment">[docs]</a>    <span class="k">def</span> <span class="nf">parseAlignment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequences</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">:</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parse the alignment from the output file of the alignment algorithm.</span>
 
@@ -297,19 +281,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_current</span> <span class="o">=</span> <span class="n">alignment</span>
         <span class="k">return</span> <span class="n">alignment</span></div>
 
-
-<div class="viewcode-block" id="BioPythonMSA.checkTool">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.checkTool">[docs]</a>
-    <span class="k">def</span> <span class="nf">checkTool</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="viewcode-block" id="BioPythonMSA.checkTool"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.msa_calculator.BioPythonMSA.checkTool">[docs]</a>    <span class="k">def</span> <span class="nf">checkTool</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the MAFFT tool is installed&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
-</div>
+        <span class="k">return</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cmd</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div></div>
 
 
-
-<div class="viewcode-block" id="MAFFT">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.msa_calculator.MAFFT">[docs]</a>
-<span class="k">class</span> <span class="nc">MAFFT</span><span class="p">(</span><span class="n">BioPythonMSA</span><span class="p">):</span>
+<div class="viewcode-block" id="MAFFT"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.msa_calculator.MAFFT">[docs]</a><span class="k">class</span> <span class="nc">MAFFT</span><span class="p">(</span><span class="n">BioPythonMSA</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Multiple sequence alignment provider using the MAFFT cross-platform program</span>
 <span class="sd">    - https://mafft.cbrc.jp/alignment/software/</span>
@@ -366,10 +343,7 @@
         <span class="k">return</span> <span class="s2">&quot;mafft&quot;</span></div>
 
 
-
-<div class="viewcode-block" id="ClustalMSA">
-<a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.msa_calculator.ClustalMSA">[docs]</a>
-<span class="k">class</span> <span class="nc">ClustalMSA</span><span class="p">(</span><span class="n">BioPythonMSA</span><span class="p">):</span>
+<div class="viewcode-block" id="ClustalMSA"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.utils.html#qsprpred.extra.data.utils.msa_calculator.ClustalMSA">[docs]</a><span class="k">class</span> <span class="nc">ClustalMSA</span><span class="p">(</span><span class="n">BioPythonMSA</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Multiple sequence alignment provider using the Clustal Omega Linux program</span>
 <span class="sd">    - http://www.clustal.org/omega/</span>
@@ -422,7 +396,6 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">cmd</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;clustalo&quot;</span></div>
-
 </pre></div>
 
            </div>

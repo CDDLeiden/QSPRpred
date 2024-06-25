@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.sampling.splits &mdash; QSPRpred 3.0.2 documentation</title>
+  <title>qsprpred.data.sampling.splits &mdash; QSPRpred 3.1.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -16,9 +16,9 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=3f474186"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=5b1057fd"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="../../../../_static/design-tabs.js?v=36754332"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2
+                v3.1.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -124,9 +124,7 @@
 <span class="kn">from</span> <span class="nn">...utils.interfaces.randomized</span> <span class="kn">import</span> <span class="n">Randomized</span>
 
 
-<div class="viewcode-block" id="DataSplit">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.DataSplit">[docs]</a>
-<span class="k">class</span> <span class="nc">DataSplit</span><span class="p">(</span><span class="n">DataSetDependant</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="DataSplit"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.DataSplit">[docs]</a><span class="k">class</span> <span class="nc">DataSplit</span><span class="p">(</span><span class="n">DataSetDependant</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Defines a function split a dataframe into train and test set.</span>
 
@@ -137,9 +135,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">MoleculeDataTable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
 
-<div class="viewcode-block" id="DataSplit.split">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.DataSplit.split">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="DataSplit.split"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.DataSplit.split">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">split</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
@@ -162,21 +158,14 @@
 <span class="sd">            pandas index!)</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-
-<div class="viewcode-block" id="DataSplit.splitDataset">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.DataSplit.splitDataset">[docs]</a>
-    <span class="k">def</span> <span class="nf">splitDataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="s2">&quot;QSPRDataset&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="DataSplit.splitDataset"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.DataSplit.splitDataset">[docs]</a>    <span class="k">def</span> <span class="nf">splitDataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="s2">&quot;QSPRDataset&quot;</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span>
             <span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">(</span><span class="n">concat</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
             <span class="n">dataset</span><span class="o">.</span><span class="n">getTargetPropertiesValues</span><span class="p">(</span><span class="n">concat</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-        <span class="p">)</span></div>
-</div>
+        <span class="p">)</span></div></div>
 
 
-
-<div class="viewcode-block" id="RandomSplit">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.RandomSplit">[docs]</a>
-<span class="k">class</span> <span class="nc">RandomSplit</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">,</span> <span class="n">Randomized</span><span class="p">):</span>
+<div class="viewcode-block" id="RandomSplit"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.RandomSplit">[docs]</a><span class="k">class</span> <span class="nc">RandomSplit</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">,</span> <span class="n">Randomized</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Splits dataset in random train and test subsets.</span>
 
 <span class="sd">    Attributes:</span>
@@ -197,9 +186,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">testFraction</span> <span class="o">=</span> <span class="n">test_fraction</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setSeed</span><span class="p">(</span><span class="n">seed</span> <span class="ow">or</span> <span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">randomState</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDataSet</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))</span>
 
-<div class="viewcode-block" id="RandomSplit.split">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.RandomSplit.split">[docs]</a>
-    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<div class="viewcode-block" id="RandomSplit.split"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.RandomSplit.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setSeed</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">getDataSet</span><span class="p">()</span><span class="o">.</span><span class="n">randomState</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDataSet</span> <span class="k">else</span> <span class="kc">None</span>
@@ -212,14 +199,10 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">ShuffleSplit</span><span class="p">(</span>
             <span class="mi">1</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">testFraction</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
-</div>
+        <span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div></div>
 
 
-
-<div class="viewcode-block" id="BootstrapSplit">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.BootstrapSplit">[docs]</a>
-<span class="k">class</span> <span class="nc">BootstrapSplit</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">,</span> <span class="n">Randomized</span><span class="p">):</span>
+<div class="viewcode-block" id="BootstrapSplit"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.BootstrapSplit">[docs]</a><span class="k">class</span> <span class="nc">BootstrapSplit</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">,</span> <span class="n">Randomized</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Splits dataset in random train and test subsets (bootstraps). Unlike</span>
 <span class="sd">    cross-validation, bootstrapping allows for repeated samples in the test set.</span>
 
@@ -244,9 +227,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">nBootstraps</span> <span class="o">=</span> <span class="n">n_bootstraps</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_current</span> <span class="o">=</span> <span class="mi">0</span>
 
-<div class="viewcode-block" id="BootstrapSplit.split">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.BootstrapSplit.split">[docs]</a>
-    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span>
+<div class="viewcode-block" id="BootstrapSplit.split"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.BootstrapSplit.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Split the given data into `nBootstraps` training and test sets.</span>
@@ -267,14 +248,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_current</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_split</span><span class="p">,</span> <span class="s2">&quot;setSeed&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_split</span><span class="o">.</span><span class="n">setSeed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_original_split_seed</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_current</span> <span class="o">=</span> <span class="mi">0</span></div>
-</div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current</span> <span class="o">=</span> <span class="mi">0</span></div></div>
 
 
-
-<div class="viewcode-block" id="ManualSplit">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.ManualSplit">[docs]</a>
-<span class="k">class</span> <span class="nc">ManualSplit</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">):</span>
+<div class="viewcode-block" id="ManualSplit"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.ManualSplit">[docs]</a><span class="k">class</span> <span class="nc">ManualSplit</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Splits dataset in train and test subsets based on a column in the dataframe.</span>
 
 <span class="sd">    Attributes:</span>
@@ -308,9 +285,7 @@
                 <span class="s2">&quot;There are more values in splitcol than trainval and testval&quot;</span>
             <span class="p">)</span>
 
-<div class="viewcode-block" id="ManualSplit.split">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.ManualSplit.split">[docs]</a>
-    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<div class="viewcode-block" id="ManualSplit.split"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.ManualSplit.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Split the given data into one or multiple train/test subsets based on the</span>
 <span class="sd">        predefined splitcol.</span>
@@ -326,14 +301,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">train</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitCol</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">splitCol</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainVal</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span>
         <span class="n">test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitCol</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">splitCol</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">testVal</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span>
-        <span class="k">return</span> <span class="nb">iter</span><span class="p">([(</span><span class="n">train</span><span class="p">,</span> <span class="n">test</span><span class="p">)])</span></div>
-</div>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">([(</span><span class="n">train</span><span class="p">,</span> <span class="n">test</span><span class="p">)])</span></div></div>
 
 
-
-<div class="viewcode-block" id="TemporalSplit">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.TemporalSplit">[docs]</a>
-<span class="k">class</span> <span class="nc">TemporalSplit</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">):</span>
+<div class="viewcode-block" id="TemporalSplit"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.TemporalSplit">[docs]</a><span class="k">class</span> <span class="nc">TemporalSplit</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Splits dataset train and test subsets based on a threshold in time.</span>
 
@@ -364,9 +335,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">timeSplit</span> <span class="o">=</span> <span class="n">timesplit</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timeCol</span> <span class="o">=</span> <span class="n">timeprop</span>
 
-<div class="viewcode-block" id="TemporalSplit.split">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.TemporalSplit.split">[docs]</a>
-    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<div class="viewcode-block" id="TemporalSplit.split"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.TemporalSplit.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Split single-task dataset based on a time threshold.</span>
 
@@ -413,14 +382,10 @@
 
             <span class="n">train</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span>
 
-            <span class="k">yield</span> <span class="n">train</span><span class="p">,</span> <span class="n">test</span></div>
-</div>
+            <span class="k">yield</span> <span class="n">train</span><span class="p">,</span> <span class="n">test</span></div></div>
 
 
-
-<div class="viewcode-block" id="GBMTDataSplit">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.GBMTDataSplit">[docs]</a>
-<span class="k">class</span> <span class="nc">GBMTDataSplit</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">):</span>
+<div class="viewcode-block" id="GBMTDataSplit"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.GBMTDataSplit">[docs]</a><span class="k">class</span> <span class="nc">GBMTDataSplit</span><span class="p">(</span><span class="n">DataSplit</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Splits dataset into balanced train and test subsets</span>
 <span class="sd">    based on an initial clustering algorithm. If `nFolds` is specified,</span>
@@ -462,17 +427,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">testFraction</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">customTestList</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="GBMTDataSplit.setDataSet">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.GBMTDataSplit.setDataSet">[docs]</a>
-    <span class="k">def</span> <span class="nf">setDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">MoleculeDataTable</span><span class="p">):</span>
+<div class="viewcode-block" id="GBMTDataSplit.setDataSet"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.GBMTDataSplit.setDataSet">[docs]</a>    <span class="k">def</span> <span class="nf">setDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">MoleculeDataTable</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setDataSet</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nFolds</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">testFraction</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">nFolds</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span></div>
 
-
-<div class="viewcode-block" id="GBMTDataSplit.split">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.GBMTDataSplit.split">[docs]</a>
-    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span>
+<div class="viewcode-block" id="GBMTDataSplit.split"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.GBMTDataSplit.split">[docs]</a>    <span class="k">def</span> <span class="nf">split</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -549,14 +509,10 @@
             <span class="p">),</span> <span class="s2">&quot;Not all samples were assigned to a split&quot;</span>
             <span class="c1"># Reset index back to QSPRID</span>
             <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">indexCols</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="k">yield</span> <span class="n">train_indices</span><span class="p">,</span> <span class="n">test_indices</span></div>
-</div>
+            <span class="k">yield</span> <span class="n">train_indices</span><span class="p">,</span> <span class="n">test_indices</span></div></div>
 
 
-
-<div class="viewcode-block" id="GBMTRandomSplit">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.GBMTRandomSplit">[docs]</a>
-<span class="k">class</span> <span class="nc">GBMTRandomSplit</span><span class="p">(</span><span class="n">GBMTDataSplit</span><span class="p">):</span>
+<div class="viewcode-block" id="GBMTRandomSplit"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.GBMTRandomSplit">[docs]</a><span class="k">class</span> <span class="nc">GBMTRandomSplit</span><span class="p">(</span><span class="n">GBMTDataSplit</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Splits dataset into balanced random train and test subsets.</span>
 
@@ -601,10 +557,7 @@
         <span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="ScaffoldSplit">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.ScaffoldSplit">[docs]</a>
-<span class="k">class</span> <span class="nc">ScaffoldSplit</span><span class="p">(</span><span class="n">GBMTDataSplit</span><span class="p">):</span>
+<div class="viewcode-block" id="ScaffoldSplit"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.ScaffoldSplit">[docs]</a><span class="k">class</span> <span class="nc">ScaffoldSplit</span><span class="p">(</span><span class="n">GBMTDataSplit</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Splits dataset into balanced train and test subsets based on molecular scaffolds.</span>
 
@@ -638,10 +591,7 @@
         <span class="p">)</span></div>
 
 
-
-<div class="viewcode-block" id="ClusterSplit">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.ClusterSplit">[docs]</a>
-<span class="k">class</span> <span class="nc">ClusterSplit</span><span class="p">(</span><span class="n">GBMTDataSplit</span><span class="p">):</span>
+<div class="viewcode-block" id="ClusterSplit"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.ClusterSplit">[docs]</a><span class="k">class</span> <span class="nc">ClusterSplit</span><span class="p">(</span><span class="n">GBMTDataSplit</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Splits dataset into balanced train and test subsets based on clusters of similar</span>
 <span class="sd">    molecules.</span>
@@ -691,9 +641,7 @@
             <span class="o">**</span><span class="n">split_kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="ClusterSplit.setSeed">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.ClusterSplit.setSeed">[docs]</a>
-    <span class="k">def</span> <span class="nf">setSeed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ClusterSplit.setSeed"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.ClusterSplit.setSeed">[docs]</a>    <span class="k">def</span> <span class="nf">setSeed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the seed for this instance.</span>
 
 <span class="sd">        Args:</span>
@@ -704,10 +652,7 @@
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="p">,</span> <span class="s2">&quot;seed&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">clustering</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span></div>
 
-
-<div class="viewcode-block" id="ClusterSplit.getSeed">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.ClusterSplit.getSeed">[docs]</a>
-    <span class="k">def</span> <span class="nf">getSeed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ClusterSplit.getSeed"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.ClusterSplit.getSeed">[docs]</a>    <span class="k">def</span> <span class="nf">getSeed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the seed for this instance.</span>
 
 <span class="sd">        Returns:</span>
@@ -716,9 +661,7 @@
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;seed&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">None</span></div>
-</div>
-
+            <span class="k">return</span> <span class="kc">None</span></div></div>
 </pre></div>
 
            </div>

@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="../../../../">
+<html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.sampling.folds &mdash; QSPRpred 3.0.2 documentation</title>
+  <title>qsprpred.data.sampling.folds &mdash; QSPRpred 3.1.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.dd2be2f2a6c4c2be2874857420137035.css?v=8ed43ab2" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
   <!--[if lt IE 9]>
@@ -16,9 +16,9 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../../../../_static/documentation_options.js?v=3f474186"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=5b1057fd"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
         <script src="../../../../_static/design-tabs.js?v=36754332"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.0.2
+                v3.1.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -105,14 +105,10 @@
 <span class="kn">from</span> <span class="nn">...data.processing.feature_standardizers</span> <span class="kn">import</span> <span class="n">apply_feature_standardizer</span>
 
 
-<div class="viewcode-block" id="FoldGenerator">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.folds.FoldGenerator">[docs]</a>
-<span class="k">class</span> <span class="nc">FoldGenerator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="FoldGenerator"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.folds.FoldGenerator">[docs]</a><span class="k">class</span> <span class="nc">FoldGenerator</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A generator that creates folds from a given data set.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="FoldGenerator.iterFolds">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.folds.FoldGenerator.iterFolds">[docs]</a>
-    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="FoldGenerator.iterFolds"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.folds.FoldGenerator.iterFolds">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">iterFolds</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">dataset</span><span class="p">:</span> <span class="s2">&quot;QSPRDataset&quot;</span><span class="p">,</span>
@@ -142,19 +138,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
 
-
-<div class="viewcode-block" id="FoldGenerator.getFolds">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.folds.FoldGenerator.getFolds">[docs]</a>
-    <span class="k">def</span> <span class="nf">getFolds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="s2">&quot;QSPRDataset&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="FoldGenerator.getFolds"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.folds.FoldGenerator.getFolds">[docs]</a>    <span class="k">def</span> <span class="nf">getFolds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="s2">&quot;QSPRDataset&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Directly converts the output of `iterFolds` to a `list`.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="n">dataset</span><span class="p">))</span></div>
-</div>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="n">dataset</span><span class="p">))</span></div></div>
 
 
-
-<div class="viewcode-block" id="FoldsFromDataSplit">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.folds.FoldsFromDataSplit">[docs]</a>
-<span class="k">class</span> <span class="nc">FoldsFromDataSplit</span><span class="p">(</span><span class="n">FoldGenerator</span><span class="p">):</span>
+<div class="viewcode-block" id="FoldsFromDataSplit"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.folds.FoldsFromDataSplit">[docs]</a><span class="k">class</span> <span class="nc">FoldsFromDataSplit</span><span class="p">(</span><span class="n">FoldGenerator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This generator takes a scikit-learn or scikit-learn-like splitter</span>
 <span class="sd">    and creates folds from it. It is possible to pass a standardizer to</span>
 <span class="sd">    make sure features in the splits are properly standardized.</span>
@@ -220,9 +209,7 @@
             <span class="k">yield</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">train_index</span><span class="p">,</span> <span class="p">:],</span> <span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">test_index</span><span class="p">,</span> <span class="p">:],</span> <span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span>
                 <span class="n">train_index</span><span class="p">],</span> <span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">test_index</span><span class="p">],</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span>
 
-<div class="viewcode-block" id="FoldsFromDataSplit.iterFolds">
-<a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.folds.FoldsFromDataSplit.iterFolds">[docs]</a>
-    <span class="k">def</span> <span class="nf">iterFolds</span><span class="p">(</span>
+<div class="viewcode-block" id="FoldsFromDataSplit.iterFolds"><a class="viewcode-back" href="../../../../api/qsprpred.data.sampling.html#qsprpred.data.sampling.folds.FoldsFromDataSplit.iterFolds">[docs]</a>    <span class="k">def</span> <span class="nf">iterFolds</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">dataset</span><span class="p">:</span> <span class="s2">&quot;QSPRDataset&quot;</span><span class="p">,</span>
             <span class="n">concat</span><span class="o">=</span><span class="kc">False</span>
@@ -269,9 +256,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">featureStandardizer</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_standardize_folds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_folds</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">targets</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_folds</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span></div>
-</div>
-
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_folds</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>
