@@ -358,14 +358,14 @@ class ModelCheckMixIn:
                 )
 
         # define check for comparing predictions with expected result
-        def check_predictions(predictions, expected_result, expect_equal_result):
+        def check_predictions(preds, expected, expect_equal):
             # check if predictions are almost equal to expected result (rtol=1e-5)
-            check_outcome = self.assertTrue if expect_equal_result else self.assertFalse
-            if isinstance(expected_result, list):
-                for i in range(len(expected_result)):
-                    check_outcome(np.allclose(predictions[i], expected_result[i]))
+            check_outcome = self.assertTrue if expect_equal else self.assertFalse
+            if isinstance(expected, list):
+                for i in range(len(expected)):
+                    check_outcome(np.allclose(preds[i], expected[i]))
             else:
-                check_outcome(np.allclose(predictions, expected_result))
+                check_outcome(np.allclose(preds, expected))
 
         # Check if the predictMols function gives the same result as the
         # predict/predictProba function
