@@ -31,6 +31,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
     def setUp(self):
         super().setUp()
         self.setUpPaths()
+        self.nCPU = 1
 
     def getModel(
         self,
@@ -95,10 +96,10 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
                 random_state,
             )
             for alg, alg_name in ((XGBClassifier, "XGBC"),)
-            for random_state in ([None], [1, 42], [42, 42])
+            for random_state in ([None], [21, 42], [42, 42])
         ]
     )
-    def testRegressionBasicFitPCM(
+    def testFittingPCM(
         self,
         _,
         props: list[TargetProperty | dict],
