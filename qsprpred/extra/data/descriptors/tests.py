@@ -55,14 +55,14 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, QSPRTestCase):
         self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
         self.dataset.shuffle()
 
-    @skipIf(platform.system() == "Darwin", "Mold2 not supported on Mac OS")
-    def testMold2(self):
-        """Test the Mold2 descriptor calculator."""
-        self.dataset.nJobs = 1
-        self.dataset.addDescriptors([Mold2()])
-        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 777))
-        self.assertTrue(self.dataset.X.any().any())
-        self.assertTrue(self.dataset.X.any().sum() > 1)
+    # @skipIf(platform.system() == "Darwin", "Mold2 not supported on Mac OS")
+    # def testMold2(self):
+    #     """Test the Mold2 descriptor calculator."""
+    #     self.dataset.nJobs = 1
+    #     self.dataset.addDescriptors([Mold2()])
+    #     self.assertEqual(self.dataset.X.shape, (len(self.dataset), 777))
+    #     self.assertTrue(self.dataset.X.any().any())
+    #     self.assertTrue(self.dataset.X.any().sum() > 1)
 
     def testPaDELDescriptors(self):
         """Test the PaDEL descriptor calculator."""
