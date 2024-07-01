@@ -132,6 +132,7 @@ class Mold2(DescriptorSet):
         super().__init__()
         self._descs = descs
         self._mold2 = Mold2_calculator()
+        assert os.path.exists(self._mold2._zipfile), "Mold2 binary not found"
         self._defaultDescs = self._mold2.calculate(
             [Chem.MolFromSmiles("C")], show_banner=False
         ).columns.tolist()

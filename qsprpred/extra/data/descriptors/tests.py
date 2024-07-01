@@ -58,6 +58,7 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, QSPRTestCase):
     @skipIf(platform.system() == "Darwin", "Mold2 not supported on Mac OS")
     def testMold2(self):
         """Test the Mold2 descriptor calculator."""
+        self.dataset.nJobs = 1
         self.dataset.addDescriptors([Mold2()])
         self.assertEqual(self.dataset.X.shape, (len(self.dataset), 777))
         self.assertTrue(self.dataset.X.any().any())
