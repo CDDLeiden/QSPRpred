@@ -137,7 +137,7 @@ class Mold2(DescriptorSet):
         assert os.path.exists(self._mold2._zipfile), "Mold2 binary not found"
         with open(self._mold2._zipfile, "rb") as f:
             content = f.read()
-            print(content[:100])
+            print(content)
             # open as zip file
             with zipfile.ZipFile(self._mold2._zipfile, "r") as zip_ref:
                 zip_ref.extractall("/tmp")
