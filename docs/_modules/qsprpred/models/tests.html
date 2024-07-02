@@ -464,6 +464,7 @@
                 <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]</span>
             <span class="p">}],</span>
             <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="c1"># test classifier</span>
         <span class="c1"># initialize model for training from class</span>
@@ -480,6 +481,7 @@
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;RFC_</span><span class="si">{</span><span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="n">alg</span><span class="o">=</span><span class="n">RandomForestClassifier</span><span class="p">,</span>
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
         <span class="n">summary</span> <span class="o">=</span> <span class="n">create_metrics_summary</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>

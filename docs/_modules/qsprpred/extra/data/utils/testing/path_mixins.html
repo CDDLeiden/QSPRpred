@@ -162,14 +162,14 @@
             <span class="n">PaDEL</span><span class="p">(),</span>
             <span class="n">ExtendedValenceSignature</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
         <span class="p">]</span>
-        <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;Darwin&quot;</span><span class="p">:</span>
-            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Mold2</span><span class="p">())</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># not supported on macOS</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="s2">&quot;Mold2 is not supported on macOS. &quot;</span>
-                <span class="s2">&quot;Skipping Mold2 descriptor set in tests.&quot;</span>
-            <span class="p">)</span>
+        <span class="c1"># if platform.system() != &quot;Darwin&quot;:</span>
+        <span class="c1">#     ret.append(Mold2())</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     # not supported on macOS</span>
+        <span class="c1">#     logger.warning(</span>
+        <span class="c1">#         &quot;Mold2 is not supported on macOS. &quot;</span>
+        <span class="c1">#         &quot;Skipping Mold2 descriptor set in tests.&quot;</span>
+        <span class="c1">#     )</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 
 <div class="viewcode-block" id="DataSetsMixInExtras.getAllProteinDescriptors"><a class="viewcode-back" href="../../../../../../api/qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.getAllProteinDescriptors">[docs]</a>    <span class="nd">@classmethod</span>
