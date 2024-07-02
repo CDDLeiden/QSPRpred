@@ -365,6 +365,7 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
                 "th": [6.5]
             }],
             preparation_settings=self.getDefaultPrep(),
+            random_state=42,
         )
         # test classifier
         # initialize model for training from class
@@ -381,6 +382,7 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
             name=f"RFC_{TargetTasks.SINGLECLASS}",
             alg=RandomForestClassifier,
             parameters=parameters,
+            random_state=42,
         )
         self.fitTest(model, dataset)
         summary = create_metrics_summary(model)
