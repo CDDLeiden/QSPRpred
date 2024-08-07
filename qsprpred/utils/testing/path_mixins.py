@@ -9,7 +9,6 @@ import pandas as pd
 from mlchemad.applicability_domains import TopKatApplicabilityDomain
 from sklearn.preprocessing import StandardScaler
 
-from ...data import RandomSplit, QSPRDataset
 from ...data.descriptors.fingerprints import (
     AtomPairFP,
     AvalonFP,
@@ -30,6 +29,7 @@ from ...data.descriptors.sets import (
 from ...data.processing.data_filters import RepeatsFilter
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
 from ...data.processing.feature_standardizers import SKLearnStandardizer
+from ...data.sampling.splits import RandomSplit, QSPRDataset
 from ...models import SklearnModel
 from ...tasks import TargetTasks
 
@@ -178,13 +178,13 @@ class DataSetsPathMixIn(PathMixIn):
             # deep copy to avoid conflicts cayed by operating on one instance twice
             copy.deepcopy(combo)
             for combo in itertools.product(
-                descriptor_calculators,
-                splits,
-                feature_standardizers,
-                feature_filters,
-                data_filters,
-                applicability_domains,
-            )
+            descriptor_calculators,
+            splits,
+            feature_standardizers,
+            feature_filters,
+            data_filters,
+            applicability_domains,
+        )
         )
 
     @classmethod
@@ -254,13 +254,13 @@ class DataSetsPathMixIn(PathMixIn):
         return pd.read_csv(f"{self.inputDataPath}/test_data.tsv", sep="\t").sample(10)
 
     def createLargeTestDataSet(
-        self,
-        name="QSPRDataset_test_large",
-        target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
-        preparation_settings=None,
-        random_state=42,
-        n_jobs=1,
-        chunk_size=None,
+            self,
+            name="QSPRDataset_test_large",
+            target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
+            preparation_settings=None,
+            random_state=42,
+            n_jobs=1,
+            chunk_size=None,
     ):
         """Create a large dataset for testing purposes.
 
@@ -284,11 +284,11 @@ class DataSetsPathMixIn(PathMixIn):
         )
 
     def createSmallTestDataSet(
-        self,
-        name="QSPRDataset_test_small",
-        target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
-        preparation_settings=None,
-        random_state=42,
+            self,
+            name="QSPRDataset_test_small",
+            target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
+            preparation_settings=None,
+            random_state=42,
     ):
         """Create a small dataset for testing purposes.
 
@@ -310,14 +310,14 @@ class DataSetsPathMixIn(PathMixIn):
         )
 
     def createTestDataSetFromFrame(
-        self,
-        df,
-        name="QSPRDataset_test",
-        target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
-        random_state=None,
-        prep=None,
-        n_jobs=1,
-        chunk_size=None,
+            self,
+            df,
+            name="QSPRDataset_test",
+            target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
+            random_state=None,
+            prep=None,
+            n_jobs=1,
+            chunk_size=None,
     ):
         """Create a dataset for testing purposes from the given data frame.
 
@@ -345,14 +345,14 @@ class DataSetsPathMixIn(PathMixIn):
         return ret
 
     def createLargeMultitaskDataSet(
-        self,
-        name="QSPRDataset_multi_test",
-        target_props=[
-            {"name": "HBD", "task": TargetTasks.MULTICLASS, "th": [-1, 1, 2, 100]},
-            {"name": "CL", "task": TargetTasks.REGRESSION},
-        ],
-        preparation_settings=None,
-        random_state=42,
+            self,
+            name="QSPRDataset_multi_test",
+            target_props=[
+                {"name": "HBD", "task": TargetTasks.MULTICLASS, "th": [-1, 1, 2, 100]},
+                {"name": "CL", "task": TargetTasks.REGRESSION},
+            ],
+            preparation_settings=None,
+            random_state=42,
     ):
         """Create a large dataset for testing purposes.
 

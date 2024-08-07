@@ -2,8 +2,8 @@ from parameterized import parameterized
 from rdkit import Chem
 
 from ... import TargetTasks
-from ...data import QSPRDataset
 from ...data.chem.scaffolds import BemisMurckoRDKit, BemisMurcko
+from ...data.tables.qspr import QSPRDataset
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn
 

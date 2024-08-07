@@ -62,7 +62,7 @@ class ParallelGenerator(ABC):
 
     def __call__(
             self,
-            generator: Generator,
+            generator: Generator[Any, None, None],
             process_func: Callable,
             *args,
             **kwargs

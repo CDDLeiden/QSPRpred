@@ -13,7 +13,6 @@ from .mol_processor import MolProcessor
 from ..descriptors.fingerprints import MorganFP
 from ..descriptors.sets import DataFrameDescriptorSet
 from ... import TargetTasks
-from ...data import QSPRDataset
 from ...data.processing.applicability_domain import MLChemADWrapper
 from ...data.processing.data_filters import CategoryFilter, RepeatsFilter
 from ...data.processing.feature_filters import (
@@ -22,6 +21,7 @@ from ...data.processing.feature_filters import (
     LowVarianceFilter,
 )
 from ...data.processing.feature_standardizers import SKLearnStandardizer
+from ...data.tables.qspr import QSPRDataset
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn, PathMixIn
 
@@ -324,7 +324,7 @@ class TestMolProcessor(DataSetsPathMixIn, QSPRTestCase):
         expected_args = set(args) if args is not None else set()
         expected_kwargs = set(kwargs) if kwargs is not None else set()
         expected_cols = (
-            len(expected_props) + len(expected_args) + len(expected_kwargs) + 1
+                len(expected_props) + len(expected_args) + len(expected_kwargs) + 1
         )
         for item in result:
             if dataset.nJobs > 1:

@@ -102,7 +102,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
             n_bootstraps=10,
         )
         for time, fold_info in zip(
-            split.timeSplit, list(dataset.iterFolds(bootstrap_split))
+                split.timeSplit, list(dataset.iterFolds(bootstrap_split))
         ):
             years = dataset.getDF().loc[fold_info[1].index, "Year of first disclosure"]
             self.assertTrue(all(years > time))
@@ -111,9 +111,9 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
         [
             (False, BemisMurckoRDKit(), None),
             (
-                False,
-                BemisMurcko(use_csk=True),
-                ["ScaffoldSplit_000", "ScaffoldSplit_001"],
+                    False,
+                    BemisMurcko(use_csk=True),
+                    ["ScaffoldSplit_000", "ScaffoldSplit_001"],
             ),
             (True, BemisMurckoRDKit(), None),
         ]
@@ -148,7 +148,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
         )
         test_index_all = []
         for k, (X_train, X_test, y_train, y_test, train_index, test_index) in enumerate(
-            dataset.iterFolds(split)
+                dataset.iterFolds(split)
         ):
             self.assertTrue(all(x not in test_index_all for x in test_index))
             self.assertTrue(len(X_train) > len(X_test))
@@ -159,28 +159,30 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
     @parameterized.expand(
         [
             (
-                False,
-                FPSimilarityLeaderPickerClusters(
-                    fp_calculator=MorganFP(radius=2, nBits=128)
-                ),
-                None,
+                    False,
+                    FPSimilarityLeaderPickerClusters(
+                        fp_calculator=MorganFP(radius=2, nBits=128)
+                    ),
+                    None,
             ),
             (
-                False,
-                FPSimilarityMaxMinClusters(fp_calculator=MorganFP(radius=2, nBits=128)),
-                ["ClusterSplit_000", "ClusterSplit_001"],
+                    False,
+                    FPSimilarityMaxMinClusters(
+                        fp_calculator=MorganFP(radius=2, nBits=128)),
+                    ["ClusterSplit_000", "ClusterSplit_001"],
             ),
             (
-                True,
-                FPSimilarityMaxMinClusters(fp_calculator=MorganFP(radius=2, nBits=128)),
-                None,
+                    True,
+                    FPSimilarityMaxMinClusters(
+                        fp_calculator=MorganFP(radius=2, nBits=128)),
+                    None,
             ),
             (
-                True,
-                FPSimilarityLeaderPickerClusters(
-                    fp_calculator=MorganFP(radius=2, nBits=128)
-                ),
-                ["ClusterSplit_000", "ClusterSplit_001"],
+                    True,
+                    FPSimilarityLeaderPickerClusters(
+                        fp_calculator=MorganFP(radius=2, nBits=128)
+                    ),
+                    ["ClusterSplit_000", "ClusterSplit_001"],
             ),
         ]
     )
@@ -224,7 +226,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
         self.assertTrue(len(dataset_new.featureNames) == n_bits)
         self.assertTrue(all(mol_id in dataset_new.X_ind.index for mol_id in test_ids))
         self.assertTrue(all(mol_id in dataset_new.y_ind.index for mol_id in train_ids))
-        dataset_new.clearFiles()
+        dataset_new.clear()
 
 
 class TestFoldSplitters(DataSetsPathMixIn, QSPRTestCase):
@@ -242,12 +244,12 @@ class TestFoldSplitters(DataSetsPathMixIn, QSPRTestCase):
         k = 0
         tested_indices = []
         for (
-            X_train,
-            X_test,
-            y_train,
-            y_test,
-            train_index,
-            test_index,
+                X_train,
+                X_test,
+                y_train,
+                y_test,
+                train_index,
+                test_index,
         ) in folds:
             k += 1
             self.assertEqual(len(X_train), len(y_train))

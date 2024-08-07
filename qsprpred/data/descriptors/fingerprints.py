@@ -9,6 +9,7 @@ from rdkit.Avalon import pyAvalonTools
 from rdkit.Chem import AllChem, MACCSkeys, rdMolDescriptors, rdmolops, Mol
 
 from qsprpred.data.descriptors.sets import DescriptorSet
+from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 
 
 class Fingerprint(DescriptorSet, ABC):
@@ -50,7 +51,11 @@ class Fingerprint(DescriptorSet, ABC):
         return [Chem.AddHs(mol) for mol in self.iterMols(mols)]
 
     def __call__(
-        self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
+            self,
+            mols: list[str | Mol | StoredMol],
+            props: dict[str, list[Any]] | None = None,
+            *args,
+            **kwargs
     ) -> pd.DataFrame:
         """Calculate binary fingerprints for the input molecules. Only the bits
         specified by `usedBits` will be returned if more bits are calculated.
@@ -69,11 +74,13 @@ class Fingerprint(DescriptorSet, ABC):
         Returns:
             data frame of descriptor values of shape (n_mols, n_descriptors)
         """
+        mols, props = self.parsePropsAndMols(mols, props)
         values = self.getDescriptors(self.prepMols(mols), props, *args, **kwargs)
         values = values[:, self.usedBits]
         values = values.astype(self.dtype)
         df = pd.DataFrame(
-            values, index=props[self.idProp], columns=self.transformToFeatureNames()
+            values, index=pd.Index(props[self.idProp], name=self.idProp),
+            columns=self.transformToFeatureNames()
         )
         return df
 
@@ -88,7 +95,7 @@ class MorganFP(Fingerprint):
         self.kwargs = kwargs
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         convertFP = DataStructs.ConvertToNumpyArray
         ret = np.zeros((len(mols), len(self)))
@@ -112,7 +119,7 @@ class RDKitMACCSFP(Fingerprint):
     """RDKits implementation of MACCS keys fingerprint."""
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         convertFP = DataStructs.ConvertToNumpyArray
 
@@ -139,7 +146,7 @@ class MaccsFP(Fingerprint):
         self.kwargs = kwargs
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         convertFP = DataStructs.ConvertToNumpyArray
         ret = np.zeros((len(mols), len(self)))
@@ -164,7 +171,7 @@ class AvalonFP(Fingerprint):
         self.kwargs = kwargs
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         convertFP = DataStructs.ConvertToNumpyArray
         ret = np.zeros((len(mols), len(self)))
@@ -189,7 +196,7 @@ class TopologicalFP(Fingerprint):
         self.kwargs = kwargs
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         convertFP = DataStructs.ConvertToNumpyArray
         ret = np.zeros((len(mols), len(self)))
@@ -216,7 +223,7 @@ class AtomPairFP(Fingerprint):
         self.kwargs = kwargs
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         convertFP = DataStructs.ConvertToNumpyArray
         ret = np.zeros((len(mols), len(self)))
@@ -245,7 +252,7 @@ class RDKitFP(Fingerprint):
         self.kwargs = kwargs
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         convertFP = DataStructs.ConvertToNumpyArray
         ret = np.zeros((len(mols), len(self)))
@@ -276,7 +283,7 @@ class PatternFP(Fingerprint):
         self.kwargs = kwargs
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         convertFP = DataStructs.ConvertToNumpyArray
 
@@ -305,7 +312,7 @@ class LayeredFP(Fingerprint):
         self.kwargs = kwargs
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         convertFP = DataStructs.ConvertToNumpyArray
         ret = np.zeros((len(mols), len(self)))

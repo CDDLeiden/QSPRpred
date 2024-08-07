@@ -174,7 +174,7 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         self.assertTrue(all(mol_id in dataset_new.X_ind.index for mol_id in test_ids))
         self.assertTrue(all(mol_id in dataset_new.y_ind.index for mol_id in train_ids))
         # full_removal files and try saving again
-        dataset_new.clearFiles()
+        dataset_new.clear()
         dataset_new.save()
 
     def testSwitching(self):
@@ -265,18 +265,18 @@ class TestDescriptorsExtra(
     @parameterized.expand(
         [
             (
-                f"{desc_set}",
-                desc_set,
-                [{"name": "CL", "task": TargetTasks.REGRESSION}],
+                    f"{desc_set}",
+                    desc_set,
+                    [{"name": "CL", "task": TargetTasks.REGRESSION}],
             )
             for desc_set in DataSetsMixInExtras.getAllDescriptors()
         ]
     )
     def testDescriptorsExtraAll(
-        self,
-        _,
-        desc_set: DescriptorSet,
-        target_props: list[dict | TargetProperty],
+            self,
+            _,
+            desc_set: DescriptorSet,
+            target_props: list[dict | TargetProperty],
     ):
         """Test the calculation of extra descriptors with data preparation."""
         dataset = self.createLargeTestDataSet(
@@ -305,38 +305,39 @@ class TestDescriptorsPCM(DataSetsMixInExtras, DescriptorInDataCheckMixIn, TestCa
     @parameterized.expand(
         [
             (
-                f"{desc_set}_{TargetTasks.MULTICLASS}",
-                desc_set,
-                [
-                    {
-                        "name": "pchembl_value_Median",
-                        "task": TargetTasks.MULTICLASS,
-                        "th": [2.0, 5.5, 6.5, 12.0],
-                    }
-                ],
+                    f"{desc_set}_{TargetTasks.MULTICLASS}",
+                    desc_set,
+                    [
+                        {
+                            "name": "pchembl_value_Median",
+                            "task": TargetTasks.MULTICLASS,
+                            "th": [2.0, 5.5, 6.5, 12.0],
+                        }
+                    ],
             )
             for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
         ]
         + [
             (
-                f"{desc_set}_{TargetTasks.REGRESSION}",
-                desc_set,
-                [{"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}],
+                    f"{desc_set}_{TargetTasks.REGRESSION}",
+                    desc_set,
+                    [{"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}],
             )
             for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
         ]
         + [
             (
-                f"{desc_set}_Multitask",
-                desc_set,
-                [
-                    {"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION},
-                    {
-                        "name": "pchembl_value_Mean",
-                        "task": TargetTasks.SINGLECLASS,
-                        "th": [6.5],
-                    },
-                ],
+                    f"{desc_set}_Multitask",
+                    desc_set,
+                    [
+                        {"name": "pchembl_value_Median",
+                         "task": TargetTasks.REGRESSION},
+                        {
+                            "name": "pchembl_value_Mean",
+                            "task": TargetTasks.SINGLECLASS,
+                            "th": [6.5],
+                        },
+                    ],
             )
             for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
         ]

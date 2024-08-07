@@ -1,6 +1,10 @@
-from typing import Literal
+from typing import Literal, Any
 
+import pandas as pd
 from rdkit import Chem
+from rdkit.Chem import Mol
+
+from qsprpred.data.processing.mol_processor import MolProcessorWithID
 
 
 def match_mol_to_smarts(
@@ -8,7 +12,7 @@ def match_mol_to_smarts(
         smarts: list[str],
         operator: Literal["or", "and"] = "or",
         use_chirality: bool = False
-):
+) -> bool:
     """
     Check if a molecule matches a SMARTS pattern.
 
@@ -36,3 +40,19 @@ def match_mol_to_smarts(
                 return False
     return ret
 
+
+class SMARTSMatchProcessor(MolProcessorWithID):
+    def __call__(self, mols: list[str | Mol], props: dict[str, list[Any]], *args,
+                 **kwargs) -> Any:
+        mols = [mol if isinstance(mol, Mol) else Chem.MolFromSmiles(mol) for mol in
+                mols]
+        res = []
+        for mol in mols:
+            res.append(
+                match_mol_to_smarts(mol, *args, **kwargs)
+            )
+        return pd.DataFrame({"match": res}, index=props[self.idProp])
+
+    @property
+    def supportsParallel(self) -> bool:
+        return True

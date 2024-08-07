@@ -10,9 +10,9 @@ from sklearn.model_selection import KFold
 
 from .path_mixins import ModelDataSetsPathMixIn
 from ... import TargetTasks
-from ...data import QSPRDataset
 from ...data.descriptors.sets import DescriptorSet
 from ...data.processing.feature_standardizers import SKLearnStandardizer
+from ...data.tables.qspr import QSPRDataset
 from ...models import (
     QSPRModel,
     OptunaOptimization,
@@ -77,7 +77,7 @@ class DescriptorCheckMixIn:
             self.assertEqual(X_ind.shape[0], expected_num_samples)
 
     def checkDescriptors(
-        self, dataset: QSPRDataset, target_props: list[dict | TargetProperty]
+            self, dataset: QSPRDataset, target_props: list[dict | TargetProperty]
     ):
         """
         Check if information about descriptors is consistent in the data set. Checks
@@ -105,7 +105,7 @@ class DescriptorCheckMixIn:
         self.assertEqual(ds_loaded.chunkSize, dataset.chunkSize)
         self.assertEqual(ds_loaded.randomState, dataset.randomState)
         for ds_loaded_prop, target_prop in zip(
-            ds_loaded.targetProperties, target_props
+                ds_loaded.targetProperties, target_props
         ):
             if ds_loaded_prop.task.isClassification():
                 self.assertEqual(ds_loaded_prop.name, target_prop["name"])
@@ -121,15 +121,15 @@ class DataPrepCheckMixIn(DescriptorCheckMixIn):
     """Mixin for testing data preparation."""
 
     def checkPrep(
-        self,
-        dataset,
-        feature_calculators,
-        split,
-        feature_standardizer,
-        feature_filter,
-        data_filter,
-        applicability_domain,
-        expected_target_props,
+            self,
+            dataset,
+            feature_calculators,
+            split,
+            feature_standardizer,
+            feature_filter,
+            data_filter,
+            applicability_domain,
+            expected_target_props,
     ):
         """Check the consistency of the dataset after preparation."""
         name = dataset.name
@@ -200,7 +200,7 @@ class DescriptorInDataCheckMixIn(DescriptorCheckMixIn):
         return f"{desc_set}_{target_props_id}"
 
     def checkDataSetContainsDescriptorSet(
-        self, dataset, desc_set, prep_combo, target_props
+            self, dataset, desc_set, prep_combo, target_props
     ):
         """Check if a descriptor set is in a data set."""
         # run the preparation
@@ -236,7 +236,8 @@ class ModelCheckMixIn:
         return grid_params[grid_params[:, 0] == mname, 1][0]
 
     def checkOptimization(
-        self, model: QSPRModel, ds: QSPRDataset, optimizer: HyperparameterOptimization
+            self, model: QSPRModel, ds: QSPRDataset,
+            optimizer: HyperparameterOptimization
     ):
         model_path, est_path = model.save(save_estimator=True)
         # get last modified time stamp of the model file
@@ -316,12 +317,12 @@ class ModelCheckMixIn:
         self.assertEqual(path, model.metaFile)
 
     def predictorTest(
-        self,
-        model: QSPRModel,
-        dataset: QSPRDataset,
-        comparison_model: QSPRModel | None = None,
-        expect_equal_result=True,
-        **pred_kwargs,
+            self,
+            model: QSPRModel,
+            dataset: QSPRDataset,
+            comparison_model: QSPRModel | None = None,
+            expect_equal_result=True,
+            **pred_kwargs,
     ):
         """Test model predictions.
 
@@ -406,18 +407,18 @@ class ModelCheckMixIn:
 
 class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
     def trainModelWithMonitoring(
-        self,
-        model: QSPRModel,
-        ds: QSPRDataset,
-        hyperparam_monitor: HyperparameterOptimizationMonitor,
-        crossval_monitor: AssessorMonitor,
-        test_monitor: AssessorMonitor,
-        fit_monitor: FitMonitor,
+            self,
+            model: QSPRModel,
+            ds: QSPRDataset,
+            hyperparam_monitor: HyperparameterOptimizationMonitor,
+            crossval_monitor: AssessorMonitor,
+            test_monitor: AssessorMonitor,
+            fit_monitor: FitMonitor,
     ) -> (
-        HyperparameterOptimizationMonitor,
-        AssessorMonitor,
-        AssessorMonitor,
-        FitMonitor,
+            HyperparameterOptimizationMonitor,
+            AssessorMonitor,
+            AssessorMonitor,
+            FitMonitor,
     ):
         score_func = (
             "r2" if ds.targetProperties[0].task.isRegression() else "roc_auc_ovr"
@@ -450,10 +451,10 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
         return hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
 
     def baseMonitorTest(
-        self,
-        monitor: BaseMonitor,
-        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
-        neural_net: bool,
+            self,
+            monitor: BaseMonitor,
+            monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
+            neural_net: bool,
     ):
         """Test the base monitor."""
 
@@ -522,10 +523,10 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
             raise ValueError(f"Unknown monitor type {monitor_type}")
 
     def fileMonitorTest(
-        self,
-        monitor: FileMonitor,
-        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
-        neural_net: bool,
+            self,
+            monitor: FileMonitor,
+            monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
+            neural_net: bool,
     ):
         """Test if the correct files are generated"""
 
@@ -567,16 +568,16 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
             check_fit_files(monitor.outDir)
 
     def listMonitorTest(
-        self,
-        monitor: ListMonitor,
-        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
-        neural_net: bool,
+            self,
+            monitor: ListMonitor,
+            monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
+            neural_net: bool,
     ):
         self.baseMonitorTest(monitor.monitors[0], monitor_type, neural_net)
         self.fileMonitorTest(monitor.monitors[1], monitor_type, neural_net)
 
     def runMonitorTest(
-        self, model, data, monitor_type, test_method, nerual_net, *args, **kwargs
+            self, model, data, monitor_type, test_method, nerual_net, *args, **kwargs
     ):
         hyperparam_monitor = monitor_type(*args, **kwargs)
         crossval_monitor = deepcopy(hyperparam_monitor)

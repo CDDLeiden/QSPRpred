@@ -6,7 +6,7 @@ from typing import ClassVar, Callable, Optional, Generator, Any
 import numpy as np
 import pandas as pd
 
-from .base import DataTable
+from qsprpred.data.storage.interfaces.property_storage import PropertyStorage
 from ...logs import logger
 from ...utils.parallel import batched_generator, ParallelGenerator, \
     MultiprocessingJITGenerator
@@ -14,7 +14,7 @@ from ...utils.serialization import JSONSerializable
 from ...utils.stringops import generate_padded_index
 
 
-class PandasDataTable(DataTable, JSONSerializable):
+class PandasDataTable(PropertyStorage):
     """A Pandas DataFrame wrapper class to enable data processing functions on
     QSPRpred data.
 
@@ -56,6 +56,12 @@ class PandasDataTable(DataTable, JSONSerializable):
             want to use a different parallelization strategy (i.e. utilize
             remote servers instead of local processes).
     """
+
+    def __contains__(self, item):
+        return item in self.df.index
+
+    def __getitem__(self, item):
+        self.getSubset(self.getProperties(), ids=item)
 
     _notJSON: ClassVar = [*JSONSerializable._notJSON, "df"]
 
@@ -116,7 +122,7 @@ class PandasDataTable(DataTable, JSONSerializable):
                 want to use a different parallelization strategy (i.e. utilize
                 remote servers instead of local processes).
         """
-        self.idProp = autoindex_name
+        self._idProp = autoindex_name
         self.storeFormat = store_format
         self.randomState = None
         self.setRandomState(
@@ -138,7 +144,7 @@ class PandasDataTable(DataTable, JSONSerializable):
                 )
                 self.reload()
             else:
-                self.clearFiles()
+                self.clear()
                 self.df = df
                 if index_cols is not None:
                     self.setIndex(index_cols)
@@ -160,6 +166,10 @@ class PandasDataTable(DataTable, JSONSerializable):
             self.nJobs
         )
 
+    @property
+    def idProp(self) -> str:
+        return self._idProp
+
     def __len__(self) -> int:
         """Get the number of rows in the data frame."""
         return len(self.df)
@@ -175,6 +185,10 @@ class PandasDataTable(DataTable, JSONSerializable):
 
     def __setstate__(self, state):
         super().__setstate__(state)
+        if hasattr(self, "_json_main"):
+            self._storeDir = os.path.abspath(
+                os.path.join(os.path.dirname(self._json_main), "..")
+            )
         self.reload()
 
     @property
@@ -238,7 +252,7 @@ class PandasDataTable(DataTable, JSONSerializable):
             cols (list[str]): list of columns to use as index.
         """
         self.indexCols = cols
-        self.idProp = "~".join(self.indexCols)
+        self._idProp = "~".join(self.indexCols)
         self.df[self.idProp] = self.df[self.indexCols].apply(
             lambda x: "~".join(map(str, x.tolist())), axis=1
         )
@@ -285,15 +299,31 @@ class PandasDataTable(DataTable, JSONSerializable):
         """
         return name in self.df.columns
 
-    def getProperty(self, name: str) -> pd.Series:
+    def getProperty(
+            self,
+            name: str,
+            ids: tuple[str] | None = None,
+            ignore_missing: bool = False
+    ) -> pd.Series:
         """Get property values from the data set.
 
         Args:
             name (str): Name of the property to get.
+            ids: IDs of entries to get properties for.
+            ignore_missing (bool): If `True`, missing IDs are ignored.
 
         Returns:
             pd.Series: List of values for the property.
         """
+        if not self.hasProperty(name):
+            raise ValueError(f"Property '{name}' not found in data set.")
+        if ids is not None:
+            if not ignore_missing:
+                assert sum(
+                    self.df.index.isin(ids)
+                ) == len(ids), "Not all IDs found in data set."
+            ids = self.df.index.intersection(ids)
+            return self.df.loc[ids, name]
         return self.df[name]
 
     def getProperties(self) -> list[str]:
@@ -304,21 +334,45 @@ class PandasDataTable(DataTable, JSONSerializable):
         """
         return self.df.columns.tolist()
 
-    def addProperty(self, name: str, data: list):
+    def addProperty(
+            self,
+            name: str,
+            data: list,
+            ids: list[str] | None = None,
+            ignore_missing: bool = False
+    ):
         """Add a property to the data frame.
 
         Args:
             name (str): Name of the property.
             data (list): list of property values.
+            ids: IDs of entries to get properties for.
+            ignore_missing (bool): If `True`, missing IDs are ignored.
         """
+        if name == self.idProp:
+            logger.warning(
+                "ID property will change. "
+                f"Old IDs saved to property: {name}_before_change."
+            )
+            self.df[f"{name}_before_change"] = self.df[name]
         if isinstance(data, pd.Series):
-            if not self.df.index.equals(data.index):
-                logger.info(
-                    f"Adding property '{name}' to data set might be introducing 'nan' "
-                    "values due to index with pandas series. Make sure the index of "
-                    "the data frame and the series match or convert series to list."
-                )
-        self.df[name] = data
+            data = data.tolist()
+        if ids is None:
+            self.df[name] = data
+        else:
+            if not ignore_missing:
+                assert all(
+                    self.df.index.isin(ids)
+                ), "Not all IDs found in data set."
+            else:
+                ids = self.df.index.intersection(ids)
+            self.df.loc[ids, name] = data
+        if name == self.idProp:
+            logger.warning(
+                "ID property was changed. "
+                "Updating index columns to match new ID property."
+            )
+            self.df.set_index(name, inplace=True, verify_integrity=True, drop=False)
 
     def removeProperty(self, name):
         """Remove a property from the data frame.
@@ -336,31 +390,65 @@ class PandasDataTable(DataTable, JSONSerializable):
         """
         self.df.dropna(subset=names, how="all", inplace=True)
 
-    def getSubset(self, prefix: str):
+    def getSubset(
+            self,
+            properties: list[str],
+            ids: list[str] | None = None,
+            ignore_missing: bool = False
+    ) -> "PandasDataTable":
         """Get a subset of the data set by providing a prefix for the column names or a
         column name directly.
 
         Args:
-            prefix (str): Prefix of the column names to select.
+            properties (list[str]): list of property names to get.
+            ids: IDs of entries to get subset of properties for.
+            ignore_missing (bool): If `True`, missing IDs are ignored.
         """
-        if self.df.columns.str.startswith(prefix).any():
-            return self.df[self.df.columns[self.df.columns.str.startswith(prefix)]]
+        if self.idProp not in properties:
+            properties = [self.idProp] + properties
+        mask = self.df.columns.isin(properties)
+        if mask.any():
+            if ids is not None and not ignore_missing:
+                assert all(
+                    self.df.index.isin(ids)
+                ), "Not all IDs found in data set."
+            if ignore_missing and ids is not None:
+                ids = self.df.index.intersection(ids)
+                ret = self.df.loc[
+                    ids, self.df.columns[mask]
+                ]
+            else:
+                ret = self.df[self.df.columns[mask]]
+            return self.fromDF(
+                ret,
+                name=f"{self.name}_subset",
+                store_dir=self.baseDir,
+                index_cols=self.indexCols,
+                n_jobs=self.nJobs,
+                chunk_size=self.chunkSize,
+                autoindex_name=self.idProp,
+                random_state=self.randomState,
+                store_format=self.storeFormat,
+                parallel_generator=self.parallelGenerator,
+            )
+        else:
+            raise ValueError(f"None of the properties were found: {properties}")
 
     def iterChunks(
             self,
-            include_props: list[str] | None = None,
+            size: int | None = None,
+            on_props: tuple[str] | None = None,
             as_dict: bool = False,
-            chunk_size: int | None = None,
     ) -> Generator[pd.DataFrame | dict, None, None]:
         """Batch a data frame into chunks of the given size.
 
         Args:
-            include_props (list[str]):
+            on_props (list[str]):
                 list of properties to include, if `None`, all
                 properties are included.
             as_dict (bool):
                 If `True`, the generator yields dictionaries instead of data frames.
-            chunk_size (int):
+            size (int):
                 Size of chunks to use per job in parallel processing.
                 If `None`, `self.chunkSize` is used.
 
@@ -368,27 +456,31 @@ class PandasDataTable(DataTable, JSONSerializable):
             Generator[pd.DataFrame, None, None]:
                 Generator that yields batches of the data frame as smaller data frames.
         """
-        chunk_size = chunk_size if chunk_size is not None else self.chunkSize
-        include_props = include_props or self.df.columns
+        chunk_size = size if size is not None else self.chunkSize
+        on_props = on_props or self.df.columns
+        on_props = list(on_props)
         df_batches = batched_generator(
-            self.df[self.idProp] if include_props is not None else self.df.iterrows(),
+            self.df[self.idProp] if on_props is not None else self.df.iterrows(),
             chunk_size,
         )
         for ids in df_batches:
             df_batch = self.df.loc[ids]
-            ret = {}
-            if self.idProp not in include_props:
-                include_props.append(self.idProp)
-            for prop in include_props:
-                ret[prop] = df_batch[prop].tolist()
-            yield ret if as_dict else df_batch
+            if as_dict:
+                ret = {}
+                if self.idProp not in on_props:
+                    on_props.append(self.idProp)
+                for prop in on_props:
+                    ret[prop] = df_batch[prop].tolist()
+                yield ret
+            else:
+                yield df_batch
 
     def apply(
             self,
             func: Callable[[dict[str, list[Any]] | pd.DataFrame, ...], Any],
-            func_args: tuple[Any] | None = None,
+            func_args: tuple[Any, ...] | None = None,
             func_kwargs: dict[str, Any] | None = None,
-            on_props: list[str] | None = None,
+            on_props: tuple[str, ...] | None = None,
             as_df: bool = False,
             chunk_size: int | None = None,
             n_jobs: int | None = None,
@@ -435,16 +527,16 @@ class PandasDataTable(DataTable, JSONSerializable):
         """
         n_jobs = self.nJobs if n_jobs is None else n_jobs
         chunk_size = chunk_size if chunk_size is not None else self.chunkSize
+        args = func_args or []
+        kwargs = func_kwargs or {}
         if n_jobs > 1:
-            args = func_args or []
-            kwargs = func_kwargs or {}
             logger.debug(
                 f"Applying function '{func!r}' in parallel on {n_jobs} CPUs, "
                 f"using chunk size: {chunk_size} and parameters: {args}, {kwargs}"
             )
             for result in self.parallelGenerator(
                     self.iterChunks(
-                        include_props=on_props, as_dict=not as_df, chunk_size=chunk_size
+                        on_props=on_props, as_dict=not as_df, size=chunk_size
                     ),
                     func,
                     *args,
@@ -458,9 +550,9 @@ class PandasDataTable(DataTable, JSONSerializable):
         else:
             logger.debug(f"Applying function '{func!r}' in serial.")
             for props in self.iterChunks(
-                    include_props=on_props, as_dict=not as_df, chunk_size=len(self)
+                    on_props=on_props, as_dict=not as_df, size=len(self)
             ):
-                result = func(props, *func_args, **func_kwargs)
+                result = func(props, *args, **kwargs)
                 logger.debug(f"Result for chunk returned: {result!r}")
                 yield result
 
@@ -468,7 +560,7 @@ class PandasDataTable(DataTable, JSONSerializable):
         """Transform property values using a transformer function.
 
         Args:
-            targets (list[str]): list of column names to transform.
+            names (list[str]): list of column names to transform.
             transformer (Callable): Function that transforms the data in target columns
                 to a new representation.
         """
@@ -504,31 +596,6 @@ class PandasDataTable(DataTable, JSONSerializable):
         logger.debug(f"Imputed missing values for properties: {names}")
         logger.debug(f"Old values saved in: {names_old}")
 
-    def filter(self, table_filters: list[Callable]):
-        """Filter the data frame using a list of filters.
-
-        Each filter is a function that takes the data frame and returns a
-        a new data frame with the filtered rows. The new data frame is then used as the
-        input for the next filter. The final data frame is saved as the new data frame
-        of the `MoleculeTable`."""
-        df_filtered = None
-        for table_filter in table_filters:
-            if len(self.df) == 0:
-                logger.warning("Dataframe is empty")
-            if table_filter.__class__.__name__ == "CategoryFilter":
-                df_filtered = table_filter(self.df)
-            elif table_filter.__class__.__name__ == "DuplicateFilter":
-                descriptors = self.getDescriptors()
-                if len(descriptors.columns) == 0:
-                    logger.warning(
-                        "Removing duplicates based on descriptors does not \
-                                    work if there are no descriptors"
-                    )
-                else:
-                    df_filtered = table_filter(self.df, descriptors)
-            if df_filtered is not None:
-                self.df = df_filtered.copy()
-
     def toFile(self, filename: str):
         """Save the metafile and all associated files to a custom location.
 
@@ -550,7 +617,7 @@ class PandasDataTable(DataTable, JSONSerializable):
         """
         return self.toFile(f"{self.storePrefix}_meta.json")
 
-    def clearFiles(self):
+    def clear(self):
         """Remove all files associated with this data set from disk."""
         if os.path.exists(self.storeDir):
             shutil.rmtree(self.storeDir)
@@ -566,12 +633,16 @@ class PandasDataTable(DataTable, JSONSerializable):
         assert all(col in self.df.columns for col in self.indexCols)
 
     @classmethod
-    def fromFile(cls, filename: str) -> "PandasDataTable":
-        with open(filename, "r") as f:
-            json_f = f.read()
-        o_dict = json.loads(json_f)
-        o_dict["py/state"]["storeDir"] = os.path.dirname(filename)
-        return cls.fromJSON(json.dumps(o_dict))
+    def fromDF(cls, df: pd.DataFrame, *args, **kwargs) -> "PandasDataTable":
+        return cls(df=df, *args, **kwargs)
+
+    # @classmethod
+    # def fromFile(cls, filename: str) -> "PandasDataTable":
+    #     with open(filename, "r") as f:
+    #         json_f = f.read()
+    #     o_dict = json.loads(json_f)
+    #     o_dict["py/state"]["storeDir"] = os.path.dirname(filename)
+    #     return cls.fromJSON(json.dumps(o_dict))
 
     def getDF(self):
         """Get the data frame this instance manages.
@@ -595,3 +666,40 @@ class PandasDataTable(DataTable, JSONSerializable):
                 Random state to use for shuffling and other random operations.
         """
         self.randomState = random_state
+
+    def dropEntries(self, ids: tuple[str, ...], ignore_missing: bool = False):
+        if ignore_missing:
+            ids = self.df.index.intersection(ids)
+        else:
+            assert all(
+                self.df.index.isin(ids)
+            ), "Not all IDs found in data set."
+            ids = pd.Index(ids)
+        self.df.drop(index=ids, inplace=True)
+
+    def addEntries(self, ids: list[str], props: dict[str, list],
+                   raise_on_existing: bool = True):
+        duplicates = self.df[self.df[self.idProp].isin(ids)]
+        if raise_on_existing and len(duplicates) > 0:
+            raise ValueError(
+                f"Duplicate entries found: {duplicates}. Resolve them or "
+                "set `raise_on_existing=False` to ignore the new duplicate entries."
+            )
+        else:
+            logger.warning(
+                f"Duplicate entries found: {duplicates}. Ignoring them."
+            )
+        for dup in duplicates[self.idProp]:
+            idx = ids.index(dup)
+            ids.remove(dup)
+            for prop in props:
+                props[prop].pop(idx)
+        self.df = pd.concat(
+            [
+                self.df,
+                pd.DataFrame(
+                    {self.idProp: ids, **props},
+                ),
+            ]
+        )
+        self.df.set_index(self.idProp, inplace=True, verify_integrity=True, drop=False)

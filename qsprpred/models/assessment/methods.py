@@ -8,8 +8,8 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold
 
-from qsprpred.data import QSPRDataset
 from qsprpred.data.sampling.splits import DataSplit
+from qsprpred.data.tables.qspr import QSPRDataset
 from qsprpred.logs import logger
 from qsprpred.models.early_stopping import EarlyStoppingMode
 from qsprpred.models.metrics import SklearnMetrics
@@ -33,12 +33,12 @@ class ModelAssessor(ABC):
     """
 
     def __init__(
-        self,
-        scoring: str | Callable[[Iterable, Iterable], float],
-        monitor: AssessorMonitor | None = None,
-        use_proba: bool = True,
-        mode: EarlyStoppingMode | None = None,
-        split_multitask_scores: bool = False,
+            self,
+            scoring: str | Callable[[Iterable, Iterable], float],
+            monitor: AssessorMonitor | None = None,
+            use_proba: bool = True,
+            mode: EarlyStoppingMode | None = None,
+            split_multitask_scores: bool = False,
     ):
         """Initialize the evaluation method class.
 
@@ -59,13 +59,13 @@ class ModelAssessor(ABC):
 
     @abstractmethod
     def __call__(
-        self,
-        model: QSPRModel,
-        ds: QSPRDataset,
-        save: bool = True,
-        parameters: dict | None = None,
-        monitor: AssessorMonitor | None = None,
-        **kwargs,
+            self,
+            model: QSPRModel,
+            ds: QSPRDataset,
+            save: bool = True,
+            parameters: dict | None = None,
+            monitor: AssessorMonitor | None = None,
+            **kwargs,
     ) -> np.ndarray:
         """Evaluate the model.
 
@@ -85,12 +85,12 @@ class ModelAssessor(ABC):
         """
 
     def predictionsToDataFrame(
-        self,
-        model: QSPRModel,
-        y: np.array,
-        predictions: np.ndarray | list[np.ndarray],
-        index: pd.Series,
-        extra_columns: dict[str, np.ndarray] | None = None,
+            self,
+            model: QSPRModel,
+            y: np.array,
+            predictions: np.ndarray | list[np.ndarray],
+            index: pd.Series,
+            extra_columns: dict[str, np.ndarray] | None = None,
     ) -> pd.DataFrame:
         """Create a dataframe with true values and predictions.
 
@@ -144,14 +144,14 @@ class CrossValAssessor(ModelAssessor):
     """
 
     def __init__(
-        self,
-        scoring: str | Callable[[Iterable, Iterable], float],
-        split: DataSplit | None = None,
-        monitor: AssessorMonitor | None = None,
-        use_proba: bool = True,
-        mode: EarlyStoppingMode | None = None,
-        round: int = 5,
-        split_multitask_scores: bool = False,
+            self,
+            scoring: str | Callable[[Iterable, Iterable], float],
+            split: DataSplit | None = None,
+            monitor: AssessorMonitor | None = None,
+            use_proba: bool = True,
+            mode: EarlyStoppingMode | None = None,
+            round: int = 5,
+            split_multitask_scores: bool = False,
     ):
         super().__init__(scoring, monitor, use_proba, mode, split_multitask_scores)
         self.split = split
@@ -160,13 +160,13 @@ class CrossValAssessor(ModelAssessor):
         self.round = round
 
     def __call__(
-        self,
-        model: QSPRModel,
-        ds: QSPRDataset,
-        save: bool = True,
-        parameters: dict | None = None,
-        monitor: AssessorMonitor | None = None,
-        **kwargs,
+            self,
+            model: QSPRModel,
+            ds: QSPRDataset,
+            save: bool = True,
+            parameters: dict | None = None,
+            monitor: AssessorMonitor | None = None,
+            **kwargs,
     ) -> np.ndarray:
         """Perform cross validation on the model with the given parameters.
 
@@ -198,7 +198,7 @@ class CrossValAssessor(ModelAssessor):
         predictions = []
         scores = []
         for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(
-            ds.iterFolds(split=split)
+                ds.iterFolds(split=split)
         ):
             logger.debug(
                 "cross validation fold %s started: %s"
@@ -278,13 +278,13 @@ class TestSetAssessor(ModelAssessor):
     """
 
     def __init__(
-        self,
-        scoring: str | Callable[[Iterable, Iterable], float],
-        monitor: AssessorMonitor | None = None,
-        use_proba: bool = True,
-        mode: EarlyStoppingMode | None = None,
-        round: int = 5,
-        split_multitask_scores: bool = False,
+            self,
+            scoring: str | Callable[[Iterable, Iterable], float],
+            monitor: AssessorMonitor | None = None,
+            use_proba: bool = True,
+            mode: EarlyStoppingMode | None = None,
+            round: int = 5,
+            split_multitask_scores: bool = False,
     ):
         super().__init__(scoring, monitor, use_proba, mode, split_multitask_scores)
         if monitor is None:
@@ -292,13 +292,13 @@ class TestSetAssessor(ModelAssessor):
         self.round = round
 
     def __call__(
-        self,
-        model: QSPRModel,
-        ds: QSPRDataset,
-        save: bool = True,
-        parameters: dict | None = None,
-        monitor: AssessorMonitor | None = None,
-        **kwargs,
+            self,
+            model: QSPRModel,
+            ds: QSPRDataset,
+            save: bool = True,
+            parameters: dict | None = None,
+            monitor: AssessorMonitor | None = None,
+            **kwargs,
     ) -> np.ndarray:
         """Make predictions for independent test set.
 

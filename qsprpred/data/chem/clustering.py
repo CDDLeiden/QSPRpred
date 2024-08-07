@@ -7,8 +7,8 @@ from rdkit import Chem, DataStructs
 from rdkit.SimDivFilters import rdSimDivPickers
 
 from .scaffolds import BemisMurckoRDKit, Scaffold
-from .. import MoleculeTable
 from ..descriptors.fingerprints import Fingerprint, MorganFP
+from ..tables.mol import MoleculeTable
 from ...logs import logger
 
 
@@ -130,8 +130,8 @@ class ScaffoldClusters(MoleculeClusters):
 
 class FPSimilarityClusters(MoleculeClusters):
     def __init__(
-        self,
-        fp_calculator: Fingerprint = MorganFP(radius=3, nBits=2048),
+            self,
+            fp_calculator: Fingerprint = MorganFP(radius=3, nBits=2048),
     ) -> None:
         super().__init__()
         self.fp_calculator = fp_calculator
@@ -190,11 +190,11 @@ class FPSimilarityMaxMinClusters(FPSimilarityClusters):
     """
 
     def __init__(
-        self,
-        n_clusters: int | None = None,
-        seed: int | None = None,
-        initial_centroids: list[str] | None = None,
-        fp_calculator: Fingerprint = MorganFP(radius=3, nBits=2048),
+            self,
+            n_clusters: int | None = None,
+            seed: int | None = None,
+            initial_centroids: list[str] | None = None,
+            fp_calculator: Fingerprint = MorganFP(radius=3, nBits=2048),
     ):
         super().__init__(fp_calculator=fp_calculator)
         self.nClusters = n_clusters
@@ -234,9 +234,9 @@ class FPSimilarityLeaderPickerClusters(FPSimilarityClusters):
     """
 
     def __init__(
-        self,
-        similarity_threshold: float = 0.7,
-        fp_calculator: Fingerprint = MorganFP(radius=3, nBits=2048),
+            self,
+            similarity_threshold: float = 0.7,
+            fp_calculator: Fingerprint = MorganFP(radius=3, nBits=2048),
     ):
         super().__init__(fp_calculator=fp_calculator)
         self.similarityThreshold = similarity_threshold

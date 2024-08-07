@@ -5,6 +5,8 @@ from typing import Any
 
 from rdkit.Chem import Mol
 
+from qsprpred.data.storage.interfaces.stored_mol import StoredMol
+
 
 class MolProcessor(ABC):
     """A callable that processes a list of molecules either specified as strings or
@@ -13,7 +15,7 @@ class MolProcessor(ABC):
 
     @abstractmethod
     def __call__(
-        self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[StoredMol], *args, **kwargs
     ) -> Any:
         """Process molecules.
 
@@ -69,7 +71,7 @@ class MolProcessorWithID(MolProcessor, ABC):
                 Name of the property that contains the molecule's unique identifier.
                 Defaults to "QSPRID".
         """
-        self.idProp = id_prop if id_prop else "QSPRID"
+        self.idProp = id_prop if id_prop else "ID"
 
     @property
     def requiredProps(self) -> list[str]:

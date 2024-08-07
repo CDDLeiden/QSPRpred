@@ -1,4 +1,6 @@
 import os
+import shutil
+import tempfile
 
 import numpy as np
 import pandas as pd
@@ -6,18 +8,138 @@ from parameterized import parameterized
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import KFold, ShuffleSplit
 
+from qsprpred.data.descriptors.sets import DrugExPhyschem
+from qsprpred.data.storage.tabular.basic_storage import TabularStorageBasic
+from .mol import MoleculeTable
+from ..chem.standardizers.papyrus import PapyrusStandardizer
 from ..descriptors.fingerprints import MorganFP
 from ... import TargetProperty, TargetTasks
-from ...data import QSPRDataset
+from ...data.tables.qspr import QSPRDataset
 from ...utils.stopwatch import StopWatch
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import DataPrepCheckMixIn
 from ...utils.testing.path_mixins import DataSetsPathMixIn, PathMixIn
 
 
+class TestMolTableCreation(DataSetsPathMixIn, QSPRTestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.setUpPaths()
+        # self.nCPU = 2
+        # self.chunkSize = 2
+
+    def getStorage(self):
+        df = self.getSmallDF()
+        return TabularStorageBasic(
+            "test",
+            self.generatedDataPath,
+            df,
+            standardizer=PapyrusStandardizer(),
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize
+        )
+
+    def getTable(self):
+        storage = self.getStorage()
+        return MoleculeTable(storage, path=self.generatedDataPath)
+
+    def testTableCreation(self):
+        """Test the creation of a table from a data set."""
+        storage = self.getStorage()
+        mt = MoleculeTable(storage, path=self.generatedDataPath)
+        self.assertEqual(len(mt), len(storage))
+        # from SMILES
+        mt = MoleculeTable.fromSMILES(
+            f"{mt.name}_from_smiles",
+            list(storage.smiles),
+            path=self.generatedDataPath,
+            standardizer=PapyrusStandardizer(),
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize,
+        )
+        self.assertEqual(len(mt), len(storage))
+        # from table file
+        mt = MoleculeTable.fromTableFile(
+            f"{mt.name}_from_file",
+            f"{self.inputDataPath}/test_data.tsv",
+            path=self.generatedDataPath,
+        )
+        self.assertEqual(len(mt), len(storage))
+
+    def testTableSerialization(self):
+        mt = self.getTable()
+        mt.save()
+        self.assertTrue(os.path.exists(mt.metaFile))
+        mt_new = MoleculeTable.fromFile(mt.metaFile)
+        self.assertEqual(len(mt), len(mt_new))
+        self.assertListEqual(list(mt.smiles), list(mt_new.smiles))
+        # see if we can still reload even if we move the files to a different location
+        random_new_folder = tempfile.mkdtemp()
+        shutil.move(self.generatedDataPath, random_new_folder)
+        mt_moved = MoleculeTable.fromFile(
+            os.path.join(random_new_folder, "datasets", mt.name, "meta.json")
+        )
+        self.assertEqual(len(mt), len(mt_moved))
+        self.assertListEqual(list(mt.smiles), list(mt_moved.smiles))
+
+    def getDescriptorSets(self):
+        return [MorganFP(radius=2, nBits=128), DrugExPhyschem()]
+
+    def testDescriptors(self):
+        # add descriptors
+        mt = self.getTable()
+        mt.addDescriptors(self.getDescriptorSets())
+        self.assertEqual(len(mt.descriptors), len(self.getDescriptorSets()))
+        mt.save()
+        mt_new = MoleculeTable.fromFile(mt.metaFile)
+        self.assertEqual(len(mt_new.descriptors), len(self.getDescriptorSets()))
+        # move the files and check if we can still reload
+        random_new_folder = tempfile.mkdtemp()
+        shutil.move(self.generatedDataPath, random_new_folder)
+        mt_moved = MoleculeTable.fromFile(
+            os.path.join(random_new_folder, "datasets", mt.name, "meta.json")
+        )
+        self.assertEqual(len(mt_moved.descriptors), len(mt.descriptors))
+        # drop descriptors
+        df_descriptors = mt.getDescriptors()
+        old_shape = df_descriptors.shape
+        all_descriptors = mt.getDescriptorNames()
+        mt_moved.dropDescriptors([all_descriptors[0], all_descriptors[-1]])
+        new_shape = mt_moved.getDescriptors().shape
+        self.assertEqual(new_shape[1], old_shape[1] - 2)
+        self.assertTrue(new_shape[0] == old_shape[0])
+        self.assertTrue(all_descriptors[0] not in mt_moved.getDescriptorNames())
+        self.assertTrue(all_descriptors[-1] not in mt_moved.getDescriptorNames())
+        # drop a descriptor set
+        old_shape = new_shape
+        ds = mt_moved.descriptorSets[0]
+        n_removed = len(ds.descriptors)
+        mt_moved.dropDescriptorSets([ds])
+        new_shape = mt_moved.getDescriptors().shape
+        self.assertEqual(new_shape[1], old_shape[1] - n_removed)
+        self.assertEqual(new_shape[0], old_shape[0])
+        self.assertTrue(ds in mt_moved.descriptorSets)
+        self.assertEqual(len(ds.descriptors), 0)
+        # try save and reload
+        mt_moved.save()
+        mt_moved = MoleculeTable.fromFile(mt_moved.metaFile)
+        self.assertEqual(mt_moved.getDescriptors().shape[1], new_shape[1])
+        self.assertEqual(len(mt_moved.descriptorSets), len(mt.descriptorSets))
+        self.assertEqual(len(ds.descriptors), 0)
+        # drop completely
+        mt_moved.dropDescriptorSets([ds], full_removal=True)
+        self.assertEqual(len(mt_moved.descriptorSets), len(mt.descriptorSets) - 1)
+        # try save and reload
+        mt_moved.save()
+        mt_moved = MoleculeTable.fromFile(mt_moved.metaFile)
+        self.assertEqual(len(mt_moved.descriptorSets), len(mt.descriptorSets) - 1)
+
+
 class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
     """Simple tests for dataset creation and serialization under different conditions
     and error states."""
+
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -336,7 +458,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             ),
         )
 
-    @parameterized.expand([(1, ), (2, )])  # use one or two CPUs
+    @parameterized.expand([(1,), (2,)])  # use one or two CPUs
     def testInvalidsDetection(self, n_cpu):
         df = self.getBigDF()
         all_mols = len(df)
@@ -423,7 +545,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         self.assertListEqual(train.index.tolist(), order_train)
         split = KFold(5, shuffle=True, random_state=dataset.randomState)
         for i, (_, _, _, _, train_index, test_index) in enumerate(
-            dataset.iterFolds(split)
+                dataset.iterFolds(split)
         ):
             self.assertListEqual(train.iloc[train_index].index.tolist(), order_folds[i])
 
@@ -506,6 +628,7 @@ def prop_transform(x):
 
 class TestTargetProperty(QSPRTestCase):
     """Test the TargetProperty class."""
+
     def checkTargetProperty(self, target_prop, name, task, th):
         # Check the target property creation consistency
         self.assertEqual(target_prop.name, name)
@@ -597,21 +720,22 @@ class TestDataSetPreparation(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCase
     """Test as many possible combinations of data sets and their preparation
     settings. These can run potentially for a long time so use the ``skip`` decorator
     if you want to skip all these tests to speed things up during development."""
+
     def setUp(self):
         super().setUp()
         self.setUpPaths()
 
     @parameterized.expand(DataSetsPathMixIn.getPrepCombos())
     def testPrepCombos(
-        self,
-        _,
-        name,
-        feature_calculators,
-        split,
-        feature_standardizer,
-        feature_filter,
-        data_filter,
-        applicability_domain,
+            self,
+            _,
+            name,
+            feature_calculators,
+            split,
+            feature_standardizer,
+            feature_filter,
+            data_filter,
+            applicability_domain,
     ):
         """Tests one combination of a data set and its preparation settings.
 
@@ -634,6 +758,7 @@ class TestDataSetPreparation(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCase
 
 class TestTargetImputation(PathMixIn, QSPRTestCase):
     """Small tests to only check if the target imputation works on its own."""
+
     def setUp(self):
         """Set up the test Dataframe."""
         super().setUp()
@@ -708,7 +833,8 @@ class TestTargetTransformation(DataSetsPathMixIn, QSPRTestCase):
                 },
             ]
         )
-        self.assertTrue(all(dataset.df["CL"] == np.log10(dataset.df["CL_before_transform"])))
+        self.assertTrue(
+            all(dataset.df["CL"] == np.log10(dataset.df["CL_before_transform"])))
 
 
 class TestApply(DataSetsPathMixIn, QSPRTestCase):

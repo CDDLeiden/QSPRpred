@@ -9,7 +9,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from sklearn import metrics
 
-from ..data import QSPRDataset
+from ..data.tables.qspr import QSPRDataset
 from ..models import QSPRModel
 from ..plotting.base_plot import ModelPlot
 from ..tasks import ModelTasks
@@ -59,7 +59,7 @@ class RegressionPlot(ModelPlot, ABC):
         return df
 
     def prepareRegressionResults(
-        self,
+            self,
     ) -> pd.DataFrame:
         """Prepare regression results dataframe for plotting.
 
@@ -121,10 +121,10 @@ class CorrelationPlot(RegressionPlot):
     """Class to plot the results of regression models. Plot predicted pX_train vs real pX_train."""
 
     def make(
-        self,
-        save: bool = True,
-        show: bool = False,
-        out_path: str | None = None,
+            self,
+            save: bool = True,
+            show: bool = False,
+            out_path: str | None = None,
     ) -> tuple[sns.FacetGrid, pd.DataFrame]:
         """Plot the results of regression models. Plot predicted pX_train vs real pX_train.
 
@@ -199,10 +199,10 @@ class WilliamsPlot(RegressionPlot):
         self.datasets = datasets
 
     def make(
-        self,
-        save: bool = True,
-        show: bool = False,
-        out_path: str | None = None,
+            self,
+            save: bool = True,
+            show: bool = False,
+            out_path: str | None = None,
     ) -> tuple[sns.FacetGrid, pd.DataFrame, List[float]]:
         """make Williams plot
 
@@ -225,7 +225,7 @@ class WilliamsPlot(RegressionPlot):
         """
 
         def calculateLeverages(
-            features_train: pd.DataFrame, features_test: pd.DataFrame
+                features_train: pd.DataFrame, features_test: pd.DataFrame
         ) -> pd.DataFrame:
             """Calculate the leverages for each compound in the dataset.
 

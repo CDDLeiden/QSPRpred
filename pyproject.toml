@@ -45,6 +45,7 @@ dependencies = [
     "pandas >= 1.2.2",
     "matplotlib >= 2.0",
     "chembl_structure_pipeline >= 1.2.0",
+    "papyrus_structure_pipeline",
     "rdkit",
     "optuna",
     "gitpython",

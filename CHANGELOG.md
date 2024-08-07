@@ -39,4 +39,4 @@ From v3.0.2 to v3.1.0
 
 ## Removed Features
 
-None.
+- the `old` standardization option was removed

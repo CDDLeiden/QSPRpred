@@ -12,6 +12,8 @@ import pandas as pd
 from gbmtsplits import GloballyBalancedSplit
 from sklearn.model_selection import ShuffleSplit
 
+from qsprpred.data.storage.interfaces.chem_store import ChemStore
+from qsprpred.data.storage.interfaces.chem_store import StorageDependent
 from ...data.chem.clustering import (
     FPSimilarityMaxMinClusters,
     MoleculeClusters,
@@ -19,26 +21,25 @@ from ...data.chem.clustering import (
     ScaffoldClusters,
 )
 from ...data.chem.scaffolds import BemisMurckoRDKit, Scaffold
-from ...data.tables.base import MoleculeDataTable, DataSetDependant
 from ...data.tables.qspr import QSPRDataset
 from ...logs import logger
 from ...utils.interfaces.randomized import Randomized
 
 
-class DataSplit(DataSetDependant, ABC):
+class DataSplit(StorageDependent, ABC):
     """
     Defines a function split a dataframe into train and test set.
 
     Attributes:
-        dataset (MoleculeDataTable): The dataset to split.
+        dataset (MoleculeStorage): The dataset to split.
     """
 
-    def __init__(self, dataset: MoleculeDataTable | None = None) -> None:
+    def __init__(self, dataset: ChemStore | None = None) -> None:
         super().__init__(dataset)
 
     @abstractmethod
     def split(
-        self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame | pd.Series
+            self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame | pd.Series
     ) -> Iterable[tuple[list[int], list[int]]]:
         """Split the given data into one or multiple train/test subsets.
 
@@ -77,10 +78,10 @@ class RandomSplit(DataSplit, Randomized):
     """
 
     def __init__(
-        self,
-        test_fraction=0.1,
-        dataset: QSPRDataset | None = None,
-        seed: int | None = None,
+            self,
+            test_fraction=0.1,
+            dataset: QSPRDataset | None = None,
+            seed: int | None = None,
     ) -> None:
         DataSplit.__init__(self, dataset)
         Randomized.__init__(self, seed)
@@ -129,7 +130,7 @@ class BootstrapSplit(DataSplit, Randomized):
         self._current = 0
 
     def split(
-        self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame | pd.Series
+            self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame | pd.Series
     ) -> Iterable[tuple[list[int], list[int]]]:
         """Split the given data into `nBootstraps` training and test sets.
 
@@ -216,10 +217,10 @@ class TemporalSplit(DataSplit):
     """
 
     def __init__(
-        self,
-        timesplit: float | list[float],
-        timeprop: str,
-        dataset: QSPRDataset | None = None,
+            self,
+            timesplit: float | list[float],
+            timeprop: str,
+            dataset: QSPRDataset | None = None,
     ):
         """Initialize a TemporalSplit object.
 
@@ -310,13 +311,13 @@ class GBMTDataSplit(DataSplit):
     """
 
     def __init__(
-        self,
-        dataset: QSPRDataset = None,
-        clustering: MoleculeClusters = FPSimilarityMaxMinClusters(),
-        test_fraction: float = 0.1,
-        n_folds: int = 1,
-        custom_test_list: list[str] | None = None,
-        **split_kwargs,
+            self,
+            dataset: QSPRDataset = None,
+            clustering: MoleculeClusters = FPSimilarityMaxMinClusters(),
+            test_fraction: float = 0.1,
+            n_folds: int = 1,
+            custom_test_list: list[str] | None = None,
+            **split_kwargs,
     ):
         super().__init__(dataset)
         self.testFraction = test_fraction
@@ -328,13 +329,13 @@ class GBMTDataSplit(DataSplit):
             self.testFraction = None
             self.customTestList = None
 
-    def setDataSet(self, dataset: MoleculeDataTable):
+    def setDataSet(self, dataset: ChemStore):
         super().setDataSet(dataset)
         if self.nFolds > 1:
             self.testFraction = (len(dataset) / self.nFolds) / len(dataset)
 
     def split(
-        self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame | pd.Series
+            self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame | pd.Series
     ) -> Iterable[tuple[list[int], list[int]]]:
         """
         Split dataset into balanced train and test subsets
@@ -396,11 +397,11 @@ class GBMTDataSplit(DataSplit):
         )
         # Get indices
         for split in (
-            df_split["Split"].unique()
-            if self.nFolds > 1
-            else [
-                1,
-            ]
+                df_split["Split"].unique()
+                if self.nFolds > 1
+                else [
+                    1,
+                ]
         ):
             split = int(split)
             test_indices = df_split[df_split["Split"] == split].index.values
@@ -431,14 +432,14 @@ class GBMTRandomSplit(GBMTDataSplit):
     """
 
     def __init__(
-        self,
-        dataset: QSPRDataset | None = None,
-        test_fraction: float = 0.1,
-        n_folds: int = 1,
-        seed: int | None = None,
-        n_initial_clusters: int | None = None,
-        custom_test_list: list[str] | None = None,
-        **split_kwargs,
+            self,
+            dataset: QSPRDataset | None = None,
+            test_fraction: float = 0.1,
+            n_folds: int = 1,
+            seed: int | None = None,
+            n_initial_clusters: int | None = None,
+            custom_test_list: list[str] | None = None,
+            **split_kwargs,
     ) -> None:
         seed = seed or (dataset.randomState if dataset is not None else None)
         if seed is None:
@@ -474,13 +475,13 @@ class ScaffoldSplit(GBMTDataSplit):
     """
 
     def __init__(
-        self,
-        dataset: QSPRDataset | None = None,
-        scaffold: Scaffold = BemisMurckoRDKit(),
-        test_fraction: float = 0.1,
-        n_folds: int = 1,
-        custom_test_list: list | None = None,
-        **split_kwargs,
+            self,
+            dataset: QSPRDataset | None = None,
+            scaffold: Scaffold = BemisMurckoRDKit(),
+            test_fraction: float = 0.1,
+            n_folds: int = 1,
+            custom_test_list: list | None = None,
+            **split_kwargs,
     ) -> None:
         super().__init__(
             dataset,
@@ -511,14 +512,14 @@ class ClusterSplit(GBMTDataSplit):
     """
 
     def __init__(
-        self,
-        dataset: QSPRDataset = None,
-        test_fraction: float = 0.1,
-        n_folds: int = 1,
-        custom_test_list: list[str] | None = None,
-        seed: int | None = None,
-        clustering: MoleculeClusters | None = None,
-        **split_kwargs,
+            self,
+            dataset: QSPRDataset = None,
+            test_fraction: float = 0.1,
+            n_folds: int = 1,
+            custom_test_list: list[str] | None = None,
+            seed: int | None = None,
+            clustering: MoleculeClusters | None = None,
+            **split_kwargs,
     ) -> None:
         seed = seed or (dataset.randomState if dataset is not None else None)
         if seed is None:

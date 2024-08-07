@@ -52,7 +52,7 @@ class JSONSerializable(FileSerializable):
             list of attributes that should not be serialized to JSON explicitly
     """
 
-    _notJSON = []
+    _notJSON = ["_json_main"]
 
     def __getstate__(self) -> dict:
         """Get state of object for JSON serialization. Whatever
@@ -106,8 +106,12 @@ class JSONSerializable(FileSerializable):
             instance (object): new instance of the class
         """
         with open(filename, 'r') as f:
-            json = f.read()
-        return cls.fromJSON(json)
+            json_str = f.read()
+        # inject the path to the JSON file itself as a hidden attribute
+        new_dict = json.loads(json_str)
+        new_dict["py/state"]["_json_main"] = os.path.abspath(filename)
+        json_str = json.dumps(new_dict)
+        return cls.fromJSON(json_str)
 
     def toJSON(self) -> str:
         """Serialize object to a JSON string. This JSON string should
