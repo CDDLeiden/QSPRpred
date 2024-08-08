@@ -1,5 +1,4 @@
 from abc import abstractmethod, ABC
-from typing import Literal
 
 
 class SMARTSSearchable(ABC):
@@ -8,9 +7,6 @@ class SMARTSSearchable(ABC):
     def searchWithSMARTS(
             self,
             patterns: list[str],
-            operator: Literal["or", "and"] = "or",
-            use_chirality: bool = False,
-            name: str | None = None,
     ) -> "SMARTSSearchable":
         """
         Search the molecules within this `MoleculeDataSet` with SMARTS patterns.
@@ -18,22 +14,18 @@ class SMARTSSearchable(ABC):
         Args:
             patterns:
                 List of SMARTS patterns to search with.
-            operator (object):
-                Whether to use an "or" or "and" operator on patterns. Defaults to "or".
-            use_chirality:
-                Whether to use chirality in the search.
-            name:
-                Name of the new table.
 
         Returns:
-            (MoleculeStorage): A dataframe with the molecules that match the pattern.
+            (SMARTSSearchable): Another instance that can be filtered further.
         """
 
 
 class PropSearchable(ABC):
     @abstractmethod
     def searchOnProperty(
-            self, prop_name: str, values: list[str], name: str | None = None,
+            self,
+            prop_name: str,
+            values: list[float | int | str],
             exact=False
     ) -> "PropSearchable":
         """Search the molecules within this `MoleculeDataSet` on a property value.
@@ -49,6 +41,5 @@ class PropSearchable(ABC):
                 Whether to search for exact matches or not.
 
         Returns:
-            (MoleculeStorage):
-                A data set with the molecules that match the search.
+            (PropSearchable): Another instance that can be filtered further.
         """

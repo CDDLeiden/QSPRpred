@@ -21,7 +21,7 @@ from ...utils.testing.check_mixins import DataPrepCheckMixIn
 from ...utils.testing.path_mixins import DataSetsPathMixIn, PathMixIn
 
 
-class TestMolTableCreation(DataSetsPathMixIn, QSPRTestCase):
+class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
 
     def setUp(self):
         super().setUp()
@@ -200,7 +200,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             else:
                 self.assertEqual(target_prop.task, TargetTasks.MULTICLASS)
             self.assertEqual(target_prop.name, target_names[idx])
-            y = ds.getTargetPropertiesValues(concat=True)
+            y = ds.getTargets(concat=True)
             self.assertTrue(y.columns[idx] == target_prop.name)
             if target_prop.task == TargetTasks.SINGLECLASS:
                 self.assertEqual(y[target_prop.name].unique().shape[0], 2)
@@ -216,7 +216,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             self.assertEqual(target_prop.task, TargetTasks.REGRESSION)
             self.assertTrue(ds.hasProperty(target_names[idx]))
             self.assertEqual(target_prop.name, target_names[idx])
-            ds.getTargetPropertiesValues(concat=True)
+            ds.getTargets(concat=True)
 
     def testDefaults(self):
         """Test basic dataset creation and serialization with mostly default options."""
@@ -321,7 +321,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         with self.assertRaises(AssertionError):
             dataset.unsetTargetProperty("CL")
         # Check the dataset after adding a task
-        dataset.setTargetProperty({"name": "fu", "task": TargetTasks.REGRESSION})
+        dataset.addTargetProperty({"name": "fu", "task": TargetTasks.REGRESSION})
         self.checkConsistencyMulticlass(dataset)
 
     def testTargetProperty(self):

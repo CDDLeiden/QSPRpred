@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Generator
 
 import pandas as pd
+
 from ...data.processing.feature_standardizers import apply_feature_standardizer
 
 
@@ -37,7 +38,6 @@ class FoldGenerator(ABC):
                 a generator that yields a tuple of
                 (X_train, X_test, y_train, y_test, train_index, test_index)
         """
-        pass
 
     def getFolds(self, dataset: "QSPRDataset"):
         """Directly converts the output of `iterFolds` to a `list`."""
@@ -84,9 +84,9 @@ class FoldsFromDataSplit(FoldGenerator):
         self.featureStandardizer = feature_standardizer
 
     def _make_folds(
-        self,
-        X: pd.DataFrame,
-        y: pd.DataFrame | pd.Series
+            self,
+            X: pd.DataFrame,
+            y: pd.DataFrame | pd.Series
     ) -> Generator[tuple[
         pd.DataFrame,
         pd.DataFrame,
@@ -150,7 +150,7 @@ class FoldsFromDataSplit(FoldGenerator):
             if self.split.getSeed() is None:
                 self.split.setSeed(dataset.randomState)
         features = dataset.getFeatures(raw=True, concat=concat, ordered=True)
-        targets = dataset.getTargetPropertiesValues(concat=concat, ordered=True)
+        targets = dataset.getTargets(concat=concat, ordered=True)
         if not concat:
             features = features[0]
             targets = targets[0]

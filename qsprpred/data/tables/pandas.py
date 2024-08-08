@@ -57,6 +57,30 @@ class PandasDataTable(PropertyStorage):
             remote servers instead of local processes).
     """
 
+    def searchOnProperty(
+            self,
+            prop_name: str,
+            values: list[str],
+            exact=False
+    ) -> "PandasDataTable":
+        """Search the molecules within this `MoleculeDataSet` on a property value
+        and return the appropriate subset.
+
+        Args:
+            prop_name:
+                Name of the column to search on.
+            values:
+                Values to search for.
+            name:
+                Name of the new table.
+            exact:
+                Whether to search for exact matches or not.
+
+        Returns:
+            (MoleculeStorage):
+                A data set with the molecules that match the search.
+        """
+
     def __contains__(self, item):
         return item in self.df.index
 

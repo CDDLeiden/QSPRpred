@@ -9,10 +9,10 @@ from qsprpred.data.chem.matching import SMARTSMatchProcessor
 from qsprpred.data.chem.standardizers import ChemStandardizer
 from qsprpred.data.processing.mol_processor import MolProcessor
 from qsprpred.data.storage.interfaces.chem_store import ChemStore
+from qsprpred.data.storage.interfaces.searchable import SMARTSSearchable, PropSearchable
 from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 from qsprpred.data.storage.tabular.stored_mol import TabularMol
 from qsprpred.data.tables.pandas import PandasDataTable
-from qsprpred.data.tables.searchable import SMARTSSearchable, PropSearchable
 from qsprpred.logs import logger
 from qsprpred.utils.interfaces.summarizable import Summarizable
 from qsprpred.utils.parallel import ParallelGenerator, MultiprocessingJITGenerator
@@ -131,7 +131,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         """
         if len(df) == 0 and len(self._libraries) > 0:
             logger.warning(
-                f"No valid or unique molecules found in the data frame."
+                "No valid or unique molecules found in the data frame."
                 "Nothing will be added."
             )
             return
@@ -497,8 +497,12 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         for lib in self._libraries.values():
             lib.removeProperty(name)
 
-    def getSubset(self, subset: list[str],
-                  ids: list[str] | None = None) -> "TabularStorage":
+    def getSubset(
+            self, subset: list[str],
+            ids: list[str] | None = None,
+            name: str | None = None
+    ) -> "TabularStorageBasic":
+        name = name or f"{self.name}_subset"
         if self.smilesProp not in subset:
             subset = [self.smilesProp, *subset]
         subsets = []
@@ -507,7 +511,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         ret = pd.concat(subsets)
         return self.fromDF(
             ret,
-            name=f"{self.name}_subset",
+            name=name,
             path=self.path,
             overwrite=True,
             save=False,
@@ -535,7 +539,10 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
     #     return pd_table.transformProperties(names, transformer)
 
     def getDF(self) -> pd.DataFrame:
-        return pd.concat([lib.getDF() for lib in self._libraries.values()])
+        if len(self) > 0:
+            return pd.concat([lib.getDF() for lib in self._libraries.values()])
+        else:
+            return pd.DataFrame()
 
     def reload(self):
         self.__dict__.update(self.fromFile(self.metaFile).__dict__)
@@ -566,12 +573,20 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         )
 
     def searchOnProperty(
-            self, prop_name: str, values: list[str], name: str | None = None,
+            self,
+            prop_name: str,
+            values: list[float | int | str],
+            name: str | None = None,
             exact=False
-    ) -> "TabularStorage":
-        """Search in this table using a property name and a list of values. It is
-        assumed that the property is searchable with string matching. Either an
-        exact match or a partial match can be used. If 'exact' is `False`, the
+    ) -> "TabularStorageBasic":
+        """Search in this table using a property name and a list of values.
+        It is assumed that the property is searchable with string matching
+        or direct comparison if a number is supplied.
+        Note that the types of the query list need to be consistent.
+        Otherwise, a `ValueError` will be raised.
+
+        In the case of string comparison,
+        if 'exact' is `False`, the
         search will be performed with partial matching, i.e. all molecules that
         contain any of the given values in the property will be returned. If
         'exact' is `True`, only molecules that have the exact property value for
@@ -594,17 +609,44 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             MoleculeTable:
                 A new table with the molecules from the
                 old table with the given property values.
+        Raises:
+            ValueError: If the types of the query list are not consistent.
         """
-        prop = self.getProperty(prop_name)
-        mask = [False] * len(prop)
-        for value in values:
-            mask = (
-                mask | (prop.str.contains(value))
-                if not exact
-                else mask | (prop == value)
+        assert len(values) > 0, "No values provided for the search."
+        # check type consistency
+        value_type = type(values[0])
+        if not all(isinstance(x, value_type) for x in values):
+            raise ValueError(
+                "Inconsistent types in the query list. "
+                "All values must be of the same type."
             )
-        matches = self.getSubset([prop_name], ids=self.getProperty(self.idProp)[mask])
-        return matches
+        name = name or f"{self.name}_{prop_name}_searched"
+        if value_type is str:
+            prop = self.getProperty(prop_name)
+            mask = [False] * len(prop)
+            for value in values:
+                mask = (
+                    mask | (prop.str.contains(value))
+                    if not exact
+                    else mask | (prop == value)
+                )
+            matches = self.getSubset(
+                [prop_name],
+                ids=self.getProperty(self.idProp)[mask],
+                name=name,
+            )
+            return matches
+        elif value_type in (int, float):
+            prop = self.getProperty(prop_name)
+            mask = [False] * len(prop)
+            for value in values:
+                mask = mask | (prop == value)
+            matches = self.getSubset(
+                [prop_name],
+                ids=self.getProperty(self.idProp)[mask],
+                name=name,
+            )
+            return matches
 
     @staticmethod
     def _apply_match_function(
@@ -628,10 +670,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             use_chirality: bool = False,
             name: str | None = None,
             match_function: MolProcessor | None = None,
-            n_jobs: int | None = None,
-            chunk_size: int | None = None,
-            chunk_processor: ParallelGenerator = None,
-    ) -> "TabularStorage":
+    ) -> "TabularStorageBasic":
         """Search the molecules in the table with a SMARTS pattern.
 
         Args:
@@ -652,22 +691,20 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             (MolTable): A dataframe with the molecules that match the pattern.
         """
         match_function = match_function or SMARTSMatchProcessor()
-        chunk_processor = chunk_processor or self.chunkProcessor
-        n_cpus = n_jobs or os.cpu_count()
-        chunk_size = chunk_size or int(len(self) / n_cpus)
         results = []
         for result in self.processMols(
                 match_function,
                 proc_args=(patterns, operator, use_chirality),
-                chunk_size=chunk_size,
-                n_jobs=n_cpus,
-                chunk_processor=chunk_processor,
 
         ):
-            results.extend(result)
+            results.append(result)
         results = pd.concat(results)
         results = results[results["match"]]
-        return self.getSubset(self.getProperties(), ids=results.index)
+        return self.getSubset(
+            self.getProperties(),
+            ids=results.index.values,
+            name=name,
+        )
 
     def getSummary(self):
         """
@@ -718,7 +755,8 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         """
         Remove a molecule from the store.
         """
-        raise NotImplementedError("Removing molecules is not yet implemented.")
+        for lib in self._libraries.values():
+            lib.dropEntries([mol_id], ignore_missing=True)
 
     def get_mol_ids(self) -> tuple[str, ...]:
         """

@@ -395,8 +395,8 @@ class MultiprocessingJITGenerator(JITParallelGenerator):
     def createJob(self, pool, process_func, *args, **kwargs):
         return pool.apply_async(
             process_func,
-            args,
-            kwargs
+            args=args,
+            kwds=kwargs
         )
 
 

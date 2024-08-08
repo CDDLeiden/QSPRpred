@@ -13,7 +13,7 @@ from gbmtsplits import GloballyBalancedSplit
 from sklearn.model_selection import ShuffleSplit
 
 from qsprpred.data.storage.interfaces.chem_store import ChemStore
-from qsprpred.data.storage.interfaces.chem_store import StorageDependent
+from ..tables.interfaces.data_set_dependent import DataSetDependent
 from ...data.chem.clustering import (
     FPSimilarityMaxMinClusters,
     MoleculeClusters,
@@ -26,7 +26,7 @@ from ...logs import logger
 from ...utils.interfaces.randomized import Randomized
 
 
-class DataSplit(StorageDependent, ABC):
+class DataSplit(DataSetDependent, ABC):
     """
     Defines a function split a dataframe into train and test set.
 
@@ -63,11 +63,15 @@ class DataSplit(StorageDependent, ABC):
     def splitDataset(self, dataset: "QSPRDataset"):
         return self.split(
             dataset.getFeatures(concat=True),
-            dataset.getTargetPropertiesValues(concat=True),
+            dataset.getTargets(concat=True),
         )
 
 
-class RandomSplit(DataSplit, Randomized):
+class RandomizedDataSplit(DataSplit, Randomized, ABC):
+    pass
+
+
+class RandomSplit(RandomizedDataSplit):
     """Splits dataset in random train and test subsets.
 
     Attributes:
@@ -84,27 +88,32 @@ class RandomSplit(DataSplit, Randomized):
             seed: int | None = None,
     ) -> None:
         DataSplit.__init__(self, dataset)
-        Randomized.__init__(self, seed)
         self.testFraction = test_fraction
-        self.setSeed(seed or (dataset.randomState if self.hasDataSet else None))
+        self._seed = seed
+
+    @property
+    def randomState(self) -> int:
+        return self._seed
+
+    @randomState.setter
+    def randomState(self, seed: int | None):
+        self._seed = seed
 
     def split(self, X, y):
-        if self.seed is None:
-            self.seed = self.setSeed(
-                self.getDataSet().randomState if self.hasDataSet else None
-            )
-        if self.seed is None:
+        if self.randomState is None:
+            self.randomState = self.getDataSet().randomState if self.hasDataSet else None
+        if self.randomState is None:
             logger.info(
                 "No random state supplied, "
                 "and could not find random state on the dataset."
                 "Random seed will be set randomly."
             )
         return ShuffleSplit(
-            1, test_size=self.testFraction, random_state=self.seed
+            1, test_size=self.testFraction, random_state=self.randomState
         ).split(X, y)
 
 
-class BootstrapSplit(DataSplit, Randomized):
+class BootstrapSplit(RandomizedDataSplit):
     """Splits dataset in random train and test subsets (bootstraps). Unlike
     cross-validation, bootstrapping allows for repeated samples in the test set.
 
@@ -115,7 +124,7 @@ class BootstrapSplit(DataSplit, Randomized):
             Random state to use for shuffling and other random operations.
     """
 
-    def __init__(self, split: DataSplit, n_bootstraps=5, seed=None):
+    def __init__(self, split: RandomizedDataSplit, n_bootstraps=5, seed=None):
         """Initialize a BootstrapSplit object.
 
         Args:
@@ -123,11 +132,20 @@ class BootstrapSplit(DataSplit, Randomized):
             n_bootstraps (int): number of bootstraps to perform
             seed (int): random seed to use for random operations
         """
-        Randomized.__init__(self, seed)
+        super().__init__(split.getDataSet())
         self._split = split
         self._original_split_seed = split.seed if hasattr(split, "seed") else None
         self.nBootstraps = n_bootstraps
         self._current = 0
+        self._seed = seed
+
+    @property
+    def randomState(self) -> int:
+        return self._seed
+
+    @randomState.setter
+    def randomState(self, seed: int | None):
+        self._seed = seed
 
     def split(
             self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame | pd.Series
@@ -144,8 +162,8 @@ class BootstrapSplit(DataSplit, Randomized):
         if hasattr(self._split, "setDataSet") and self.hasDataSet:
             self._split.setDataSet(self.getDataSet())
         for i in range(self.nBootstraps):
-            if hasattr(self._split, "setSeed") and self.seed is not None:
-                self._split.setSeed(self.seed + self._current)
+            if hasattr(self._split, "setSeed") and self.randomState is not None:
+                self._split.randomState = self.randomState + self._current
             yield from self._split.split(X, y)
             self._current += 1
         if hasattr(self._split, "setSeed"):

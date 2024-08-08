@@ -10,10 +10,12 @@ from mlchemad.applicability_domains import (
 )
 from sklearn.preprocessing import LabelEncoder
 
+from qsprpred.data.tables.interfaces.qspr_data_set import QSPRDataSet
+from .interfaces.molecule_data_set import MoleculeDataSet
 from .mol import MoleculeTable
 from ..descriptors.sets import DescriptorSet
+from ..storage.interfaces.chem_store import ChemStore
 from ...data.processing.applicability_domain import ApplicabilityDomain, MLChemADWrapper
-from ...data.processing.data_filters import RepeatsFilter
 from ...data.processing.feature_standardizers import (
     SKLearnStandardizer,
     apply_feature_standardizer,
@@ -23,7 +25,7 @@ from ...logs import logger
 from ...tasks import TargetProperty, TargetTasks
 
 
-class QSPRDataset(MoleculeTable):
+class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be renamed
     """Prepare dataset for QSPR model training.
 
     It splits the data in train and test set, as well as creating cross-validation
@@ -53,25 +55,17 @@ class QSPRDataset(MoleculeTable):
         applicabilityDomain (ApplicabilityDomain) : applicability domain
     """
 
-    _notJSON: ClassVar = [*MoleculeTable._notJSON, "X", "X_ind", "y", "y_ind"]
+    _notJSON: ClassVar = [*MoleculeDataSet._notJSON, "X", "X_ind", "y", "y_ind"]
 
     def __init__(
             self,
-            name: str,
+            storage: ChemStore,
+            name: str | None = None,
             target_props: list[TargetProperty | dict] | None = None,
-            df: Optional[pd.DataFrame] = None,
-            smiles_col: str = "SMILES",
-            add_rdkit: bool = False,
-            store_dir: str = ".",
-            overwrite: bool = False,
-            n_jobs: int | None = 1,
-            chunk_size: int | None = None,
-            drop_invalids: bool = True,
-            drop_empty: bool = True,
-            index_cols: Optional[list[str]] = None,
-            autoindex_name: str = "QSPRID",
+            path: str = ".",
             random_state: int | None = None,
             store_format: str = "pkl",
+            drop_empty_target_props: bool = True,
     ):
         """Construct QSPRdata, also apply transformations of output property if
                 specified.
@@ -84,60 +78,23 @@ class QSPRDataset(MoleculeTable):
                 should correspond with target columnname in df. If `None`, target
                 properties will be inferred if this data set has been saved
                 previously. Defaults to `None`.
-            df (pd.DataFrame, optional):
-                input dataframe containing smiles and target
-                property. Defaults to None.
-            smiles_col (str, optional):
-                name of column in df containing SMILES.
-                Defaults to "SMILES".
-            add_rdkit (bool, optional):
-                if true, column with rdkit molecules will be
-                added to df. Defaults to False.
-            store_dir (str, optional):
-                directory for saving the output data.
-                Defaults to '.'.
-            overwrite (bool, optional):
-                if already saved data at output dir if should
-                be overwritten. Defaults to False.
-            n_jobs (int, optional):
-                number of parallel jobs. If <= 0, all available
-                cores will be used. Defaults to 1.
-            chunk_size (int, optional):
-                chunk size for parallel processing.
-                Defaults to 50.
-            drop_invalids (bool, optional):
-                if true, invalid SMILES will be dropped.
-                Defaults to True.
-            drop_empty (bool, optional):
-                if true, rows with empty target property will  be removed.
-            index_cols (list[str], optional):
-                columns to be used as index in the
-                dataframe. Defaults to `None` in which case a custom ID will be
-                generated.
-            autoindex_name (str):
-                Column name to use for automatically generated IDs.
             random_state (int, optional):
                 random state for splitting the data.
             store_format (str, optional):
                 format to use for storing the data ('pkl' or 'csv').
+            drop_empty_target_props (bool, optional):
+                whether to ignore entries with empty target properties. Defaults to
+                `True`.
 
         Raises:
             `ValueError`: Raised if threshold given with non-classification task.
         """
         super().__init__(
-            name,
-            df,
-            smiles_col,
-            add_rdkit,
-            store_dir,
-            overwrite,
-            n_jobs,
-            chunk_size,
-            False,
-            index_cols,
-            autoindex_name,
-            random_state,
-            store_format,
+            storage,
+            name=name,
+            path=path,
+            random_state=random_state,
+            store_format=store_format,
         )
         # load target properties if not specified and file exists
         if target_props is None and os.path.exists(self.metaFile):
@@ -155,68 +112,78 @@ class QSPRDataset(MoleculeTable):
         self.featureStandardizer = None
         self.applicabilityDomain = None
         # populate feature matrix and target properties
-        self.X = None
-        self.y = None
-        self.X_ind = None
-        self.y_ind = None
+        self._X = None
+        self._y = None
+        self._X_ind = None
+        self._y_ind = None
         self.targetProperties = []
-        self.setTargetProperties(target_props, drop_empty)
-        self.chunkSize = chunk_size
-        if drop_invalids:
-            self.dropInvalids()
-            self.chunkSize = chunk_size
+        self.setTargetProperties(target_props, drop_empty_target_props)
         logger.info(
             f"Dataset '{self.name}' created for "
             f"target Properties: '{self.targetProperties}'. "
-            f"Number of samples: {len(self.df)}. "
-            f"Chunk size: {self.chunkSize}. "
-            f"Number of CPUs: {self.nJobs}."
+            f"Number of samples: {len(self.storage)}. "
         )
+
+    @property
+    def X(self) -> pd.DataFrame:
+        return self._X
+
+    @property
+    def y(self) -> pd.Series | pd.DataFrame:
+        return self._y
+
+    @property
+    def X_ind(self) -> pd.DataFrame:
+        return self._X_ind
+
+    @property
+    def y_ind(self) -> pd.Series | pd.DataFrame:
+        return self._y_ind
 
     def __setstate__(self, state):
         super().__setstate__(state)
         self.restoreTrainingData()
 
-    @staticmethod
-    def fromTableFile(name: str, filename: str, sep: str = "\t", *args, **kwargs):
-        r"""Create QSPRDataset from table file (i.e. CSV or TSV).
+    # @staticmethod
+    # def fromTableFile(name: str, filename: str, sep: str = "\t", *args, **kwargs):
+    #     r"""Create QSPRDataset from table file (i.e. CSV or TSV).
+    #
+    #     Args:
+    #         name (str): name of the data set
+    #         filename (str): path to the table file
+    #         sep (str, optional): separator in the table file. Defaults to "\t".
+    #         *args: additional arguments for QSPRDataset constructor
+    #         **kwargs: additional keyword arguments for QSPRDataset constructor
+    #     Returns:
+    #         QSPRDataset: `QSPRDataset` object
+    #     """
+    #     return QSPRDataset(
+    #         name,
+    #         df=pd.read_table(filename, sep=sep),
+    #         *args,  # FIXME: this is a bug in flake8...
+    #         **kwargs,
+    #     )
+    #
+    # @staticmethod
+    # def fromSDF(name: str, filename: str, smiles_prop: str, *args, **kwargs):
+    #     """Create QSPRDataset from SDF file.
+    #
+    #     It is currently not implemented for QSPRDataset, but you can convert from
+    #     'MoleculeTable' with the 'fromMolTable' method.
+    #
+    #     Args:
+    #         name (str): name of the data set
+    #         filename (str): path to the SDF file
+    #         smiles_prop (str): name of the property in the SDF file containing SMILES
+    #         *args: additional arguments for QSPRDataset constructor
+    #         **kwargs: additional keyword arguments for QSPRDataset constructor
+    #     """
+    #     raise NotImplementedError(
+    #         f"SDF loading not implemented for {QSPRDataset.__name__}, yet. You can "
+    #         "convert from 'MoleculeTable' with 'fromMolTable'."
+    #     )
 
-        Args:
-            name (str): name of the data set
-            filename (str): path to the table file
-            sep (str, optional): separator in the table file. Defaults to "\t".
-            *args: additional arguments for QSPRDataset constructor
-            **kwargs: additional keyword arguments for QSPRDataset constructor
-        Returns:
-            QSPRDataset: `QSPRDataset` object
-        """
-        return QSPRDataset(
-            name,
-            df=pd.read_table(filename, sep=sep),
-            *args,  # noqa: B026 # FIXME: this is a bug in flake8...
-            **kwargs,
-        )
-
-    @staticmethod
-    def fromSDF(name: str, filename: str, smiles_prop: str, *args, **kwargs):
-        """Create QSPRDataset from SDF file.
-
-        It is currently not implemented for QSPRDataset, but you can convert from
-        'MoleculeTable' with the 'fromMolTable' method.
-
-        Args:
-            name (str): name of the data set
-            filename (str): path to the SDF file
-            smiles_prop (str): name of the property in the SDF file containing SMILES
-            *args: additional arguments for QSPRDataset constructor
-            **kwargs: additional keyword arguments for QSPRDataset constructor
-        """
-        raise NotImplementedError(
-            f"SDF loading not implemented for {QSPRDataset.__name__}, yet. You can "
-            "convert from 'MoleculeTable' with 'fromMolTable'."
-        )
-
-    def resetTargetProperty(self, prop: TargetProperty | str):
+    def restoreTargetProperty(self, prop: TargetProperty | str):
         """Reset target property to its original value.
 
         Args:
@@ -261,7 +228,7 @@ class QSPRDataset(MoleculeTable):
             )
         self.targetProperties = []
         for prop in target_props:
-            self.setTargetProperty(prop, drop_empty)
+            self.addTargetProperty(prop, drop_empty)
 
     @property
     def hasFeatures(self):
@@ -322,7 +289,7 @@ class QSPRDataset(MoleculeTable):
             target_property (str): name of the target property to use for regression
         """
         target_property = self.getTargetProperties([target_property])[0]
-        self.resetTargetProperty(target_property)
+        self.restoreTargetProperty(target_property)
         target_property.task = TargetTasks.REGRESSION
         if hasattr(target_property, "th"):
             del target_property.th
@@ -347,7 +314,7 @@ class QSPRDataset(MoleculeTable):
         """
         prop_name = target_property
         target_property = self.getTargetProperties([target_property])[0]
-        self.resetTargetProperty(target_property)
+        self.restoreTargetProperty(target_property)
         # perform some checks
         if th is not None:
             assert (
@@ -418,18 +385,18 @@ class QSPRDataset(MoleculeTable):
         self.restoreTrainingData()
         logger.info(f"Target property '{prop_name}' converted to classification.")
 
-    def searchWithIndex(
-            self, index: pd.Index, name: str | None = None
-    ) -> "MoleculeTable":
-        ret = super().searchWithIndex(index, name)
-        ret = QSPRDataset.fromMolTable(ret, self.targetProperties, name=ret.name)
-        ret.featureStandardizer = self.featureStandardizer
-        ret.featurize()
-        return ret
+    # def searchWithIndex(
+    #         self, index: pd.Index, name: str | None = None
+    # ) -> "MoleculeTable":
+    #     ret = super().searchWithIndex(index, name)
+    #     ret = QSPRDataset.fromMolTable(ret, self.targetProperties, name=ret.name)
+    #     ret.featureStandardizer = self.featureStandardizer
+    #     ret.featurize()
+    #     return ret
 
     @staticmethod
     def fromMolTable(
-            mol_table: MoleculeTable,
+            mol_table: MoleculeDataSet,
             target_props: list[TargetProperty | dict],
             name=None,
             **kwargs,
@@ -446,57 +413,36 @@ class QSPRDataset(MoleculeTable):
             QSPRDataset: created data set
         """
         name = mol_table.name if name is None else name
-        kwargs["store_dir"] = (
-            mol_table.baseDir if "store_dir" not in kwargs else kwargs["store_dir"]
-        )
         kwargs["random_state"] = (
             mol_table.randomState
             if "random_state" not in kwargs
             else kwargs["random_state"]
-        )
-        kwargs["n_jobs"] = (
-            mol_table.nJobs if "n_jobs" not in kwargs else kwargs["n_jobs"]
-        )
-        kwargs["chunk_size"] = (
-            mol_table.chunkSize if "chunk_size" not in kwargs else kwargs["chunk_size"]
-        )
-        kwargs["smiles_col"] = (
-            mol_table.smilesCol if "smiles_col" not in kwargs else kwargs["smiles_col"]
-        )
-        kwargs["index_cols"] = (
-            mol_table.indexCols if "index_cols" not in kwargs else kwargs["index_cols"]
         )
         kwargs["store_format"] = (
             mol_table.storeFormat
             if "store_format" not in kwargs
             else kwargs["store_format"]
         )
-        if mol_table.invalidsRemoved and "drop_invalids" not in kwargs:
-            kwargs["drop_invalids"] = False
-        else:
-            kwargs["drop_invalids"] = True
         ds = QSPRDataset(
+            mol_table.storage,
             name,
             target_props,
-            mol_table.getDF(),
             **kwargs,
         )
-        if mol_table.invalidsRemoved or kwargs["drop_invalids"]:
-            ds.invalidsRemoved = True
         ds.descriptors = mol_table.descriptors
         ds.featureNames = mol_table.getDescriptorNames()
         ds.loadDescriptorsToSplits()
         return ds
 
-    def filter(self, table_filters: list[Callable]):
-        """Filter the data set using the given filters.
-
-        Args:
-            table_filters (list[Callable]): list of filters to apply
-        """
-        super().filter(table_filters)
-        self.restoreTrainingData()
-        self.featurize()
+    # def filter(self, table_filters: list[Callable]):
+    #     """Filter the data set using the given filters.
+    #
+    #     Args:
+    #         table_filters (list[Callable]): list of filters to apply
+    #     """
+    #     super().filter(table_filters)
+    #     self.restoreTrainingData()
+    #     self.featurize()
 
     def addDescriptors(
             self,
@@ -786,28 +732,23 @@ class QSPRDataset(MoleculeTable):
             feature_standardizer = SKLearnStandardizer(feature_standardizer)
         self.featureStandardizer = feature_standardizer
 
-    def addFeatures(
-            self,
-            feature_calculators: list[DescriptorSet],
-            recalculate: bool = False,
-    ):
-        """Add features to the data set.
-
-        Args:
-            feature_calculators (list[DescriptorSet]): list of
-                feature calculators to add. Defaults to None.
-            recalculate (bool): if True, recalculate features even if they are already
-                present in the data set. Defaults to False.
-        """
-        self.addDescriptors(
-            feature_calculators, recalculate=recalculate, featurize=False
-        )
-        self.featurize()
-
-    def dropInvalids(self):
-        ret = super().dropInvalids()
-        self.restoreTrainingData()
-        return ret
+    # def addFeatures(
+    #         self,
+    #         feature_calculators: list[DescriptorSet],
+    #         recalculate: bool = False,
+    # ):
+    #     """Add features to the data set.
+    #
+    #     Args:
+    #         feature_calculators (list[DescriptorSet]): list of
+    #             feature calculators to add. Defaults to None.
+    #         recalculate (bool): if True, recalculate features even if they are already
+    #             present in the data set. Defaults to False.
+    #     """
+    #     self.addDescriptors(
+    #         feature_calculators, recalculate=recalculate, featurize=False
+    #     )
+    #     self.featurize()
 
     def reset(self):
         """Reset the data set. Splits will be removed and all descriptors will be
@@ -826,8 +767,7 @@ class QSPRDataset(MoleculeTable):
 
     def prepareDataset(
             self,
-            smiles_standardizer: str | Callable | None = "chembl",
-            data_filters: list | None = (RepeatsFilter(keep=True),),
+            # data_filters: list | None = (RepeatsFilter(keep=True),),
             split=None,
             feature_calculators: list["DescriptorSet"] | None = None,
             feature_filters: list | None = None,
@@ -867,15 +807,12 @@ class QSPRDataset(MoleculeTable):
         """
         # reset everything
         self.reset()
-        # apply sanitization and standardization
-        if smiles_standardizer is not None:
-            self.standardizeSmiles(smiles_standardizer)
         # calculate features
         if feature_calculators is not None:
-            self.addFeatures(feature_calculators, recalculate=recalculate_features)
+            self.addDescriptors(feature_calculators, recalculate=recalculate_features)
         # apply data filters
-        if data_filters is not None:
-            self.filter(data_filters)
+        # if data_filters is not None:
+        #     self.filter(data_filters)
         # Replace any NaN values in featureNames by 0
         # FIXME: this is not very good, we should probably add option to do custom
         # data imputation here or drop rows with NaNs
@@ -995,7 +932,7 @@ class QSPRDataset(MoleculeTable):
             X = X.loc[self.df.index, :]
         return (X, X_ind) if not concat else X
 
-    def getTargetPropertiesValues(self, concat: bool = False, ordered: bool = False):
+    def getTargets(self, concat: bool = False, ordered: bool = False):
         """Get the response values (training and test) for the set target property.
 
         Args:
@@ -1071,24 +1008,21 @@ class QSPRDataset(MoleculeTable):
         super().dropEmptyProperties(names)
         self.restoreTrainingData()
 
-    # def transformProperties(self, targets: list[str], transformer: Callable):
-    #     """Transform the target properties using the given transformer.
-    #
-    #     Args:
-    #         targets (list[str]): list of target properties names to transform
-    #         transformer (Callable): transformer function
-    #         add_as (list[str] | None, optional): list of names to add the transformed
-    #             target properties as. If `None`, the original target properties will be
-    #             overwritten. Defaults to `None`.
-    #     """
-    #     super().transformProperties(targets, transformer)
-    #     self.restoreTrainingData()
+    def transformProperties(self, targets: list[str], transformer: Callable):
+        """Transform the target properties using the given transformer.
+
+        Args:
+            targets (list[str]): list of target properties names to transform
+            transformer (Callable): transformer function
+        """
+        super().transformProperties(targets, transformer)
+        self.restoreTrainingData()
 
     def imputeProperties(self, names: list[str], imputer: Callable):
         super().imputeProperties(names, imputer)
         self.restoreTrainingData()
 
-    def setTargetProperty(self, prop: TargetProperty | dict, drop_empty: bool = True):
+    def addTargetProperty(self, prop: TargetProperty | dict, drop_empty: bool = True):
         """Add a target property to the dataset.
 
         Args:
@@ -1111,7 +1045,7 @@ class QSPRDataset(MoleculeTable):
         # add the target property to the list
         self.targetProperties.append(prop)
         # restore original values if they were transformed
-        self.resetTargetProperty(prop)
+        self.restoreTargetProperty(prop)
         # impute the property
         if prop.imputer is not None:
             self.imputeProperties([prop.name], prop.imputer)

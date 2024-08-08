@@ -7,6 +7,11 @@ from qsprpred.data.descriptors.sets import DescriptorSet
 
 class DescriptorProvider(ABC):
 
+    @property
+    @abstractmethod
+    def descriptorSets(self) -> list[DescriptorSet]:
+        pass
+
     @abstractmethod
     def dropDescriptorSets(
             self,

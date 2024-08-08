@@ -1,6 +1,6 @@
 import os
 import shutil
-from typing import Generator, Any, Iterable, Sized, ClassVar
+from typing import Generator, Any, Iterable, Sized, ClassVar, Literal
 
 import numpy as np
 import pandas as pd
@@ -8,36 +8,33 @@ from rdkit.Chem import PandasTools
 
 from qsprpred.data.descriptors.sets import DescriptorSet
 from qsprpred.data.storage.interfaces.chem_store import ChemStore
-from qsprpred.data.storage.interfaces.descriptor_provider import DescriptorProvider
-from qsprpred.data.storage.interfaces.mol_processable import MolProcessable
 from qsprpred.data.storage.interfaces.property_storage import PropertyStorage
 from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 from qsprpred.data.storage.tabular.basic_storage import TabularStorageBasic
 from .descriptor import DescriptorTable
+from .interfaces.molecule_data_set import MoleculeDataSet
 from ...data.chem.scaffolds import Scaffold
 from ...logs import logger
 
 
-class MoleculeTable(PropertyStorage, MolProcessable, DescriptorProvider):
+class MoleculeTable(MoleculeDataSet):
     """Class that holds and prepares molecule data for modelling and other analyses.
 
     Attributes:
-        smilesCol (str):
-            Name of the column containing the SMILES sequences
-            of molecules.
-        includesRdkit (bool):
-            Whether the data frame contains RDKit molecules as one of
-            the properties.
-        descriptors (list[DescriptorTable]):
-            List of `DescriptorTable` objects containing the descriptors
-            calculated for this table.
+        storage (ChemStore): The storage object that holds the molecule data.
+        name (str): Name of the data set.
+        path (str): Path to the directory where the data set will be stored.
+        descriptors (list[DescriptorTable]): List of descriptor tables attached to this
+            data set.
+        storeFormat (str): Format to use for storing the data set.
     """
 
-    _notJSON: ClassVar = PropertyStorage._notJSON + ["descriptors", "storage"]
+    _notJSON: ClassVar = [*PropertyStorage._notJSON, "descriptors", "storage"]
 
     def __init__(
             self,
             storage: ChemStore,
+            name: str | None = None,
             path: str = ".",
             random_state: int | None = None,
             store_format: str = "pkl",
@@ -48,36 +45,26 @@ class MoleculeTable(PropertyStorage, MolProcessable, DescriptorProvider):
         molecule data for modelling and analysis.
 
         Args:
-            name (str): Name of the dataset. You can use this name to load the dataset
-                from disk anytime and create a new instance.
-            df (pd.DataFrame): Pandas dataframe containing the data. If you provide a
-                dataframe for a dataset that already exists on disk,
-            the dataframe from disk will override the supplied data frame. Set
-                'overwrite' to `True` to override the data frame on disk.
-            smiles_col (str): Name of the column containing the SMILES sequences
-                of molecules.
-            add_rdkit (bool): Add RDKit molecule instances to the dataframe.
-                WARNING: This can take a lot of memory.
-            store_dir (str): Directory to store the dataset files. Defaults to the
-                current directory. If it already contains files with the same name,
-                the existing data will be loaded.
-            overwrite (bool): Overwrite existing dataset.
-            n_jobs (int): Number of jobs to use for parallel processing. If <= 0, all
-                available cores will be used.
-            chunk_size (int): Size of chunks to use per job in parallel processing.
-            drop_invalids (bool): Drop invalid molecules from the data frame.
-            index_cols (list[str]): list of columns to use as index. If None, the index
-                will be a custom generated ID.
-            autoindex_name (str): Column name to use for automatically generated IDs.
+            storage (ChemStore): The storage object that holds the molecule data.
+            name (str): Name of the data set.
+            path (str): Path to the directory where the data set will be stored.
             random_state (int): Random state to use for shuffling and other random ops.
-            store_format (str): Format to use for storing the data ('pkl' or 'csv').
+            store_format (str): Format to use for storing the data set.
         """
         self.storage = storage
-        self.name = f"{self.storage}_mol_table"
-        self.randomState = random_state
+        self.name = name or f"{self.storage}_mol_table"
+        self._randomState = random_state
         self.descriptors = []
         self.path = os.path.abspath(os.path.join(path, self.name))
         self.storeFormat = store_format
+
+    @property
+    def randomState(self) -> int:
+        return self._randomState
+
+    @randomState.setter
+    def randomState(self, seed: int | None):
+        self._randomState = seed
 
     def sample(
             self, n: int, name: str | None = None, random_state: int | None = None
@@ -110,8 +97,8 @@ class MoleculeTable(PropertyStorage, MolProcessable, DescriptorProvider):
             )
         return mt
 
-    @staticmethod
-    def fromSMILES(name: str, smiles: list, path: str, *args, **kwargs):
+    @classmethod
+    def fromSMILES(cls, name: str, smiles: list, path: str, *args, **kwargs):
         """Create a `MoleculeTable` instance from a list of SMILES sequences.
 
         Args:
@@ -124,16 +111,18 @@ class MoleculeTable(PropertyStorage, MolProcessable, DescriptorProvider):
         smiles_col = "SMILES"
         df = pd.DataFrame({smiles_col: smiles})
         storage = TabularStorageBasic.fromDF(df, name=name, path=path, *args, **kwargs)
-        return MoleculeTable(storage, path=os.path.dirname(storage.path))
+        return cls(storage, path=os.path.dirname(storage.path))
 
-    @staticmethod
-    def fromTableFile(name: str, filename: str, path: str, sep="\t", *args, **kwargs):
+    @classmethod
+    def fromTableFile(cls, name: str, filename: str, path: str, sep="\t", *args,
+                      **kwargs):
         """Create a `MoleculeTable` instance from a file containing a table of molecules
         (i.e. a CSV file).
 
         Args:
             name (str): Name of the data set.
             filename (str): Path to the file containing the table.
+            path (str): Path to the directory where the data set will be stored.
             sep (str): Separator used in the file for different columns.
             *args: Additional arguments to pass to the `MoleculeTable` constructor.
             **kwargs: Additional keyword arguments to pass to the `MoleculeTable`
@@ -141,15 +130,16 @@ class MoleculeTable(PropertyStorage, MolProcessable, DescriptorProvider):
         """
         df = pd.read_table(filename, sep=sep)
         storage = TabularStorageBasic.fromDF(df, name=name, path=path, *args, **kwargs)
-        return MoleculeTable(storage, path=os.path.dirname(storage.path))
+        return cls(storage, path=os.path.dirname(storage.path))
 
-    @staticmethod
-    def fromSDF(name, filename, smiles_prop, path: str, *args, **kwargs):
+    @classmethod
+    def fromSDF(cls, name, filename, smiles_prop, path: str, *args, **kwargs):
         """Create a `MoleculeTable` instance from an SDF file.
 
         Args:
             name (str): Name of the data set.
             filename (str): Path to the SDF file.
+            path (str): Path to the directory where the data set will be stored.
             smiles_prop (str): Name of the property in the SDF file containing the
                 SMILES sequence.
             *args: Additional arguments to pass to the `MoleculeTable` constructor.
@@ -166,7 +156,7 @@ class MoleculeTable(PropertyStorage, MolProcessable, DescriptorProvider):
             *args,
             **kwargs
         )
-        return MoleculeTable(storage, path=os.path.dirname(storage.path))
+        return cls(storage, path=os.path.dirname(storage.path))
 
     @property
     def smiles(self) -> Generator[str, None, None]:
@@ -647,3 +637,16 @@ class MoleculeTable(PropertyStorage, MolProcessable, DescriptorProvider):
     ) -> Generator[list[StoredMol], None, None]:
         # TODO: extend this to descriptors as well
         return self.storage.iterChunks(size, on_props)
+
+    def getSummary(self) -> pd.DataFrame:
+        raise NotImplementedError("Summary not yet available for MoleculeTable.")
+
+    def searchWithSMARTS(self, patterns: list[str],
+                         operator: Literal["or", "and"] = "or",
+                         use_chirality: bool = False,
+                         name: str | None = None) -> "MoleculeTable":
+        pass
+
+    def searchOnProperty(self, prop_name: str, values: list[float | int | str],
+                         exact=False) -> "MoleculeTable":
+        pass

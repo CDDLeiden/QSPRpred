@@ -5,9 +5,10 @@ import pandas as pd
 
 from qsprpred.data.storage.interfaces.chunk_iterable import ChunkIterable
 from qsprpred.data.storage.interfaces.data_store import DataStorage
+from qsprpred.data.storage.interfaces.searchable import PropSearchable
 
 
-class PropertyStorage(DataStorage, ChunkIterable, ABC):
+class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
     """A simple `DataStorage` that maps property names to arbitrary data."""
 
     @property
@@ -181,7 +182,6 @@ class PropertyStorage(DataStorage, ChunkIterable, ABC):
 
         :return: an iterable of lists of stored molecules
         """
-        pass
 
     @abstractmethod
     def __getitem__(self, item):

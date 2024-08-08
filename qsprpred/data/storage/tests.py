@@ -72,6 +72,8 @@ class TabularStorageTest(StorageTest, TestCase):
         self.assertEqual(store.nLibs, store2.nLibs)
         self.assertEqual(len(store), len(store2))
         self.assertListEqual(list(store.smiles), list(store2.smiles))
+        self.assertEqual(len(store), len(store.getDF()))
+        self.assertEqual(len(store2), len(store2.getDF()))
 
     def testInitsAndSaves(self):
         # test default
@@ -239,3 +241,56 @@ class TabularStorageTest(StorageTest, TestCase):
             self.assertIn(mol.id, subset)
             self.assertIn("TestProp1", subset[mol.id].props)
             self.assertIn("ExtraIndexColumn", subset[mol.id].props)
+
+    def testSearch(self):
+        # by property
+        store = self.getStorage()
+        result = store.searchOnProperty("TestProp1", [1.0])
+        result = result.getProperty("TestProp1")
+        self.assertTrue(all(result == 1.0))
+        # using a string
+        result = store.searchOnProperty("ExtraIndexColumn", ["Molecule8"])
+        result = result.getProperty("ExtraIndexColumn")
+        self.assertTrue(all(result == "Molecule8"))
+        self.assertEqual(len(result), 1)
+        # find non-existing
+        result = store.searchOnProperty("ExtraIndexColumn", ["MoleculeX"])
+        self.assertEqual(len(result), 0)
+        # by SMARTS
+        result = store.searchWithSMARTS(
+            ["N[C@H]"],
+            name="test_smarts",
+            use_chirality=True,
+        )
+        self.assertEqual(len(result), len(store) - 1)
+        # using non-chiral match
+        result = store.searchWithSMARTS(
+            ["N[C@H]"],
+            name="test_smarts",
+            use_chirality=False,
+        )
+        self.assertEqual(len(result), len(store))
+        # using multiple patterns
+        result = store.searchWithSMARTS(
+            ["N[C@H]", "C1CCC1"],
+            name="test_smarts",
+            operator="and",
+            use_chirality=True,
+        )
+        self.assertEqual(len(result), 0)
+        result = store.searchWithSMARTS(
+            ["N[C@H]", "C1CCC1"],
+            name="test_smarts",
+            operator="and",
+            use_chirality=False,
+        )
+        self.assertEqual(len(result), 1)
+        # get single molecule and check that is has all the props
+        result_mol = list(result)[0]
+        result_mol = store.get_mol(result_mol.id)
+        for prop in store.getProperties():
+            self.assertIn(prop, result_mol.props)
+        # drop it and check that it is not there
+        result.remove_mol(result_mol.id)
+        self.assertNotIn(result_mol.id, result)
+        self.assertEqual(len(result), 0)
