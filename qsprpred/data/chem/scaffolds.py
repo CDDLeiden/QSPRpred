@@ -83,7 +83,7 @@ class BemisMurcko(Scaffold):
         self,
         real_bemismurcko: bool = True,
         use_csk: bool = False,
-        id_prop: bool | None = None,
+        id_prop: str | None = None,
     ):
         """
         Initialize the scaffold generator.

@@ -58,9 +58,7 @@ The following options are available:
 - extra : include extra dependencies for PCM models and extra descriptor sets from
   packages other than RDKit
 - deep : include deep learning models (torch and chemprop)
-- pyboost : include pyboost model (requires cupy, `pip install cupy-cudaX`, replace X
-  with your [cuda version](https://docs.cupy.dev/en/stable/install.html), you can obtain
-  cude toolkit from Anaconda as well: `conda install cudatoolkit`)
+- chemprop: include the ChemProp integration (only ChemProp versions < 2.0.0 supported at the moment)
 - full : include all optional dependecies (requires cupy, `pip install cupy-cudaX`,
   replace X with your [cuda version](https://docs.cupy.dev/en/stable/install.html))
 

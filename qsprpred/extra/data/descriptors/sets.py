@@ -6,7 +6,9 @@
 - `ProDec`: Protein descriptors from the ProDec package.
 
 """
+import logging
 import os
+import zipfile
 from abc import abstractmethod
 from typing import Optional, Any
 

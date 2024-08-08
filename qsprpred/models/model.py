@@ -176,7 +176,7 @@ class QSPRModel(JSONSerializable, ABC):
                     f"Estimator will be reloaded with the new parameters "
                     f"and will have to be re-fitted if fitted previously."
                 )
-                self.parameters = parameters
+                self.parameters = copy.deepcopy(parameters)
                 self.estimator = self.loadEstimator(self.parameters)
             if random_state:
                 logger.warning(
@@ -185,7 +185,8 @@ class QSPRModel(JSONSerializable, ABC):
                 )
                 self.initRandomState(random_state)
         else:
-            self.parameters = parameters
+            # make a deep copy of the params to make sure no problems happen downstream
+            self.parameters = copy.deepcopy(parameters)
             # initialize an estimator instance with the given parameters
             self.alg = alg
             # initialize random state

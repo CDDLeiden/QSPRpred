@@ -21,7 +21,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ] # FIXME: add macos-latest and windows-latest (removed for now due to limited debugging options)
-        python-version: [ '3.10' ]
+        python-version: [ '3.12' ]
       fail-fast: false
     defaults:
       run:

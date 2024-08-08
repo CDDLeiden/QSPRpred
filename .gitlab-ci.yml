@@ -29,12 +29,7 @@ stages:
   script:
     - cd testing && QSPPRED_TEST_SPLIT_UNITS=true QSPRPRED_VERBOSE_LOGGING=true ./run.sh
 
-# # Run tests on Python version 11 (linux image)
-# test:python3.11:
-#    extends: .test
-#    image: python:3.11
-
-# Run tests on Python version 10 (linux image)
-test:python3.10:
+# Run tests on the recent Python (linux image)
+test:python3.12:
   extends: .test
-  image: python:3.10
+  image: python:3.12
