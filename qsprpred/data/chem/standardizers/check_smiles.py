@@ -2,6 +2,7 @@ from typing import Any
 
 import pandas as pd
 from rdkit import Chem
+from rdkit.Chem import Mol
 
 from qsprpred.data.chem.standardizers import ChemStandardizer
 from qsprpred.data.processing.mol_processor import MolProcessorWithID
@@ -10,12 +11,22 @@ from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 
 class CheckSmilesValid(MolProcessorWithID):
     def __call__(
-            self, mols: list[StoredMol], *args, **kwargs
+            self, mols: list[StoredMol | str | Mol], props: dict | None = None, *args,
+            **kwargs
     ) -> Any:
         throw = kwargs.get("throw", False)
         ret = []
-        for mol in mols:
-            mol = mol.as_rd_mol()
+        ret_ids = []
+        for idx, mol in enumerate(mols):
+            if isinstance(mol, str):
+                mol = Chem.MolFromSmiles(mol)
+                mol_id = props[self.idProp][idx]
+            elif isinstance(mol, StoredMol):
+                mol = mol.as_rd_mol()
+                mol_id = mol.id
+            else:
+                mol = mol
+                mol_id = props[self.idProp][idx]
             is_valid = True
             exception = None
             if not mol:
@@ -30,7 +41,8 @@ class CheckSmilesValid(MolProcessorWithID):
                 raise exception
             else:
                 ret.append(is_valid)
-        ret = pd.Series(ret, index=[mol.id for mol in mols])
+                ret_ids.append(mol_id)
+        ret = pd.Series(ret, index=ret_ids)
         return ret
 
     @property

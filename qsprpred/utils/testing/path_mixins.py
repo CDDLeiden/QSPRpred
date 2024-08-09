@@ -9,6 +9,7 @@ import pandas as pd
 from mlchemad.applicability_domains import TopKatApplicabilityDomain
 from sklearn.preprocessing import StandardScaler
 
+from ...data.chem.standardizers.check_smiles import ValidationStandardizer
 from ...data.descriptors.fingerprints import (
     AtomPairFP,
     AvalonFP,
@@ -29,8 +30,9 @@ from ...data.descriptors.sets import (
 from ...data.processing.data_filters import RepeatsFilter
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
 from ...data.processing.feature_standardizers import SKLearnStandardizer
-from ...data.sampling.splits import RandomSplit, QSPRDataset
+from ...data.sampling.splits import RandomSplit
 from ...data.storage.tabular.basic_storage import TabularStorageBasic
+from ...data.tables.qspr import QSPRDataset
 from ...models import SklearnModel
 from ...tasks import TargetTasks
 
@@ -317,6 +319,7 @@ class DataSetsPathMixIn(PathMixIn):
             df,
             n_jobs=n_jobs,
             chunk_size=chunk_size,
+            standardizer=ValidationStandardizer(),
         )
 
     def createTestDataSetFromFrame(

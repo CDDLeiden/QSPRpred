@@ -180,9 +180,6 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
     def __delitem__(self, key):
         return self.dropEntries((key,))
 
-    def __setitem__(self, key, value):
-        return self.addEntries((key,), value)
-
     def __str__(self):
         return f"{self.__class__.__name__} ({len(self)})"
 

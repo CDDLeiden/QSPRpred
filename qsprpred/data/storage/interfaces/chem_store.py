@@ -126,9 +126,6 @@ class ChemStore(PropertyStorage, MolProcessable, ABC):
     def __delitem__(self, key):
         return self.remove_mol(key)
 
-    def __setitem__(self, key, value):
-        return self.add_mols(value, key)
-
     def __bool__(self):
         return len(self) > 0
 

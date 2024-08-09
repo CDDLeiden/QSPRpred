@@ -298,7 +298,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         stopwatch = StopWatch()
         dataset.save()
         stopwatch.stop("Saving took: ")
-        self.assertTrue(os.path.exists(dataset.storePath))
+        self.assertTrue(os.path.exists(dataset.metaFile))
         # load the data set again and check if everything is consistent after loading
         # creation from file
         stopwatch.reset()
@@ -307,16 +307,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         self.checkConsistency(dataset_new)
         # creation by reinitialization
         stopwatch.reset()
-        dataset_new = QSPRDataset(
-            "test_defaults",
-            [{
-                "name": "CL",
-                "task": TargetTasks.REGRESSION
-            }],
-            store_dir=self.generatedDataPath,
-            n_jobs=self.nCPU,
-            chunk_size=self.chunkSize,
-        )
+        dataset_new = QSPRDataset.fromFile(dataset.metaFile)
         stopwatch.stop("Reinitialization took: ")
         self.checkConsistency(dataset_new)
         # creation from a table file

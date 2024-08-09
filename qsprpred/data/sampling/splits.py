@@ -21,7 +21,7 @@ from ...data.chem.clustering import (
     ScaffoldClusters,
 )
 from ...data.chem.scaffolds import BemisMurckoRDKit, Scaffold
-from ...data.tables.qspr import QSPRDataset
+from ...data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ...logs import logger
 from ...utils.interfaces.randomized import Randomized
 
@@ -84,7 +84,7 @@ class RandomSplit(RandomizedDataSplit):
     def __init__(
             self,
             test_fraction=0.1,
-            dataset: QSPRDataset | None = None,
+            dataset: QSPRDataSet | None = None,
             seed: int | None = None,
     ) -> None:
         DataSplit.__init__(self, dataset)
@@ -238,7 +238,7 @@ class TemporalSplit(DataSplit):
             self,
             timesplit: float | list[float],
             timeprop: str,
-            dataset: QSPRDataset | None = None,
+            dataset: QSPRDataSet | None = None,
     ):
         """Initialize a TemporalSplit object.
 
@@ -330,7 +330,7 @@ class GBMTDataSplit(DataSplit):
 
     def __init__(
             self,
-            dataset: QSPRDataset = None,
+            dataset: QSPRDataSet = None,
             clustering: MoleculeClusters = FPSimilarityMaxMinClusters(),
             test_fraction: float = 0.1,
             n_folds: int = 1,
@@ -451,7 +451,7 @@ class GBMTRandomSplit(GBMTDataSplit):
 
     def __init__(
             self,
-            dataset: QSPRDataset | None = None,
+            dataset: QSPRDataSet | None = None,
             test_fraction: float = 0.1,
             n_folds: int = 1,
             seed: int | None = None,
@@ -494,7 +494,7 @@ class ScaffoldSplit(GBMTDataSplit):
 
     def __init__(
             self,
-            dataset: QSPRDataset | None = None,
+            dataset: QSPRDataSet | None = None,
             scaffold: Scaffold = BemisMurckoRDKit(),
             test_fraction: float = 0.1,
             n_folds: int = 1,
@@ -531,7 +531,7 @@ class ClusterSplit(GBMTDataSplit):
 
     def __init__(
             self,
-            dataset: QSPRDataset = None,
+            dataset: QSPRDataSet = None,
             test_fraction: float = 0.1,
             n_folds: int = 1,
             custom_test_list: list[str] | None = None,
