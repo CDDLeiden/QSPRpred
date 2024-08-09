@@ -59,13 +59,17 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
         """
 
     @abstractmethod
-    def getSubset(self, subset: list[str],
-                  ids: list[str] | None = None) -> "PropertyStorage":
+    def getSubset(
+            self,
+            subset: list[str],
+            ids: list[str] | None = None,
+    ) -> "PropertyStorage":
         """Get a subset of the storage for the given properties.
 
         Args:
             subset (list): The list of property names to include in the subset.
             ids (list, optional): The IDs of the entries to include in the subset.
+            name (str, optional): The name of the new storage.
         """
 
     # @abstractmethod
@@ -96,20 +100,6 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
             pd.DataFrame: The data as a pandas DataFrame.
         """
 
-    @classmethod
-    @abstractmethod
-    def fromDF(cls, df: pd.DataFrame, *args, **kwargs) -> "PropertyStorage":
-        """Create a new `PropertyStorage` object from a pandas DataFrame.
-
-        Args:
-            df (pd.DataFrame): The data to create the storage from.
-            args: Additional positional arguments to be passed to the constructor.
-            kwargs: Additional keyword arguments to be passed to the constructor.
-
-        Returns:
-            PropertyStorage: The new storage object.
-        """
-
     @abstractmethod
     def apply(
             self,
@@ -135,7 +125,7 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
         """
 
     @abstractmethod
-    def dropEntries(self, ids: tuple[str, ...]):
+    def dropEntries(self, ids: Iterable[str]):
         """Drop entries from the storage.
 
         Args:

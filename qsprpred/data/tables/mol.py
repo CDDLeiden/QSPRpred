@@ -85,17 +85,12 @@ class MoleculeTable(MoleculeDataSet):
             (MoleculeTable): A dataframe with the sampled molecules.
         """
         random_state = random_state or self.randomState
-        name = f"{self.storage}_sampled" if name is None else name
         df_sample = self.storage.getDF().sample(n=n, random_state=random_state)
-        storage = self.storage.fromDF(df_sample, name=name)
-        mt = MoleculeTable(storage, random_state=random_state)
-        for descs in self.descriptors:
-            mt.attachDescriptors(
-                descs.calculator,
-                descs.getDescriptors(),
-                [self.idProp]
-            )
-        return mt
+        return self.getSubset(
+            self.getProperties(),
+            df_sample[self.idProp].values,
+            name=name
+        )
 
     @classmethod
     def fromSMILES(cls, name: str, smiles: list, path: str, *args, **kwargs):
@@ -110,7 +105,7 @@ class MoleculeTable(MoleculeDataSet):
         """
         smiles_col = "SMILES"
         df = pd.DataFrame({smiles_col: smiles})
-        storage = TabularStorageBasic.fromDF(df, name=name, path=path, *args, **kwargs)
+        storage = TabularStorageBasic(name, path, df, *args, **kwargs)
         return cls(storage, path=os.path.dirname(storage.path))
 
     @classmethod
@@ -129,7 +124,7 @@ class MoleculeTable(MoleculeDataSet):
                 constructor.
         """
         df = pd.read_table(filename, sep=sep)
-        storage = TabularStorageBasic.fromDF(df, name=name, path=path, *args, **kwargs)
+        storage = TabularStorageBasic(name, path, df, *args, **kwargs)
         return cls(storage, path=os.path.dirname(storage.path))
 
     @classmethod
@@ -148,12 +143,12 @@ class MoleculeTable(MoleculeDataSet):
         """
         # FIXME: the RDKit mols are always added here, which might be unnecessary
         df = PandasTools.LoadSDF(filename, molColName="RDMol")
-        storage = TabularStorageBasic.fromDF(
+        storage = TabularStorageBasic(
+            name,
+            path,
             df,
-            name=name,
-            smiles_prop=smiles_prop,
-            path=path,
             *args,
+            smiles_col=smiles_prop,
             **kwargs
         )
         return cls(storage, path=os.path.dirname(storage.path))
@@ -407,14 +402,23 @@ class MoleculeTable(MoleculeDataSet):
             descriptors (list[DescriptorSet | str]):
                 List of `DescriptorSet` objects or their names. Name of a descriptor
                 set corresponds to the result returned by its `__str__` method.
+        Raises:
+            ValueError: If any of the descriptors are not present in the data set.
         """
         if not isinstance(descriptors[0], str):
             descriptors = [str(x) for x in descriptors]
         for name in descriptors:
+            restored = False
             for ds in self.descriptors:
                 calc = ds.calculator
                 if name == str(calc):
                     ds.restoreDescriptors()
+                    restored = True
+            if not restored:
+                raise ValueError(
+                    f"Could not restore descriptors for '{name}'. "
+                    "The descriptor set was not found in the data set."
+                )
 
     def attachDescriptors(
             self,
@@ -437,7 +441,7 @@ class MoleculeTable(MoleculeDataSet):
                 descriptors,
                 store_dir=self.descsPath,
                 overwrite=True,
-                key_cols=index_cols,
+                index_cols=index_cols,
                 store_format=self.storeFormat,
             )
         )
@@ -492,10 +496,6 @@ class MoleculeTable(MoleculeDataSet):
                 df_descriptors.append(result)
             df_descriptors = pd.concat(df_descriptors, axis=0)
             self.attachDescriptors(calculator, df_descriptors, [self.idProp])
-
-    def updateDescriptors(self):
-        for desc_table in self.descriptors:
-            self.addDescriptors([desc_table.calculator])
 
     def getDescriptors(self, active_only=True):
         """Get the calculated descriptors as a pandas data frame.
@@ -559,18 +559,36 @@ class MoleculeTable(MoleculeDataSet):
         return self.storage.getProperty(name, ids)
 
     def getProperties(self) -> list[str]:
-        return self.storage.getProperties() + self.getDescriptorNames()
+        return self.storage.getProperties()
 
     def addProperty(self, name: str, data: Sized, ids: list[str] | None = None):
-        self.storage.addProperty(name, data, ids)
+        return self.storage.addProperty(name, data, ids)
 
     def removeProperty(self, name: str):
-        self.storage.removeProperty(name)
+        return self.storage.removeProperty(name)
 
-    def getSubset(self, subset: list[str],
-                  ids: list[str] | None = None) -> "MoleculeTable":
-        # FIXME:  this needs to return a new table with properly subsetted descriptors
-        raise NotImplementedError()
+    def getSubset(
+            self,
+            subset: list[str],
+            ids: list[str] | None = None,
+            name: str | None = None,
+            path: str | None = None,
+            **kwargs,
+    ) -> "MoleculeTable":
+        name = name or f"{self.name}_subset"
+        path = path or self.path
+        store_subset = self.storage.getSubset(subset, ids)
+        ret = MoleculeTable(store_subset, name, path, **kwargs)
+        descriptors = []
+        for desc in self.descriptors:
+            descriptors.append(desc.getSubset(
+                self.getDescriptorNames(),
+                ids,
+                name=name,
+                path=ret.descsPath,
+            ))
+        ret.descriptors = descriptors
+        return ret
 
     # def transformProperties(self, names: list[str],
     #                         transformer: Callable[[Iterable[Any]], Iterable[Any]]):
@@ -581,24 +599,20 @@ class MoleculeTable(MoleculeDataSet):
     def getDF(self) -> pd.DataFrame:
         return self.getDescriptors().join(self.storage.getDF())
 
-    @classmethod
-    def fromDF(cls, df: pd.DataFrame, *args, **kwargs) -> "MoleculeTable":
-        return cls(TabularStorageBasic.fromDF(df), *args, **kwargs)
-
     def apply(self, func: callable, func_args: list | None = None,
               func_kwargs: dict | None = None, on_props: tuple[str, ...] | None = None,
               as_df: bool = True) -> Generator[Iterable[Any], None, None]:
-        # TODO: extend this to descriptors as well
         return self.storage.apply(func, func_args, func_kwargs, on_props, as_df)
 
-    def dropEntries(self, ids: tuple[str, ...]):
+    def dropEntries(self, ids: Iterable[str]):
         self.storage.dropEntries(ids)
         for dset in self.descriptors:
             dset.dropEntries(ids)
 
     def addEntries(self, ids: list[str], props: dict[str, list],
                    raise_on_existing: bool = True):
-        self.storage.addEntries(ids, props, raise_on_existing)
+        # FIXME: make sure descriptors are calculated for new entries as well
+        raise NotImplementedError("Adding entries not yet available for MoleculeTable.")
 
     def __len__(self):
         return len(self.storage)
@@ -645,11 +659,24 @@ class MoleculeTable(MoleculeDataSet):
                          operator: Literal["or", "and"] = "or",
                          use_chirality: bool = False,
                          name: str | None = None) -> "MoleculeTable":
-        pass
+        if hasattr(self.storage, "searchWithSMARTS"):
+            result = self.storage.searchWithSMARTS(
+                patterns,
+                operator,
+                use_chirality,
+                name
+            )
+            mol_ids = result.getProperty(result.idProp)
+            return self.getSubset(self.getProperties(), mol_ids)
+        raise NotImplementedError(
+            "The underlying storage does not support SMARTS search."
+        )
 
     def searchOnProperty(self, prop_name: str, values: list[float | int | str],
                          exact=False) -> "MoleculeTable":
-        pass
+        result = self.storage.searchOnProperty(prop_name, values, exact)
+        mol_ids = result.getProperty(result.idProp)
+        return self.getSubset(self.getProperties(), mol_ids)
 
     def addClusters(
             self,

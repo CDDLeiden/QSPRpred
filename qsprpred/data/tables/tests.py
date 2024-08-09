@@ -83,7 +83,8 @@ class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(len(mt), len(mt_moved))
         self.assertListEqual(list(mt.smiles), list(mt_moved.smiles))
 
-    def getDescriptorSets(self):
+    @staticmethod
+    def getDescriptorSets():
         return [MorganFP(radius=2, nBits=128), DrugExPhyschem()]
 
     def testDescriptors(self):
@@ -106,6 +107,9 @@ class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
         old_shape = df_descriptors.shape
         all_descriptors = mt.getDescriptorNames()
         mt_moved.dropDescriptors([all_descriptors[0], all_descriptors[-1]])
+        self.assertEqual(mt_moved.getDescriptors().shape[0], len(mt_moved))
+        self.assertEqual(mt_moved.getDescriptors().shape[1],
+                         len(mt_moved.getDescriptorNames()))
         new_shape = mt_moved.getDescriptors().shape
         self.assertEqual(new_shape[1], old_shape[1] - 2)
         self.assertTrue(new_shape[0] == old_shape[0])
@@ -121,6 +125,12 @@ class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(new_shape[0], old_shape[0])
         self.assertTrue(ds in mt_moved.descriptorSets)
         self.assertEqual(len(ds.descriptors), 0)
+        mt_moved.restoreDescriptorSets([ds])
+        new_shape = mt_moved.getDescriptors().shape
+        self.assertEqual(new_shape[0], old_shape[0])
+        self.assertEqual(new_shape[1], old_shape[1] + 1)
+        mt_moved.dropDescriptorSets([ds])
+        new_shape = mt_moved.getDescriptors().shape
         # try save and reload
         mt_moved.save()
         mt_moved = MoleculeTable.fromFile(mt_moved.metaFile)
@@ -134,6 +144,52 @@ class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
         mt_moved.save()
         mt_moved = MoleculeTable.fromFile(mt_moved.metaFile)
         self.assertEqual(len(mt_moved.descriptorSets), len(mt.descriptorSets) - 1)
+        # try restore
+        self.assertRaises(ValueError, lambda: mt_moved.restoreDescriptorSets([ds]))
+        # drop a descriptor and restore with reload
+        old_shape = mt_moved.getDescriptors().shape
+        mt_moved.dropDescriptors(mt_moved.getDescriptorNames()[0:2])
+        new_shape = mt_moved.getDescriptors().shape
+        self.assertEqual(new_shape[1], old_shape[1] - 2)
+        mt_moved.reload()
+        self.assertEqual(mt_moved.getDescriptors().shape[1], old_shape[1])
+
+    def testSubsetting(self):
+        mt = self.getTable()
+        mt.addDescriptors(self.getDescriptorSets())
+        # get subset for all ids
+        mt_sub = mt.getSubset(mt.getProperties())
+        self.assertEqual(len(mt), len(mt_sub))
+        self.assertListEqual(list(mt.smiles), list(mt_sub.smiles))
+        self.assertListEqual(list(mt.getProperties()), list(mt_sub.getProperties()))
+        self.assertEqual(mt.getDescriptors().shape, mt_sub.getDescriptors().shape)
+        mt_sub.save()
+        self.assertTrue(os.path.exists(mt_sub.metaFile))
+        self.assertTrue(os.path.exists(mt_sub.storage.metaFile))
+        new = MoleculeTable.fromFile(mt_sub.metaFile)
+        self.assertEqual(len(mt_sub), len(new))
+        self.assertListEqual(list(mt_sub.smiles), list(new.smiles))
+        self.assertListEqual(list(mt_sub.getProperties()), list(new.getProperties()))
+        # move the files and check if we can still reload
+        random_new_folder = tempfile.mkdtemp()
+        shutil.move(self.generatedDataPath, random_new_folder)
+        mt_moved = MoleculeTable.fromFile(
+            os.path.join(random_new_folder, "datasets", mt.name,
+                         mt_sub.name, "meta.json")
+        )
+        self.assertEqual(len(mt_sub), len(mt_moved))
+        self.assertListEqual(list(mt_sub.smiles), list(mt_moved.smiles))
+        self.assertListEqual(list(mt_sub.getProperties()),
+                             list(mt_moved.getProperties()))
+        # check sampling
+        mt_sample = mt.sample(5)
+        self.assertEqual(len(mt_sample), 5)
+        # drop entries
+        mt_sample.dropEntries(mt_sample.getProperty(mt_sample.idProp)[0:2])
+        self.assertEqual(len(mt_sample), 3)
+        self.assertEqual(mt_sample.getDescriptors().shape[0], len(mt_sample))
+        self.assertEqual(mt_sample.getDescriptors().shape[1],
+                         len(mt_sample.getDescriptorNames()))
 
 
 class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
@@ -221,16 +277,20 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
     def testDefaults(self):
         """Test basic dataset creation and serialization with mostly default options."""
         # create a basic regression data set
+        storage = self.getStorage(
+            self.getSmallDF(),
+            "test_defaults_storage",
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize,
+        )
         dataset = QSPRDataset(
+            storage,
             "test_defaults",
             [{
                 "name": "CL",
                 "task": TargetTasks.REGRESSION
             }],
-            df=self.getSmallDF(),
-            store_dir=self.generatedDataPath,
-            n_jobs=self.nCPU,
-            chunk_size=self.chunkSize,
+            path=self.generatedDataPath,
         )
         self.assertIn("HBD", dataset.getProperties())
         dataset.removeProperty("HBD")

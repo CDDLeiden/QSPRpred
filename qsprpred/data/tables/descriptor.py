@@ -1,9 +1,8 @@
-from typing import Optional
-
 import pandas as pd
 
 from qsprpred.data.descriptors.sets import DescriptorSet
 from qsprpred.data.tables.pandas import PandasDataTable
+from qsprpred.utils.parallel import ParallelGenerator
 
 
 class DescriptorTable(PandasDataTable):
@@ -18,15 +17,16 @@ class DescriptorTable(PandasDataTable):
             self,
             calculator: DescriptorSet,
             name: str,
-            df: Optional[pd.DataFrame] = None,
+            df: pd.DataFrame | None = None,
             store_dir: str = ".",
             overwrite: bool = False,
-            key_cols: list | None = None,
+            index_cols: list[str] | None = None,
             n_jobs: int = 1,
-            chunk_size: int = 1000,
+            chunk_size: int | None = None,
             autoindex_name: str = "ID",
             random_state: int | None = None,
             store_format: str = "pkl",
+            parallel_generator: ParallelGenerator | None = None,
     ):
         """Initialize a `DescriptorTable` object.
 
@@ -47,7 +47,7 @@ class DescriptorTable(PandasDataTable):
                 the existing data will be loaded.
             overwrite (bool):
                 Overwrite existing dataset.
-            key_cols (list):
+            index_cols (list):
                 list of columns to use as index. If None, the index
                 will be a custom generated ID.
             n_jobs (int):
@@ -67,14 +67,28 @@ class DescriptorTable(PandasDataTable):
             df,
             store_dir,
             overwrite,
-            key_cols,
+            index_cols,
             n_jobs,
             chunk_size,
             autoindex_name,
             random_state,
             store_format,
+            parallel_generator,
         )
         self.calculator = calculator
+
+    def getSubset(
+            self,
+            properties: list[str],
+            ids: list[str] | None = None,
+            name: str | None = None,
+            path: str | None = None,
+            ignore_missing: bool = False
+    ) -> "DescriptorTable":
+        pd_data = super().getSubset(properties, ids, name, path, ignore_missing)
+        pd_data.calculator = self.calculator
+        pd_data.__class__ = DescriptorTable
+        return pd_data
 
     def getDescriptors(self, active_only=True):
         """Get the descriptors stored in this table."""

@@ -30,6 +30,7 @@ from ...data.processing.data_filters import RepeatsFilter
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
 from ...data.processing.feature_standardizers import SKLearnStandardizer
 from ...data.sampling.splits import RandomSplit, QSPRDataset
+from ...data.storage.tabular.basic_storage import TabularStorageBasic
 from ...models import SklearnModel
 from ...tasks import TargetTasks
 
@@ -309,6 +310,15 @@ class DataSetsPathMixIn(PathMixIn):
             prep=preparation_settings,
         )
 
+    def getStorage(self, df, name, n_jobs, chunk_size):
+        return TabularStorageBasic(
+            name,
+            self.generatedDataPath,
+            df,
+            n_jobs=n_jobs,
+            chunk_size=chunk_size,
+        )
+
     def createTestDataSetFromFrame(
             self,
             df,
@@ -327,18 +337,19 @@ class DataSetsPathMixIn(PathMixIn):
             target_props (List of dicts or TargetProperty): list of target properties
             random_state (int): random state to use for splitting and shuffling
             prep (dict): dictionary containing preparation settings
+            n_jobs (int): number of jobs to use for parallel processing
+            chunk_size (int): size of chunks to use per job in parallel processing
 
         Returns:
             QSPRDataset: a `QSPRDataset` object
         """
+        storage = self.getStorage(df, f"{name}_storage", n_jobs, chunk_size)
         ret = QSPRDataset(
+            storage,
             name,
             target_props=target_props,
-            df=df,
-            store_dir=self.generatedDataPath,
+            path=self.generatedDataPath,
             random_state=random_state,
-            n_jobs=n_jobs,
-            chunk_size=chunk_size,
         )
         if prep:
             ret.prepareDataset(**prep)

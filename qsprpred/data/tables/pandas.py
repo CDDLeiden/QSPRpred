@@ -1,7 +1,7 @@
 import json
 import os
 import shutil
-from typing import ClassVar, Callable, Optional, Generator, Any
+from typing import ClassVar, Callable, Optional, Generator, Any, Iterable
 
 import numpy as np
 import pandas as pd
@@ -418,6 +418,8 @@ class PandasDataTable(PropertyStorage):
             self,
             properties: list[str],
             ids: list[str] | None = None,
+            name: str | None = None,
+            path: str | None = None,
             ignore_missing: bool = False
     ) -> "PandasDataTable":
         """Get a subset of the data set by providing a prefix for the column names or a
@@ -426,16 +428,20 @@ class PandasDataTable(PropertyStorage):
         Args:
             properties (list[str]): list of property names to get.
             ids: IDs of entries to get subset of properties for.
+            name (str): Name of the new data set.
+            path (str): Path to save the new data set.
             ignore_missing (bool): If `True`, missing IDs are ignored.
         """
+        name = name or f"{self.name}_subset"
+        path = path or self.baseDir
         if self.idProp not in properties:
-            properties = [self.idProp] + properties
+            properties = [self.idProp, *properties]
         mask = self.df.columns.isin(properties)
         if mask.any():
             if ids is not None and not ignore_missing:
-                assert all(
+                assert sum(
                     self.df.index.isin(ids)
-                ), "Not all IDs found in data set."
+                ) == len(ids), "Not all IDs found in data set."
             if ignore_missing and ids is not None:
                 ids = self.df.index.intersection(ids)
                 ret = self.df.loc[
@@ -443,10 +449,10 @@ class PandasDataTable(PropertyStorage):
                 ]
             else:
                 ret = self.df[self.df.columns[mask]]
-            return self.fromDF(
+            return PandasDataTable(
+                name,
                 ret,
-                name=f"{self.name}_subset",
-                store_dir=self.baseDir,
+                store_dir=path,
                 index_cols=self.indexCols,
                 n_jobs=self.nJobs,
                 chunk_size=self.chunkSize,
@@ -656,9 +662,16 @@ class PandasDataTable(PropertyStorage):
         self.indexCols = self.df.index.name.split("~")
         assert all(col in self.df.columns for col in self.indexCols)
 
-    @classmethod
-    def fromDF(cls, df: pd.DataFrame, *args, **kwargs) -> "PandasDataTable":
-        return cls(df=df, *args, **kwargs)
+    # @classmethod
+    # def fromDF(
+    #         cls,
+    #         df: pd.DataFrame,
+    #         *args,
+    #         name: str | None = None,
+    #         **kwargs
+    # ) -> "PandasDataTable":
+    #     name = name or repr(df)
+    #     return cls(name, df, *args, **kwargs)
 
     # @classmethod
     # def fromFile(cls, filename: str) -> "PandasDataTable":
@@ -691,14 +704,13 @@ class PandasDataTable(PropertyStorage):
         """
         self.randomState = random_state
 
-    def dropEntries(self, ids: tuple[str, ...], ignore_missing: bool = False):
+    def dropEntries(self, ids: Iterable[str], ignore_missing: bool = False):
         if ignore_missing:
             ids = self.df.index.intersection(ids)
         else:
-            assert all(
-                self.df.index.isin(ids)
-            ), "Not all IDs found in data set."
-            ids = pd.Index(ids)
+            assert sum(self.df.index.isin(ids)) == len(
+                ids), "Not all IDs found in data set."
+            ids = pd.Index(ids, name=self.idProp)
         self.df.drop(index=ids, inplace=True)
 
     def addEntries(self, ids: list[str], props: dict[str, list],
