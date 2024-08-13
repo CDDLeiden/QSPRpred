@@ -36,6 +36,12 @@ from ..models.metrics import (
     Prevalence,
     SklearnMetrics,
     Specificity,
+    Kendall,
+    KPrimeSlope,
+    KSlope,
+    Pearson,
+    RPrime20,
+    R20
 )
 from ..models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ..models.scikit_learn import SklearnModel
@@ -611,24 +617,54 @@ class TestMetrics(TestCase):
         y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS, use_proba=True)
         
         cal_error = CalibrationError()
-        cal_error(y_true, y_pred)
+        # check assertion error is raised when n_bins > n_samples
+        with self.assertRaises(AssertionError):
+            cal_error(y_true, y_pred)
+            
+        cal_error = CalibrationError(n_bins=5)
+        self.assertIsInstance(cal_error(y_true, y_pred), float)
         
         # assert value error is raised when using discrete predictions
         with self.assertRaises(TypeError):
             cal_error(self.sample_data(ModelTasks.SINGLECLASS, use_proba=False))
 
+        
     def test_ConfusionMatrixMetrics(self):
         y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS)
         
-        # test confusion matrix metrics
-        BalancedCohenKappa()(y_true, y_pred)
-        BalancedMatthewsCorrcoeff()(y_true, y_pred)
-        BalancedNegativePredictedValue()(y_true, y_pred)
-        BalancedPositivePredictedValue()(y_true, y_pred)
-        NegativePredictedValue()(y_true, y_pred)
-        Prevalence()(y_true, y_pred)
-        Specificity()(y_true, y_pred)
+        self.assertIsInstance(BalancedCohenKappa()(y_true, y_pred), float)
+        self.assertIsInstance(BalancedMatthewsCorrcoeff()(y_true, y_pred), float)
+        self.assertIsInstance(BalancedNegativePredictedValue()(y_true, y_pred), float)
+        self.assertIsInstance(BalancedPositivePredictedValue()(y_true, y_pred), float)
+        self.assertIsInstance(NegativePredictedValue()(y_true, y_pred), float)
+        self.assertIsInstance(Prevalence()(y_true, y_pred), float)
+        self.assertIsInstance(Specificity()(y_true, y_pred), float)
+
+    def test_Pearson(self):
+        y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
+        Pearson()(y_true, y_pred)
+    
+    def test_Kendall(self):
+        y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
+        Kendall()(y_true, y_pred)
         
+    def test_KPrimeSlope(self):
+        y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
+        KPrimeSlope()(y_true, y_pred)
+        
+    def test_KSlope(self):
+        y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
+        KSlope()(y_true, y_pred)
+        
+    def test_R20(self):
+        y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
+        R20()(y_true, y_pred)
+    
+    def test_RPrime20(self):
+        y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
+        RPrime20()(y_true, y_pred)
+    
+               
 class TestEarlyStopping(ModelDataSetsPathMixIn, TestCase):
     def setUp(self):
         super().setUp()

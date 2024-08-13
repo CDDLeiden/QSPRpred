@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 import sklearn
+import scipy.stats
 from sklearn.metrics import get_scorer
 from sklearn.metrics._scorer import _BaseScorer
 
@@ -116,18 +117,28 @@ class CalibrationError(Metric):
     Attributes:
         name (str): Name of the scoring function (calibration_error).
     """
+    def __init__(self, n_bins: int = 10, norm: str = "L1"):
+        """Initialize the calibration error scorer.
+        
+        If `norm` is 'L1', the expected calibration error is returned (ECE).
+        If `norm` is 'L2', the root-mean-square calibration error is returned (RMSCE).
+        If `norm` is 'infinity', the maximum calibration error is returned (MCE).
+
+        Args:
+            n_bins (int): Number of bins to use for calibration.
+                A bigger bin number requires more data. Defaults to 10.
+            norm (str): The norm to use for the calibration error.
+                Can be 'L1' or 'L2' or 'infinity'. Defaults to 'L1'.
+        """
+        self.n_bins = n_bins
+        self.norm = norm
+    
     def __call__(
         self,
         y_true: np.array,
         y_pred: list[np.ndarray],
-        n_bins: int = 10,
-        norm: str = "L1",
     ) -> float:
         """Compute the calibration error of a classifier.
-
-        If `norm` is 'L1', the expected calibration error is returned (ECE).
-        If `norm` is 'L2', the root-mean-square calibration error is returned (RMSCE).
-        If `norm` is 'infinity', the maximum calibration error is returned (MCE).
 
         Referece: Guo et al. (2017) On Calibration of Modern Neural Networks.
         https://arxiv.org/abs/1706.04599
@@ -137,10 +148,6 @@ class CalibrationError(Metric):
             y_pred (list[np.array]): Predicted class probabilities.
                 List of arrays of shape (n_samples, n_classes) of length n_tasks.
                 Note. Multi-task predictions are not supported.
-            n_bins (int): Number of bins to use for calibration.
-                A bigger bin number requires more data. Defaults to 10.
-            norm (str): The norm to use for the calibration error.
-                Can be 'L1' or 'L2' or 'infinity'. Defaults to 'L1'.
 
         Returns:
             float: The calibration error.
@@ -152,8 +159,10 @@ class CalibrationError(Metric):
             raise ValueError("Multi-task predictions are not supported.")
 
         # TODO: support multi-task predictions
-        # Convert y_pred to a 2D array
+        # Convert y_pred from list to a 2D array
         y_pred = y_pred[0]
+        
+        assert len(y_true) >= self.n_bins, "Number of samples must be at least n_bins."
 
         # Get the highest probability and the predicted class
         y_pred_max = np.max(y_pred, axis=1)
@@ -164,9 +173,9 @@ class CalibrationError(Metric):
         sorted_y_pred_max = y_pred_max[sorted_indices]
         sorted_y_pred_class = y_pred_class[sorted_indices]
         # Bin sorted data
-        binned_y_true = np.array_split(sorted_y_true, n_bins)
-        binned_y_pred_max = np.array_split(sorted_y_pred_max, n_bins)
-        binned_y_pred_class = np.array_split(sorted_y_pred_class, n_bins)
+        binned_y_true = np.array_split(sorted_y_true, self.n_bins)
+        binned_y_pred_max = np.array_split(sorted_y_pred_max, self.n_bins)
+        binned_y_pred_class = np.array_split(sorted_y_pred_class, self.n_bins)
         # Compute the calibration error by iterating over the bins
         calibration_error = 0.0
         for bin_y_true, bin_y_pred_max, bin_y_pred_class in zip(
@@ -176,19 +185,19 @@ class CalibrationError(Metric):
             mean_prob = np.mean(bin_y_pred_max)
             accuracy = np.mean(bin_y_true == bin_y_pred_class)
             # Compute the calibration error for the bin based on the norm
-            if norm == "L1":
+            if self.norm == "L1":
                 calibration_error += (
                     np.abs(mean_prob - accuracy) * len(bin_y_true) / len(y_true)
                 )
-            elif norm == "L2":
+            elif self.norm == "L2":
                 calibration_error += (
                     np.square(mean_prob - accuracy)**2 * len(bin_y_true) / len(y_true)
                 )
-            elif norm == "infinity":
+            elif self.norm == "infinity":
                 calibration_error = max(calibration_error, np.abs(mean_prob - accuracy))
             else:
-                raise ValueError(f"Unknown norm {norm}")
-        if norm == "L2":
+                raise ValueError(f"Unknown norm {self.norm}")
+        if self.norm == "L2":
             calibration_error = np.sqrt(calibration_error)
 
         return calibration_error
@@ -196,7 +205,6 @@ class CalibrationError(Metric):
     def __str__(self) -> str:
         """Return the name of the scorer."""
         return "calibration_error"
-
 
 class Specificity(Metric):
     """Calculate specificity (true postive rate).
@@ -390,3 +398,215 @@ class BalancedCohenKappa(Metric):
     def __str__(self) -> str:
         """Return the name of the scorer."""
         return "balanced_cohen_kappa"
+
+
+class KSlope(Metric):
+    """Calculate the slope of the regression line through the origin
+    between the predicted and observed values.
+    
+    Reference: Tropsha, A., & Golbraikh, A. (2010). In J.-L. Faulon & A. Bender (Eds.),
+        Handbook of Chemoinformatics Algorithms.
+    https://www.taylorfrancis.com/books/9781420082999
+
+    Attributes:
+        name (str): Name of the scoring function (k_slope).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the slope of the regression line through the origin
+        between the predicted and observed values.
+
+        Args:
+            y_true (np.array): Ground truth (correct) target values. 1d array.
+            y_pred (np.array): 2D array (n_samples, n_tasks)
+
+        Returns:
+            float: The coefficient of determination.
+
+        """
+        num, denom = 0, 0
+        for i in range(len(y_true)):
+            num += y_true[i] * y_pred[i]
+            denom += y_true[i] ** 2
+        return num / denom if len(y_pred) >= 2 else 0
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "k_slope"
+
+
+class KPrimeSlope(Metric):
+    """Calculate the slope of the regression line through the origin
+    between the observed and predicted values.
+
+    Reference: Tropsha, A., & Golbraikh, A. (2010). In J.-L. Faulon & A. Bender (Eds.),
+    Handbook of Chemoinformatics Algorithms.
+    https://www.taylorfrancis.com/books/9781420082999
+
+
+    Attributes:
+        name (str): Name of the scoring function (k_prime_slope).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the slope of the regression line through the origin
+        between the observed and predicted values.
+
+        Args:
+            y_true (np.array): Ground truth (correct) target values. 1d array.
+            y_pred (np.array): 2D array (n_samples, n_tasks)
+
+        Returns:
+            float: The coefficient of determination.
+
+        """
+        num, denom = 0, 0
+        for i in range(len(y_true)):
+            num += y_true[i] * y_pred[i]
+            denom += y_pred[i] ** 2
+        return num / denom if len(y_pred) >= 2 else 0
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "k_prime_slope"
+    
+class Pearson(Metric):
+    """Calculate the Pearson correlation coefficient.
+
+    Attributes:
+        name (str): Name of the scoring function (pearson).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the Pearson correlation coefficient.
+
+        Args:
+            y_true (np.array): Ground truth (correct) target values. 1d array.
+            y_pred (np.array): 2D array (n_samples, 1)
+
+        Returns:
+            float: The Pearson correlation coefficient.
+
+        """
+        y_pred = y_pred.flatten()
+        return scipy.stats.pearsonr(y_true, y_pred)[0] if len(y_pred) >= 2 else 0
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "pearson"
+
+
+class Spearman(Metric):
+    """Calculate the Spearman correlation
+    
+    Attributes:
+        name (str): Name of the scoring function (spearman).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the Spearman correlation
+        
+        Args:
+            y_true (np.array): Ground truth (correct) target values. 1d array.
+            y_pred (np.array): 2D array (n_samples, n_tasks)
+
+        Returns:
+            float: The Pearson Spearman coefficient.
+
+        """
+        return scipy.stats.spearmanr(y_true, y_pred)[0] if len(y_pred) >= 2 else 0
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "spearman"
+
+class Kendall(Metric):
+    """Calculate the Kendall rank correlation coefficient.
+
+    Attributes:
+        name (str): Name of the scoring function (kendall).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the Kendall rank correlation coefficient.
+
+        Args:
+            y_true (np.array): Ground truth (correct) target values. 1d array.
+            y_pred (np.array): 2D array (n_samples, n_tasks)
+
+        Returns:
+            float: The Kendall rank correlation coefficient.
+
+        """
+        return scipy.stats.kendalltau(y_true, y_pred)[0] if len(y_pred) >= 2 else 0
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "kendall"
+
+class R20(KSlope):
+    """Calculate the coefficient of determination for regression line
+    through the origin between the observed and predicted values.
+
+    Reference: Tropsha, A., & Golbraikh, A. (2010). In J.-L. Faulon & A. Bender (Eds.),
+    Handbook of Chemoinformatics Algorithms.
+    https://www.taylorfrancis.com/books/9781420082999
+
+    Attributes:
+        name (str): Name of the scoring function (r_2_0).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the coefficient of determination for regression line
+        through the origin between the observed and predicted values.
+
+        Args:
+            y_true (np.array): Ground truth (correct) target values. 1d array.
+            y_pred (np.array): 2D array (n_samples, n_tasks)
+
+        Returns:
+            float: The coefficient of determination.
+
+        """
+        # get the slope of the regression line through the origin
+        k_prime = super().__call__(y_true, y_pred)
+        y_true_mean = y_true.mean()
+        num, denom = 0, 0
+        for i in range(len(y_true)):
+            num += y_true[i] - k_prime * y_pred[i]
+            denom += (y_true[i] - y_true_mean) ** 2
+        return 1 - num / denom if len(y_pred) >= 2 else 0
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "r_2_0"
+
+class RPrime20(KPrimeSlope):
+    """Calculate the coefficient of determination for regression line
+    through the origin between the predicted and observed values.
+
+    Reference: Tropsha, A., & Golbraikh, A. (2010). In J.-L. Faulon & A. Bender (Eds.),
+    Handbook of Chemoinformatics Algorithms.
+    https://www.taylorfrancis.com/books/9781420082999
+
+    Attributes:
+        name (str): Name of the scoring function (r_prime_2_0).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the coefficient of determination for regression line
+        through the origin between the predicted and observed values.
+
+        Args:
+            y_true (np.array): Ground truth (correct) target values. 1d array.
+            y_pred (np.array): 2D array (n_samples, n_tasks)
+
+        Returns:
+            float: The coefficient of determination.
+
+        """
+        # get the slope of the regression line through the origin
+        k = super().__call__(y_true, y_pred)
+        y_pred_mean = y_pred.mean()
+        num, denom = 0, 0
+        for i in range(len(y_true)):
+            num += y_pred[i] - k * y_true[i]
+            denom += (y_pred[i] - y_pred_mean) ** 2
+        return 1 - num / denom if len(y_pred) >= 2 else 0
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "r_prime_2_0"
