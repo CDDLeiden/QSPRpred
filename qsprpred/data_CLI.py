@@ -2,47 +2,57 @@
 
 import argparse
 import json
-import os
 import os.path
-import random
 import sys
 from datetime import datetime
-from importlib.util import find_spec
 
 import numpy as np
 import optuna
 import pandas as pd
+from boruta import BorutaPy
+from rdkit.Chem.rdFingerprintGenerator import TopologicalTorsionFP
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
-from .data.data import QSPRDataset
-from .data.utils.datafilters import papyrusLowQualityFilter
-from .data.utils.datasplitters import (
+from qsprpred.data.chem.clustering import (
+    FPSimilarityMaxMinClusters,
+    FPSimilarityLeaderPickerClusters,
+)
+from qsprpred.data.descriptors.fingerprints import (
+    MorganFP,
+    RDKitMACCSFP,
+    AtomPairFP,
+    LayeredFP,
+    PatternFP,
+    RDKitFP,
+    AvalonFP,
+)
+from qsprpred.data.descriptors.sets import (
+    DrugExPhyschem,
+    PredictorDesc,
+    RDKitDescs,
+    SmilesDesc,
+)
+from qsprpred.data.processing.data_filters import papyrusLowQualityFilter
+from qsprpred.data.processing.feature_filters import (
+    BorutaFilter,
+    HighCorrelationFilter,
+    LowVarianceFilter,
+)
+from qsprpred.data.sampling.splits import (
     ClusterSplit,
     ManualSplit,
     RandomSplit,
     ScaffoldSplit,
     TemporalSplit,
 )
-from .data.utils.descriptorcalculator import MoleculeDescriptorsCalculator
-from .data.utils.descriptorsets import (
-    DrugExPhyschem,
-    FingerprintSet,
-    PredictorDesc,
-    RDKitDescs,
-    SmilesDesc,
-)
-from .data.utils.featurefilters import (
-    BorutaFilter,
-    HighCorrelationFilter,
-    LowVarianceFilter,
-)
-from .data.utils.scaffolds import Murcko
+from qsprpred.data.tables.qspr import QSPRDataset
+from qsprpred.tasks import TargetTasks
+from .data.chem.scaffolds import BemisMurckoRDKit
 from .extra.gpu.models.dnn import DNNModel
 from .logs.utils import backup_files, enable_file_logger
-from .models.sklearn import SklearnModel
-from .models.tasks import TargetTasks
+from .models.scikit_learn import SklearnModel
 
 
 def QSPRArgParser(txt=None):
@@ -90,8 +100,7 @@ def QSPRArgParser(txt=None):
         "--smiles_col",
         type=str,
         default="SMILES",
-        help="Name of the column in the dataset\
-                        containing the smiles.",
+        help="Name of the column in the dataset containing the smiles.",
     )
     parser.add_argument(
         "-pr",
@@ -106,7 +115,16 @@ def QSPRArgParser(txt=None):
         ),
     )
     parser.add_argument(
-        "-im", "--imputation", type=str, choices=["mean", "median", "most_frequent"]
+        "-im",
+        "--imputation",
+        type=json.loads,
+        help=(
+            "Imputation method for missing values. Specify the imputation method as a "
+            "dictionary with the property name as key and the imputation method as "
+            "value, e.g. -im \"{'CL':'mean','fu':'median'}\". Note: no spaces and "
+            "surrounded by single quotes. Choose from 'mean', 'median', 'most_frequent'"
+        ),
+        default={},
     )
     # model type arguments
     parser.add_argument(
@@ -114,8 +132,7 @@ def QSPRArgParser(txt=None):
         "--regression",
         type=str,
         default=None,
-        help=
-        "If True, only regression model, if False, only classification, default both",
+        help="If True, only regression model, if False, only classification, default both",
     )
     parser.add_argument(
         "-th",
@@ -136,8 +153,8 @@ def QSPRArgParser(txt=None):
         "-lq",
         "--low_quality",
         action="store_true",
-        help="If lq, than low quality data will be \
-                        should be a column 'Quality' where all 'Low' will be removed",
+        help="If lq, than low quality data will be should be a column 'Quality' where "
+        "all 'Low' will be removed",
     )
     parser.add_argument(
         "-tr",
@@ -218,7 +235,7 @@ def QSPRArgParser(txt=None):
             "Mold2",
             "PaDEL",
             "DrugEx",
-            "Signature"
+            "Signature",
             "MaccsFP",
             "AvalonFP",
             "TopologicalFP",
@@ -247,22 +264,23 @@ def QSPRArgParser(txt=None):
         "--low_variability",
         type=float,
         default=None,
-        help="low variability threshold\
-                        for feature removal.",
+        help="low variability threshold for feature removal.",
     )
     parser.add_argument(
         "-hc",
         "--high_correlation",
         type=float,
         default=None,
-        help="high correlation threshold\
-                        for feature removal.",
+        help="high correlation threshold for feature removal.",
     )
     parser.add_argument(
         "-bf",
         "--boruta_filter",
-        action="store_true",
-        help="boruta filter with random forest",
+        type=float,
+        default=None,
+        help="Boruta filter with random forest estimator, value between 0 and 100 "
+        "for percentile threshold for comparison between shadow and real features"
+        "see https://github.com/scikit-learn-contrib/boruta_py for more info.",
     )
     # other
     parser.add_argument(
@@ -315,7 +333,8 @@ def QSPR_dataprep(args):
                 else:
                     task = (
                         TargetTasks.SINGLECLASS
-                        if len(th) == 1 else TargetTasks.MULTICLASS
+                        if len(th) == 1
+                        else TargetTasks.MULTICLASS
                     )
                 if task == TargetTasks.REGRESSION and th:
                     log.warning(
@@ -324,42 +343,33 @@ def QSPR_dataprep(args):
                     )
                     th = None
                 transform_dict = {
-                    "log10": np.log10,
-                    "log2": np.log2,
-                    "log": np.log,
-                    "sqrt": np.sqrt,
-                    "cbrt": np.cbrt,
-                    "exp": np.exp,
-                    "square": np.square,
-                    "cube": lambda x: np.power(x, 3),
-                    "reciprocal": np.reciprocal,
+                    "log10": lambda x: (__import__("numpy").log10(x)),
+                    "log2": lambda x: (__import__("numpy").log2(x)),
+                    "log": lambda x: (__import__("numpy").log(x)),
+                    "sqrt": lambda x: (__import__("numpy").sqrt(x)),
+                    "cbrt": lambda x: (__import__("numpy").cbrt(x)),
+                    "exp": lambda x: (__import__("numpy").exp(x)),
+                    "square": lambda x: __import__("numpy").power(x, 2),
+                    "cube": lambda x: __import__("numpy").power(x, 3),
+                    "reciprocal": lambda x: __import__("numpy").reciprocal(x),
                 }
                 target_props.append(
                     {
-                        "name":
-                            prop,
-                        "task":
-                            task,
-                        "th":
-                            th,
-                        "transformer":
-                            transform_dict[args.transform_data[prop]]
-                            if prop in args.transform_data else None,
+                        "name": prop,
+                        "task": task,
+                        "th": th,
+                        "transformer": transform_dict[args.transform_data[prop]]
+                        if prop in args.transform_data
+                        else None,
+                        "imputer": SimpleImputer(strategy=args.imputation[prop])
+                        if prop in args.imputation
+                        else None,
                     }
                 )
-            # missing value imputation
-            if args.imputation is not None:
-                if args.imputation == "mean":
-                    imputer = SimpleImputer(strategy="mean")
-                elif args.imputation == "median":
-                    imputer = SimpleImputer(strategy="median")
-                elif args.imputation == "most_frequent":
-                    imputer = SimpleImputer(strategy="most_frequent")
-                else:
-                    sys.exit("invalid impute arg given")
             dataset_name = (
                 f"{props_name}_{task}_{args.data_suffix}"
-                if args.data_suffix else f"{props_name}_{task}"
+                if args.data_suffix
+                else f"{props_name}_{task}"
             )
             mydataset = QSPRDataset(
                 dataset_name,
@@ -369,17 +379,19 @@ def QSPR_dataprep(args):
                 n_jobs=args.ncpu,
                 store_dir=args.output_dir,
                 overwrite=True,
-                target_imputer=imputer if args.imputation is not None else None,
+                random_state=args.random_state
+                if args.random_state is not None
+                else None,
             )
             # data filters
-            datafilters = []
+            data_filters = []
             if args.low_quality:
-                datafilters.append(papyrusLowQualityFilter())
+                data_filters.append(papyrusLowQualityFilter())
             # data splitter
             if args.split == "scaffold":
                 split = ScaffoldSplit(
                     test_fraction=args.split_fraction,
-                    scaffold=Murcko(),
+                    scaffold=BemisMurckoRDKit(),
                     dataset=mydataset,
                 )
             elif args.split == "time":
@@ -399,9 +411,13 @@ def QSPR_dataprep(args):
                     splitcol=df["datasplit"], trainval="train", testval="test"
                 )
             elif args.split == "cluster":
+                if args.split_cluster_method == "MaxMin":
+                    clustering = FPSimilarityMaxMinClusters()
+                elif args.split_cluster_method == "LeaderPicker":
+                    clustering = FPSimilarityLeaderPickerClusters()
                 split = ClusterSplit(
                     test_fraction=args.split_fraction,
-                    clustering_algorithm=args.split_clustering_method,
+                    clustering=clustering,
                     dataset=mydataset,
                 )
             else:
@@ -413,16 +429,14 @@ def QSPR_dataprep(args):
             # Avoid importing optional dependencies if not needed
             f_arr = np.array(args.features)
             if np.isin(["Mordred", "Mold2", "PaDEL", "Signature"], f_arr).any():
-                from .extra.data.utils.descriptorsets import (
+                from qsprpred.extra.data.descriptors.sets import (
                     ExtendedValenceSignature,
                     Mold2,
                     Mordred,
                     PaDEL,
                 )
             if "Morgan" in args.features:
-                descriptorsets.append(
-                    FingerprintSet(fingerprint_type="MorganFP", radius=3, nBits=2048)
-                )
+                descriptorsets.append(MorganFP(radius=3, nBits=2048))
             if "RDkit" in args.features:
                 descriptorsets.append(RDKitDescs())
             if "Mordred" in args.features:
@@ -436,21 +450,19 @@ def QSPR_dataprep(args):
             if "Signature" in args.features:
                 descriptorsets.append(ExtendedValenceSignature(depth=1))
             if "MaccsFP" in args.features:
-                descriptorsets.append(FingerprintSet(fingerprint_type="MACCS"))
+                descriptorsets.append(RDKitMACCSFP())
             if "AtomPairFP" in args.features:
-                descriptorsets.append(FingerprintSet(fingerprint_type="AtomPairFP"))
+                descriptorsets.append(AtomPairFP())
             if "TopologicalFP" in args.features:
-                descriptorsets.append(
-                    FingerprintSet(fingerprint_type="TopologicalTorsionFP")
-                )
+                descriptorsets.append(TopologicalTorsionFP())
             if "AvalonFP" in args.features:
-                descriptorsets.append(FingerprintSet(fingerprint_type="AvalonFP"))
+                descriptorsets.append(AvalonFP())
             if "RDKitFP" in args.features:
-                descriptorsets.append(FingerprintSet(fingerprint_type="RDKitFP"))
+                descriptorsets.append(RDKitFP())
             if "PatternFP" in args.features:
-                descriptorsets.append(FingerprintSet(fingerprint_type="PatternFP"))
+                descriptorsets.append(PatternFP())
             if "LayeredFP" in args.features:
-                descriptorsets.append(FingerprintSet(fingerprint_type="LayeredFP"))
+                descriptorsets.append(LayeredFP())
             if "Smiles" in args.features:
                 descriptorsets.append(SmilesDesc())
             if args.predictor_descs:
@@ -471,25 +483,32 @@ def QSPR_dataprep(args):
             if args.high_correlation:
                 featurefilters.append(HighCorrelationFilter(th=args.high_correlation))
             if args.boruta_filter:
-                if args.regression:
-                    featurefilters.append(
-                        BorutaFilter(estimator=RandomForestRegressor(n_jobs=args.ncpu))
+                # boruta filter can not be used for multi-task models
+                if len(props) > 1:
+                    raise ValueError(
+                        "Boruta filter can not be used for multi-task models"
                     )
-                else:
-                    featurefilters.append(
-                        BorutaFilter(
-                            estimator=RandomForestClassifier(n_jobs=args.ncpu)
-                        )
+                boruta_estimator = (
+                    RandomForestRegressor(n_jobs=args.ncpu)
+                    if args.regression
+                    else RandomForestClassifier(n_jobs=args.ncpu)
+                )
+                featurefilters.append(
+                    BorutaFilter(
+                        BorutaPy(estimator=boruta_estimator, perc=args.boruta_filter),
+                        args.random_state,
                     )
+                )
             # prepare dataset for modelling
             mydataset.prepareDataset(
-                feature_calculators=[MoleculeDescriptorsCalculator(descriptorsets)],
-                datafilters=datafilters,
+                feature_calculators=descriptorsets,
+                data_filters=data_filters,
                 split=split,
                 feature_filters=featurefilters,
                 feature_standardizer=StandardScaler()
-                if "Smiles" not in args.features else None,
-                feature_fill_value=0.0,
+                if "Smiles" not in args.features
+                else None,
+                feature_fill_value=args.fill_value,
             )
 
             # save dataset files and fingerprints
@@ -499,30 +518,26 @@ def QSPR_dataprep(args):
 if __name__ == "__main__":
     args = QSPRArgParser()
 
-    # Set random seeds
-    random.seed(args.random_state)
-    np.random.seed(args.random_state)
-    if find_spec("torch") is not None:
-        import torch
-
-        torch.manual_seed(args.random_state)
-    os.environ["TF_DETERMINISTIC_OPS"] = str(args.random_state)
-
     # check input file and output directory exist
     if not os.path.exists(args.input):
         raise FileNotFoundError(f"Input file {args.input} not found.")
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
 
-    # Backup files
-    tasks = ["REG" if reg is True else "CLS" for reg in args.regression]
-    file_prefixes = [
-        f"{property}_{task}" for task in tasks for property in args.properties
+    # get a list of all the folders in the output directory
+    folders = [
+        f
+        for f in os.listdir(args.output_dir)
+        if os.path.isdir(f"{args.output_dir}/{f}")
     ]
+
+    # remove folders that start with backup
+    folders = [f for f in folders if not f.startswith("backup")]
+
     if not args.skip_backup:
         backup_msg = backup_files(
             args.output_dir,
-            tuple(file_prefixes),
+            tuple(folders),
             cp_suffix=["calculators", "standardizer", "meta"],
         )
 

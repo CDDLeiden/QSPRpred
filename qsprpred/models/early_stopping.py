@@ -1,13 +1,13 @@
 """Early stopping for training of models."""
-import json
 from enum import Enum
 from typing import Any, Callable
 
 import numpy as np
 import pandas as pd
 
-from ..data.data import QSPRDataset
+from ..data.tables.qspr import QSPRDataset
 from ..logs import logger
+from ..utils.serialization import JSONSerializable
 
 
 class EarlyStoppingMode(Enum):
@@ -36,7 +36,7 @@ class EarlyStoppingMode(Enum):
         return self in [EarlyStoppingMode.NOT_RECORDING, EarlyStoppingMode.RECORDING]
 
 
-class EarlyStopping:
+class EarlyStopping(JSONSerializable):
     """Early stopping tracker for training of QSPRpred models.
 
     An instance of this class is used to track the number of epochs trained in a model
@@ -58,6 +58,7 @@ class EarlyStopping:
         trainedEpochs (list[int]): list of number of epochs trained in a model training
             with early stopping on RECORDING mode.
     """
+
     def __init__(
         self,
         mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
@@ -76,6 +77,15 @@ class EarlyStopping:
         self.numEpochs = num_epochs
         self._trainedEpochs = []
         self.aggregateFunc = aggregate_func
+
+    def __getstate__(self):
+        state = super().__getstate__()
+        state["aggregateFunc"] = self.aggregateFunc.__name__
+        return state
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.aggregateFunc = getattr(np, self.aggregateFunc)
 
     @property
     def optimalEpochs(self) -> int:
@@ -124,41 +134,13 @@ class EarlyStopping:
         """Return the name of the task."""
         return self.mode.name
 
-    def toFile(self, path: str):
-        """Save early stopping object to file.
-
-        Args:
-            path (str): path to file to save early stopping object to
-        """
-        with open(path, "w") as f:
-            json.dump(
-                {
-                    "mode": self.mode.name,
-                    "num_epochs": self.numEpochs,
-                    "trained_epochs": self.trainedEpochs,
-                    "aggregate_func_name": self.aggregateFunc.__name__,
-                },
-                f,
-            )
-
-    @classmethod
-    def fromFile(cls, path: str) -> "EarlyStopping":
-        """Load early stopping object from file.
-
-        Args:
-            path (str): path to file containing early stopping object
-        """
-        with open(path, "r") as f:
-            data = json.load(f)
-        mode = EarlyStoppingMode[data["mode"]]
-        aggregate_func = getattr(np, data["aggregate_func_name"])
-        early_stopping = cls(mode, data["num_epochs"], aggregate_func)
-        early_stopping.trainedEpochs = data["trained_epochs"]
-        return early_stopping
-
     def __bool__(self) -> bool:
         """Return whether early stopping is used."""
         return self.mode.__bool__()
+
+    def clean(self):
+        """Clean early stopping object."""
+        self._trainedEpochs = []
 
 
 def early_stopping(func: Callable) -> Callable:
@@ -167,12 +149,15 @@ def early_stopping(func: Callable) -> Callable:
     Returns:
         function: decorated fit method
     """
+
     def wrapper_fit(
         self,
         X: pd.DataFrame | np.ndarray | QSPRDataset,
         y: pd.DataFrame | np.ndarray | QSPRDataset,
         estimator: Any | None = None,
         mode: EarlyStoppingMode | None = None,
+        split: "DataSplit" = None,
+        monitor: "FitMonitor" = None,
         **kwargs,
     ) -> Any:
         """Wrapper for fit method of models that support early stopping.
@@ -182,6 +167,10 @@ def early_stopping(func: Callable) -> Callable:
             y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
             estimator (Any): estimator instance to use for fitting
             mode (EarlyStoppingMode): early stopping mode
+            split (DataSplit): data split to use for early stopping,
+                if None, a ShuffleSplit with 10% validation set size is used
+            monitor (FitMonitor): monitor to use for fitting, if None, a BaseMonitor
+                is used
             kwargs (dict): additional keyword arguments for the estimator's fit method
 
         Returns:
@@ -192,7 +181,9 @@ def early_stopping(func: Callable) -> Callable:
             " early stopping."
         )
         self.earlyStopping.mode = mode if mode is not None else self.earlyStopping.mode
-        estimator, best_epoch = func(self, X, y, estimator, mode, **kwargs)
+        estimator, best_epoch = func(
+            self, X, y, estimator, mode, split, monitor, **kwargs
+        )
         if self.earlyStopping.mode == EarlyStoppingMode.RECORDING:
             self.earlyStopping.recordEpochs(best_epoch + 1)  # +1 for 0-indexing
         return estimator

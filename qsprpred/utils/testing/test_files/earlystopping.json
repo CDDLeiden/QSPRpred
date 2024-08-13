@@ -1,0 +1,26 @@
+{
+    "py/object": "qsprpred.models.early_stopping.EarlyStopping",
+    "py/state": {
+        "mode": {
+            "py/reduce": [
+                {
+                    "py/type": "qsprpred.models.early_stopping.EarlyStoppingMode"
+                },
+                {
+                    "py/tuple": [
+                        "OPTIMAL"
+                    ]
+                }
+            ]
+        },
+        "numEpochs": 100,
+        "_trainedEpochs": [
+            10,
+            20,
+            30,
+            40,
+            60
+        ],
+        "aggregateFunc": "median"
+    }
+}

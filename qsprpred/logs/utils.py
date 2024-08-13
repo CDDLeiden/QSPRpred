@@ -89,7 +89,7 @@ def generate_backup_runID(path="."):
     if previous:
         runid = max(previous) + 1
 
-    # backup_files = sorted([ _file for _file in os.listdir(path) if _file.startswith('#')]) # noqa: E501
+    # backup_files = sorted([ _file for _file in os.listdir(path) if _file.startswith('#')])
     # if len(backup_files) == 0 :
     #     runid = 0
     # else :

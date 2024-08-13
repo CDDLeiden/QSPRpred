@@ -3,7 +3,6 @@ as well as fully connected NN subclass.
 """
 
 import inspect
-import time
 from collections import defaultdict
 
 import numpy as np
@@ -12,8 +11,8 @@ from torch import nn, optim
 from torch.nn import functional as f
 from torch.utils.data import DataLoader, TensorDataset
 
-from ....extra.gpu import DEFAULT_DEVICE, DEFAULT_GPUS
 from ....logs import logger
+from ....models.monitors import BaseMonitor, FitMonitor
 
 
 class Base(nn.Module):
@@ -40,10 +39,11 @@ class Base(nn.Module):
         gpus (list):
             list of gpus to run the model on
     """
+
     def __init__(
         self,
-        device: torch.device = DEFAULT_DEVICE,
-        gpus: list[int] = DEFAULT_GPUS,
+        device: str,
+        gpus: list[int],
         n_epochs: int = 1000,
         lr: float = 1e-4,
         batch_size: int = 256,
@@ -53,7 +53,7 @@ class Base(nn.Module):
         """Initialize the DNN model.
 
         Args:
-            device (torch.device):
+            device (str):
                 device to run the model on
             gpus (list):
                 list of gpus to run the model on
@@ -76,10 +76,7 @@ class Base(nn.Module):
         self.batch_size = batch_size
         self.patience = patience
         self.tol = tol
-        if device.type == "cuda":
-            self.device = torch.device(f"cuda:{gpus[0]}")
-        else:
-            self.device = device
+        self.device = torch.device(device)
         self.gpus = gpus
         if len(self.gpus) > 1:
             logger.warning(
@@ -93,8 +90,7 @@ class Base(nn.Module):
         y_train,
         X_valid=None,
         y_valid=None,
-        log=False,
-        log_prefix=None
+        monitor: FitMonitor | None = None,
     ) -> int:
         """Training the DNN model.
 
@@ -113,15 +109,15 @@ class Base(nn.Module):
             y_valid (np.ndarray or pd.Dataframe):
                 validation target (m X l), m is the No. of samples, l is
                 the No. of classes or tasks
-            log (bool):
-                whether to log the training process to {self.log_prefix}.log
-            log_prefix (str):
-                prefix for the log file if log is True
+            monitor (FitMonitor):
+                monitor to use for training, if None, use base monitor
 
         Returns:
             int:
                 the epoch number when the optimal model is saved
         """
+        self.to(self.device)
+        monitor = BaseMonitor() if monitor is None else monitor
         train_loader = self.getDataLoader(X_train, y_train)
         valid_loader = None
         # if validation data is provided, use early stopping
@@ -139,16 +135,14 @@ class Base(nn.Module):
         best_loss = np.inf
         best_weights = self.state_dict()
         last_save = 0  # record the epoch when optimal model is saved.
-        log_file = None
-        if log:
-            log_file = open(log_prefix + ".log", "a")
         for epoch in range(self.n_epochs):
-            t0 = time.time()
+            monitor.onEpochStart(epoch)
             loss = None
             # decrease learning rate over the epochs
             for param_group in optimizer.param_groups:
-                param_group["lr"] = self.lr * (1 - 1 / self.n_epochs)**(epoch * 10)
+                param_group["lr"] = self.lr * (1 - 1 / self.n_epochs) ** (epoch * 10)
             for i, (Xb, yb) in enumerate(train_loader):
+                monitor.onBatchStart(i)
                 # Batch of target tenor and label tensor
                 Xb, yb = Xb.to(self.device), yb.to(self.device)
                 optimizer.zero_grad()
@@ -167,49 +161,21 @@ class Base(nn.Module):
                     loss = self.criterion(y_, yb)
                 loss.backward()
                 optimizer.step()
+                monitor.onBatchEnd(i, float(loss))
             if patience == -1:
-                if log:
-                    print(
-                        "[Epoch: %d/%d] %.1fs loss_train: %f" %
-                        (epoch, self.n_epochs, time.time() - t0, loss.item()),
-                        file=log_file,
-                    )
+                monitor.onEpochEnd(epoch, loss.item())
             else:
                 # loss value on validation set based on which optimal model is saved.
                 loss_valid = self.evaluate(valid_loader)
-                if log:
-                    print(
-                        "[Epoch: %d/%d] %.1fs loss_train: %f loss_valid: %f" % (
-                            epoch,
-                            self.n_epochs,
-                            time.time() - t0,
-                            loss.item(),
-                            loss_valid,
-                        ),
-                        file=log_file,
-                    )
                 if loss_valid + self.tol < best_loss:
                     best_weights = self.state_dict()
-                    if log:
-                        print(
-                            "[Performance] loss_valid is improved from %f to %f" %
-                            (best_loss, loss_valid),
-                            file=log_file,
-                        )
                     best_loss = loss_valid
                     last_save = epoch
-                else:
-                    if log:
-                        print(
-                            "[Performance] loss_valid is not improved.", file=log_file
-                        )
-                    if epoch - last_save > patience:  # early stop
-                        break
+                elif epoch - last_save > patience:  # early stop
+                    break
+                monitor.onEpochEnd(epoch, loss.item(), loss_valid)
         if patience == -1:
             best_weights = self.state_dict()
-        if log:
-            print("Neural net fitting completed.", file=log_file)
-            log_file.close()
         self.load_state_dict(best_weights)
         return self, last_save
 
@@ -228,6 +194,7 @@ class Base(nn.Module):
                 the average loss value based on the calculation of loss
                 function with given test set.
         """
+        self.to(self.device)
         loss = 0
         for Xb, yb in loader:
             Xb, yb = Xb.to(self.device), yb.to(self.device)
@@ -258,6 +225,7 @@ class Base(nn.Module):
                 it is an m X l FloatTensor (m is the No. of sample, l is the
                 No. of classes or tasks.)
         """
+        self.to(self.device)
         loader = self.getDataLoader(X_test)
         score = []
         for X_b in loader:
@@ -278,7 +246,8 @@ class Base(nn.Module):
         """
         init_signature = inspect.signature(cls.__init__)
         parameters = [
-            p for p in init_signature.parameters.values()
+            p
+            for p in init_signature.parameters.values()
             if p.name != "self" and p.kind != p.VAR_KEYWORD
         ]
         return sorted([p.name for p in parameters])
@@ -342,7 +311,7 @@ class Base(nn.Module):
         return self
 
     def getDataLoader(self, X, y=None):
-        """Convert data to tensors and get iterable over dataset with dataloader.
+        """Convert data to tensors and get generator over dataset with dataloader.
 
         Args:
             X (numpy 2d array): input dataset
@@ -389,20 +358,21 @@ class STFullyConnected(Base):
         fc3 (torch.nn.Module): the fourth fully connected layer
         activation (torch.nn.Module): the activation function
     """
+
     def __init__(
         self,
         n_dim,
-        n_class=1,
-        device=DEFAULT_DEVICE,
-        gpus=DEFAULT_GPUS,
-        n_epochs=1000,
+        n_class,
+        device,
+        gpus,
+        n_epochs=100,
         lr=None,
         batch_size=256,
         patience=50,
         tol=0,
         is_reg=True,
-        neurons_h1=4000,
-        neurons_hx=1000,
+        neurons_h1=256,
+        neurons_hx=128,
         extra_layer=False,
         dropout_frac=0.25,
     ):
@@ -486,7 +456,6 @@ class STFullyConnected(Base):
             # loss and activation function of output layer for multiple classification
             self.criterion = nn.CrossEntropyLoss()
             self.activation = nn.Softmax(dim=1)
-        self.to(self.device)
 
     def set_params(self, **params) -> "STFullyConnected":
         """Set parameters and re-initialize model.
