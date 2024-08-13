@@ -68,15 +68,14 @@ class SklearnMetrics(Metric):
         """
         # Convert predictions to correct shape for sklearn scorer
         if isinstance(y_pred, list):
-
             convert_to_discrete = False
             if sklearn.__version__ < "1.4.0":
                 if self.scorer.__class__.__name__ == "_PredictScorer":
                     convert_to_discrete = True
             elif self.scorer._response_method == "predict":
-                    convert_to_discrete = True
+                convert_to_discrete = True
             elif "predict_proba" not in self.scorer._response_method:
-                    convert_to_discrete = True
+                convert_to_discrete = True
 
             if convert_to_discrete:
                 # convert to discrete values
@@ -84,8 +83,7 @@ class SklearnMetrics(Metric):
             else:
                 # for each task if single class take second column
                 y_pred = [
-                    yp[:, 1].reshape(-1, 1) if yp.shape[1] == 2 else yp
-                    for yp in y_pred
+                    yp[:, 1].reshape(-1, 1) if yp.shape[1] == 2 else yp for yp in y_pred
                 ]
 
             if len(y_pred) > 1:
@@ -107,24 +105,23 @@ class SklearnMetrics(Metric):
 
 class CalibrationError(Metric):
     """Compute the calibration error of a classifier.
-    
+
     ECE is defined as the expected difference between the predicted probability
     and the observed frequency in each bin. The lower the ECE, the more
     calibrated the classifier is.
-    
+
     Referece: Guo et al. (2017) On Calibration of Modern Neural Networks.
     https://arxiv.org/abs/1706.04599
-    
+
     Attributes:
         name (str): Name of the scoring function (calibration_error).
     """
-
     def __call__(
         self,
         y_true: np.array,
         y_pred: list[np.ndarray],
         n_bins: int = 10,
-        norm: str = "L1"
+        norm: str = "L1",
     ) -> float:
         """Compute the calibration error of a classifier.
 
@@ -153,9 +150,9 @@ class CalibrationError(Metric):
             raise ValueError("y_pred must be a list of 2D arrays.")
         if len(y_pred) > 1:
             raise ValueError("Multi-task predictions are not supported.")
-        
+
         # TODO: support multi-task predictions
-        # Convert y_pred to a 2D array 
+        # Convert y_pred to a 2D array
         y_pred = y_pred[0]
 
         # Get the highest probability and the predicted class
@@ -195,7 +192,201 @@ class CalibrationError(Metric):
             calibration_error = np.sqrt(calibration_error)
 
         return calibration_error
-    
+
     def __str__(self) -> str:
         """Return the name of the scorer."""
         return "calibration_error"
+
+
+class Specificity(Metric):
+    """Calculate specificity (true postive rate).
+
+    Attributes:
+        name (str): Name of the scoring function (specificity).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the specificity (selectivity).
+
+        Args:
+            y_true (np.array): Ground truth (correct) labels. 1d array.
+            y_pred (np.array): Predicted labels. 2D array (n_samples, 1)
+
+        Returns:
+            float: The specificity.
+
+        """
+        tn, fp, _, _ = sklearn.metrics.confusion_matrix(y_true, y_pred).ravel()
+        return tn / (tn + fp)
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "specificity"
+
+
+class NegativePredictedValue(Metric):
+    """Calculate the negative predicted value.
+
+    Attributes:
+        name (str): Name of the scoring function (negative_predicted_value).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the negative predicted value.
+
+        Args:
+            y_true (np.array): Ground truth (correct) labels. 1d array.
+            y_pred (np.array): Predicted labels. 2D array (n_samples, 1)
+
+        Returns:
+            float: The negative predicted value.
+
+        """
+        tn, _, fn, _ = sklearn.metrics.confusion_matrix(y_true, y_pred).ravel()
+        return tn / (tn + fn)
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "negative_predicted_value"
+
+
+class BalancedMatthewsCorrcoeff(Metric):
+    """Calculate the balanced Matthews correlation coefficient.
+
+    Attributes:
+        name (str): Name of the scoring function (balanced_matthews_corrcoeff).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the balanced Matthews correlation coefficient.
+
+        Args:
+            y_true (np.array): Ground truth (correct) labels. 1d array.
+            y_pred (np.array): Predicted labels. 2D array (n_samples, 1)
+
+        Returns:
+            float: The correlation coefficient.
+
+        """
+        tn, fp, fn, tp = sklearn.metrics.confusion_matrix(y_true, y_pred).ravel()
+        prevalence = sum(y_true) / len(y_true)
+        sen = tp / (tp + fn)
+        spe = tn / (tn + fp)
+        return (sen + spe - 1) / (
+            (sen + (1 - spe) * (1 - prevalence) / prevalence) *
+            (spe + (1 - sen) * prevalence / (1 - prevalence))
+        )**0.5
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "balanced_matthews_corrcoeff"
+
+
+class Prevalence(Metric):
+    """Calculate the prevalence.
+
+    Attributes:
+        name (str): Name of the scoring function (prevalence).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the prevalence.
+
+        Args:
+            y_true (np.array): Ground truth (correct) labels. 1d array.
+            y_pred (np.array): Predicted labels. 2D array (n_samples, 1)
+
+        Returns:
+            float: The prevalence.
+
+        """
+        return sum(y_true) / len(y_true)
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "prevalence"
+
+
+class BalancedPositivePredictedValue(Metric):
+    """Calculate the balanced positive predicted value.
+
+    Attributes:
+        name (str): Name of the scoring function (balanced_positive_predicted_value).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the balanced positive predicted value.
+
+        Args:
+            y_true (np.array): Ground truth (correct) labels. 1d array.
+            y_pred (np.array): Predicted labels. 2D array (n_samples, 1)
+
+        Returns:
+            float: The balanced positive predicted value.
+
+        """
+        tn, fp, fn, tp = sklearn.metrics.confusion_matrix(y_true, y_pred).ravel()
+        prevalence = sum(y_true) / len(y_true)
+        sen = tp / (tp + fn)
+        spe = tn / (tn + fp)
+        return (sen * prevalence) / (sen * prevalence + (1 - spe) * (1 - prevalence))
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "balanced_positive_predicted_value"
+
+
+class BalancedNegativePredictedValue(Metric):
+    """Calculate the balanced negative predicted value.
+
+    Attributes:
+        name (str): Name of the scoring function (balanced_negative_predicted_value).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the balanced negative predicted value.
+
+        Args:
+            y_true (np.array): Ground truth (correct) labels. 1d array.
+            y_pred (np.array): Predicted labels. 2D array (n_samples, 1)
+
+        Returns:
+            float: The balanced negative predicted value.
+
+        """
+        tn, fp, fn, tp = sklearn.metrics.confusion_matrix(y_true, y_pred).ravel()
+        prevalence = sum(y_true) / len(y_true)
+        sen = tp / (tp + fn)
+        spe = tn / (tn + fp)
+        return (spe * (1 - prevalence)) / (
+            spe * (1 - prevalence) + (1 - sen) * prevalence
+        )
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "balanced_negative_predicted_value"
+
+
+class BalancedCohenKappa(Metric):
+    """Calculate the balanced Cohen kappa coefficient.
+
+    Attributes:
+        name (str): Name of the scoring function (balanced_cohen_kappa).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the balanced Cohen kappa coefficient.
+
+        Args:
+            y_true (np.array): Ground truth (correct) labels. 1d array.
+            y_pred (np.array): Predicted labels. 2D array (n_samples, 1)
+
+        Returns:
+            float: The balanced Cohen kappa coefficient.
+
+        """
+        tn, fp, fn, tp = sklearn.metrics.confusion_matrix(y_true, y_pred).ravel()
+        prevalence = sum(y_true) / len(y_true)
+        sen = tp / (tp + fn)
+        spe = tn / (tn + fp)
+        return (2 * (sen + spe - 1)) / (
+            (sen + (1 - spe) * (1 - prevalence) / prevalence) +
+            (spe + (1 - sen) * prevalence / (1 - prevalence))
+        )
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "balanced_cohen_kappa"

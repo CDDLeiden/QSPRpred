@@ -26,10 +26,20 @@ from xgboost import XGBClassifier, XGBRegressor
 
 from ..data.processing.applicability_domain import MLChemADWrapper
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stopping
-from ..models.metrics import SklearnMetrics, CalibrationError
+from ..models.metrics import (
+    BalancedCohenKappa,
+    BalancedMatthewsCorrcoeff,
+    BalancedNegativePredictedValue,
+    BalancedPositivePredictedValue,
+    CalibrationError,
+    NegativePredictedValue,
+    Prevalence,
+    SklearnMetrics,
+    Specificity,
+)
 from ..models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ..models.scikit_learn import SklearnModel
-from ..tasks import TargetTasks, ModelTasks
+from ..tasks import ModelTasks, TargetTasks
 from ..utils.testing.base import QSPRTestCase
 from ..utils.testing.check_mixins import ModelCheckMixIn, MonitorsCheckMixIn
 from ..utils.testing.path_mixins import ModelDataSetsPathMixIn
@@ -607,6 +617,18 @@ class TestMetrics(TestCase):
         with self.assertRaises(TypeError):
             cal_error(self.sample_data(ModelTasks.SINGLECLASS, use_proba=False))
 
+    def test_ConfusionMatrixMetrics(self):
+        y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS)
+        
+        # test confusion matrix metrics
+        BalancedCohenKappa()(y_true, y_pred)
+        BalancedMatthewsCorrcoeff()(y_true, y_pred)
+        BalancedNegativePredictedValue()(y_true, y_pred)
+        BalancedPositivePredictedValue()(y_true, y_pred)
+        NegativePredictedValue()(y_true, y_pred)
+        Prevalence()(y_true, y_pred)
+        Specificity()(y_true, y_pred)
+        
 class TestEarlyStopping(ModelDataSetsPathMixIn, TestCase):
     def setUp(self):
         super().setUp()
