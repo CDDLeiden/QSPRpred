@@ -57,6 +57,8 @@ class MoleculeTable(MoleculeDataSet):
         self.descriptors = []
         self.path = os.path.abspath(os.path.join(path, self.name))
         self.storeFormat = store_format
+        if os.path.exists(self.metaFile):
+            self.reload()
 
     @property
     def randomState(self) -> int:
@@ -109,7 +111,7 @@ class MoleculeTable(MoleculeDataSet):
         return cls(storage, path=os.path.dirname(storage.path))
 
     @classmethod
-    def fromTableFile(cls, name: str, filename: str, path: str, sep="\t", *args,
+    def fromTableFile(cls, name: str, filename: str, path: str, *args, sep="\t",
                       **kwargs):
         """Create a `MoleculeTable` instance from a file containing a table of molecules
         (i.e. a CSV file).
@@ -124,8 +126,9 @@ class MoleculeTable(MoleculeDataSet):
                 constructor.
         """
         df = pd.read_table(filename, sep=sep)
-        storage = TabularStorageBasic(name, path, df, *args, **kwargs)
-        return cls(storage, path=os.path.dirname(storage.path))
+        storage = TabularStorageBasic(f"{name}_storage", path, df)
+        return MoleculeTable(storage, name, path=os.path.dirname(storage.path), *args,
+                             **kwargs)
 
     @classmethod
     def fromSDF(cls, name, filename, smiles_prop, path: str, *args, **kwargs):
@@ -327,6 +330,9 @@ class MoleculeTable(MoleculeDataSet):
         self.storage = ChemStore.fromFile(
             os.path.join(self.path, state["storage"])
         )
+
+    def hasProperty(self, name: str) -> bool:
+        return self.storage.hasProperty(name)
 
     @property
     def descriptorSets(self):
@@ -605,6 +611,7 @@ class MoleculeTable(MoleculeDataSet):
         return self.storage.apply(func, func_args, func_kwargs, on_props, as_df)
 
     def dropEntries(self, ids: Iterable[str]):
+        # FIXME: do not drop from storage here, but just mask the removed entries
         self.storage.dropEntries(ids)
         for dset in self.descriptors:
             dset.dropEntries(ids)

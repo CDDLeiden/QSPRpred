@@ -146,25 +146,35 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
         self.restoreTrainingData()
 
     @classmethod
-    def fromTableFile(cls, name: str, filename: str, sep: str = "\t", *args, **kwargs):
+    def fromTableFile(
+            cls,
+            name: str,
+            filename: str,
+            path: str,
+            *args,
+            sep: str = "\t",
+            target_props: list[TargetProperty | dict] | None = None,
+            **kwargs
+    ):
         r"""Create QSPRDataset from table file (i.e. CSV or TSV).
 
         Args:
             name (str): name of the data set
             filename (str): path to the table file
-            sep (str, optional): separator in the table file. Defaults to "\t".
+            path (str): path to the directory where the data set will be saved
             *args: additional arguments for QSPRDataset constructor
+            sep (str, optional): separator in the table file. Defaults to "\t".
+            target_props (list[TargetProperty | dict], optional): target properties to
+                use. Defaults to `None`.
             **kwargs: additional keyword arguments for QSPRDataset constructor
         Returns:
             QSPRDataset: `QSPRDataset` object
         """
-        raise NotImplementedError(
-            f"Table file loading not implemented for {QSPRDataset.__name__}, yet. You "
-            "can convert from 'MoleculeTable' with 'fromMolTable'."
-        )
+        mt = super().fromTableFile(name, filename, path, *args, sep=sep, **kwargs)
+        return QSPRDataset.fromMolTable(mt, target_props, name=mt.name)
 
     @classmethod
-    def fromSDF(name: str, filename: str, smiles_prop: str, *args, **kwargs):
+    def fromSDF(cls, name: str, filename: str, smiles_prop: str, *args, **kwargs):
         """Create QSPRDataset from SDF file.
 
         It is currently not implemented for QSPRDataset, but you can convert from
@@ -504,7 +514,10 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
             self.saveSplit()
         elif "Split_IsTrain" in self.getProperties():
             is_outlier = self.getProperty("Split_IsOutlier")
-            ids = pd.Series(self.getProperty(self.idProp))
+            ids = pd.Series(
+                self.getProperty(self.idProp),
+                index=self.getProperty(self.idProp)
+            )
             self.dropEntries(ids[is_outlier].values)
         super().save()
 
@@ -575,7 +588,8 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
                     self.y[prop.name] = self.y[prop.name].cat.codes
                     self.y_ind[prop.name] = self.y_ind[prop.name].cat.codes
         if "Split_IsOutlier" in self.getProperties():
-            ids = pd.Series(self.getProperty(self.idProp))
+            ids = pd.Series(self.getProperty(self.idProp),
+                            index=self.getProperty(self.idProp))
             is_outlier = self.getProperty("Split_IsOutlier")
             self.dropEntries(ids[is_outlier].values)
         # convert splits to features if required
@@ -961,7 +975,12 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
         else:
             if self.y_ind is not None and "Split_IsOutlier" in self.getProperties():
                 y_ind = self.y_ind.loc[
-                        ~pd.Series(self.getProperty("Split_IsOutlier")), :
+                        ~pd.Series(
+                            self.getProperty(
+                                "Split_IsOutlier",
+                                ids=self.y_ind.index.values),
+                            index=self.y_ind.index
+                        ), :
                         ]
             else:
                 y_ind = self.y_ind
@@ -1016,11 +1035,15 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
         self.restoreTrainingData()
 
     def dropEmptyProperties(self, names: list[str]):
-        mask = pd.Series([False] * len(self))
+        mask = pd.Series([False] * len(self), index=self.getProperty(self.idProp))
         for prop in names:
-            prop = pd.Series(self.getProperty(prop))
+            prop = pd.Series(self.getProperty(prop),
+                             index=self.getProperty(self.idProp))
             mask = mask | prop.isna()
-        to_drop = pd.Series(self.getProperty(self.idProp))[mask]
+        to_drop = pd.Series(
+            self.getProperty(self.idProp),
+            index=self.getProperty(self.idProp)
+        )[mask]
         self.dropEntries(to_drop)
         self.restoreTrainingData()
 

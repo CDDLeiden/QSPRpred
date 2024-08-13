@@ -12,7 +12,7 @@ class ChemStandardizer(ABC):
         Convert the SMILES to a standardized form.
 
         :param smiles: SMILES to be converted
-        :return: standardized SMILES
+        :return: a tuple where the first element is the standardized SMILES and the second element is the original SMILES
         """
         pass
 

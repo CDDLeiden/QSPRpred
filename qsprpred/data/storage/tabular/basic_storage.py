@@ -64,7 +64,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             if df is None:
                 df = pd.DataFrame(columns=columns)
             self.add_library(
-                self.name,
+                f"{self.name}_library",
                 df,
                 smiles_col,
                 id_col,
@@ -387,6 +387,9 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             return []
         return [self.get_mol(x) for x in
                 self._libraries[library].getProperty(self.idProp) if x in df.index]
+
+    def hasProperty(self, name: str) -> bool:
+        return name in self.getProperties()
 
     def __getstate__(self):
         o_dict = super().__getstate__()

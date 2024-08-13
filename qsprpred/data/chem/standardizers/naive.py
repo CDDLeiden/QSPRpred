@@ -43,7 +43,7 @@ def standardize_mol(mol):
 class NaiveStandardizer(ChemStandardizer):
     def convert_smiles(self, smiles):
         mol = Chem.MolFromSmiles(smiles)
-        return standardize_mol(mol)
+        return standardize_mol(mol), smiles
 
     @property
     def settings(self):

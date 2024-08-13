@@ -211,6 +211,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(len(ds.X_ind), 0)
         self.assertEqual(len(ds.y), len(ds))
         self.assertEqual(len(ds.y_ind), 0)
+        self.assertEqual(ds.X.shape[1], 128)
 
     def checkConsistencyMulticlass(self, ds):
         self.assertTrue(ds.isMultiTask)
@@ -292,6 +293,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             }],
             path=self.generatedDataPath,
         )
+        dataset.addDescriptors([MorganFP(radius=2, nBits=128)])
         self.assertIn("HBD", dataset.getProperties())
         dataset.removeProperty("HBD")
         self.assertNotIn("HBD", dataset.getProperties())
@@ -315,13 +317,11 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         dataset_new = QSPRDataset.fromTableFile(
             "test_defaults",
             f"{self.inputDataPath}/test_data.tsv",
+            path=self.generatedDataPath,
             target_props=[{
                 "name": "CL",
                 "task": TargetTasks.REGRESSION
-            }],
-            store_dir=self.generatedDataPath,
-            n_jobs=self.nCPU,
-            chunk_size=self.chunkSize,
+            }]
         )
         stopwatch.stop("Loading from table file took: ")
         self.assertTrue(isinstance(dataset_new, QSPRDataset))
@@ -334,18 +334,25 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
                 "name": "CL",
                 "task": TargetTasks.REGRESSION
             }],
-            store_dir=self.generatedDataPath,
-            n_jobs=self.nCPU,
-            chunk_size=self.chunkSize,
+            path=self.generatedDataPath,
         )
         self.assertTrue(isinstance(dataset_new, QSPRDataset))
         self.assertIn("HBD", dataset_new.getProperties())
         dataset_new.removeProperty("HBD")
+        self.assertEqual(dataset_new.X.shape[1], 0)
+        dataset_new.addDescriptors([MorganFP(radius=2, nBits=128)])
         self.checkConsistency(dataset_new)
 
     def testMultitask(self):
         """Test multi-task dataset creation and functionality."""
+        storage = self.getStorage(
+            self.getSmallDF(),
+            "testMultitask_storage",
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize,
+        )
         dataset = QSPRDataset(
+            storage,
             "testMultitask",
             [
                 {
@@ -357,10 +364,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
                     "task": TargetTasks.REGRESSION
                 },
             ],
-            df=self.getSmallDF(),
-            store_dir=self.generatedDataPath,
-            n_jobs=self.nCPU,
-            chunk_size=self.chunkSize,
+            path=self.generatedDataPath,
         )
         # Check that the dataset is correctly initialized
         self.checkConsistencyMulticlass(dataset)

@@ -60,7 +60,7 @@ class ValidationStandardizer(ChemStandardizer):
         checks = self.checker([smiles], {"index": [0]})
         if not checks[0]:
             raise ValueError(f"Invalid SMILES found: {smiles}")
-        return smiles
+        return smiles, smiles
 
     @property
     def settings(self):

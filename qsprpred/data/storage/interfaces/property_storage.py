@@ -40,6 +40,7 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
             ids (list, optional): The IDs of the entries to add the property for.
         """
 
+    @abstractmethod
     def hasProperty(self, name: str) -> bool:
         """Check whether a property is present in the data frame.
 

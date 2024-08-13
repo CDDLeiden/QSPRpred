@@ -60,7 +60,7 @@ class ChemblStandardizer(ChemStandardizer):
     def convert_smiles(self, smiles):
         return chembl_smi_standardizer(
             smiles, isomeric_smiles=self.isomericSmiles, sanitize=self.sanitize
-        )
+        ), smiles
 
     @property
     def settings(self):
