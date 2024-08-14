@@ -23,7 +23,7 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 
-from ..models.metrics import calibration_error
+from ..models.metrics import CalibrationError
 from ..models.model import QSPRModel
 from ..plotting.base_plot import ModelPlot
 from ..tasks import ModelTasks
@@ -124,7 +124,7 @@ class ClassifierPlot(ModelPlot, ABC):
                 "matthews_corrcoef": matthews_corrcoef(df.Label, df.Prediction),
             }
             if proba:
-                metrics["calibration_error"] = calibration_error(
+                metrics["calibration_error"] = CalibrationError()(
                     df.Label, df[[f"ProbabilityClass_{i}" for i in range(n_classes)]]
                 )
             return pd.Series(metrics)
@@ -179,7 +179,7 @@ class ClassifierPlot(ModelPlot, ABC):
         }
 
         if proba:
-            metrics["calibration_error"] = calibration_error(
+            metrics["calibration_error"] = CalibrationError()(
                 df.Label, df.ProbabilityClass_1
             )
             metrics["roc_auc"] = roc_auc_score(df.Label, df.ProbabilityClass_1)
