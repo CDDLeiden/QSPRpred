@@ -29,13 +29,16 @@ from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stop
 from ..models.metrics import (
     BalancedCohenKappa,
     BalancedMatthewsCorrcoeff,
-    BalancedNegativePredictedValue,
-    BalancedPositivePredictedValue,
+    BalancedNegativePredictivity,
+    BalancedPositivePredictivity,
     CalibrationError,
-    NegativePredictedValue,
+    NegativePredictivity,
+    PositivePredictivity,
     Prevalence,
     SklearnMetrics,
+    Sensitivity,
     Specificity,
+    CohenKappa,
     Kendall,
     KPrimeSlope,
     KSlope,
@@ -632,13 +635,16 @@ class TestMetrics(TestCase):
     def test_ConfusionMatrixMetrics(self):
         y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS)
         
-        self.assertIsInstance(BalancedCohenKappa()(y_true, y_pred), float)
-        self.assertIsInstance(BalancedMatthewsCorrcoeff()(y_true, y_pred), float)
-        self.assertIsInstance(BalancedNegativePredictedValue()(y_true, y_pred), float)
-        self.assertIsInstance(BalancedPositivePredictedValue()(y_true, y_pred), float)
-        self.assertIsInstance(NegativePredictedValue()(y_true, y_pred), float)
         self.assertIsInstance(Prevalence()(y_true, y_pred), float)
         self.assertIsInstance(Specificity()(y_true, y_pred), float)
+        self.assertIsInstance(Sensitivity()(y_true, y_pred), float)
+        self.assertIsInstance(NegativePredictivity()(y_true, y_pred), float)
+        self.assertIsInstance(PositivePredictivity()(y_true, y_pred), float)
+        self.assertIsInstance(CohenKappa()(y_true, y_pred), float)
+        self.assertIsInstance(BalancedNegativePredictivity()(y_true, y_pred), float)
+        self.assertIsInstance(BalancedPositivePredictivity()(y_true, y_pred), float)
+        self.assertIsInstance(BalancedMatthewsCorrcoeff()(y_true, y_pred), float)
+        self.assertIsInstance(BalancedCohenKappa()(y_true, y_pred), float)
 
     def test_Pearson(self):
         y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)

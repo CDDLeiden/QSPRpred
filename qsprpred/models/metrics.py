@@ -282,21 +282,45 @@ class Specificity(Metric):
         return "specificity"
 
 
-class NegativePredictedValue(Metric):
-    """Calculate the negative predicted value.
+class PositivePredictivity(Metric):
+    """Calculate the Positive predictivity.
 
     Attributes:
-        name (str): Name of the scoring function (negative_predicted_value).
+        name (str): Name of the scoring function (Positive_predictivity).
     """
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
-        """Calculate the negative predicted value.
+        """Calculate the Positive predictivity.
 
         Args:
             y_true (np.array): Ground truth (correct) labels. 1d array.
             y_pred (np.array): Predicted labels. 2D array (n_samples, 1)
 
         Returns:
-            float: The negative predicted value.
+            float: The Positive predictivity.
+
+        """
+        _, fp, _, tp = sklearn.metrics.confusion_matrix(y_true, y_pred).ravel()
+        return tp / (tp + fp)
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "Positive_predictivity"
+
+class NegativePredictivity(Metric):
+    """Calculate the negative predictivity.
+
+    Attributes:
+        name (str): Name of the scoring function (negative_predictivity).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the negative predictivity.
+
+        Args:
+            y_true (np.array): Ground truth (correct) labels. 1d array.
+            y_pred (np.array): Predicted labels. 2D array (n_samples, 1)
+
+        Returns:
+            float: The negative predictivity.
 
         """
         tn, _, fn, _ = sklearn.metrics.confusion_matrix(y_true, y_pred).ravel()
@@ -304,8 +328,32 @@ class NegativePredictedValue(Metric):
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
-        return "negative_predicted_value"
+        return "negative_predictivity"
 
+class CohenKappa(Metric):
+    """Calculate the Cohen's kappa coefficient.
+
+    Attributes:
+        name (str): Name of the scoring function (cohen_kappa).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the Cohen kappa coefficient.
+
+        Args:
+            y_true (np.array): Ground truth (correct) labels. 1d array.
+            y_pred (np.array): Predicted labels. 2D array (n_samples, 1)
+
+        Returns:
+            float: The Cohen kappa coefficient.
+
+        """
+        tn, fp, fn, tp = sklearn.metrics.confusion_matrix(y_true, y_pred).ravel()
+        return (2 * (tp * tn - fp * fn)) / (
+            (tp + fp) * (tn + fp) + (tp + fn) * (tn + fn))
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "cohen_kappa"
 
 def derived_confusion_matrix(y_true: np.array,
                              y_pred: np.array) -> tuple[int, int, int]:
@@ -326,59 +374,67 @@ def derived_confusion_matrix(y_true: np.array,
     return pre, sen, spe
 
 
-class BalancedPositivePredictedValue(Metric):
-    """Calculate the balanced positive predicted value.
+class BalancedPositivePredictivity(Metric):
+    """Calculate the balanced positive predictivity.
+    
+    Guesné, S.J.J., Hanser, T., Werner, S. et al. Mind your prevalence!.
+    J Cheminform 16, 43 (2024). https://doi.org/10.1186/s13321-024-00837-w
 
     Attributes:
-        name (str): Name of the scoring function (balanced_positive_predicted_value).
+        name (str): Name of the scoring function (balanced_positive_predictivity).
     """
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
-        """Calculate the balanced positive predicted value.
+        """Calculate the balanced positive predictivity.
 
         Args:
             y_true (np.array): Ground truth (correct) labels. 1d array.
             y_pred (np.array): Predicted labels. 2D array (n_samples, 1)
 
         Returns:
-            float: The balanced positive predicted value.
+            float: The balanced positive predictivity.
 
         """
-        prevalence, sen, spe = derived_confusion_matrix(y_true, y_pred)
-        return (sen * prevalence) / (sen * prevalence + (1 - spe) * (1 - prevalence))
+        _, sen, spe = derived_confusion_matrix(y_true, y_pred)
+        return sen / (1 + sen - spe)
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
-        return "balanced_positive_predicted_value"
+        return "balanced_positive_predictivity"
 
 
-class BalancedNegativePredictedValue(Metric):
-    """Calculate the balanced negative predicted value.
+class BalancedNegativePredictivity(Metric):
+    """Calculate the balanced negative predictivity.
+    
+    Guesné, S.J.J., Hanser, T., Werner, S. et al. Mind your prevalence!. 
+    J Cheminform 16, 43 (2024). https://doi.org/10.1186/s13321-024-00837-w
 
     Attributes:
-        name (str): Name of the scoring function (balanced_negative_predicted_value).
+        name (str): Name of the scoring function (balanced_negative_predictivity).
     """
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
-        """Calculate the balanced negative predicted value.
+        """Calculate the balanced negative predictivity.
 
         Args:
             y_true (np.array): Ground truth (correct) labels. 1d array.
             y_pred (np.array): Predicted labels. 2D array (n_samples, 1)
 
         Returns:
-            float: The balanced negative predicted value.
+            float: The balanced negative predictivity.
 
         """
-        prevalence, sen, spe = derived_confusion_matrix(y_true, y_pred)
-        return (spe *
-                (1 - prevalence)) / (spe * (1 - prevalence) + (1 - sen) * prevalence)
+        _, sen, spe = derived_confusion_matrix(y_true, y_pred)
+        return spe / (1 + sen + spe)
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
-        return "balanced_negative_predicted_value"
+        return "balanced_negative_predictivity"
 
 
 class BalancedMatthewsCorrcoeff(Metric):
     """Calculate the balanced Matthews correlation coefficient.
+    
+    Guesné, S.J.J., Hanser, T., Werner, S. et al. Mind your prevalence!. 
+    J Cheminform 16, 43 (2024). https://doi.org/10.1186/s13321-024-00837-w
 
     Attributes:
         name (str): Name of the scoring function (balanced_matthews_corrcoeff).
@@ -394,11 +450,8 @@ class BalancedMatthewsCorrcoeff(Metric):
             float: The correlation coefficient.
 
         """
-        prevalence, sen, spe = derived_confusion_matrix(y_true, y_pred)
-        return (sen + spe - 1) / (
-            (sen + (1 - spe) * (1 - prevalence) / prevalence) *
-            (spe + (1 - sen) * prevalence / (1 - prevalence))
-        )**0.5
+        _, sen, spe = derived_confusion_matrix(y_true, y_pred)
+        return (sen + spe - 1) / np.sqrt(1 - (sen - spe)**2)
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
@@ -407,6 +460,9 @@ class BalancedMatthewsCorrcoeff(Metric):
 
 class BalancedCohenKappa(Metric):
     """Calculate the balanced Cohen kappa coefficient.
+    
+    Guesné, S.J.J., Hanser, T., Werner, S. et al. Mind your prevalence!. 
+    J Cheminform 16, 43 (2024). https://doi.org/10.1186/s13321-024-00837-w
 
     Attributes:
         name (str): Name of the scoring function (balanced_cohen_kappa).
@@ -422,11 +478,8 @@ class BalancedCohenKappa(Metric):
             float: The balanced Cohen kappa coefficient.
 
         """
-        prevalence, sen, spe = derived_confusion_matrix(y_true, y_pred)
-        return (2 * (sen + spe - 1)) / (
-            (sen + (1 - spe) * (1 - prevalence) / prevalence) +
-            (spe + (1 - sen) * prevalence / (1 - prevalence))
-        )
+        _, sen, spe = derived_confusion_matrix(y_true, y_pred)
+        return sen + spe - 1
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
