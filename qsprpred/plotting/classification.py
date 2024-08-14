@@ -124,8 +124,10 @@ class ClassifierPlot(ModelPlot, ABC):
                 "matthews_corrcoef": matthews_corrcoef(df.Label, df.Prediction),
             }
             if proba:
+                # convert y_pred to a list of arrays with shape (n_samples, n_classes)
+                y_pred = [df[[f"ProbabilityClass_{i}" for i in range(n_classes)]].values]
                 metrics["calibration_error"] = CalibrationError()(
-                    df.Label, df[[f"ProbabilityClass_{i}" for i in range(n_classes)]]
+                    df.Label.values, y_pred
                 )
             return pd.Series(metrics)
 
@@ -179,9 +181,9 @@ class ClassifierPlot(ModelPlot, ABC):
         }
 
         if proba:
-            metrics["calibration_error"] = CalibrationError()(
-                df.Label, df.ProbabilityClass_1
-            )
+            # convert y_pred to a list of arrays with shape (n_samples, 2)
+            y_pred = [np.column_stack([1 - df.ProbabilityClass_1, df.ProbabilityClass_1])]
+            metrics["calibration_error"] = CalibrationError()(df.Label.values, y_pred)
             metrics["roc_auc"] = roc_auc_score(df.Label, df.ProbabilityClass_1)
 
         return pd.Series(metrics)
