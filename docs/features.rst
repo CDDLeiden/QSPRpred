@@ -158,6 +158,28 @@ Overview of available features
             .. tab-item:: Core
 
                 * :class:`~qsprpred.models.metrics.SklearnMetrics`: SklearnMetrics
+                * :class:`~qsprpred.models.metrics.CalibrationError`: CalibrationError
+                * :class:`~qsprpred.models.metrics.Prevalence`: Prevalence
+                * :class:`qsprpred.models.metrics.Sensitivity`: Sensitivity
+                * :class:`qsprpred.models.metrics.Specificity`: Specificity
+                * :class:`qsprpred.models.metrics.PositivePredictivity`: PositivePredictivity
+                * :class:`qsprpred.models.metrics.NegativePredictivity`: NegativePredictivity
+                * :class:`qsprpred.models.metrics.CohenKappa`: CohenKappa
+                * :class:`qsprpred.models.metrics.BalancedPositivePredictivity`: BalancedPositivePredictivity
+                * :class:`qsprpred.models.metrics.BalancedNegativePredictivity`: BalancedNegativePredictivity
+                * :class:`qsprpred.models.metrics.BalancedMatthewsCorrcoeff`: BalancedMatthewsCorrcoeff
+                * :class:`qsprpred.models.metrics.BalancedCohenKappa`: BalancedCohenKappa
+                * :class:`qsprpred.models.metrics.KSlope`: KSlope
+                * :class:`qsprpred.models.metrics.R20`: R20
+                * :class:`qsprpred.models.metrics.KPrimeSlope`: KPrimeSlope
+                * :class:`qsprpred.models.metrics.RPrime20`: RPrime20
+                * :class:`qsprpred.models.metrics.Pearson`: Pearson
+                * :class:`qsprpred.models.metrics.Spearman`: Spearman
+                * :class:`qsprpred.models.metrics.Kendall`: Kendall
+                * :class:`qsprpred.models.metrics.AverageFoldError`: AverageFoldError
+                * :class:`qsprpred.models.metrics.AbsoluteAverageFoldError`: AbsoluteAverageFoldError
+                * :class:`qsprpred.models.metrics.PercentageWithinFoldError`: PercentageWithinFoldError
+
 
     .. dropdown:: Model Assessors
 
