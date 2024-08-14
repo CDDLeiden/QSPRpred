@@ -159,6 +159,9 @@ Overview of available features
 
                 * :class:`~qsprpred.models.metrics.SklearnMetrics`: SklearnMetrics
                 * :class:`~qsprpred.models.metrics.CalibrationError`: CalibrationError
+                * :class:`~qsprpred.models.metrics.BEDROC`: BEDROC
+                * :class:`~qsprpred.models.metrics.EnrichmentFactor`: EnrichmentFactor
+                * :class:`~qsprpred.models.metrics.RobustInitialEnhancement`: RobustInitialEnhancement
                 * :class:`~qsprpred.models.metrics.Prevalence`: Prevalence
                 * :class:`qsprpred.models.metrics.Sensitivity`: Sensitivity
                 * :class:`qsprpred.models.metrics.Specificity`: Specificity
