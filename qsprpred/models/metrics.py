@@ -3,10 +3,11 @@
 from abc import ABC, abstractmethod
 
 import numpy as np
-import sklearn
 import scipy.stats
+import sklearn
 from sklearn.metrics import get_scorer
 from sklearn.metrics._scorer import _BaseScorer
+
 
 class Metric(ABC):
     """Abstract class for scoring functions.
@@ -119,7 +120,7 @@ class CalibrationError(Metric):
     """
     def __init__(self, n_bins: int = 10, norm: str = "L1"):
         """Initialize the calibration error scorer.
-        
+
         If `norm` is 'L1', the expected calibration error is returned (ECE).
         If `norm` is 'L2', the root-mean-square calibration error is returned (RMSCE).
         If `norm` is 'infinity', the maximum calibration error is returned (MCE).
@@ -132,7 +133,7 @@ class CalibrationError(Metric):
         """
         self.n_bins = n_bins
         self.norm = norm
-    
+
     def __call__(
         self,
         y_true: np.array,
@@ -161,7 +162,7 @@ class CalibrationError(Metric):
         # TODO: support multi-task predictions
         # Convert y_pred from list to a 2D array
         y_pred = y_pred[0]
-        
+
         assert len(y_true) >= self.n_bins, "Number of samples must be at least n_bins."
 
         # Get the highest probability and the predicted class
@@ -206,8 +207,58 @@ class CalibrationError(Metric):
         """Return the name of the scorer."""
         return "calibration_error"
 
+
+class Prevalence(Metric):
+    """Calculate the prevalence.
+
+    Attributes:
+        name (str): Name of the scoring function (prevalence).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the prevalence.
+
+        Args:
+            y_true (np.array): Ground truth (correct) labels. 1d array.
+            y_pred (np.array): Predicted labels. 2D array (n_samples, 1)
+
+        Returns:
+            float: The prevalence.
+
+        """
+        return sum(y_true) / len(y_true)
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "prevalence"
+
+
+class Sensitivity(Metric):
+    """Calculate sensitivity (true positive rate).
+
+    Attributes:
+        name (str): Name of the scoring function (sensitivity).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the sensitivity (recall).
+
+        Args:
+            y_true (np.array): Ground truth (correct) labels. 1d array.
+            y_pred (np.array): Predicted labels. 2D array (n_samples, 1)
+
+        Returns:
+            float: The sensitivity.
+
+        """
+        _, _, fn, tp = sklearn.metrics.confusion_matrix(y_true, y_pred).ravel()
+        return tp / (tp + fn)
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "sensitivity"
+
+
 class Specificity(Metric):
-    """Calculate specificity (true postive rate).
+    """Calculate specificity (true negative rate).
 
     Attributes:
         name (str): Name of the scoring function (specificity).
@@ -256,59 +307,23 @@ class NegativePredictedValue(Metric):
         return "negative_predicted_value"
 
 
-class BalancedMatthewsCorrcoeff(Metric):
-    """Calculate the balanced Matthews correlation coefficient.
+def derived_confusion_matrix(y_true: np.array,
+                             y_pred: np.array) -> tuple[int, int, int]:
+    """Calculate the derived confusion matrix.
 
-    Attributes:
-        name (str): Name of the scoring function (balanced_matthews_corrcoeff).
+    Args:
+        y_true (np.array): Ground truth (correct) labels. 1d array.
+        y_pred (np.array): Predicted labels. 2D array (n_samples, 1)
+
+    Returns:
+        tuple[int, int, int]: The derived confusion matrix.
+                              Prevalence, sensitivity and specificity.
     """
-    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
-        """Calculate the balanced Matthews correlation coefficient.
-
-        Args:
-            y_true (np.array): Ground truth (correct) labels. 1d array.
-            y_pred (np.array): Predicted labels. 2D array (n_samples, 1)
-
-        Returns:
-            float: The correlation coefficient.
-
-        """
-        tn, fp, fn, tp = sklearn.metrics.confusion_matrix(y_true, y_pred).ravel()
-        prevalence = sum(y_true) / len(y_true)
-        sen = tp / (tp + fn)
-        spe = tn / (tn + fp)
-        return (sen + spe - 1) / (
-            (sen + (1 - spe) * (1 - prevalence) / prevalence) *
-            (spe + (1 - sen) * prevalence / (1 - prevalence))
-        )**0.5
-
-    def __str__(self) -> str:
-        """Return the name of the scorer."""
-        return "balanced_matthews_corrcoeff"
-
-
-class Prevalence(Metric):
-    """Calculate the prevalence.
-
-    Attributes:
-        name (str): Name of the scoring function (prevalence).
-    """
-    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
-        """Calculate the prevalence.
-
-        Args:
-            y_true (np.array): Ground truth (correct) labels. 1d array.
-            y_pred (np.array): Predicted labels. 2D array (n_samples, 1)
-
-        Returns:
-            float: The prevalence.
-
-        """
-        return sum(y_true) / len(y_true)
-
-    def __str__(self) -> str:
-        """Return the name of the scorer."""
-        return "prevalence"
+    tn, fp, fn, tp = sklearn.metrics.confusion_matrix(y_true, y_pred).ravel()
+    pre = sum(y_true) / len(y_true)
+    sen = tp / (tp + fn)
+    spe = tn / (tn + fp)
+    return pre, sen, spe
 
 
 class BalancedPositivePredictedValue(Metric):
@@ -328,10 +343,7 @@ class BalancedPositivePredictedValue(Metric):
             float: The balanced positive predicted value.
 
         """
-        tn, fp, fn, tp = sklearn.metrics.confusion_matrix(y_true, y_pred).ravel()
-        prevalence = sum(y_true) / len(y_true)
-        sen = tp / (tp + fn)
-        spe = tn / (tn + fp)
+        prevalence, sen, spe = derived_confusion_matrix(y_true, y_pred)
         return (sen * prevalence) / (sen * prevalence + (1 - spe) * (1 - prevalence))
 
     def __str__(self) -> str:
@@ -356,17 +368,41 @@ class BalancedNegativePredictedValue(Metric):
             float: The balanced negative predicted value.
 
         """
-        tn, fp, fn, tp = sklearn.metrics.confusion_matrix(y_true, y_pred).ravel()
-        prevalence = sum(y_true) / len(y_true)
-        sen = tp / (tp + fn)
-        spe = tn / (tn + fp)
-        return (spe * (1 - prevalence)) / (
-            spe * (1 - prevalence) + (1 - sen) * prevalence
-        )
+        prevalence, sen, spe = derived_confusion_matrix(y_true, y_pred)
+        return (spe *
+                (1 - prevalence)) / (spe * (1 - prevalence) + (1 - sen) * prevalence)
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
         return "balanced_negative_predicted_value"
+
+
+class BalancedMatthewsCorrcoeff(Metric):
+    """Calculate the balanced Matthews correlation coefficient.
+
+    Attributes:
+        name (str): Name of the scoring function (balanced_matthews_corrcoeff).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the balanced Matthews correlation coefficient.
+
+        Args:
+            y_true (np.array): Ground truth (correct) labels. 1d array.
+            y_pred (np.array): Predicted labels. 2D array (n_samples, 1)
+
+        Returns:
+            float: The correlation coefficient.
+
+        """
+        prevalence, sen, spe = derived_confusion_matrix(y_true, y_pred)
+        return (sen + spe - 1) / (
+            (sen + (1 - spe) * (1 - prevalence) / prevalence) *
+            (spe + (1 - sen) * prevalence / (1 - prevalence))
+        )**0.5
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "balanced_matthews_corrcoeff"
 
 
 class BalancedCohenKappa(Metric):
@@ -386,10 +422,7 @@ class BalancedCohenKappa(Metric):
             float: The balanced Cohen kappa coefficient.
 
         """
-        tn, fp, fn, tp = sklearn.metrics.confusion_matrix(y_true, y_pred).ravel()
-        prevalence = sum(y_true) / len(y_true)
-        sen = tp / (tp + fn)
-        spe = tn / (tn + fp)
+        prevalence, sen, spe = derived_confusion_matrix(y_true, y_pred)
         return (2 * (sen + spe - 1)) / (
             (sen + (1 - spe) * (1 - prevalence) / prevalence) +
             (spe + (1 - sen) * prevalence / (1 - prevalence))
@@ -403,7 +436,7 @@ class BalancedCohenKappa(Metric):
 class KSlope(Metric):
     """Calculate the slope of the regression line through the origin
     between the predicted and observed values.
-    
+
     Reference: Tropsha, A., & Golbraikh, A. (2010). In J.-L. Faulon & A. Bender (Eds.),
         Handbook of Chemoinformatics Algorithms.
     https://www.taylorfrancis.com/books/9781420082999
@@ -426,118 +459,13 @@ class KSlope(Metric):
         num, denom = 0, 0
         for i in range(len(y_true)):
             num += y_true[i] * y_pred[i]
-            denom += y_true[i] ** 2
+            denom += y_true[i]**2
         return num / denom if len(y_pred) >= 2 else 0
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
         return "k_slope"
 
-
-class KPrimeSlope(Metric):
-    """Calculate the slope of the regression line through the origin
-    between the observed and predicted values.
-
-    Reference: Tropsha, A., & Golbraikh, A. (2010). In J.-L. Faulon & A. Bender (Eds.),
-    Handbook of Chemoinformatics Algorithms.
-    https://www.taylorfrancis.com/books/9781420082999
-
-
-    Attributes:
-        name (str): Name of the scoring function (k_prime_slope).
-    """
-    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
-        """Calculate the slope of the regression line through the origin
-        between the observed and predicted values.
-
-        Args:
-            y_true (np.array): Ground truth (correct) target values. 1d array.
-            y_pred (np.array): 2D array (n_samples, n_tasks)
-
-        Returns:
-            float: The coefficient of determination.
-
-        """
-        num, denom = 0, 0
-        for i in range(len(y_true)):
-            num += y_true[i] * y_pred[i]
-            denom += y_pred[i] ** 2
-        return num / denom if len(y_pred) >= 2 else 0
-
-    def __str__(self) -> str:
-        """Return the name of the scorer."""
-        return "k_prime_slope"
-    
-class Pearson(Metric):
-    """Calculate the Pearson correlation coefficient.
-
-    Attributes:
-        name (str): Name of the scoring function (pearson).
-    """
-    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
-        """Calculate the Pearson correlation coefficient.
-
-        Args:
-            y_true (np.array): Ground truth (correct) target values. 1d array.
-            y_pred (np.array): 2D array (n_samples, 1)
-
-        Returns:
-            float: The Pearson correlation coefficient.
-
-        """
-        y_pred = y_pred.flatten()
-        return scipy.stats.pearsonr(y_true, y_pred)[0] if len(y_pred) >= 2 else 0
-
-    def __str__(self) -> str:
-        """Return the name of the scorer."""
-        return "pearson"
-
-
-class Spearman(Metric):
-    """Calculate the Spearman correlation
-    
-    Attributes:
-        name (str): Name of the scoring function (spearman).
-    """
-    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
-        """Calculate the Spearman correlation
-        
-        Args:
-            y_true (np.array): Ground truth (correct) target values. 1d array.
-            y_pred (np.array): 2D array (n_samples, n_tasks)
-
-        Returns:
-            float: The Pearson Spearman coefficient.
-
-        """
-        return scipy.stats.spearmanr(y_true, y_pred)[0] if len(y_pred) >= 2 else 0
-
-    def __str__(self) -> str:
-        """Return the name of the scorer."""
-        return "spearman"
-
-class Kendall(Metric):
-    """Calculate the Kendall rank correlation coefficient.
-
-    Attributes:
-        name (str): Name of the scoring function (kendall).
-    """
-    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
-        """Calculate the Kendall rank correlation coefficient.
-
-        Args:
-            y_true (np.array): Ground truth (correct) target values. 1d array.
-            y_pred (np.array): 2D array (n_samples, n_tasks)
-
-        Returns:
-            float: The Kendall rank correlation coefficient.
-
-        """
-        return scipy.stats.kendalltau(y_true, y_pred)[0] if len(y_pred) >= 2 else 0
-
-    def __str__(self) -> str:
-        """Return the name of the scorer."""
-        return "kendall"
 
 class R20(KSlope):
     """Calculate the coefficient of determination for regression line
@@ -568,12 +496,48 @@ class R20(KSlope):
         num, denom = 0, 0
         for i in range(len(y_true)):
             num += y_true[i] - k_prime * y_pred[i]
-            denom += (y_true[i] - y_true_mean) ** 2
+            denom += (y_true[i] - y_true_mean)**2
         return 1 - num / denom if len(y_pred) >= 2 else 0
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
         return "r_2_0"
+
+
+class KPrimeSlope(Metric):
+    """Calculate the slope of the regression line through the origin
+    between the observed and predicted values.
+
+    Reference: Tropsha, A., & Golbraikh, A. (2010). In J.-L. Faulon & A. Bender (Eds.),
+    Handbook of Chemoinformatics Algorithms.
+    https://www.taylorfrancis.com/books/9781420082999
+
+
+    Attributes:
+        name (str): Name of the scoring function (k_prime_slope).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the slope of the regression line through the origin
+        between the observed and predicted values.
+
+        Args:
+            y_true (np.array): Ground truth (correct) target values. 1d array.
+            y_pred (np.array): 2D array (n_samples, n_tasks)
+
+        Returns:
+            float: The coefficient of determination.
+
+        """
+        num, denom = 0, 0
+        for i in range(len(y_true)):
+            num += y_true[i] * y_pred[i]
+            denom += y_pred[i]**2
+        return num / denom if len(y_pred) >= 2 else 0
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "k_prime_slope"
+
 
 class RPrime20(KPrimeSlope):
     """Calculate the coefficient of determination for regression line
@@ -604,9 +568,82 @@ class RPrime20(KPrimeSlope):
         num, denom = 0, 0
         for i in range(len(y_true)):
             num += y_pred[i] - k * y_true[i]
-            denom += (y_pred[i] - y_pred_mean) ** 2
+            denom += (y_pred[i] - y_pred_mean)**2
         return 1 - num / denom if len(y_pred) >= 2 else 0
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
         return "r_prime_2_0"
+
+
+class Pearson(Metric):
+    """Calculate the Pearson correlation coefficient.
+
+    Attributes:
+        name (str): Name of the scoring function (pearson).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the Pearson correlation coefficient.
+
+        Args:
+            y_true (np.array): Ground truth (correct) target values. 1d array.
+            y_pred (np.array): 2D array (n_samples, 1)
+
+        Returns:
+            float: The Pearson correlation coefficient.
+
+        """
+        y_pred = y_pred.flatten()
+        return scipy.stats.pearsonr(y_true, y_pred)[0] if len(y_pred) >= 2 else 0
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "pearson"
+
+
+class Spearman(Metric):
+    """Calculate the Spearman correlation
+
+    Attributes:
+        name (str): Name of the scoring function (spearman).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the Spearman correlation
+
+        Args:
+            y_true (np.array): Ground truth (correct) target values. 1d array.
+            y_pred (np.array): 2D array (n_samples, n_tasks)
+
+        Returns:
+            float: The Pearson Spearman coefficient.
+
+        """
+        return scipy.stats.spearmanr(y_true, y_pred)[0] if len(y_pred) >= 2 else 0
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "spearman"
+
+
+class Kendall(Metric):
+    """Calculate the Kendall rank correlation coefficient.
+
+    Attributes:
+        name (str): Name of the scoring function (kendall).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the Kendall rank correlation coefficient.
+
+        Args:
+            y_true (np.array): Ground truth (correct) target values. 1d array.
+            y_pred (np.array): 2D array (n_samples, n_tasks)
+
+        Returns:
+            float: The Kendall rank correlation coefficient.
+
+        """
+        return scipy.stats.kendalltau(y_true, y_pred)[0] if len(y_pred) >= 2 else 0
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "kendall"
