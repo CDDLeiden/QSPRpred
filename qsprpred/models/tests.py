@@ -17,7 +17,7 @@ from sklearn.metrics import (
     make_scorer,
     mean_squared_error,
     roc_auc_score,
-    top_k_accuracy_score,
+    top_k_accuracy_score
 )
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
@@ -50,7 +50,8 @@ from ..models.metrics import (
     R20,
     AbsoluteAverageFoldError,
     AverageFoldError,
-    PercentageWithinFoldError
+    PercentageWithinFoldError,
+    MaskedMetric
 )
 from ..models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ..models.scikit_learn import SklearnModel
@@ -698,6 +699,23 @@ class TestMetrics(TestCase):
         self.assertIsInstance(AbsoluteAverageFoldError()(y_true, y_pred), float)
         self.assertIsInstance(AverageFoldError()(y_true, y_pred), float)
         self.assertIsInstance(PercentageWithinFoldError()(y_true, y_pred), float)
+        
+    def test_MaskedMetric(self):
+        y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
+        y_true[1] = None
+        
+        metric = MaskedMetric(SklearnMetrics("neg_mean_squared_error"))
+        self.assertIsInstance(metric(y_true, y_pred), float)
+        
+        y_true, y_pred = self.sample_data(ModelTasks.MULTITASK_SINGLECLASS, use_proba=False)
+        y_true = y_true.astype(float)
+        y_true[0, :] = None
+        y_true[1, 1] = None
+        
+        y_true, y_pred = self.sample_data(ModelTasks.MULTITASK_SINGLECLASS, use_proba=True)
+        y_true = y_true.astype(float)
+        y_true[0, :] = None
+        y_true[1, 1] = None
     
                
 class TestEarlyStopping(ModelDataSetsPathMixIn, TestCase):
