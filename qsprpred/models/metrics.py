@@ -7,7 +7,12 @@ import scipy.stats
 import sklearn
 from sklearn.metrics import get_scorer
 from sklearn.metrics._scorer import _BaseScorer
+from rdkit.ML.Scoring.Scoring import CalcEnrichment, CalcRIE, CalcBEDROC
 
+
+# ==========================================
+#            Metrics interface
+# ==========================================
 
 class Metric(ABC):
     """Abstract class for scoring functions.
@@ -36,6 +41,10 @@ class Metric(ABC):
         """Return the name of the scorer."""
         return self.name
 
+
+# ==========================================
+#        SciKit-learn Metrics Wrapper
+# ==========================================
 
 class SklearnMetrics(Metric):
     """Wrapper for sklearn scoring functions.
@@ -104,6 +113,14 @@ class SklearnMetrics(Metric):
             y_true, y_pred, **self.scorer._kwargs
         )
 
+
+# ==========================================
+#          Classification Metrics
+# ==========================================
+
+# ------------------------------------------
+#   Classification Metrics (Probabilistic)
+# ------------------------------------------
 
 class CalibrationError(Metric):
     """Compute the calibration error of a classifier.
@@ -206,6 +223,122 @@ class CalibrationError(Metric):
     def __str__(self) -> str:
         """Return the name of the scorer."""
         return "calibration_error"
+
+class BEDROC(Metric):
+    """Calculate the Boltzmann-enhanced discrimination of ROC (BEDROC).
+
+    Reference: Truchon and Bayly, J. Chem. Inf. Model. 2007 47 (2), 488-508. DOI: 10.1021/ci600426e
+    
+    Attributes:
+        name (str): Name of the scoring function (bedroc).
+    """
+    def __init__(self, alpha: float = 20):
+        """Initialize the BEDROC scorer.
+
+        Args:
+            alpha (float): Weighting parameter (default: 20)
+        """
+        self.alpha = alpha
+    
+    def __call__(self, y_true: np.array, y_pred: list[np.array]) -> float:
+        """Calculate the BEDROC score.
+
+        Args:
+            y_true (np.array): Ground truth (correct) labels. 1d array.
+            y_pred (list[np.array]): Target probability scores.
+                List of arrays of shape (n_samples, n_classes) of length n_tasks.
+                Note. Multi-task predictions are not supported.
+
+        Returns:
+            float: The BEDROC score.
+        """
+        if isinstance(y_pred, list):
+            y_pred = y_pred[0]
+        return CalcBEDROC([[y] for _, y in sorted(zip(y_pred[1], y_true), reverse=True)],
+                          col=0,
+                          alpha=self.alpha)
+    
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "bedroc"
+    
+class EnrichmentFactor(Metric):
+    """Calculate the enrichment factor.
+
+    Attributes:
+        name (str): Name of the scoring function (enrichment_factor).
+    """
+    def __init__(self, chi: float = 0.05):
+        """Initialize the enrichment factor scorer.
+
+        Args:
+            chi (float): Weighting parameter (default: 5%)
+        """
+        self.chi = chi
+    
+    def __call__(self, y_true: np.array, y_pred: list[np.array]) -> float:
+        """Calculate the enrichment factor.
+
+        Args:
+            y_true (np.array): Ground truth (correct) labels. 1d array.
+            y_pred (list[np.array]): Target probability scores.
+                List of arrays of shape (n_samples, n_classes) of length n_tasks.
+                Note. Multi-task predictions are not supported.
+
+        Returns:
+            float: The enrichment factor.
+        """
+        if isinstance(y_pred, list):
+            y_pred = y_pred[0]
+        return CalcEnrichment([[y] for _, y in sorted(zip(y_pred[1], y_true), reverse=True)],
+                              col=0,
+                              fractions=[self.chi])[0]
+    
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "enrichment_factor"
+    
+class RobustInitialEnhancement(Metric):
+    """Calculate the robust initial enhancement.
+
+    Reference: Sheridan et al., J. Chem. Inf. Model. 2001 41 (5), 1395-1406. DOI: 10.1021/ci0100144
+
+    Attributes:
+        name (str): Name of the scoring function (robust_initial_enhancement).
+    """
+    def __init__(self, alpha: float = 100):
+        """Initialize the robust initial enhancement scorer.
+
+        Args:
+            alpha (float): Weighting parameter (default: 100)
+        """
+        self.alpha = alpha
+    
+    def __call__(self, y_true: np.array, y_pred: list[np.array]) -> float:
+        """Calculate the robust initial enhancement.
+
+        Args:
+            y_true (np.array): Ground truth (correct) labels. 1d array.
+            y_pred (list[np.array]): Target probability scores.
+                List of arrays of shape (n_samples, n_classes) of length n_tasks.
+                Note. Multi-task predictions are not supported.
+
+        Returns:
+            float: The robust initial enhancement.
+        """
+        if isinstance(y_pred, list):
+            y_pred = y_pred[0]
+        return CalcRIE([[y] for _, y in sorted(zip(y_pred[1], y_true), reverse=True)],
+                        col=0,
+                        alpha=self.alpha)
+    
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "robust_initial_enhancement"
+ 
+# ------------------------------------------
+#   Classification Metrics (Discrete)
+# ------------------------------------------
 
 
 class Prevalence(Metric):
@@ -485,6 +618,9 @@ class BalancedCohenKappa(Metric):
         """Return the name of the scorer."""
         return "balanced_cohen_kappa"
 
+# ==========================================
+#          Regression Metrics
+# ==========================================
 
 class KSlope(Metric):
     """Calculate the slope of the regression line through the origin

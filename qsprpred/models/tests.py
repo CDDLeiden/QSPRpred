@@ -32,6 +32,9 @@ from ..models.metrics import (
     BalancedNegativePredictivity,
     BalancedPositivePredictivity,
     CalibrationError,
+    BEDROC,
+    EnrichmentFactor,
+    RobustInitialEnhancement,
     NegativePredictivity,
     PositivePredictivity,
     Prevalence,
@@ -634,6 +637,23 @@ class TestMetrics(TestCase):
         with self.assertRaises(TypeError):
             cal_error(self.sample_data(ModelTasks.SINGLECLASS, use_proba=False))
 
+    def test_BEDROC(self):
+        """Test the BEDROC metric."""
+        y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS, use_proba=True)
+        bedroc = BEDROC()
+        self.assertIsInstance(bedroc(y_true, y_pred), float)
+        
+    def test_EnrichmentFactor(self):
+        """Test the enrichment factor metric."""
+        y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS, use_proba=True)
+        enrichment = EnrichmentFactor()
+        self.assertIsInstance(enrichment(y_true, y_pred), float)
+    
+    def test_RobustInitialEnhancement(self):
+        """Test the robust initial enhancement metric."""
+        y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS, use_proba=True)
+        robust_enhancement = RobustInitialEnhancement()
+        self.assertIsInstance(robust_enhancement(y_true, y_pred), float)
         
     def test_ConfusionMatrixMetrics(self):
         y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS)
