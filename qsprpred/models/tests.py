@@ -44,7 +44,10 @@ from ..models.metrics import (
     KSlope,
     Pearson,
     RPrime20,
-    R20
+    R20,
+    AbsoluteAverageFoldError,
+    AverageFoldError,
+    PercentageWithinFoldError
 )
 from ..models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ..models.scikit_learn import SklearnModel
@@ -669,6 +672,12 @@ class TestMetrics(TestCase):
     def test_RPrime20(self):
         y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
         RPrime20()(y_true, y_pred)
+        
+    def test_FoldErrorMetrics(self):
+        y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
+        self.assertIsInstance(AbsoluteAverageFoldError()(y_true, y_pred), float)
+        self.assertIsInstance(AverageFoldError()(y_true, y_pred), float)
+        self.assertIsInstance(PercentageWithinFoldError()(y_true, y_pred), float)
     
                
 class TestEarlyStopping(ModelDataSetsPathMixIn, TestCase):

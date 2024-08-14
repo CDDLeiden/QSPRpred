@@ -700,3 +700,83 @@ class Kendall(Metric):
     def __str__(self) -> str:
         """Return the name of the scorer."""
         return "kendall"
+
+class AverageFoldError(Metric):
+    """Calculate the average fold error (AFE).
+
+    Attributes:
+        name (str): Name of the scoring function (fold_error).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the fold error.
+
+        Args:
+            y_true (np.array): Ground truth (correct) target values. 1d array.
+            y_pred (np.array): 2D array (n_samples, n_tasks)
+
+        Returns:
+            float: The fold error.
+
+        """
+        return 10**(np.mean(np.log10(y_pred / y_true)))
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "average_fold_error"
+    
+class AbsoluteAverageFoldError(Metric):
+    """Calculate the absolute average fold error (AAFE).
+    
+    The AAFE is also known as the geometric mean fold error (GMFE).
+
+    Attributes:
+        name (str): Name of the scoring function (absolute_average_fold_error).
+    """
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the absolute fold error.
+
+        Args:
+            y_true (np.array): Ground truth (correct) target values. 1d array.
+            y_pred (np.array): 2D array (n_samples, n_tasks)
+
+        Returns:
+            float: The absolute average fold error.
+
+        """
+        return 10**(np.mean(np.abs(np.log10(y_pred / y_true))))
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return "absolute_average_fold_error"
+    
+class PercentageWithinFoldError(Metric):
+    """Calculate the percentage of predictions within a certain fold error.
+
+    Attributes:
+        name (str): Name of the scoring function (percentage_within_{x}_fold_error).
+    """
+    def __init__(self, fold_error: float = 2):
+        """Initialize the percentage within fold error scorer.
+
+        Args:
+            fold_error (float): The fold error threshold. Defaults to 2.
+        """
+        self.fold_error = fold_error
+
+    def __call__(self, y_true: np.array, y_pred: np.array) -> float:
+        """Calculate the percentage of predictions within a specified fold error.
+
+        Args:
+            y_true (np.array): Ground truth (correct) target values. 1d array.
+            y_pred (np.array): 2D array (n_samples, n_tasks)
+
+        Returns:
+            float: The percentage of predictions within a fold error.
+
+        """
+        fold_errors = np.abs(np.log10(y_pred / y_true))
+        return np.mean(fold_errors < np.log10(self.fold_error)) * 100
+
+    def __str__(self) -> str:
+        """Return the name of the scorer."""
+        return f"percentage_within_{self.fold_error}_fold_error"
