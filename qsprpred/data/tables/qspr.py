@@ -385,7 +385,7 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
                     df[prop_name], bins=th, include_lowest=True
                 ).astype(str))
                 self.addProperty(prop_name, LabelEncoder().fit_transform(
-                    df[f"{prop_name}_intervals"]
+                    self.getProperty(f"{prop_name}_intervals")
                 ))
             else:
                 self.addProperty(prop_name, df[prop_name] > th[0])

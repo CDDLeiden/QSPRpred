@@ -383,7 +383,14 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         """Test target property creation and serialization
         in the context of a dataset.
         """
+        storage = self.getStorage(
+            self.getSmallDF(),
+            "test_targets_storage",
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize,
+        )
         dataset = QSPRDataset(
+            storage,
             "testTargetProperty",
             [
                 {
@@ -395,10 +402,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
                     "task": TargetTasks.REGRESSION
                 },
             ],
-            df=self.getSmallDF(),
-            store_dir=self.generatedDataPath,
-            n_jobs=self.nCPU,
-            chunk_size=self.chunkSize,
+            path=self.generatedDataPath,
         )
         # Check that the make classification method works as expected
         self.checkBadInit(dataset)
@@ -409,19 +413,23 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         self.checkClassification(dataset, ["CL", "fu"], [[0, 15, 30, 60], [0.3]])
         dataset.save()
         # check precomputed threshold setting
-        df_new = dataset.df.copy()
+        df_new = storage.getDF().copy()
         del df_new["CL_original"]
+        storage = self.getStorage(
+            df_new,
+            "test_targets_storage_precomputed",
+            n_jobs=self.nCPU,
+            chunk_size=self.chunkSize,
+        )
         dataset = QSPRDataset(
+            storage,
             "testTargetProperty-precomputed",
             [{
                 "name": "CL",
                 "task": TargetTasks.MULTICLASS,
                 "th": "precomputed"
             }],
-            df=df_new,
-            store_dir=self.generatedDataPath,
-            n_jobs=self.nCPU,
-            chunk_size=self.chunkSize,
+            path=self.generatedDataPath,
         )
         self.assertEqual(len(dataset.targetProperties), 1)
         self.assertEqual(dataset.targetProperties[0].task, TargetTasks.MULTICLASS)
