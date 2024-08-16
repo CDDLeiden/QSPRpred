@@ -115,16 +115,16 @@ class ApplicabilityDomain(JSONSerializable, ABC):
         """Apply a threshold to the applicability domain.
 
         Args:
-            X (pd.DataFrame): array of features
+            X (pd.Series): array of transformed features
         """
         if self.direction == ">":
-            return self.transform(X) > self.threshold
+            return X > self.threshold
         elif self.direction == "<":
-            return self.transform(X) < self.threshold
+            return X < self.threshold
         elif self.direction == ">=":
-            return self.transform(X) >= self.threshold
+            return X >= self.threshold
         elif self.direction == "<=":
-            return self.transform(X) <= self.threshold
+            return X <= self.threshold
         else:
             raise ValueError("Direction must be set to apply threshold")
 
@@ -203,7 +203,7 @@ class MLChemADWrapper(ApplicabilityDomain):
                     "the result may be incorrect"
                 )
         return pd.Series(
-            self.applicabilityDomain.contains(X),
+            self.applicabilityDomain.contains(X.copy()),
             index=X.index,
         )
 
@@ -228,6 +228,7 @@ class KNNApplicabilityDomain(ApplicabilityDomain):
         dist: str = "euclidean",
         scaler_kwargs=None,
         njobs: int = 1,
+        astype: str | None = "float64",
     ):
         f"""Create the k-Nearest Neighbor applicability domain.
 
@@ -273,6 +274,7 @@ class KNNApplicabilityDomain(ApplicabilityDomain):
         self.hard_threshold = hard_threshold
         self.nn = NearestNeighbors(n_neighbors=k, metric=dist, n_jobs=njobs)
         self._fitted = False
+        self.astype = astype
 
     def fit(self, X):
         """Fit the applicability domain to the given feature matrix
@@ -308,11 +310,19 @@ class KNNApplicabilityDomain(ApplicabilityDomain):
 
         :return: array of distances to the kNN neighbors
         """
+        try:
+            X = X.astype(self.astype)
+        except ValueError:
+            logger.warning(
+                f"Cannot convert X to {self.astype}, fitting with raw data"
+            )
+        
         # Scale input features
-        if self.scaler is not None:
-            X = self.scaler.transform(X)
 
-        X_transformed = self.nn.kneighbors(X, return_distance=True)[0].mean(axis=1)
+        if self.scaler is not None:
+            X_scaled = self.scaler.transform(X.copy())
+
+        X_transformed = self.nn.kneighbors(X_scaled, return_distance=True)[0].mean(axis=1)
         return pd.Series(X_transformed, index=X.index)
 
     @property
