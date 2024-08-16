@@ -807,10 +807,10 @@ class TestAttachedApplicabilityDomain(ModelDataSetsPathMixIn, QSPRTestCase):
         _, ap_preds_model = model.predictMols(
             dataset.df["SMILES"], use_applicability_domain=True
         )
-        self.assertTrue(np.array_equal(ap_pred.reshape(-1, 1), ap_preds_model))
+        self.assertTrue(np.array_equal(ap_pred, ap_preds_model))
 
         # check if the applicability domain predictions arrays are equal after saving and loading
         _, ap_preds_model2 = model2.predictMols(
             dataset.df["SMILES"], use_applicability_domain=True
         )
-        self.assertTrue(np.array_equal(ap_pred.reshape(-1, 1), ap_preds_model2))
+        self.assertTrue(np.array_equal(ap_pred, ap_preds_model2))
