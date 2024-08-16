@@ -271,16 +271,16 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         """
         duplicated = ids.duplicated(keep="first")
         if sum(duplicated) > 0:
+            duplicates = (
+                ids[duplicated].index,
+                pd_table.getProperty(
+                    self.originalSmilesProp, duplicated[duplicated].index
+                    )
+                )
             logger.warning(
                 f"Duplicated identifiers found in {pd_table}."
                 f"Dropping duplicates, keeping only the first occurrence."
-                f"Molecules dropped (ID, original SMILES): {
-                ids[duplicated].index.tolist(),
-                pd_table.getProperty(
-                    self.originalSmilesProp,
-                    duplicated[duplicated].index
-                )
-                }"
+                f"Molecules dropped (ID, original SMILES): {duplicates}"
             )
         pd_table.dropEntries(duplicated[duplicated].index, ignore_missing=True)
         ids = ids[~duplicated]
@@ -290,16 +290,14 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         for lib in self._libraries.values():
             overlap = tuple(set(lib.getProperty(self.idProp)) & set(ids))
             if len(overlap) > 0:
+                duplicates = (
+                    pd_table.getProperty(self.idProp, overlap).tolist(),
+                    pd_table.getProperty(self.originalSmilesProp, overlap)
+                )
                 logger.warning(
                     f"Duplicated identifiers found in library: {lib}."
                     f"Dropping duplicates from: {pd_table}."
-                    f"Molecules dropped (ID, original SMILES): {
-                    pd_table.getProperty(self.idProp, overlap).tolist(),
-                    pd_table.getProperty(
-                        self.originalSmilesProp,
-                        overlap
-                    )
-                    }"
+                    f"Molecules dropped (ID, original SMILES): {duplicates}"
                 )
                 pd_table.dropEntries(overlap, ignore_missing=True)
 
