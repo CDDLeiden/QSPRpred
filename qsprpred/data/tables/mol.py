@@ -603,7 +603,7 @@ class MoleculeTable(MoleculeDataSet):
     #     return ret
 
     def getDF(self) -> pd.DataFrame:
-        return self.getDescriptors().join(self.storage.getDF())
+        return self.storage.getDF()
 
     def apply(self, func: callable, func_args: list | None = None,
               func_kwargs: dict | None = None, on_props: tuple[str, ...] | None = None,
@@ -665,25 +665,28 @@ class MoleculeTable(MoleculeDataSet):
     def searchWithSMARTS(self, patterns: list[str],
                          operator: Literal["or", "and"] = "or",
                          use_chirality: bool = False,
-                         name: str | None = None) -> "MoleculeTable":
+                         name: str | None = None,
+                         path: str | None = None
+                         ) -> "MoleculeTable":
         if hasattr(self.storage, "searchWithSMARTS"):
             result = self.storage.searchWithSMARTS(
                 patterns,
                 operator,
                 use_chirality,
-                name
+                name,
             )
             mol_ids = result.getProperty(result.idProp)
-            return self.getSubset(self.getProperties(), mol_ids)
+            return self.getSubset(self.getProperties(), mol_ids, name=name, path=path)
         raise NotImplementedError(
             "The underlying storage does not support SMARTS search."
         )
 
     def searchOnProperty(self, prop_name: str, values: list[float | int | str],
-                         exact=False) -> "MoleculeTable":
+                         exact=False, name: str | None = None,
+                         path: str | None = None) -> "MoleculeTable":
         result = self.storage.searchOnProperty(prop_name, values, exact)
         mol_ids = result.getProperty(result.idProp)
-        return self.getSubset(self.getProperties(), mol_ids)
+        return self.getSubset(self.getProperties(), mol_ids, name=name, path=path)
 
     def addClusters(
             self,

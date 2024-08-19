@@ -389,7 +389,9 @@ class PandasDataTable(PropertyStorage):
                     self.df.index.isin(ids)
                 ), "Not all IDs found in data set."
             else:
+                data = pd.Series(data, index=ids, name=name)
                 ids = self.df.index.intersection(ids)
+                data = data.loc[ids]
             self.df.loc[ids, name] = data
         if name == self.idProp:
             logger.warning(

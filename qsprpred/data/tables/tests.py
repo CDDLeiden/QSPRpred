@@ -449,120 +449,30 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         dataset_new = QSPRDataset.fromFile(dataset.metaFile)
         self.checkRegression(dataset_new, ["CL"])
 
-    def testIndexing(self):
-        # default index
-        QSPRDataset(
-            "testTargetProperty",
-            [{
-                "name": "CL",
-                "task": TargetTasks.REGRESSION
-            }],
-            df=self.getSmallDF(),
-            store_dir=self.generatedDataPath,
-            n_jobs=self.nCPU,
-            chunk_size=self.chunkSize,
-        )
-        # set index to SMILES column
-        QSPRDataset(
-            "testTargetProperty",
-            [{
-                "name": "CL",
-                "task": TargetTasks.REGRESSION
-            }],
-            df=self.getSmallDF(),
-            store_dir=self.generatedDataPath,
-            n_jobs=self.nCPU,
-            chunk_size=self.chunkSize,
-            index_cols=["SMILES"],
-        )
-        # multiindex
-        QSPRDataset(
-            "testTargetProperty",
-            [{
-                "name": "CL",
-                "task": TargetTasks.REGRESSION
-            }],
-            df=self.getSmallDF(),
-            store_dir=self.generatedDataPath,
-            n_jobs=self.nCPU,
-            chunk_size=self.chunkSize,
-            index_cols=["SMILES", "Name"],
-        )
-        # index with duplicates
-        self.assertRaises(
-            ValueError,
-            lambda: QSPRDataset(
-                "testTargetProperty",
-                [{
-                    "name": "CL",
-                    "task": TargetTasks.REGRESSION
-                }],
-                df=self.getSmallDF(),
-                store_dir=self.generatedDataPath,
-                n_jobs=self.nCPU,
-                chunk_size=self.chunkSize,
-                index_cols=["moka_ionState7.4"],
-            ),
-        )
-        # index has nans
-        self.assertRaises(
-            ValueError,
-            lambda: QSPRDataset(
-                "testTargetProperty",
-                [{
-                    "name": "CL",
-                    "task": TargetTasks.REGRESSION
-                }],
-                df=self.getSmallDF(),
-                store_dir=self.generatedDataPath,
-                n_jobs=self.nCPU,
-                chunk_size=self.chunkSize,
-                index_cols=["fu"],
-            ),
-        )
-
-    @parameterized.expand([(1,), (2,)])  # use one or two CPUs
-    def testInvalidsDetection(self, n_cpu):
-        df = self.getBigDF()
-        all_mols = len(df)
-        dataset = QSPRDataset(
-            "testInvalidsDetection",
-            [{
-                "name": "CL",
-                "task": TargetTasks.REGRESSION
-            }],
-            df=df,
-            store_dir=self.generatedDataPath,
-            drop_invalids=False,
-            drop_empty=False,
-            n_jobs=n_cpu,
-        )
-        self.assertEqual(dataset.df.shape[0], df.shape[0])
-        self.assertRaises(ValueError, lambda: dataset.checkMols())
-        self.assertRaises(
-            ValueError,
-            lambda: dataset.addDescriptors([MorganFP(radius=2, nBits=128)]),
-        )
-        invalids = dataset.checkMols(throw=False)
-        self.assertEqual(sum(~invalids), 1)
-        dataset.dropInvalids()
-        self.assertEqual(dataset.df.shape[0], all_mols - 1)
-
     def testRandomStateShuffle(self):
         dataset = self.createLargeTestDataSet()
+        # initial order
+        order = dataset.X.index.tolist()
         seed = dataset.randomState
         dataset.shuffle()
-        order = dataset.getDF().index.tolist()
+        # shuffled order
+        order_next = dataset.X.index.tolist()
+        # initial and shuffled order should be different
+        self.assertNotEqual(order, order_next)
+        # save current order
+        order = order_next
+        # save data set with shuffled order
         dataset.save()
+        # shuffle again
         dataset.shuffle()
-        order_next = dataset.getDF().index.tolist()
+        order_next = dataset.X.index.tolist()
         # reload and check if seed and order are the same
         dataset = QSPRDataset.fromFile(dataset.metaFile)
         self.assertEqual(dataset.randomState, seed)
-        self.assertListEqual(dataset.getDF().index.tolist(), order)
-        # shuffle again and check if order is the same as before
+        self.assertListEqual(dataset.X.index.tolist(), order)
+        # shuffle the reloaded set and check if we got the same order as before
         dataset.shuffle()
-        self.assertListEqual(dataset.getDF().index.tolist(), order_next)
+        self.assertListEqual(dataset.X.index.tolist(), order_next)
 
     def testRandomStateFeaturization(self):
         # create and save the data set

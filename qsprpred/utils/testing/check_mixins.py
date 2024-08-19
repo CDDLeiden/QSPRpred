@@ -68,8 +68,9 @@ class DescriptorCheckMixIn:
             )
 
         # check if outliers are dropped
-        if "TestOutlier" in ds.df.columns:
-            num_dropped = ds.df.TestOutlier.sum()
+        if "TestOutlier" in ds.getProperties():
+            # FIXME:  this does not seem to be called
+            num_dropped = ds.getDF().TestOutlier.sum()
             # expected number of samples is the total number of samples minus the number
             # of samples in the training set, minus the number of dropped
             expected_num_samples = len(ds) - (len(ds.X)) - num_dropped
@@ -158,6 +159,9 @@ class DataPrepCheckMixIn(DescriptorCheckMixIn):
         dataset.save()
         # reload the dataset and check consistency again
         dataset = dataset.__class__.fromFile(dataset.metaFile)
+        train2, test2 = dataset.getFeatures()
+        self.assertTrue(train.index.equals(train2.index))
+        self.assertTrue(test.index.equals(test2.index))
         self.assertEqual(dataset.name, name)
         self.assertEqual(dataset.targetProperties[0].task, TargetTasks.REGRESSION)
         for idx, prop in enumerate(expected_target_props):
@@ -182,9 +186,6 @@ class DataPrepCheckMixIn(DescriptorCheckMixIn):
         )
         self.checkFeatures(dataset, expected_feature_count)
         self.assertListEqual(sorted(dataset.featureNames), sorted(original_features))
-        train2, test2 = dataset.getFeatures()
-        self.assertTrue(train.index.equals(train2.index))
-        self.assertTrue(test.index.equals(test2.index))
 
 
 class DescriptorInDataCheckMixIn(DescriptorCheckMixIn):

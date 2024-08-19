@@ -10,6 +10,7 @@ from mlchemad.applicability_domains import (
 )
 from sklearn.preprocessing import LabelEncoder
 
+from qsprpred.data.processing.data_filters import RepeatsFilter
 from qsprpred.data.sampling.splits import DataSplit
 from qsprpred.data.tables.interfaces.qspr_data_set import QSPRDataSet
 from .interfaces.molecule_data_set import MoleculeDataSet
@@ -268,11 +269,12 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
         logger.debug("Restoring training data...")
         # split data into training and independent sets if saved previously
         df = self.getDF()
-        if "Split_IsTrain" in df.columns:
-            self._y = df.query("Split_IsTrain")[self.targetPropertyNames]
+        if "Split_IsTrain" in self.getProperties():
+            self._y = df.query("Split_IsTrain").sort_values("Split_Index")[
+                self.targetPropertyNames]
             self._y_ind = df.loc[
-                ~df.index.isin(self.y.index), self.targetPropertyNames
-            ]
+                          ~df.index.isin(self.y.index), :
+                          ].sort_values("Split_Index")[self.targetPropertyNames]
         else:
             self._y = df[self.targetPropertyNames]
             self._y_ind = df.loc[
@@ -396,14 +398,16 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
         self.restoreTrainingData()
         logger.info(f"Target property '{prop_name}' converted to classification.")
 
-    # def searchWithIndex(
-    #         self, index: pd.Index, name: str | None = None
-    # ) -> "MoleculeTable":
-    #     ret = super().searchWithIndex(index, name)
-    #     ret = QSPRDataset.fromMolTable(ret, self.targetProperties, name=ret.name)
-    #     ret.featureStandardizer = self.featureStandardizer
-    #     ret.featurize()
-    #     return ret
+    def getSubset(
+            self,
+            subset: list[str],
+            ids: list[str] | None = None,
+            name: str | None = None,
+            path: str | None = None,
+            **kwargs,
+    ) -> "QSPRDataset":
+        mt = super().getSubset(subset, ids, name, path, **kwargs)
+        return self.fromMolTable(mt, self.targetProperties, name=mt.name, **kwargs)
 
     @classmethod
     def fromMolTable(
@@ -446,15 +450,20 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
         ds.loadDescriptorsToSplits()
         return ds
 
-    # def filter(self, table_filters: list[Callable]):
-    #     """Filter the data set using the given filters.
-    #
-    #     Args:
-    #         table_filters (list[Callable]): list of filters to apply
-    #     """
-    #     super().filter(table_filters)
-    #     self.restoreTrainingData()
-    #     self.featurize()
+    def filter(self, table_filters: list[Callable]):
+        """Filter the data set using the given filters.
+
+        Args:
+            table_filters (list[Callable]): list of filters to apply
+        """
+        for filter in table_filters:
+            ret = filter(self.getDF(), self.getDescriptors())
+            ids = pd.Series(self.getProperty(self.idProp),
+                            index=self.getProperty(self.idProp))
+            ids_to_drop = ids[~ids.isin(ret.index)].values
+            self.dropEntries(ids_to_drop)
+        self.restoreTrainingData()
+        self.featurize()
 
     def addDescriptors(
             self,
@@ -499,8 +508,15 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
     def saveSplit(self):
         """Save split data to the managed data frame."""
         if self.X is not None:
-            df = self.getDF()
-            self.addProperty("Split_IsTrain", df.index.isin(self.X.index))
+            ids = pd.Series(self.getProperty(self.idProp),
+                            index=self.getProperty(self.idProp))
+            self.addProperty("Split_IsTrain", ids.isin(self.X.index).values)
+            self.addProperty("Split_Index",
+                             ids.apply(
+                                 lambda x: self.X.index.get_loc(x)
+                                 if x in self.X.index
+                                 else self.X_ind.index.get_loc(x)
+                             ))
         else:
             logger.debug("No split data available. Skipping split data save.")
 
@@ -512,13 +528,13 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
         """
         if save_split:
             self.saveSplit()
-        elif "Split_IsTrain" in self.getProperties():
-            is_outlier = self.getProperty("Split_IsOutlier")
-            ids = pd.Series(
-                self.getProperty(self.idProp),
-                index=self.getProperty(self.idProp)
-            )
-            self.dropEntries(ids[is_outlier].values)
+        # elif "Split_IsTrain" in self.getProperties():
+        #     is_outlier = self.getProperty("Split_IsOutlier")
+        #     ids = pd.Series(
+        #         self.getProperty(self.idProp),
+        #         index=self.getProperty(self.idProp)
+        #     )
+        #     self.dropEntries(ids[is_outlier].values)
         super().save()
 
     def split(self, split: DataSplit, featurize: bool = False):
@@ -587,11 +603,11 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
                 if self.y[prop.name].dtype.name == "category":
                     self.y[prop.name] = self.y[prop.name].cat.codes
                     self.y_ind[prop.name] = self.y_ind[prop.name].cat.codes
-        if "Split_IsOutlier" in self.getProperties():
-            ids = pd.Series(self.getProperty(self.idProp),
-                            index=self.getProperty(self.idProp))
-            is_outlier = self.getProperty("Split_IsOutlier")
-            self.dropEntries(ids[is_outlier].values)
+        # if "Split_IsOutlier" in self.getProperties():
+        #     ids = pd.Series(self.getProperty(self.idProp),
+        #                     index=self.getProperty(self.idProp))
+        #     is_outlier = self.getProperty("Split_IsOutlier")
+        #     self.dropEntries(ids[is_outlier].values)
         # convert splits to features if required
         if featurize:
             self.featurizeSplits(shuffle=False)
@@ -728,11 +744,11 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
             return
         else:
             for featurefilter in feature_filters:
-                self.X = featurefilter(self.X, self.y)
+                self._X = featurefilter(self.X, self.y)
             # update features
             self.featureNames = self.X.columns.to_list()
             if self.X_ind is not None:
-                self.X_ind = self.X_ind[self.featureNames]
+                self._X_ind = self.X_ind[self.featureNames]
             logger.info(f"Selected features: {self.featureNames}")
             # update descriptor calculator
             for ds in self.descriptors:
@@ -779,17 +795,17 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
         """
         if self.featureNames is not None:
             self.featureNames = self.getDescriptorNames()
-            self.X = None
-            self.X_ind = None
-            self.y = None
-            self.y_ind = None
+            self._X = None
+            self._X_ind = None
+            self._y = None
+            self._y_ind = None
             self.featureStandardizer = None
             self.applicabilityDomain = None
             self.loadDescriptorsToSplits(shuffle=False)
 
     def prepareDataset(
             self,
-            # data_filters: list | None = (RepeatsFilter(keep=True),),
+            data_filters: list | None = (RepeatsFilter(keep=True),),
             split=None,
             feature_calculators: list["DescriptorSet"] | None = None,
             feature_filters: list | None = None,
@@ -833,8 +849,8 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
         if feature_calculators is not None:
             self.addDescriptors(feature_calculators, recalculate=recalculate_features)
         # apply data filters
-        # if data_filters is not None:
-        #     self.filter(data_filters)
+        if data_filters is not None:
+            self.filter(data_filters)
         # Replace any NaN values in featureNames by 0
         # FIXME: this is not very good, we should probably add option to do custom
         # data imputation here or drop rows with NaNs
@@ -945,7 +961,8 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
         # drop outliers from test set
         if "Split_IsOutlier" in df.columns and not concat:
             if X_ind is not None:
-                X_ind = X_ind.loc[~df["Split_IsOutlier"], :]
+                X_ind = X_ind.loc[
+                        ~X_ind.index.isin(df[df["Split_IsOutlier"]].index), :]
         # replace original feature matrices if inplace
         if inplace:
             self._X = X
@@ -1180,7 +1197,7 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
         self.addProperty(
             "Split_IsOutlier",
             ~mask["in_domain"],
-            X_ind.index.values
+            mask.index.values
         )
         logger.info(
             f"Marked {(~mask).sum().sum()} samples from the test set as outlier."

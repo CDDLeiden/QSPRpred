@@ -194,13 +194,13 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         self._remove_duplicates_from_table(pd_table, ids)
         # FIXME: add RDKit molecules here if requested
         self._remove_duplicates_from_libs(pd_table, pd_table.getProperty(self.idProp))
-        if len(pd_table) == 0:
-            logger.warning(
-                f"No valid or unique molecules found "
-                f"while adding library: {pd_table.name}. "
-                "The library will be ignored."
-            )
-            return
+        # if len(pd_table) == 0:
+        #     logger.warning(
+        #         f"No valid or unique molecules found "
+        #         f"while adding library: {pd_table.name}. "
+        #         "The library will be ignored."
+        #     )
+        #     return
         self._libraries[pd_table.name] = pd_table
         # make sure all properties of the new library are present in all libraries
         props = set()
@@ -484,7 +484,8 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             subset = lib.getProperty(name, ids, ignore_missing=True)
             if len(subset) > 0:
                 subsets.append(subset)
-        return pd.concat(subsets)
+        return pd.concat(subsets) if len(subsets) > 0 else pd.Series(
+            index=pd.Index([], name=self.idProp), name=name)
 
     def getProperties(self) -> list[str]:
         ret = set()
@@ -545,7 +546,8 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         if len(self) > 0:
             return pd.concat([lib.getDF() for lib in self._libraries.values()])
         else:
-            return pd.DataFrame()
+            return pd.DataFrame(index=pd.Index([], name=self.idProp),
+                                columns=self.getProperties())
 
     def reload(self):
         self.__dict__.update(self.fromFile(self.metaFile).__dict__)
@@ -579,8 +581,8 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             self,
             prop_name: str,
             values: list[float | int | str],
+            exact=False,
             name: str | None = None,
-            exact=False
     ) -> "TabularStorageBasic":
         """Search in this table using a property name and a list of values.
         It is assumed that the property is searchable with string matching
@@ -634,7 +636,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
                     else mask | (prop == value)
                 )
             matches = self.getSubset(
-                [prop_name],
+                self.getProperties(),
                 ids=self.getProperty(self.idProp)[mask],
                 name=name,
             )
@@ -645,7 +647,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             for value in values:
                 mask = mask | (prop == value)
             matches = self.getSubset(
-                [prop_name],
+                self.getProperties(),
                 ids=self.getProperty(self.idProp)[mask],
                 name=name,
             )
