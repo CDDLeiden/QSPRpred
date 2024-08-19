@@ -321,6 +321,8 @@ class KNNApplicabilityDomain(ApplicabilityDomain):
 
         if self.scaler is not None:
             X_scaled = self.scaler.transform(X.copy())
+        else:
+            X_scaled = X.copy()
 
         X_transformed = self.nn.kneighbors(X_scaled, return_distance=True)[0].mean(axis=1)
         return pd.Series(X_transformed, index=X.index)
