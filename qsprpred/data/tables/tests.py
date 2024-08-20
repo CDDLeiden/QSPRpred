@@ -759,8 +759,9 @@ class TestTargetImputation(PathMixIn, QSPRTestCase):
 
     def testImputation(self):
         """Test the imputation of missing values in the target properties."""
-        self.dataset = QSPRDataset(
+        self.dataset = QSPRDataset.fromDF(
             "TestImputation",
+            self.df,
             target_props=[
                 {
                     "name": "y",
@@ -773,17 +774,14 @@ class TestTargetImputation(PathMixIn, QSPRTestCase):
                     "imputer": SimpleImputer(strategy="mean"),
                 },
             ],
-            df=self.df,
-            store_dir=self.generatedPath,
-            n_jobs=self.nCPU,
-            chunk_size=self.chunkSize,
+            path=self.generatedPath,
         )
         self.assertEqual(self.dataset.targetProperties[0].name, "y")
         self.assertEqual(self.dataset.targetProperties[1].name, "z")
-        self.assertTrue("y_before_impute" in self.dataset.df.columns)
-        self.assertTrue("z_before_impute" in self.dataset.df.columns)
-        self.assertEqual(self.dataset.df["y"].isna().sum(), 0)
-        self.assertEqual(self.dataset.df["z"].isna().sum(), 0)
+        self.assertTrue("y_before_impute" in self.dataset.getDF().columns)
+        self.assertTrue("z_before_impute" in self.dataset.getDF().columns)
+        self.assertEqual(self.dataset.getDF()["y"].isna().sum(), 0)
+        self.assertEqual(self.dataset.getDF()["z"].isna().sum(), 0)
 
 
 class TestTargetTransformation(DataSetsPathMixIn, QSPRTestCase):
@@ -807,7 +805,8 @@ class TestTargetTransformation(DataSetsPathMixIn, QSPRTestCase):
             ]
         )
         self.assertTrue(
-            all(dataset.df["CL"] == np.log10(dataset.df["CL_before_transform"])))
+            all(dataset.getDF()["CL"] == np.log10(
+                dataset.getDF()["CL_before_transform"])))
 
 
 class TestApply(DataSetsPathMixIn, QSPRTestCase):

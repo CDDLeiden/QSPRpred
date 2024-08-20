@@ -605,29 +605,6 @@ class PandasDataTable(PropertyStorage):
         logger.debug(f"Transformed properties in: {names}")
         logger.debug(f"Old values saved in: {names_old}")
 
-    def imputeProperties(self, names: list[str], imputer: Callable):
-        """Impute missing property values.
-
-        Args:
-            names (list):
-                List of property names to impute.
-            imputer (Callable):
-                imputer object implementing the `fit_transform`
-                 method from scikit-learn API.
-        """
-        assert hasattr(imputer, "fit_transform"), (
-            "Imputer object must implement the `fit_transform` "
-            "method from scikit-learn API."
-        )
-        assert all(
-            name in self.df.columns for name in names
-        ), "Not all properties in dataframe columns for imputation."
-        names_old = [f"{name}_before_impute" for name in names]
-        self.df[names_old] = self.df[names]
-        self.df[names] = imputer.fit_transform(self.df[names])
-        logger.debug(f"Imputed missing values for properties: {names}")
-        logger.debug(f"Old values saved in: {names_old}")
-
     def toFile(self, filename: str):
         """Save the metafile and all associated files to a custom location.
 

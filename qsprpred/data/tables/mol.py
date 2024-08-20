@@ -1,6 +1,6 @@
 import os
 import shutil
-from typing import Generator, Any, Iterable, Sized, ClassVar, Literal
+from typing import Generator, Any, Iterable, Sized, ClassVar, Literal, Callable
 
 import numpy as np
 import pandas as pd
@@ -93,6 +93,27 @@ class MoleculeTable(MoleculeDataSet):
             df_sample[self.idProp].values,
             name=name
         )
+
+    @classmethod
+    def fromDF(
+            cls,
+            name: str,
+            df: pd.DataFrame,
+            path: str = ".",
+            smiles_col: str = "SMILES",
+    ) -> "MoleculeTable":
+        """Create a `MoleculeTable` instance from a pandas DataFrame.
+
+        Args:
+            name (str): Name of the data set.
+            df (pd.DataFrame): DataFrame containing the molecule data.
+            path (str): Path to the directory where the data set will be stored.
+            smiles_col (str): Name of the column in the data frame containing the SMILES
+                sequences.
+        """
+        storage = TabularStorageBasic(f"{name}_storage", path, df,
+                                      smiles_col=smiles_col)
+        return MoleculeTable(storage, name=name, path=storage.path)
 
     @classmethod
     def fromSMILES(cls, name: str, smiles: list, path: str, *args, **kwargs):
@@ -596,11 +617,13 @@ class MoleculeTable(MoleculeDataSet):
         ret.descriptors = descriptors
         return ret
 
-    # def transformProperties(self, names: list[str],
-    #                         transformer: Callable[[Iterable[Any]], Iterable[Any]]):
-    #     subset = self.getSubset(names)
-    #     ret = pd.concat(list(subset.apply(transformer, on_props=names)))
-    #     return ret
+    def transformProperties(self, names: list[str],
+                            transformer: Callable[[Iterable[Any]], Iterable[Any]]):
+        subset = self.getDF()[names]
+        ret = subset.apply(transformer, axis=1)
+        for col in ret.columns:
+            self.addProperty(f"{col}_before_transform", subset[col])
+            self.addProperty(col, ret[col])
 
     def getDF(self) -> pd.DataFrame:
         return self.storage.getDF()
@@ -746,3 +769,29 @@ class MoleculeTable(MoleculeDataSet):
             bool: Whether the data frame contains clusters.
         """
         return len(self.getClusterNames()) > 0
+
+    def imputeProperties(self, names: list[str], imputer: Callable):
+        """Impute missing property values.
+
+        Args:
+            names (list):
+                List of property names to impute.
+            imputer (Callable):
+                imputer object implementing the `fit_transform`
+                 method from scikit-learn API.
+        """
+        df_subset = self.getDF()[names].copy()
+        assert hasattr(imputer, "fit_transform"), (
+            "Imputer object must implement the `fit_transform` "
+            "method from scikit-learn API."
+        )
+        assert all(
+            name in df_subset.columns for name in names
+        ), "Not all properties in dataframe columns for imputation."
+        names_old = [f"{name}_before_impute" for name in names]
+        df_subset[names_old] = df_subset[names]
+        df_subset[names] = imputer.fit_transform(df_subset[names])
+        for name in df_subset.columns:
+            self.addProperty(name, df_subset[name])
+        logger.debug(f"Imputed missing values for properties: {names}")
+        logger.debug(f"Old values saved in: {names_old}")

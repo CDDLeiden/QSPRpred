@@ -1,4 +1,5 @@
-from abc import ABC
+from abc import ABC, abstractmethod
+from typing import Callable, Iterable, Any
 
 from qsprpred.data.storage.interfaces.chunk_iterable import ChunkIterable
 from qsprpred.data.storage.interfaces.descriptor_provider import DescriptorProvider
@@ -19,4 +20,17 @@ class MoleculeDataSet(
     Randomized,
     ABC
 ):
-    pass
+
+    @abstractmethod
+    def imputeProperties(self, names: list[str], imputer: Callable):
+        """Impute missing values in the target properties using the given imputer.
+
+        Args:
+            names (list[str]): list of target properties names to impute
+            imputer (Callable): imputer function
+        """
+
+    @abstractmethod
+    def transformProperties(self, names: list[str],
+                            transformer: Callable[[Iterable[Any]], Iterable[Any]]):
+        pass

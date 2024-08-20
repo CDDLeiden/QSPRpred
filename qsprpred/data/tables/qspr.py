@@ -147,6 +147,18 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
         self.restoreTrainingData()
 
     @classmethod
+    def fromDF(
+            cls,
+            name: str,
+            df: pd.DataFrame,
+            target_props: list[TargetProperty | dict],
+            path: str = ".",
+            smiles_col: str = "SMILES",
+    ) -> "QSPRDataset":
+        mt = super().fromDF(name, df, path, smiles_col)
+        return QSPRDataset.fromMolTable(mt, target_props, name=name, path=path)
+
+    @classmethod
     def fromTableFile(
             cls,
             name: str,
@@ -1106,8 +1118,8 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
         if prop.imputer is not None:
             self.imputeProperties([prop.name], prop.imputer)
         # transform the property
-        # if prop.transformer is not None:
-        #     self.transformProperties([prop.name], prop.transformer)
+        if prop.transformer is not None:
+            self.transformProperties([prop.name], prop.transformer)
         # drop rows with missing smiles/no target property for any of
         # the target properties
         if drop_empty:
