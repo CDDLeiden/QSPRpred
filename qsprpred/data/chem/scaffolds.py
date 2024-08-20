@@ -6,6 +6,7 @@ from rdkit.Chem import Mol, ReplaceSubstructs
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
 from qsprpred.data.processing.mol_processor import MolProcessorWithID
+from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 
 
 class Scaffold(MolProcessorWithID, ABC):
@@ -14,7 +15,13 @@ class Scaffold(MolProcessorWithID, ABC):
     """
 
     @abstractmethod
-    def __call__(self, mols: list[str | Mol], props, *args, **kwargs):
+    def __call__(
+            self,
+            mols: list[str | Mol | StoredMol],
+            props: dict[str, list] | None = None,
+            *args,
+            **kwargs
+    ) -> pd.Series:
         """
         Calculate the scaffold for a molecule.
 
@@ -40,13 +47,14 @@ class BemisMurckoRDKit(Scaffold):
 
     """
 
-    def __call__(self, mols, props, *args, **kwargs):
+    def __call__(self, mols, props=None, *args, **kwargs):
         res = []
-        for mol in mols:
-            mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
+        ids = []
+        for mol, _id in self.iterMolsAndIDs(mols, props):
+            ids.append(_id)
             scaff = MurckoScaffold.GetScaffoldForMol(mol)
-            res.append(Chem.MolToSmiles(scaff))
-        return pd.Series(res, index=props[self.idProp])
+            res.append(Chem.MolToSmiles(scaff, canonical=True, isomericSmiles=True))
+        return pd.Series(res, index=pd.Index(ids, name=self.idProp))
 
     def __str__(self):
         return "BemisMurckoRDKit"
@@ -80,10 +88,10 @@ class BemisMurcko(Scaffold):
     """
 
     def __init__(
-        self,
-        real_bemismurcko: bool = True,
-        use_csk: bool = False,
-        id_prop: str | None = None,
+            self,
+            real_bemismurcko: bool = True,
+            use_csk: bool = False,
+            id_prop: str | None = None,
     ):
         """
         Initialize the scaffold generator.
@@ -107,10 +115,11 @@ class BemisMurcko(Scaffold):
                 res.append(a)
         return res
 
-    def __call__(self, mols, props, *args, **kwargs):
+    def __call__(self, mols, props=None, *args, **kwargs):
         res = []
-        for mol in mols:
-            mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
+        ids = []
+        for mol, _id in self.iterMolsAndIDs(mols, props):
+            ids.append(_id)
             Chem.RemoveStereochemistry(mol)  # important for canonization !
             scaff = MurckoScaffold.GetScaffoldForMol(mol)
 
@@ -127,8 +136,9 @@ class BemisMurcko(Scaffold):
                 if self.realBemisMurcko:
                     scaff = MurckoScaffold.GetScaffoldForMol(scaff)
             Chem.SanitizeMol(scaff)
-            res.append(Chem.MolToSmiles(scaff))
-        return pd.Series(res, index=props[self.idProp])
+            res.append(Chem.MolToSmiles(scaff, canonical=True, isomericSmiles=True))
+        return pd.Series(res, index=pd.Index(ids
+                                             , name=self.idProp))
 
     def __str__(self):
         return "Bemis-Murcko"

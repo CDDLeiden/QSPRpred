@@ -1,5 +1,6 @@
 from parameterized import parameterized
 
+from .standardizers.chembl import ChemblStandardizer
 from ... import TargetTasks
 from ...data.chem.clustering import RandomClusters, FPSimilarityMaxMinClusters, \
     FPSimilarityLeaderPickerClusters, ScaffoldClusters
@@ -83,14 +84,12 @@ class TestStandardizers(DataSetsPathMixIn, QSPRTestCase):
         mask = [False] * orig_len
         mask[0] = True
         df.loc[mask, "SMILES"] = "C(C)(C)(C)(C)(C)(C)(C)(C)(C)"  # bad valence example
-        dataset = QSPRDataset(
+        dataset = QSPRDataset.fromDF(
             "standardization_test_invalid_filter",
             df=df,
-            target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
-            drop_invalids=False,
-            drop_empty=False,
+            target_props=[{"name": "VDss", "task": TargetTasks.REGRESSION}],
+            path=self.generatedDataPath
         )
-        dataset.standardizeSmiles("chembl", drop_invalid=False)
         self.assertEqual(len(dataset), len(df))
-        dataset.standardizeSmiles("chembl", drop_invalid=True)
+        dataset.applyStandardizer(ChemblStandardizer())
         self.assertEqual(len(dataset), orig_len - 1)

@@ -62,8 +62,8 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
     @abstractmethod
     def getSubset(
             self,
-            subset: list[str],
-            ids: list[str] | None = None,
+            subset: Iterable[str],
+            ids: Iterable[str] | None = None,
     ) -> "PropertyStorage":
         """Get a subset of the storage for the given properties.
 

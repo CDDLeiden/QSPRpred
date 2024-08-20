@@ -102,8 +102,6 @@ class DescriptorCheckMixIn:
         # save to file, check if it can be loaded, and if the features are consistent
         dataset.save()
         ds_loaded = dataset.__class__.fromFile(dataset.metaFile)
-        self.assertEqual(ds_loaded.nJobs, dataset.nJobs)
-        self.assertEqual(ds_loaded.chunkSize, dataset.chunkSize)
         self.assertEqual(ds_loaded.randomState, dataset.randomState)
         for ds_loaded_prop, target_prop in zip(
                 ds_loaded.targetProperties, target_props

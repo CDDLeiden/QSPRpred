@@ -40,13 +40,13 @@ class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
         """Test the category filter, which drops specific values from dataset
         properties."""
         remove_cation = CategoryFilter(name="moka_ionState7.4", values=["cationic"])
-        df_anion = remove_cation(self.getBigDF())
+        df_anion = remove_cation(self.getBigDF(), self.getBigDF())
         self.assertTrue((df_anion["moka_ionState7.4"] == "cationic").sum() == 0)
 
         only_cation = CategoryFilter(
             name="moka_ionState7.4", values=["cationic"], keep=True
         )
-        df_cation = only_cation(self.getBigDF())
+        df_cation = only_cation(self.getBigDF(), self.getBigDF())
         self.assertTrue((df_cation["moka_ionState7.4"] != "cationic").sum() == 0)
 
     def testRepeatsFilter(self):
@@ -116,6 +116,16 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         self.nCPU = 2  # just to test parallel processing
         self.chunkSize = 2
         self.setUpPaths()
+        self.df = pd.DataFrame(
+            data=np.array([["C", 1], ["C", 2], ["C", 3], ["C", 4], ["C", 5], ["C", 6]]),
+            columns=["SMILES", "y"],
+        )
+        self.dataset = QSPRDataset.fromDF(
+            "TestFeatureFilters",
+            target_props=[{"name": "y", "task": TargetTasks.REGRESSION}],
+            df=self.df,
+            path=self.generatedPath,
+        )
         descriptors = [
             "Descriptor_F1",
             "Descriptor_F2",
@@ -136,22 +146,10 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
             ),
             columns=descriptors,
         )
-        self.df = pd.DataFrame(
-            data=np.array([["C", 1], ["C", 2], ["C", 3], ["C", 4], ["C", 5], ["C", 6]]),
-            columns=["SMILES", "y"],
-        )
-        self.dataset = QSPRDataset(
-            "TestFeatureFilters",
-            target_props=[{"name": "y", "task": TargetTasks.REGRESSION}],
-            df=self.df,
-            store_dir=self.generatedPath,
-            n_jobs=self.nCPU,
-            chunk_size=self.chunkSize,
-        )
-        self.df_descriptors["QSPRID"] = self.dataset.getProperty(
+        self.df_descriptors[self.dataset.idProp] = list(self.dataset.getProperty(
             self.dataset.idProp
-        ).values
-        self.df_descriptors.set_index("QSPRID", inplace=True, drop=True)
+        ))
+        self.df_descriptors.set_index(self.dataset.idProp, inplace=True, drop=True)
         self.dataset.addDescriptors([DataFrameDescriptorSet(self.df_descriptors)])
         self.descriptors = self.dataset.featureNames
 
@@ -164,7 +162,7 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         )
         self.df_descriptors["ID_COL2"] = (
             self.dataset.getProperty(self.dataset.idProp)
-            .apply(lambda x: x.split("_")[1])
+            .apply(lambda x: x.split("_")[-1])
             .to_list()
         )
         self.dataset.addProperty("ID_COL1", self.df_descriptors["ID_COL1"].values)

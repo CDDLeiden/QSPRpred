@@ -317,6 +317,7 @@ class DataFrameDescriptorSet(DescriptorSet):
             self._df,
             how="left",
             on=index_cols,
+            validate="one_to_one",
         )
         # ret is in the same order as the input mols, so we can just return the values
         return ret[self.descriptors].values

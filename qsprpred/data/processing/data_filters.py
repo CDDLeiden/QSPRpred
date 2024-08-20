@@ -17,7 +17,7 @@ class DataFilter(ABC):
     """Filter out some rows from a dataframe."""
 
     @abstractmethod
-    def __call__(self, df: pd.DataFrame) -> pd.DataFrame:
+    def __call__(self, df: pd.DataFrame, descriptors: pd.DataFrame) -> pd.DataFrame:
         """Filter out some rows from a dataframe.
 
         Args:
@@ -50,7 +50,7 @@ class CategoryFilter(DataFilter):
         self.values = values
         self.keep = keep
 
-    def __call__(self, df: pd.DataFrame) -> pd.DataFrame:
+    def __call__(self, df: pd.DataFrame, descriptors: pd.DataFrame) -> pd.DataFrame:
         """Filter rows from dataframe.
 
         Args:
@@ -95,10 +95,10 @@ class RepeatsFilter(DataFilter):
     """
 
     def __init__(
-        self,
-        keep: str | bool = False,
-        timecol: str | None = None,
-        additional_cols: list[str] = [],
+            self,
+            keep: str | bool = False,
+            timecol: str | None = None,
+            additional_cols: list[str] = [],
     ) -> None:
         """Initialize the RepeatsFilter with the keep, timecol and additional_cols
         attributes.
@@ -174,7 +174,7 @@ class RepeatsFilter(DataFilter):
             df = df.drop(list(chain(*allrepeats)))
         elif self.keep in ["first", "last"]:
             assert (
-                self.timeCol is not None
+                    self.timeCol is not None
             ), "timecol must be specified if keep is 'first' or 'last'"
             for repeat in allrepeats:
                 years = df.loc[repeat, self.timeCol]

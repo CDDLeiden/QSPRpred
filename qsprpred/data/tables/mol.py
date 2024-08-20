@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from rdkit.Chem import PandasTools
 
+from qsprpred.data.chem.clustering import MoleculeClusters
 from qsprpred.data.descriptors.sets import DescriptorSet
 from qsprpred.data.storage.interfaces.chem_store import ChemStore
 from qsprpred.data.storage.interfaces.property_storage import PropertyStorage
@@ -13,6 +14,8 @@ from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 from qsprpred.data.storage.tabular.basic_storage import TabularStorageBasic
 from .descriptor import DescriptorTable
 from .interfaces.molecule_data_set import MoleculeDataSet
+from ..chem.identifiers import ChemIdentifier
+from ..chem.standardizers import ChemStandardizer
 from ...data.chem.scaffolds import Scaffold
 from ...logs import logger
 
@@ -94,6 +97,42 @@ class MoleculeTable(MoleculeDataSet):
             name=name
         )
 
+    @property
+    def identifier(self) -> ChemIdentifier:
+        return self.storage.identifier
+
+    def applyIdentifier(self, identifier: ChemIdentifier):
+        self.storage.applyIdentifier(identifier)
+        if self.descriptorSets:
+            # FIXME: this should not drop the descriptors, but just reindex the data
+            self.dropDescriptorSets([str(x) for x in self.descriptorSets],
+                                    full_removal=True)
+            logger.warning(f"Applied identifier {identifier} to the data set.")
+            logger.warning("The data set has been reindexed and the old index is lost.")
+            logger.warning(
+                "This means that the descriptor data is no longer valid "
+                "and has been removed. "
+                "You can reload this data set if this is not what you want."
+            )
+
+    @property
+    def standardizer(self) -> ChemStandardizer:
+        return self.storage.standardizer
+
+    def applyStandardizer(self, standardizer: ChemStandardizer):
+        self.storage.applyStandardizer(standardizer)
+        if self.descriptorSets:
+            # FIXME: this should not drop the descriptors, but just reindex the data
+            self.dropDescriptorSets([str(x) for x in self.descriptorSets],
+                                    full_removal=True)
+            logger.warning(f"Applied standardizer {standardizer} to the data set.")
+            logger.warning("The data set has been reindexed and the old index is lost.")
+            logger.warning(
+                "This means that the descriptor data is no longer valid "
+                "and has been removed. "
+                "You can reload this data set if this is not what you want."
+            )
+
     @classmethod
     def fromDF(
             cls,
@@ -122,6 +161,7 @@ class MoleculeTable(MoleculeDataSet):
         Args:
             name (str): Name of the data set.
             smiles (list): list of SMILES sequences.
+            path (str): Path to the directory where the data set will be stored.
             *args: Additional arguments to pass to the `MoleculeTable` constructor.
             **kwargs: Additional keyword arguments to pass to the `MoleculeTable`
                 constructor.
@@ -596,8 +636,8 @@ class MoleculeTable(MoleculeDataSet):
 
     def getSubset(
             self,
-            subset: list[str],
-            ids: list[str] | None = None,
+            subset: Iterable[str],
+            ids: Iterable[str] | None = None,
             name: str | None = None,
             path: str | None = None,
             **kwargs,
@@ -713,7 +753,7 @@ class MoleculeTable(MoleculeDataSet):
 
     def addClusters(
             self,
-            clusters: list["MoleculeClusters"],
+            clusters: list[MoleculeClusters],
             recalculate: bool = False,
     ):
         """Add clusters to the data frame.
@@ -727,13 +767,14 @@ class MoleculeTable(MoleculeDataSet):
                 already present in the data frame.
         """
         for cluster in clusters:
-            if not recalculate and f"Cluster_{cluster}" in self.df.columns:
+            if not recalculate and f"Cluster_{cluster}" in self.getProperties():
                 continue
-            for clusters in self.processMols(cluster):
-                self.df.loc[clusters.index, f"Cluster_{cluster}"] = clusters.values
+            for clusters in self.storage.processMols(cluster):
+                self.addProperty(f"Cluster_{cluster}", clusters.values,
+                                 clusters.index.values)
 
     def getClusterNames(
-            self, clusters: list["MoleculeClusters"] | None = None
+            self, clusters: list[MoleculeClusters] | None = None
     ):
         """Get the names of the clusters in the data frame.
 
@@ -742,7 +783,7 @@ class MoleculeTable(MoleculeDataSet):
         """
         all_names = [
             col
-            for col in self.df.columns
+            for col in self.getProperties()
             if col.startswith("Cluster_")
         ]
         if clusters:
@@ -751,7 +792,7 @@ class MoleculeTable(MoleculeDataSet):
         return all_names
 
     def getClusters(
-            self, clusters: list["MoleculeClusters"] | None = None
+            self, clusters: list[MoleculeClusters] | None = None
     ):
         """Get the subset of the data frame that contains only clusters.
 
@@ -759,7 +800,7 @@ class MoleculeTable(MoleculeDataSet):
             pd.DataFrame: Data frame containing only clusters.
         """
         names = self.getClusterNames(clusters)
-        return self.df[names]
+        return self.getDF()[names]
 
     @property
     def hasClusters(self):

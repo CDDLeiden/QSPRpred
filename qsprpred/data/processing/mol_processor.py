@@ -3,6 +3,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
+from rdkit import Chem
 from rdkit.Chem import Mol
 
 from qsprpred.data.storage.interfaces.stored_mol import StoredMol
@@ -15,7 +16,8 @@ class MolProcessor(ABC):
 
     @abstractmethod
     def __call__(
-            self, mols: list[StoredMol], *args, **kwargs
+            self, mols: list[StoredMol], *args, props: dict[str, list] | None = None,
+            **kwargs
     ) -> Any:
         """Process molecules.
 
@@ -72,6 +74,14 @@ class MolProcessorWithID(MolProcessor, ABC):
                 Defaults to "QSPRID".
         """
         self.idProp = id_prop if id_prop else "ID"
+
+    def iterMolsAndIDs(self, mols, props: dict[str, list] | None):
+        for idx, mol in enumerate(mols):
+            if isinstance(mol, StoredMol):
+                yield mol.as_rd_mol(), mol.id
+            else:
+                mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
+                yield mol, props[self.idProp][idx]
 
     @property
     def requiredProps(self) -> list[str]:

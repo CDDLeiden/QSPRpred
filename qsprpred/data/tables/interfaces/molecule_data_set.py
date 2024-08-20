@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Callable, Iterable, Any
 
+from qsprpred.data.chem.identifiers import Identifiable
+from qsprpred.data.chem.standardizers.base import Standardizable
 from qsprpred.data.storage.interfaces.chunk_iterable import ChunkIterable
 from qsprpred.data.storage.interfaces.descriptor_provider import DescriptorProvider
 from qsprpred.data.storage.interfaces.mol_processable import MolProcessable
@@ -18,6 +20,8 @@ class MoleculeDataSet(
     Summarizable,
     ChunkIterable,
     Randomized,
+    Identifiable,
+    Standardizable,
     ABC
 ):
 

@@ -9,7 +9,7 @@ import sys
 import typing
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Callable, List, Type, Union
+from typing import Any, List, Type, Union
 
 import numpy as np
 import pandas as pd
@@ -451,7 +451,6 @@ class QSPRModel(JSONSerializable, ABC):
     def createPredictionDatasetFromMols(
             self,
             mols: list[str | Mol],
-            smiles_standardizer: str | Callable[[str], str] = "chembl",
             n_jobs: int = 1,
             fill_value: float = np.nan,
     ) -> tuple[QSPRDataset, np.ndarray]:
@@ -474,6 +473,7 @@ class QSPRModel(JSONSerializable, ABC):
         dataset = MoleculeTable.fromSMILES(
             f"{self.__class__.__name__}_{hash(self)}",
             mols,
+            self.baseDir,
             drop_invalids=False,
             n_jobs=n_jobs,
         )
@@ -488,11 +488,10 @@ class QSPRModel(JSONSerializable, ABC):
             drop_invalids=False,
             n_jobs=n_jobs,
         )
-        dataset.standardizeSmiles(smiles_standardizer, drop_invalid=False)
+        dataset.applyStandardizer(self.chemStandardizer)
         failed_mask = dataset.dropInvalids().values
         # prepare dataset and return it
         dataset.prepareDataset(
-            smiles_standardizer=smiles_standardizer,
             feature_calculators=self.featureCalculators,
             feature_standardizer=self.featureStandardizer,
             feature_fill_value=fill_value,

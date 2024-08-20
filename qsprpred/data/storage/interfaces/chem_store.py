@@ -1,38 +1,21 @@
 from abc import ABC, abstractmethod
 from typing import Iterable, Generator, Any
 
-from qsprpred.data.chem.identifiers import ChemIdentifier
+from qsprpred.data.chem.identifiers import ChemIdentifier, Identifiable
 from qsprpred.data.chem.standardizers import ChemStandardizer
+from qsprpred.data.chem.standardizers.base import Standardizable
 from qsprpred.data.processing.mol_processor import MolProcessor
 from qsprpred.data.storage.interfaces.mol_processable import MolProcessable
 from qsprpred.data.storage.interfaces.property_storage import PropertyStorage
 from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 
 
-class ChemStore(PropertyStorage, MolProcessable, ABC):
+class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, ABC):
 
     @property
     @abstractmethod
     def smilesProp(self) -> str:
         """Get the name of the property that contains the SMILES strings."""
-
-    @property
-    @abstractmethod
-    def standardizer(self) -> ChemStandardizer:
-        """
-        Get the standardizer used by the store.
-
-        :return: `ChemStandardizer` instance
-        """
-
-    @property
-    @abstractmethod
-    def identifier(self) -> ChemIdentifier:
-        """
-        Get the identifier used by the store.
-
-        :return: `ChemIdentifier` instance
-        """
 
     @property
     def n_mols(self) -> int:
@@ -129,6 +112,7 @@ class ChemStore(PropertyStorage, MolProcessable, ABC):
     def __bool__(self):
         return len(self) > 0
 
+    @abstractmethod
     def processMols(
             self,
             processor: MolProcessor,
@@ -137,3 +121,21 @@ class ChemStore(PropertyStorage, MolProcessable, ABC):
             add_props: Iterable[str] | None = None,
     ) -> Generator:
         pass
+
+    @abstractmethod
+    def applyIdentifier(self, identifier: ChemIdentifier):
+        """
+        Apply a new identifier to the store.
+
+        :param identifier: new identifier to apply
+        :return:
+        """
+
+    @abstractmethod
+    def applyStandardizer(self, standardizer: ChemStandardizer):
+        """
+        Apply a new standardizer to the store.
+
+        :param standardizer: new standardizer to apply
+        :return:
+        """

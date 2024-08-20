@@ -1,4 +1,3 @@
-import os
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -10,7 +9,7 @@ from rdkit.SimDivFilters import rdSimDivPickers
 from qsprpred.data.processing.mol_processor import MolProcessorWithID
 from .scaffolds import BemisMurckoRDKit, Scaffold
 from ..descriptors.fingerprints import Fingerprint, MorganFP
-from ..tables.mol import MoleculeTable
+from ..storage.interfaces.stored_mol import StoredMol
 from ...logs import logger
 
 
@@ -22,7 +21,9 @@ class MoleculeClusters(MolProcessorWithID, ABC):
         nClusters (int): number of clusters
     """
 
-    def __call__(self, mols: list[str | Mol], props, *args, **kwargs):
+    def __call__(self, mols: list[str | Mol | StoredMol],
+                 props: dict[str, list] | None = None,
+                 *args, **kwargs) -> pd.Series:
         """
         Calculate the clusters for a list of  molecules.
 
@@ -32,17 +33,23 @@ class MoleculeClusters(MolProcessorWithID, ABC):
         Returns:
             list of cluster index for each molecule
         """
-        if isinstance(mols[0], Mol):
-            mols = [Chem.MolToSmiles(mol) for mol in mols]
-
-        clusters = self.get_clusters(mols)
+        smiles = []
+        ids = []
+        if props and "SMILES" in props:
+            mols = props["SMILES"]
+            ids = props[self.idProp]
+        else:
+            for mol, _id in self.iterMolsAndIDs(mols, props):
+                ids.append(_id)
+                smiles.append(Chem.MolToSmiles(mol))
+        clusters = self.get_clusters(smiles)
 
         # map clusters to molecules
         output = np.array([-1] * len(mols))
         for cluster_idx, molecule_idxs in clusters.items():
             output[molecule_idxs] = cluster_idx
 
-        return pd.Series(output, index=props[self.idProp])
+        return pd.Series(output, index=pd.Index(ids, name=self.idProp))
 
     @abstractmethod
     def get_clusters(self, smiles_list: list[str]) -> dict:
@@ -148,8 +155,9 @@ class ScaffoldClusters(MoleculeClusters):
         """
 
         # Generate scaffolds for each molecule
-        mt = MoleculeTable(
-            "scaffolds", pd.DataFrame({"SMILES": smiles_list}), n_jobs=os.cpu_count()
+        from qsprpred.data import MoleculeTable
+        mt = MoleculeTable.fromDF(
+            "scaffolds", pd.DataFrame({"SMILES": smiles_list})
         )
         mt.addScaffolds([self.scaffold])
         scaffolds = (
