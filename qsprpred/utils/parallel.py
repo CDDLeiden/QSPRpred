@@ -337,7 +337,7 @@ class ThreadsJITGenerator(JITParallelGenerator):
         return ThreadPoolExecutor(max_workers=self.nWorkers)
 
     def checkResultAvailable(self, process: Future):
-        time.sleep(0.1)
+        time.sleep(0.01)
         return process.done()
 
     def getResult(self, process: Any):
@@ -373,7 +373,7 @@ class MultiprocessingJITGenerator(JITParallelGenerator):
 
     def checkResultAvailable(self, process):
         try:
-            process.wait(0.1)
+            process.wait(0.01)
             # check if process is done
             if not process.ready():
                 # not finished, return nothing
@@ -448,7 +448,7 @@ class PebbleJITGenerator(JITParallelGenerator):
                 "Failed to import pool type 'pebble'. Install it first.")
 
     def checkResultAvailable(self, process: ProcessFuture):
-        time.sleep(0.1)
+        time.sleep(0.01)
         return process.done()
 
     def getResult(self, process: Any):
