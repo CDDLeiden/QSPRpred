@@ -832,9 +832,9 @@ class TestApply(DataSetsPathMixIn, QSPRTestCase):
         dataset.chunkSize = chunk_size
         result = dataset.apply(
             self.regularFunc,
-            on_props=["CL", "fu"],
             func_args=[1, 2, 3],
             func_kwargs={"A_col": "A", "B_col": "B"},
+            chunk_type="df"
         )
         for item in result:
             self.assertIsInstance(item, pd.DataFrame)

@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from qsprpred.data.storage.interfaces.property_storage import PropertyStorage
+from qsprpred.utils.interfaces.randomized import Randomized
 from ...logs import logger
 from ...utils.parallel import batched_generator, ParallelGenerator, \
     MultiprocessingJITGenerator
@@ -14,7 +15,7 @@ from ...utils.serialization import JSONSerializable
 from ...utils.stringops import generate_padded_index
 
 
-class PandasDataTable(PropertyStorage):
+class PandasDataTable(PropertyStorage, Randomized):
     """A Pandas DataFrame wrapper class to enable data processing functions on
     QSPRpred data.
 
@@ -57,36 +58,6 @@ class PandasDataTable(PropertyStorage):
             remote servers instead of local processes).
     """
 
-    def searchOnProperty(
-            self,
-            prop_name: str,
-            values: list[str],
-            exact=False
-    ) -> "PandasDataTable":
-        """Search the molecules within this `MoleculeDataSet` on a property value
-        and return the appropriate subset.
-
-        Args:
-            prop_name:
-                Name of the column to search on.
-            values:
-                Values to search for.
-            name:
-                Name of the new table.
-            exact:
-                Whether to search for exact matches or not.
-
-        Returns:
-            (MoleculeStorage):
-                A data set with the molecules that match the search.
-        """
-
-    def __contains__(self, item):
-        return item in self.df.index
-
-    def __getitem__(self, item):
-        self.getSubset(self.getProperties(), ids=item)
-
     _notJSON: ClassVar = [*JSONSerializable._notJSON, "df"]
 
     def __init__(
@@ -98,7 +69,7 @@ class PandasDataTable(PropertyStorage):
             index_cols: list[str] | None = None,
             n_jobs: int = 1,
             chunk_size: int | None = None,
-            autoindex_name: str = "QSPRID",
+            autoindex_name: str = "ID",
             random_state: int | None = None,
             store_format: str = "pkl",
             parallel_generator: ParallelGenerator | None = None,
@@ -135,7 +106,7 @@ class PandasDataTable(PropertyStorage):
                 Random state to use for all random operations
                 for reproducibility. If not specified, the state is generated randomly.
                 The state is saved upon `save` so if you want to change the state later,
-                call the `setRandomState` method after loading.
+                set it in the `randomState` property.
             store_format (str):
                 Format to use for storing the data frame.
                 Currently only 'pkl' and 'csv' are supported.
@@ -149,9 +120,8 @@ class PandasDataTable(PropertyStorage):
         self._idProp = autoindex_name
         self.storeFormat = store_format
         self.randomState = None
-        self.setRandomState(
-            random_state or int(np.random.randint(0, 2 ** 31 - 1, dtype=np.int64))
-        )
+        self.randomState = random_state or int(
+            np.random.randint(0, 2 ** 31 - 1, dtype=np.int64))
         self.name = name
         self.indexCols = index_cols
         # paths
@@ -189,6 +159,44 @@ class PandasDataTable(PropertyStorage):
         self.parallelGenerator = parallel_generator or MultiprocessingJITGenerator(
             self.nJobs
         )
+
+    @property
+    def randomState(self) -> int:
+        return self._seed
+
+    @randomState.setter
+    def randomState(self, value: int):
+        self._seed = value
+
+    def searchOnProperty(
+            self,
+            prop_name: str,
+            values: list[str],
+            exact=False
+    ) -> "PandasDataTable":
+        """Search the molecules within this `MoleculeDataSet` on a property value
+        and return the appropriate subset.
+
+        Args:
+            prop_name:
+                Name of the column to search on.
+            values:
+                Values to search for.
+            name:
+                Name of the new table.
+            exact:
+                Whether to search for exact matches or not.
+
+        Returns:
+            (MoleculeStorage):
+                A data set with the molecules that match the search.
+        """
+
+    def __contains__(self, item):
+        return item in self.df.index
+
+    def __getitem__(self, item):
+        self.getSubset(self.getProperties(), ids=item)
 
     @property
     def idProp(self) -> str:
@@ -673,15 +681,6 @@ class PandasDataTable(PropertyStorage):
         self.df = self.df.sample(
             frac=1, random_state=random_state if random_state else self.randomState
         )
-
-    def setRandomState(self, random_state: int):
-        """Set the random state for this instance.
-
-        Args:
-            random_state (int):
-                Random state to use for shuffling and other random operations.
-        """
-        self.randomState = random_state
 
     def dropEntries(self, ids: Iterable[str], ignore_missing: bool = False):
         if ignore_missing:

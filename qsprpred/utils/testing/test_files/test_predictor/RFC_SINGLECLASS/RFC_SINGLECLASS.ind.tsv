@@ -1,4 +1,4 @@
-QSPRID	CL_Label	CL_Prediction	CL_ProbabilityClass_0	CL_ProbabilityClass_1
+ID	CL_Label	CL_Prediction	CL_ProbabilityClass_0	CL_ProbabilityClass_1
 PredictorDescriptorDataset_083	False	0	0.73	0.27
 PredictorDescriptorDataset_015	False	0	0.5	0.5
 PredictorDescriptorDataset_112	False	0	0.66	0.34

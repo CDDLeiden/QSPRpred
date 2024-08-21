@@ -9,15 +9,17 @@ import sys
 import typing
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, List, Type, Union
+from typing import Any, List, Type, Iterable
 
 import numpy as np
 import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import Mol
 
+from qsprpred.data import QSPRDataset
+from ..data.storage.tabular.basic_storage import TabularStorageBasic
+from ..data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ..data.tables.mol import MoleculeTable
-from ..data.tables.qspr import QSPRDataset
 from ..logs import logger
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
 from ..tasks import ModelTasks
@@ -200,6 +202,7 @@ class QSPRModel(JSONSerializable, ABC):
         assert (
                 self.alg is not None
         ), "Algorithm class not initialized when it should be."
+        self.chemStandardizer = None
 
     def __str__(self) -> str:
         """Return the name of the model and the underlying class as the identifier."""
@@ -218,7 +221,7 @@ class QSPRModel(JSONSerializable, ABC):
             self.alg = dynamic_import(self.alg)
         self.estimator = self.loadEstimator(self.parameters)
 
-    def initFromDataset(self, data: QSPRDataset | None):
+    def initFromDataset(self, data: QSPRDataSet | None):
         if data is not None:
             self.targetProperties = data.targetProperties
             self.nTargets = len(self.targetProperties)
@@ -226,11 +229,13 @@ class QSPRModel(JSONSerializable, ABC):
             self.featureStandardizer = data.featureStandardizer
             if self.randomState is None:
                 self.initRandomState(data.randomState)
+            self.chemStandardizer = data.standardizer
         else:
             self.targetProperties = None
             self.nTargets = None
             self.featureCalculators = None
             self.featureStandardizer = None
+            self.chemStandardizer = None
 
     def initRandomState(self, random_state):
         """Set random state if applicable.
@@ -383,7 +388,7 @@ class QSPRModel(JSONSerializable, ABC):
         if reset_estimator:
             self.estimator = self.loadEstimator(self.parameters)
 
-    def checkData(self, ds: QSPRDataset, exception: bool = True) -> bool:
+    def checkData(self, ds: QSPRDataSet, exception: bool = True) -> bool:
         """Check if the model has a data set.
 
         Args:
@@ -404,8 +409,8 @@ class QSPRModel(JSONSerializable, ABC):
 
     def convertToNumpy(
             self,
-            X: pd.DataFrame | np.ndarray | QSPRDataset,
-            y: pd.DataFrame | np.ndarray | QSPRDataset | None = None,
+            X: pd.DataFrame | np.ndarray | QSPRDataSet,
+            y: pd.DataFrame | np.ndarray | QSPRDataSet | None = None,
     ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
         """Convert the given data matrix and target matrix to np.ndarray format.
 
@@ -416,12 +421,12 @@ class QSPRModel(JSONSerializable, ABC):
         Returns:
                 data matrix and/or target matrix in np.ndarray format
         """
-        if isinstance(X, QSPRDataset):
+        if isinstance(X, QSPRDataSet):
             X = X.getFeatures(concat=True, refit_standardizer=False)
         if isinstance(X, pd.DataFrame):
             X = X.values
         if y is not None:
-            if isinstance(y, QSPRDataset):
+            if isinstance(y, QSPRDataSet):
                 y = y.getTargets(concat=True)
             if isinstance(y, pd.DataFrame):
                 y = y.values
@@ -453,12 +458,11 @@ class QSPRModel(JSONSerializable, ABC):
             mols: list[str | Mol],
             n_jobs: int = 1,
             fill_value: float = np.nan,
-    ) -> tuple[QSPRDataset, np.ndarray]:
+    ) -> tuple[QSPRDataSet, np.ndarray]:
         """Create a `QSPRDataset` instance from a list of SMILES strings.
 
         Args:
             mols (list[str | Mol]): list of SMILES strings
-            smiles_standardizer (str, callable): smiles standardizer to use
             n_jobs (int): number of parallel jobs to use
             fill_value (float): value to fill for missing features
 
@@ -470,12 +474,23 @@ class QSPRModel(JSONSerializable, ABC):
         # make a molecule table first and add the target properties
         if isinstance(mols[0], Mol):
             mols = [Chem.MolToSmiles(mol) for mol in mols]
-        dataset = MoleculeTable.fromSMILES(
-            f"{self.__class__.__name__}_{hash(self)}",
-            mols,
+        storage = TabularStorageBasic(
+            f"{self.__class__.__name__}_{hash(self)}_store",
             self.baseDir,
-            drop_invalids=False,
+            pd.DataFrame({"SMILES": mols}),
+            standardizer=self.chemStandardizer,
             n_jobs=n_jobs,
+        )
+        failed_mask = np.full(len(mols), False)
+        if len(storage) != len(mols):
+            original_smiles = storage.getProperty("SMILES_original")
+            for i, mol in enumerate(mols):
+                if mol not in original_smiles:
+                    failed_mask[i] = True
+        dataset = MoleculeTable(
+            storage,
+            f"{self.__class__.__name__}_{hash(self)}",
+            path=self.baseDir,
         )
         for target_property in self.targetProperties:
             target_property.imputer = None
@@ -484,12 +499,8 @@ class QSPRModel(JSONSerializable, ABC):
         dataset = QSPRDataset.fromMolTable(
             dataset,
             self.targetProperties,
-            drop_empty=False,
-            drop_invalids=False,
-            n_jobs=n_jobs,
+            drop_empty_target_props=False,
         )
-        dataset.applyStandardizer(self.chemStandardizer)
-        failed_mask = dataset.dropInvalids().values
         # prepare dataset and return it
         dataset.prepareDataset(
             feature_calculators=self.featureCalculators,
@@ -500,7 +511,7 @@ class QSPRModel(JSONSerializable, ABC):
         return dataset, failed_mask
 
     def predictDataset(
-            self, dataset: QSPRDataset, use_probas: bool = False
+            self, dataset: QSPRDataSet, use_probas: bool = False
     ) -> np.ndarray | list[np.ndarray]:
         """
         Make predictions for the given dataset.
@@ -526,9 +537,8 @@ class QSPRModel(JSONSerializable, ABC):
 
     def predictMols(
             self,
-            mols: List[str | Mol],
+            mols: Iterable[str | Mol],
             use_probas: bool = False,
-            smiles_standardizer: Union[str, callable] = "chembl",
             n_jobs: int = 1,
             fill_value: float = np.nan,
             use_applicability_domain: bool = False,
@@ -539,9 +549,6 @@ class QSPRModel(JSONSerializable, ABC):
         Args:
             mols (List[str  | Mol]): list of SMILES strings
             use_probas (bool): use probabilities for classification models
-            smiles_standardizer:
-                either `chembl`, `old`, or a partial function
-                that reads and standardizes smiles.
             n_jobs: Number of jobs to use for parallel processing.
             fill_value: Value to use for missing values in the feature matrix.
             use_applicability_domain: Use applicability domain to return if a
@@ -558,7 +565,7 @@ class QSPRModel(JSONSerializable, ABC):
             raise ValueError("No feature calculator set on this instance.")
         # create data set from mols
         dataset, failed_mask = self.createPredictionDatasetFromMols(
-            mols, smiles_standardizer, n_jobs, fill_value
+            mols, n_jobs, fill_value
         )
         # make predictions for the dataset
         predictions = self.predictDataset(dataset, use_probas)
@@ -586,7 +593,7 @@ class QSPRModel(JSONSerializable, ABC):
 
     def fitDataset(
             self,
-            ds: QSPRDataset,
+            ds: QSPRDataSet,
             monitor=None,
             mode=EarlyStoppingMode.OPTIMAL,
             save_model=True,
@@ -719,7 +726,7 @@ class QSPRModel(JSONSerializable, ABC):
 
     @abstractmethod
     def predict(
-            self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
+            self, X: pd.DataFrame | np.ndarray | QSPRDataSet, estimator: Any = None
     ) -> np.ndarray:
         """Make predictions for the given data matrix or `QSPRDataset`.
 
@@ -741,7 +748,7 @@ class QSPRModel(JSONSerializable, ABC):
 
     @abstractmethod
     def predictProba(
-            self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
+            self, X: pd.DataFrame | np.ndarray | QSPRDataSet, estimator: Any = None
     ) -> list[np.ndarray]:
         """Make predictions for the given data matrix or `QSPRDataset`,
         but use probabilities for classification models. Does not work with

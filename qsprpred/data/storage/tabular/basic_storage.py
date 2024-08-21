@@ -176,13 +176,6 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         self._remove_duplicates_from_table(pd_table, ids)
         # FIXME: add RDKit molecules here if requested
         self._remove_duplicates_from_libs(pd_table, pd_table.getProperty(self.idProp))
-        # if len(pd_table) == 0:
-        #     logger.warning(
-        #         f"No valid or unique molecules found "
-        #         f"while adding library: {pd_table.name}. "
-        #         "The library will be ignored."
-        #     )
-        #     return
         self._libraries[pd_table.name] = pd_table
         # make sure all properties of the new library are present in all libraries
         props = set()
@@ -360,7 +353,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         if props:
             data.update(props)
         df = pd.DataFrame(data)
-        library = library or self.name
+        library = library or f"{self.name}_library"
         if library not in self._libraries:
             self.add_library(
                 name=library,
@@ -802,7 +795,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
                 yield chunk_converters[chunk_type](chunk, on_props)
 
     def _convert_chunk_df(self, chunk, on_props):
-        return chunk[{self.idProp, self.smilesProp, *on_props}]
+        return chunk[list({self.idProp, self.smilesProp, *on_props})]
 
     def _convert_chunk_mol(self, chunk, on_props):
         ids = chunk[self.idProp]

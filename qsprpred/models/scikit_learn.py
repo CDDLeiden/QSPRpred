@@ -28,13 +28,13 @@ class SklearnModel(QSPRModel):
     """
 
     def __init__(
-        self,
-        base_dir: str,
-        alg=None,
-        name: str | None = None,
-        parameters: dict | None = None,
-        autoload: bool = True,
-        random_state: int | None = None,
+            self,
+            base_dir: str,
+            alg=None,
+            name: str | None = None,
+            parameters: dict | None = None,
+            autoload: bool = True,
+            random_state: int | None = None,
     ):
         """Initialize SklearnModel model.
 
@@ -61,9 +61,9 @@ class SklearnModel(QSPRModel):
             raise
         # set parameters if defined
         if (
-            (self.parameters not in [None, {}])
-            and hasattr(self, "estimator")
-            and self.estimator is not None
+                (self.parameters not in [None, {}])
+                and hasattr(self, "estimator")
+                and self.estimator is not None
         ):
             try:
                 check_is_fitted(self.estimator)
@@ -91,7 +91,7 @@ class SklearnModel(QSPRModel):
             return self.alg()
 
     def loadEstimatorFromFile(
-        self, params: dict | None = None, fallback_load: bool = True
+            self, params: dict | None = None, fallback_load: bool = True
     ):
         """Load estimator from file.
 
@@ -128,13 +128,13 @@ class SklearnModel(QSPRModel):
         return estimator_path
 
     def fit(
-        self,
-        X: pd.DataFrame | np.ndarray,
-        y: pd.DataFrame | np.ndarray,
-        estimator: Any = None,
-        mode: Any = None,
-        monitor: None = None,
-        **kwargs,
+            self,
+            X: pd.DataFrame | np.ndarray,
+            y: pd.DataFrame | np.ndarray,
+            estimator: Any = None,
+            mode: Any = None,
+            monitor: None = None,
+            **kwargs,
     ):
         # check for incompatible tasks
         if self.task == ModelTasks.MULTITASK_MIXED:
@@ -156,7 +156,7 @@ class SklearnModel(QSPRModel):
         return estimator.fit(X, y)
 
     def predict(
-        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
+            self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
     ):
         """See `QSPRModel.predict`."""
         estimator = self.estimator if estimator is None else estimator
@@ -170,7 +170,7 @@ class SklearnModel(QSPRModel):
         return preds
 
     def predictProba(
-        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
+            self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
     ):
         """See `QSPRModel.predictProba`."""
         estimator = self.estimator if estimator is None else estimator

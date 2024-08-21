@@ -531,7 +531,7 @@ class TanimotoDistances(DescriptorSet):
             DataStructs.CreateFromBitString("".join(map(str, x)))
             for x in self.fp.getDescriptors(
                 [Chem.MolFromSmiles(smiles) for smiles in list_of_smiles],
-                props={"QSPRID": list_of_smiles},
+                props={"ID": list_of_smiles},
             )
         ]
 

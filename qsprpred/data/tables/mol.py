@@ -57,7 +57,7 @@ class MoleculeTable(MoleculeDataSet):
         """
         self.storage = storage
         self.name = name or f"{self.storage}_mol_table"
-        self._randomState = random_state
+        self.randomState = random_state
         self.descriptors = []
         self.path = os.path.abspath(os.path.join(path, self.name))
         self.storeFormat = store_format
@@ -70,7 +70,7 @@ class MoleculeTable(MoleculeDataSet):
 
     @randomState.setter
     def randomState(self, seed: int | None):
-        self._randomState = seed
+        self._randomState = seed or np.random.randint(0, 2 ** 32 - 1)
 
     def sample(
             self, n: int, name: str | None = None, random_state: int | None = None
@@ -219,12 +219,11 @@ class MoleculeTable(MoleculeDataSet):
         return cls(storage, path=os.path.dirname(storage.path))
 
     @property
-    def smiles(self) -> Generator[str, None, None]:
-        """Get the SMILES strings of the molecules in the data frame.
+    def smilesProp(self) -> str:
+        return self.storage.smilesProp
 
-        Returns:
-            Generator[str, None, None]: Generator of SMILES strings.
-        """
+    @property
+    def smiles(self) -> Generator[str, None, None]:
         return self.storage.smiles
 
     def addScaffolds(
@@ -669,10 +668,15 @@ class MoleculeTable(MoleculeDataSet):
     def getDF(self) -> pd.DataFrame:
         return self.storage.getDF()
 
-    def apply(self, func: callable, func_args: list | None = None,
-              func_kwargs: dict | None = None, on_props: tuple[str, ...] | None = None,
-              as_df: bool = True) -> Generator[Iterable[Any], None, None]:
-        return self.storage.apply(func, func_args, func_kwargs, on_props, as_df)
+    def apply(
+            self,
+            func: callable,
+            func_args: list | None = None,
+            func_kwargs: dict | None = None,
+            on_props: tuple[str, ...] | None = None,
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
+    ) -> Generator[Iterable[Any], None, None]:
+        return self.storage.apply(func, func_args, func_kwargs, on_props, chunk_type)
 
     def dropEntries(self, ids: Iterable[str]):
         # FIXME: do not drop from storage here, but just mask the removed entries

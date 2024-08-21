@@ -28,24 +28,24 @@ class PCMDataSet(QSPRDataset):
     """
 
     def __init__(
-        self,
-        name: str,
-        protein_col: str,
-        target_props: list[TargetProperty | dict],
-        df: pd.DataFrame | None = None,
-        smiles_col: str = "SMILES",
-        protein_seq_provider: Callable | None = None,
-        add_rdkit: bool = False,
-        store_dir: str = ".",
-        overwrite: bool = False,
-        n_jobs: int | None = 1,
-        chunk_size: int | None = None,
-        drop_invalids: bool = True,
-        drop_empty: bool = True,
-        index_cols: list[str] | None = None,
-        autoindex_name: str = "QSPRID",
-        random_state: int | None = None,
-        store_format: str = "pkl",
+            self,
+            name: str,
+            protein_col: str,
+            target_props: list[TargetProperty | dict],
+            df: pd.DataFrame | None = None,
+            smiles_col: str = "SMILES",
+            protein_seq_provider: Callable | None = None,
+            add_rdkit: bool = False,
+            store_dir: str = ".",
+            overwrite: bool = False,
+            n_jobs: int | None = 1,
+            chunk_size: int | None = None,
+            drop_invalids: bool = True,
+            drop_empty: bool = True,
+            index_cols: list[str] | None = None,
+            autoindex_name: str = "ID",
+            random_state: int | None = None,
+            store_format: str = "pkl",
     ):
         """Construct a data set to handle PCM data.
 
@@ -136,12 +136,12 @@ class PCMDataSet(QSPRDataset):
         return self.proteinSeqProvider(self.getProteinKeys())
 
     def addDescriptors(
-        self,
-        descriptors: list[DescriptorSet | ProteinDescriptorSet],
-        recalculate: bool = False,
-        featurize: bool = True,
-        *args,
-        **kwargs,
+            self,
+            descriptors: list[DescriptorSet | ProteinDescriptorSet],
+            recalculate: bool = False,
+            featurize: bool = True,
+            *args,
+            **kwargs,
     ):
         # make sure the acc_keys property is set for ProteinDescriptorSets
         self.df["acc_keys"] = self.df[self.proteinCol]
@@ -189,11 +189,11 @@ class PCMDataSet(QSPRDataset):
 
     @staticmethod
     def fromMolTable(
-        mol_table: MoleculeTable,
-        protein_col: str,
-        target_props: list[TargetProperty | dict] | None = None,
-        name: str | None = None,
-        **kwargs,
+            mol_table: MoleculeTable,
+            protein_col: str,
+            target_props: list[TargetProperty | dict] | None = None,
+            name: str | None = None,
+            **kwargs,
     ) -> "PCMDataSet":
         """Construct a data set to handle PCM data from a `MoleculeTable`.
 
@@ -226,7 +226,7 @@ class PCMDataSet(QSPRDataset):
         return ret
 
     def searchWithIndex(
-        self, index: pd.Index, name: str | None = None
+            self, index: pd.Index, name: str | None = None
     ) -> "MoleculeTable":
         ret = super().searchWithIndex(index, name)
         ret = PCMDataSet.fromMolTable(

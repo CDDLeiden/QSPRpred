@@ -160,6 +160,8 @@ class RepeatsFilter(DataFilter):
             if col in df.columns:
                 descriptors[col] = df[col]
 
+        if len(descriptors.columns) == 0:
+            return df
         allrepeats = group_duplicate_index(descriptors)
 
         if self.keep is True:

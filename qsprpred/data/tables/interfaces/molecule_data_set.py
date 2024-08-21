@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Iterable, Any
+from typing import Callable, Iterable, Any, Generator
 
 from qsprpred.data.chem.identifiers import Identifiable
 from qsprpred.data.chem.standardizers.base import Standardizable
@@ -24,6 +24,20 @@ class MoleculeDataSet(
     Standardizable,
     ABC
 ):
+
+    @property
+    @abstractmethod
+    def smilesProp(self) -> str:
+        """Get the name of the property that contains the SMILES strings."""
+
+    @property
+    @abstractmethod
+    def smiles(self) -> Generator[str, None, None]:
+        """Get the SMILES strings of the molecules in the data frame.
+
+        Returns:
+            Generator[str, None, None]: Generator of SMILES strings.
+        """
 
     @abstractmethod
     def imputeProperties(self, names: list[str], imputer: Callable):
