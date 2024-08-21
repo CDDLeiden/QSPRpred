@@ -101,6 +101,8 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         self._chunkSize = value
         for lib in self._libraries.values():
             lib.chunkSize = value
+        if self._chunkSize is None:
+            self._chunkSize = len(self)
 
     @property
     def nJobs(self):
@@ -424,6 +426,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             processor: MolProcessor,
             proc_args: Iterable[Any] | None = None,
             proc_kwargs: dict[str, Any] | None = None,
+            mol_type: Literal["smiles", "mol", "rdkit"] = "mol",
             add_props: Iterable[str] | None = None,
             chunk_processor: ParallelGenerator | None = None,
     ) -> Generator:
@@ -451,6 +454,9 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             add_props (list, optional):
                 List of data set properties to send to the processor. If `None`, all
                 properties will be sent.
+            mol_type (str, optional):
+                Type of molecule to send to the processor. Can be 'smiles', 'mol', or
+                'rdkit'. Defaults to 'mol', which implies `TabularMol` objects.
             chunk_processor (ParallelGenerator, optional):
                 The parallel generator to use for processing. If not specified,
                 `self.chunkProcessor` is used.
@@ -462,8 +468,10 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         """
         proc_args = proc_args or ()
         proc_kwargs = proc_kwargs or {}
-        add_props = add_props or {self.idProp, self.smilesProp,
-                                  *processor.requiredProps}
+        if add_props is None:
+            add_props = self.getProperties()
+        else:
+            add_props = list(add_props) + list(processor.requiredProps)
         chunk_processor = chunk_processor or self.chunkProcessor
         for prop in add_props:
             if prop not in self.getProperties():
@@ -477,6 +485,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
                 func_args=proc_args,
                 func_kwargs=proc_kwargs,
                 on_props=add_props,
+                chunk_type=mol_type,
                 chunk_processor=chunk_processor,
         ):
             yield result
@@ -557,13 +566,14 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             func_args: list | None = None,
             func_kwargs: dict | None = None,
             on_props: tuple[str, ...] | None = None,
-            as_df: bool = False,
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
             chunk_processor: ParallelGenerator | None = None,
     ) -> Generator[Iterable[Any], None, None]:
         chunk_processor = chunk_processor or self.chunkProcessor
         if self.nJobs > 1:
             for result in chunk_processor(
-                    self.iterChunks(self.chunkSize, as_df=as_df, on_props=on_props),
+                    self.iterChunks(self.chunkSize, chunk_type=chunk_type,
+                                    on_props=on_props),
                     func,
                     *func_args,
                     **func_kwargs,
@@ -571,7 +581,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
                 yield result
         else:
             # do not use the parallel generator if n_jobs is 1
-            for chunk in self.iterChunks(self.chunkSize, as_df=as_df,
+            for chunk in self.iterChunks(self.chunkSize, chunk_type=chunk_type,
                                          on_props=on_props):
                 yield func(chunk, *func_args, **func_kwargs)
 
@@ -778,23 +788,43 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             self,
             size=1000,
             on_props: Iterable[str] | None = None,
-            as_df: bool = False,
-    ) -> Generator[list[StoredMol | pd.DataFrame], None, None]:
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
+    ) -> Generator[list[StoredMol | str | Chem.Mol | pd.DataFrame], None, None]:
         on_props = on_props or self.getProperties()
         for lib in self._libraries.values():
             for chunk in lib.iterChunks(size, on_props=on_props):
-                if as_df:
-                    yield chunk[{self.idProp, self.smilesProp, *on_props}]
-                else:
-                    ids = chunk[self.idProp]
-                    smiles = chunk[self.smilesProp]
-                    props = {prop: chunk[prop] for prop in on_props}
-                    mols = []
-                    for idx, id in enumerate(ids):
-                        mol_props = {prop: props[prop][idx] for prop in
-                                     on_props} if props else None
-                        mols.append(TabularMol(id, smiles[idx], props=mol_props))
-                    yield mols
+                chunk_converters = {
+                    "df": self._convert_chunk_df,
+                    "mol": self._convert_chunk_mol,
+                    "smiles": self._convert_chunk_smiles,
+                    "rdkit": self._convert_chunk_rdkit,
+                }
+                yield chunk_converters[chunk_type](chunk, on_props)
+
+    def _convert_chunk_df(self, chunk, on_props):
+        return chunk[{self.idProp, self.smilesProp, *on_props}]
+
+    def _convert_chunk_mol(self, chunk, on_props):
+        ids = chunk[self.idProp]
+        smiles = chunk[self.smilesProp]
+        props = {prop: chunk[prop] for prop in on_props}
+        mols = []
+        for idx, _id in enumerate(ids):
+            mol_props = {prop: props[prop][idx] for prop in on_props} if props else None
+            mols.append(TabularMol(_id, smiles[idx], props=mol_props))
+        return mols
+
+    def _convert_chunk_smiles(self, chunk, on_props):
+        return chunk[self.smilesProp]
+
+    def _convert_chunk_rdkit(self, chunk, on_props):
+        mols = []
+        for idx, mol in enumerate(chunk[self.smilesProp]):
+            mol = Chem.MolFromSmiles(mol)
+            for prop in on_props:
+                mol.SetProp(prop, str(chunk[prop].iloc[idx]))
+            mols.append(mol)
+        return mols
 
     def iter_mols(self) -> Generator[TabularMol, None, None]:
         for chunk in self.iterChunks():

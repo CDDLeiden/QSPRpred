@@ -99,6 +99,22 @@ class BorutaFilter(FeatureFilter, Randomized):
             Random state to use for shuffling and other random operations.
     """
 
+    @property
+    def randomState(self) -> int:
+        """Get the random state for the object."""
+        return self.seed
+
+    @randomState.setter
+    def randomState(self, seed: int | None):
+        """Set the random state for the object.
+
+        Args:
+            seed (int | None):
+                The seed to use to randomize the action. If `None`,
+                a random seed is used instead of a fixed one.
+        """
+        self.seed = seed
+
     def __init__(self, boruta_feat_selector: BorutaPy = None, seed: int | None = None):
         """Initialize the BorutaFilter class.
 
@@ -109,7 +125,7 @@ class BorutaFilter(FeatureFilter, Randomized):
                 random operations. If None, the random state set in the BorutaPy
                 instance is used. Defaults to None.
         """
-        Randomized.__init__(self, seed)
+        self.seed = seed
         self.featSelector = boruta_feat_selector
         if self.featSelector is None:
             self.featSelector = BorutaPy(estimator=RandomForestRegressor())
@@ -117,10 +133,10 @@ class BorutaFilter(FeatureFilter, Randomized):
             self.featSelector.random_state = seed
 
         # set seed from BorutaPy instance to class attribute
-        self.setSeed(self.featSelector.random_state)
+        self.randomState = self.featSelector.random_state
 
     def __call__(
-        self, features: pd.DataFrame, y_col: pd.DataFrame = None
+            self, features: pd.DataFrame, y_col: pd.DataFrame = None
     ) -> pd.DataFrame:
         """Filter out uninformative features from a dataframe using BorutaPy.
 

@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Iterable, Generator, Any
+from typing import Iterable, Generator, Literal
 
-from qsprpred.data.chem.identifiers import ChemIdentifier, Identifiable
-from qsprpred.data.chem.standardizers import ChemStandardizer
+import pandas as pd
+from rdkit import Chem
+
+from qsprpred.data.chem.identifiers import Identifiable
 from qsprpred.data.chem.standardizers.base import Standardizable
-from qsprpred.data.processing.mol_processor import MolProcessor
 from qsprpred.data.storage.interfaces.mol_processable import MolProcessable
 from qsprpred.data.storage.interfaces.property_storage import PropertyStorage
 from qsprpred.data.storage.interfaces.stored_mol import StoredMol
@@ -86,12 +87,39 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
     def iterChunks(
             self,
             size: int | None = None,
-            on_props: list | None = None
-    ) -> Generator[list[StoredMol], None, None]:
+            on_props: list | None = None,
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
+    ) -> Generator[list[StoredMol | str | Chem.Mol | pd.DataFrame], None, None]:
         """
         Iterate over chunks of molecules across the store.
 
-        :return: an iterable of lists of stored molecules
+        Args:
+            size (int, optional): The size of the chunks.
+            on_props (list, optional): The properties to include in the chunks.
+            chunk_type (str, optional): The type of chunks to yield.
+        """
+
+    @abstractmethod
+    def apply(
+            self,
+            func: callable,
+            func_args: list | None = None,
+            func_kwargs: dict | None = None,
+            on_props: tuple[str, ...] | None = None,
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
+    ) -> Generator[Iterable[StoredMol | str | Chem.Mol | pd.DataFrame], None, None]:
+        """Apply a function on all or selected properties of the chunks of data.
+        The requested chunk type is supplied as the first positional argument
+        to the function. Properties are attached to it as appropriate.
+        The format of the properties is up to the downstream implementation, but they
+        should be attached to the objects in chunks somehow.
+
+        Args:
+            func (callable): The function to apply.
+            func_args (list, optional): The positional arguments of the function.
+            func_kwargs (dict, optional): The keyword arguments of the function.
+            on_props (list, optional): The properties to apply the function on.
+            chunk_type (str, optional): The type of chunks to yield.
         """
 
     def __len__(self):
@@ -111,31 +139,3 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
 
     def __bool__(self):
         return len(self) > 0
-
-    @abstractmethod
-    def processMols(
-            self,
-            processor: MolProcessor,
-            proc_args: Iterable[Any] | None = None,
-            proc_kwargs: dict[str, Any] | None = None,
-            add_props: Iterable[str] | None = None,
-    ) -> Generator:
-        pass
-
-    @abstractmethod
-    def applyIdentifier(self, identifier: ChemIdentifier):
-        """
-        Apply a new identifier to the store.
-
-        :param identifier: new identifier to apply
-        :return:
-        """
-
-    @abstractmethod
-    def applyStandardizer(self, standardizer: ChemStandardizer):
-        """
-        Apply a new standardizer to the store.
-
-        :param standardizer: new standardizer to apply
-        :return:
-        """

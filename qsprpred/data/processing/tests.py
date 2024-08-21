@@ -6,12 +6,13 @@ import numpy as np
 import pandas as pd
 from mlchemad.applicability_domains import KNNApplicabilityDomain
 from parameterized import parameterized
-from rdkit.Chem import Mol
+from rdkit import Chem
 from sklearn.preprocessing import StandardScaler
 
 from .mol_processor import MolProcessor
 from ..descriptors.fingerprints import MorganFP
 from ..descriptors.sets import DataFrameDescriptorSet
+from ..storage.interfaces.stored_mol import StoredMol
 from ... import TargetTasks
 from ...data.processing.applicability_domain import MLChemADWrapper
 from ...data.processing.data_filters import CategoryFilter, RepeatsFilter
@@ -282,11 +283,17 @@ class TestMolProcessor(DataSetsPathMixIn, QSPRTestCase):
         self.setUpPaths()
 
     class TestingProcessor(MolProcessor):
-        def __call__(self, mols, props, *args, **kwargs):
-            assert "QSPRID" in props, "QSPRID not in props"
+        def __init__(self, id_prop):
+            self.id_prop = id_prop
+
+        def __call__(self, mols, *args, **kwargs):
             result = []
             for mol in mols:
-                result.append((mol, *props.keys(), *args, *kwargs.keys()))
+                if not isinstance(mol, Chem.Mol):
+                    assert self.id_prop in mol.props
+                    result.append((mol, mol.props, {"args": args}, {"kwargs": kwargs}))
+                else:
+                    result.append((mol, None, {"args": args}, {"kwargs": kwargs}))
             return np.array(result)
 
         @property
@@ -295,53 +302,56 @@ class TestMolProcessor(DataSetsPathMixIn, QSPRTestCase):
 
         @property
         def requiredProps(self) -> list[str]:
-            return ["QSPRID"]
+            return [self.id_prop]
 
     @parameterized.expand([["_".join([str(i) for i in x]), *x] for x in getCombos()])
     def testMolProcess(self, _, n_jobs, chunk_size, props, add_rdkit, args, kwargs):
         dataset = self.createLargeTestDataSet()
-        dataset.nJobs = n_jobs
-        dataset.chunkSize = chunk_size
-        self.assertTrue(dataset.nJobs is not None)
-        self.assertTrue(dataset.chunkSize is not None)
-        self.assertTrue(dataset.nJobs > 0)
-        self.assertTrue(dataset.chunkSize > 0)
+        dataset.storage.nJobs = n_jobs
+        dataset.storage.chunkSize = chunk_size
+        self.assertTrue(dataset.storage.nJobs is not None)
+        self.assertTrue(dataset.storage.chunkSize is not None)
+        self.assertTrue(dataset.storage.nJobs > 0)
+        self.assertTrue(dataset.storage.chunkSize > 0)
         result = dataset.processMols(
-            self.TestingProcessor(),
+            self.TestingProcessor(dataset.idProp),
             add_props=props,
-            as_rdkit=add_rdkit,
             proc_args=args,
             proc_kwargs=kwargs,
+            mol_type="rdkit" if add_rdkit else "mol",
         )
         expected_props = (
-            [*props, "QSPRID", "SMILES"]
+            [*props, dataset.idProp]
             if props is not None
             else dataset.getProperties()
         )
         expected_props = set(expected_props)
         expected_args = set(args) if args is not None else set()
         expected_kwargs = set(kwargs) if kwargs is not None else set()
-        expected_cols = (
-                len(expected_props) + len(expected_args) + len(expected_kwargs) + 1
-        )
         for item in result:
-            if dataset.nJobs > 1:
-                self.assertTrue(item.shape[0] <= dataset.chunkSize)
-            else:
-                self.assertTrue(item.shape[0] == len(dataset))
-            self.assertEqual(
-                item.shape[1],
-                expected_cols,
-            )
-            for prop in expected_props:
-                self.assertIn(prop, item)
+            self.assertTrue(item.shape[0] <= dataset.storage.chunkSize)
             if add_rdkit:
-                self.assertIsInstance(item[0, 0], Mol)
+                self.assertIsInstance(item[0, 0], Chem.Mol)
             else:
-                self.assertIsInstance(item[0, 0], str)
+                self.assertIsInstance(item[0, 0], StoredMol)
+            if not add_rdkit:
+                self.assertEqual(
+                    len(expected_props),
+                    len(item[0, 1])
+                )
+                for prop in expected_props:
+                    self.assertIn(prop, item[0, 1])
+            self.assertEqual(
+                len(expected_args),
+                len(item[0, 2]["args"])
+            )
+            self.assertEqual(
+                len(expected_kwargs),
+                len(item[0, 3]["kwargs"])
+            )
 
 
-class testApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
+class TestApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
     """Test the applicability domain."""
 
     def setUp(self):

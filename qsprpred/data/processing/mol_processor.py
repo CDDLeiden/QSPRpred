@@ -16,7 +16,10 @@ class MolProcessor(ABC):
 
     @abstractmethod
     def __call__(
-            self, mols: list[StoredMol], *args, props: dict[str, list] | None = None,
+            self,
+            mols: list[str | Chem.Mol | StoredMol],
+            *args,
+            props: dict[str, list] | None = None,
             **kwargs
     ) -> Any:
         """Process molecules.

@@ -8,6 +8,7 @@ from rdkit.Chem import PandasTools
 
 from qsprpred.data.chem.clustering import MoleculeClusters
 from qsprpred.data.descriptors.sets import DescriptorSet
+from qsprpred.data.processing.mol_processor import MolProcessor
 from qsprpred.data.storage.interfaces.chem_store import ChemStore
 from qsprpred.data.storage.interfaces.property_storage import PropertyStorage
 from qsprpred.data.storage.interfaces.stored_mol import StoredMol
@@ -717,10 +718,11 @@ class MoleculeTable(MoleculeDataSet):
     def iterChunks(
             self,
             size: int | None = None,
-            on_props: list | None = None
+            on_props: list | None = None,
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
     ) -> Generator[list[StoredMol], None, None]:
         # TODO: extend this to descriptors as well
-        return self.storage.iterChunks(size, on_props)
+        return self.storage.iterChunks(size, on_props, chunk_type)
 
     def getSummary(self) -> pd.DataFrame:
         raise NotImplementedError("Summary not yet available for MoleculeTable.")
@@ -836,3 +838,15 @@ class MoleculeTable(MoleculeDataSet):
             self.addProperty(name, df_subset[name])
         logger.debug(f"Imputed missing values for properties: {names}")
         logger.debug(f"Old values saved in: {names_old}")
+
+    def processMols(
+            self,
+            processor: MolProcessor,
+            proc_args: tuple[Any, ...] | None = None,
+            proc_kwargs: dict[str, Any] | None = None,
+            mol_type: Literal["smiles", "mol", "rdkit"] = "mol",
+            add_props: Iterable[str] | None = None,
+    ) -> Generator[
+        Any, None, None]:
+        return self.storage.processMols(processor, proc_args, proc_kwargs,
+                                        mol_type=mol_type, add_props=add_props)

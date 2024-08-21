@@ -73,32 +73,24 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
             name (str, optional): The name of the new storage.
         """
 
-    # @abstractmethod
-    # def transformProperties(
-    #         self,
-    #         names: list[str],
-    #         transformer: Callable[[Iterable[Any]], Iterable[Any]]
-    # ):
-    #     """Transform property values using a transformer function. The transformer
-    #     function is applied to the values of the properties in the storage in order of
-    #     appearance in the `names` list. The transformer function should take a single
-    #     iterable argument and return a new iterable of the same length with the
-    #     transformed values. The transformed values will replace the original values
-    #     in the storage. If the original values should be preserved, is up to the
-    #     downstream implementation.
-    #
-    #     Args:
-    #         names (list[str]): list of column names to transform.
-    #         transformer (Callable): Function that transforms the data in target columns
-    #             to a new representation.
-    #     """
-
     @abstractmethod
     def getDF(self) -> pd.DataFrame:
         """Get the stored properties as a pandas DataFrame.
 
         Returns:
             pd.DataFrame: The data as a pandas DataFrame.
+        """
+
+    @abstractmethod
+    def iterChunks(
+            self,
+            size: int | None = None,
+            on_props: list | None = None
+    ) -> Generator[list[Any], None, None]:
+        """
+        Iterate over chunks of molecules across the store.
+
+        :return: an iterable of lists of stored molecules
         """
 
     @abstractmethod
@@ -121,8 +113,6 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
             func_kwargs (dict, optional): The keyword arguments of the function.
             on_props (list, optional): The properties to apply the function on.
             as_df (bool, optional): Provide properties as a DataFrame to the function.
-            *args: Additional positional arguments to the function.
-            **kwargs: Additional keyword arguments to the function.
         """
 
     @abstractmethod
@@ -161,18 +151,6 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
 
     def __iter__(self):
         return self.iterChunks(1)
-
-    @abstractmethod
-    def iterChunks(
-            self,
-            size: int | None = None,
-            on_props: list | None = None
-    ) -> Generator[list[Any], None, None]:
-        """
-        Iterate over chunks of molecules across the store.
-
-        :return: an iterable of lists of stored molecules
-        """
 
     @abstractmethod
     def __getitem__(self, item):
