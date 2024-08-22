@@ -4,7 +4,7 @@ from unittest import skipIf
 
 import numpy as np
 import pandas as pd
-from mlchemad.applicability_domains import KNNApplicabilityDomain
+from mlchemad.applicability_domains import KNNApplicabilityDomain as KNNAD
 from parameterized import parameterized
 from rdkit import Chem
 from sklearn.preprocessing import StandardScaler
@@ -14,7 +14,8 @@ from ..descriptors.fingerprints import MorganFP
 from ..descriptors.sets import DataFrameDescriptorSet
 from ..storage.interfaces.stored_mol import StoredMol
 from ... import TargetTasks
-from ...data.processing.applicability_domain import MLChemADWrapper
+from ...data.processing.applicability_domain import MLChemADWrapper, \
+    KNNApplicabilityDomain
 from ...data.processing.data_filters import CategoryFilter, RepeatsFilter
 from ...data.processing.feature_filters import (
     BorutaFilter,
@@ -364,15 +365,28 @@ class TestApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
     def testApplicabilityDomain(self):
         """Test the applicability domain fitting, transforming and serialization."""
         ad = MLChemADWrapper(
-            KNNApplicabilityDomain(dist="jaccard", scaling=None, alpha=0.95)
+            KNNAD(dist="jaccard", scaling=None, alpha=0.95)
         )
         ad.fit(self.dataset.X)
-        self.assertIsInstance(ad.contains(self.dataset.X), pd.DataFrame)
-        filtered_dataset = ad.filter(self.dataset.X)
-        self.assertIsInstance(filtered_dataset, pd.DataFrame)
+        self.assertIsInstance(ad.contains(self.dataset.X), pd.Series)
 
         ad.toFile(f"{self.generatedPath}/test_ad.json")
         ad_fromfile = MLChemADWrapper.fromFile(f"{self.generatedPath}/test_ad.json")
-        self.assertIsInstance(ad_fromfile.contains(self.dataset.X), pd.DataFrame)
-        filtered_dataset_fromfile = ad_fromfile.filter(self.dataset.X)
-        self.assertIsInstance(filtered_dataset_fromfile, pd.DataFrame)
+        self.assertIsInstance(ad_fromfile.contains(self.dataset.X), pd.Series)
+
+    def testContinousAD(self):
+        """Test the applicability domain for continuous data."""
+        ad = KNNApplicabilityDomain(dist="euclidean", scaling="standard", alpha=0.95)
+        ad.fit(self.dataset.X)
+
+        with self.assertRaises(ValueError):
+            ad.contains(ad.contains(self.dataset.X))
+
+        self.assertIsInstance(ad.transform(self.dataset.X), pd.Series)
+
+        ad.threshold = 0.3
+        ad.direction = "<"
+        self.assertIsInstance(ad.contains(self.dataset.X), pd.Series)
+
+        ad.toFile(f"{self.generatedPath}/test_ad.json")
+        ad_fromfile = MLChemADWrapper.fromFile(f"{self.generatedPath}/test_ad.json")

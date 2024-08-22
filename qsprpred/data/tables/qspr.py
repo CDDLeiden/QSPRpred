@@ -1176,6 +1176,29 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
         else:
             self.applicabilityDomain = applicability_domain
 
+    def getApplicability(self):
+        """Get applicability predictions for the test set."""
+        if self.applicabilityDomain is None:
+            raise ValueError(
+                "No applicability domain calculator attached to the data set."
+            )
+        X, X_ind = self.getFeatures()
+        if X_ind.shape[0] == 0:
+            logger.warning(
+                "No test samples available, skipping applicability domain prediction."
+            )
+            return
+        # check if X or X_ind contain any nan values
+        if X.isna().any().any() or X_ind.isna().any().any():
+            logger.warning(
+                "Feature matrix contains NaN values. "
+                "Please fill them before applying applicability domain prediction."
+                "Applicability domain will not be calculated."
+            )
+            return
+        self.applicabilityDomain.fit(X)
+        return self.applicabilityDomain.transform(X_ind)
+
     def dropOutliers(self):
         """Drop outliers from the test set based on the applicability domain."""
         if self.applicabilityDomain is None:
@@ -1208,7 +1231,7 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
         self.addProperty("Split_IsOutlier", len(self) * [False])
         self.addProperty(
             "Split_IsOutlier",
-            ~mask["in_domain"],
+            ~mask,
             mask.index.values
         )
         logger.info(
