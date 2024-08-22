@@ -1,8 +1,6 @@
 from typing import Any, Iterable, Optional, Callable
 
-import meeko
 import pandas as pd
-from rdkit import Chem
 
 from qsprpred.data.tables.pandas import PandasDataTable
 from qsprpred.extra.data.storage.protein.interfaces.protein_storage import \
@@ -11,27 +9,6 @@ from qsprpred.extra.data.storage.protein.interfaces.storedprotein import StoredP
 from qsprpred.logs import logger
 from qsprpred.utils.parallel import ParallelGenerator
 from qsprpred.utils.serialization import function_as_string, function_from_string
-
-
-def read_pdb(pdb_file):
-    # pdb_file = open(pdb_file, "r").read()
-    # prot = Chem.MolFromMolBlock(pdb_file, sanitize=False, removeHs=False)
-    prot = Chem.MolFromPDBFile(
-        pdb_file, removeHs=False, sanitize=False, proximityBonding=True
-    )
-    Chem.SanitizeMol(prot, Chem.SANITIZE_SETAROMATICITY)
-    Chem.SanitizeMol(prot, Chem.SANITIZE_SETCONJUGATION)
-    Chem.SanitizeMol(prot, Chem.SANITIZE_SETHYBRIDIZATION)
-    Chem.SanitizeMol(prot, Chem.SANITIZE_SYMMRINGS)
-    # Chem.SanitizeMol(prot, Chem.SANITIZE_PROPERTIES)
-    Chem.SanitizeMol(prot, Chem.SANITIZE_CLEANUP)
-    # prot = Chem.AddHs(prot, addCoords=True)
-    return prot
-
-
-def parse_poses(poses):
-    pmol = meeko.PDBQTMolecule(poses)
-    return meeko.RDKitMolCreate.from_pdbqt_mol(pmol)[0]
 
 
 class TabularProtein(StoredProtein):
