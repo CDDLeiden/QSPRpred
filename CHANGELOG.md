@@ -22,6 +22,10 @@ From v3.1.1 to v3.2.0
 - Added `MaskedMetric` which can be wrapped around any metric to mask datapoints
   when a target value is missing.
 - Added a tutorial on model and data serialization.
+- `ApplicabilityDomain` now has a `transform` method that can be used to transform
+  a dataset to a continuous applicability domain score, such as the distance to the
+  nearest neighbor in the training set (an example is added in the 
+  `tutorials.basics.data.applicability_domain.ipynb` tutorial).
 
 ## Removed Features
 
