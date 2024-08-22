@@ -21,7 +21,9 @@ From v3.1.1 to v3.2.0
    `AbsoluteAverageFoldError`, `PercentageWithinFoldError`
 - Added `MaskedMetric` which can be wrapped around any metric to mask datapoints
   when a target value is missing.
+- Added a tutorial on model and data serialization.
 
 ## Removed Features
 
+None.
 
