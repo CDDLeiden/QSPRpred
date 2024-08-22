@@ -17,21 +17,30 @@ from sklearn.metrics import (
     make_scorer,
     mean_squared_error,
     roc_auc_score,
-    top_k_accuracy_score,
+    top_k_accuracy_score
 )
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
+from . import SklearnMetrics
 from .assessment.classification import create_metrics_summary
+from .assessment.metrics.classification import CalibrationError, BEDROC, \
+    EnrichmentFactor, \
+    RobustInitialEnhancement, Prevalence, Sensitivity, Specificity, \
+    PositivePredictivity, NegativePredictivity, CohenKappa, \
+    BalancedPositivePredictivity, BalancedNegativePredictivity, \
+    BalancedMatthewsCorrcoeff, BalancedCohenKappa
+from .assessment.metrics.masked import MaskedMetric
+from .assessment.metrics.regression import Pearson, Kendall, KSlope, R20, KPrimeSlope, \
+    AverageFoldError, AbsoluteAverageFoldError, PercentageWithinFoldError, RPrime20
 from .assessment.regression import create_correlation_summary
 from ..data.processing.applicability_domain import MLChemADWrapper
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stopping
-from ..models.metrics import SklearnMetrics
 from ..models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ..models.scikit_learn import SklearnModel
-from ..tasks import TargetTasks
+from ..tasks import ModelTasks, TargetTasks
 from ..utils.testing.base import QSPRTestCase
 from ..utils.testing.check_mixins import ModelCheckMixIn, MonitorsCheckMixIn
 from ..utils.testing.path_mixins import ModelDataSetsPathMixIn
@@ -46,11 +55,11 @@ class SklearnBaseModelTestCase(ModelDataSetsPathMixIn, ModelCheckMixIn, QSPRTest
         self.nCPU = 2
 
     def getModel(
-            self,
-            name: str,
-            alg: Type | None = None,
-            parameters: dict | None = None,
-            random_state: int | None = None,
+        self,
+        name: str,
+        alg: Type | None = None,
+        parameters: dict | None = None,
+        random_state: int | None = None,
     ):
         """Create a SklearnModel model.
 
@@ -88,9 +97,9 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
         ] + [
             (alg_name, TargetTasks.REGRESSION, alg_name, alg, [None])
             for alg, alg_name in (
-                    (PLSRegression, "PLSR"),
-                    (SVR, "SVR"),
-                    (KNeighborsRegressor, "KNNR"),
+                (PLSRegression, "PLSR"),
+                (SVR, "SVR"),
+                (KNeighborsRegressor, "KNNR"),
             )
         ]
     )
@@ -477,12 +486,56 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
 class TestMetrics(TestCase):
     """Test the SklearnMetrics from the metrics module."""
 
+    def sample_data(self, task: ModelTasks, use_proba: bool = False):
+        """Sample data for testing."""
+        if task == ModelTasks.REGRESSION:
+            y_true = np.array([1.2, 2.2, 3.2, 4.2, 5.2])
+            y_pred = np.array([[2.2], [2.2], [3.2], [4.2], [5.2]])
+        elif task == ModelTasks.MULTITASK_REGRESSION:
+            y_true = np.array(
+                [[1.2, 2.2], [3.2, 4.2], [5.2, 1.2], [2.2, 3.2], [4.2, 5.2]]
+            )
+            y_pred = np.array(
+                [[2.2, 2.2], [3.2, 4.2], [5.2, 1.2], [2.2, 3.2], [4.2, 5.2]]
+            )
+        elif task == ModelTasks.SINGLECLASS and not use_proba:
+            y_true = np.array([1, 0, 1, 0, 1])
+            y_pred = np.array([[0], [0], [1], [0], [1]])
+        elif task == ModelTasks.SINGLECLASS and use_proba:
+            y_true = np.array([1, 0, 1, 0, 1])
+            y_pred = [
+                np.array([[0.2, 0.8], [0.2, 0.8], [0.8, 0.2], [0.1, 0.9], [0.9, 0.1]])
+            ]
+        elif task == ModelTasks.MULTICLASS and not use_proba:
+            y_true = np.array([1, 2, 1, 0, 1])
+            y_pred = np.array([[0], [1], [2], [1], [1]])
+        elif task == ModelTasks.MULTICLASS and use_proba:
+            y_true = np.array([1, 2, 1, 0, 1])
+            y_pred = [
+                np.array([[0.9, 0.1, 0.0],
+                          [0.1, 0.8, 0.1],
+                          [0.0, 0.1, 0.9],
+                          [0.1, 0.8, 0.1],
+                          [0.1, 0.8, 0.1]])
+            ]
+        elif task == ModelTasks.MULTITASK_SINGLECLASS and not use_proba:
+            y_true = np.array([[1, 0], [1, 1], [1, 0], [0, 0], [1, 0]])
+            y_pred = np.array([[0, 0], [1, 1], [0, 0], [0, 0], [1, 0]])
+        elif task == ModelTasks.MULTITASK_SINGLECLASS and use_proba:
+            y_true = np.array([[1, 0], [1, 1], [1, 0], [0, 0], [1, 0]])
+            y_pred = [
+                np.array([[0.2, 0.8], [0.2, 0.8], [0.8, 0.2], [0.1, 0.9], [0.9, 0.1]]),
+                np.array([[0.2, 0.8], [0.2, 0.8], [0.8, 0.2], [0.1, 0.9], [0.9, 0.1]]),
+            ]
+        else:
+            raise ValueError(f"Invalid task or not implemented: {task}")
+        return y_true, y_pred
+
     def test_SklearnMetrics(self):
         """Test the sklearn metrics wrapper."""
 
         # test regression metrics
-        y_true = np.array([1.2, 2.2, 3.2, 4.2, 5.2])
-        y_pred = np.array([[2.2], [2.2], [3.2], [4.2], [5.2]])
+        y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
 
         ## test explained variance score with scorer from metric
         metric = explained_variance_score
@@ -500,8 +553,7 @@ class TestMetrics(TestCase):
         )
 
         ## test multitask regression
-        y_true = np.array([[1.2, 2.2], [3.2, 4.2], [5.2, 1.2], [2.2, 3.2], [4.2, 5.2]])
-        y_pred = np.array([[2.2, 2.2], [3.2, 4.2], [5.2, 1.2], [2.2, 3.2], [4.2, 5.2]])
+        y_true, y_pred = self.sample_data(ModelTasks.MULTITASK_REGRESSION)
         qsprpred_scorer = SklearnMetrics("explained_variance")
         self.assertEqual(
             qsprpred_scorer(y_true, y_pred), explained_variance_score(y_true, y_pred)
@@ -509,42 +561,17 @@ class TestMetrics(TestCase):
 
         # test classification metrics
         ## single class discrete
-        y_true = np.array([1, 0, 1, 0, 1])
-        y_pred = np.array([[0], [0], [1], [0], [1]])
+        y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS)
         qsprpred_scorer = SklearnMetrics("accuracy")
         self.assertEqual(
             qsprpred_scorer(y_true, y_pred), accuracy_score(y_true, np.squeeze(y_pred))
         )
 
         ## single class proba
-        y_true = np.array([1, 0, 1, 0, 1])
-        y_pred = [
-            np.array([[0.2, 0.8], [0.2, 0.8], [0.8, 0.2], [0.1, 0.9], [0.9, 0.1]])
-        ]  # list of 2D np.arrays
+        y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS, use_proba=True)
         qsprpred_scorer = SklearnMetrics("neg_log_loss")
         self.assertEqual(
             qsprpred_scorer(y_true, y_pred), -log_loss(y_true, np.squeeze(y_pred[0]))
-        )
-
-        ## multi-class with threshold
-        y_true = np.array([1, 2, 1, 0, 1])
-        y_pred = [
-            np.array(
-                [
-                    [0.9, 0.1, 0.0],
-                    [0.1, 0.8, 0.1],
-                    [0.0, 0.1, 0.9],
-                    [0.1, 0.8, 0.1],
-                    [0.1, 0.8, 0.1],
-                ]
-            )
-        ]  # list of 2D np.arrays
-        qsprpred_scorer = SklearnMetrics(
-            make_scorer(top_k_accuracy_score, needs_threshold=True, k=2)
-        )
-        self.assertEqual(
-            qsprpred_scorer(y_true, y_pred),
-            top_k_accuracy_score(y_true, y_pred[0], k=2),
         )
 
         ## multi-class discrete scorer (_PredictScorer)
@@ -554,13 +581,21 @@ class TestMetrics(TestCase):
             accuracy_score(y_true, np.argmax(y_pred[0], axis=1)),
         )
 
+        ## multi-class with threshold
+        y_true, y_pred = self.sample_data(ModelTasks.MULTICLASS, use_proba=True)
+        qsprpred_scorer = SklearnMetrics(
+            make_scorer(top_k_accuracy_score, needs_threshold=True, k=2)
+        )
+        self.assertEqual(
+            qsprpred_scorer(y_true, y_pred),
+            top_k_accuracy_score(y_true, y_pred[0], k=2),
+        )
+
         ## multi-task single class (same as multi-label in sklearn)
         ### proba
-        y_true = np.array([[1, 0], [1, 1], [1, 0], [0, 0], [1, 0]])
-        y_pred = [
-            np.array([[0.2, 0.8], [0.2, 0.8], [0.8, 0.2], [0.1, 0.9], [0.9, 0.1]]),
-            np.array([[0.2, 0.8], [0.2, 0.8], [0.8, 0.2], [0.1, 0.9], [0.9, 0.1]]),
-        ]  # list of 2D np.arrays
+        y_true, y_pred = self.sample_data(
+            ModelTasks.MULTITASK_SINGLECLASS, use_proba=True
+        )
         qsprpred_scorer = SklearnMetrics("roc_auc_ovr")
         y_pred_sklearn = np.array([y_pred[0][:, 1], y_pred[1][:, 1]]).T
         self.assertEqual(
@@ -569,13 +604,110 @@ class TestMetrics(TestCase):
         )
 
         ### discrete
-        y_true = np.array([[1, 0], [1, 1], [1, 0], [0, 0], [1, 0]])
-        y_pred = np.array([[0, 0], [1, 1], [0, 0], [0, 0], [1, 0]])
+        y_true, y_pred = self.sample_data(ModelTasks.MULTITASK_SINGLECLASS)
         qsprpred_scorer = SklearnMetrics("accuracy")
         self.assertEqual(
             qsprpred_scorer(y_true, y_pred),
             accuracy_score(y_true, y_pred),
         )
+
+    def test_CalibrationError(self):
+        """Test the calibration error metric."""
+        # test calibration error with single class probabilities
+        y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS, use_proba=True)
+
+        cal_error = CalibrationError()
+        # check assertion error is raised when n_bins > n_samples
+        with self.assertRaises(AssertionError):
+            cal_error(y_true, y_pred)
+
+        cal_error = CalibrationError(n_bins=5)
+        self.assertIsInstance(cal_error(y_true, y_pred), float)
+
+        # assert value error is raised when using discrete predictions
+        with self.assertRaises(TypeError):
+            cal_error(self.sample_data(ModelTasks.SINGLECLASS, use_proba=False))
+
+    def test_BEDROC(self):
+        """Test the BEDROC metric."""
+        y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS, use_proba=True)
+        bedroc = BEDROC()
+        self.assertIsInstance(bedroc(y_true, y_pred), float)
+
+    def test_EnrichmentFactor(self):
+        """Test the enrichment factor metric."""
+        y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS, use_proba=True)
+        enrichment = EnrichmentFactor()
+        self.assertIsInstance(enrichment(y_true, y_pred), float)
+
+    def test_RobustInitialEnhancement(self):
+        """Test the robust initial enhancement metric."""
+        y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS, use_proba=True)
+        robust_enhancement = RobustInitialEnhancement()
+        self.assertIsInstance(robust_enhancement(y_true, y_pred), float)
+
+    def test_ConfusionMatrixMetrics(self):
+        y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS)
+
+        self.assertIsInstance(Prevalence()(y_true, y_pred), float)
+        self.assertIsInstance(Specificity()(y_true, y_pred), float)
+        self.assertIsInstance(Sensitivity()(y_true, y_pred), float)
+        self.assertIsInstance(NegativePredictivity()(y_true, y_pred), float)
+        self.assertIsInstance(PositivePredictivity()(y_true, y_pred), float)
+        self.assertIsInstance(CohenKappa()(y_true, y_pred), float)
+        self.assertIsInstance(BalancedNegativePredictivity()(y_true, y_pred), float)
+        self.assertIsInstance(BalancedPositivePredictivity()(y_true, y_pred), float)
+        self.assertIsInstance(BalancedMatthewsCorrcoeff()(y_true, y_pred), float)
+        self.assertIsInstance(BalancedCohenKappa()(y_true, y_pred), float)
+
+    def test_Pearson(self):
+        y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
+        Pearson()(y_true, y_pred)
+
+    def test_Kendall(self):
+        y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
+        Kendall()(y_true, y_pred)
+
+    def test_KPrimeSlope(self):
+        y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
+        KPrimeSlope()(y_true, y_pred)
+
+    def test_KSlope(self):
+        y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
+        KSlope()(y_true, y_pred)
+
+    def test_R20(self):
+        y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
+        R20()(y_true, y_pred)
+
+    def test_RPrime20(self):
+        y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
+        RPrime20()(y_true, y_pred)
+
+    def test_FoldErrorMetrics(self):
+        y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
+        self.assertIsInstance(AbsoluteAverageFoldError()(y_true, y_pred), float)
+        self.assertIsInstance(AverageFoldError()(y_true, y_pred), float)
+        self.assertIsInstance(PercentageWithinFoldError()(y_true, y_pred), float)
+
+    def test_MaskedMetric(self):
+        y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
+        y_true[1] = None
+
+        metric = MaskedMetric(SklearnMetrics("neg_mean_squared_error"))
+        self.assertIsInstance(metric(y_true, y_pred), float)
+
+        y_true, y_pred = self.sample_data(ModelTasks.MULTITASK_SINGLECLASS,
+                                          use_proba=False)
+        y_true = y_true.astype(float)
+        y_true[0, :] = None
+        y_true[1, 1] = None
+
+        y_true, y_pred = self.sample_data(ModelTasks.MULTITASK_SINGLECLASS,
+                                          use_proba=True)
+        y_true = y_true.astype(float)
+        y_true[0, :] = None
+        y_true[1, 1] = None
 
 
 class TestEarlyStopping(ModelDataSetsPathMixIn, TestCase):
