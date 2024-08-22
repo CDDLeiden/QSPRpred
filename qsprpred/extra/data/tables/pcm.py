@@ -1,14 +1,13 @@
-from typing import Callable
-
-import pandas as pd
+from typing import Literal
 
 from qsprpred.data.descriptors.sets import DescriptorSet
+from qsprpred.data.storage.interfaces.chem_store import ChemStore
 from qsprpred.data.tables.mol import MoleculeTable
 from qsprpred.data.tables.qspr import QSPRDataset
 from qsprpred.extra.data.descriptors.sets import ProteinDescriptorSet
-from qsprpred.logs import logger
+from qsprpred.extra.data.storage.protein.interfaces.protein_storage import \
+    ProteinStorage
 from qsprpred.tasks import TargetProperty
-from qsprpred.utils.serialization import function_as_string, function_from_string
 
 
 class PCMDataSet(QSPRDataset):
@@ -18,7 +17,7 @@ class PCMDataSet(QSPRDataset):
     and the calculation of protein descriptors.
 
     Attributes:
-        proteinCol (str):
+        proteinIDProp (str):
             name of column in df containing the protein target identifier (usually a
             UniProt ID) to use for protein descriptors for PCM modelling
             and other protein related tasks.
@@ -29,91 +28,74 @@ class PCMDataSet(QSPRDataset):
 
     def __init__(
             self,
-            name: str,
-            protein_col: str,
-            target_props: list[TargetProperty | dict],
-            df: pd.DataFrame | None = None,
-            smiles_col: str = "SMILES",
-            protein_seq_provider: Callable | None = None,
-            add_rdkit: bool = False,
-            store_dir: str = ".",
-            overwrite: bool = False,
-            n_jobs: int | None = 1,
-            chunk_size: int | None = None,
-            drop_invalids: bool = True,
-            drop_empty: bool = True,
-            index_cols: list[str] | None = None,
-            autoindex_name: str = "ID",
+            storage: ChemStore,
+            proteins: ProteinStorage,
+            name: str | None = None,
+            target_props: list[TargetProperty | dict] | None = None,
+            path: str = ".",
             random_state: int | None = None,
             store_format: str = "pkl",
+            drop_empty_target_props: bool = True,
     ):
-        """Construct a data set to handle PCM data.
+        """Construct QSPRdata, also apply transformations of output property if
+                specified.
 
         Args:
-            name (str): data name, used in saving the data
-            protein_col (str): name of column in df containing the protein target
-                identifier (usually a UniProt ID) to use for protein descriptors for PCM
-                modelling and other protein related tasks.
-            protein_seq_provider: Callable = None, optional):
-                function that takes a list of protein identifiers and returns a `dict`
-                mapping those identifiers to their sequences. Defaults to `None`.
-            target_props (list[TargetProperty | dict]):
-                target properties,
-                names should correspond with target column name in `df`
-            df (pd.DataFrame, optional):
-                input dataframe containing smiles and target property.
-                Defaults to `None`.
-            smiles_col (str, optional):
-                name of column in `df` containing SMILES. Defaults to "SMILES".
-            add_rdkit (bool, optional):
-                if `True`, column with rdkit molecules will be added to `df`.
-                Defaults to `False`.
-            store_dir (str, optional):
-                directory for saving the output data. Defaults to '.'.
-            overwrite (bool, optional):
-                if `True`, existing data will be overwritten. Defaults to `False`.
-            n_jobs (int, optional):
-                number of parallel jobs. If <= 0, all available cores will be used.
-                Defaults to 1.
-            chunk_size (int, optional):
-                chunk size for parallel processing. Defaults to 50.
-            drop_invalids (bool, optional):
-                If `True`, invalid SMILES will be dropped. Defaults to `True`.
-            drop_empty (bool, optional):
-                If `True`, rows with empty SMILES will be dropped. Defaults to `True`.
-            index_cols (List[str], optional):
-                columns to be used as index in the dataframe.
-                Defaults to `None` in which case a custom ID will be generated.
-            autoindex_name (str, optional):
-                Column name to use for automatically generated IDs.
+            name (str):
+                data name, used in saving the data
+            target_props (list[TargetProperty | dict] | None):
+                target properties, names
+                should correspond with target columnname in df. If `None`, target
+                properties will be inferred if this data set has been saved
+                previously. Defaults to `None`.
             random_state (int, optional):
-                random state for reproducibility. Defaults to `None`.
-            store_format
+                random state for splitting the data.
+            store_format (str, optional):
                 format to use for storing the data ('pkl' or 'csv').
+            drop_empty_target_props (bool, optional):
+                whether to ignore entries with empty target properties. Defaults to
+                `True`.
 
         Raises:
-            `ValueError`:
-                Raised if threshold given with non-classification task.
+            `ValueError`: Raised if threshold given with non-classification task.
         """
         super().__init__(
-            name,
-            df=df,
-            smiles_col=smiles_col,
-            add_rdkit=add_rdkit,
-            store_dir=store_dir,
-            overwrite=overwrite,
-            n_jobs=n_jobs,
-            chunk_size=chunk_size,
-            drop_invalids=drop_invalids,
-            index_cols=index_cols,
+            storage,
+            name=name,
+            path=path,
             target_props=target_props,
-            drop_empty=drop_empty,
-            autoindex_name=autoindex_name,
             random_state=random_state,
             store_format=store_format,
+            drop_empty_target_props=drop_empty_target_props,
         )
-        self.proteinCol = protein_col
-        self.proteinSeqProvider = protein_seq_provider
+        self.proteins = proteins
+        if self.proteins.idProp not in self.storage.getProperties():
+            raise ValueError(
+                f"Protein ID property '{self.proteins.idProp}' not found in "
+                f"storage '{self.storage}' properties: {self.storage.getProperties()}"
+            )
+        # check if all protein IDs can be found
+        if not set(self.getProteinKeys()).issubset(
+                set(self.storage.getProperty(self.proteins.idProp))
+        ):
+            raise ValueError(
+                f"Not all protein IDs found in storage '{self.storage}' properties: "
+                f"{self.storage.getProperty(self.proteins.idProp)}. Missing the"
+                f" following protein IDs: {
+                set(self.getProteinKeys())
+                - set(self.storage.getProperty(self.proteins.idProp))
+                }"
+            )
+
+    @property
+    def proteinIDProp(self) -> str:
+        """Return the name of the property in the data frame containing
+        the protein target identifier.
+
+        Returns:
+            proteinIDProp (str): Name of the protein target identifier column.
+        """
+        return self.proteins.idProp
 
     def getProteinKeys(self) -> list[str]:
         """Return a list of keys identifying the proteins in the data frame.
@@ -121,19 +103,15 @@ class PCMDataSet(QSPRDataset):
         Returns:
             keys (list): List of protein keys.
         """
-        return self.df[self.proteinCol].unique().tolist()
+        return list(set(self.proteins.getProperty(self.proteins.idProp)))
 
-    def getProteinSequences(self) -> dict[str, str]:
+    def getPCMInfo(self) -> tuple[dict[str, str], dict]:
         """Return a dictionary of protein sequences for the proteins in the data frame.
 
         Returns:
             sequences (dict): Dictionary of protein sequences.
         """
-        if not self.proteinSeqProvider:
-            raise ValueError(
-                "Protein sequence provider not set. Cannot get protein sequences."
-            )
-        return self.proteinSeqProvider(self.getProteinKeys())
+        return self.proteins.getPCMInfo()
 
     def addDescriptors(
             self,
@@ -143,14 +121,12 @@ class PCMDataSet(QSPRDataset):
             *args,
             **kwargs,
     ):
-        # make sure the acc_keys property is set for ProteinDescriptorSets
-        self.df["acc_keys"] = self.df[self.proteinCol]
         # get protein sequences and metadata
-        sequences, info = (
-            self.getProteinSequences() if self.proteinSeqProvider else (None, {})
-        )
+        sequences, info = self.proteins.getPCMInfo()
         # append sequences and metadata to kwargs
         kwargs["sequences"] = sequences
+        kwargs["protein_ids"] = sequences.keys()
+        kwargs["protein_id_prop"] = self.proteins.idProp
         for key in info:
             kwargs[key] = info[key]
         # pass everything to the descriptor calculation
@@ -158,39 +134,11 @@ class PCMDataSet(QSPRDataset):
             descriptors, recalculate, featurize, *args, **kwargs
         )
 
-    def __getstate__(self):
-        o_dict = super().__getstate__()
-        if self.proteinSeqProvider:
-            o_dict["proteinSeqProvider"] = function_as_string(self.proteinSeqProvider)
-        return o_dict
-
-    def __setstate__(self, state):
-        super().__setstate__(state)
-        if self.proteinSeqProvider:
-            try:
-                self.proteinSeqProvider = function_from_string(self.proteinSeqProvider)
-            except Exception as e:
-                logger.warning(
-                    "Failed to load protein sequence provider from metadata. "
-                    f"The function object could not be recreated from the code. "
-                    f"\nError: {e}"
-                    f"\nDeserialized Code: {self.proteinSeqProvider}"
-                    f"\nSetting protein sequence provider to `None` for now."
-                )
-                self.proteinSeqProvider = None
-
-    @staticmethod
-    def fromSDF(name, filename, smiles_prop, *args, **kwargs):
-        raise NotImplementedError(
-            f"SDF loading not implemented for {PCMDataSet.__name__}, yet. "
-            f"Use `PCMDataSet.fromMolTable` to convert a `MoleculeTable`"
-            f"read from an SDF instead."
-        )
-
-    @staticmethod
+    @classmethod
     def fromMolTable(
+            cls,
             mol_table: MoleculeTable,
-            protein_col: str,
+            proteins: ProteinStorage,
             target_props: list[TargetProperty | dict] | None = None,
             name: str | None = None,
             **kwargs,
@@ -200,10 +148,8 @@ class PCMDataSet(QSPRDataset):
         Args:
             mol_table (MoleculeTable):
                 `MoleculeTable` instance containing the PCM data.
-            protein_col (str):
-                name of column in df containing the protein target identifier (usually a
-                UniProt ID) to use for protein descriptors for PCM modelling
-                and other protein related tasks.
+            proteins (ProteinStorage):
+                `ProteinStorage` instance containing the protein data.
             target_props (list[TargetProperty | dict], optional):
                 target properties,
                 names should correspond with target column name in `df`
@@ -216,25 +162,26 @@ class PCMDataSet(QSPRDataset):
             PCMDataSet:
                 `PCMDataset` instance containing the PCM data.
         """
-        protein_seq_provider = None
-        if "protein_seq_provider" in kwargs:
-            protein_seq_provider = kwargs.pop("protein_seq_provider")
         ret = QSPRDataset.fromMolTable(mol_table, target_props, name, **kwargs)
-        ret.proteinCol = protein_col
-        ret.proteinSeqProvider = protein_seq_provider
+        ret.proteins = proteins
         ret.__class__ = PCMDataSet
         return ret
 
-    def searchWithIndex(
-            self, index: pd.Index, name: str | None = None
-    ) -> "MoleculeTable":
-        ret = super().searchWithIndex(index, name)
-        ret = PCMDataSet.fromMolTable(
-            ret,
-            self.proteinCol,
-            self.targetProperties,
-            name=ret.name,
-        )
-        ret.featureStandardizer = self.featureStandardizer
-        ret.featurize()
+    def searchWithSMARTS(self, patterns: list[str],
+                         operator: Literal["or", "and"] = "or",
+                         use_chirality: bool = False,
+                         name: str | None = None,
+                         path: str | None = None
+                         ) -> "PCMDataSet":
+        ret = super().searchWithSMARTS(patterns, operator, use_chirality, name, path)
+        ret.proteins = self.proteins
+        ret.__class__ = PCMDataSet
+        return ret
+
+    def searchOnProperty(self, prop_name: str, values: list[float | int | str],
+                         exact=False, name: str | None = None,
+                         path: str | None = None) -> "PCMDataSet":
+        ret = super().searchOnProperty(prop_name, values, exact, name, path)
+        ret.proteins = self.proteins
+        ret.__class__ = PCMDataSet
         return ret

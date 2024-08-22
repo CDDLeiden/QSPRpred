@@ -6,9 +6,7 @@
 - `ProDec`: Protein descriptors from the ProDec package.
 
 """
-import logging
 import os
-import zipfile
 from abc import abstractmethod
 from typing import Optional, Any
 
@@ -43,11 +41,11 @@ class Mordred(DescriptorSet):
     """
 
     def __init__(
-        self,
-        descs: list[str] | None = None,
-        version: str | None = None,
-        ignore_3D: bool = False,
-        config: str | None = None,
+            self,
+            descs: list[str] | None = None,
+            version: str | None = None,
+            ignore_3D: bool = False,
+            config: str | None = None,
     ):
         """
         Initialize the descriptor with the same arguments as you would pass
@@ -80,7 +78,7 @@ class Mordred(DescriptorSet):
         self.descriptors = [str(d) for d in descs]
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         df = self._mordred.pandas(self.iterMols(mols), quiet=True, nproc=1)
         df = df.apply(pd.to_numeric, errors="coerce")  # replace errors by nan values
@@ -145,7 +143,7 @@ class Mold2(DescriptorSet):
         return False
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         values = self._mold2.calculate(self.iterMols(mols), show_banner=False)
         # Drop columns
@@ -199,10 +197,10 @@ class PaDEL(DescriptorSet):
     _notJSON = ["_nameMapping", "_padel", "_descriptors", *DescriptorSet._notJSON]
 
     def __init__(
-        self,
-        descs: list[str] | None = None,
-        ignore_3d: bool = True,
-        n_jobs: int | None = None,
+            self,
+            descs: list[str] | None = None,
+            ignore_3d: bool = True,
+            n_jobs: int | None = None,
     ):
         """Initialize a PaDEL calculator
 
@@ -242,7 +240,7 @@ class PaDEL(DescriptorSet):
         self.descriptors = state["_keep"]
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
         df = self._padel.calculate(mols, show_banner=False, njobs=self.nJobs)
@@ -317,7 +315,7 @@ class ExtendedValenceSignature(DescriptorSet):
         return False
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
         df = self._signature.calculate(
@@ -352,7 +350,8 @@ class ProteinDescriptorSet(DescriptorSet):
 
     @abstractmethod
     def getProteinDescriptors(
-        self, acc_keys: list[str], sequences: Optional[dict[str, str]] = None, **kwargs
+            self, acc_keys: list[str], sequences: Optional[dict[str, str]] = None,
+            **kwargs
     ) -> pd.DataFrame:
         """
         Calculate the protein descriptors for a given target.
@@ -373,11 +372,11 @@ class ProteinDescriptorSet(DescriptorSet):
         """
 
     def getDescriptors(
-        self,
-        mols: list[Mol],
-        props: dict[str, list[Any] | dict[str, str]],
-        *args,
-        **kwargs,
+            self,
+            mols: list[Mol],
+            props: dict[str, list[Any] | dict[str, str]],
+            *args,
+            **kwargs,
     ) -> np.ndarray:
         """Get array of calculated protein descriptors for given targets.
 
@@ -392,21 +391,17 @@ class ProteinDescriptorSet(DescriptorSet):
             np.ndarray: array of calculated protein descriptors
         """
         # Get array of calculated protein descriptors
-        acc_keys = sorted(set(props["acc_keys"]))
+        acc_keys = kwargs["protein_ids"]
+        protein_id_prop = kwargs["protein_id_prop"]
         values = self.getProteinDescriptors(acc_keys, **kwargs).reset_index()
-        values.rename(columns={"ID": "acc_keys"}, inplace=True)
+        values.rename(columns={"ID": protein_id_prop}, inplace=True)
         # create a data frame with the same order of acc_keys as in props
-        df = pd.DataFrame({"acc_keys": props["acc_keys"]})
+        df = pd.DataFrame({protein_id_prop: props[protein_id_prop]})
         # merge the calculated values with the data frame to attach them to the rows
         df = df.merge(
-            values, left_on="acc_keys", right_on="acc_keys", how="left"
-        ).set_index("acc_keys")
+            values, left_on=protein_id_prop, right_on=protein_id_prop, how="left"
+        ).set_index(protein_id_prop)
         return df.values
-
-    @property
-    def requiredProps(self) -> list[str]:
-        existing = super().requiredProps
-        return ["acc_keys", *existing]
 
     def supportsParallel(self) -> bool:
         return False
@@ -425,7 +420,8 @@ class ProDec(ProteinDescriptorSet):
     """
 
     def __init__(
-        self, sets: list[str] | None = None, msa_provider: MSAProvider = ClustalMSA()
+            self, sets: list[str] | None = None,
+            msa_provider: MSAProvider = ClustalMSA()
     ):
         """Initialize a ProDec calculator.
 
@@ -454,7 +450,7 @@ class ProDec(ProteinDescriptorSet):
 
     @staticmethod
     def calculateDescriptor(
-        factory: prodec.ProteinDescriptors, msa: dict[str, str], descriptor: str
+            factory: prodec.ProteinDescriptors, msa: dict[str, str], descriptor: str
     ):
         """
         Calculate a protein descriptor for given targets
@@ -481,7 +477,8 @@ class ProDec(ProteinDescriptorSet):
         return protein_features
 
     def getProteinDescriptors(
-        self, acc_keys: list[str], sequences: Optional[dict[str, str]] = None, **kwargs
+            self, acc_keys: list[str], sequences: Optional[dict[str, str]] = None,
+            **kwargs
     ) -> pd.DataFrame:
         """
         Calculate the protein descriptors for a given target.

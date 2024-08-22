@@ -34,11 +34,11 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         self.nCPU = 1
 
     def getModel(
-        self,
-        name: str,
-        alg: Type | None = None,
-        parameters: dict | None = None,
-        random_state: int | None = None,
+            self,
+            name: str,
+            alg: Type | None = None,
+            parameters: dict | None = None,
+            random_state: int | None = None,
     ):
         """Initialize dataset and model.
 
@@ -62,50 +62,50 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
     @parameterized.expand(
         [
             (
-                alg_name,
-                [{"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}],
-                alg_name,
-                alg,
-                random_state,
+                    alg_name,
+                    [{"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}],
+                    alg_name,
+                    alg,
+                    random_state,
             )
             for alg, alg_name in ((XGBRegressor, "XGBR"),)
             for random_state in ([None], [1, 42], [42, 42])
         ]
         + [
             (
-                alg_name,
-                [{"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}],
-                alg_name,
-                alg,
-                [None],
+                    alg_name,
+                    [{"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}],
+                    alg_name,
+                    alg,
+                    [None],
             )
             for alg, alg_name in ((PLSRegression, "PLSR"),)
         ]
         + [
             (
-                alg_name,
-                [
-                    {
-                        "name": "pchembl_value_Median",
-                        "task": TargetTasks.SINGLECLASS,
-                        "th": [6.5],
-                    }
-                ],
-                alg_name,
-                alg,
-                random_state,
+                    alg_name,
+                    [
+                        {
+                            "name": "pchembl_value_Median",
+                            "task": TargetTasks.SINGLECLASS,
+                            "th": [6.5],
+                        }
+                    ],
+                    alg_name,
+                    alg,
+                    random_state,
             )
             for alg, alg_name in ((XGBClassifier, "XGBC"),)
             for random_state in ([None], [21, 42], [42, 42])
         ]
     )
     def testFittingPCM(
-        self,
-        _,
-        props: list[TargetProperty | dict],
-        model_name: str,
-        model_class: Type,
-        random_state: list[int | None],
+            self,
+            _,
+            props: list[TargetProperty | dict],
+            model_name: str,
+            model_class: Type,
+            random_state: list[int | None],
     ):
         """Test model training for regression models.
 
@@ -147,9 +147,9 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         # make predictions with the trained model and check if the results are (not)
         # equal if the random state is the (not) same and at the same time
         # check if the output is the same before and after saving and loading
-        for protein_id in sorted(set(dataset.getProperty(dataset.proteinCol))):
+        for protein_id in sorted(set(dataset.getProperty(dataset.proteinIDProp))):
             subset = dataset.searchOnProperty(
-                dataset.proteinCol, [protein_id], exact=True
+                dataset.proteinIDProp, [protein_id], exact=True
             )
             if random_state[0] is not None:
                 comparison_model = self.getModel(
@@ -160,9 +160,9 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
                 )
                 self.fitTest(comparison_model, dataset)
                 self.predictorTest(
-                    predictor, # model loaded from file
+                    predictor,  # model loaded from file
                     subset,
-                    comparison_model=comparison_model, # model not loaded from file
+                    comparison_model=comparison_model,  # model not loaded from file
                     protein_id=protein_id,
                     expect_equal_result=random_state[0] == random_state[1],
                 )
@@ -180,11 +180,11 @@ class RandomBaseModelTestCase(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTes
         self.setUpPaths()
 
     def getModel(
-        self,
-        name: str,
-        alg: ScipyDistributionAlgorithm | RatioDistributionAlgorithm = ScipyDistributionAlgorithm,
-        parameters: dict | None = None,
-        random_state: int | None = None,
+            self,
+            name: str,
+            alg: ScipyDistributionAlgorithm | RatioDistributionAlgorithm = ScipyDistributionAlgorithm,
+            parameters: dict | None = None,
+            random_state: int | None = None,
     ):
         """Initialize dataset and model.
 
@@ -244,9 +244,9 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
             )
             self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor, # model loaded from file
+                predictor,  # model loaded from file
                 dataset,
-                comparison_model, # model not loaded from file
+                comparison_model,  # model not loaded from file
                 expect_equal_result=random_state[0] == random_state[1],
             )
 
@@ -287,7 +287,7 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
             alg=MedianDistributionAlgorithm
         )
         self.predictorTest(predictor, dataset)
-        
+
         # test if the results are (not) equal if the random state is the (not) same
         # and check if the output is the same before and after saving and loading
         if random_state[0] is not None:
@@ -306,21 +306,22 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
 
 class TestRandomModelClassification(RandomBaseModelTestCase):
     """Test the RandomModel class for regression models."""
+
     @parameterized.expand(
         [
             (f"{alg_name}_{task}", task, th, alg_name, alg, random_state)
             for alg, alg_name in (
                 (RatioDistributionAlgorithm, "RandomModel"),
-            )
+        )
             for task, th in (
                 (TargetTasks.SINGLECLASS, [6.5]),
                 (TargetTasks.MULTICLASS, [0, 2, 10, 1100]),
-            )
+        )
             for random_state in ([None], [42, 42])
         ]
     )
     def testClassificationBasicFit(
-        self, _, task, th, model_name, model_class, random_state
+            self, _, task, th, model_name, model_class, random_state
     ):
         """Test model training for classification models."""
         parameters = None
@@ -346,7 +347,7 @@ class TestRandomModelClassification(RandomBaseModelTestCase):
         )
 
         self.predictorTest(predictor, dataset)
-        
+
         # test if the results are (not) equal if the random state is the (not) same
         # and check if the output is the same before and after saving and loading
         if random_state[0] is not None:
@@ -358,9 +359,9 @@ class TestRandomModelClassification(RandomBaseModelTestCase):
             )
             self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor, # model loaded from file
+                predictor,  # model loaded from file
                 dataset,
-                comparison_model, # model not loaded from file
+                comparison_model,  # model not loaded from file
                 expect_equal_result=random_state[0] == random_state[1],
             )
 
@@ -413,7 +414,7 @@ class TestRandomModelClassificationMultiTask(RandomBaseModelTestCase):
         )
 
         self.predictorTest(predictor, dataset)
-        
+
         # test if the results are (not) equal if the random state is the (not) same
         # and check if the output is the same before and after saving and loading
         if random_state[0] is not None:
@@ -425,8 +426,8 @@ class TestRandomModelClassificationMultiTask(RandomBaseModelTestCase):
             )
             self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor, # model loaded from file
+                predictor,  # model loaded from file
                 dataset,
-                comparison_model, # model not loaded from file
+                comparison_model,  # model not loaded from file
                 expect_equal_result=random_state[0] == random_state[1],
             )

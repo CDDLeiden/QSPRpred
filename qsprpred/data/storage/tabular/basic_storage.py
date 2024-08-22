@@ -36,7 +36,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             id_col: str = "ID",
             store_format: str = "pkl",
             chunk_processor: ParallelGenerator = None,
-            chunk_size: int = 1000,
+            chunk_size: int | None = None,
             n_jobs: int = 1,
     ) -> None:
         super().__init__()
@@ -464,7 +464,8 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         if add_props is None:
             add_props = self.getProperties()
         else:
-            add_props = list(add_props) + list(processor.requiredProps)
+            add_props = list(add_props)
+        add_props = add_props + list(processor.requiredProps)
         chunk_processor = chunk_processor or self.chunkProcessor
         for prop in add_props:
             if prop not in self.getProperties():
@@ -480,6 +481,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
                 on_props=add_props,
                 chunk_type=mol_type,
                 chunk_processor=chunk_processor,
+                no_parallel=not processor.supportsParallel,
         ):
             yield result
 
@@ -561,9 +563,10 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             on_props: tuple[str, ...] | None = None,
             chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
             chunk_processor: ParallelGenerator | None = None,
+            no_parallel: bool = False,
     ) -> Generator[Iterable[Any], None, None]:
         chunk_processor = chunk_processor or self.chunkProcessor
-        if self.nJobs > 1:
+        if self.nJobs > 1 and not no_parallel:
             for result in chunk_processor(
                     self.iterChunks(self.chunkSize, chunk_type=chunk_type,
                                     on_props=on_props),

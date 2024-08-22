@@ -393,8 +393,8 @@ class PandasDataTable(PropertyStorage, Randomized):
             self.df[name] = data
         else:
             if not ignore_missing:
-                assert all(
-                    self.df.index.isin(ids)
+                assert self.df.index.intersection(ids).shape[0] == len(
+                    ids
                 ), "Not all IDs found in data set."
             else:
                 data = pd.Series(data, index=ids, name=name)

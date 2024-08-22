@@ -1064,7 +1064,7 @@ class WandBMonitor(BaseMonitor):
 
         # add smiles to fold predictions by merging on index
         dataset_smiles = self.assessmentDataset.getDF()[
-            self.assessmentDataset.smilesCol
+            self.assessmentDataset.smilesProp
         ]
         fold_predictions_copy = fold_predictions_copy.merge(
             dataset_smiles, left_index=True, right_index=True
@@ -1072,7 +1072,7 @@ class WandBMonitor(BaseMonitor):
 
         fold_predictions_copy["molecule"] = None
         for index, row in fold_predictions_copy.iterrows():
-            mol = Chem.MolFromSmiles(row[self.assessmentDataset.smilesCol])
+            mol = Chem.MolFromSmiles(row[self.assessmentDataset.smilesProp])
             if mol is not None:
                 fold_predictions_copy.at[index, "molecule"] = self.wandb.Image(
                     Draw.MolToImage(mol, size=(200, 200))
