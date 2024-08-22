@@ -34,7 +34,7 @@ from .assessment.metrics.classification import CalibrationError, BEDROC, \
     BalancedMatthewsCorrcoeff, BalancedCohenKappa
 from .assessment.metrics.masked import MaskedMetric
 from .assessment.metrics.regression import Pearson, Kendall, KSlope, R20, KPrimeSlope, \
-    AverageFoldError, AbsoluteAverageFoldError, PercentageWithinFoldError
+    AverageFoldError, AbsoluteAverageFoldError, PercentageWithinFoldError, RPrime20
 from .assessment.regression import create_correlation_summary
 from ..data.processing.applicability_domain import MLChemADWrapper
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stopping
