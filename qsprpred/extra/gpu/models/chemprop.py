@@ -632,6 +632,8 @@ class ChempropModel(QSPRModelPyTorchGPU):
             X, y = self.convertToNumpy(X, y)
             if y.dtype == bool:
                 y = y.astype(float)  # BCEWithLogitsLoss expects float
+            # convert np.nan to None
+            y = np.where(np.isnan(y), None, y)
         else:
             X = self.convertToNumpy(X)
             y = [None] * len(X)  # dummy targets
