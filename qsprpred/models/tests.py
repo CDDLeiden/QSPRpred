@@ -24,57 +24,41 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
+from . import SklearnMetrics
+from .assessment.classification import create_metrics_summary
+from .assessment.metrics.classification import CalibrationError, BEDROC, \
+    EnrichmentFactor, \
+    RobustInitialEnhancement, Prevalence, Sensitivity, Specificity, \
+    PositivePredictivity, NegativePredictivity, CohenKappa, \
+    BalancedPositivePredictivity, BalancedNegativePredictivity, \
+    BalancedMatthewsCorrcoeff, BalancedCohenKappa
+from .assessment.metrics.masked import MaskedMetric
+from .assessment.metrics.regression import Pearson, Kendall, KSlope, R20, KPrimeSlope, \
+    AverageFoldError, AbsoluteAverageFoldError, PercentageWithinFoldError
+from .assessment.regression import create_correlation_summary
 from ..data.processing.applicability_domain import MLChemADWrapper
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stopping
-from ..models.metrics import (
-    BalancedCohenKappa,
-    BalancedMatthewsCorrcoeff,
-    BalancedNegativePredictivity,
-    BalancedPositivePredictivity,
-    CalibrationError,
-    BEDROC,
-    EnrichmentFactor,
-    RobustInitialEnhancement,
-    NegativePredictivity,
-    PositivePredictivity,
-    Prevalence,
-    SklearnMetrics,
-    Sensitivity,
-    Specificity,
-    CohenKappa,
-    Kendall,
-    KPrimeSlope,
-    KSlope,
-    Pearson,
-    RPrime20,
-    R20,
-    AbsoluteAverageFoldError,
-    AverageFoldError,
-    PercentageWithinFoldError,
-    MaskedMetric
-)
 from ..models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ..models.scikit_learn import SklearnModel
 from ..tasks import ModelTasks, TargetTasks
 from ..utils.testing.base import QSPRTestCase
 from ..utils.testing.check_mixins import ModelCheckMixIn, MonitorsCheckMixIn
 from ..utils.testing.path_mixins import ModelDataSetsPathMixIn
-from .assessment.classification import create_metrics_summary
-from .assessment.regression import create_correlation_summary
 
 
 class SklearnBaseModelTestCase(ModelDataSetsPathMixIn, ModelCheckMixIn, QSPRTestCase):
     """This class holds the tests for the SklearnModel class."""
+
     def setUp(self):
         super().setUp()
         self.setUpPaths()
 
     def getModel(
-        self,
-        name: str,
-        alg: Type | None = None,
-        parameters: dict | None = None,
-        random_state: int | None = None,
+            self,
+            name: str,
+            alg: Type | None = None,
+            parameters: dict | None = None,
+            random_state: int | None = None,
     ):
         """Create a SklearnModel model.
 
@@ -101,19 +85,20 @@ class SklearnBaseModelTestCase(ModelDataSetsPathMixIn, ModelCheckMixIn, QSPRTest
 
 class TestSklearnRegression(SklearnBaseModelTestCase):
     """Test the SklearnModel class for regression models."""
+
     @parameterized.expand(
         [
             (alg_name, TargetTasks.REGRESSION, alg_name, alg, random_state)
             for alg, alg_name in (
                 (RandomForestRegressor, "RFR"),
                 (XGBRegressor, "XGBR"),
-            ) for random_state in ([None], [1, 42], [42, 42])
+        ) for random_state in ([None], [1, 42], [42, 42])
         ] + [
             (alg_name, TargetTasks.REGRESSION, alg_name, alg, [None])
             for alg, alg_name in (
-                (PLSRegression, "PLSR"),
-                (SVR, "SVR"),
-                (KNeighborsRegressor, "KNNR"),
+                    (PLSRegression, "PLSR"),
+                    (SVR, "SVR"),
+                    (KNeighborsRegressor, "KNNR"),
             )
         ]
     )
@@ -155,9 +140,9 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
             )
             self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor, # model loaded from file
+                predictor,  # model loaded from file
                 dataset=dataset,
-                comparison_model=comparison_model, # comparison model not saved/loaded
+                comparison_model=comparison_model,  # comparison model not saved/loaded
                 expect_equal_result=random_state[0] == random_state[1],
             )
         else:
@@ -201,14 +186,15 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
 
 class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
     """Test the SklearnModel class for multi-task regression models."""
+
     @parameterized.expand(
         [
             (alg_name, alg_name, alg, random_state)
-            for alg, alg_name in ((RandomForestRegressor, "RFR"), )
+            for alg, alg_name in ((RandomForestRegressor, "RFR"),)
             for random_state in ([None], [1, 42], [42, 42])
         ] + [
             (alg_name, alg_name, alg, [None])
-            for alg, alg_name in ((KNeighborsRegressor, "KNNR"), )
+            for alg, alg_name in ((KNeighborsRegressor, "KNNR"),)
         ]
     )
     def testRegressionMultiTaskFit(self, _, model_name, model_class, random_state):
@@ -254,9 +240,9 @@ class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
             )
             self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor, # model loaded from file
+                predictor,  # model loaded from file
                 dataset=dataset,
-                comparison_model=comparison_model, # comparison model not saved/loaded
+                comparison_model=comparison_model,  # comparison model not saved/loaded
                 expect_equal_result=random_state[0] == random_state[1],
             )
         else:
@@ -298,30 +284,31 @@ class TestSklearnSerialization(SklearnBaseModelTestCase):
 
 class TestSklearnClassification(SklearnBaseModelTestCase):
     """Test the SklearnModel class for classification models."""
+
     @parameterized.expand(
         [
             (f"{alg_name}_{task}", task, th, alg_name, alg, random_state)
             for alg, alg_name in (
                 (RandomForestClassifier, "RFC"),
                 (XGBClassifier, "XGBC"),
-            ) for task, th in (
+        ) for task, th in (
                 (TargetTasks.SINGLECLASS, [6.5]),
                 (TargetTasks.MULTICLASS, [0, 2, 10, 1100]),
-            ) for random_state in ([None], [1, 42], [42, 42])
+        ) for random_state in ([None], [1, 42], [42, 42])
         ] + [
             (f"{alg_name}_{task}", task, th, alg_name, alg, [None])
             for alg, alg_name in (
-                (SVC, "SVC"),
-                (KNeighborsClassifier, "KNNC"),
-                (GaussianNB, "NB"),
+                    (SVC, "SVC"),
+                    (KNeighborsClassifier, "KNNC"),
+                    (GaussianNB, "NB"),
             ) for task, th in (
-                (TargetTasks.SINGLECLASS, [6.5]),
-                (TargetTasks.MULTICLASS, [0, 2, 10, 1100]),
+                    (TargetTasks.SINGLECLASS, [6.5]),
+                    (TargetTasks.MULTICLASS, [0, 2, 10, 1100]),
             )
         ]
     )
     def testClassificationBasicFit(
-        self, _, task, th, model_name, model_class, random_state
+            self, _, task, th, model_name, model_class, random_state
     ):
         """Test model training for classification models."""
         if model_name not in ["NB", "SVC"]:
@@ -371,9 +358,9 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
             )
             self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor, # model loaded from file
+                predictor,  # model loaded from file
                 dataset=dataset,
-                comparison_model=comparison_model, # comparison model not saved/loaded
+                comparison_model=comparison_model,  # comparison model not saved/loaded
                 expect_equal_result=random_state[0] == random_state[1],
             )
         else:
@@ -421,14 +408,15 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
 
 class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
     """Test the SklearnModel class for multi-task classification models."""
+
     @parameterized.expand(
         [
             (alg_name, alg_name, alg, random_state)
-            for alg, alg_name in ((RandomForestClassifier, "RFC"), )
+            for alg, alg_name in ((RandomForestClassifier, "RFC"),)
             for random_state in ([None], [1, 42], [42, 42])
         ] + [
             (alg_name, alg_name, alg, [None])
-            for alg, alg_name in ((KNeighborsClassifier, "KNNC"), )
+            for alg, alg_name in ((KNeighborsClassifier, "KNNC"),)
         ]
     )
     def testClassificationMultiTaskFit(self, _, model_name, model_class, random_state):
@@ -485,9 +473,9 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
             )
             self.fitTest(comparison_model, dataset)
             self.predictorTest(
-                predictor, # model loaded from file
+                predictor,  # model loaded from file
                 dataset=dataset,
-                comparison_model=comparison_model, # comparison model not saved/loaded
+                comparison_model=comparison_model,  # comparison model not saved/loaded
                 expect_equal_result=random_state[0] == random_state[1],
             )
         else:
@@ -496,6 +484,7 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
 
 class TestMetrics(TestCase):
     """Test the SklearnMetrics from the metrics module."""
+
     def sample_data(self, task: ModelTasks, use_proba: bool = False):
         """Sample data for testing."""
         if task == ModelTasks.REGRESSION:
@@ -536,11 +525,11 @@ class TestMetrics(TestCase):
             y_pred = [
                 np.array([[0.2, 0.8], [0.2, 0.8], [0.8, 0.2], [0.1, 0.9], [0.9, 0.1]]),
                 np.array([[0.2, 0.8], [0.2, 0.8], [0.8, 0.2], [0.1, 0.9], [0.9, 0.1]]),
-            ] 
+            ]
         else:
             raise ValueError(f"Invalid task or not implemented: {task}")
         return y_true, y_pred
-    
+
     def test_SklearnMetrics(self):
         """Test the sklearn metrics wrapper."""
 
@@ -559,7 +548,7 @@ class TestMetrics(TestCase):
         qsprpred_scorer = SklearnMetrics("neg_mean_squared_error")
         self.assertEqual(
             qsprpred_scorer(y_true, y_pred),
-            -mean_squared_error(y_true, np.squeeze(y_pred)), # negated
+            -mean_squared_error(y_true, np.squeeze(y_pred)),  # negated
         )
 
         ## test multitask regression
@@ -625,15 +614,15 @@ class TestMetrics(TestCase):
         """Test the calibration error metric."""
         # test calibration error with single class probabilities
         y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS, use_proba=True)
-        
+
         cal_error = CalibrationError()
         # check assertion error is raised when n_bins > n_samples
         with self.assertRaises(AssertionError):
             cal_error(y_true, y_pred)
-            
+
         cal_error = CalibrationError(n_bins=5)
         self.assertIsInstance(cal_error(y_true, y_pred), float)
-        
+
         # assert value error is raised when using discrete predictions
         with self.assertRaises(TypeError):
             cal_error(self.sample_data(ModelTasks.SINGLECLASS, use_proba=False))
@@ -643,22 +632,22 @@ class TestMetrics(TestCase):
         y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS, use_proba=True)
         bedroc = BEDROC()
         self.assertIsInstance(bedroc(y_true, y_pred), float)
-        
+
     def test_EnrichmentFactor(self):
         """Test the enrichment factor metric."""
         y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS, use_proba=True)
         enrichment = EnrichmentFactor()
         self.assertIsInstance(enrichment(y_true, y_pred), float)
-    
+
     def test_RobustInitialEnhancement(self):
         """Test the robust initial enhancement metric."""
         y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS, use_proba=True)
         robust_enhancement = RobustInitialEnhancement()
         self.assertIsInstance(robust_enhancement(y_true, y_pred), float)
-        
+
     def test_ConfusionMatrixMetrics(self):
         y_true, y_pred = self.sample_data(ModelTasks.SINGLECLASS)
-        
+
         self.assertIsInstance(Prevalence()(y_true, y_pred), float)
         self.assertIsInstance(Specificity()(y_true, y_pred), float)
         self.assertIsInstance(Sensitivity()(y_true, y_pred), float)
@@ -673,51 +662,53 @@ class TestMetrics(TestCase):
     def test_Pearson(self):
         y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
         Pearson()(y_true, y_pred)
-    
+
     def test_Kendall(self):
         y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
         Kendall()(y_true, y_pred)
-        
+
     def test_KPrimeSlope(self):
         y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
         KPrimeSlope()(y_true, y_pred)
-        
+
     def test_KSlope(self):
         y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
         KSlope()(y_true, y_pred)
-        
+
     def test_R20(self):
         y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
         R20()(y_true, y_pred)
-    
+
     def test_RPrime20(self):
         y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
         RPrime20()(y_true, y_pred)
-        
+
     def test_FoldErrorMetrics(self):
         y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
         self.assertIsInstance(AbsoluteAverageFoldError()(y_true, y_pred), float)
         self.assertIsInstance(AverageFoldError()(y_true, y_pred), float)
         self.assertIsInstance(PercentageWithinFoldError()(y_true, y_pred), float)
-        
+
     def test_MaskedMetric(self):
         y_true, y_pred = self.sample_data(ModelTasks.REGRESSION)
         y_true[1] = None
-        
+
         metric = MaskedMetric(SklearnMetrics("neg_mean_squared_error"))
         self.assertIsInstance(metric(y_true, y_pred), float)
-        
-        y_true, y_pred = self.sample_data(ModelTasks.MULTITASK_SINGLECLASS, use_proba=False)
+
+        y_true, y_pred = self.sample_data(ModelTasks.MULTITASK_SINGLECLASS,
+                                          use_proba=False)
         y_true = y_true.astype(float)
         y_true[0, :] = None
         y_true[1, 1] = None
-        
-        y_true, y_pred = self.sample_data(ModelTasks.MULTITASK_SINGLECLASS, use_proba=True)
+
+        y_true, y_pred = self.sample_data(ModelTasks.MULTITASK_SINGLECLASS,
+                                          use_proba=True)
         y_true = y_true.astype(float)
         y_true[0, :] = None
         y_true[1, 1] = None
-    
-               
+
+
 class TestEarlyStopping(ModelDataSetsPathMixIn, TestCase):
     def setUp(self):
         super().setUp()
@@ -794,6 +785,7 @@ class TestEarlyStopping(ModelDataSetsPathMixIn, TestCase):
 
     def test_early_stopping_decorator(self):
         """Test the early stopping decorator."""
+
         class test_class:
             def __init__(self, support=True):
                 self.earlyStopping = EarlyStopping(EarlyStoppingMode.RECORDING)
@@ -801,14 +793,14 @@ class TestEarlyStopping(ModelDataSetsPathMixIn, TestCase):
 
             @early_stopping
             def test_func(
-                self,
-                X,
-                y,
-                estimator=None,
-                mode=EarlyStoppingMode.NOT_RECORDING,
-                split=None,
-                monitor=None,
-                **kwargs,
+                    self,
+                    X,
+                    y,
+                    estimator=None,
+                    mode=EarlyStoppingMode.NOT_RECORDING,
+                    split=None,
+                    monitor=None,
+                    **kwargs,
             ):
                 return None, kwargs["best_epoch"]
 

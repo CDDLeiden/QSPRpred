@@ -5,12 +5,12 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 
-from qsprpred.models.assessment.methods import ModelAssessor
 from .settings.benchmark import DataPrepSettings
 from ..data import QSPRDataset
 from ..data.descriptors.sets import DescriptorSet
 from ..data.sources.data_source import DataSource
 from ..logs import logger
+from ..models.assessment.methods import ModelAssessor
 from ..models.hyperparam_optimization import HyperparameterOptimization
 from ..models.model import QSPRModel
 from ..models.monitors import NullMonitor
@@ -53,17 +53,17 @@ class Replica(JSONSerializable):
     _notJSON = JSONSerializable._notJSON + ["ds", "results", "model"]
 
     def __init__(
-        self,
-        idx: int,
-        name: str,
-        data_source: DataSource,
-        descriptors: list[DescriptorSet],
-        target_props: list[TargetProperty],
-        prep_settings: DataPrepSettings,
-        model: QSPRModel,
-        optimizer: HyperparameterOptimization,
-        assessors: list[ModelAssessor],
-        random_seed: int,
+            self,
+            idx: int,
+            name: str,
+            data_source: DataSource,
+            descriptors: list[DescriptorSet],
+            target_props: list[TargetProperty],
+            prep_settings: DataPrepSettings,
+            model: QSPRModel,
+            optimizer: HyperparameterOptimization,
+            assessors: list[ModelAssessor],
+            random_seed: int,
     ):
         self.idx = idx
         self.name = name
