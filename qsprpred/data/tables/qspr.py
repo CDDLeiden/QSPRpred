@@ -415,7 +415,7 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
             subset: list[str],
             ids: list[str] | None = None,
             name: str | None = None,
-            path: str | None = None,
+            path: str = ".",
             **kwargs,
     ) -> "QSPRDataset":
         mt = super().getSubset(subset, ids, name, path, **kwargs)
@@ -478,7 +478,7 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
         )
         ds.descriptors = mol_table.descriptors
         ds.featureNames = mol_table.getDescriptorNames()
-        ds.loadDescriptorsToSplits()
+        ds.loadDescriptorsToSplits(shuffle=False)
         return ds
 
     def filter(self, table_filters: list[Callable]):

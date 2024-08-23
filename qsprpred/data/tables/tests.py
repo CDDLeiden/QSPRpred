@@ -158,7 +158,7 @@ class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
         mt = self.getTable()
         mt.addDescriptors(self.getDescriptorSets())
         # get subset for all ids
-        mt_sub = mt.getSubset(mt.getProperties())
+        mt_sub = mt.getSubset(mt.getProperties(), path=self.generatedDataPath)
         self.assertEqual(len(mt), len(mt_sub))
         self.assertListEqual(list(mt.smiles), list(mt_sub.smiles))
         self.assertListEqual(list(mt.getProperties()), list(mt_sub.getProperties()))
@@ -174,7 +174,7 @@ class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
         random_new_folder = tempfile.mkdtemp()
         shutil.move(self.generatedDataPath, random_new_folder)
         mt_moved = MoleculeTable.fromFile(
-            os.path.join(random_new_folder, "datasets", mt.name,
+            os.path.join(random_new_folder, "datasets",
                          mt_sub.name, "meta.json")
         )
         self.assertEqual(len(mt_sub), len(mt_moved))
@@ -342,6 +342,37 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(dataset_new.X.shape[1], 0)
         dataset_new.addDescriptors([MorganFP(radius=2, nBits=128)])
         self.checkConsistency(dataset_new)
+        # test subset creation
+        features = dataset_new.getFeatures(concat=True, refit_standardizer=False)
+        targets = dataset_new.getTargets(concat=True)
+        subset = dataset_new.getSubset(["CL"], path=self.generatedDataPath)
+        props = subset.getProperties()
+        self.assertIn("CL", props)
+        self.assertNotIn("HBD", props)
+        self.assertNotIn("Notes", props)
+        self.assertEqual(len(subset), len(dataset_new))
+        features_new = subset.getFeatures(concat=True, refit_standardizer=False)
+        self.assertTrue(np.allclose(features_new, features))
+        targets_new = subset.getTargets(concat=True)
+        self.assertTrue(np.allclose(targets_new, targets))
+        # subset only first two ids
+        subset = dataset_new.getSubset(
+            ["CL"],
+            ids=list(dataset_new.getProperty(dataset_new.idProp)[0:2])
+        )
+        self.assertEqual(len(subset), 2)
+        self.assertEqual(subset.getFeatures(concat=True).shape[0], 2)
+        self.assertEqual(subset.getTargets(concat=True).shape[0], 2)
+        self.assertListEqual(list(subset.getFeatures(concat=True).index),
+                             list(features.iloc[0:2, :].index))
+        self.assertListEqual(list(subset.getTargets(concat=True).index),
+                             list(targets.iloc[0:2, :].index))
+        self.assertTrue(
+            np.allclose(subset.getFeatures(concat=True, refit_standardizer=False),
+                        features.iloc[0:2, :]))
+        self.assertTrue(
+            np.allclose(subset.getTargets(concat=True),
+                        targets.iloc[0:2, :]))
 
     def testMultitask(self):
         """Test multi-task dataset creation and functionality."""
