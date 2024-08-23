@@ -61,7 +61,7 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
 
     def __init__(
             self,
-            storage: ChemStore,
+            storage: ChemStore | None,
             name: str | None = None,
             target_props: list[TargetProperty | dict] | None = None,
             path: str = ".",
@@ -92,7 +92,7 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
             `ValueError`: Raised if threshold given with non-classification task.
         """
         super().__init__(
-            storage,
+            storage=storage,
             name=name,
             path=path,
             random_state=random_state,
@@ -419,23 +419,40 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
             **kwargs,
     ) -> "QSPRDataset":
         mt = super().getSubset(subset, ids, name, path, **kwargs)
-        return self.fromMolTable(mt, self.targetProperties, name=mt.name, **kwargs)
+        ds = self.fromMolTable(mt, self.targetProperties, name=mt.name, path=path,
+                               **kwargs)
+        ds.featureStandardizer = self.featureStandardizer
+        ds.applicabilityDomain = self.applicabilityDomain
+        ds.featureNames = self.featureNames
+        ds.restoreTrainingData()
+        return ds
 
     @classmethod
     def fromMolTable(
             cls,
             mol_table: MoleculeTable,
             target_props: list[TargetProperty | dict],
-            name=None,
+            *args,
+            path: str = ".",
+            name: str | None = None,
             **kwargs,
     ) -> "QSPRDataset":
         """Create QSPRDataset from a MoleculeTable.
 
         Args:
-            mol_table (MoleculeTable): MoleculeTable to use as the data source
-            target_props (list): list of target properties to use
-            name (str, optional): name of the data set. Defaults to None.
-            kwargs: additional keyword arguments to pass to the constructor
+            mol_table (MoleculeTable):
+                `MoleculeTable` to use as the data source
+            target_props (list):
+                list of target properties to use
+            *args:
+                additional positional arguments to pass to the constructor of
+                `QSPRDataset`
+            path (str):
+                path to the directory where the data set will be saved
+            name (str):
+                name of the data set
+            **kwargs:
+                additional keyword arguments to pass to the constructor of `QSPRDataset`
 
         Returns:
             QSPRDataset: created data set
@@ -455,6 +472,8 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
             mol_table.storage,
             name,
             target_props,
+            path,
+            *args,
             **kwargs,
         )
         ds.descriptors = mol_table.descriptors

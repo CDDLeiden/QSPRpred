@@ -149,7 +149,8 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         # check if the output is the same before and after saving and loading
         for protein_id in sorted(set(dataset.getProperty(dataset.proteinIDProp))):
             subset = dataset.searchOnProperty(
-                dataset.proteinIDProp, [protein_id], exact=True
+                dataset.proteinIDProp, [protein_id], exact=True,
+                path=self.generatedDataPath
             )
             if random_state[0] is not None:
                 comparison_model = self.getModel(

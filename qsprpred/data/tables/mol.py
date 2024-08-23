@@ -37,7 +37,7 @@ class MoleculeTable(MoleculeDataSet):
 
     def __init__(
             self,
-            storage: ChemStore,
+            storage: ChemStore | None,
             name: str | None = None,
             path: str = ".",
             random_state: int | None = None,
@@ -55,14 +55,32 @@ class MoleculeTable(MoleculeDataSet):
             random_state (int): Random state to use for shuffling and other random ops.
             store_format (str): Format to use for storing the data set.
         """
-        self.storage = storage
-        self.name = name or f"{self.storage}_mol_table"
-        self.randomState = random_state
+        assert storage is not None or name is not None, "Either storage or name must be provided."
         self.descriptors = []
-        self.path = os.path.abspath(os.path.join(path, self.name))
+        self.randomState = random_state
         self.storeFormat = store_format
-        if os.path.exists(self.metaFile):
-            self.reload()
+        if storage is not None:
+            self.storage = storage
+            self.name = name or f"{self.storage}_mol_table"
+            self.path = os.path.abspath(os.path.join(path, self.name))
+            if os.path.exists(self.metaFile):
+                self.reload()
+                if random_state is not None and self.randomState != random_state:
+                    logger.warning(
+                        "Random state in the data set "
+                        "does not match the given random state. Setting to given value:"
+                        f" {random_state}."
+                    )
+                    self.randomState = random_state
+        else:
+            self.name = name
+            self.path = os.path.abspath(os.path.join(path, self.name))
+            if os.path.exists(self.metaFile):
+                self.reload()
+            else:
+                raise ValueError(f"Could not initialize from meta file: {self.metaFile}"
+                                 f"Are you sure the path parameter is correct? "
+                                 f"Path supplied: {self.path}")
 
     @property
     def randomState(self) -> int:
@@ -639,7 +657,7 @@ class MoleculeTable(MoleculeDataSet):
             subset: Iterable[str],
             ids: Iterable[str] | None = None,
             name: str | None = None,
-            path: str | None = None,
+            path: str = ".",
             **kwargs,
     ) -> "MoleculeTable":
         name = name or f"{self.name}_subset"
@@ -735,7 +753,7 @@ class MoleculeTable(MoleculeDataSet):
                          operator: Literal["or", "and"] = "or",
                          use_chirality: bool = False,
                          name: str | None = None,
-                         path: str | None = None
+                         path: str = "."
                          ) -> "MoleculeTable":
         if hasattr(self.storage, "searchWithSMARTS"):
             result = self.storage.searchWithSMARTS(
@@ -752,7 +770,7 @@ class MoleculeTable(MoleculeDataSet):
 
     def searchOnProperty(self, prop_name: str, values: list[float | int | str],
                          exact=False, name: str | None = None,
-                         path: str | None = None) -> "MoleculeTable":
+                         path: str = ".") -> "MoleculeTable":
         result = self.storage.searchOnProperty(prop_name, values, exact)
         mol_ids = result.getProperty(result.idProp)
         return self.getSubset(self.getProperties(), mol_ids, name=name, path=path)

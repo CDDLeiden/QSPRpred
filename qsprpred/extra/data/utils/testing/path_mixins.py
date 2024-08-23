@@ -182,8 +182,8 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
             index_cols=[protein_col],
         )
         ret = PCMDataSet(
-            storage,
-            proteins,
+            storage=storage,
+            proteins=proteins,
             name=name,
             target_props=target_props,
             random_state=random_state,
