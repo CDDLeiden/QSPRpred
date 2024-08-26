@@ -1,3 +1,4 @@
+import ctypes
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -274,7 +275,7 @@ class FPSimilarityMaxMinClusters(FPSimilarityClusters):
             len(fps),
             self.nClusters,
             firstPicks=self.initialCentroids if self.initialCentroids else [],
-            seed=self.seed if self.seed is not None else -1,
+            seed=ctypes.c_int(self.seed).value if self.seed is not None else -1,
         )
 
         return self.centroid_indices
