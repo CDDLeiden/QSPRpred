@@ -38,22 +38,21 @@ class KSlope(Metric):
         """Return the name of the scorer."""
         return "k_slope"
 
-
-class R20(KSlope):
+class RPrime20(KSlope):
     """Calculate the coefficient of determination for regression line
-    through the origin between the observed and predicted values.
+    through the origin between the predicted and observed values.
 
     Reference: Tropsha, A., & Golbraikh, A. (2010). In J.-L. Faulon & A. Bender (Eds.),
     Handbook of Chemoinformatics Algorithms.
     https://www.taylorfrancis.com/books/9781420082999
 
     Attributes:
-        name (str): Name of the scoring function (r_2_0).
+        name (str): Name of the scoring function (r_prime_2_0).
     """
 
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the coefficient of determination for regression line
-        through the origin between the observed and predicted values.
+        through the origin between the predicted and observed values.
 
         Args:
             y_true (np.array): Ground truth (correct) target values. 1d array.
@@ -64,17 +63,17 @@ class R20(KSlope):
 
         """
         # get the slope of the regression line through the origin
-        k_prime = super().__call__(y_true, y_pred)
-        y_true_mean = y_true.mean()
+        k = super().__call__(y_true, y_pred)
+        y_pred_mean = y_pred.mean()
         num, denom = 0, 0
         for i in range(len(y_true)):
-            num += y_true[i] - k_prime * y_pred[i]
-            denom += (y_true[i] - y_true_mean) ** 2
+            num += y_pred[i] - k * y_true[i]
+            denom += (y_pred[i] - y_pred_mean) ** 2
         return 1 - num / denom if len(y_pred) >= 2 else 0
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
-        return "r_2_0"
+        return "r_prime_2_0"
 
 
 class KPrimeSlope(Metric):
@@ -113,21 +112,21 @@ class KPrimeSlope(Metric):
         return "k_prime_slope"
 
 
-class RPrime20(KPrimeSlope):
+class R20(KPrimeSlope):
     """Calculate the coefficient of determination for regression line
-    through the origin between the predicted and observed values.
+    through the origin between the observed and predicted values.
 
     Reference: Tropsha, A., & Golbraikh, A. (2010). In J.-L. Faulon & A. Bender (Eds.),
     Handbook of Chemoinformatics Algorithms.
     https://www.taylorfrancis.com/books/9781420082999
 
     Attributes:
-        name (str): Name of the scoring function (r_prime_2_0).
+        name (str): Name of the scoring function (r_2_0).
     """
 
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the coefficient of determination for regression line
-        through the origin between the predicted and observed values.
+        through the origin between the observed and predicted values.
 
         Args:
             y_true (np.array): Ground truth (correct) target values. 1d array.
@@ -138,17 +137,17 @@ class RPrime20(KPrimeSlope):
 
         """
         # get the slope of the regression line through the origin
-        k = super().__call__(y_true, y_pred)
-        y_pred_mean = y_pred.mean()
+        k_prime = super().__call__(y_true, y_pred)
+        y_true_mean = y_true.mean()
         num, denom = 0, 0
         for i in range(len(y_true)):
-            num += y_pred[i] - k * y_true[i]
-            denom += (y_pred[i] - y_pred_mean) ** 2
+            num += y_true[i] - k_prime * y_pred[i]
+            denom += (y_true[i] - y_true_mean) ** 2
         return 1 - num / denom if len(y_pred) >= 2 else 0
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
-        return "r_prime_2_0"
+        return "r_2_0"
 
 
 class Pearson(Metric):
