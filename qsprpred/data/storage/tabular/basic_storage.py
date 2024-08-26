@@ -806,8 +806,9 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         props = {prop: chunk[prop] for prop in on_props}
         mols = []
         for idx, _id in enumerate(ids):
-            mol_props = {prop: props[prop][idx] for prop in on_props} if props else None
-            mols.append(TabularMol(_id, smiles[idx], props=mol_props))
+            mol_props = {prop: props[prop].iloc[idx] for prop in
+                         on_props} if props else None
+            mols.append(TabularMol(_id, smiles.iloc[idx], props=mol_props))
         return mols
 
     def _convert_chunk_smiles(self, chunk, on_props):

@@ -382,7 +382,7 @@ class PandasDataTable(PropertyStorage, Randomized):
             ignore_missing (bool): If `True`, missing IDs are ignored.
         """
         if name == self.idProp:
-            logger.warning(
+            logger.info(
                 "ID property will change. "
                 f"Old IDs saved to property: {name}_before_change."
             )
@@ -402,7 +402,7 @@ class PandasDataTable(PropertyStorage, Randomized):
                 data = data.loc[ids]
             self.df.loc[ids, name] = data
         if name == self.idProp:
-            logger.warning(
+            logger.info(
                 "ID property was changed. "
                 "Updating index columns to match new ID property."
             )

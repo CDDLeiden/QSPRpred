@@ -4,7 +4,6 @@ from typing import Generator, Any, Iterable, Sized, ClassVar, Literal, Callable
 
 import numpy as np
 import pandas as pd
-from rdkit.Chem import PandasTools
 
 from qsprpred.data.chem.clustering import MoleculeClusters
 from qsprpred.data.descriptors.sets import DescriptorSet
@@ -237,6 +236,7 @@ class MoleculeTable(MoleculeDataSet):
                 constructor.
         """
         # FIXME: the RDKit mols are always added here, which might be unnecessary
+        from rdkit.Chem import PandasTools
         df = PandasTools.LoadSDF(filename, molColName="RDMol")
         storage = TabularStorageBasic(
             name,
