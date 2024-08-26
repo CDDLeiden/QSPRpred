@@ -1,6 +1,14 @@
 qsprpred.models.assessment package
 ==================================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qsprpred.models.assessment.metrics
+
 Submodules
 ----------
 

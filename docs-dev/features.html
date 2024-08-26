@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Overview of available features &mdash; QSPRpred 3.1.2.dev6+g4022298a documentation</title>
+  <title>Overview of available features &mdash; QSPRpred 3.1.2.dev37+gbe4ae447 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=87e54e7c" />
@@ -17,7 +17,7 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b5b04ee0"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=94598546"></script>
         <script src="_static/doctools.js?v=888ff710"></script>
         <script src="_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev6+g4022298a
+                v3.1.2.dev37+gbe4ae447
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -298,7 +298,7 @@ GPU</label><div class="sd-tab-content docutils">
 </details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
 <summary class="sd-summary-title sd-card-header">
 <span class="sd-summary-text">Metrics</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
-<p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.html#qsprpred.models.metrics.Metric" title="qsprpred.models.metrics.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a>: Base class for metrics</p>
+<p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code>: Base class for metrics</p>
 <p class="sd-card-text">Metrics are used to evaluate the performance of models.
 More information can be found in the <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/modelling/model_assessment.ipynb">model assessment tutorial</a>.</p>
 <div class="sd-tab-set docutils">
@@ -306,7 +306,32 @@ More information can be found in the <a class="reference external" href="https:/
 <label class="sd-tab-label" for="sd-tab-item-10">
 Core</label><div class="sd-tab-content docutils">
 <ul class="simple">
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.html#qsprpred.models.metrics.SklearnMetrics" title="qsprpred.models.metrics.SklearnMetrics"><code class="xref py py-class docutils literal notranslate"><span class="pre">SklearnMetrics</span></code></a>: SklearnMetrics</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">SklearnMetrics</span></code>: SklearnMetrics</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaskedMetric</span></code>: MaskedMetric</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">CalibrationError</span></code>: CalibrationError</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">BEDROC</span></code>: BEDROC</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnrichmentFactor</span></code>: EnrichmentFactor</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">RobustInitialEnhancement</span></code>: RobustInitialEnhancement</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Prevalence</span></code>: Prevalence</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sensitivity</span></code>: Sensitivity</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Specificity</span></code>: Specificity</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">PositivePredictivity</span></code>: PositivePredictivity</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">NegativePredictivity</span></code>: NegativePredictivity</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">CohenKappa</span></code>: CohenKappa</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">BalancedPositivePredictivity</span></code>: BalancedPositivePredictivity</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">BalancedNegativePredictivity</span></code>: BalancedNegativePredictivity</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">BalancedMatthewsCorrcoeff</span></code>: BalancedMatthewsCorrcoeff</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">BalancedCohenKappa</span></code>: BalancedCohenKappa</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">KSlope</span></code>: KSlope</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">R20</span></code>: R20</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">KPrimeSlope</span></code>: KPrimeSlope</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">RPrime20</span></code>: RPrime20</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pearson</span></code>: Pearson</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Spearman</span></code>: Spearman</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Kendall</span></code>: Kendall</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">AverageFoldError</span></code>: AverageFoldError</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsoluteAverageFoldError</span></code>: AbsoluteAverageFoldError</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">PercentageWithinFoldError</span></code>: PercentageWithinFoldError</p></li>
 </ul>
 </div>
 </div>

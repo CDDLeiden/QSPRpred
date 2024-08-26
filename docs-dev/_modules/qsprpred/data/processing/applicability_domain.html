@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.processing.applicability_domain &mdash; QSPRpred 3.1.2.dev6+g4022298a documentation</title>
+  <title>qsprpred.data.processing.applicability_domain &mdash; QSPRpred 3.1.2.dev37+gbe4ae447 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=b5b04ee0"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=94598546"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev6+g4022298a
+                v3.1.2.dev37+gbe4ae447
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -98,10 +98,20 @@
              
   <h1>Source code for qsprpred.data.processing.applicability_domain</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">floor</span>
 
 <span class="kn">import</span> <span class="nn">ml2json</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">mlchemad.base</span> <span class="kn">import</span> <span class="n">ApplicabilityDomain</span> <span class="k">as</span> <span class="n">MLChemADApplicabilityDomain</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial.distance</span> <span class="kn">import</span> <span class="n">_METRICS</span> <span class="k">as</span> <span class="n">dist_fns</span>
+<span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="kn">import</span> <span class="n">NearestNeighbors</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MaxAbsScaler</span><span class="p">,</span>
+    <span class="n">MinMaxScaler</span><span class="p">,</span>
+    <span class="n">RobustScaler</span><span class="p">,</span>
+    <span class="n">StandardScaler</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">...logs</span> <span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">from</span> <span class="nn">...utils.serialization</span> <span class="kn">import</span> <span class="n">JSONSerializable</span>
@@ -115,6 +125,19 @@
 <span class="sd">    in the applicability domain or just to check if a molecule is in the applicability</span>
 <span class="sd">    domain.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the applicability domain with a threshold.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            threshold (float | None): threshold value</span>
+<span class="sd">            direction (str | None): direction of the threshold, should be set if</span>
+<span class="sd">                threshold is set</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_direction</span> <span class="o">=</span> <span class="n">direction</span>
+
 <div class="viewcode-block" id="ApplicabilityDomain.fit"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.applicability_domain.ApplicabilityDomain.fit">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit the applicability domain model.</span>
@@ -123,36 +146,86 @@
 <span class="sd">            X (pd.DataFrame): array of features to fit model on</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="ApplicabilityDomain.contains"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.applicability_domain.ApplicabilityDomain.contains">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="ApplicabilityDomain.transform"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.applicability_domain.ApplicabilityDomain.transform">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform the features to a score for the applicability domain.</span>
+
+<span class="sd">        The result could be a boolean array indicating if the features are in the</span>
+<span class="sd">        applicability domain or a score indicating how much the features are in the</span>
+<span class="sd">        applicability domain</span>
+<span class="sd">        (e.g., a probability or a distance).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (pd.DataFrame): array of features</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.Series: scores for the applicability domain</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether the applicability domain is fitted or not.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ApplicabilityDomain.contains"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.applicability_domain.ApplicabilityDomain.contains">[docs]</a>    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the applicability domain contains the features.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            X (pd.DataFrame): array of features to check</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            pd.DataFrame: array of booleans indicating if the features are in the</span>
+<span class="sd">            pd.Series: pd.Series of booleans indicating if the features are in the</span>
 <span class="sd">                applicability domain</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
-
-<div class="viewcode-block" id="ApplicabilityDomain.filter"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.applicability_domain.ApplicabilityDomain.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter out some rows from a dataframe.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            X (pd.DataFrame): array of features to filter</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            The filtered pd.DataFrame</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Empty dataframe, nothing to filter&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">X</span>
-        <span class="k">return</span> <span class="n">X</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">X</span><span class="p">)]</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_threshold</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">X_transformed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="c1"># Check if the transformed features are boolean or could be converted to</span>
+            <span class="c1"># boolean</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">X_transformed</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Features cannot be converted to boolean,&quot;</span>
+                    <span class="s2">&quot;set threshold and direction to apply threshold&quot;</span>
+                <span class="p">)</span></div>
 
     <span class="nd">@property</span>
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether the applicability domain is fitted or not.&quot;&quot;&quot;</span></div>
+    <span class="k">def</span> <span class="nf">direction</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the direction of the threshold.</span>
+
+<span class="sd">        The direction should be &#39;&gt;&#39;, &#39;&lt;&#39;, &#39;&gt;=&#39;, &#39;&lt;=&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_direction</span>
+
+    <span class="nd">@direction</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">direction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">direction</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the direction of the threshold.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            direction (str): direction of the threshold</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">direction</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&gt;=&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;=&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Direction must be one of &#39;&gt;&#39;, &#39;&lt;&#39;, &#39;&gt;=&#39;, &#39;&lt;=&#39;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_direction</span> <span class="o">=</span> <span class="n">direction</span>
+
+    <span class="k">def</span> <span class="nf">_apply_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a threshold to the applicability domain.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (pd.Series): array of transformed features</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s2">&quot;&gt;&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">X</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s2">&quot;&lt;&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">X</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s2">&quot;&gt;=&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">X</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="s2">&quot;&lt;=&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">X</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Direction must be set to apply threshold&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MLChemADWrapper"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.applicability_domain.MLChemADWrapper">[docs]</a><span class="k">class</span> <span class="nc">MLChemADWrapper</span><span class="p">(</span><span class="n">ApplicabilityDomain</span><span class="p">):</span>
@@ -180,6 +253,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span> <span class="o">=</span> <span class="n">applicability_domain</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">astype</span> <span class="o">=</span> <span class="n">astype</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_direction</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">o_dict</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__getstate__</span><span class="p">()</span>
@@ -205,14 +280,14 @@
                 <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="MLChemADWrapper.contains"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.applicability_domain.MLChemADWrapper.contains">[docs]</a>    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MLChemADWrapper.transform"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.applicability_domain.MLChemADWrapper.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the applicability domain contains the features.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            X (pd.DataFrame): array of features to check</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            pd.DataFrame: array of booleans indicating if the features are in the</span>
+<span class="sd">            pd.Series: pd.Series of booleans indicating if the features are in the</span>
 <span class="sd">                applicability domain</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitted</span><span class="p">:</span>
@@ -226,14 +301,135 @@
                     <span class="s2">&quot;Note. if the data type is different from the one used for fitting,&quot;</span>
                     <span class="s2">&quot;the result may be incorrect&quot;</span>
                 <span class="p">)</span>
-        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;in_domain&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">()),</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
         <span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether the applicability domain is fitted or not.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">applicabilityDomain</span><span class="o">.</span><span class="n">fitted_</span></div>
+
+
+<div class="viewcode-block" id="KNNApplicabilityDomain"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.applicability_domain.KNNApplicabilityDomain">[docs]</a><span class="k">class</span> <span class="nc">KNNApplicabilityDomain</span><span class="p">(</span><span class="n">ApplicabilityDomain</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Applicability domain defined using K-nearest neighbours.</span>
+
+<span class="sd">    This class is adapted from the `KNNApplicabilityDomain` class in the</span>
+<span class="sd">    `mlchemad` package.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">hard_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">scaling</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;robust&quot;</span><span class="p">,</span>
+        <span class="n">dist</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;euclidean&quot;</span><span class="p">,</span>
+        <span class="n">scaler_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">njobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">astype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;float64&quot;</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sa">f</span><span class="s2">&quot;&quot;&quot;Create the k-Nearest Neighbor applicability domain.</span>
+
+<span class="s2">        :param k: number of nearest neighbors</span>
+<span class="s2">        :param alpha: ratio of inlier samples calculated from the training set;</span>
+<span class="s2">            ignored if hard_threshold is set</span>
+<span class="s2">        :param hard_threshold: samples with a distance greater or equal to this</span>
+<span class="s2">            threshold will be considered outliers</span>
+<span class="s2">        :param scaling: scaling method; must be one of &#39;robust&#39;, &#39;minmax&#39;, &#39;maxabs&#39;,</span>
+<span class="s2">            &#39;standard&#39; or None (default: &#39;robust&#39;)</span>
+<span class="s2">        :param dist: kNN distance to be calculated (default: euclidean); one of</span>
+<span class="s2">            </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">dist_fns</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">; jaccard is recommended for binary fingerprints.</span>
+<span class="s2">        :param scaler_kwargs: additional parameters to supply to the scaler</span>
+<span class="s2">        :param njobs: number of parallel processes used to fit the kNN model</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">scaler_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">scaler_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">alpha</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;alpha must lie between 0 and 1&quot;</span><span class="p">)</span>
+        <span class="n">scaling_methods</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;robust&quot;</span><span class="p">,</span> <span class="s2">&quot;minmax&quot;</span><span class="p">,</span> <span class="s2">&quot;maxabs&quot;</span><span class="p">,</span> <span class="s2">&quot;standard&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">scaling</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">scaling_methods</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;scaling method must be one of </span><span class="si">{</span><span class="n">scaling_methods</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># Scaler for input data</span>
+        <span class="k">if</span> <span class="n">scaling</span> <span class="o">==</span> <span class="s2">&quot;robust&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span> <span class="o">=</span> <span class="n">RobustScaler</span><span class="p">(</span><span class="o">**</span><span class="n">scaler_kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">scaling</span> <span class="o">==</span> <span class="s2">&quot;minmax&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span> <span class="o">=</span> <span class="n">MinMaxScaler</span><span class="p">(</span><span class="o">**</span><span class="n">scaler_kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">scaling</span> <span class="o">==</span> <span class="s2">&quot;maxabs&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span> <span class="o">=</span> <span class="n">MaxAbsScaler</span><span class="p">(</span><span class="o">**</span><span class="n">scaler_kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">scaling</span> <span class="o">==</span> <span class="s2">&quot;standard&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">(</span><span class="o">**</span><span class="n">scaler_kwargs</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">scaling</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;scaling method not implemented&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dist</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dist_fns</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;distance type is not available&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dist</span> <span class="o">=</span> <span class="n">dist</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hard_threshold</span> <span class="o">=</span> <span class="n">hard_threshold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nn</span> <span class="o">=</span> <span class="n">NearestNeighbors</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">dist</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="n">njobs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitted</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">astype</span> <span class="o">=</span> <span class="n">astype</span>
+
+<div class="viewcode-block" id="KNNApplicabilityDomain.fit"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.applicability_domain.KNNApplicabilityDomain.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit the applicability domain to the given feature matrix</span>
+
+<span class="sd">        :param X: feature matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Normalize the data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">X</span>
+        <span class="c1"># Fit the NN</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_norm</span><span class="p">)</span>
+        <span class="c1"># Find the distance to the kNN neighbors</span>
+        <span class="c1"># (ignoring the first neighbor, which is the sample itself)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kNN_dist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">kneighbors</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X_norm</span><span class="p">,</span> <span class="n">return_distance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="p">)[</span><span class="mi">0</span><span class="p">][:,</span> <span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">kNN_train_distance_sorted_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trim_zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">kNN_dist</span><span class="p">))</span>
+        <span class="c1"># Find the confidence threshold</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hard_threshold</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">threshold_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hard_threshold</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="s2">&quot;&lt;&quot;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">kNN_train_distance_sorted_</span><span class="p">[</span>
+                <span class="n">floor</span><span class="p">(</span><span class="n">kNN_train_distance_sorted_</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="s2">&quot;&lt;=&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitted</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="KNNApplicabilityDomain.transform"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.applicability_domain.KNNApplicabilityDomain.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the distance to the kNN neighbors for the given feature matrix</span>
+
+<span class="sd">        :param X: feature matrix</span>
+
+<span class="sd">        :return: array of distances to the kNN neighbors</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">astype</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Cannot convert X to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">astype</span><span class="si">}</span><span class="s2">, fitting with raw data&quot;</span>
+            <span class="p">)</span>
+        
+        <span class="c1"># Scale input features</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">X_scaled</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">X_scaled</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">X_transformed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">kneighbors</span><span class="p">(</span><span class="n">X_scaled</span><span class="p">,</span> <span class="n">return_distance</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">X_transformed</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return whether the applicability domain is fitted or not.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fitted</span></div>
 </pre></div>
 
            </div>

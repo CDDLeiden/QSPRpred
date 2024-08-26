@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models.assessment package &mdash; QSPRpred 3.1.2.dev6+g4022298a documentation</title>
+  <title>qsprpred.models.assessment package &mdash; QSPRpred 3.1.2.dev37+gbe4ae447 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b5b04ee0"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=94598546"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -27,7 +27,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="qsprpred.plotting package" href="qsprpred.plotting.html" />
+    <link rel="next" title="qsprpred.models.assessment.metrics package" href="qsprpred.models.assessment.metrics.html" />
     <link rel="prev" title="qsprpred.models package" href="qsprpred.models.html" />
  
 
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev6+g4022298a
+                v3.1.2.dev37+gbe4ae447
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -124,6 +124,61 @@
              
   <section id="qsprpred-models-assessment-package">
 <h1>qsprpred.models.assessment package<a class="headerlink" href="#qsprpred-models-assessment-package" title="Permalink to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qsprpred.models.assessment.metrics.html">qsprpred.models.assessment.metrics package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#module-qsprpred.models.assessment.metrics.base">qsprpred.models.assessment.metrics.base module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.base.Metric"><code class="docutils literal notranslate"><span class="pre">Metric</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#module-qsprpred.models.assessment.metrics.classification">qsprpred.models.assessment.metrics.classification module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.BEDROC"><code class="docutils literal notranslate"><span class="pre">BEDROC</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.BalancedCohenKappa"><code class="docutils literal notranslate"><span class="pre">BalancedCohenKappa</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.BalancedMatthewsCorrcoeff"><code class="docutils literal notranslate"><span class="pre">BalancedMatthewsCorrcoeff</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.BalancedNegativePredictivity"><code class="docutils literal notranslate"><span class="pre">BalancedNegativePredictivity</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.BalancedPositivePredictivity"><code class="docutils literal notranslate"><span class="pre">BalancedPositivePredictivity</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.CalibrationError"><code class="docutils literal notranslate"><span class="pre">CalibrationError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.CohenKappa"><code class="docutils literal notranslate"><span class="pre">CohenKappa</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.EnrichmentFactor"><code class="docutils literal notranslate"><span class="pre">EnrichmentFactor</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.NegativePredictivity"><code class="docutils literal notranslate"><span class="pre">NegativePredictivity</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.PositivePredictivity"><code class="docutils literal notranslate"><span class="pre">PositivePredictivity</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.Prevalence"><code class="docutils literal notranslate"><span class="pre">Prevalence</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.RobustInitialEnhancement"><code class="docutils literal notranslate"><span class="pre">RobustInitialEnhancement</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.Sensitivity"><code class="docutils literal notranslate"><span class="pre">Sensitivity</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.Specificity"><code class="docutils literal notranslate"><span class="pre">Specificity</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.derived_confusion_matrix"><code class="docutils literal notranslate"><span class="pre">derived_confusion_matrix()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#module-qsprpred.models.assessment.metrics.masked">qsprpred.models.assessment.metrics.masked module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.masked.MaskedMetric"><code class="docutils literal notranslate"><span class="pre">MaskedMetric</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#module-qsprpred.models.assessment.metrics.regression">qsprpred.models.assessment.metrics.regression module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.AbsoluteAverageFoldError"><code class="docutils literal notranslate"><span class="pre">AbsoluteAverageFoldError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.AverageFoldError"><code class="docutils literal notranslate"><span class="pre">AverageFoldError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.KPrimeSlope"><code class="docutils literal notranslate"><span class="pre">KPrimeSlope</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.KSlope"><code class="docutils literal notranslate"><span class="pre">KSlope</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.Kendall"><code class="docutils literal notranslate"><span class="pre">Kendall</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.Pearson"><code class="docutils literal notranslate"><span class="pre">Pearson</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.PercentageWithinFoldError"><code class="docutils literal notranslate"><span class="pre">PercentageWithinFoldError</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.R20"><code class="docutils literal notranslate"><span class="pre">R20</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.RPrime20"><code class="docutils literal notranslate"><span class="pre">RPrime20</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.Spearman"><code class="docutils literal notranslate"><span class="pre">Spearman</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#module-qsprpred.models.assessment.metrics.scikit_learn">qsprpred.models.assessment.metrics.scikit_learn module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.scikit_learn.SklearnMetrics"><code class="docutils literal notranslate"><span class="pre">SklearnMetrics</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#module-qsprpred.models.assessment.metrics">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
 </section>
@@ -195,7 +250,7 @@ is used</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>scoreFunc</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.metrics.Metric" title="qsprpred.models.metrics.Metric"><em>Metric</em></a>) – scoring function to use, should match the output of the
+<li><p><strong>scoreFunc</strong> (<a class="reference internal" href="qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><em>Metric</em></a>) – scoring function to use, should match the output of the
 evaluation method (e.g. if the evaluation methods returns
 class probabilities, the scoring function support class
 probabilities)</p></li>
@@ -304,7 +359,7 @@ splitMultitaskScores (bool): whether to split the scores per task for multitask 
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="qsprpred.models.html" class="btn btn-neutral float-left" title="qsprpred.models package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qsprpred.plotting.html" class="btn btn-neutral float-right" title="qsprpred.plotting package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qsprpred.models.assessment.metrics.html" class="btn btn-neutral float-right" title="qsprpred.models.assessment.metrics package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

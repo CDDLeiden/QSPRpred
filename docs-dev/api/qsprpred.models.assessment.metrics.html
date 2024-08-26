@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.models.assessment.metrics package &mdash; QSPRpred 3.1.2.dev37+gbe4ae447 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=94598546"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script>
+    </script>
+        <script src="../_static/design-tabs.js?v=f930bc37"></script>
+        <script src="../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="qsprpred.plotting package" href="qsprpred.plotting.html" />
+    <link rel="prev" title="qsprpred.models.assessment package" href="qsprpred.models.assessment.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.1.2.dev37+gbe4ae447
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features.html">Overview of available features</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qsprpred.html">qsprpred package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="qsprpred.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.benchmarks.html">qsprpred.benchmarks package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.html">qsprpred.data package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.html">qsprpred.extra package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html">qsprpred.logs package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="qsprpred.models.html">qsprpred.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html">qsprpred.plotting package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html">qsprpred.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.data_CLI">qsprpred.data_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.model_CLI">qsprpred.model_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.predict_CLI">qsprpred.predict_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.tasks">qsprpred.tasks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Python API</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.html">qsprpred package</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.models.html">qsprpred.models package</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.models.assessment.html">qsprpred.models.assessment package</a></li>
+      <li class="breadcrumb-item active">qsprpred.models.assessment.metrics package</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qsprpred-models-assessment-metrics-package">
+<h1>qsprpred.models.assessment.metrics package<a class="headerlink" href="#qsprpred-models-assessment-metrics-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-qsprpred.models.assessment.metrics.base">
+<span id="qsprpred-models-assessment-metrics-base-module"></span><h2>qsprpred.models.assessment.metrics.base module<a class="headerlink" href="#module-qsprpred.models.assessment.metrics.base" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.base.Metric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.base.</span></span><span class="sig-name descname"><span class="pre">Metric</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/base.html#Metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.base.Metric" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Abstract class for scoring functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.models.assessment.metrics.classification">
+<span id="qsprpred-models-assessment-metrics-classification-module"></span><h2>qsprpred.models.assessment.metrics.classification module<a class="headerlink" href="#module-qsprpred.models.assessment.metrics.classification" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.classification.BEDROC">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.classification.</span></span><span class="sig-name descname"><span class="pre">BEDROC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/classification.html#BEDROC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.classification.BEDROC" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the Boltzmann-enhanced discrimination of ROC (BEDROC).</p>
+<p>Reference: Truchon and Bayly, J. Chem. Inf. Model. 2007 47 (2), 488-508. DOI: 10.1021/ci600426e</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (bedroc).</p>
+</dd>
+</dl>
+<p>Initialize the BEDROC scorer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Weighting parameter (default: 20)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.classification.BalancedCohenKappa">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.classification.</span></span><span class="sig-name descname"><span class="pre">BalancedCohenKappa</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/classification.html#BalancedCohenKappa"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.classification.BalancedCohenKappa" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the balanced Cohen kappa coefficient.</p>
+<p>Guesné, S.J.J., Hanser, T., Werner, S. et al. Mind your prevalence!.
+J Cheminform 16, 43 (2024). <a class="reference external" href="https://doi.org/10.1186/s13321-024-00837-w">https://doi.org/10.1186/s13321-024-00837-w</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (balanced_cohen_kappa).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.classification.BalancedMatthewsCorrcoeff">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.classification.</span></span><span class="sig-name descname"><span class="pre">BalancedMatthewsCorrcoeff</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/classification.html#BalancedMatthewsCorrcoeff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.classification.BalancedMatthewsCorrcoeff" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the balanced Matthews correlation coefficient.</p>
+<p>Guesné, S.J.J., Hanser, T., Werner, S. et al. Mind your prevalence!.
+J Cheminform 16, 43 (2024). <a class="reference external" href="https://doi.org/10.1186/s13321-024-00837-w">https://doi.org/10.1186/s13321-024-00837-w</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (balanced_matthews_corrcoeff).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.classification.BalancedNegativePredictivity">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.classification.</span></span><span class="sig-name descname"><span class="pre">BalancedNegativePredictivity</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/classification.html#BalancedNegativePredictivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.classification.BalancedNegativePredictivity" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the balanced negative predictivity.</p>
+<p>Guesné, S.J.J., Hanser, T., Werner, S. et al. Mind your prevalence!.
+J Cheminform 16, 43 (2024). <a class="reference external" href="https://doi.org/10.1186/s13321-024-00837-w">https://doi.org/10.1186/s13321-024-00837-w</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (balanced_negative_predictivity).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.classification.BalancedPositivePredictivity">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.classification.</span></span><span class="sig-name descname"><span class="pre">BalancedPositivePredictivity</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/classification.html#BalancedPositivePredictivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.classification.BalancedPositivePredictivity" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the balanced positive predictivity.</p>
+<p>Guesné, S.J.J., Hanser, T., Werner, S. et al. Mind your prevalence!.
+J Cheminform 16, 43 (2024). <a class="reference external" href="https://doi.org/10.1186/s13321-024-00837-w">https://doi.org/10.1186/s13321-024-00837-w</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (balanced_positive_predictivity).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.classification.CalibrationError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.classification.</span></span><span class="sig-name descname"><span class="pre">CalibrationError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'L1'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/classification.html#CalibrationError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.classification.CalibrationError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Compute the calibration error of a classifier.</p>
+<p>ECE is defined as the expected difference between the predicted probability
+and the observed frequency in each bin. The lower the ECE, the more
+calibrated the classifier is.</p>
+<p>Referece: Guo et al. (2017) On Calibration of Modern Neural Networks.
+<a class="reference external" href="https://arxiv.org/abs/1706.04599">https://arxiv.org/abs/1706.04599</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (calibration_error).</p>
+</dd>
+</dl>
+<p>Initialize the calibration error scorer.</p>
+<p>If <code class="xref any docutils literal notranslate"><span class="pre">norm</span></code> is ‘L1’, the expected calibration error is returned (ECE).
+If <code class="xref any docutils literal notranslate"><span class="pre">norm</span></code> is ‘L2’, the root-mean-square calibration error is returned (RMSCE).
+If <code class="xref any docutils literal notranslate"><span class="pre">norm</span></code> is ‘infinity’, the maximum calibration error is returned (MCE).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_bins</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Number of bins to use for calibration.
+A bigger bin number requires more data. Defaults to 10.</p></li>
+<li><p><strong>norm</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The norm to use for the calibration error.
+Can be ‘L1’ or ‘L2’ or ‘infinity’. Defaults to ‘L1’.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.classification.CohenKappa">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.classification.</span></span><span class="sig-name descname"><span class="pre">CohenKappa</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/classification.html#CohenKappa"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.classification.CohenKappa" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the Cohen’s kappa coefficient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (cohen_kappa).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.classification.EnrichmentFactor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.classification.</span></span><span class="sig-name descname"><span class="pre">EnrichmentFactor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/classification.html#EnrichmentFactor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.classification.EnrichmentFactor" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the enrichment factor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (enrichment_factor).</p>
+</dd>
+</dl>
+<p>Initialize the enrichment factor scorer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>chi</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Weighting parameter (default: 5%)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.classification.NegativePredictivity">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.classification.</span></span><span class="sig-name descname"><span class="pre">NegativePredictivity</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/classification.html#NegativePredictivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.classification.NegativePredictivity" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the negative predictivity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (negative_predictivity).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.classification.PositivePredictivity">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.classification.</span></span><span class="sig-name descname"><span class="pre">PositivePredictivity</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/classification.html#PositivePredictivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.classification.PositivePredictivity" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the Positive predictivity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (Positive_predictivity).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.classification.Prevalence">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.classification.</span></span><span class="sig-name descname"><span class="pre">Prevalence</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/classification.html#Prevalence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.classification.Prevalence" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the prevalence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (prevalence).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.classification.RobustInitialEnhancement">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.classification.</span></span><span class="sig-name descname"><span class="pre">RobustInitialEnhancement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/classification.html#RobustInitialEnhancement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.classification.RobustInitialEnhancement" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the robust initial enhancement.</p>
+<p>Reference: Sheridan et al., J. Chem. Inf. Model. 2001 41 (5), 1395-1406. DOI: 10.1021/ci0100144</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (robust_initial_enhancement).</p>
+</dd>
+</dl>
+<p>Initialize the robust initial enhancement scorer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>alpha</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – Weighting parameter (default: 100)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.classification.Sensitivity">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.classification.</span></span><span class="sig-name descname"><span class="pre">Sensitivity</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/classification.html#Sensitivity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.classification.Sensitivity" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate sensitivity (true positive rate).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (sensitivity).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.classification.Specificity">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.classification.</span></span><span class="sig-name descname"><span class="pre">Specificity</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/classification.html#Specificity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.classification.Specificity" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate specificity (true negative rate).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (specificity).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.classification.derived_confusion_matrix">
+<span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.classification.</span></span><span class="sig-name descname"><span class="pre">derived_confusion_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#tuple" title="(in Python v3.9)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/classification.html#derived_confusion_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.classification.derived_confusion_matrix" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate the derived confusion matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y_true</strong> (<em>np.array</em>) – Ground truth (correct) labels. 1d array.</p></li>
+<li><p><strong>y_pred</strong> (<em>np.array</em>) – Predicted labels. 2D array (n_samples, 1)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>The derived confusion matrix.</dt><dd><p>Prevalence, sensitivity and specificity.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>[<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)">int</a>, <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)">int</a>, <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)">int</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.models.assessment.metrics.masked">
+<span id="qsprpred-models-assessment-metrics-masked-module"></span><h2>qsprpred.models.assessment.metrics.masked module<a class="headerlink" href="#module-qsprpred.models.assessment.metrics.masked" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.masked.MaskedMetric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.masked.</span></span><span class="sig-name descname"><span class="pre">MaskedMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><span class="pre">Metric</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/masked.html#MaskedMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.masked.MaskedMetric" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Wrapper for Metrics to handle missing target values.</p>
+<p>Initialize the masked metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>metric</strong> (<a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><em>Metric</em></a>) – The metric to be masked.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.models.assessment.metrics.regression">
+<span id="qsprpred-models-assessment-metrics-regression-module"></span><h2>qsprpred.models.assessment.metrics.regression module<a class="headerlink" href="#module-qsprpred.models.assessment.metrics.regression" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.regression.AbsoluteAverageFoldError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.regression.</span></span><span class="sig-name descname"><span class="pre">AbsoluteAverageFoldError</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/regression.html#AbsoluteAverageFoldError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.regression.AbsoluteAverageFoldError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the absolute average fold error (AAFE).</p>
+<p>The AAFE is also known as the geometric mean fold error (GMFE).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (absolute_average_fold_error).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.regression.AverageFoldError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.regression.</span></span><span class="sig-name descname"><span class="pre">AverageFoldError</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/regression.html#AverageFoldError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.regression.AverageFoldError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the average fold error (AFE).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (fold_error).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.regression.KPrimeSlope">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.regression.</span></span><span class="sig-name descname"><span class="pre">KPrimeSlope</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/regression.html#KPrimeSlope"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.regression.KPrimeSlope" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the slope of the regression line through the origin
+between the observed and predicted values.</p>
+<p>Reference: Tropsha, A., &amp; Golbraikh, A. (2010). In J.-L. Faulon &amp; A. Bender (Eds.),
+Handbook of Chemoinformatics Algorithms.
+<a class="reference external" href="https://www.taylorfrancis.com/books/9781420082999">https://www.taylorfrancis.com/books/9781420082999</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (k_prime_slope).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.regression.KSlope">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.regression.</span></span><span class="sig-name descname"><span class="pre">KSlope</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/regression.html#KSlope"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.regression.KSlope" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the slope of the regression line through the origin
+between the predicted and observed values.</p>
+<dl class="simple">
+<dt>Reference: Tropsha, A., &amp; Golbraikh, A. (2010). In J.-L. Faulon &amp; A. Bender (Eds.),</dt><dd><p>Handbook of Chemoinformatics Algorithms.</p>
+</dd>
+</dl>
+<p><a class="reference external" href="https://www.taylorfrancis.com/books/9781420082999">https://www.taylorfrancis.com/books/9781420082999</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (k_slope).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.regression.Kendall">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.regression.</span></span><span class="sig-name descname"><span class="pre">Kendall</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/regression.html#Kendall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.regression.Kendall" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the Kendall rank correlation coefficient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (kendall).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.regression.Pearson">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.regression.</span></span><span class="sig-name descname"><span class="pre">Pearson</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/regression.html#Pearson"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.regression.Pearson" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the Pearson correlation coefficient.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (pearson).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.regression.PercentageWithinFoldError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.regression.</span></span><span class="sig-name descname"><span class="pre">PercentageWithinFoldError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fold_error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/regression.html#PercentageWithinFoldError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.regression.PercentageWithinFoldError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the percentage of predictions within a certain fold error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (percentage_within_{x}_fold_error).</p>
+</dd>
+</dl>
+<p>Initialize the percentage within fold error scorer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fold_error</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a>) – The fold error threshold. Defaults to 2.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.regression.R20">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.regression.</span></span><span class="sig-name descname"><span class="pre">R20</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/regression.html#R20"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.regression.R20" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.regression.KPrimeSlope" title="qsprpred.models.assessment.metrics.regression.KPrimeSlope"><code class="xref py py-class docutils literal notranslate"><span class="pre">KPrimeSlope</span></code></a></p>
+<p>Calculate the coefficient of determination for regression line
+through the origin between the observed and predicted values.</p>
+<p>Reference: Tropsha, A., &amp; Golbraikh, A. (2010). In J.-L. Faulon &amp; A. Bender (Eds.),
+Handbook of Chemoinformatics Algorithms.
+<a class="reference external" href="https://www.taylorfrancis.com/books/9781420082999">https://www.taylorfrancis.com/books/9781420082999</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (r_2_0).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.regression.RPrime20">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.regression.</span></span><span class="sig-name descname"><span class="pre">RPrime20</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/regression.html#RPrime20"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.regression.RPrime20" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.regression.KSlope" title="qsprpred.models.assessment.metrics.regression.KSlope"><code class="xref py py-class docutils literal notranslate"><span class="pre">KSlope</span></code></a></p>
+<p>Calculate the coefficient of determination for regression line
+through the origin between the predicted and observed values.</p>
+<p>Reference: Tropsha, A., &amp; Golbraikh, A. (2010). In J.-L. Faulon &amp; A. Bender (Eds.),
+Handbook of Chemoinformatics Algorithms.
+<a class="reference external" href="https://www.taylorfrancis.com/books/9781420082999">https://www.taylorfrancis.com/books/9781420082999</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (r_prime_2_0).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.regression.Spearman">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.regression.</span></span><span class="sig-name descname"><span class="pre">Spearman</span></span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/regression.html#Spearman"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.regression.Spearman" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Calculate the Spearman correlation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function (spearman).</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.models.assessment.metrics.scikit_learn">
+<span id="qsprpred-models-assessment-metrics-scikit-learn-module"></span><h2>qsprpred.models.assessment.metrics.scikit_learn module<a class="headerlink" href="#module-qsprpred.models.assessment.metrics.scikit_learn" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.models.assessment.metrics.scikit_learn.SklearnMetrics">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.assessment.metrics.scikit_learn.</span></span><span class="sig-name descname"><span class="pre">SklearnMetrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scorer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_BaseScorer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/assessment/metrics/scikit_learn.html#SklearnMetrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.assessment.metrics.scikit_learn.SklearnMetrics" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.assessment.metrics.base.Metric" title="qsprpred.models.assessment.metrics.base.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
+<p>Wrapper for sklearn scoring functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function.</p></li>
+<li><p><strong>scorer</strong> – Sklearn scorer object.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initialize the scoring function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>scorer</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> | </em><em>_BaseScorer</em>) – Name of the scoring function or sklearn scorer</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.models.assessment.metrics">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qsprpred.models.assessment.metrics" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qsprpred.models.assessment.html" class="btn btn-neutral float-left" title="qsprpred.models.assessment package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qsprpred.plotting.html" class="btn btn-neutral float-right" title="qsprpred.plotting package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

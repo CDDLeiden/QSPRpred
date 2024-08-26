@@ -1,0 +1,53 @@
+qsprpred.models.assessment.metrics package
+==========================================
+
+Submodules
+----------
+
+qsprpred.models.assessment.metrics.base module
+----------------------------------------------
+
+.. automodule:: qsprpred.models.assessment.metrics.base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.models.assessment.metrics.classification module
+--------------------------------------------------------
+
+.. automodule:: qsprpred.models.assessment.metrics.classification
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.models.assessment.metrics.masked module
+------------------------------------------------
+
+.. automodule:: qsprpred.models.assessment.metrics.masked
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.models.assessment.metrics.regression module
+----------------------------------------------------
+
+.. automodule:: qsprpred.models.assessment.metrics.regression
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.models.assessment.metrics.scikit\_learn module
+-------------------------------------------------------
+
+.. automodule:: qsprpred.models.assessment.metrics.scikit_learn
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: qsprpred.models.assessment.metrics
+   :members:
+   :undoc-members:
+   :show-inheritance:

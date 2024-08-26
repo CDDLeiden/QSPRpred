@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models package &mdash; QSPRpred 3.1.2.dev6+g4022298a documentation</title>
+  <title>qsprpred.models package &mdash; QSPRpred 3.1.2.dev37+gbe4ae447 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=b5b04ee0"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=94598546"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev6+g4022298a
+                v3.1.2.dev37+gbe4ae447
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -128,6 +128,19 @@
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="qsprpred.models.assessment.html">qsprpred.models.assessment package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.models.assessment.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.metrics.html">qsprpred.models.assessment.metrics package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#module-qsprpred.models.assessment.metrics.base">qsprpred.models.assessment.metrics.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#module-qsprpred.models.assessment.metrics.classification">qsprpred.models.assessment.metrics.classification module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#module-qsprpred.models.assessment.metrics.masked">qsprpred.models.assessment.metrics.masked module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#module-qsprpred.models.assessment.metrics.regression">qsprpred.models.assessment.metrics.regression module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#module-qsprpred.models.assessment.metrics.scikit_learn">qsprpred.models.assessment.metrics.scikit_learn module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.assessment.metrics.html#module-qsprpred.models.assessment.metrics">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qsprpred.models.assessment.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="qsprpred.models.assessment.html#module-qsprpred.models.assessment.classification">qsprpred.models.assessment.classification module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qsprpred.models.assessment.html#qsprpred.models.assessment.classification.create_metrics_summary"><code class="docutils literal notranslate"><span class="pre">create_metrics_summary()</span></code></a></li>
@@ -615,78 +628,6 @@ the model on the entire training set</p></li>
 </dl>
 </dd></dl>
 
-</dd></dl>
-
-</section>
-<section id="module-qsprpred.models.metrics">
-<span id="qsprpred-models-metrics-module"></span><h2>qsprpred.models.metrics module<a class="headerlink" href="#module-qsprpred.models.metrics" title="Permalink to this heading"></a></h2>
-<p>Wrapper for sklearn scoring functions.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="qsprpred.models.metrics.Metric">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.metrics.</span></span><span class="sig-name descname"><span class="pre">Metric</span></span><a class="reference internal" href="../_modules/qsprpred/models/metrics.html#Metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.metrics.Metric" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
-<p>Abstract class for scoring functions.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Variables<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qsprpred.models.metrics.SklearnMetrics">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.models.metrics.</span></span><span class="sig-name descname"><span class="pre">SklearnMetrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scorer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_BaseScorer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/metrics.html#SklearnMetrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.metrics.SklearnMetrics" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qsprpred.models.metrics.Metric" title="qsprpred.models.metrics.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">Metric</span></code></a></p>
-<p>Wrapper for sklearn scoring functions.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Variables<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the scoring function.</p></li>
-<li><p><strong>scorer</strong> – Sklearn scorer object.</p></li>
-</ul>
-</dd>
-</dl>
-<p>Initialize the scoring function.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>scorer</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> | </em><em>_BaseScorer</em>) – Name of the scoring function or sklearn scorer</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="qsprpred.models.metrics.calibration_error">
-<span class="sig-prename descclassname"><span class="pre">qsprpred.models.metrics.</span></span><span class="sig-name descname"><span class="pre">calibration_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_prob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'L1'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><span class="pre">float</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/models/metrics.html#calibration_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.metrics.calibration_error" title="Permalink to this definition"></a></dt>
-<dd><p>Compute the calibration error of a classifier.</p>
-<p>ECE is defined as the expected difference between the predicted probability
-and the observed frequency in each bin. The lower the ECE, the more
-calibrated the classifier is.</p>
-<p>If <code class="xref any docutils literal notranslate"><span class="pre">y_prob</span></code> is 1d, it assumes that probablities correspond to the positive class of
-a binary classification. If <code class="xref any docutils literal notranslate"><span class="pre">y_prob</span></code> is 2d, it assumes each column corresponds to a
-class and that the classes are in the columns in ascending order.</p>
-<p>If <code class="xref any docutils literal notranslate"><span class="pre">norm</span></code> is ‘L1’, the expected calibration error is returned (ECE).
-If <code class="xref any docutils literal notranslate"><span class="pre">norm</span></code> is ‘L2’, the root-mean-square calibration error is returned (RMSCE).
-If <code class="xref any docutils literal notranslate"><span class="pre">norm</span></code> is ‘infinity’, the maximum calibration error is returned (MCE).</p>
-<p>Referece: Guo et al. (2017) On Calibration of Modern Neural Networks. <a class="reference external" href="https://arxiv.org/abs/1706.04599">https://arxiv.org/abs/1706.04599</a></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>y_true</strong> (<em>np.array</em>) – True class labels. 1d array.</p></li>
-<li><p><strong>y_prob</strong> (<em>np.array</em>) – Raw probability/score of the positive class
-or multiclass probability. 1d or 2d array.</p></li>
-<li><p><strong>n_bins</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Number of bins to use for calibration.
-A bigger bin number requires more data. Defaults to 10.</p></li>
-<li><p><strong>norm</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The norm to use for the calibration error.
-Can be ‘L1’ or ‘L2’ or ‘infinity’. Defaults to ‘L1’.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The calibration error.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)">float</a></p>
-</dd>
-</dl>
 </dd></dl>
 
 </section>
@@ -6822,6 +6763,12 @@ function and returns the result of the __enter__ method.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.sample_data">
+<span class="sig-name descname"><span class="pre">sample_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.html#qsprpred.tasks.ModelTasks" title="qsprpred.tasks.ModelTasks"><span class="pre">ModelTasks</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_proba</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestMetrics.sample_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.sample_data" title="Permalink to this definition"></a></dt>
+<dd><p>Sample data for testing.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.setUp">
 <span class="sig-name descname"><span class="pre">setUp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.setUp" title="Permalink to this definition"></a></dt>
 <dd><p>Hook method for setting up the test fixture before exercising it.</p>
@@ -6868,6 +6815,75 @@ block, allowing further test code to be executed.</p>
 <dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.tearDownClass">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tearDownClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.tearDownClass" title="Permalink to this definition"></a></dt>
 <dd><p>Hook method for deconstructing the class fixture after running all tests in the class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.test_BEDROC">
+<span class="sig-name descname"><span class="pre">test_BEDROC</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestMetrics.test_BEDROC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.test_BEDROC" title="Permalink to this definition"></a></dt>
+<dd><p>Test the BEDROC metric.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.test_CalibrationError">
+<span class="sig-name descname"><span class="pre">test_CalibrationError</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestMetrics.test_CalibrationError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.test_CalibrationError" title="Permalink to this definition"></a></dt>
+<dd><p>Test the calibration error metric.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.test_ConfusionMatrixMetrics">
+<span class="sig-name descname"><span class="pre">test_ConfusionMatrixMetrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestMetrics.test_ConfusionMatrixMetrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.test_ConfusionMatrixMetrics" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.test_EnrichmentFactor">
+<span class="sig-name descname"><span class="pre">test_EnrichmentFactor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestMetrics.test_EnrichmentFactor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.test_EnrichmentFactor" title="Permalink to this definition"></a></dt>
+<dd><p>Test the enrichment factor metric.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.test_FoldErrorMetrics">
+<span class="sig-name descname"><span class="pre">test_FoldErrorMetrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestMetrics.test_FoldErrorMetrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.test_FoldErrorMetrics" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.test_KPrimeSlope">
+<span class="sig-name descname"><span class="pre">test_KPrimeSlope</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestMetrics.test_KPrimeSlope"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.test_KPrimeSlope" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.test_KSlope">
+<span class="sig-name descname"><span class="pre">test_KSlope</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestMetrics.test_KSlope"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.test_KSlope" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.test_Kendall">
+<span class="sig-name descname"><span class="pre">test_Kendall</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestMetrics.test_Kendall"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.test_Kendall" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.test_MaskedMetric">
+<span class="sig-name descname"><span class="pre">test_MaskedMetric</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestMetrics.test_MaskedMetric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.test_MaskedMetric" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.test_Pearson">
+<span class="sig-name descname"><span class="pre">test_Pearson</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestMetrics.test_Pearson"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.test_Pearson" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.test_R20">
+<span class="sig-name descname"><span class="pre">test_R20</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestMetrics.test_R20"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.test_R20" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.test_RPrime20">
+<span class="sig-name descname"><span class="pre">test_RPrime20</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestMetrics.test_RPrime20"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.test_RPrime20" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.models.tests.TestMetrics.test_RobustInitialEnhancement">
+<span class="sig-name descname"><span class="pre">test_RobustInitialEnhancement</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/models/tests.html#TestMetrics.test_RobustInitialEnhancement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.models.tests.TestMetrics.test_RobustInitialEnhancement" title="Permalink to this definition"></a></dt>
+<dd><p>Test the robust initial enhancement metric.</p>
 </dd></dl>
 
 <dl class="py method">
