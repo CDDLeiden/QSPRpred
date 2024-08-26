@@ -2,6 +2,7 @@ import os
 from typing import Type
 from unittest import TestCase, skipIf
 
+import chemprop
 import pandas as pd
 import torch
 from parameterized import parameterized
@@ -10,7 +11,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import ShuffleSplit
 
-import chemprop
 from qsprpred.data.descriptors.sets import SmilesDesc
 from qsprpred.data.sampling.splits import RandomSplit
 from qsprpred.extra.gpu.utils.parallel import TorchJITGenerator
@@ -20,8 +20,7 @@ from ....benchmarks.tests import BenchMarkTestCase
 from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
-from ....models import CrossValAssessor, SklearnModel
-from ....models.metrics import SklearnMetrics
+from ....models import CrossValAssessor, SklearnModel, SklearnMetrics
 from ....models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ....utils.parallel import ThreadsJITGenerator
 from ....utils.testing.check_mixins import ModelCheckMixIn, MonitorsCheckMixIn
