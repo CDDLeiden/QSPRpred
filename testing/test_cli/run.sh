@@ -56,7 +56,7 @@ python -m qsprpred.data_CLI \
 python -m qsprpred.model_CLI \
 -o ${TEST_BASE}/qspr/models \
 -de \
--dp ${TEST_BASE}/qspr/data/CL_fu_SINGLECLASS/CL_fu_SINGLECLASS_meta.json \
+-dp ${TEST_BASE}/qspr/data/CL_fu_SINGLECLASS/meta.json \
 -ncpu ${N_CPUS} \
 --model_types RF \
 -s \
@@ -73,7 +73,7 @@ python -m qsprpred.predict_CLI \
 -i ${TEST_DATA} \
 -o ${TEST_BASE}/qspr/predictions.tsv \
 -ncpu ${N_CPUS} \
--mp ${TEST_BASE}/qspr/models/RF_CL_fu_SINGLECLASS/RF_CL_fu_SINGLECLASS_meta.json \
+-mp ${TEST_BASE}/qspr/models/RF_CL_fu_SINGLECLASS/meta.json \
 -pr \
 -fv 0.0
 

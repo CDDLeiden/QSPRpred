@@ -59,10 +59,12 @@ class MoleculeTable(MoleculeDataSet):
         self.descriptors = []
         self.randomState = random_state
         self.storeFormat = store_format
+        self.rootDir = path
+        name = name or f"{storage}_mol_table"
         if storage is not None:
             self.storage = storage
-            self.name = name or f"{self.storage}_mol_table"
-            self.path = os.path.abspath(os.path.join(path, self.name))
+            self.path = os.path.abspath(os.path.join(self.rootDir, name))
+            self.name = name
             if os.path.exists(self.metaFile):
                 self.reload()
                 if random_state is not None and self.randomState != random_state:
@@ -73,8 +75,8 @@ class MoleculeTable(MoleculeDataSet):
                     )
                     self.randomState = random_state
         else:
+            self.path = os.path.abspath(os.path.join(self.rootDir, name))
             self.name = name
-            self.path = os.path.abspath(os.path.join(path, self.name))
             if os.path.exists(self.metaFile):
                 self.reload()
             else:
@@ -89,6 +91,15 @@ class MoleculeTable(MoleculeDataSet):
     @randomState.setter
     def randomState(self, seed: int | None):
         self._randomState = seed or np.random.randint(0, 2 ** 32 - 1)
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @name.setter
+    def name(self, name: str):
+        self._name = name
+        self.path = os.path.abspath(os.path.join(self.rootDir, self.name))
 
     def sample(
             self, n: int, name: str | None = None, random_state: int | None = None
@@ -159,6 +170,7 @@ class MoleculeTable(MoleculeDataSet):
             df: pd.DataFrame,
             path: str = ".",
             smiles_col: str = "SMILES",
+            **kwargs,
     ) -> "MoleculeTable":
         """Create a `MoleculeTable` instance from a pandas DataFrame.
 
@@ -170,8 +182,8 @@ class MoleculeTable(MoleculeDataSet):
                 sequences.
         """
         storage = TabularStorageBasic(f"{name}_storage", path, df,
-                                      smiles_col=smiles_col)
-        return MoleculeTable(storage, name=name, path=storage.path)
+                                      smiles_col=smiles_col, **kwargs)
+        return MoleculeTable(storage, name=name, path=path)
 
     @classmethod
     def fromSMILES(cls, name: str, smiles: list, path: str, *args, **kwargs):

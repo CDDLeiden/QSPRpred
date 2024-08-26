@@ -93,7 +93,7 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
         """
         super().__init__(
             storage=storage,
-            name=name,
+            name=name or f"{storage}_qspr_data",
             path=path,
             random_state=random_state,
             store_format=store_format,
@@ -154,8 +154,9 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
             target_props: list[TargetProperty | dict],
             path: str = ".",
             smiles_col: str = "SMILES",
+            **kwargs,
     ) -> "QSPRDataset":
-        mt = super().fromDF(name, df, path, smiles_col)
+        mt = super().fromDF(name, df, path, smiles_col, **kwargs)
         return QSPRDataset.fromMolTable(mt, target_props, name=name, path=path)
 
     @classmethod

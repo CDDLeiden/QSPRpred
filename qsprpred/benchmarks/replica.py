@@ -148,9 +148,10 @@ class Replica(JSONSerializable):
         """
         self.ds = self.dataSource.getDataSet(
             deepcopy(self.targetProps),
-            overwrite=reload,
-            random_state=self.randomSeed,
         )
+        if not reload:
+            self.ds.clear()
+        self.ds.randomState = self.randomSeed
 
     def addDescriptors(self, reload: bool = False):
         """Adds descriptors to the current data set. Make sure to call
