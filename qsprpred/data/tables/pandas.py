@@ -191,6 +191,18 @@ class PandasDataTable(PropertyStorage, Randomized):
             (MoleculeStorage):
                 A data set with the molecules that match the search.
         """
+        if exact:
+            mask = self.df[prop_name].isin(values)
+        else:
+            # interpret values as substrings to search for
+            mask = self.df[prop_name].str.contains("|".join([str(v) for v in values]))
+        ids = self.df.index[mask].values
+        return self.getSubset(
+            self.getProperties(),
+            ids=ids,
+            name=f"{self.name}_{prop_name}_searched",
+            path=self.storeDir
+        )
 
     def __contains__(self, item):
         return item in self.df.index
@@ -452,13 +464,15 @@ class PandasDataTable(PropertyStorage, Randomized):
                 assert sum(
                     self.df.index.isin(ids)
                 ) == len(ids), "Not all IDs found in data set."
-            if ignore_missing and ids is not None:
+                ret = self.df.loc[ids, self.df.columns[mask]]
+            elif ignore_missing and ids is not None:
                 ids = self.df.index.intersection(ids)
                 ret = self.df.loc[
                     ids, self.df.columns[mask]
                 ]
             else:
-                ret = self.df[self.df.columns[mask]]
+                ret = self.df.loc[self.df.columns[mask]]
+            ret = ret.copy()
             return PandasDataTable(
                 name,
                 ret,
