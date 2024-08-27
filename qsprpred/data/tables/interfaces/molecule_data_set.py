@@ -3,7 +3,6 @@ from typing import Callable, Iterable, Any, Generator
 
 from qsprpred.data.chem.identifiers import Identifiable
 from qsprpred.data.chem.standardizers.base import Standardizable
-from qsprpred.data.storage.interfaces.chunk_iterable import ChunkIterable
 from qsprpred.data.storage.interfaces.descriptor_provider import DescriptorProvider
 from qsprpred.data.storage.interfaces.mol_processable import MolProcessable
 from qsprpred.data.storage.interfaces.property_storage import PropertyStorage
@@ -18,7 +17,6 @@ class MoleculeDataSet(
     MolProcessable,
     SMARTSSearchable,
     Summarizable,
-    ChunkIterable,
     Randomized,
     Identifiable,
     Standardizable,
