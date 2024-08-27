@@ -150,7 +150,8 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
         pass
 
     def __iter__(self):
-        return self.iterChunks(1)
+        for chunk in self.iterChunks(1):
+            yield chunk[0]
 
     @abstractmethod
     def __getitem__(self, item):
