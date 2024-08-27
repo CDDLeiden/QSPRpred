@@ -4,8 +4,15 @@ import pandas as pd
 class Step(ABC):
     """"A data preprocessing step that can be applied to a dataset"""
     
-    @abstractmethod
-    def fit(self, X: pd.DataFrame, y: pd.DataFrame):
+    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
+        """"Fit the step to the dataset
+        
+        If the step requires fitting to the data, this method should be implemented.
+        
+        Args:
+            X (pd.DataFrame): training data
+            y (pd.DataFrame): training targets
+        """
         pass
     
     @abstractmethod
@@ -31,3 +38,21 @@ class Pipeline(ABC):
     @abstractmethod
     def apply(self, X: pd.DataFrame) -> pd.DataFrame:
         pass
+    
+
+class QSPRPipeline(Pipeline):
+    """Pipeline class for QSPR prediction
+    
+    QSPRPipeline is a sequence of data preprocessing steps that can be applied to a dataset.
+    
+    Args:
+        steps (dict[str, Step]): Dictionary of named steps in the pipeline
+    """
+    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
+        for step in self.steps.values():
+            step.fit(X, y)
+    
+    def apply(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> pd.DataFrame:
+        for step in self.steps.values():
+            X, y = step.transform(X, y)
+        return X, y

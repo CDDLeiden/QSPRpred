@@ -3,7 +3,7 @@
 To add a new feature filters:
 * Add a FeatureFilter subclass for your new filter
 """
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 import numpy as np
 import pandas as pd
@@ -13,23 +13,47 @@ from sklearn.preprocessing import MinMaxScaler
 
 from ...logs import logger
 from ...utils.interfaces.randomized import Randomized
+from ..pipelines.pipeline import Step
 
 
-class FeatureFilter(ABC):
+class FeatureFilter(Step):
     """Filter out uninformative featureNames from a dataframe."""
+    
+    @abstractmethod
+    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
+        """Fit the filter to the data.
+        
+        Args:
+            X (pd.DataFrame): training data
+            y (pd.DataFrame, optional): training targets
+        """
 
     @abstractmethod
-    def __call__(self, df: pd.DataFrame, y_col: pd.DataFrame = None):
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
         """Filter out uninformative features from a dataframe.
 
         Args:
-            df (pd.DataFrame): dataframe to be filtered
-            y_col (pd.DataFrame, optional): output dataframe if the filtering method
+            X (pd.DataFrame): dataframe to be filtered
+            y (pd.DataFrame, optional): output dataframe if the filtering method
                 requires it
 
         Returns:
             The filtered pd.DataFrame
         """
+        
+    def fitTransform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> pd.DataFrame:
+        """Fit the filter to the data and transform the data.
+        
+        Args:
+            X (pd.DataFrame): dataframe to be filtered
+            y (pd.DataFrame, optional): output dataframe if the filtering method
+                requires it
+
+        Returns:
+            The filtered pd.DataFrame
+        """
+        self.fit(X, y)
+        return self.transform(X, y)
 
 
 class LowVarianceFilter(FeatureFilter):
@@ -41,23 +65,42 @@ class LowVarianceFilter(FeatureFilter):
 
     def __init__(self, th: float) -> None:
         self.th = th
-
-    def __call__(self, df: pd.DataFrame, y_col: pd.DataFrame = None) -> pd.DataFrame:
-        # scale values between 0 and 1
-        colnames = df.columns
-        data_scaled = MinMaxScaler().fit_transform(X=df.values)
+        
+    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
+        """Find features with variance lower than a given threshold after MinMax scaling.
+        
+        Args:
+            X (pd.DataFrame): training data
+            y (pd.DataFrame, optional): training targets
+        """
+        colnames = X.columns
+        data_scaled = MinMaxScaler().fit_transform(X=X.values)
         variance = data_scaled.var(axis=0, ddof=1)
-
-        low_var_cols = np.where(variance <= self.th)[0]
-
-        # drop from both the minmax scaled descriptors df and the original dataframe
-        df = df.drop(list(colnames[low_var_cols]), axis=1)
+        
+        low_var_cols_idx = np.where(variance <= self.th)[0]
+        self.low_var_cols = colnames[low_var_cols_idx]
         logger.info(
-            f"number of columns dropped low variance filter: {len(low_var_cols)}"
+            f"Number of columns dropped low variance filter: {len(self.low_var_cols)}"
         )
-        logger.info(f"number of columns left: {df.shape[1]}")
+        logger.info(f"Number of columns left: {X.shape[1] - len(self.low_var_cols)}")
+        
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
+        """Filter out low variance features from a dataframe.
 
-        return df
+        Args:
+            X (pd.DataFrame): dataframe to be filtered
+            y (pd.DataFrame, optional): output dataframe if the filtering method
+                requires it
+
+        Returns:
+            The filtered pd.DataFrame
+        """
+        assert hasattr(self, "low_var_cols"), "Filter has not been fitted yet."
+        assert self.low_var_cols.isin(X.columns).all(), "Columns do not match fitted columns."
+        
+        X = X.drop(columns=self.low_var_cols)
+
+        return X
 
 
 class HighCorrelationFilter(FeatureFilter):
@@ -69,21 +112,40 @@ class HighCorrelationFilter(FeatureFilter):
 
     def __init__(self, th: float) -> None:
         self.th = th
-
-    def __call__(self, df: pd.DataFrame, y_col: pd.DataFrame = None) -> pd.DataFrame:
-        if df.shape[1] == 1:
-            return df
-        # make absolute, because we also want to filter out large negative correlation
-        correlation = np.triu(np.abs(np.corrcoef(df.values.astype(float).T)), k=1)
+        
+    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
+        """Find features with correlation higher than a given threshold.
+        
+        Args:
+            X (pd.DataFrame): training data
+            y (pd.DataFrame, optional): training targets
+        """
+        correlation = np.triu(np.abs(np.corrcoef(X.values.astype(float).T)), k=1)
         high_corr = np.where(np.any(correlation > self.th, axis=0))
 
+        self.high_corr_cols = X.columns[high_corr[0]]
         logger.info(
-            f"number of columns dropped high correlation filter: {len(high_corr[0])}"
+            f"Number of columns dropped high correlation filter: {len(self.high_corr_cols)}"
         )
-        df = df.drop(df.columns[high_corr[0]], axis=1)
-        logger.info(f"number of columns left: {df.shape[1]}")
+        logger.info(f"Number of columns left: {X.shape[1] - len(self.high_corr_cols)}")
+        
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
+        """Filter out high correlation features from a dataframe.
 
-        return df
+        Args:
+            X (pd.DataFrame): dataframe to be filtered
+            y (pd.DataFrame, optional): output dataframe if the filtering method
+                requires it
+
+        Returns:
+            The filtered pd.DataFrame
+        """
+        assert hasattr(self, "high_corr_cols"), "Filter has not been fitted yet."
+        assert self.high_corr_cols.isin(X.columns).all(), "Columns do not match fitted columns."
+        
+        X = X.drop(columns=self.high_corr_cols)
+
+        return X
 
 
 class BorutaFilter(FeatureFilter, Randomized):
@@ -134,30 +196,39 @@ class BorutaFilter(FeatureFilter, Randomized):
 
         # set seed from BorutaPy instance to class attribute
         self.randomState = self.featSelector.random_state
+        
+    def fit(self, X: pd.DataFrame, y: pd.DataFrame):
+        """Fit the Boruta filter to the data.
 
-    def __call__(
-            self, features: pd.DataFrame, y_col: pd.DataFrame = None
-    ) -> pd.DataFrame:
+        Args:
+            X (pd.DataFrame): training data
+            y (pd.DataFrame): training targets
+        """
+        assert y.shape[1] == 1, "Boruta filter only works with one target column."
+        
+        self.featSelector.fit(X.values, y.values.ravel())
+        self.dropped_features = X.columns[~self.featSelector.support_]
+
+        logger.info(
+            "Number of columns dropped Boruta filter: "
+            f"{len(self.dropped_features)}"
+        )
+        logger.info(f"Number of columns left: {X.shape[1] - len(self.dropped_features)}")
+        
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
         """Filter out uninformative features from a dataframe using BorutaPy.
 
         Args:
-            features (pd.DataFrame): dataframe to be filtered
-            y_col (pd.DataFrame): target column(s)
+            X (pd.DataFrame): dataframe to be filtered
+            y (pd.DataFrame, optional): output dataframe if the filtering method
+                requires it
 
         Returns:
-            pd.DataFrame: filtered dataframe
+            The filtered pd.DataFrame
         """
-        if y_col.shape[1] > 1:
-            raise NotImplementedError(
-                "Boruta filter only works with one target column."
-            )
-        self.featSelector.fit(features.values, y_col.values.ravel())
+        assert hasattr(self, "dropped_features"), "Filter has not been fitted yet."
+        assert self.dropped_features.isin(X.columns).all(), "Columns do not match fitted columns."
+        
+        X = X.drop(columns=self.dropped_features)
 
-        selected_features = features.loc[:, self.featSelector.support_]
-        logger.info(
-            "Number of columns dropped Boruta filter: "
-            f"{features.shape[1] - selected_features.shape[1]}"
-        )
-        logger.info(f"Number of columns left: {selected_features.shape[1]}")
-
-        return selected_features
+        return X

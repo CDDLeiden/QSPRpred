@@ -776,7 +776,7 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
             return
         else:
             for featurefilter in feature_filters:
-                self._X = featurefilter(self.X, self.y)
+                self._X = featurefilter.fitTransform(self.X, self.y)
             # update features
             self.featureNames = self.X.columns.to_list()
             if self.X_ind is not None:

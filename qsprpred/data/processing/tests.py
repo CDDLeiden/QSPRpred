@@ -224,10 +224,10 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
             (False,),
         ]
     )
-    @skipIf(
-        int(np.__version__.split(".")[1]) >= 24,
-        "numpy 1.24.0 not compatible with boruta",
-    )
+    # @skipIf(
+    #     int(np.__version__.split(".")[1]) >= 24,
+    #     "numpy 1.24.0 not compatible with boruta",
+    # )
     def testBorutaFilter(self, use_index_cols):
         """Test the Boruta filter, which removes the features which are statistically as
         relevant as random features."""
