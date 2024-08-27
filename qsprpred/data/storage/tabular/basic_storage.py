@@ -658,7 +658,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             return matches
         elif value_type in (int, float):
             prop = self.getProperty(prop_name)
-            mask = [False] * len(prop)
+            mask = pd.Series([False] * len(prop), index=prop.index)
             for value in values:
                 mask = mask | (prop == value)
             matches = self.getSubset(
@@ -766,10 +766,10 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         props = None
         for lib in self._libraries.values():
             if mol_id in lib:
-                props = {prop: lib.getProperty(prop, [mol_id])[0] for prop in
+                props = {prop: lib.getProperty(prop, [mol_id]).iloc[0] for prop in
                          lib.getProperties()}
                 break
-        return TabularMol(mol_id, smiles[0], props=props)
+        return TabularMol(mol_id, smiles.iloc[0], props=props)
 
     def remove_mol(self, mol_id):
         """
