@@ -49,8 +49,8 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         self.path = os.path.abspath(os.path.join(path, self.name))
         self.storeFormat = store_format
         self._libraries = dict()
-        self.chunkSize = chunk_size
         self.nJobs = n_jobs
+        self.chunkSize = chunk_size
         self.chunkProcessor = MultiprocessingJITGenerator(
             n_workers=self.nJobs) if chunk_processor is None else chunk_processor
         self._standardizer = standardizer
@@ -101,8 +101,10 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         self._chunkSize = value
         for lib in self._libraries.values():
             lib.chunkSize = value
-        if self._chunkSize is None:
-            self._chunkSize = len(self)
+            assert len(lib) > lib.chunkSize, (
+                f"Chunk size {lib.chunkSize} is larger "
+                f"than the number of molecules ({len(lib)}) in {lib}."
+            )
 
     @property
     def nJobs(self):
@@ -111,8 +113,10 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
     @nJobs.setter
     def nJobs(self, value: int | None):
         self._nJobs = value if value is not None and value > 0 else os.cpu_count()
+        self.chunkProcessor = MultiprocessingJITGenerator(n_workers=self.nJobs)
         for lib in self._libraries.values():
             lib.nJobs = value
+            lib.chunkProcessor = self.chunkProcessor
 
     def add_library(
             self,
@@ -155,7 +159,6 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             store_dir=self.libsPath,
             overwrite=False,
             n_jobs=self.nJobs,
-            chunk_size=self.chunkSize,
             autoindex_name=self.idProp,
             index_cols=[
                 id_col] if self._identifier is None and id_col in df.columns else None,
@@ -839,6 +842,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
                 func_args=(self.smilesProp, self.idProp, self._identifier),
                 on_props=(self.smilesProp, self.idProp),
                 as_df=True,
+                n_jobs=self.nJobs,
         ):
             ids.append(chunk)
         ids = pd.concat(ids) if len(ids) > 0 else pd.Series(
@@ -852,6 +856,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
                 func_args=(self.smilesProp, self._standardizer),
                 on_props=(self.smilesProp, self.idProp),
                 as_df=True,
+                n_jobs=self.nJobs,
         ):
             output.extend(chunk)
         pd_table.addProperty(

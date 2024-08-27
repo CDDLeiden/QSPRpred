@@ -254,7 +254,7 @@ class PandasDataTable(PropertyStorage, Randomized):
     @nJobs.setter
     def nJobs(self, value: int | None):
         self._nJobs = value if value is not None and value > 0 else os.cpu_count()
-        self.chunkSize = None
+        self.chunkSize = len(self) // self._nJobs
         self.parallelGenerator = MultiprocessingJITGenerator(self.nJobs)
 
     @property
