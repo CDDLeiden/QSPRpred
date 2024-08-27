@@ -8,6 +8,7 @@ from rdkit import Chem
 from qsprpred.data.chem.identifiers import ChemIdentifier
 from qsprpred.data.chem.matching import SMARTSMatchProcessor
 from qsprpred.data.chem.standardizers import ChemStandardizer
+from qsprpred.data.chem.standardizers.base import ChemStandardizationException
 from qsprpred.data.processing.mol_processor import MolProcessor
 from qsprpred.data.storage.interfaces.chem_store import ChemStore
 from qsprpred.data.storage.interfaces.searchable import SMARTSSearchable, PropSearchable
@@ -250,11 +251,18 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             try:
                 standardized = standardizer(smi)[0]
                 if standardized is None:
-                    raise ValueError(f"Standardizer {standardizer} returned None.")
+                    raise ChemStandardizationException(
+                        f"Standardizer {standardizer} returned None.")
+            except ChemStandardizationException:
+                logger.warning(
+                    f"Molecule refused by standardizer: {smi}. "
+                    f"Molecule removed."
+                )
+                standardized = None
             except Exception as e:
                 logger.error(
                     f"Error ({e}) standardizing SMILES: {smi}. "
-                    f"Molecule will not be added."
+                    f"Molecule removed."
                 )
                 standardized = None
             output.append((df.index[i], standardized, smi))
