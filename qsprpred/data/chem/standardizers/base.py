@@ -7,7 +7,7 @@ class ChemStandardizer(ABC):
         return self.convert_smiles(smiles)
 
     @abstractmethod
-    def convert_smiles(self, smiles):
+    def convert_smiles(self, smiles) -> tuple[str | None, str]:
         """
         Convert the SMILES to a standardized form.
 
@@ -64,3 +64,7 @@ class Standardizable(ABC):
     @abstractmethod
     def applyStandardizer(self, standardizer: ChemStandardizer):
         pass
+
+
+class ChemStandardizationException(Exception):
+    pass
