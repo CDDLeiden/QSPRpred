@@ -5,12 +5,12 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 
-from qsprpred.models.assessment.methods import ModelAssessor
 from .settings.benchmark import DataPrepSettings
 from ..data.descriptors.sets import DescriptorSet
 from ..data.sources.data_source import DataSource
 from ..data.tables.qspr import QSPRDataset
 from ..logs import logger
+from ..models.assessment.methods import ModelAssessor
 from ..models.hyperparam_optimization import HyperparameterOptimization
 from ..models.model import QSPRModel
 from ..models.monitors import NullMonitor
@@ -148,10 +148,10 @@ class Replica(JSONSerializable):
         """
         self.ds = self.dataSource.getDataSet(
             deepcopy(self.targetProps),
-            overwrite=reload,
-            random_state=self.randomSeed,
         )
-        self.ds.dropInvalids()
+        if not reload:
+            self.ds.clear()
+        self.ds.randomState = self.randomSeed
 
     def addDescriptors(self, reload: bool = False):
         """Adds descriptors to the current data set. Make sure to call
@@ -176,7 +176,7 @@ class Replica(JSONSerializable):
         if os.path.exists(self.ds.metaFile) and not reload:
             logger.info(f"Reloading existing {self.ds.name} from cache...")
             self.ds = QSPRDataset.fromFile(self.ds.metaFile)
-            self.ds.setRandomState(self.randomSeed)
+            self.ds.randomState = self.randomSeed
             self.ds.setTargetProperties(deepcopy(self.targetProps))
         else:
             logger.info(f"Data set {self.ds.name} not yet found. It will be created.")
@@ -184,7 +184,7 @@ class Replica(JSONSerializable):
             logger.info(f"Calculating descriptors for {self.ds.name}.")
             self.ds.addDescriptors(deepcopy(self.descriptors), recalculate=True)
             self.ds.setTargetProperties(deepcopy(self.targetProps))
-            self.ds.setRandomState(self.randomSeed)
+            self.ds.randomState = self.randomSeed
             self.ds.save()
 
     def prepData(self):

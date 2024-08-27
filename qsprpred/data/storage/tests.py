@@ -89,7 +89,7 @@ class TabularStorageTest(StorageTest, TestCase):
         self.checkSerialization(store_default)
         # try to add store with the same name
         self.assertRaises(ValueError, lambda: store_default.add_library(
-            store_default.name,
+            f"{store_default.name}_library",
             pd.read_csv(self.exampleFileBasic),
         ))
         # add a library with duplicated molecules
@@ -97,7 +97,7 @@ class TabularStorageTest(StorageTest, TestCase):
             f"{store_default.name}_2",
             pd.read_csv(self.exampleFileBasic),
         )
-        self.assertEqual(store_default.nLibs, 1)
+        self.assertEqual(store_default.nLibs, 2)
         self.assertEqual(len(store_default), 2)
         self.checkSerialization(store_default)
         # add a new library with additional compounds
@@ -106,7 +106,7 @@ class TabularStorageTest(StorageTest, TestCase):
             pd.read_csv(self.exampleFileIndex),
             smiles_col="smiles",
         )
-        self.assertEqual(store_default.nLibs, 2)
+        self.assertEqual(store_default.nLibs, 3)
         self.assertEqual(len(store_default), 3)
         self.checkSerialization(store_default)
         # test empty init
@@ -116,7 +116,7 @@ class TabularStorageTest(StorageTest, TestCase):
             standardizer=PapyrusStandardizer(),
             identifier=InchiIdentifier(),
         )
-        self.assertEqual(store_empty.nLibs, 0)
+        self.assertEqual(store_empty.nLibs, 1)
         self.assertEqual(len(store_empty), 0)
         self.checkSerialization(store_empty)
         # test with defaults

@@ -217,6 +217,11 @@ class BenchmarkRunner:
                 lock_report
         ):
             if isinstance(result, self.ReplicaException):
+                # show traceback and continue
+                traceback.print_exception(
+                    type(result.exception), result.exception,
+                    result.exception.__traceback__
+                )
                 if raise_errors:
                     raise result.exception
                 else:

@@ -29,10 +29,10 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         self.dataset.split(splitter, featurize=True)
         train, test = self.dataset.getFeatures()
         train, test = train.index, test.index
-        test_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[test]
-        train_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[train]
-        test_smiles = self.dataset.getProperty(self.dataset.smilesCol).loc[test]
-        train_smiles = self.dataset.getProperty(self.dataset.smilesCol).loc[train]
+        test_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[test]
+        train_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[train]
+        test_smiles = self.dataset.getProperty(self.dataset.smilesProp).loc[test]
+        train_smiles = self.dataset.getProperty(self.dataset.smilesProp).loc[train]
         self.assertEqual(len(test_targets), len(test))
         self.assertEqual(len(train_targets), len(train))
         self.assertTrue(
@@ -62,8 +62,8 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         self.dataset.split(splitter, featurize=True)
         train, test = self.dataset.getFeatures()
         train, test = train.index, test.index
-        test_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[test]
-        train_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[train]
+        test_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[test]
+        train_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[train]
         self.assertEqual(len(test_targets), len(test))
         self.assertEqual(len(train_targets), len(train))
         self.assertTrue(

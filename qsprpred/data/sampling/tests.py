@@ -40,9 +40,12 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
         dataset.nJobs = self.nCPU
         dataset.chunkSize = self.chunkSize
         # Add extra column to the data frame to use for splitting
-        dataset.df["split"] = "train"
-        dataset.df.loc[dataset.df.sample(frac=0.1).index, "split"] = "test"
-        split = ManualSplit(dataset.df["split"], "train", "test")
+        df = dataset.getDF()
+        test_ids = df.sample(frac=0.1).index.values
+        train_ids = df.index.difference(test_ids)
+        dataset.addProperty("split", "test", ids=test_ids)
+        dataset.addProperty("split", "train", ids=train_ids)
+        split = ManualSplit(dataset.getDF()["split"], "train", "test")
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)
 
@@ -58,7 +61,6 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
             dataset = self.createLargeMultitaskDataSet()
         else:
             dataset = self.createLargeTestDataSet()
-        dataset = self.createLargeTestDataSet()
         dataset.prepareDataset(split=RandomSplit(test_fraction=0.1))
         self.validate_split(dataset)
 
@@ -113,7 +115,8 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
             (
                     False,
                     BemisMurcko(use_csk=True),
-                    ["ScaffoldSplit_000", "ScaffoldSplit_001"],
+                    ["ScaffoldSplit_storage_library_000",
+                     "ScaffoldSplit_storage_library_001"],
             ),
             (True, BemisMurckoRDKit(), None),
         ]
@@ -169,7 +172,8 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
                     False,
                     FPSimilarityMaxMinClusters(
                         fp_calculator=MorganFP(radius=2, nBits=128)),
-                    ["ClusterSplit_000", "ClusterSplit_001"],
+                    ["ClusterSplit_storage_library_000",
+                     "ClusterSplit_storage_library_001"],
             ),
             (
                     True,
@@ -182,7 +186,8 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
                     FPSimilarityLeaderPickerClusters(
                         fp_calculator=MorganFP(radius=2, nBits=128)
                     ),
-                    ["ClusterSplit_000", "ClusterSplit_001"],
+                    ["ClusterSplit_storage_library_000",
+                     "ClusterSplit_storage_library_001"],
             ),
         ]
     )
@@ -270,17 +275,18 @@ class TestFoldSplitters(DataSetsPathMixIn, QSPRTestCase):
         generator = FoldsFromDataSplit(fold)
         k, indices = self.validateFolds(generator.iterFolds(dataset))
         self.assertEqual(k, 5)
-        self.assertFalse(set(dataset.df.index) - set(indices))
+        df = dataset.getDF()
+        self.assertFalse(set(df.index) - set(indices))
         # test directly on data set
         k, indices = self.validateFolds(dataset.iterFolds(fold))
         self.assertEqual(k, 5)
-        self.assertFalse(set(dataset.df.index) - set(indices))
+        self.assertFalse(set(df.index) - set(indices))
         # test default settings with classification
         dataset.makeClassification("CL", th=[20])
         fold = StratifiedKFold(5, shuffle=True, random_state=dataset.randomState)
         k, indices = self.validateFolds(dataset.iterFolds(fold))
         self.assertEqual(k, 5)
-        self.assertFalse(set(dataset.df.index) - set(indices))
+        self.assertFalse(set(df.index) - set(indices))
         # test with a standarizer
         MAX_VAL = 2
         MIN_VAL = 1
@@ -288,7 +294,7 @@ class TestFoldSplitters(DataSetsPathMixIn, QSPRTestCase):
         dataset.prepareDataset(feature_standardizer=scaler)
         k, indices = self.validateFolds(dataset.iterFolds(fold))
         self.assertEqual(k, 5)
-        self.assertFalse(set(dataset.df.index) - set(indices))
+        self.assertFalse(set(df.index) - set(indices))
 
         def check_min_max(X_train, X_test, *args, **kwargs):
             self.assertTrue(np.max(X_train.values) == MAX_VAL)
@@ -299,7 +305,7 @@ class TestFoldSplitters(DataSetsPathMixIn, QSPRTestCase):
         self.validateFolds(dataset.iterFolds(fold), more=check_min_max)
         k, indices = self.validateFolds(dataset.iterFolds(fold))
         self.assertEqual(k, 5)
-        self.assertFalse(set(dataset.df.index) - set(indices))
+        self.assertFalse(set(df.index) - set(indices))
 
         # try with a split data set
         dataset.split(RandomSplit(test_fraction=0.1))
@@ -325,5 +331,5 @@ class TestFoldSplitters(DataSetsPathMixIn, QSPRTestCase):
         fold = BootstrapSplit(split, n_bootstraps=5, seed=42)
         k, indices_third = self.validateFolds(dataset.iterFolds(fold))
         self.assertEqual(k, 5)
-        self.assertEqual(split.getSeed(), None)
+        self.assertEqual(split.randomState, None)
         self.assertNotEqual(indices, indices_third)

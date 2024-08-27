@@ -88,7 +88,7 @@ def QSPRArgParser(txt=None):
         "--skip_backup",
         action="store_true",
         help="Skip backup of files. WARNING: this may overwrite "
-        "previous results, use with caution.",
+             "previous results, use with caution.",
     )
     parser.add_argument(
         "-ran", "--random_state", type=int, default=1, help="Seed for the random state"
@@ -154,7 +154,7 @@ def QSPRArgParser(txt=None):
         "--low_quality",
         action="store_true",
         help="If lq, than low quality data will be should be a column 'Quality' where "
-        "all 'Low' will be removed",
+             "all 'Low' will be removed",
     )
     parser.add_argument(
         "-tr",
@@ -279,8 +279,8 @@ def QSPRArgParser(txt=None):
         type=float,
         default=None,
         help="Boruta filter with random forest estimator, value between 0 and 100 "
-        "for percentile threshold for comparison between shadow and real features"
-        "see https://github.com/scikit-learn-contrib/boruta_py for more info.",
+             "for percentile threshold for comparison between shadow and real features"
+             "see https://github.com/scikit-learn-contrib/boruta_py for more info.",
     )
     # other
     parser.add_argument(
@@ -371,18 +371,17 @@ def QSPR_dataprep(args):
                 if args.data_suffix
                 else f"{props_name}_{task}"
             )
-            mydataset = QSPRDataset(
+            mydataset = QSPRDataset.fromDF(
                 dataset_name,
                 target_props=target_props,
                 df=df,
                 smiles_col=args.smiles_col,
-                n_jobs=args.ncpu,
-                store_dir=args.output_dir,
-                overwrite=True,
-                random_state=args.random_state
-                if args.random_state is not None
-                else None,
+                path=args.output_dir,
             )
+            mydataset.randomState = args.random_state \
+                if args.random_state is not None \
+                else None
+            mydataset.storage.nJobs = args.ncpu
             # data filters
             data_filters = []
             if args.low_quality:

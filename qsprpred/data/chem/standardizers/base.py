@@ -48,3 +48,19 @@ class ChemStandardizer(ABC):
         import hashlib
 
         return hashlib.md5(self.get_id()).hexdigest()
+
+
+class Standardizable(ABC):
+
+    @property
+    @abstractmethod
+    def standardizer(self) -> ChemStandardizer:
+        """
+        Get the standardizer used by the store.
+
+        :return: `ChemStandardizer` instance
+        """
+
+    @abstractmethod
+    def applyStandardizer(self, standardizer: ChemStandardizer):
+        pass

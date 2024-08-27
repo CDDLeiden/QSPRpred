@@ -35,8 +35,6 @@ class PropSearchable(ABC):
                 Name of the column to search on.
             values:
                 Values to search for.
-            name:
-                Name of the new table.
             exact:
                 Whether to search for exact matches or not.
 

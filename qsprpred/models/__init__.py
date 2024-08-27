@@ -3,15 +3,15 @@ from qsprpred.models.assessment.methods import (
     TestSetAssessor,
     ModelAssessor,
 )
+from qsprpred.models.assessment.metrics.masked import MaskedMetric
+from qsprpred.models.assessment.metrics.scikit_learn import SklearnMetrics
 from .early_stopping import EarlyStoppingMode
 from .hyperparam_optimization import (
     OptunaOptimization,
     GridSearchOptimization,
     HyperparameterOptimization,
 )
-from .metrics import SklearnMetrics
 from .model import QSPRModel
-
 from .monitors import (
     BaseMonitor,
     FitMonitor,

@@ -312,7 +312,7 @@ class DataSetsPathMixIn(PathMixIn):
             prep=preparation_settings,
         )
 
-    def getStorage(self, df, name, n_jobs, chunk_size):
+    def getStorage(self, df, name, n_jobs=1, chunk_size=None):
         return TabularStorageBasic(
             name,
             self.generatedDataPath,

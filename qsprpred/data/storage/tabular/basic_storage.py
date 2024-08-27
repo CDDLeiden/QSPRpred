@@ -5,6 +5,7 @@ from typing import ClassVar, Iterable, Any, Generator, Sized, Callable, Literal
 import pandas as pd
 from rdkit import Chem
 
+from qsprpred.data.chem.identifiers import ChemIdentifier
 from qsprpred.data.chem.matching import SMARTSMatchProcessor
 from qsprpred.data.chem.standardizers import ChemStandardizer
 from qsprpred.data.processing.mol_processor import MolProcessor
@@ -35,7 +36,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             id_col: str = "ID",
             store_format: str = "pkl",
             chunk_processor: ParallelGenerator = None,
-            chunk_size: int = 1000,
+            chunk_size: int | None = None,
             n_jobs: int = 1,
     ) -> None:
         super().__init__()
@@ -100,6 +101,8 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         self._chunkSize = value
         for lib in self._libraries.values():
             lib.chunkSize = value
+        if self._chunkSize is None:
+            self._chunkSize = len(self)
 
     @property
     def nJobs(self):
@@ -161,46 +164,18 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         )
         # apply standardizer
         if self._standardizer and len(pd_table) > 0:
-            output = []
-            for chunk in pd_table.apply(
-                    self.apply_standardizer_to_data_frame,
-                    func_args=(self.smilesProp, self._standardizer),
-                    on_props=(self.smilesProp, self.idProp),
-                    as_df=True,
-            ):
-                output.extend(chunk)
-            pd_table.addProperty(
-                self.smilesProp,
-                [x[1] for x in output],  # standardized SMILES
-                [x[0] for x in output]  # IDs
-            )
+            self._apply_standardizer_to_library(pd_table)
         self._drop_invalids_from_table(pd_table)
         # create IDs for compounds
         if self._identifier:
             # replace the default ID with own identifier if requested
-            ids = []
-            for chunk in pd_table.apply(
-                    self._apply_identifier_to_data_frame,
-                    func_args=(self.smilesProp, self.idProp, self._identifier),
-                    on_props=(self.smilesProp, self.idProp),
-                    as_df=True,
-            ):
-                ids.append(chunk)
-            ids = pd.concat(ids) if len(ids) > 0 else pd.Series(
-                index=pd_table.getProperty(self.idProp))
+            ids = self._apply_identifier_to_library(pd_table)
         else:
             ids = pd_table.getProperty(self.idProp)
         # resolve duplicates within the table by taking only the first occurrence
         self._remove_duplicates_from_table(pd_table, ids)
         # FIXME: add RDKit molecules here if requested
         self._remove_duplicates_from_libs(pd_table, pd_table.getProperty(self.idProp))
-        if len(pd_table) == 0:
-            logger.warning(
-                f"No valid or unique molecules found "
-                f"while adding library: {pd_table.name}. "
-                "The library will be ignored."
-            )
-            return
         self._libraries[pd_table.name] = pd_table
         # make sure all properties of the new library are present in all libraries
         props = set()
@@ -212,6 +187,32 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
                     lib.addProperty(prop, [None] * len(lib))
         if save:
             self.save()
+
+    def applyIdentifier(self, identifier: ChemIdentifier):
+        """
+        Apply an identifier to the SMILES in the store.
+
+        Args:
+            identifier (ChemIdentifier): Identifier to apply to the SMILES.
+        """
+        self._identifier = identifier
+        for lib in self._libraries.values():
+            ids = self._apply_identifier_to_library(lib)
+            self._remove_duplicates_from_libs(lib, ids)
+
+    def applyStandardizer(self, standardizer: ChemStandardizer):
+        """
+        Apply a standardizer to the SMILES in the store.
+
+        Args:
+            standardizer (ChemStandardizer): Standardizer to apply to the SMILES.
+        """
+        self._standardizer = standardizer
+        for lib in self._libraries.values():
+            self._apply_standardizer_to_library(lib)
+            self._drop_invalids_from_table(lib)
+        if self._identifier:
+            self.applyIdentifier(self.identifier)
 
     def _drop_invalids_from_table(self, pd_table: PandasDataTable):
         pd_table.dropEmptyProperties([self.smilesProp])
@@ -350,7 +351,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         if props:
             data.update(props)
         df = pd.DataFrame(data)
-        library = library or self.name
+        library = library or f"{self.name}_library"
         if library not in self._libraries:
             self.add_library(
                 name=library,
@@ -416,6 +417,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             processor: MolProcessor,
             proc_args: Iterable[Any] | None = None,
             proc_kwargs: dict[str, Any] | None = None,
+            mol_type: Literal["smiles", "mol", "rdkit"] = "mol",
             add_props: Iterable[str] | None = None,
             chunk_processor: ParallelGenerator | None = None,
     ) -> Generator:
@@ -443,6 +445,9 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             add_props (list, optional):
                 List of data set properties to send to the processor. If `None`, all
                 properties will be sent.
+            mol_type (str, optional):
+                Type of molecule to send to the processor. Can be 'smiles', 'mol', or
+                'rdkit'. Defaults to 'mol', which implies `TabularMol` objects.
             chunk_processor (ParallelGenerator, optional):
                 The parallel generator to use for processing. If not specified,
                 `self.chunkProcessor` is used.
@@ -454,24 +459,27 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         """
         proc_args = proc_args or ()
         proc_kwargs = proc_kwargs or {}
-        add_props = add_props or [self.idProp, self.smilesProp,
-                                  *processor.requiredProps]
+        if add_props is None:
+            add_props = self.getProperties()
+        else:
+            add_props = list(add_props)
+        add_props = add_props + list(processor.requiredProps)
         chunk_processor = chunk_processor or self.chunkProcessor
-        for prop in processor.requiredProps:
+        for prop in add_props:
             if prop not in self.getProperties():
                 raise ValueError(
                     f"Cannot apply function '{processor}' to {self.name} because "
                     f"it requires the property '{prop}', which is not present in the "
                     "data set."
                 )
-            if prop not in add_props:
-                add_props.append(prop)
         for result in self.apply(
                 processor,
                 func_args=proc_args,
                 func_kwargs=proc_kwargs,
                 on_props=add_props,
+                chunk_type=mol_type,
                 chunk_processor=chunk_processor,
+                no_parallel=not processor.supportsParallel,
         ):
             yield result
 
@@ -482,7 +490,8 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             subset = lib.getProperty(name, ids, ignore_missing=True)
             if len(subset) > 0:
                 subsets.append(subset)
-        return pd.concat(subsets)
+        return pd.concat(subsets) if len(subsets) > 0 else pd.Series(
+            index=pd.Index([], name=self.idProp), name=name)
 
     def getProperties(self) -> list[str]:
         ret = set()
@@ -526,24 +535,12 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             n_jobs=self.nJobs,
         )
 
-    # def transformProperties(
-    #         self,
-    #         names: list[str],
-    #         transformer: Callable[[Iterable[Any]], Iterable[Any]]
-    # ):
-    #     subset = self.getSubset(names)
-    #     pd_table = PandasDataTable(
-    #         "temp",
-    #         df=subset,
-    #         index_cols=[self.idProp]
-    #     )
-    #     return pd_table.transformProperties(names, transformer)
-
     def getDF(self) -> pd.DataFrame:
         if len(self) > 0:
             return pd.concat([lib.getDF() for lib in self._libraries.values()])
         else:
-            return pd.DataFrame()
+            return pd.DataFrame(index=pd.Index([], name=self.idProp),
+                                columns=self.getProperties())
 
     def reload(self):
         self.__dict__.update(self.fromFile(self.metaFile).__dict__)
@@ -562,23 +559,32 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             func_args: list | None = None,
             func_kwargs: dict | None = None,
             on_props: tuple[str, ...] | None = None,
-            as_df: bool = False,
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
             chunk_processor: ParallelGenerator | None = None,
+            no_parallel: bool = False,
     ) -> Generator[Iterable[Any], None, None]:
         chunk_processor = chunk_processor or self.chunkProcessor
-        return chunk_processor(
-            self.iterChunks(self.chunkSize, as_df=as_df, on_props=on_props),
-            func,
-            *func_args,
-            **func_kwargs,
-        )
+        if self.nJobs > 1 and not no_parallel:
+            for result in chunk_processor(
+                    self.iterChunks(self.chunkSize, chunk_type=chunk_type,
+                                    on_props=on_props),
+                    func,
+                    *func_args,
+                    **func_kwargs,
+            ):
+                yield result
+        else:
+            # do not use the parallel generator if n_jobs is 1
+            for chunk in self.iterChunks(self.chunkSize, chunk_type=chunk_type,
+                                         on_props=on_props):
+                yield func(chunk, *func_args, **func_kwargs)
 
     def searchOnProperty(
             self,
             prop_name: str,
             values: list[float | int | str],
+            exact=False,
             name: str | None = None,
-            exact=False
     ) -> "TabularStorageBasic":
         """Search in this table using a property name and a list of values.
         It is assumed that the property is searchable with string matching
@@ -632,7 +638,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
                     else mask | (prop == value)
                 )
             matches = self.getSubset(
-                [prop_name],
+                self.getProperties(),
                 ids=self.getProperty(self.idProp)[mask],
                 name=name,
             )
@@ -643,7 +649,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             for value in values:
                 mask = mask | (prop == value)
             matches = self.getSubset(
-                [prop_name],
+                self.getProperties(),
                 ids=self.getProperty(self.idProp)[mask],
                 name=name,
             )
@@ -776,23 +782,44 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             self,
             size=1000,
             on_props: Iterable[str] | None = None,
-            as_df: bool = False,
-    ) -> Generator[list[StoredMol | pd.DataFrame], None, None]:
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
+    ) -> Generator[list[StoredMol | str | Chem.Mol | pd.DataFrame], None, None]:
         on_props = on_props or self.getProperties()
         for lib in self._libraries.values():
             for chunk in lib.iterChunks(size, on_props=on_props):
-                if as_df:
-                    yield chunk[[self.idProp, self.smilesProp, *on_props]]
-                else:
-                    ids = chunk[self.idProp]
-                    smiles = chunk[self.smilesProp]
-                    props = {prop: chunk[prop] for prop in on_props}
-                    mols = []
-                    for idx, id in enumerate(ids):
-                        mol_props = {prop: props[prop][idx] for prop in
-                                     on_props} if props else None
-                        mols.append(TabularMol(id, smiles[idx], props=mol_props))
-                    yield mols
+                chunk_converters = {
+                    "df": self._convert_chunk_df,
+                    "mol": self._convert_chunk_mol,
+                    "smiles": self._convert_chunk_smiles,
+                    "rdkit": self._convert_chunk_rdkit,
+                }
+                yield chunk_converters[chunk_type](chunk, on_props)
+
+    def _convert_chunk_df(self, chunk, on_props):
+        return chunk[list({self.idProp, self.smilesProp, *on_props})]
+
+    def _convert_chunk_mol(self, chunk, on_props):
+        ids = chunk[self.idProp]
+        smiles = chunk[self.smilesProp]
+        props = {prop: chunk[prop] for prop in on_props}
+        mols = []
+        for idx, _id in enumerate(ids):
+            mol_props = {prop: props[prop].iloc[idx] for prop in
+                         on_props} if props else None
+            mols.append(TabularMol(_id, smiles.iloc[idx], props=mol_props))
+        return mols
+
+    def _convert_chunk_smiles(self, chunk, on_props):
+        return chunk[self.smilesProp]
+
+    def _convert_chunk_rdkit(self, chunk, on_props):
+        mols = []
+        for idx, mol in enumerate(chunk[self.smilesProp]):
+            mol = Chem.MolFromSmiles(mol)
+            for prop in on_props:
+                mol.SetProp(prop, str(chunk[prop].iloc[idx]))
+            mols.append(mol)
+        return mols
 
     def iter_mols(self) -> Generator[TabularMol, None, None]:
         for chunk in self.iterChunks():
@@ -802,3 +829,31 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
     def dropEntries(self, ids: tuple[str, ...]):
         for lib in self._libraries.values():
             lib.dropEntries(ids, ignore_missing=True)
+
+    def _apply_identifier_to_library(self, pd_table):
+        ids = []
+        for chunk in pd_table.apply(
+                self._apply_identifier_to_data_frame,
+                func_args=(self.smilesProp, self.idProp, self._identifier),
+                on_props=(self.smilesProp, self.idProp),
+                as_df=True,
+        ):
+            ids.append(chunk)
+        ids = pd.concat(ids) if len(ids) > 0 else pd.Series(
+            index=pd_table.getProperty(self.idProp))
+        return ids
+
+    def _apply_standardizer_to_library(self, pd_table):
+        output = []
+        for chunk in pd_table.apply(
+                self.apply_standardizer_to_data_frame,
+                func_args=(self.smilesProp, self._standardizer),
+                on_props=(self.smilesProp, self.idProp),
+                as_df=True,
+        ):
+            output.extend(chunk)
+        pd_table.addProperty(
+            self.smilesProp,
+            [x[1] for x in output],  # standardized SMILES
+            [x[0] for x in output]  # IDs
+        )

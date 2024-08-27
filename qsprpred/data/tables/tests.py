@@ -158,7 +158,7 @@ class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
         mt = self.getTable()
         mt.addDescriptors(self.getDescriptorSets())
         # get subset for all ids
-        mt_sub = mt.getSubset(mt.getProperties())
+        mt_sub = mt.getSubset(mt.getProperties(), path=self.generatedDataPath)
         self.assertEqual(len(mt), len(mt_sub))
         self.assertListEqual(list(mt.smiles), list(mt_sub.smiles))
         self.assertListEqual(list(mt.getProperties()), list(mt_sub.getProperties()))
@@ -174,7 +174,7 @@ class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
         random_new_folder = tempfile.mkdtemp()
         shutil.move(self.generatedDataPath, random_new_folder)
         mt_moved = MoleculeTable.fromFile(
-            os.path.join(random_new_folder, "datasets", mt.name,
+            os.path.join(random_new_folder, "datasets",
                          mt_sub.name, "meta.json")
         )
         self.assertEqual(len(mt_sub), len(mt_moved))
@@ -342,6 +342,37 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(dataset_new.X.shape[1], 0)
         dataset_new.addDescriptors([MorganFP(radius=2, nBits=128)])
         self.checkConsistency(dataset_new)
+        # test subset creation
+        features = dataset_new.getFeatures(concat=True, refit_standardizer=False)
+        targets = dataset_new.getTargets(concat=True)
+        subset = dataset_new.getSubset(["CL"], path=self.generatedDataPath)
+        props = subset.getProperties()
+        self.assertIn("CL", props)
+        self.assertNotIn("HBD", props)
+        self.assertNotIn("Notes", props)
+        self.assertEqual(len(subset), len(dataset_new))
+        features_new = subset.getFeatures(concat=True, refit_standardizer=False)
+        self.assertTrue(np.allclose(features_new, features))
+        targets_new = subset.getTargets(concat=True)
+        self.assertTrue(np.allclose(targets_new, targets))
+        # subset only first two ids
+        subset = dataset_new.getSubset(
+            ["CL"],
+            ids=list(dataset_new.getProperty(dataset_new.idProp)[0:2])
+        )
+        self.assertEqual(len(subset), 2)
+        self.assertEqual(subset.getFeatures(concat=True).shape[0], 2)
+        self.assertEqual(subset.getTargets(concat=True).shape[0], 2)
+        self.assertListEqual(list(subset.getFeatures(concat=True).index),
+                             list(features.iloc[0:2, :].index))
+        self.assertListEqual(list(subset.getTargets(concat=True).index),
+                             list(targets.iloc[0:2, :].index))
+        self.assertTrue(
+            np.allclose(subset.getFeatures(concat=True, refit_standardizer=False),
+                        features.iloc[0:2, :]))
+        self.assertTrue(
+            np.allclose(subset.getTargets(concat=True),
+                        targets.iloc[0:2, :]))
 
     def testMultitask(self):
         """Test multi-task dataset creation and functionality."""
@@ -449,120 +480,30 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         dataset_new = QSPRDataset.fromFile(dataset.metaFile)
         self.checkRegression(dataset_new, ["CL"])
 
-    def testIndexing(self):
-        # default index
-        QSPRDataset(
-            "testTargetProperty",
-            [{
-                "name": "CL",
-                "task": TargetTasks.REGRESSION
-            }],
-            df=self.getSmallDF(),
-            store_dir=self.generatedDataPath,
-            n_jobs=self.nCPU,
-            chunk_size=self.chunkSize,
-        )
-        # set index to SMILES column
-        QSPRDataset(
-            "testTargetProperty",
-            [{
-                "name": "CL",
-                "task": TargetTasks.REGRESSION
-            }],
-            df=self.getSmallDF(),
-            store_dir=self.generatedDataPath,
-            n_jobs=self.nCPU,
-            chunk_size=self.chunkSize,
-            index_cols=["SMILES"],
-        )
-        # multiindex
-        QSPRDataset(
-            "testTargetProperty",
-            [{
-                "name": "CL",
-                "task": TargetTasks.REGRESSION
-            }],
-            df=self.getSmallDF(),
-            store_dir=self.generatedDataPath,
-            n_jobs=self.nCPU,
-            chunk_size=self.chunkSize,
-            index_cols=["SMILES", "Name"],
-        )
-        # index with duplicates
-        self.assertRaises(
-            ValueError,
-            lambda: QSPRDataset(
-                "testTargetProperty",
-                [{
-                    "name": "CL",
-                    "task": TargetTasks.REGRESSION
-                }],
-                df=self.getSmallDF(),
-                store_dir=self.generatedDataPath,
-                n_jobs=self.nCPU,
-                chunk_size=self.chunkSize,
-                index_cols=["moka_ionState7.4"],
-            ),
-        )
-        # index has nans
-        self.assertRaises(
-            ValueError,
-            lambda: QSPRDataset(
-                "testTargetProperty",
-                [{
-                    "name": "CL",
-                    "task": TargetTasks.REGRESSION
-                }],
-                df=self.getSmallDF(),
-                store_dir=self.generatedDataPath,
-                n_jobs=self.nCPU,
-                chunk_size=self.chunkSize,
-                index_cols=["fu"],
-            ),
-        )
-
-    @parameterized.expand([(1,), (2,)])  # use one or two CPUs
-    def testInvalidsDetection(self, n_cpu):
-        df = self.getBigDF()
-        all_mols = len(df)
-        dataset = QSPRDataset(
-            "testInvalidsDetection",
-            [{
-                "name": "CL",
-                "task": TargetTasks.REGRESSION
-            }],
-            df=df,
-            store_dir=self.generatedDataPath,
-            drop_invalids=False,
-            drop_empty=False,
-            n_jobs=n_cpu,
-        )
-        self.assertEqual(dataset.df.shape[0], df.shape[0])
-        self.assertRaises(ValueError, lambda: dataset.checkMols())
-        self.assertRaises(
-            ValueError,
-            lambda: dataset.addDescriptors([MorganFP(radius=2, nBits=128)]),
-        )
-        invalids = dataset.checkMols(throw=False)
-        self.assertEqual(sum(~invalids), 1)
-        dataset.dropInvalids()
-        self.assertEqual(dataset.df.shape[0], all_mols - 1)
-
     def testRandomStateShuffle(self):
         dataset = self.createLargeTestDataSet()
+        # initial order
+        order = dataset.X.index.tolist()
         seed = dataset.randomState
         dataset.shuffle()
-        order = dataset.getDF().index.tolist()
+        # shuffled order
+        order_next = dataset.X.index.tolist()
+        # initial and shuffled order should be different
+        self.assertNotEqual(order, order_next)
+        # save current order
+        order = order_next
+        # save data set with shuffled order
         dataset.save()
+        # shuffle again
         dataset.shuffle()
-        order_next = dataset.getDF().index.tolist()
+        order_next = dataset.X.index.tolist()
         # reload and check if seed and order are the same
         dataset = QSPRDataset.fromFile(dataset.metaFile)
         self.assertEqual(dataset.randomState, seed)
-        self.assertListEqual(dataset.getDF().index.tolist(), order)
-        # shuffle again and check if order is the same as before
+        self.assertListEqual(dataset.X.index.tolist(), order)
+        # shuffle the reloaded set and check if we got the same order as before
         dataset.shuffle()
-        self.assertListEqual(dataset.getDF().index.tolist(), order_next)
+        self.assertListEqual(dataset.X.index.tolist(), order_next)
 
     def testRandomStateFeaturization(self):
         # create and save the data set
@@ -849,8 +790,9 @@ class TestTargetImputation(PathMixIn, QSPRTestCase):
 
     def testImputation(self):
         """Test the imputation of missing values in the target properties."""
-        self.dataset = QSPRDataset(
+        self.dataset = QSPRDataset.fromDF(
             "TestImputation",
+            self.df,
             target_props=[
                 {
                     "name": "y",
@@ -863,17 +805,14 @@ class TestTargetImputation(PathMixIn, QSPRTestCase):
                     "imputer": SimpleImputer(strategy="mean"),
                 },
             ],
-            df=self.df,
-            store_dir=self.generatedPath,
-            n_jobs=self.nCPU,
-            chunk_size=self.chunkSize,
+            path=self.generatedPath,
         )
         self.assertEqual(self.dataset.targetProperties[0].name, "y")
         self.assertEqual(self.dataset.targetProperties[1].name, "z")
-        self.assertTrue("y_before_impute" in self.dataset.df.columns)
-        self.assertTrue("z_before_impute" in self.dataset.df.columns)
-        self.assertEqual(self.dataset.df["y"].isna().sum(), 0)
-        self.assertEqual(self.dataset.df["z"].isna().sum(), 0)
+        self.assertTrue("y_before_impute" in self.dataset.getDF().columns)
+        self.assertTrue("z_before_impute" in self.dataset.getDF().columns)
+        self.assertEqual(self.dataset.getDF()["y"].isna().sum(), 0)
+        self.assertEqual(self.dataset.getDF()["z"].isna().sum(), 0)
 
 
 class TestTargetTransformation(DataSetsPathMixIn, QSPRTestCase):
@@ -897,7 +836,8 @@ class TestTargetTransformation(DataSetsPathMixIn, QSPRTestCase):
             ]
         )
         self.assertTrue(
-            all(dataset.df["CL"] == np.log10(dataset.df["CL_before_transform"])))
+            all(dataset.getDF()["CL"] == np.log10(
+                dataset.getDF()["CL_before_transform"])))
 
 
 class TestApply(DataSetsPathMixIn, QSPRTestCase):
@@ -923,9 +863,9 @@ class TestApply(DataSetsPathMixIn, QSPRTestCase):
         dataset.chunkSize = chunk_size
         result = dataset.apply(
             self.regularFunc,
-            on_props=["CL", "fu"],
             func_args=[1, 2, 3],
             func_kwargs={"A_col": "A", "B_col": "B"},
+            chunk_type="df"
         )
         for item in result:
             self.assertIsInstance(item, pd.DataFrame)

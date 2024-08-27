@@ -15,6 +15,22 @@ class ChemIdentifier(ABC):
         """
 
 
+class Identifiable(ABC):
+
+    @property
+    @abstractmethod
+    def identifier(self) -> ChemIdentifier:
+        """
+        Get the identifier used by the store.
+
+        :return: `ChemIdentifier` instance
+        """
+
+    @abstractmethod
+    def applyIdentifier(self, identifier: ChemIdentifier):
+        pass
+
+
 class InchiIdentifier(ChemIdentifier):
 
     def __call__(self, smiles: str) -> str:

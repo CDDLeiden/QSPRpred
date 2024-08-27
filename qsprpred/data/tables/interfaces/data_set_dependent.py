@@ -1,13 +1,13 @@
-from qsprpred.data.storage.interfaces.chem_store import ChemStore
+from qsprpred.data.tables.interfaces.qspr_data_set import QSPRDataSet
 
 
 class DataSetDependent:
     """Classes that need a molecule storage attached can derive from this."""
 
-    def __init__(self, dataset: ChemStore | None = None) -> None:
+    def __init__(self, dataset: QSPRDataSet | None = None) -> None:
         self.dataSet = dataset
 
-    def setDataSet(self, dataset: ChemStore):
+    def setDataSet(self, dataset: QSPRDataSet):
         self.dataSet = dataset
 
     @property

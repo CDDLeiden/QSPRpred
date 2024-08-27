@@ -8,13 +8,13 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold
 
-from qsprpred.data.sampling.splits import DataSplit
-from qsprpred.data.tables.qspr import QSPRDataset
-from qsprpred.logs import logger
-from qsprpred.models.early_stopping import EarlyStoppingMode
-from qsprpred.models.metrics import SklearnMetrics
-from qsprpred.models.model import QSPRModel
-from qsprpred.models.monitors import AssessorMonitor, BaseMonitor
+from .metrics.scikit_learn import SklearnMetrics
+from ...data import QSPRDataset
+from ...data.sampling.splits import DataSplit
+from ...logs import logger
+from ...models.early_stopping import EarlyStoppingMode
+from ...models.model import QSPRModel
+from ...models.monitors import AssessorMonitor, BaseMonitor
 
 
 class ModelAssessor(ABC):

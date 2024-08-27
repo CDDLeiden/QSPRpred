@@ -22,8 +22,8 @@ class CheckSmilesValid(MolProcessorWithID):
                 mol = Chem.MolFromSmiles(mol)
                 mol_id = props[self.idProp][idx]
             elif isinstance(mol, StoredMol):
-                mol = mol.as_rd_mol()
                 mol_id = mol.id
+                mol = mol.as_rd_mol()
             else:
                 mol = mol
                 mol_id = props[self.idProp][idx]

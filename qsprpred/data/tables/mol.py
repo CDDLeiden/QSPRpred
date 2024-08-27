@@ -1,18 +1,21 @@
 import os
 import shutil
-from typing import Generator, Any, Iterable, Sized, ClassVar, Literal
+from typing import Generator, Any, Iterable, Sized, ClassVar, Literal, Callable
 
 import numpy as np
 import pandas as pd
-from rdkit.Chem import PandasTools
 
+from qsprpred.data.chem.clustering import MoleculeClusters
 from qsprpred.data.descriptors.sets import DescriptorSet
+from qsprpred.data.processing.mol_processor import MolProcessor
 from qsprpred.data.storage.interfaces.chem_store import ChemStore
 from qsprpred.data.storage.interfaces.property_storage import PropertyStorage
 from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 from qsprpred.data.storage.tabular.basic_storage import TabularStorageBasic
 from .descriptor import DescriptorTable
 from .interfaces.molecule_data_set import MoleculeDataSet
+from ..chem.identifiers import ChemIdentifier
+from ..chem.standardizers import ChemStandardizer
 from ...data.chem.scaffolds import Scaffold
 from ...logs import logger
 
@@ -33,7 +36,7 @@ class MoleculeTable(MoleculeDataSet):
 
     def __init__(
             self,
-            storage: ChemStore,
+            storage: ChemStore | None,
             name: str | None = None,
             path: str = ".",
             random_state: int | None = None,
@@ -51,14 +54,34 @@ class MoleculeTable(MoleculeDataSet):
             random_state (int): Random state to use for shuffling and other random ops.
             store_format (str): Format to use for storing the data set.
         """
-        self.storage = storage
-        self.name = name or f"{self.storage}_mol_table"
-        self._randomState = random_state
+        assert storage is not None or name is not None, "Either storage or name must be provided."
         self.descriptors = []
-        self.path = os.path.abspath(os.path.join(path, self.name))
+        self.randomState = random_state
         self.storeFormat = store_format
-        if os.path.exists(self.metaFile):
-            self.reload()
+        self.rootDir = path
+        name = name or f"{storage}_mol_table"
+        if storage is not None:
+            self.storage = storage
+            self.path = os.path.abspath(os.path.join(self.rootDir, name))
+            self.name = name
+            if os.path.exists(self.metaFile):
+                self.reload()
+                if random_state is not None and self.randomState != random_state:
+                    logger.warning(
+                        "Random state in the data set "
+                        "does not match the given random state. Setting to given value:"
+                        f" {random_state}."
+                    )
+                    self.randomState = random_state
+        else:
+            self.path = os.path.abspath(os.path.join(self.rootDir, name))
+            self.name = name
+            if os.path.exists(self.metaFile):
+                self.reload()
+            else:
+                raise ValueError(f"Could not initialize from meta file: {self.metaFile}"
+                                 f"Are you sure the path parameter is correct? "
+                                 f"Path supplied: {self.path}")
 
     @property
     def randomState(self) -> int:
@@ -66,7 +89,16 @@ class MoleculeTable(MoleculeDataSet):
 
     @randomState.setter
     def randomState(self, seed: int | None):
-        self._randomState = seed
+        self._randomState = seed or np.random.randint(0, 2 ** 32 - 1)
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @name.setter
+    def name(self, name: str):
+        self._name = name
+        self.path = os.path.abspath(os.path.join(self.rootDir, self.name))
 
     def sample(
             self, n: int, name: str | None = None, random_state: int | None = None
@@ -94,6 +126,64 @@ class MoleculeTable(MoleculeDataSet):
             name=name
         )
 
+    @property
+    def identifier(self) -> ChemIdentifier:
+        return self.storage.identifier
+
+    def applyIdentifier(self, identifier: ChemIdentifier):
+        self.storage.applyIdentifier(identifier)
+        if self.descriptorSets:
+            # FIXME: this should not drop the descriptors, but just reindex the data
+            self.dropDescriptorSets([str(x) for x in self.descriptorSets],
+                                    full_removal=True)
+            logger.warning(f"Applied identifier {identifier} to the data set.")
+            logger.warning("The data set has been reindexed and the old index is lost.")
+            logger.warning(
+                "This means that the descriptor data is no longer valid "
+                "and has been removed. "
+                "You can reload this data set if this is not what you want."
+            )
+
+    @property
+    def standardizer(self) -> ChemStandardizer:
+        return self.storage.standardizer
+
+    def applyStandardizer(self, standardizer: ChemStandardizer):
+        self.storage.applyStandardizer(standardizer)
+        if self.descriptorSets:
+            # FIXME: this should not drop the descriptors, but just reindex the data
+            self.dropDescriptorSets([str(x) for x in self.descriptorSets],
+                                    full_removal=True)
+            logger.warning(f"Applied standardizer {standardizer} to the data set.")
+            logger.warning("The data set has been reindexed and the old index is lost.")
+            logger.warning(
+                "This means that the descriptor data is no longer valid "
+                "and has been removed. "
+                "You can reload this data set if this is not what you want."
+            )
+
+    @classmethod
+    def fromDF(
+            cls,
+            name: str,
+            df: pd.DataFrame,
+            path: str = ".",
+            smiles_col: str = "SMILES",
+            **kwargs,
+    ) -> "MoleculeTable":
+        """Create a `MoleculeTable` instance from a pandas DataFrame.
+
+        Args:
+            name (str): Name of the data set.
+            df (pd.DataFrame): DataFrame containing the molecule data.
+            path (str): Path to the directory where the data set will be stored.
+            smiles_col (str): Name of the column in the data frame containing the SMILES
+                sequences.
+        """
+        storage = TabularStorageBasic(f"{name}_storage", path, df,
+                                      smiles_col=smiles_col, **kwargs)
+        return MoleculeTable(storage, name=name, path=path)
+
     @classmethod
     def fromSMILES(cls, name: str, smiles: list, path: str, *args, **kwargs):
         """Create a `MoleculeTable` instance from a list of SMILES sequences.
@@ -101,6 +191,7 @@ class MoleculeTable(MoleculeDataSet):
         Args:
             name (str): Name of the data set.
             smiles (list): list of SMILES sequences.
+            path (str): Path to the directory where the data set will be stored.
             *args: Additional arguments to pass to the `MoleculeTable` constructor.
             **kwargs: Additional keyword arguments to pass to the `MoleculeTable`
                 constructor.
@@ -145,6 +236,7 @@ class MoleculeTable(MoleculeDataSet):
                 constructor.
         """
         # FIXME: the RDKit mols are always added here, which might be unnecessary
+        from rdkit.Chem import PandasTools
         df = PandasTools.LoadSDF(filename, molColName="RDMol")
         storage = TabularStorageBasic(
             name,
@@ -157,12 +249,11 @@ class MoleculeTable(MoleculeDataSet):
         return cls(storage, path=os.path.dirname(storage.path))
 
     @property
-    def smiles(self) -> Generator[str, None, None]:
-        """Get the SMILES strings of the molecules in the data frame.
+    def smilesProp(self) -> str:
+        return self.storage.smilesProp
 
-        Returns:
-            Generator[str, None, None]: Generator of SMILES strings.
-        """
+    @property
+    def smiles(self) -> Generator[str, None, None]:
         return self.storage.smiles
 
     def addScaffolds(
@@ -575,10 +666,10 @@ class MoleculeTable(MoleculeDataSet):
 
     def getSubset(
             self,
-            subset: list[str],
-            ids: list[str] | None = None,
+            subset: Iterable[str],
+            ids: Iterable[str] | None = None,
             name: str | None = None,
-            path: str | None = None,
+            path: str = ".",
             **kwargs,
     ) -> "MoleculeTable":
         name = name or f"{self.name}_subset"
@@ -596,19 +687,26 @@ class MoleculeTable(MoleculeDataSet):
         ret.descriptors = descriptors
         return ret
 
-    # def transformProperties(self, names: list[str],
-    #                         transformer: Callable[[Iterable[Any]], Iterable[Any]]):
-    #     subset = self.getSubset(names)
-    #     ret = pd.concat(list(subset.apply(transformer, on_props=names)))
-    #     return ret
+    def transformProperties(self, names: list[str],
+                            transformer: Callable[[Iterable[Any]], Iterable[Any]]):
+        subset = self.getDF()[names]
+        ret = subset.apply(transformer, axis=1)
+        for col in ret.columns:
+            self.addProperty(f"{col}_before_transform", subset[col])
+            self.addProperty(col, ret[col])
 
     def getDF(self) -> pd.DataFrame:
-        return self.getDescriptors().join(self.storage.getDF())
+        return self.storage.getDF()
 
-    def apply(self, func: callable, func_args: list | None = None,
-              func_kwargs: dict | None = None, on_props: tuple[str, ...] | None = None,
-              as_df: bool = True) -> Generator[Iterable[Any], None, None]:
-        return self.storage.apply(func, func_args, func_kwargs, on_props, as_df)
+    def apply(
+            self,
+            func: callable,
+            func_args: list | None = None,
+            func_kwargs: dict | None = None,
+            on_props: tuple[str, ...] | None = None,
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
+    ) -> Generator[Iterable[Any], None, None]:
+        return self.storage.apply(func, func_args, func_kwargs, on_props, chunk_type)
 
     def dropEntries(self, ids: Iterable[str]):
         # FIXME: do not drop from storage here, but just mask the removed entries
@@ -654,10 +752,11 @@ class MoleculeTable(MoleculeDataSet):
     def iterChunks(
             self,
             size: int | None = None,
-            on_props: list | None = None
+            on_props: list | None = None,
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
     ) -> Generator[list[StoredMol], None, None]:
         # TODO: extend this to descriptors as well
-        return self.storage.iterChunks(size, on_props)
+        return self.storage.iterChunks(size, on_props, chunk_type)
 
     def getSummary(self) -> pd.DataFrame:
         raise NotImplementedError("Summary not yet available for MoleculeTable.")
@@ -665,29 +764,32 @@ class MoleculeTable(MoleculeDataSet):
     def searchWithSMARTS(self, patterns: list[str],
                          operator: Literal["or", "and"] = "or",
                          use_chirality: bool = False,
-                         name: str | None = None) -> "MoleculeTable":
+                         name: str | None = None,
+                         path: str = "."
+                         ) -> "MoleculeTable":
         if hasattr(self.storage, "searchWithSMARTS"):
             result = self.storage.searchWithSMARTS(
                 patterns,
                 operator,
                 use_chirality,
-                name
+                name,
             )
             mol_ids = result.getProperty(result.idProp)
-            return self.getSubset(self.getProperties(), mol_ids)
+            return self.getSubset(self.getProperties(), mol_ids, name=name, path=path)
         raise NotImplementedError(
             "The underlying storage does not support SMARTS search."
         )
 
     def searchOnProperty(self, prop_name: str, values: list[float | int | str],
-                         exact=False) -> "MoleculeTable":
+                         exact=False, name: str | None = None,
+                         path: str = ".") -> "MoleculeTable":
         result = self.storage.searchOnProperty(prop_name, values, exact)
         mol_ids = result.getProperty(result.idProp)
-        return self.getSubset(self.getProperties(), mol_ids)
+        return self.getSubset(self.getProperties(), mol_ids, name=name, path=path)
 
     def addClusters(
             self,
-            clusters: list["MoleculeClusters"],
+            clusters: list[MoleculeClusters],
             recalculate: bool = False,
     ):
         """Add clusters to the data frame.
@@ -701,13 +803,14 @@ class MoleculeTable(MoleculeDataSet):
                 already present in the data frame.
         """
         for cluster in clusters:
-            if not recalculate and f"Cluster_{cluster}" in self.df.columns:
+            if not recalculate and f"Cluster_{cluster}" in self.getProperties():
                 continue
-            for clusters in self.processMols(cluster):
-                self.df.loc[clusters.index, f"Cluster_{cluster}"] = clusters.values
+            for clusters in self.storage.processMols(cluster):
+                self.addProperty(f"Cluster_{cluster}", clusters.values,
+                                 clusters.index.values)
 
     def getClusterNames(
-            self, clusters: list["MoleculeClusters"] | None = None
+            self, clusters: list[MoleculeClusters] | None = None
     ):
         """Get the names of the clusters in the data frame.
 
@@ -716,7 +819,7 @@ class MoleculeTable(MoleculeDataSet):
         """
         all_names = [
             col
-            for col in self.df.columns
+            for col in self.getProperties()
             if col.startswith("Cluster_")
         ]
         if clusters:
@@ -725,7 +828,7 @@ class MoleculeTable(MoleculeDataSet):
         return all_names
 
     def getClusters(
-            self, clusters: list["MoleculeClusters"] | None = None
+            self, clusters: list[MoleculeClusters] | None = None
     ):
         """Get the subset of the data frame that contains only clusters.
 
@@ -733,7 +836,7 @@ class MoleculeTable(MoleculeDataSet):
             pd.DataFrame: Data frame containing only clusters.
         """
         names = self.getClusterNames(clusters)
-        return self.df[names]
+        return self.getDF()[names]
 
     @property
     def hasClusters(self):
@@ -743,3 +846,41 @@ class MoleculeTable(MoleculeDataSet):
             bool: Whether the data frame contains clusters.
         """
         return len(self.getClusterNames()) > 0
+
+    def imputeProperties(self, names: list[str], imputer: Callable):
+        """Impute missing property values.
+
+        Args:
+            names (list):
+                List of property names to impute.
+            imputer (Callable):
+                imputer object implementing the `fit_transform`
+                 method from scikit-learn API.
+        """
+        df_subset = self.getDF()[names].copy()
+        assert hasattr(imputer, "fit_transform"), (
+            "Imputer object must implement the `fit_transform` "
+            "method from scikit-learn API."
+        )
+        assert all(
+            name in df_subset.columns for name in names
+        ), "Not all properties in dataframe columns for imputation."
+        names_old = [f"{name}_before_impute" for name in names]
+        df_subset[names_old] = df_subset[names]
+        df_subset[names] = imputer.fit_transform(df_subset[names])
+        for name in df_subset.columns:
+            self.addProperty(name, df_subset[name])
+        logger.debug(f"Imputed missing values for properties: {names}")
+        logger.debug(f"Old values saved in: {names_old}")
+
+    def processMols(
+            self,
+            processor: MolProcessor,
+            proc_args: tuple[Any, ...] | None = None,
+            proc_kwargs: dict[str, Any] | None = None,
+            mol_type: Literal["smiles", "mol", "rdkit"] = "mol",
+            add_props: Iterable[str] | None = None,
+    ) -> Generator[
+        Any, None, None]:
+        return self.storage.processMols(processor, proc_args, proc_kwargs,
+                                        mol_type=mol_type, add_props=add_props)

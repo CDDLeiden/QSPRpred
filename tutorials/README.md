@@ -44,9 +44,11 @@ the [documentation pages](https://cddleiden.github.io/QSPRpred/docs/).
         - [Logging](basics/modelling/logging.ipynb): How to set-up logging.
         - [Model Assessment](basics/modelling/model_assessment.ipynb): How to assess the
           performance of a model.
-    - Benchmarking
-        - [Benchmarking](basics/benchmarking/benchmarking.ipynb): How to benchmark
+    - Other
+        - [Benchmarking](basics/other/benchmarking.ipynb): How to benchmark
           QSPRpred.
+        - [Serialization](basics/other/serialization.ipynb): How to save and
+          load datasets and models.
 - **Advanced**
     - Data
         - [Parallelization](advanced/data/parallelization.ipynb): How to parallelize

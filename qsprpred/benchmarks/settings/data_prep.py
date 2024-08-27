@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Callable
 
 from ...data.processing.data_filters import RepeatsFilter
 from ...data.processing.feature_standardizers import SKLearnStandardizer
@@ -29,7 +28,6 @@ class DataPrepSettings:
     """
     data_filters: list | None = (RepeatsFilter(keep=True),)
     split: DataSplit = None
-    smiles_standardizer: str | Callable = "chembl"
     feature_filters: list = None
     feature_standardizer: SKLearnStandardizer = None
     feature_fill_value: float = 0.0

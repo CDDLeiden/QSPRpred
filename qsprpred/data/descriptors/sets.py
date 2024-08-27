@@ -317,6 +317,7 @@ class DataFrameDescriptorSet(DescriptorSet):
             self._df,
             how="left",
             on=index_cols,
+            validate="one_to_one",
         )
         # ret is in the same order as the input mols, so we can just return the values
         return ret[self.descriptors].values
@@ -530,7 +531,7 @@ class TanimotoDistances(DescriptorSet):
             DataStructs.CreateFromBitString("".join(map(str, x)))
             for x in self.fp.getDescriptors(
                 [Chem.MolFromSmiles(smiles) for smiles in list_of_smiles],
-                props={"QSPRID": list_of_smiles},
+                props={"ID": list_of_smiles},
             )
         ]
 

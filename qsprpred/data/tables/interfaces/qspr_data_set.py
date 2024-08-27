@@ -76,15 +76,6 @@ class QSPRDataSet(MoleculeDataSet, ABC):
         """
 
     @abstractmethod
-    def imputeProperties(self, names: list[str], imputer: Callable):
-        """Impute missing values in the target properties using the given imputer.
-
-        Args:
-            names (list[str]): list of target properties names to impute
-            imputer (Callable): imputer function
-        """
-
-    @abstractmethod
     def addTargetProperty(self, prop: TargetProperty | dict, drop_empty: bool = True):
         """Add a target property to the dataset.
 

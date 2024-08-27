@@ -38,7 +38,7 @@ class RegressionPlot(ModelPlot, ABC):
                 columns: QSPRID, Fold, Property, Label, Prediction, Set
         """
         # change all property columns into one column
-        id_vars = ["QSPRID", "Fold"] if "Fold" in assessment_df.columns else ["QSPRID"]
+        id_vars = ["ID", "Fold"] if "Fold" in assessment_df.columns else ["ID"]
         df = assessment_df.melt(id_vars=id_vars)
         # split the variable (<property_name>_<suffixes>_<Label/Prediction>) column
         # into the property name and the type (Label or Prediction)
@@ -301,7 +301,7 @@ class WilliamsPlot(RegressionPlot):
 
         # Add the levarages to the dataframe
         df["leverage"] = df.apply(
-            lambda x: model_leverages[x["Model"]][x["QSPRID"]], axis=1
+            lambda x: model_leverages[x["Model"]][x["ID"]], axis=1
         )
         df["n_features"] = df["Model"].apply(lambda x: model_p[x])
 
@@ -374,6 +374,6 @@ class WilliamsPlot(RegressionPlot):
         plt.clf()
         return (
             g,
-            df[["Model", "Fold", "Property", "leverage", "std_resid", "QSPRID"]],
+            df[["Model", "Fold", "Property", "leverage", "std_resid", "ID"]],
             model_h_star,
         )

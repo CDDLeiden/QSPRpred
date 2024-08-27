@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from qsprpred import TargetProperty
-from qsprpred.data import MoleculeTable, QSPRDataset
+from qsprpred.data import QSPRDataset, MoleculeTable
 
 
 class DataSource(ABC):
@@ -10,11 +10,12 @@ class DataSource(ABC):
         pass
 
     def getDataSet(
-        self,
-        target_props: list[TargetProperty | dict],
-        name: str | None = None,
-        **kwargs
+            self,
+            target_props: list[TargetProperty | dict],
+            name: str | None = None,
+            **kwargs
     ) -> QSPRDataset:
         mt = self.getData(name, **kwargs)
         name = name or mt.name
-        return QSPRDataset.fromMolTable(mt, target_props, name, **kwargs)
+        return QSPRDataset.fromMolTable(mt, target_props, name=name, path=mt.rootDir,
+                                        **kwargs)

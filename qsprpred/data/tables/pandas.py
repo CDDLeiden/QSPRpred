@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from qsprpred.data.storage.interfaces.property_storage import PropertyStorage
+from qsprpred.utils.interfaces.randomized import Randomized
 from ...logs import logger
 from ...utils.parallel import batched_generator, ParallelGenerator, \
     MultiprocessingJITGenerator
@@ -14,7 +15,7 @@ from ...utils.serialization import JSONSerializable
 from ...utils.stringops import generate_padded_index
 
 
-class PandasDataTable(PropertyStorage):
+class PandasDataTable(PropertyStorage, Randomized):
     """A Pandas DataFrame wrapper class to enable data processing functions on
     QSPRpred data.
 
@@ -57,36 +58,6 @@ class PandasDataTable(PropertyStorage):
             remote servers instead of local processes).
     """
 
-    def searchOnProperty(
-            self,
-            prop_name: str,
-            values: list[str],
-            exact=False
-    ) -> "PandasDataTable":
-        """Search the molecules within this `MoleculeDataSet` on a property value
-        and return the appropriate subset.
-
-        Args:
-            prop_name:
-                Name of the column to search on.
-            values:
-                Values to search for.
-            name:
-                Name of the new table.
-            exact:
-                Whether to search for exact matches or not.
-
-        Returns:
-            (MoleculeStorage):
-                A data set with the molecules that match the search.
-        """
-
-    def __contains__(self, item):
-        return item in self.df.index
-
-    def __getitem__(self, item):
-        self.getSubset(self.getProperties(), ids=item)
-
     _notJSON: ClassVar = [*JSONSerializable._notJSON, "df"]
 
     def __init__(
@@ -98,7 +69,7 @@ class PandasDataTable(PropertyStorage):
             index_cols: list[str] | None = None,
             n_jobs: int = 1,
             chunk_size: int | None = None,
-            autoindex_name: str = "QSPRID",
+            autoindex_name: str = "ID",
             random_state: int | None = None,
             store_format: str = "pkl",
             parallel_generator: ParallelGenerator | None = None,
@@ -135,7 +106,7 @@ class PandasDataTable(PropertyStorage):
                 Random state to use for all random operations
                 for reproducibility. If not specified, the state is generated randomly.
                 The state is saved upon `save` so if you want to change the state later,
-                call the `setRandomState` method after loading.
+                set it in the `randomState` property.
             store_format (str):
                 Format to use for storing the data frame.
                 Currently only 'pkl' and 'csv' are supported.
@@ -149,9 +120,8 @@ class PandasDataTable(PropertyStorage):
         self._idProp = autoindex_name
         self.storeFormat = store_format
         self.randomState = None
-        self.setRandomState(
-            random_state or int(np.random.randint(0, 2 ** 31 - 1, dtype=np.int64))
-        )
+        self.randomState = random_state or int(
+            np.random.randint(0, 2 ** 31 - 1, dtype=np.int64))
         self.name = name
         self.indexCols = index_cols
         # paths
@@ -189,6 +159,44 @@ class PandasDataTable(PropertyStorage):
         self.parallelGenerator = parallel_generator or MultiprocessingJITGenerator(
             self.nJobs
         )
+
+    @property
+    def randomState(self) -> int:
+        return self._seed
+
+    @randomState.setter
+    def randomState(self, value: int):
+        self._seed = value
+
+    def searchOnProperty(
+            self,
+            prop_name: str,
+            values: list[str],
+            exact=False
+    ) -> "PandasDataTable":
+        """Search the molecules within this `MoleculeDataSet` on a property value
+        and return the appropriate subset.
+
+        Args:
+            prop_name:
+                Name of the column to search on.
+            values:
+                Values to search for.
+            name:
+                Name of the new table.
+            exact:
+                Whether to search for exact matches or not.
+
+        Returns:
+            (MoleculeStorage):
+                A data set with the molecules that match the search.
+        """
+
+    def __contains__(self, item):
+        return item in self.df.index
+
+    def __getitem__(self, item):
+        self.getSubset(self.getProperties(), ids=item)
 
     @property
     def idProp(self) -> str:
@@ -374,7 +382,7 @@ class PandasDataTable(PropertyStorage):
             ignore_missing (bool): If `True`, missing IDs are ignored.
         """
         if name == self.idProp:
-            logger.warning(
+            logger.info(
                 "ID property will change. "
                 f"Old IDs saved to property: {name}_before_change."
             )
@@ -385,14 +393,16 @@ class PandasDataTable(PropertyStorage):
             self.df[name] = data
         else:
             if not ignore_missing:
-                assert all(
-                    self.df.index.isin(ids)
+                assert self.df.index.intersection(ids).shape[0] == len(
+                    ids
                 ), "Not all IDs found in data set."
             else:
+                data = pd.Series(data, index=ids, name=name)
                 ids = self.df.index.intersection(ids)
+                data = data.loc[ids]
             self.df.loc[ids, name] = data
         if name == self.idProp:
-            logger.warning(
+            logger.info(
                 "ID property was changed. "
                 "Updating index columns to match new ID property."
             )
@@ -603,29 +613,6 @@ class PandasDataTable(PropertyStorage):
         logger.debug(f"Transformed properties in: {names}")
         logger.debug(f"Old values saved in: {names_old}")
 
-    def imputeProperties(self, names: list[str], imputer: Callable):
-        """Impute missing property values.
-
-        Args:
-            names (list):
-                List of property names to impute.
-            imputer (Callable):
-                imputer object implementing the `fit_transform`
-                 method from scikit-learn API.
-        """
-        assert hasattr(imputer, "fit_transform"), (
-            "Imputer object must implement the `fit_transform` "
-            "method from scikit-learn API."
-        )
-        assert all(
-            name in self.df.columns for name in names
-        ), "Not all properties in dataframe columns for imputation."
-        names_old = [f"{name}_before_impute" for name in names]
-        self.df[names_old] = self.df[names]
-        self.df[names] = imputer.fit_transform(self.df[names])
-        logger.debug(f"Imputed missing values for properties: {names}")
-        logger.debug(f"Old values saved in: {names_old}")
-
     def toFile(self, filename: str):
         """Save the metafile and all associated files to a custom location.
 
@@ -694,15 +681,6 @@ class PandasDataTable(PropertyStorage):
         self.df = self.df.sample(
             frac=1, random_state=random_state if random_state else self.randomState
         )
-
-    def setRandomState(self, random_state: int):
-        """Set the random state for this instance.
-
-        Args:
-            random_state (int):
-                Random state to use for shuffling and other random operations.
-        """
-        self.randomState = random_state
 
     def dropEntries(self, ids: Iterable[str], ignore_missing: bool = False):
         if ignore_missing:
