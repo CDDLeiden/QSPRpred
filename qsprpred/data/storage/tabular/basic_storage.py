@@ -8,6 +8,7 @@ from rdkit import Chem
 from qsprpred.data.chem.identifiers import ChemIdentifier
 from qsprpred.data.chem.matching import SMARTSMatchProcessor
 from qsprpred.data.chem.standardizers import ChemStandardizer
+from qsprpred.data.chem.standardizers.base import ChemStandardizationException
 from qsprpred.data.processing.mol_processor import MolProcessor
 from qsprpred.data.storage.interfaces.chem_store import ChemStore
 from qsprpred.data.storage.interfaces.searchable import SMARTSSearchable, PropSearchable
@@ -16,10 +17,17 @@ from qsprpred.data.storage.tabular.stored_mol import TabularMol
 from qsprpred.data.tables.pandas import PandasDataTable
 from qsprpred.logs import logger
 from qsprpred.utils.interfaces.summarizable import Summarizable
-from qsprpred.utils.parallel import ParallelGenerator, MultiprocessingJITGenerator
+from qsprpred.utils.parallel import ParallelGenerator, MultiprocessingJITGenerator, \
+    Parallelizable
 
 
-class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summarizable):
+class TabularStorageBasic(
+    ChemStore,
+    SMARTSSearchable,
+    PropSearchable,
+    Summarizable,
+    Parallelizable
+):
     _notJSON: ClassVar = ChemStore._notJSON + ["_libraries"]
 
     def __init__(
@@ -49,8 +57,8 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         self.path = os.path.abspath(os.path.join(path, self.name))
         self.storeFormat = store_format
         self._libraries = dict()
-        self.chunkSize = chunk_size
         self.nJobs = n_jobs
+        self.chunkSize = chunk_size
         self.chunkProcessor = MultiprocessingJITGenerator(
             n_workers=self.nJobs) if chunk_processor is None else chunk_processor
         self._standardizer = standardizer
@@ -100,9 +108,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
     def chunkSize(self, value: int | None):
         self._chunkSize = value
         for lib in self._libraries.values():
-            lib.chunkSize = value
-        if self._chunkSize is None:
-            self._chunkSize = len(self)
+            lib.chunkSize = self._chunkSize
 
     @property
     def nJobs(self):
@@ -111,8 +117,10 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
     @nJobs.setter
     def nJobs(self, value: int | None):
         self._nJobs = value if value is not None and value > 0 else os.cpu_count()
+        self.chunkProcessor = MultiprocessingJITGenerator(n_workers=self.nJobs)
         for lib in self._libraries.values():
             lib.nJobs = value
+            lib.chunkProcessor = self.chunkProcessor
 
     def add_library(
             self,
@@ -154,12 +162,12 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             df=df,
             store_dir=self.libsPath,
             overwrite=False,
-            n_jobs=self.nJobs,
-            chunk_size=self.chunkSize,
             autoindex_name=self.idProp,
             index_cols=[
                 id_col] if self._identifier is None and id_col in df.columns else None,
             store_format=store_format,
+            n_jobs=self.nJobs,
+            chunk_size=self.chunkSize,
             parallel_generator=self.chunkProcessor,
         )
         # apply standardizer
@@ -247,11 +255,18 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             try:
                 standardized = standardizer(smi)[0]
                 if standardized is None:
-                    raise ValueError(f"Standardizer {standardizer} returned None.")
+                    raise ChemStandardizationException(
+                        f"Standardizer {standardizer} returned None.")
+            except ChemStandardizationException:
+                logger.warning(
+                    f"Molecule refused by standardizer: {smi}. "
+                    f"Molecule removed."
+                )
+                standardized = None
             except Exception as e:
                 logger.error(
                     f"Error ({e}) standardizing SMILES: {smi}. "
-                    f"Molecule will not be added."
+                    f"Molecule removed."
                 )
                 standardized = None
             output.append((df.index[i], standardized, smi))
@@ -645,7 +660,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             return matches
         elif value_type in (int, float):
             prop = self.getProperty(prop_name)
-            mask = [False] * len(prop)
+            mask = pd.Series([False] * len(prop), index=prop.index)
             for value in values:
                 mask = mask | (prop == value)
             matches = self.getSubset(
@@ -753,10 +768,10 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
         props = None
         for lib in self._libraries.values():
             if mol_id in lib:
-                props = {prop: lib.getProperty(prop, [mol_id])[0] for prop in
+                props = {prop: lib.getProperty(prop, [mol_id]).iloc[0] for prop in
                          lib.getProperties()}
                 break
-        return TabularMol(mol_id, smiles[0], props=props)
+        return TabularMol(mol_id, smiles.iloc[0], props=props)
 
     def remove_mol(self, mol_id):
         """
@@ -837,6 +852,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
                 func_args=(self.smilesProp, self.idProp, self._identifier),
                 on_props=(self.smilesProp, self.idProp),
                 as_df=True,
+                n_jobs=self.nJobs,
         ):
             ids.append(chunk)
         ids = pd.concat(ids) if len(ids) > 0 else pd.Series(
@@ -850,6 +866,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
                 func_args=(self.smilesProp, self._standardizer),
                 on_props=(self.smilesProp, self.idProp),
                 as_df=True,
+                n_jobs=self.nJobs,
         ):
             output.extend(chunk)
         pd_table.addProperty(

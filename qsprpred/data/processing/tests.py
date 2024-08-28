@@ -311,9 +311,7 @@ class TestMolProcessor(DataSetsPathMixIn, QSPRTestCase):
         dataset.storage.nJobs = n_jobs
         dataset.storage.chunkSize = chunk_size
         self.assertTrue(dataset.storage.nJobs is not None)
-        self.assertTrue(dataset.storage.chunkSize is not None)
         self.assertTrue(dataset.storage.nJobs > 0)
-        self.assertTrue(dataset.storage.chunkSize > 0)
         result = dataset.processMols(
             self.TestingProcessor(dataset.idProp),
             add_props=props,
@@ -330,7 +328,8 @@ class TestMolProcessor(DataSetsPathMixIn, QSPRTestCase):
         expected_args = set(args) if args is not None else set()
         expected_kwargs = set(kwargs) if kwargs is not None else set()
         for item in result:
-            self.assertTrue(item.shape[0] <= dataset.storage.chunkSize)
+            if dataset.storage.chunkSize is not None:
+                self.assertTrue(item.shape[0] <= dataset.storage.chunkSize)
             if add_rdkit:
                 self.assertIsInstance(item[0, 0], Chem.Mol)
             else:

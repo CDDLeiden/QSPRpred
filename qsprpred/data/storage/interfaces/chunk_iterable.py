@@ -5,6 +5,16 @@ from typing import Generator, Any, Iterable
 class ChunkIterable(ABC):
     """Objects that can be iterated over and processed in chunks."""
 
+    @property
+    @abstractmethod
+    def chunkSize(self) -> int:
+        """The size of the chunks to iterate over."""
+
+    @chunkSize.setter
+    @abstractmethod
+    def chunkSize(self, value: int):
+        """Set the size of the chunks to iterate over."""
+
     @abstractmethod
     def iterChunks(self, size: int | None = None) -> Generator[list[Any], None, None]:
         """Iterate over chunks of the storage.

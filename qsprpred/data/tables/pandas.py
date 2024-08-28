@@ -191,6 +191,18 @@ class PandasDataTable(PropertyStorage, Randomized):
             (MoleculeStorage):
                 A data set with the molecules that match the search.
         """
+        if exact:
+            mask = self.df[prop_name].isin(values)
+        else:
+            # interpret values as substrings to search for
+            mask = self.df[prop_name].str.contains("|".join([str(v) for v in values]))
+        ids = self.df.index[mask].values
+        return self.getSubset(
+            self.getProperties(),
+            ids=ids,
+            name=f"{self.name}_{prop_name}_searched",
+            path=self.storeDir
+        )
 
     def __contains__(self, item):
         return item in self.df.index
@@ -229,10 +241,8 @@ class PandasDataTable(PropertyStorage, Randomized):
 
     @chunkSize.setter
     def chunkSize(self, value: int | None):
-        self._chunkSize = value if value is not None else int(len(self) / self.nJobs)
-        if self._chunkSize < 1:
-            self._chunkSize = len(self)
-        if self._chunkSize > len(self):
+        self._chunkSize = value if value is not None else len(self) // self.nJobs
+        if self._chunkSize < 1 or self._chunkSize > len(self):
             self._chunkSize = len(self)
 
     @property
@@ -242,7 +252,7 @@ class PandasDataTable(PropertyStorage, Randomized):
     @nJobs.setter
     def nJobs(self, value: int | None):
         self._nJobs = value if value is not None and value > 0 else os.cpu_count()
-        self.chunkSize = None
+        self.chunkSize = len(self) // self._nJobs
         self.parallelGenerator = MultiprocessingJITGenerator(self.nJobs)
 
     @property
@@ -452,13 +462,15 @@ class PandasDataTable(PropertyStorage, Randomized):
                 assert sum(
                     self.df.index.isin(ids)
                 ) == len(ids), "Not all IDs found in data set."
-            if ignore_missing and ids is not None:
+                ret = self.df.loc[ids, self.df.columns[mask]]
+            elif ignore_missing and ids is not None:
                 ids = self.df.index.intersection(ids)
                 ret = self.df.loc[
                     ids, self.df.columns[mask]
                 ]
             else:
-                ret = self.df[self.df.columns[mask]]
+                ret = self.df.loc[:, self.df.columns[mask]]
+            ret = ret.copy()
             return PandasDataTable(
                 name,
                 ret,
@@ -690,6 +702,7 @@ class PandasDataTable(PropertyStorage, Randomized):
                 ids), "Not all IDs found in data set."
             ids = pd.Index(ids, name=self.idProp)
         self.df.drop(index=ids, inplace=True)
+        self.chunkSize = len(self) // self.nJobs
 
     def addEntries(self, ids: list[str], props: dict[str, list],
                    raise_on_existing: bool = True):
