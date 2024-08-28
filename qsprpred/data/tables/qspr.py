@@ -61,7 +61,7 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
 
     def __init__(
             self,
-            storage: ChemStore | None,
+            storage: ChemStore | None = None,
             name: str | None = None,
             target_props: list[TargetProperty | dict] | None = None,
             path: str = ".",

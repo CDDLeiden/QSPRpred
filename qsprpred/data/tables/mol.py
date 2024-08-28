@@ -37,7 +37,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
 
     def __init__(
             self,
-            storage: ChemStore | None,
+            storage: ChemStore | None = None,
             name: str | None = None,
             path: str = ".",
             random_state: int | None = None,
@@ -245,7 +245,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         """
         df = pd.read_table(filename, sep=sep)
         storage = TabularStorageBasic(f"{name}_storage", path, df)
-        return MoleculeTable(storage, name, path=os.path.dirname(storage.path), *args,
+        return MoleculeTable(storage, name, path=path, *args,
                              **kwargs)
 
     @classmethod
