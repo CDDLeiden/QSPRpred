@@ -17,10 +17,17 @@ from qsprpred.data.storage.tabular.stored_mol import TabularMol
 from qsprpred.data.tables.pandas import PandasDataTable
 from qsprpred.logs import logger
 from qsprpred.utils.interfaces.summarizable import Summarizable
-from qsprpred.utils.parallel import ParallelGenerator, MultiprocessingJITGenerator
+from qsprpred.utils.parallel import ParallelGenerator, MultiprocessingJITGenerator, \
+    Parallelizable
 
 
-class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summarizable):
+class TabularStorageBasic(
+    ChemStore,
+    SMARTSSearchable,
+    PropSearchable,
+    Summarizable,
+    Parallelizable
+):
     _notJSON: ClassVar = ChemStore._notJSON + ["_libraries"]
 
     def __init__(
@@ -101,11 +108,7 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
     def chunkSize(self, value: int | None):
         self._chunkSize = value
         for lib in self._libraries.values():
-            lib.chunkSize = value
-            assert len(lib) > lib.chunkSize, (
-                f"Chunk size {lib.chunkSize} is larger "
-                f"than the number of molecules ({len(lib)}) in {lib}."
-            )
+            lib.chunkSize = self._chunkSize
 
     @property
     def nJobs(self):
@@ -159,11 +162,12 @@ class TabularStorageBasic(ChemStore, SMARTSSearchable, PropSearchable, Summariza
             df=df,
             store_dir=self.libsPath,
             overwrite=False,
-            n_jobs=self.nJobs,
             autoindex_name=self.idProp,
             index_cols=[
                 id_col] if self._identifier is None and id_col in df.columns else None,
             store_format=store_format,
+            n_jobs=self.nJobs,
+            chunk_size=self.chunkSize,
             parallel_generator=self.chunkProcessor,
         )
         # apply standardizer

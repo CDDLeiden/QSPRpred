@@ -241,10 +241,8 @@ class PandasDataTable(PropertyStorage, Randomized):
 
     @chunkSize.setter
     def chunkSize(self, value: int | None):
-        self._chunkSize = value if value is not None else int(len(self) / self.nJobs)
-        if self._chunkSize < 1:
-            self._chunkSize = len(self)
-        if self._chunkSize > len(self):
+        self._chunkSize = value if value is not None else len(self) // self.nJobs
+        if self._chunkSize < 1 or self._chunkSize > len(self):
             self._chunkSize = len(self)
 
     @property
@@ -471,7 +469,7 @@ class PandasDataTable(PropertyStorage, Randomized):
                     ids, self.df.columns[mask]
                 ]
             else:
-                ret = self.df.loc[self.df.columns[mask]]
+                ret = self.df.loc[:, self.df.columns[mask]]
             ret = ret.copy()
             return PandasDataTable(
                 name,
@@ -704,6 +702,7 @@ class PandasDataTable(PropertyStorage, Randomized):
                 ids), "Not all IDs found in data set."
             ids = pd.Index(ids, name=self.idProp)
         self.df.drop(index=ids, inplace=True)
+        self.chunkSize = len(self) // self.nJobs
 
     def addEntries(self, ids: list[str], props: dict[str, list],
                    raise_on_existing: bool = True):

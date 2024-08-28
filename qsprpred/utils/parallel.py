@@ -31,6 +31,19 @@ def batched_generator(iterable: Iterable, batch_size: int) -> Generator:
         yield batch
 
 
+class Parallelizable(ABC):
+
+    @property
+    @abstractmethod
+    def nJobs(self) -> int:
+        """Get the number of jobs to run in parallel."""
+
+    @nJobs.setter
+    @abstractmethod
+    def nJobs(self, n_jobs: int):
+        """Set the number of jobs to run in parallel."""
+
+
 class ParallelGenerator(ABC):
     """An abstract class to facilitate parallel processing of an arbitrary generator."""
 

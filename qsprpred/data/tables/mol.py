@@ -18,9 +18,10 @@ from ..chem.identifiers import ChemIdentifier
 from ..chem.standardizers import ChemStandardizer
 from ...data.chem.scaffolds import Scaffold
 from ...logs import logger
+from ...utils.parallel import Parallelizable
 
 
-class MoleculeTable(MoleculeDataSet):
+class MoleculeTable(MoleculeDataSet, Parallelizable):
     """Class that holds and prepares molecule data for modelling and other analyses.
 
     Attributes:
@@ -160,6 +161,32 @@ class MoleculeTable(MoleculeDataSet):
                 "This means that the descriptor data is no longer valid "
                 "and has been removed. "
                 "You can reload this data set if this is not what you want."
+            )
+
+    @property
+    def chunkSize(self) -> int:
+        return self.storage.chunkSize
+
+    @chunkSize.setter
+    def chunkSize(self, size: int):
+        self.storage.chunkSize = size
+
+    @property
+    def nJobs(self) -> int:
+        if hasattr(self.storage, "nJobs"):
+            return self.storage.nJobs
+        else:
+            raise NotImplementedError(
+                "The used storage does not seem to support parallelization."
+            )
+
+    @nJobs.setter
+    def nJobs(self, n_jobs: int):
+        if hasattr(self.storage, "nJobs"):
+            self.storage.nJobs = n_jobs
+        else:
+            raise NotImplementedError(
+                "The used storage does not seem to support parallelization."
             )
 
     @classmethod

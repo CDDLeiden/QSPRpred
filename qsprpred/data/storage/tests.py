@@ -215,7 +215,7 @@ class TabularStorageTest(StorageTest, TestCase):
         # test with parallel
         store.nJobs = 2
         result = list(store.processMols(CheckSmilesValid()))
-        self.assertEqual(len(result), 2)
+        self.assertEqual(len(result), 3)
         result = pd.concat(result)
         self.assertEqual(len(result), len(store))
         self.assertTrue(all(result))
