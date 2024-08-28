@@ -110,6 +110,7 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, QSPRTestCase):
     def testExtendedValenceSignature(self):
         """Test the SMILES based signature descriptor calculator."""
         desc_set = ExtendedValenceSignature(1)
+        self.dataset.nJobs = 2
         self.dataset.addDescriptors([desc_set], recalculate=True)
         self.dataset.featurize()
         self.assertTrue(self.dataset.X.shape[1] == len(desc_set))
