@@ -185,7 +185,7 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME this class should be ren
             QSPRDataset: `QSPRDataset` object
         """
         mt = super().fromTableFile(name, filename, path, *args, sep=sep, **kwargs)
-        return QSPRDataset.fromMolTable(mt, target_props, name=mt.name)
+        return QSPRDataset.fromMolTable(mt, target_props, name=mt.name, path=path)
 
     @classmethod
     def fromSDF(cls, name: str, filename: str, smiles_prop: str, *args, **kwargs):
