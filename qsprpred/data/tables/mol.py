@@ -619,6 +619,17 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
                 result[self.idProp] = result.index.values
                 df_descriptors.append(result)
             df_descriptors = pd.concat(df_descriptors, axis=0)
+            before = list(df_descriptors.columns)
+            df_descriptors = df_descriptors[
+                calculator.transformToFeatureNames() + [self.idProp]]
+            after = list(df_descriptors.columns)
+            if len(before) != len(after):
+                logger.warning(
+                    f"Descriptor set {calculator} has been reduced from "
+                    f"{len(before)} to {len(after)} descriptors."
+                    "Returned data frame contained more columns than expected."
+                    f"Extra columns: {set(before) - set(after)}"
+                )
             self.attachDescriptors(calculator, df_descriptors, [self.idProp])
 
     def getDescriptors(self, active_only=True):
