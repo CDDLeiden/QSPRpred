@@ -121,6 +121,7 @@ class TabularStorageBasic(
         for lib in self._libraries.values():
             lib.nJobs = value
             lib.chunkProcessor = self.chunkProcessor
+        self.chunkSize = None
 
     def add_library(
             self,
@@ -581,6 +582,8 @@ class TabularStorageBasic(
             no_parallel: bool = False,
     ) -> Generator[Iterable[Any], None, None]:
         chunk_processor = chunk_processor or self.chunkProcessor
+        func_args = func_args or []
+        func_kwargs = func_kwargs or {}
         if self.nJobs > 1 and not no_parallel:
             for result in chunk_processor(
                     self.iterChunks(self.chunkSize, chunk_type=chunk_type,
