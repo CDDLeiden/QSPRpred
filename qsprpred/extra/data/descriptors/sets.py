@@ -325,8 +325,9 @@ class ExtendedValenceSignature(DescriptorSet):
             self.descriptors = df.columns.tolist()
             self._descriptors_init = True
         else:
-            intersection = list(set(self.descriptors).intersection(df.columns))
+            intersection = [col for col in df.columns if col in self.descriptors]
             df = df[intersection]
+            self.descriptors = intersection
         return df.values
 
     @property
