@@ -1,32 +1,27 @@
 # Change Log
 
-From v3.1.1 to v3.2.0
+From v3.2.0 to v4.0.0
 
 ## Fixes
 
-- Fixed a bug in `ChempropModel` that caused it not to work with missing values in the
-  target column.
+None.
 
 ## Changes
 
-- `calibration_score` is now implemented under the `Metric` class as `CalibrationScore`.
+- New API definition (`ChemStore`) was added. It describes a chemical storage system for
+  easier interoperability between QSPRpred and other packages.
+  The `TabularStorageBasic` implementation was added to provide storage
+  for `MoleculeTable` and `QSPRDataset`, which still function as before, but take a
+  storage object for initialization. As a result the `fromDF` method
+  of `MoleculeTable`/`QSPRDataset` now serves as a factory method for creating the
+  objects from a `pandas.DataFrame`. This is now covered more in-depth in
+  the [data representation tutorial](./tutorials/basics/data/data_representation.ipynb).
 
 ## New Features
 
-- Added a range of new
-  metrics: `BEDROC`, `EnrichmentFactor`, `RobustInitialEnhancement`,
-  `Prevalence`, `Sensitivity`, `Specificity`, `PositivePredictivity`, `NegativePredictivity`,
-  `CohenKappa`, `BalancedPositivePredictivity`, `BalancedNegativePredictivity`,
-  `BalancedMatthewsCorrcoeff`, `BalancedCohenKappa`, `KSlope`, `R20`, `KPrimeSlope`,
-  `RPrime20`, `Pearson`, `Spearman`, `Kendall`, `AverageFoldError`,
-  `AbsoluteAverageFoldError`, `PercentageWithinFoldError`
-- Added `MaskedMetric` which can be wrapped around any metric to mask datapoints
-  when a target value is missing.
-- Added a tutorial on model and data serialization.
-- `ApplicabilityDomain` now has a `transform` method that can be used to transform
-  a dataset to a continuous applicability domain score, such as the distance to the
-  nearest neighbor in the training set (an example was added to the
-  [tutorials](./tutorials/basics/data/applicability_domain.ipynb)).
+- Thanks to the new storage API, standardization of molecules is now more flexible and
+  the `PapyrusStandardizer` class was added that provides standardization of molecules
+  as done in the Papyrus database.
 
 ## Removed Features
 
