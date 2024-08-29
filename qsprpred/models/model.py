@@ -507,6 +507,7 @@ class QSPRModel(JSONSerializable, ABC):
             feature_standardizer=self.featureStandardizer,
             feature_fill_value=fill_value,
             shuffle=False,
+            data_filters=None,
         )
         return dataset, failed_mask
 
