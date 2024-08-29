@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.plotting.classification &mdash; QSPRpred 3.1.1 documentation</title>
+  <title>qsprpred.plotting.classification &mdash; QSPRpred 3.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
@@ -16,12 +16,12 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=5b1057fd"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=6d170d0f"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
     </script>
-        <script src="../../../_static/design-tabs.js?v=36754332"></script>
+        <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
         <script src="../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.1
+                v3.2.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -122,7 +122,7 @@
     <span class="n">confusion_matrix</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">..models.metrics</span> <span class="kn">import</span> <span class="n">calibration_error</span>
+<span class="kn">from</span> <span class="nn">..models.assessment.metrics.classification</span> <span class="kn">import</span> <span class="n">CalibrationError</span>
 <span class="kn">from</span> <span class="nn">..models.model</span> <span class="kn">import</span> <span class="n">QSPRModel</span>
 <span class="kn">from</span> <span class="nn">..plotting.base_plot</span> <span class="kn">import</span> <span class="n">ModelPlot</span>
 <span class="kn">from</span> <span class="nn">..tasks</span> <span class="kn">import</span> <span class="n">ModelTasks</span>
@@ -223,8 +223,11 @@
                 <span class="s2">&quot;matthews_corrcoef&quot;</span><span class="p">:</span> <span class="n">matthews_corrcoef</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">Prediction</span><span class="p">),</span>
             <span class="p">}</span>
             <span class="k">if</span> <span class="n">proba</span><span class="p">:</span>
-                <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;calibration_error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calibration_error</span><span class="p">(</span>
-                    <span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df</span><span class="p">[[</span><span class="sa">f</span><span class="s2">&quot;ProbabilityClass_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_classes</span><span class="p">)]]</span>
+                <span class="c1"># convert y_pred to a list of arrays with shape (n_samples, n_classes)</span>
+                <span class="n">y_pred</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">df</span><span class="p">[[</span><span class="sa">f</span><span class="s2">&quot;ProbabilityClass_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_classes</span><span class="p">)]]</span><span class="o">.</span><span class="n">values</span><span class="p">]</span>
+                <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;calibration_error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CalibrationError</span><span class="p">()(</span>
+                    <span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y_pred</span>
                 <span class="p">)</span>
             <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
 
@@ -278,9 +281,10 @@
         <span class="p">}</span>
 
         <span class="k">if</span> <span class="n">proba</span><span class="p">:</span>
-            <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;calibration_error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calibration_error</span><span class="p">(</span>
-                <span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">ProbabilityClass_1</span>
-            <span class="p">)</span>
+            <span class="c1"># convert y_pred to a list of arrays with shape (n_samples, 2)</span>
+            <span class="n">y_pred</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="mi">1</span> <span class="o">-</span> <span class="n">df</span><span class="o">.</span><span class="n">ProbabilityClass_1</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">ProbabilityClass_1</span><span class="p">])]</span>
+            <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;calibration_error&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CalibrationError</span><span class="p">()(</span><span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
             <span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;roc_auc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">ProbabilityClass_1</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span></div>
@@ -299,7 +303,7 @@
             <span class="k">for</span> <span class="n">property_name</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">Property</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
                 <span class="n">df_subset</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span>
                     <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Model</span> <span class="o">==</span> <span class="n">model_name</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Property</span> <span class="o">==</span> <span class="n">property_name</span><span class="p">)</span>
-                <span class="p">]</span>
+                    <span class="p">]</span>
 
                 <span class="c1"># get the number of classes</span>
                 <span class="n">n_classes</span> <span class="o">=</span> <span class="n">df_subset</span><span class="p">[</span><span class="s2">&quot;Label&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span>
@@ -466,12 +470,12 @@
         <span class="k">return</span> <span class="n">ax</span></div>
 
 <div class="viewcode-block" id="ROCPlot.make"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ROCPlot.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">validation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cv&quot;</span><span class="p">,</span>
-        <span class="n">fig_size</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">validation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cv&quot;</span><span class="p">,</span>
+            <span class="n">fig_size</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the ROC plot for given validation sets.</span>
 
@@ -611,12 +615,12 @@
         <span class="k">return</span> <span class="n">ax</span></div>
 
 <div class="viewcode-block" id="PRCPlot.make"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.PRCPlot.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">validation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cv&quot;</span><span class="p">,</span>
-        <span class="n">fig_size</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">validation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cv&quot;</span><span class="p">,</span>
+            <span class="n">fig_size</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given validation type.</span>
 
@@ -663,7 +667,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="CalibrationPlot.makeCV"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot.makeCV">[docs]</a>    <span class="k">def</span> <span class="nf">makeCV</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given model using cross-validation data.</span>
 
@@ -722,7 +726,7 @@
         <span class="k">return</span> <span class="n">ax</span></div>
 
 <div class="viewcode-block" id="CalibrationPlot.makeInd"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot.makeInd">[docs]</a>    <span class="k">def</span> <span class="nf">makeInd</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given model using independent test data.</span>
 
@@ -759,12 +763,12 @@
         <span class="k">return</span> <span class="n">ax</span></div>
 
 <div class="viewcode-block" id="CalibrationPlot.make"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">validation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cv&quot;</span><span class="p">,</span>
-        <span class="n">fig_size</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">validation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cv&quot;</span><span class="p">,</span>
+            <span class="n">fig_size</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given validation type.</span>
 
@@ -814,10 +818,21 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">QSPRModel</span><span class="p">],</span>
-        <span class="n">metrics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span>
-            <span class="n">Literal</span><span class="p">[</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">QSPRModel</span><span class="p">],</span>
+            <span class="n">metrics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span>
+                <span class="n">Literal</span><span class="p">[</span>
+                    <span class="s2">&quot;f1&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;matthews_corrcoef&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;precision&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;recall&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;accuracy&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;calibration_error&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;roc_auc_ovr&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;roc_auc_ovo&quot;</span><span class="p">,</span>
+                <span class="p">]</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="s2">&quot;f1&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;matthews_corrcoef&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;precision&quot;</span><span class="p">,</span>
@@ -827,18 +842,7 @@
                 <span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;roc_auc_ovr&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;roc_auc_ovo&quot;</span><span class="p">,</span>
-            <span class="p">]</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s2">&quot;f1&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;matthews_corrcoef&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;precision&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;recall&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;accuracy&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;calibration_error&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;roc_auc_ovr&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;roc_auc_ovo&quot;</span><span class="p">,</span>
-        <span class="p">],</span>
+            <span class="p">],</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise the metrics plot.</span>
 
@@ -850,10 +854,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="n">metrics</span>
 
 <div class="viewcode-block" id="MetricsPlot.make"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.MetricsPlot.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">out_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">out_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">sns</span><span class="o">.</span><span class="n">FacetGrid</span><span class="p">],</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given validation type.</span>
 
@@ -944,17 +948,17 @@
                         <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Model</span> <span class="o">==</span> <span class="n">model</span><span class="p">)</span>
                         <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Property</span> <span class="o">==</span> <span class="nb">property</span><span class="p">)</span>
                         <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Fold</span> <span class="o">==</span> <span class="n">fold</span><span class="p">)</span>
-                    <span class="p">]</span>
+                        <span class="p">]</span>
                     <span class="n">conf_dict</span><span class="p">[(</span><span class="n">model</span><span class="p">,</span> <span class="nb">property</span><span class="p">,</span> <span class="n">fold</span><span class="p">)]</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span>
                         <span class="n">df_subset</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df_subset</span><span class="o">.</span><span class="n">Prediction</span>
                     <span class="p">)</span>
         <span class="k">return</span> <span class="n">conf_dict</span></div>
 
 <div class="viewcode-block" id="ConfusionMatrixPlot.make"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ConfusionMatrixPlot.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">out_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">out_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make confusion matrix heatmap for each model, property and fold</span>
 
