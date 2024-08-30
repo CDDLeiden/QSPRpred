@@ -100,13 +100,12 @@ class PCMDataSet(QSPRDataset):
         if not set(self.getProteinKeys()).issubset(
                 set(self.storage.getProperty(self.proteins.idProp))
         ):
+            missing_ids = set(self.getProteinKeys()) - set(
+                self.storage.getProperty(self.proteins.idProp))
             logger.warning(
                 f"Not all protein IDs found in storage '{self.storage}' properties: "
                 f"{self.storage.getProperty(self.proteins.idProp)}. Missing the"
-                f" following protein IDs: {
-                set(self.getProteinKeys())
-                - set(self.storage.getProperty(self.proteins.idProp))
-                }"
+                f" following protein IDs: {missing_ids}"
             )
 
     def getProteinKeys(self) -> list[str]:
