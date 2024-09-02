@@ -22,10 +22,19 @@ class ExcThread(Thread):
     """Thread that can catch exceptions from the target function."""
 
     def __init__(self, *args, **kwargs):
+        """Initialize the thread.
+        
+        Args:
+            args:
+                Arguments to pass to the `Thread` constructor.
+            kwargs:
+                Keyword arguments to pass to the `Thread` constructor.
+        """
         super().__init__(*args, **kwargs)
         self.bucket = queue.Queue()
 
     def run(self):
+        """Run the thread and catch exceptions."""
         try:
             super().run()
         except Exception:
@@ -52,13 +61,20 @@ class BenchmarkRunner:
     Attributes:
         settings (BenchmarkSettings):
             Benchmark settings.
+        parallelGeneratorCPU (ParallelGenerator):
+            Parallel generator for CPU replicas.
         nProc (int):
             Number of processes to use.
         resultsFile (str):
             Path to the results file.
         dataDir (str):
             Path to the directory to store data.
-
+        nRuns (int):
+            Total number of benchmarking runs.
+        lock_data_t (Any):
+            Lock for data set operations.
+        lock_report_t (Any):
+            Lock for final report file operations.           
     """
 
     # default locks for threads

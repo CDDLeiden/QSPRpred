@@ -48,6 +48,9 @@ class Replica(JSONSerializable):
         results (pd.DataFrame):
             Results from the replica. Only available after
             `runAssessment` has been called.
+        model (QSPRModel):
+            Model to use for the replica. This is a deep copy of the model
+            provided in the constructor.
     """
 
     _notJSON = JSONSerializable._notJSON + ["ds", "results", "model"]
@@ -65,6 +68,31 @@ class Replica(JSONSerializable):
             assessors: list[ModelAssessor],
             random_seed: int,
     ):
+        """ Initializes the replica.
+        
+        Args:
+            idx (int):
+                Index of the replica. This is not an identifier, but rather a number
+                that indicates the order of the replica in the benchmarking run.
+            name (str):
+                Name of the replica.
+            data_source (DataSource):
+                Data source to use.
+            descriptors (list[DescriptorSet]):
+                Descriptor sets to use.
+            target_props (list[TargetProperty]):
+                Target properties to use.
+            prep_settings (DataPrepSettings):
+                Data preparation settings to use.
+            model (QSPRModel):
+                Model to use for the replica.
+            optimizer (HyperparameterOptimization):
+                Hyperparameter optimizer to use.
+            assessors (list[ModelAssessor]):
+                Model assessors to use.
+            random_seed (int):
+                Random seed to use for all random operations withing the replica.
+        """
         self.idx = idx
         self.name = name
         self.dataSource = data_source

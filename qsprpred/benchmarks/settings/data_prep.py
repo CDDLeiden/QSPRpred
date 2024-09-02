@@ -15,8 +15,6 @@ class DataPrepSettings:
             Data filters to use.
         split (DataSplit):
             Data split to use.
-        smiles_standardizer (str or callable):
-            Standardizer to use for SMILES strings.
         feature_filters (list):
             Feature filters to use.
         feature_standardizer (SKLearnStandardizer):
