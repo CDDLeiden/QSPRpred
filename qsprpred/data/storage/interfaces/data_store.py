@@ -8,7 +8,11 @@ class DataStorage(JSONSerializable, ABC):
 
     @abstractmethod
     def save(self) -> str:
-        """Save current state to storage and return the path to the serialized file."""
+        """Save current state to storage and return the path to the serialized file.
+        
+        Returns:
+            str: The path to the serialized file.
+        """
 
     @abstractmethod
     def reload(self):
@@ -24,4 +28,7 @@ class DataStorage(JSONSerializable, ABC):
         """Get the absolute path to the metadata file that describes how the
         persisted data can be accessed. This can be used to load the object
         back from storage using the `fromFile` class method.
+        
+        Returns:
+            str: The absolute path to the metadata file.
         """

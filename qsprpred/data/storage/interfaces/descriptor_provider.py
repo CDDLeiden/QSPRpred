@@ -10,6 +10,11 @@ class DescriptorProvider(ABC):
     @property
     @abstractmethod
     def descriptorSets(self) -> list[DescriptorSet]:
+        """Get the descriptor sets that are currently in the storage.
+        
+        Returns:
+            a `list` of descriptor sets
+        """
         pass
 
     @abstractmethod
@@ -17,12 +22,17 @@ class DescriptorProvider(ABC):
             self,
             descriptors: list[DescriptorSet | str],
     ):
+        """Drop descriptor sets from the storage.
+        
+        Args:
+            descriptors:
+                The descriptor sets to drop.
+        """
         pass
 
     @abstractmethod
     def addDescriptors(self, descriptors: DescriptorSet, *args, **kwargs):
-        """
-        Add descriptors to the dataset.
+        """Add descriptors to the dataset.
 
         Args:
             descriptors (list[DescriptorSet]): The descriptors to add.
@@ -32,8 +42,7 @@ class DescriptorProvider(ABC):
 
     @abstractmethod
     def getDescriptors(self) -> pd.DataFrame:
-        """
-        Get the table of descriptors that are currently in the storage.
+        """Get the table of descriptors that are currently in the storage.
 
         Returns:
             a pd.DataFrame with the descriptors
@@ -41,8 +50,7 @@ class DescriptorProvider(ABC):
 
     @abstractmethod
     def getDescriptorNames(self) -> list[str]:
-        """
-        Get the names of the descriptors that are currently in the storage.
+        """Get the names of the descriptors that are currently in the storage.
 
         Returns:
             a `list` of descriptor names

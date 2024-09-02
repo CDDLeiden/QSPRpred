@@ -25,62 +25,72 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
 
     @property
     def smiles(self) -> Generator[str, None, None]:
+        """Generator of SMILES strings of all molecules in storage."""
         return (x.smiles for x in self)
 
     @abstractmethod
     def get_mol(self, mol_id: str) -> StoredMol:
-        """
-        Get a molecule from the store using its ID.
+        """Get a molecule from the store using its ID.
 
-        :param mol_id: identifier of the molecule to search
-        :return: instance of `StoredMol`
+        Args:
+            mol_id (str): identifier of the molecule to search
+        
+        Returns:
+            StoredMol: instance of the molecule
         """
 
     @abstractmethod
     def add_mols(self, smiles: Iterable[str], props: dict[str, list] | None = None,
                  *args, **kwargs) -> list[StoredMol]:
-        """
-        Add a molecule to the store. This method should not perform any standardization or identifier calculation. The `add_mol_from_smiles` method should be used instead if automatic standardization and identification should be performed before storage.
+        """Add a molecule to the store. 
+        
+        This method should not perform any standardization or identifier calculation.
+        The `add_mol_from_smiles` method should be used instead if automatic 
+        standardization and identification should be performed before storage.
 
-        :param smiles: molecule to add as SMILES
-        :param mol_id: identifier of the molecule to add as determined by `self.identifier`
-        :param metadata: additional metadata to store with the molecule
-        :return: `StoredMol` instance of the added molecule
+        Args:
+            smiles (Iterable[str]): molecules to add as SMILES
+            props (dict, optional): additional metadata to store with the molecules
+            args: Additional positional arguments to be passed to each molecule.
+            kwargs: Additional keyword arguments to be passed to each molecule.
 
-        :raises: `ValueError` if the molecule cannot be added
+        Returns:
+            list[StoredMol]: instances of the added molecules
+            
+        Raises:
+            ValueError: if the molecules cannot be added
         """
 
     @abstractmethod
-    def remove_mol(self, mol_id):
-        """
-        Remove a molecule from the store.
-
-        :param mol_id: identifier of the molecule to remove
-        :return:
+    def remove_mol(self, mol_id: str):
+        """Remove a molecule from the store.
+        
+        Args:
+            mol_id (str): identifier of the molecule to remove
         """
 
     @abstractmethod
     def get_mol_ids(self) -> tuple[str]:
-        """
-        Get all molecule IDs in the store.
+        """Get all molecule IDs in the store.
 
-        :return: list of molecule IDs
+        Returns:
+            tuple[str]: molecule IDs
         """
 
     @abstractmethod
     def get_mol_count(self):
-        """
-        Get the number of molecules in the store.
+        """Get the number of molecules in the store.
 
-        :return: number of molecules
+        Returns:
+            (int) number of molecules
         """
 
     @abstractmethod
     def iter_mols(self) -> Generator[StoredMol, None, None]:
-        """
-        Iterate over all molecules in the store.
+        """Iterate over all molecules in the store.
 
-        :return: iterator over `StoredMol` instances
+        Returns:
+            iterator over `StoredMol` instances
         """
 
     @abstractmethod
@@ -90,13 +100,15 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
             on_props: list | None = None,
             chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
     ) -> Generator[list[StoredMol | str | Chem.Mol | pd.DataFrame], None, None]:
-        """
-        Iterate over chunks of molecules across the store.
+        """Iterate over chunks of molecules across the store.
 
         Args:
             size (int, optional): The size of the chunks.
             on_props (list, optional): The properties to include in the chunks.
             chunk_type (str, optional): The type of chunks to yield.
+            
+        Returns:
+            an iterable of lists of stored molecules
         """
 
     @abstractmethod
@@ -120,6 +132,9 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
             func_kwargs (dict, optional): The keyword arguments of the function.
             on_props (list, optional): The properties to apply the function on.
             chunk_type (str, optional): The type of chunks to yield.
+            
+        Returns:
+            A generator that yields the results of the function applied to each chunk.
         """
 
     def __len__(self):

@@ -71,6 +71,9 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
             subset (list): The list of property names to include in the subset.
             ids (list, optional): The IDs of the entries to include in the subset.
             name (str, optional): The name of the new storage.
+            
+        Returns:
+            PropertyStorage: The subset of the storage.
         """
 
     @abstractmethod
@@ -87,10 +90,10 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
             size: int | None = None,
             on_props: list | None = None
     ) -> Generator[list[Any], None, None]:
-        """
-        Iterate over chunks of molecules across the store.
+        """Iterate over chunks of molecules across the store.
 
-        :return: an iterable of lists of stored molecules
+        Returns:
+            an iterable of lists of stored molecules
         """
 
     @abstractmethod
@@ -113,6 +116,9 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
             func_kwargs (dict, optional): The keyword arguments of the function.
             on_props (list, optional): The properties to apply the function on.
             as_df (bool, optional): Provide properties as a DataFrame to the function.
+            
+        Returns:
+            A generator that yields the results of the function applied to each chunk.
         """
 
     @abstractmethod

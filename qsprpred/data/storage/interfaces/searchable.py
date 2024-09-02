@@ -8,8 +8,7 @@ class SMARTSSearchable(ABC):
             self,
             patterns: list[str],
     ) -> "SMARTSSearchable":
-        """
-        Search the molecules within this `MoleculeDataSet` with SMARTS patterns.
+        """Search the molecules within this `MoleculeDataSet` with SMARTS patterns.
 
         Args:
             patterns:
