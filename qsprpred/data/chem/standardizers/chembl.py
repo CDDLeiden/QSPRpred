@@ -7,7 +7,7 @@ from .base import ChemStandardizer
 
 def chembl_smi_standardizer(
         smi: str, isomeric_smiles: bool = True, sanitize: bool = True
-) -> str:
+) -> str | None:
     """Standardize SMILES using ChEMBL standardizer.
 
     Args:
@@ -57,25 +57,52 @@ class ChemblStandardizer(ChemStandardizer):
         self.isomericSmiles = isomeric_smiles
         self.sanitize = sanitize
 
-    def convert_smiles(self, smiles):
+    def convert_smiles(self, smiles: str) -> tuple[str | None, str]:
+        """Standardize SMILES using the ChEMBL standardizer.
+        
+        Args:
+            smiles (str): SMILES to be standardized
+        
+        Returns:
+            (tuple[str | None, str]): a tuple where the first element is the 
+                standardized SMILES and the second element is the original SMILES
+        """
         return chembl_smi_standardizer(
             smiles, isomeric_smiles=self.isomericSmiles, sanitize=self.sanitize
         ), smiles
 
     @property
-    def settings(self):
+    def settings(self) -> dict:
+        """Settings of the standardizer.
+        
+        Returns:
+            dict: settings of the standardizer
+        """
         return {
             "isomeric_smiles": self.isomericSmiles,
             "sanitize": self.sanitize,
         }
 
-    def get_id(self):
+    def get_id(self) -> str:
+        """Return the unique identifier of the standardizer.
+        
+        Returns:
+            str: unique identifier of the standardizer
+        """
         return ("ChEMBLStandardizer"
                 "~isomeric_smiles={self.isomeric_smiles}"
                 "~sanitize={self.sanitize}")
 
     @classmethod
-    def from_settings(cls, settings: dict):
+    def from_settings(cls, settings: dict) -> "ChemblStandardizer":
+        """Create a standardizer from settings.	
+        
+        Args:
+            settings (dict): Settings of the standardizer
+            
+        Returns:
+            ChemblStandardizer: The standardizer created from settings
+        """
         return cls(
             isomeric_smiles=settings["isomeric_smiles"],
             sanitize=settings["sanitize"],
