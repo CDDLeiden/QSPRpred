@@ -166,7 +166,7 @@ class Replica(JSONSerializable):
         """
         return f"{self.name}_{self.randomSeed}"
 
-    def initData(self, reload=False):
+    def initData(self, reload: bool = False):
         """Initializes the data set for this replica.
 
         Args:

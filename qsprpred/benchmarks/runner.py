@@ -206,7 +206,7 @@ class BenchmarkRunner:
             self,
             generator: ParallelGenerator,
             replicas: Generator[Replica, None, None],
-            raise_errors=False,
+            raise_errors: bool = False,
     ):
         """Processes replicas in parallel using the given `ParallelGenerator`.
         Each generated replica is run by the `runReplica` method, which
@@ -249,7 +249,7 @@ class BenchmarkRunner:
             else:
                 logger.debug(f"Return success from replica: {result}")
 
-    def run(self, raise_errors=False) -> pd.DataFrame:
+    def run(self, raise_errors: bool = False) -> pd.DataFrame:
         """Runs the benchmarking experiments.
 
         Args:
