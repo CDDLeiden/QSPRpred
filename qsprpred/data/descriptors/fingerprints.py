@@ -17,37 +17,66 @@ class Fingerprint(DescriptorSet, ABC):
 
     Attributes:
         usedBits (list): list of bits of the fingerprint currently being used
+        idProp (str): Name of the property to use as the index.
+        _notJSON (list[str]): List of attributes that should not be serialized.
     """
 
     def __init__(self, used_bits: list[int] | None = None):
+        """Initialize the fingerprint.
+        
+        Args:
+            used_bits (list): list of bits of the fingerprint currently being used
+        """
         super().__init__()
         self.usedBits = used_bits or list(range(len(self)))
 
     @property
     def usedBits(self) -> list[int] | None:
+        """List of bits of the fingerprint currently being used."""
         return self._usedBits
 
     @usedBits.setter
     def usedBits(self, value: list[int]):
+        """Set the list of bits of the fingerprint currently being used.
+        
+        Args:
+            value (list): list of bits of the fingerprint currently being used
+        """
         self._usedBits = sorted(value)
 
     @property
     def descriptors(self) -> list[str]:
+        """list of descriptors."""
         return [f"{self}_{i}" for i in self.usedBits]
 
     @descriptors.setter
     def descriptors(self, value: list[str]):
+        """Set the list of descriptors
+        
+        Args:
+            value (list): list of descriptors
+        """
         self.usedBits = [int(x.split("_")[-1]) for x in sorted(value)]
 
     @property
     def isFP(self):
+        """Whether the descriptor is a fingerprint."""
         return True
 
     @property
     def dtype(self):
+        """Data type of the descriptor."""
         return bool
 
     def prepMols(self, mols: list[str | Mol]) -> list[Mol]:
+        """Prepare the molecules by adding hydrogens.
+        
+        Args:
+            mols (list): list of SMILES or RDKit molecules
+            
+        Returns:
+            list of RDKit molecules
+        """
         return [Chem.AddHs(mol) for mol in self.iterMols(mols)]
 
     def __call__(
@@ -86,9 +115,25 @@ class Fingerprint(DescriptorSet, ABC):
 
 
 class MorganFP(Fingerprint):
-    """Morgan fingerprint."""
+    """Morgan fingerprint.
+    
+    Attributes:
+        radius (int): radius of the fingerprint
+        nBits (int): number of bits in the fingerprint
+        kwargs (dict): additional keyword arguments
+        usedBits (list): list of bits of the fingerprint currently being used
+        idProp (str): Name of the property to use as the index.
+        _notJSON (list[str]): List of attributes that should not be serialized.
+    """
 
     def __init__(self, radius=2, nBits=2048, **kwargs):
+        """Initialize the Morgan fingerprint.
+        
+        Args:
+            radius (int): radius of the fingerprint
+            nBits (int): number of bits in the fingerprint
+            kwargs (dict): additional keyword arguments
+        """
         super().__init__(used_bits=list(range(nBits)))
         self.radius = radius
         self.nBits = nBits
@@ -97,6 +142,17 @@ class MorganFP(Fingerprint):
     def getDescriptors(
             self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
+        """Calculate the Morgan fingerprints for the input molecules.
+        
+        Args:
+            mols (list): list of RDKit molecules
+            props (dict): dictionary of properties
+            *args: positional arguments
+            **kwargs: keyword arguments
+            
+        Returns:
+            np.ndarray of shape (n_mols, n_descriptors)
+        """
         convertFP = DataStructs.ConvertToNumpyArray
         ret = np.zeros((len(mols), len(self)))
         for idx, mol in enumerate(mols):
@@ -116,11 +172,28 @@ class MorganFP(Fingerprint):
 
 
 class RDKitMACCSFP(Fingerprint):
-    """RDKits implementation of MACCS keys fingerprint."""
+    """RDKits implementation of MACCS keys fingerprint.
+    
+    Attributes:
+        usedBits (list): list of bits of the fingerprint currently being used
+        idProp (str): Name of the property to use as the index.
+        _notJSON (list[str]): List of attributes that should not be serialized.
+    """
 
     def getDescriptors(
             self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
+        """Calculate the MACCS keys fingerprints for the input molecules.
+        
+        Args:
+            mols (list): list of RDKit molecules
+            props (dict): dictionary of properties
+            *args: positional arguments
+            **kwargs: keyword arguments
+        
+        Returns:
+            np.ndarray of shape (n_mols, n_descriptors)
+        """
         convertFP = DataStructs.ConvertToNumpyArray
 
         ret = np.zeros((len(mols), len(self)))
@@ -140,7 +213,23 @@ class RDKitMACCSFP(Fingerprint):
 
 
 class MaccsFP(Fingerprint):
+    """MACCS keys fingerprint.
+    
+    Attributes:
+        nBits (int): number of bits in the fingerprint
+        kwargs (dict): additional keyword arguments
+        usedBits (list): list of bits of the fingerprint currently being used
+        idProp (str): Name of the property to use as the index.
+        _notJSON (list[str]): List of attributes that should not be serialized.
+    """
+    
     def __init__(self, nBits=167, **kwargs):
+        """Initialize the MACCS keys fingerprint.	
+        
+        Args:
+            nBits (int): number of bits in the fingerprint
+            kwargs (dict): additional keyword arguments
+        """
         super().__init__(used_bits=list(range(nBits)))
         self.nBits = nBits
         self.kwargs = kwargs
@@ -148,6 +237,17 @@ class MaccsFP(Fingerprint):
     def getDescriptors(
             self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
+        """Calculate the MACCS keys fingerprints for the input molecules.
+        
+        Args:
+            mols (list): list of RDKit molecules
+            props (dict): dictionary of properties
+            *args: positional arguments
+            **kwargs: keyword arguments
+        
+        Returns:
+            np.ndarray of shape (n_mols, n_descriptors)
+        """
         convertFP = DataStructs.ConvertToNumpyArray
         ret = np.zeros((len(mols), len(self)))
         for idx, mol in enumerate(mols):
@@ -165,7 +265,23 @@ class MaccsFP(Fingerprint):
 
 
 class AvalonFP(Fingerprint):
+    """Avalon fingerprint.
+    
+    Attributes:
+        nBits (int): number of bits in the fingerprint
+        kwargs (dict): additional keyword arguments
+        usedBits (list): list of bits of the fingerprint currently being used
+        idProp (str): Name of the property to use as the index.
+        _notJSON (list[str]): List of attributes that should not be serialized.
+    """
+    
     def __init__(self, nBits=1024, **kwargs):
+        """Initialize the Avalon fingerprint.
+        
+        Args:
+            nBits (int): number of bits in the fingerprint
+            kwargs (dict): additional keyword arguments
+        """
         super().__init__(used_bits=list(range(nBits)))
         self.nBits = nBits
         self.kwargs = kwargs
@@ -173,6 +289,17 @@ class AvalonFP(Fingerprint):
     def getDescriptors(
             self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
+        """Calculate the Avalon fingerprints for the input molecules.
+        
+        Args:
+            mols (list): list of RDKit molecules
+            props (dict): dictionary of properties
+            *args: positional arguments
+            **kwargs: keyword arguments
+        
+        Returns:
+            np.ndarray of shape (n_mols, n_descriptors)
+        """
         convertFP = DataStructs.ConvertToNumpyArray
         ret = np.zeros((len(mols), len(self)))
         for idx, mol in enumerate(mols):
@@ -190,7 +317,22 @@ class AvalonFP(Fingerprint):
 
 
 class TopologicalFP(Fingerprint):
+    """Topological torsion fingerprint.
+    
+    Attributes:
+        nBits (int): number of bits in the fingerprint
+        kwargs (dict): additional keyword arguments
+        usedBits (list): list of bits of the fingerprint currently being used
+        idProp (str): Name of the property to use as the index.
+        _notJSON (list[str]): List of attributes that should not be serialized.
+    """
     def __init__(self, nBits=2048, **kwargs):
+        """Initialize the topological torsion fingerprint.
+        
+        Args:
+            nBits (int): number of bits in the fingerprint
+            kwargs (dict): additional keyword arguments
+        """
         super().__init__(used_bits=list(range(nBits)))
         self.nBits = nBits
         self.kwargs = kwargs
@@ -198,6 +340,17 @@ class TopologicalFP(Fingerprint):
     def getDescriptors(
             self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
+        """Calculate the topological torsion fingerprints for the input molecules.
+        
+        Args:
+            mols (list): list of RDKit molecules
+            props (dict): dictionary of properties
+            *args: positional arguments
+            **kwargs: keyword arguments
+        
+        Returns:
+            np.ndarray of shape (n_mols, n_descriptors)
+        """
         convertFP = DataStructs.ConvertToNumpyArray
         ret = np.zeros((len(mols), len(self)))
         for idx, mol in enumerate(mols):
@@ -217,7 +370,22 @@ class TopologicalFP(Fingerprint):
 
 
 class AtomPairFP(Fingerprint):
+    """Atom pair fingerprint.
+    
+    Attributes:
+        nBits (int): number of bits in the fingerprint
+        kwargs (dict): additional keyword arguments
+        usedBits (list): list of bits of the fingerprint currently being used
+        idProp (str): Name of the property to use as the index.
+        _notJSON (list[str]): List of attributes that should not be serialized.
+    """
     def __init__(self, nBits=2048, **kwargs):
+        """Initialize the atom pair fingerprint.
+        
+        Args:
+            nBits (int): number of bits in the fingerprint
+            kwargs (dict): additional keyword arguments
+        """
         super().__init__(used_bits=list(range(nBits)))
         self.nBits = nBits
         self.kwargs = kwargs
@@ -225,6 +393,17 @@ class AtomPairFP(Fingerprint):
     def getDescriptors(
             self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
+        """Calculate the atom pair fingerprints for the input molecules.
+        
+        Args:
+            mols (list): list of RDKit molecules
+            props (dict): dictionary of properties
+            *args: positional arguments
+            **kwargs: keyword arguments
+            
+        Returns:
+            np.ndarray of shape (n_mols, n_descriptors)
+        """
         convertFP = DataStructs.ConvertToNumpyArray
         ret = np.zeros((len(mols), len(self)))
         for idx, mol in enumerate(mols):
@@ -244,7 +423,28 @@ class AtomPairFP(Fingerprint):
 
 
 class RDKitFP(Fingerprint):
+    """RDKit fingerprint.
+    
+    This is a wrapper around RDKit's RDKFingerprint function.
+    
+    Attributes:
+        minPath (int): minimum path length
+        maxPath (int): maximum path length
+        nBits (int): number of bits in the fingerprint
+        kwargs (dict): additional keyword arguments
+        usedBits (list): list of bits of the fingerprint currently being used
+        idProp (str): Name of the property to use as the index.
+        _notJSON (list[str]): List of attributes that should not be serialized
+    """
     def __init__(self, minPath=1, maxPath=7, nBits=2048, **kwargs):
+        """Initialize the RDKit fingerprint.
+        
+        Args:
+            minPath (int): minimum path length
+            maxPath (int): maximum path length
+            nBits (int): number of bits in the fingerprint
+            kwargs (dict): additional keyword arguments
+        """
         super().__init__(used_bits=list(range(nBits)))
         self.minPath = minPath
         self.maxPath = maxPath
@@ -254,6 +454,17 @@ class RDKitFP(Fingerprint):
     def getDescriptors(
             self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
+        """Calculate the RDKit fingerprints for the input molecules.	
+        
+        Args:
+            mols (list): list of RDKit molecules
+            props (dict): dictionary of properties
+            *args: positional arguments
+            **kwargs: keyword arguments
+        
+        Returns:
+            np.ndarray of shape (n_mols, n_descriptors)
+        """
         convertFP = DataStructs.ConvertToNumpyArray
         ret = np.zeros((len(mols), len(self)))
         for idx, mol in enumerate(mols):
@@ -277,7 +488,23 @@ class RDKitFP(Fingerprint):
 
 
 class PatternFP(Fingerprint):
+    """Pattern fingerprint.
+    
+    Attributes:
+        nBits (int): number of bits in the fingerprint
+        kwargs (dict): additional keyword arguments
+        usedBits (list): list of bits of the fingerprint currently being used
+        idProp (str): Name of the property to use as the index.
+        _notJSON (list[str]): List of attributes that should not be serialized
+    """
+    
     def __init__(self, nBits=2048, **kwargs):
+        """Initialize the pattern fingerprint.	
+        
+        Args:
+            nBits (int): number of bits in the fingerprint
+            kwargs (dict): additional keyword arguments
+        """
         super().__init__(used_bits=list(range(nBits)))
         self.nBits = nBits
         self.kwargs = kwargs
@@ -285,6 +512,17 @@ class PatternFP(Fingerprint):
     def getDescriptors(
             self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
+        """Calculate the pattern fingerprints for the input molecules.
+        
+        Args:
+            mols (list): list of RDKit molecules
+            props (dict): dictionary of properties
+            *args: positional arguments
+            **kwargs: keyword arguments
+        
+        Returns:
+            np.ndarray of shape (n_mols, n_descriptors)
+        """
         convertFP = DataStructs.ConvertToNumpyArray
 
         ret = np.zeros((len(mols), len(self)))
@@ -304,7 +542,27 @@ class PatternFP(Fingerprint):
 
 
 class LayeredFP(Fingerprint):
+    """Layered fingerprint.
+    
+    Attributes:
+        minPath (int): minimum path length
+        maxPath (int): maximum path length
+        nBits (int): number of bits in the fingerprint
+        kwargs (dict): additional keyword arguments
+        usedBits (list): list of bits of the fingerprint currently being used
+        idProp (str): Name of the property to use as the index.
+        _notJSON (list[str]): List of attributes that should not be serialized
+    """
+    
     def __init__(self, minPath=1, maxPath=7, nBits=2048, **kwargs):
+        """Initialize the layered fingerprint.
+        
+        Args:
+            minPath (int): minimum path length
+            maxPath (int): maximum path length
+            nBits (int): number of bits in the fingerprint
+            kwargs (dict): additional keyword arguments
+        """
         super().__init__(used_bits=list(range(nBits)))
         self.minPath = minPath
         self.maxPath = maxPath
@@ -314,6 +572,14 @@ class LayeredFP(Fingerprint):
     def getDescriptors(
             self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
+        """Calculate the layered fingerprints for the input molecules.
+        
+        Args:
+            mols (list): list of RDKit molecules
+            props (dict): dictionary of properties
+            *args: positional arguments
+            **kwargs: keyword arguments
+        """
         convertFP = DataStructs.ConvertToNumpyArray
         ret = np.zeros((len(mols), len(self)))
         for idx, mol in enumerate(mols):
