@@ -15,24 +15,34 @@ from ...logs import logger
 
 
 class MoleculeClusters(MolProcessorWithID, ABC):
-    """
-    Abstract base class for clustering molecules.
+    """Abstract base class for clustering molecules.
 
     Attributes:
         nClusters (int): number of clusters
+        idProp (str):                 
+            Name of the property that contains the molecule's unique identifier.
+            Defaults to "QSPRID".
     """
 
     def __call__(self, mols: list[str | Mol | StoredMol],
                  props: dict[str, list] | None = None,
                  *args, **kwargs) -> pd.Series:
-        """
-        Calculate the clusters for a list of  molecules.
+        """Calculate the clusters for a list of molecules.
 
         Args:
             mol (str | Mol): SMILES or RDKit molecule to calculate the cluster for.
+            props (dict): 
+                A dictionary of properties related to the molecules to process. The
+                dictionary uses property names as keys and lists of values as values.
+                Each value in the list corresponds to a molecule in the list of
+                molecules. Thus, the length of the list of values for each property
+                can be expected to be the same as the length of the list of molecules.
+            args: Additional positional arguments.
+            kwargs: Additional keyword arguments.
 
         Returns:
-            list of cluster index for each molecule
+            pd.Series: A pandas series with the cluster index as the value and the
+                molecule's unique identifier as the index.
         """
         smiles = []
         ids = []
@@ -54,15 +64,15 @@ class MoleculeClusters(MolProcessorWithID, ABC):
 
     @abstractmethod
     def get_clusters(self, smiles_list: list[str]) -> dict:
-        """
-        Cluster molecules.
+        """Cluster molecules.
 
         Args:
             smiles_list (list): list of molecules to be clustered
 
         Returns:
-            clusters (dict): dictionary of clusters, where keys are cluster indices
-                and values are indices of molecules
+            clusters (dict): 
+                dictionary of clusters, where keys are cluster indices and values
+                are indices of molecules
         """
 
     def _set_nClusters(self, N: int) -> None:
@@ -75,6 +85,7 @@ class MoleculeClusters(MolProcessorWithID, ABC):
             )
 
     def supportsParallel(self) -> bool:
+        """Whether the processor supports parallel processing."""
         return False
 
     @abstractmethod
@@ -83,8 +94,7 @@ class MoleculeClusters(MolProcessorWithID, ABC):
 
 
 class RandomClusters(MoleculeClusters):
-    """
-    Randomly cluster molecules.
+    """Randomly cluster molecules.
 
     Attributes:
         seed (int): random seed
@@ -96,20 +106,27 @@ class RandomClusters(MoleculeClusters):
             self, seed: int = 42, n_clusters: int | None = None,
             id_prop: str | None = None
     ):
+        """Initialize the RandomClusters
+        
+        Args:
+            seed (int): random seed
+            n_clusters (int): number of clusters
+            id_prop (str): name of the property to be used as ID
+        """
         super().__init__(id_prop=id_prop)
         self.seed = seed
         self.nClusters = n_clusters
 
     def get_clusters(self, smiles_list: list[str]) -> dict:
-        """
-        Cluster molecules.
+        """Cluster molecules.
 
         Args:
             smiles_list (list): list of molecules to be clustered
 
         Returns:
-            clusters (dict): dictionary of clusters, where keys are cluster indices \
-                and values are indices of molecules
+            clusters (dict): 
+                dictionary of clusters, where keys are cluster indices and values are
+                indices of molecules
         """
 
         self._set_nClusters(len(smiles_list))
@@ -129,8 +146,7 @@ class RandomClusters(MoleculeClusters):
 
 
 class ScaffoldClusters(MoleculeClusters):
-    """
-    Cluster molecules based on scaffolds.
+    """Cluster molecules based on scaffolds.
 
     Attributes:
         scaffold (Scaffold): scaffold generator
@@ -140,21 +156,26 @@ class ScaffoldClusters(MoleculeClusters):
     def __init__(
             self, scaffold: Scaffold = BemisMurckoRDKit(), id_prop: str | None = None
     ):
+        """Initialize the ScaffoldClusters
+        
+        Args:
+            scaffold (Scaffold): scaffold generator
+            id_prop (str): name of the property to be used as ID
+        """
         super().__init__(id_prop=id_prop)
         self.scaffold = scaffold
 
     def get_clusters(self, smiles_list: list[str]) -> dict:
-        """
-        Cluster molecules.
+        """Cluster molecules.
 
         Args:
             smiles_list (list): list of molecules to be clustered
 
         Returns:
-            clusters (dict): dictionary of clusters, where keys are cluster indices
-                and values are indices of molecules
+            clusters (dict): 
+                dictionary of clusters, where keys are cluster indices and values are 
+                indices of molecules
         """
-
         # Generate scaffolds for each molecule
         from qsprpred.data import MoleculeTable
         mt = MoleculeTable.fromDF(
@@ -188,19 +209,25 @@ class FPSimilarityClusters(MoleculeClusters):
             fp_calculator: Fingerprint = MorganFP(radius=3, nBits=2048),
             id_prop: str | None = None,
     ) -> None:
+        """Initialize the FPSimilarityClusters
+        
+        Args:
+            fp_calculator (Fingerprint): fingerprint calculator
+            id_prop (str): name of the property to be used as ID
+        """
         super().__init__(id_prop=id_prop)
         self.fp_calculator = fp_calculator
 
     def get_clusters(self, smiles_list: list[str]) -> dict:
-        """
-        Cluster a list of SMILES strings based on molecular dissimilarity.
+        """Cluster a list of SMILES strings based on molecular dissimilarity.
 
         Args:
             smiles_list (list): list of SMILES strings to be clustered
 
         Returns:
-            clusters (dict): dictionary of clusters, where keys are cluster indices
-                and values are indices of molecules
+            clusters (dict): 
+                dictionary of clusters, where keys are cluster indices and values are 
+                indices of molecules
         """
 
         # Get fingerprints for each molecule
@@ -234,8 +261,7 @@ class FPSimilarityClusters(MoleculeClusters):
 
 
 class FPSimilarityMaxMinClusters(FPSimilarityClusters):
-    """
-    Cluster molecules based on molecular fingerprint with MaxMin algorithm.
+    """Cluster molecules based on molecular fingerprint with MaxMin algorithm.
 
     Attributes:
         fp_calculator (FingerprintSet): fingerprint calculator
@@ -253,14 +279,22 @@ class FPSimilarityMaxMinClusters(FPSimilarityClusters):
             fp_calculator: Fingerprint = MorganFP(radius=3, nBits=2048),
             id_prop: str | None = None,
     ):
+        """Initialize the FPSimilarityMaxMinClusters	
+        
+        Args:
+            n_clusters (int): number of clusters
+            seed (int): random seed
+            initial_centroids (list): list of indices of initial cluster centroids
+            fp_calculator (Fingerprint): fingerprint calculator
+            id_prop (str): name of the property to be used as ID
+        """
         super().__init__(fp_calculator=fp_calculator, id_prop=id_prop)
         self.nClusters = n_clusters
         self.seed = seed
         self.initialCentroids = initial_centroids
 
     def _get_centroids(self, fps: list) -> list:
-        """
-        Get cluster centroids with MaxMin algorithm.
+        """Get cluster centroids with MaxMin algorithm.
 
         Args:
             fps (list): list of molecular fingerprints
@@ -285,8 +319,7 @@ class FPSimilarityMaxMinClusters(FPSimilarityClusters):
 
 
 class FPSimilarityLeaderPickerClusters(FPSimilarityClusters):
-    """
-    Cluster molecules based on molecular fingerprint with LeaderPicker algorithm.
+    """Cluster molecules based on molecular fingerprint with LeaderPicker algorithm.
 
     Attributes:
         fp_calculator (FingerprintSet): fingerprint calculator
@@ -305,9 +338,7 @@ class FPSimilarityLeaderPickerClusters(FPSimilarityClusters):
         self.fpCalculator = fp_calculator
 
     def _get_centroids(self, fps: list) -> list:
-        """
-        Get cluster centroids with LeaderPicker algorithm.
-        """
+        """Get cluster centroids with LeaderPicker algorithm."""
         picker = rdSimDivPickers.LeaderPicker()
         self.centroid_indices = picker.LazyBitVectorPick(
             fps, len(fps), self.similarityThreshold

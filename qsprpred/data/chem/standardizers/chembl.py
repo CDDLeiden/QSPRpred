@@ -64,8 +64,9 @@ class ChemblStandardizer(ChemStandardizer):
             smiles (str): SMILES to be standardized
         
         Returns:
-            (tuple[str | None, str]): a tuple where the first element is the 
-                standardized SMILES and the second element is the original SMILES
+            (tuple[str | None, str]): 
+                a tuple where the first element is the standardized SMILES and the 
+                second element is the original SMILES
         """
         return chembl_smi_standardizer(
             smiles, isomeric_smiles=self.isomericSmiles, sanitize=self.sanitize

@@ -26,8 +26,9 @@ class CheckSmilesValid(MolProcessorWithID):
             mols (list[StoredMol | str | Mol]): List of molecules to be checked.
             props (dict, optional): Dictionary of properties. Defaults to None.
             args: Additional arguments (not used).
-            kwargs: Additional keyword arguments 
-                (used to set the throw flag, if kwargs["throw"] is True,
+            kwargs: 
+                Additional keyword arguments (used to set the throw flag, if 
+                kwargs["throw"] is True,
             
         Returns:
             Any: A pandas Series where the index is the molecule ID and the value is 
@@ -92,8 +93,9 @@ class ValidationStandardizer(ChemStandardizer):
             smiles (str): SMILES to be checked
         
         Returns:
-            (tuple[str | None, str]): a tuple where the first element is the 
-                standardized SMILES and the second element is the original SMILES
+            (tuple[str | None, str]): 
+                a tuple where the first element is the standardized SMILES and the 
+                second element is the original SMILES
         """
         checks = self.checker([smiles], {"index": [0]})
         if not checks[0]:

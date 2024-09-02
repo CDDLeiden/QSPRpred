@@ -11,7 +11,8 @@ class ChemStandardizer(ABC):
             smiles (str): SMILES to be converted
         
         Returns:
-            (tuple[str | None, str]): a tuple where the first element is the 
+            (tuple[str | None, str]): 
+                a tuple where the first element is the 
                 standardized SMILES and the second element is the original SMILES
         """
         return self.convert_smiles(smiles)
@@ -24,7 +25,8 @@ class ChemStandardizer(ABC):
             smiles (str): SMILES to be converted
             
         Returns:
-            (tuple[str | None, str]): a tuple where the first element is the 
+            (tuple[str | None, str]): 
+                a tuple where the first element is the 
                 standardized SMILES and the second element is the original SMILES
         """
         pass

@@ -7,16 +7,16 @@ from .base import ChemStandardizer
 def standardize_mol(mol) -> str | None:
     """Standardizes SMILES and removes fragments
     
-    Standardizes SMILES using RDKit MolStandardize to 
-        disconnect metals, normalize, remove salts (largest fragment), and uncharge.
-        Followed by a second round of disconnecting metals and normalizing.
-        Finally, the SMILES is canonicalized.
+    Standardizes SMILES using RDKit MolStandardize to disconnect metals, 
+    normalize, remove salts (largest fragment), and uncharge. Followed by a second 
+    round of disconnecting metals and normalizing. Finally, the SMILES is canonicalized.
 
     Args:
         mol: RDKit molecule object
         
     Returns:
-        str: Standardized SMILES or None if SMILES could not be standardized or
+        str: 
+            Standardized SMILES or None if SMILES could not be standardized or
             if SMILES does not contain carbon or contains salts after standardization
     """
 
@@ -63,7 +63,8 @@ class NaiveStandardizer(ChemStandardizer):
             smiles (str): SMILES to be standardized
         
         Returns:
-            (tuple[str | None, str]): a tuple where the first element is the 
+            (tuple[str | None, str]): 
+                a tuple where the first element is the 
                 standardized SMILES and the second element is the original SMILES
         """
         mol = Chem.MolFromSmiles(smiles)

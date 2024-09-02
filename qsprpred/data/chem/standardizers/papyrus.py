@@ -45,26 +45,30 @@ class PapyrusStandardizer(ChemStandardizer):
             canonize (bool, optional): Canonicalize SMILES.
             mixture_handling (Literal["keep_largest", "filter", "keep"], optional):
                 How to handle mixtures. Defaults to "keep_largest".
-            remove_additional_salts (bool, optional): Removes a custom set of fragments
-                if present in the molecule object.
-            remove_additional_metals (bool, optional): Removes metal fragments if 
-                present in the molecule object. Ignored if remove_additional_salts is 
-                set to False.
+            remove_additional_salts (bool, optional): 
+                Removes a custom set of fragments if present in the molecule object.
+            remove_additional_metals (bool, optional): 
+                Removes metal fragments if present in the molecule object. 
+                Ignored if remove_additional_salts is set to False.
             filter_inorganic (bool, optional): Filter inorganic molecules.
             filter_non_small_molecule (bool, optional): Filter non-small molecules.
-            small_molecule_min_mw (float, optional): Minimum molecular weight of small
-                molecules.
-            small_molecule_max_mw (float, optional): Maximum molecular weight of small
-                molecules.
+            small_molecule_min_mw (float, optional): 
+                Minimum molecular weight of small molecules.
+            small_molecule_max_mw (float, optional): 
+                Maximum molecular weight of small molecules.
             canonicalize_tautomer (bool, optional): Canonicalize tautomers.
-            tautomer_max_tautomers (int, optional): Maximum number of tautomers to 
-                consider by the tautomer search algorithm (<2^32).
-            extra_organic_atoms (list, optional): Extra organic atoms to consider in
-                addition to the default set (Papyrus_standardizer.ORGANIC_ATOMS).
-            extra_metals (list, optional): Extra metals to consider in addition to the
-                default set (Papyrus_standardizer.METALS).
-            extra_salts (list, optional): Extra salts to consider in addition to the
-                default set (Papyrus_standardizer.SALTS).
+            tautomer_max_tautomers (int, optional): 
+                Maximum number of tautomers to consider by the tautomer search 
+                algorithm (<2^32).
+            extra_organic_atoms (list, optional): 
+                Extra organic atoms to consider in addition to the default set 
+                (Papyrus_standardizer.ORGANIC_ATOMS).
+            extra_metals (list, optional): 
+                Extra metals to consider in addition to the default set 
+                (Papyrus_standardizer.METALS).
+            extra_salts (list, optional): 
+                Extra salts to consider in addition to the default set 
+                (Papyrus_standardizer.SALTS).
             uncharge (bool, optional): Uncharge molecules.            
         """
         
@@ -123,8 +127,9 @@ class PapyrusStandardizer(ChemStandardizer):
             verbose (bool, optional): Print verbose output. Defaults to False.
         
         Returns:
-            tuple[str | None, str]: a tuple where the first element is the
-                standardized SMILES and the second element is the original SMILES
+            tuple[str | None, str]: 
+                a tuple where the first element is the standardized SMILES and the 
+                second element is the original SMILES
         """
         mol = Chem.MolFromSmiles(smiles, sanitize=False)
         out = Papyrus_standardizer.standardize(
