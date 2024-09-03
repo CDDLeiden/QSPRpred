@@ -27,6 +27,30 @@ from qsprpred.utils.parallel import (
 class TabularStorageBasic(
     ChemStore, SMARTSSearchable, PropSearchable, Summarizable, Parallelizable
 ):
+    """Tabular storage for molecules.
+    
+    Attributes:
+        name (str): Name of the storage.
+        path (str): Path to the storage directory.
+        storeFormat (str): Format to use for storing the data.
+        nJobs (int): Number of parallel jobs to use for processing.
+        chunkSize (int): Size of the chunks to use for processing.
+        chunkProcessor (ParallelGenerator): Parallel generator to use for processing.
+        libsPath (str): Path to the libraries directory.
+        smilesProp (str): Name of the column containing the SMILES.
+        originalSmilesProp (str): Name of the column containing the original SMILES.
+        idProp (str): Name of the column containing the molecule IDs.
+        metaFile (str): Path to the meta file.
+        standardizer (ChemStandardizer): Standardizer to use for the molecules.
+        identifier (ChemIdentifier): Identifier to use for the molecules.
+        nLibs (int): Number of libraries in the storage.
+        
+        _chunkSize (int): Size of the chunks to use for processing.
+        _nJobs (int): Number of parallel jobs to use for processing.
+        _libraries (dict[str, PandasDataTable]): Dictionary of libraries in the storage.
+        _standardizer (ChemStandardizer): Standardizer to use for the molecules.
+        _identifier (ChemIdentifier): Identifier to use for the molecules.
+    """
     _notJSON: ClassVar = ChemStore._notJSON + ["_libraries"]
 
     def __init__(
@@ -45,7 +69,28 @@ class TabularStorageBasic(
         chunk_processor: ParallelGenerator = None,
         chunk_size: int | None = None,
         n_jobs: int = 1,
-    ) -> None:
+    ):
+        """Initialize the storage.
+        
+        Args:
+            name (str): Name of the storage.
+            path (str): Path to the storage directory.
+            df (pd.DataFrame, optional): Data frame to initialize the storage with.
+            smiles_col (str, optional): Name of the column containing the SMILES.
+            add_rdkit (bool, optional): Whether to add RDKit molecules to the storage.
+            overwrite (bool, optional): 
+                Whether to overwrite the storage if it already exists.
+            save (bool, optional): Whether to save the storage after initialization.
+            standardizer (ChemStandardizer, optional): 
+                Standardizer to use for the molecules.
+            identifier (ChemIdentifier, optional): Identifier to use for the molecules.
+            id_col (str, optional): Name of the column containing the molecule IDs.
+            store_format (str, optional): Format to use for storing the data.
+            chunk_processor (ParallelGenerator, optional): 
+                Parallel generator to use for processing.
+            chunk_size (int, optional): Size of the chunks to use for processing.
+            n_jobs (int, optional): Number of parallel jobs to use for processing.
+        """
         super().__init__()
         if df is not None and smiles_col not in df.columns:
             raise ValueError(
@@ -88,36 +133,52 @@ class TabularStorageBasic(
 
     @property
     def libsPath(self):
+        """Path to the libraries directory."""
         return os.path.join(self.path, "libs")
 
     @property
     def smilesProp(self) -> str:
+        """Name of the column containing the SMILES."""
         return "SMILES"
 
     @property
     def originalSmilesProp(self) -> str:
+        """Name of the column containing the original SMILES."""
         return "original_smiles"
 
     @property
     def idProp(self) -> str:
+        """Name of the column containing the molecule IDs."""
         return "ID"
 
     @property
     def chunkSize(self) -> int:
+        """Size of the chunks to use for processing."""
         return self._chunkSize
 
     @chunkSize.setter
     def chunkSize(self, value: int | None):
+        """Set the size of the chunks to use for processing.
+        
+        Args:
+            value (int): Size of the chunks.
+        """
         self._chunkSize = value
         for lib in self._libraries.values():
             lib.chunkSize = self._chunkSize
 
     @property
     def nJobs(self):
+        """Number of parallel jobs to use for processing."""
         return self._nJobs
 
     @nJobs.setter
     def nJobs(self, value: int | None):
+        """Set the number of parallel jobs to use for processing.
+        
+        Args:
+            value (int): Number of parallel jobs.
+        """
         self._nJobs = value if value is not None and value > 0 else os.cpu_count()
         self.chunkProcessor = MultiprocessingJITGenerator(n_workers=self.nJobs)
         for lib in self._libraries.values():
@@ -128,20 +189,23 @@ class TabularStorageBasic(
     def add_library(
         self,
         name: str,
-        df,
+        df: pd.DataFrame,
         smiles_col: str = "SMILES",
         id_col: str = "ID",
         add_rdkit=False,
         store_format="pkl",
         save=False,
     ):
-        """
-        Reads molecules from a file and adds standardized SMILES to the store.
+        """Reads molecules from a file and adds standardized SMILES to the store.
 
-        :param path: path to the library file
-        :param smiles_col: name of the column containing the SMILES
-
-        :return: `StoredMol` instance of the added molecule
+        Args:
+            name (str): name of the library
+            df (pd.DataFrame): data frame containing the molecules
+            smiles_col (str): name of the column containing the SMILES
+            id_col (str): name of the column containing the molecule IDs
+            add_rdkit (bool): whether to add RDKit molecules to the store
+            store_format (str): format to use for storing the data
+            save (bool): whether to save the store after adding the library
         """
         if len(df) == 0 and len(self._libraries) > 0:
             logger.warning(
@@ -201,8 +265,7 @@ class TabularStorageBasic(
             self.save()
 
     def applyIdentifier(self, identifier: ChemIdentifier):
-        """
-        Apply an identifier to the SMILES in the store.
+        """Apply an identifier to the SMILES in the store.
 
         Args:
             identifier (ChemIdentifier): Identifier to apply to the SMILES.
@@ -213,8 +276,7 @@ class TabularStorageBasic(
             self._remove_duplicates_from_libs(lib, ids)
 
     def applyStandardizer(self, standardizer: ChemStandardizer):
-        """
-        Apply a standardizer to the SMILES in the store.
+        """Apply a standardizer to the SMILES in the store.
 
         Args:
             standardizer (ChemStandardizer): Standardizer to apply to the SMILES.
@@ -227,14 +289,18 @@ class TabularStorageBasic(
             self.applyIdentifier(self.identifier)
 
     def _drop_invalids_from_table(self, pd_table: PandasDataTable):
+        """Drop invalid molecules from the table.
+        
+        Args:
+            pd_table (PandasDataTable): Table to drop invalid molecules from.
+        """
         pd_table.dropEmptyProperties([self.smilesProp])
 
     @classmethod
     def fromDF(
         cls, df: pd.DataFrame, *args, name: str | None = None, **kwargs
     ) -> "TabularStorageBasic":
-        """
-        Create a new instance from a pandas DataFrame.
+        """Create a new instance from a pandas DataFrame.
 
         Args:
             df (pd.DataFrame): DataFrame to create the instance from.
@@ -251,7 +317,19 @@ class TabularStorageBasic(
     @staticmethod
     def apply_standardizer_to_data_frame(
         df: pd.DataFrame, smiles_prop: str, standardizer: ChemStandardizer
-    ):
+    ) -> list[tuple[int, str, str]]:
+        """Apply a standardizer to the SMILES in a data frame.
+        
+        Args:
+            df (pd.DataFrame): Data frame to apply the standardizer to.
+            smiles_prop (str): Name of the column containing the SMILES.
+            standardizer (ChemStandardizer): Standardizer to apply to the SMILES.
+        
+        Returns:
+            (list[tuple[int, str, str]]):
+                List of tuples containing the index, standardized SMILES,
+                and original SMILES.
+        """
         smiles = df[smiles_prop].values
         output = []
         for i, smi in enumerate(smiles):
@@ -275,15 +353,15 @@ class TabularStorageBasic(
         return output
 
     def _remove_duplicates_from_table(self, pd_table: PandasDataTable, ids: pd.Series):
-        """
-        Remove duplicates from the table using a list of identifiers.
+        """Remove duplicates from the table using a list of identifiers.
+        
         If duplicates are found, the first occurrence is kept. The index
         property of the table is also updated with the ids provided.
 
         Args:
-            pd_table:
+            pd_table (PandasDataTable):
                 The table to remove duplicates from.
-            ids:
+            ids (pd.Series):
                 A list of values to use as identifiers. Duplicates are
                 identified based on these values.
         """
@@ -304,6 +382,12 @@ class TabularStorageBasic(
         pd_table.addProperty(self.idProp, ids, ids[~duplicated].index)
 
     def _remove_duplicates_from_libs(self, pd_table: PandasDataTable, ids: pd.Series):
+        """Remove duplicates from the libraries using a list of identifiers.
+        
+        Args:
+            pd_table (PandasDataTable): The table to remove duplicates from.
+            ids (pd.Series): A list of values to use as identifiers.
+        """
         for lib in self._libraries.values():
             overlap = tuple(set(lib.getProperty(self.idProp)) & set(ids))
             if len(overlap) > 0:
@@ -326,6 +410,17 @@ class TabularStorageBasic(
         id_prop: str,
         identifier: Callable[[str], str],
     ) -> pd.Series:
+        """Apply an identifier to the SMILES in a data frame.
+        
+        Args:
+            df (pd.DataFrame): Data frame to apply the identifier to.
+            smiles_col (str): Name of the column containing the SMILES.
+            id_prop (str): Name of the column containing the molecule IDs.
+            identifier (callable): Identifier to apply to the SMILES.
+        
+        Returns:
+            (pd.Series): Series containing the identifiers.
+        """
         identifiers = df[smiles_col].apply(identifier)
         ids = df[id_prop]
         return pd.Series(identifiers, index=ids)
@@ -337,6 +432,15 @@ class TabularStorageBasic(
         raise_on_existing: bool = True,
         library: str | None = None,
     ):
+        """Add entries to the storage.
+        
+        Args:
+            ids (list): The IDs of the entries to add.
+            props (dict): The properties to add.
+            raise_on_existing (bool): 
+                Whether to raise an error if the entry already exists.
+            library (str): Name of the library to add the entries to.
+        """
         lib = self._libraries[library] if library else self._libraries[self.name]
         lib.addEntries(ids, props, raise_on_existing)
 
@@ -352,22 +456,27 @@ class TabularStorageBasic(
         chunk_size: int | None = None,
         chunk_processor: ParallelGenerator | None = None,
     ) -> list[TabularMol]:
-        """
-        Add a molecule to the store using its raw SMILES. The SMILES will be standardized and an identifier will be
-        calculated.
+        """Add a molecule to the store using its raw SMILES. 
+        
+        The SMILES will be standardized and an identifier will be calculated.
 
-        :param smiles: SMILES of the molecule to add
-        :param mol_id: identifier of the molecule to add
-        :param metadata: additional metadata to store with the molecule
-        :ligprep_metadata: metadata from the ligprep process
-        :param sdf_path: path to the SDF file containing the molecule processed via ligprep
-        :param library: name of the library the molecule belongs to
-        :param raise_on_existing: whether to raise an error if the molecule already exists in the store
-        :param update_existing: whether to update the existing molecule if it already exists in the store
+        Args:
+            smiles (list[str]): SMILES of the molecule to add.
+            props (dict, optional): Additional properties to store with the molecule.
+            library (str, optional): Name of the library to add the molecule to.
+            raise_on_existing (bool, optional):
+                Whether to raise an error if the molecule already exists in the store.
+            add_rdkit (bool, optional): Whether to add RDKit molecules to the store.
+            store_format (str, optional): Format to use for storing the data.
+            save (bool, optional): Whether to save the store after adding the molecule.
+            chunk_size (int, optional): 
+                Size of the chunks to use for processing (not used).
+            chunk_processor (ParallelGenerator, optional):
+                Parallel generator to use for processing (not used).
 
-        :return: `StoredMol` instance of the added molecule
 
-        :raises ValueError: if the molecule already exists in the store
+        Returns:
+            (list[StoredMol]): Instances of the added molecules.
         """
         data = {self.smilesProp: smiles}
         if props:
@@ -413,6 +522,7 @@ class TabularStorageBasic(
         ]
 
     def hasProperty(self, name: str) -> bool:
+        """Check if a property is present in the storage."""
         return name in self.getProperties()
 
     def __getstate__(self):
@@ -433,7 +543,11 @@ class TabularStorageBasic(
             self._libraries[name] = PandasDataTable.fromFile(lib)
 
     def save(self):
-        """Save the whole storage to disk."""
+        """Save the whole storage to disk.
+        
+        Returns:
+            (str): Path to the saved storage.
+        """
         os.makedirs(self.path, exist_ok=True)
         return self.toFile(self.metaFile)
 
@@ -467,12 +581,12 @@ class TabularStorageBasic(
                 Any additional positional arguments to pass to the processor.
             proc_kwargs (dict, optional):
                 Any additional keyword arguments to pass to the processor.
-            add_props (list, optional):
-                List of data set properties to send to the processor. If `None`, all
-                properties will be sent.
             mol_type (str, optional):
                 Type of molecule to send to the processor. Can be 'smiles', 'mol', or
                 'rdkit'. Defaults to 'mol', which implies `TabularMol` objects.
+            add_props (list, optional):
+                List of data set properties to send to the processor. If `None`, all
+                properties will be sent.
             chunk_processor (ParallelGenerator, optional):
                 The parallel generator to use for processing. If not specified,
                 `self.chunkProcessor` is used.
@@ -509,6 +623,15 @@ class TabularStorageBasic(
             yield result
 
     def getProperty(self, name: str, ids: list[str] | None = None) -> pd.Series:
+        """Get a property from the storage.
+        
+        Args:
+            name (str): Name of the property to get.
+            ids (list, optional): IDs of the molecules to get the property for.
+            
+        Returns:
+            (pd.Series): Series containing the property values.
+        """
         # find the libraries that contain the specified ids if any
         subsets = []
         for lib in self._libraries.values():
@@ -522,22 +645,49 @@ class TabularStorageBasic(
         )
 
     def getProperties(self) -> list[str]:
+        """Get a list of all properties in the storage.
+        
+        Returns:
+            (list): List of all properties in the storage.
+        """
         ret = set()
         for lib in self._libraries.values():
             ret.update(lib.getProperties())
         return list(ret)
 
     def addProperty(self, name: str, data: Sized, ids: list[str] | None = None):
+        """Add a property to the storage.
+        
+        Args:
+            name (str): Name of the property to add.
+            data (list): Data of the property.
+            ids (list, optional): IDs of the molecules to add the property for.
+        """
         for lib in self._libraries.values():
             lib.addProperty(name, data, ids, ignore_missing=True)
 
     def removeProperty(self, name: str):
+        """Remove a property from the storage.	
+        
+        Args:
+            name (str): Name of the property to remove.
+        """
         for lib in self._libraries.values():
             lib.removeProperty(name)
 
     def getSubset(
         self, subset: list[str], ids: list[str] | None = None, name: str | None = None
     ) -> "TabularStorageBasic":
+        """Get a subset of the storage for the given properties.
+        
+        Args:
+            subset (list): List of property names to include in the subset.
+            ids (list, optional): IDs of the entries to include in the subset.
+            name (str, optional): Name of the new table.
+            
+        Returns:
+            (TabularStorageBasic): New table containing the subset.
+        """
         name = name or f"{self.name}_subset"
         if self.smilesProp not in subset:
             subset = [self.smilesProp, *subset]
@@ -562,6 +712,7 @@ class TabularStorageBasic(
         )
 
     def getDF(self) -> pd.DataFrame:
+        """Get the stored properties as a pandas DataFrame."""
         if len(self) > 0:
             return pd.concat([lib.getDF() for lib in self._libraries.values()])
         else:
@@ -570,14 +721,17 @@ class TabularStorageBasic(
             )
 
     def reload(self):
+        """Reload the storage from disk."""
         self.__dict__.update(self.fromFile(self.metaFile).__dict__)
 
     def clear(self):
+        """Clear the storage."""
         if os.path.exists(self.path):
             shutil.rmtree(self.path)
 
     @property
     def metaFile(self) -> str:
+        """Path to the meta file."""
         return os.path.join(self.path, "meta.json")
 
     def apply(
@@ -590,6 +744,30 @@ class TabularStorageBasic(
         chunk_processor: ParallelGenerator | None = None,
         no_parallel: bool = False,
     ) -> Generator[Iterable[Any], None, None]:
+        """Apply a function to the molecules in the data frame.
+        
+        Args:
+            func (callable): Function to apply to the molecules.
+            func_args (list, optional): Additional arguments to pass to the function.
+            func_kwargs (dict, optional): 
+                Additional keyword arguments to pass to the function.
+            on_props (tuple, optional):
+                Properties to pass to the function. If `None`, all properties will be
+                passed.
+            chunk_type (str, optional):
+                Type of molecule to send to the function. Can be 'smiles', 'mol', or
+                'rdkit'. Defaults to 'mol', which implies `TabularMol` objects.
+            chunk_processor (ParallelGenerator, optional):
+                The parallel generator to use for processing. If not specified,
+                `self.chunkProcessor` is used.
+            no_parallel (bool, optional):
+                Whether to use parallel processing. Defaults to `False`.
+                
+        Returns:
+            (Generator):
+                A generator that yields the results of the supplied function on the
+                chunked molecules from the data set.
+        """
         chunk_processor = chunk_processor or self.chunkProcessor
         func_args = func_args or []
         func_kwargs = func_kwargs or {}
@@ -636,15 +814,15 @@ class TabularStorageBasic(
             values (list[str]):
                 List of values to search for. If any of the values is found in the
                 property, the molecule will be considered a match.
-            name (str | None, optional):
-                Name of the new table. Defaults to the name of
-                the old table, plus the `_searched` suffix.
             exact (bool, optional):
                 Whether to use exact matching, i.e. whether to
                 search for exact strings or just substrings. Defaults to False.
+            name (str | None, optional):
+                Name of the new table. Defaults to the name of
+                the old table, plus the `_searched` suffix.
 
         Returns:
-            MoleculeTable:
+            (MoleculeTable):
                 A new table with the molecules from the
                 old table with the given property values.
         Raises:
@@ -693,6 +871,18 @@ class TabularStorageBasic(
         *args: list[str],
         **kwargs: dict[str, Any],
     ):
+        """Apply a match function to an iterable of molecules.
+        
+        Args:
+            iterable (Iterable[StoredMol]): 
+                Iterable of molecules to apply the function to.
+            match_function (Callable): Function to apply to the molecules.
+            *args (list): Additional arguments to pass to the function.
+            **kwargs (dict): Additional keyword arguments to pass to the function.
+        
+        Returns:
+            (list): List of results from the function.
+        """
         res = []
         for mol in iterable:
             rd_mol = mol.as_rd_mol()
@@ -742,16 +932,14 @@ class TabularStorageBasic(
         )
 
     def getSummary(self):
-        """
-        Make a summary with some statistics about the molecules in this table.
+        """Make a summary with some statistics about the molecules in this table.
+        
         The summary contains the number of molecules per target and the number of
         unique molecules per target.
-
         Requires this data set to be imported from Papyrus for now.
 
         Returns:
             (pd.DataFrame): A dataframe with the summary statistics.
-
         """
         summary = {
             "n_mols": [sum(len(lib) for lib in self._libraries.values())],
@@ -764,17 +952,28 @@ class TabularStorageBasic(
 
     @property
     def standardizer(self) -> ChemStandardizer:
+        """Standardizer used in this storage."""
         return self._standardizer
 
     @property
     def identifier(self):
+        """Identifier used in this storage."""
         return self._identifier
 
     @property
     def nLibs(self):
+        """Number of libraries in this storage."""
         return len(self._libraries)
 
     def get_mol(self, mol_id) -> TabularMol:
+        """Get a molecule from the store by its ID.
+        
+        Args:
+            mol_id (str): ID of the molecule to get.
+            
+        Returns:
+            (TabularMol): Molecule with the given ID.
+        """
         smiles = self.getProperty(self.smilesProp, [mol_id])
         if len(smiles) == 0:
             raise ValueError(f"Molecule with ID {mol_id} not found.")
@@ -789,16 +988,21 @@ class TabularStorageBasic(
         return TabularMol(mol_id, smiles.iloc[0], props=props)
 
     def remove_mol(self, mol_id):
-        """
-        Remove a molecule from the store.
+        """Remove a molecule from the store.
+        
+        Args:
+            mol_id (str): ID of the molecule to remove.
         """
         for lib in self._libraries.values():
             lib.dropEntries([mol_id], ignore_missing=True)
 
     def get_mol_ids(self) -> tuple[str, ...]:
-        """
-        Returns a set of all molecule IDs in the store.
+        """Returns a set of all molecule IDs in the store.
+        
         Good for checking possible overlaps between stores.
+        
+        Returns:
+            (tuple): Tuple of all molecule IDs in the store.
         """
         ids = []
         for lib in self._libraries.values():
@@ -806,14 +1010,25 @@ class TabularStorageBasic(
         return tuple(ids)
 
     def get_mol_count(self) -> int:
+        """Get the number of molecules in the store."""
         return sum(len(lib) for lib in self._libraries.values())
 
     def iterChunks(
         self,
-        size=1000,
+        size: int = 1000,
         on_props: Iterable[str] | None = None,
         chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
     ) -> Generator[list[StoredMol | str | Chem.Mol | pd.DataFrame], None, None]:
+        """Iterate over the molecules in the store in chunks.
+        
+        Args:
+            size (int, optional): Size of the chunks to use for processing.
+            on_props (list, optional): Properties to pass to the function.
+            chunk_type (str, optional): Type of molecule to send to the function.
+            
+        Yields:
+            (list): List of molecules in the chunk.
+        """
         on_props = on_props or self.getProperties()
         for lib in self._libraries.values():
             for chunk in lib.iterChunks(size, on_props=on_props):
@@ -825,10 +1040,28 @@ class TabularStorageBasic(
                 }
                 yield chunk_converters[chunk_type](chunk, on_props)
 
-    def _convert_chunk_df(self, chunk, on_props):
+    def _convert_chunk_df(self, chunk: pd.DataFrame, on_props: list) -> pd.DataFrame:
+        """Convert a chunk to a pandas DataFrame.
+        
+        Args:
+            chunk (pd.DataFrame): Chunk to convert.
+            on_props (list): Properties to include in the DataFrame.
+            
+        Returns:
+            (pd.DataFrame): DataFrame containing the chunk.
+        """
         return chunk[list({self.idProp, self.smilesProp, *on_props})]
 
-    def _convert_chunk_mol(self, chunk, on_props):
+    def _convert_chunk_mol(self, chunk: pd.DataFrame, on_props: list) -> list[TabularMol]:
+        """Convert a chunk to a list of `TabularMol` objects.
+        
+        Args:
+            chunk (pd.DataFrame): Chunk to convert.
+            on_props (list): Properties to include in the `TabularMol` objects.
+        
+        Returns:
+            (list[TabularMol]): List of `TabularMol` objects
+        """
         ids = chunk[self.idProp]
         smiles = chunk[self.smilesProp]
         props = {prop: chunk[prop] for prop in on_props}
@@ -840,10 +1073,28 @@ class TabularStorageBasic(
             mols.append(TabularMol(_id, smiles.iloc[idx], props=mol_props))
         return mols
 
-    def _convert_chunk_smiles(self, chunk, on_props):
+    def _convert_chunk_smiles(self, chunk: pd.DataFrame, on_props: list) -> list[str]:
+        """Convert a chunk to a list of SMILES strings.
+        
+        Args:
+            chunk (pd.DataFrame): Chunk to convert.
+            on_props (list): ignored
+        
+        Returns:
+            (list): List of SMILES strings.
+        """
         return chunk[self.smilesProp]
 
-    def _convert_chunk_rdkit(self, chunk, on_props):
+    def _convert_chunk_rdkit(self, chunk: pd.DataFrame, on_props: list) -> list[Chem.Mol]:
+        """Convert a chunk to a list of RDKit molecules.
+        
+        Args:
+            chunk (pd.DataFrame): Chunk to convert.
+            on_props (list): ignored
+        
+        Returns:
+            (list): List of RDKit molecules.
+        """
         mols = []
         for idx, mol in enumerate(chunk[self.smilesProp]):
             mol = Chem.MolFromSmiles(mol)
@@ -853,15 +1104,33 @@ class TabularStorageBasic(
         return mols
 
     def iter_mols(self) -> Generator[TabularMol, None, None]:
+        """Iterate over the molecules in the store.	
+        
+        Yields:
+            (TabularMol): Molecule from the store.
+        """
         for chunk in self.iterChunks():
             for mol in chunk:
                 yield mol
 
     def dropEntries(self, ids: tuple[str, ...]):
+        """Drop entries from the store.
+        
+        Args:
+            ids (tuple): IDs of the entries to drop.
+        """
         for lib in self._libraries.values():
             lib.dropEntries(ids, ignore_missing=True)
 
-    def _apply_identifier_to_library(self, pd_table):
+    def _apply_identifier_to_library(self, pd_table: PandasDataTable) -> pd.Series:
+        """Apply an identifier to the SMILES in a library.	
+        
+        Args:
+            pd_table (PandasDataTable): Library to apply the identifier to.
+        
+        Returns:
+            (pd.Series): Series containing the identifiers.
+        """
         ids = []
         for chunk in pd_table.apply(
             self._apply_identifier_to_data_frame,
@@ -878,7 +1147,12 @@ class TabularStorageBasic(
         )
         return ids
 
-    def _apply_standardizer_to_library(self, pd_table):
+    def _apply_standardizer_to_library(self, pd_table: PandasDataTable):
+        """Apply a standardizer to the SMILES in a library.
+        
+        Args:
+            pd_table (PandasDataTable): Library to apply the standardizer to.
+        """
         output = []
         for chunk in pd_table.apply(
             self.apply_standardizer_to_data_frame,
