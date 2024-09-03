@@ -16,7 +16,9 @@ class PapyrusStandardizer(ChemStandardizer):
     Béquignon, O.J.M., Bongers, B.J., Jespers, W. et al. 
     Papyrus: a large-scale curated dataset aimed at bioactivity predictions. 
     J Cheminform 15, 3 (2023). https://doi.org/10.1186/s13321-022-00672-x
-        
+    
+    Attributes:
+        settings (dict): Settings of the standardizer
     """
 
     def __init__(

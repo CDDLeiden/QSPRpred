@@ -2,6 +2,7 @@ from abc import abstractmethod, ABC
 
 
 class SMARTSSearchable(ABC):
+    """Interface for searching with SMARTS patterns."""	
 
     @abstractmethod
     def searchWithSMARTS(
@@ -20,6 +21,8 @@ class SMARTSSearchable(ABC):
 
 
 class PropSearchable(ABC):
+    """Interface for searching on properties."""
+    
     @abstractmethod
     def searchOnProperty(
             self,

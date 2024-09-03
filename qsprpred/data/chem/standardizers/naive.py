@@ -12,10 +12,10 @@ def standardize_mol(mol) -> str | None:
     round of disconnecting metals and normalizing. Finally, the SMILES is canonicalized.
 
     Args:
-        mol: RDKit molecule object
+        mol (rdkit.Chem.rdchem.Mol): RDKit molecule object
         
     Returns:
-        str: 
+        (str | None): 
             Standardized SMILES or None if SMILES could not be standardized or
             if SMILES does not contain carbon or contains salts after standardization
     """
@@ -54,6 +54,9 @@ class NaiveStandardizer(ChemStandardizer):
        Briefly, the standardization process involves disconnecting metals, normalizing,
        removing salts (largest fragment) and charges. See 
        `qsprpred.data.chem.standardizers.naive.standardize_mol` for more details.
+       
+        Attributes:
+            settings (dict): Settings of the standardizer
     """
     
     def convert_smiles(self, smiles: str) -> tuple[str | None, str]:

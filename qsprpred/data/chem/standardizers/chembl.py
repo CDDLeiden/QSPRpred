@@ -11,12 +11,13 @@ def chembl_smi_standardizer(
     """Standardize SMILES using ChEMBL standardizer.
 
     Args:
-        smi: SMILES string to be standardized.
-        isomeric_smiles: return the isomeric smiles. Defaults to True.
-        sanitize: applies sanitization using the ChEMBL standardizer. Defaults to True.
+        smi (str): SMILES string to be standardized.
+        isomeric_smiles (bool): return the isomeric smiles. Defaults to True.
+        sanitize (bool): 
+            applies sanitization using the ChEMBL standardizer. Defaults to True.
 
     Returns:
-        smiles (str): standardized SMILES string or `None` if standardization failed.
+        (str): standardized SMILES string or `None` if standardization failed.
     """
     try:
         mol = Chem.MolFromSmiles(smi)
@@ -39,8 +40,9 @@ class ChemblStandardizer(ChemStandardizer):
     """Standardizer using the ChEMBL standardizer.
 
     Attributes:
-        isomericSmiles: return the isomeric smiles. Defaults to True.
-        sanitize: sanitize SMILES before standardization. Defaults to True.
+        isomericSmiles (bool): return the isomeric smiles.
+        sanitize (bool): sanitize SMILES before standardization.
+        settings (dict): Settings of the standardizer
     """
 
     def __init__(
@@ -51,8 +53,8 @@ class ChemblStandardizer(ChemStandardizer):
         """Initialize the ChEMBL standardizer.
 
         Args:
-            isomeric_smiles: return the isomeric smiles. Defaults to True.
-            sanitize: sanitize SMILES before standardization. Defaults to True.
+            isomeric_smiles (bool): return the isomeric smiles. Defaults to True.
+            sanitize (bool): sanitize SMILES before standardization. Defaults to True.
         """
         self.isomericSmiles = isomeric_smiles
         self.sanitize = sanitize
@@ -77,7 +79,7 @@ class ChemblStandardizer(ChemStandardizer):
         """Settings of the standardizer.
         
         Returns:
-            dict: settings of the standardizer
+            (dict): settings of the standardizer
         """
         return {
             "isomeric_smiles": self.isomericSmiles,
@@ -88,7 +90,7 @@ class ChemblStandardizer(ChemStandardizer):
         """Return the unique identifier of the standardizer.
         
         Returns:
-            str: unique identifier of the standardizer
+            (str): unique identifier of the standardizer
         """
         return ("ChEMBLStandardizer"
                 "~isomeric_smiles={self.isomeric_smiles}"
@@ -102,7 +104,7 @@ class ChemblStandardizer(ChemStandardizer):
             settings (dict): Settings of the standardizer
             
         Returns:
-            ChemblStandardizer: The standardizer created from settings
+            (ChemblStandardizer): The standardizer created from settings
         """
         return cls(
             isomeric_smiles=settings["isomeric_smiles"],

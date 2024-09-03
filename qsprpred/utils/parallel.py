@@ -32,6 +32,7 @@ def batched_generator(iterable: Iterable, batch_size: int) -> Generator:
 
 
 class Parallelizable(ABC):
+    """An abstract class to facilitate parallel processing of an arbitrary function."""
 
     @property
     @abstractmethod

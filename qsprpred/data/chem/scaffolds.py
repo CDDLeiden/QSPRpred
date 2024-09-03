@@ -13,7 +13,7 @@ class Scaffold(MolProcessorWithID, ABC):
     """Abstract base class for calculating molecular scaffolds of different kinds.
     
     Attributes:
-        idProp (str): Name of the property to use as the index.
+        supportsParallel (bool): Whether the processor supports parallel processing
     """
 
     @abstractmethod
@@ -38,13 +38,14 @@ class Scaffold(MolProcessorWithID, ABC):
             kwargs: Additional keyword arguments.
             
         Returns:
-            smiles of the scaffold
+            (pd.Series): smiles of the scaffold
         """
 
     @abstractmethod
     def __str__(self):
         pass
 
+    @property
     def supportsParallel(self) -> bool:
         """Check if the processor supports parallel processing.
         
@@ -60,7 +61,7 @@ class BemisMurckoRDKit(Scaffold):
     closer to the original paper, see the `BemisMurcko` class.
     """
 
-    def __call__(self, mols, props=None, *args, **kwargs):
+    def __call__(self, mols, props=None, *args, **kwargs) -> pd.Series:
         """Calculate the scaffold for a molecule.
         
         Args:
@@ -69,6 +70,9 @@ class BemisMurckoRDKit(Scaffold):
                 Dictionary of properties. Should contain the idProp key.
             args: Additional positional arguments (not used).
             kwargs: Additional keyword arguments (not used).
+            
+        Returns:
+            (pd.Series): smiles of the scaffold
         """
         res = []
         ids = []
@@ -151,7 +155,7 @@ class BemisMurcko(Scaffold):
                 res.append(a)
         return res
 
-    def __call__(self, mols, props=None, *args, **kwargs):
+    def __call__(self, mols, props=None, *args, **kwargs) -> pd.Series:
         """Calculate the scaffold for a molecule.
         
         Args:
@@ -160,6 +164,9 @@ class BemisMurcko(Scaffold):
                 Dictionary of properties. Should contain the idProp key.
             args: Additional positional arguments (not used).
             kwargs: Additional keyword arguments (not used).
+            
+        Returns:
+            (pd.Series): smiles of the scaffold
         """
         res = []
         ids = []

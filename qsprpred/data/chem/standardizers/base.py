@@ -2,7 +2,11 @@ from abc import ABC, abstractmethod
 
 
 class ChemStandardizer(ABC):
-    """Standardizer to convert SMILES to a standardized form."""
+    """Standardizer to convert SMILES to a standardized form.
+    
+    Attributes:
+        settings (dict): Settings of the standardizer
+    """
 
     def __call__(self, smiles: str) -> tuple[str | None, str]:
         """Convert the SMILES to a standardized form.

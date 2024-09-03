@@ -19,7 +19,11 @@ class ChemIdentifier(ABC):
 
 
 class Identifiable(ABC):
-    """Interface for objects which have molecule identifiers."""
+    """Interface for objects which have molecule identifiers.
+    
+    Attributes:
+        identifier (ChemIdentifier): The identifier used by the store.
+    """
 
     @property
     @abstractmethod

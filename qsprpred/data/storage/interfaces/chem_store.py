@@ -12,6 +12,7 @@ from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 
 
 class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, ABC):
+    """Interface for storing and managing chemical data."""
 
     @property
     @abstractmethod

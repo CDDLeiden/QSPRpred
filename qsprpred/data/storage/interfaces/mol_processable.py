@@ -5,6 +5,7 @@ from qsprpred.data.processing.mol_processor import MolProcessor
 
 
 class MolProcessable(ABC):
+    """Interface for processing molecules."""
 
     @abstractmethod
     def processMols(

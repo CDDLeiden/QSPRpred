@@ -13,7 +13,7 @@ class CheckSmilesValid(MolProcessorWithID):
     """Processor to check the validity of the SMILES.
     
     Attributes:
-        idProp (str): Property name of the molecule ID.
+        supportsParallel (bool): Whether the processor supports parallel processing
     """
     
     def __call__(
@@ -75,7 +75,12 @@ class CheckSmilesValid(MolProcessorWithID):
 
 
 class ValidationStandardizer(ChemStandardizer):
-    """Standardizer that checks the validity of the SMILES."""
+    """Standardizer that checks the validity of the SMILES.
+    
+    Attributes:
+        checker (CheckSmilesValid): Processor to check the validity of the SMILES
+        settings (dict): Settings of the standardizer
+    """
 
     def __init__(self):
         """Initialize the standardizer.

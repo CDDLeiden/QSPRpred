@@ -46,7 +46,7 @@ class SMARTSMatchProcessor(MolProcessorWithID):
     """Processor that checks if a molecule matches a SMARTS pattern.
     
     Attributes:
-        idProp (str): Name of the property to use as the index.
+        supportsParallel (bool): Whether the processor supports parallel processing
     """
     
     def __call__(

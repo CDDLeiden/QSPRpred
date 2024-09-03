@@ -4,7 +4,12 @@ from qsprpred.utils.serialization import JSONSerializable
 
 
 class DataStorage(JSONSerializable, ABC):
-    """Abstract base class defining an API to interact with persistent data storage."""
+    """Abstract base class defining an API to interact with persistent data storage.
+
+    Attributes:
+        _notJSON (list):
+            list of attributes that should not be serialized to JSON explicitly
+    """
 
     @abstractmethod
     def save(self) -> str:
