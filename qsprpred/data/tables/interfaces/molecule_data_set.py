@@ -22,6 +22,13 @@ class MoleculeDataSet(
     Standardizable,
     ABC
 ):
+    """Interface for storing and managing chemical data.
+    
+    Attributes:
+        smilesProp (str): name of the property that contains the SMILES strings
+        smiles (Generator[str, None, None]): 
+            generator of SMILES strings of all molecules in storage
+    """
 
     @property
     @abstractmethod
@@ -47,6 +54,10 @@ class MoleculeDataSet(
         """
 
     @abstractmethod
-    def transformProperties(self, names: list[str],
-                            transformer: Callable[[Iterable[Any]], Iterable[Any]]):
+    def transformProperties(
+        self, 
+        names: list[str],
+        transformer: Callable[[Iterable[Any]], Iterable[Any]]
+        ):
+        """Transform the target properties using the given transformer."""
         pass

@@ -56,6 +56,16 @@ class PandasDataTable(PropertyStorage, Randomized):
             You can replace this with your own parallel generator function if you
             want to use a different parallelization strategy (i.e. utilize
             remote servers instead of local processes).
+        baseDir (str):
+            The base directory of the data set folder.
+        storeDir (str):
+            The data set folder containing the data set files after saving.
+        storePath (str):
+            The path to the main data set file.
+        storePrefix (str):
+            The prefix of the data set files.
+        metaFile (str):
+            The path to the meta file of this data set.
     """
 
     _notJSON: ClassVar = [*JSONSerializable._notJSON, "df"]
@@ -162,33 +172,34 @@ class PandasDataTable(PropertyStorage, Randomized):
 
     @property
     def randomState(self) -> int:
+        """Random state to use for all random operations for reproducibility."""
         return self._seed
 
     @randomState.setter
     def randomState(self, value: int):
+        """Set the random state to use for all random operations for reproducibility.
+        
+        Args:
+            value (int): Random state to use for all random operations.
+        """
         self._seed = value
 
     def searchOnProperty(
             self,
             prop_name: str,
             values: list[str],
-            exact=False
+            exact: bool = False
     ) -> "PandasDataTable":
         """Search the molecules within this `MoleculeDataSet` on a property value
         and return the appropriate subset.
 
         Args:
-            prop_name:
-                Name of the column to search on.
-            values:
-                Values to search for.
-            name:
-                Name of the new table.
-            exact:
-                Whether to search for exact matches or not.
+            prop_name (str): Name of the column to search on.
+            values (list[str]): Values to search for.
+            exact (bool): Whether to search for exact matches or not.
 
         Returns:
-            (MoleculeStorage):
+            (PandasDataTable):
                 A data set with the molecules that match the search.
         """
         if exact:
@@ -212,6 +223,7 @@ class PandasDataTable(PropertyStorage, Randomized):
 
     @property
     def idProp(self) -> str:
+        """Column name to use for automatically generated IDs."""
         return self._idProp
 
     def __len__(self) -> int:
@@ -237,20 +249,32 @@ class PandasDataTable(PropertyStorage, Randomized):
 
     @property
     def chunkSize(self) -> int:
+        """Size of chunks to use per job in parallel processing."""	
         return self._chunkSize
 
     @chunkSize.setter
     def chunkSize(self, value: int | None):
+        """Set the size of chunks to use per job in parallel processing.
+        
+        Args:
+            value (int): Size of chunks to use per job in parallel processing.
+        """
         self._chunkSize = value if value is not None else len(self) // self.nJobs
         if self._chunkSize < 1 or self._chunkSize > len(self):
             self._chunkSize = len(self)
 
     @property
     def nJobs(self):
+        """Number of jobs to use for parallel processing."""
         return self._nJobs
 
     @nJobs.setter
     def nJobs(self, value: int | None):
+        """Set the number of jobs to use for parallel processing.
+        
+        Args:
+            value (int): Number of jobs to use for parallel processing.
+        """
         self._nJobs = value if value is not None and value > 0 else os.cpu_count()
         self.chunkSize = len(self) // self._nJobs
         self.parallelGenerator = MultiprocessingJITGenerator(self.nJobs)
@@ -317,20 +341,20 @@ class PandasDataTable(PropertyStorage, Randomized):
         self.df[name] = generate_padded_index(self.df.index, prefix=prefix)
         self.setIndex([name])
 
-    def _isInStore(self, name):
+    def _isInStore(self, name: str) -> bool:
         """Check if a pickled file with the given suffix exists.
 
         Args:
             name (str): Suffix of the file to check.
 
         Returns:
-            bool: `True` if the file exists, `False` otherwise.
+            (bool): `True` if the file exists, `False` otherwise.
         """
         return os.path.exists(self.storePath) and self.storePath.endswith(
             f"_{name}.{self.storeFormat}"
         )
 
-    def hasProperty(self, name):
+    def hasProperty(self, name: str) -> bool:
         """Check whether a property is present in the data frame.
 
         Args:
@@ -355,7 +379,7 @@ class PandasDataTable(PropertyStorage, Randomized):
             ignore_missing (bool): If `True`, missing IDs are ignored.
 
         Returns:
-            pd.Series: List of values for the property.
+            (pd.Series): List of values for the property.
         """
         if not self.hasProperty(name):
             raise ValueError(f"Property '{name}' not found in data set.")
@@ -372,7 +396,7 @@ class PandasDataTable(PropertyStorage, Randomized):
         """Get names of all properties/variables saved in the data frame (all columns).
 
         Returns:
-            list: list of property names.
+            (list[str]): list of property names.
         """
         return self.df.columns.tolist()
 
@@ -451,6 +475,9 @@ class PandasDataTable(PropertyStorage, Randomized):
             name (str): Name of the new data set.
             path (str): Path to save the new data set.
             ignore_missing (bool): If `True`, missing IDs are ignored.
+            
+        Returns:
+            (PandasDataTable): A new data set containing the subset of the properties
         """
         name = name or f"{self.name}_subset"
         path = path or self.baseDir
@@ -495,14 +522,13 @@ class PandasDataTable(PropertyStorage, Randomized):
         """Batch a data frame into chunks of the given size.
 
         Args:
+            size (int):
+                Size of chunks to use per job in parallel processing. If `None`, 
+                `self.chunkSize` is used.
             on_props (list[str]):
-                list of properties to include, if `None`, all
-                properties are included.
+                list of properties to include, if `None`, all properties are included.
             as_dict (bool):
                 If `True`, the generator yields dictionaries instead of data frames.
-            size (int):
-                Size of chunks to use per job in parallel processing.
-                If `None`, `self.chunkSize` is used.
 
         Returns:
             Generator[pd.DataFrame, None, None]:
@@ -625,11 +651,14 @@ class PandasDataTable(PropertyStorage, Randomized):
         logger.debug(f"Transformed properties in: {names}")
         logger.debug(f"Old values saved in: {names_old}")
 
-    def toFile(self, filename: str):
+    def toFile(self, filename: str) -> str:
         """Save the metafile and all associated files to a custom location.
 
         Args:
             filename (str): absolute path to the saved metafile.
+            
+        Returns:
+            (str): Path to the saved data frame.
         """
         os.makedirs(self.storeDir, exist_ok=True)
         o_dict = json.loads(self.toJSON())
@@ -638,11 +667,11 @@ class PandasDataTable(PropertyStorage, Randomized):
             json.dump(o_dict, fh, indent=4)
         return os.path.abspath(filename)
 
-    def save(self):
+    def save(self) -> str:
         """Save the data frame to disk and all associated files.
 
         Returns:
-            str: Path to the saved data frame.
+            (str): Path to the saved data frame.
         """
         return self.toFile(f"{self.storePrefix}_meta.json")
 
@@ -689,12 +718,24 @@ class PandasDataTable(PropertyStorage, Randomized):
         return self.df
 
     def shuffle(self, random_state: Optional[int] = None):
-        """Shuffle the internal data frame."""
+        """Shuffle the internal data frame.
+        
+        Args:
+            random_state (int | None): 
+                Random state to use for shuffling. If `None`, the random state of the 
+                data set is used.
+        """
         self.df = self.df.sample(
             frac=1, random_state=random_state if random_state else self.randomState
         )
 
     def dropEntries(self, ids: Iterable[str], ignore_missing: bool = False):
+        """Drop entries from the data set by their IDs.	
+        
+        Args:
+            ids (Iterable[str]): IDs of entries to drop.
+            ignore_missing (bool): If `True`, missing IDs are ignored.
+        """
         if ignore_missing:
             ids = self.df.index.intersection(ids)
         else:
@@ -704,8 +745,20 @@ class PandasDataTable(PropertyStorage, Randomized):
         self.df.drop(index=ids, inplace=True)
         self.chunkSize = len(self) // self.nJobs
 
-    def addEntries(self, ids: list[str], props: dict[str, list],
-                   raise_on_existing: bool = True):
+    def addEntries(
+        self, 
+        ids: list[str], 
+        props: dict[str, list],
+        raise_on_existing: bool = True
+    ):
+        """Add entries to the data set.
+        
+        Args:
+            ids (list[str]): IDs of entries to add.
+            props (dict[str, list]): Dictionary of properties to add.
+            raise_on_existing (bool): If `True`, raise an error if any of the new entries
+                are duplicates.
+        """
         duplicates = self.df[self.df[self.idProp].isin(ids)]
         if raise_on_existing and len(duplicates) > 0:
             raise ValueError(
