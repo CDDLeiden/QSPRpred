@@ -15,7 +15,7 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
-from qsprpred.data.tables.qspr import QSPRDataset
+from qsprpred.data.tables.qspr import QSPRTable
 from qsprpred.models.assessment.methods import CrossValAssessor, TestSetAssessor
 from qsprpred.tasks import TargetTasks
 from .extra.gpu.models.dnn import DNNModel
@@ -54,7 +54,7 @@ def QSPRArgParser(txt=None):
         "--skip_backup",
         action="store_true",
         help="Skip backup of files. WARNING: this may overwrite "
-        "previous results, use with caution.",
+             "previous results, use with caution.",
     )
     parser.add_argument(
         "-ran", "--random_state", type=int, default=1, help="Seed for the random state"
@@ -260,9 +260,9 @@ def QSPR_modelling(args):
                 scale_pos_weight = (
                     counts[0] / counts[1]
                     if (
-                        args.sample_weighing
-                        and len(tasks) == 1
-                        and not tasks[0].isMultiClass()
+                            args.sample_weighing
+                            and len(tasks) == 1
+                            and not tasks[0].isMultiClass()
                     )
                     else 1
                 )
@@ -368,7 +368,7 @@ if __name__ == "__main__":
     args = QSPRArgParser()
 
     # Backup files
-    datasets = [QSPRDataset.fromFile(data_file) for data_file in args.data_paths]
+    datasets = [QSPRTable.fromFile(data_file) for data_file in args.data_paths]
     file_prefixes = [
         f"{alg}_{dataset.name}" for alg in args.model_types for dataset in datasets
     ]

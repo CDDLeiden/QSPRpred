@@ -8,7 +8,7 @@ from sklearn.neural_network import MLPClassifier
 from qsprpred.models.assessment.methods import CrossValAssessor, TestSetAssessor
 from . import BenchmarkRunner, BenchmarkSettings, DataPrepSettings
 from .. import TargetProperty, TargetTasks
-from ..data import MoleculeTable, QSPRDataset
+from ..data import MoleculeTable, QSPRTable
 from ..data.descriptors.sets import RDKitDescs
 from ..data.sources.data_source import DataSource
 from ..models.scikit_learn import SklearnModel
@@ -36,7 +36,7 @@ class DataSourceTesting(DataSetsPathMixIn, DataSource):
             target_props: list[TargetProperty | dict],
             name: str | None = None,
             **kwargs,
-    ) -> QSPRDataset:
+    ) -> QSPRTable:
         name = name or self.name
         return self.createLargeTestDataSet(name, target_props=target_props)
 

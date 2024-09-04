@@ -3,7 +3,7 @@ import logging
 from qsprpred.data.descriptors.sets import DescriptorSet
 from qsprpred.data.storage.interfaces.chem_store import ChemStore
 from qsprpred.data.tables.mol import MoleculeTable
-from qsprpred.data.tables.qspr import QSPRDataset
+from qsprpred.data.tables.qspr import QSPRTable
 from qsprpred.extra.data.descriptors.sets import ProteinDescriptorSet
 from qsprpred.extra.data.storage.protein.interfaces.protein_storage import \
     ProteinStorage
@@ -11,7 +11,7 @@ from qsprpred.logs import logger
 from qsprpred.tasks import TargetProperty
 
 
-class PCMDataSet(QSPRDataset):
+class PCMDataSet(QSPRTable):
     """Extension of `QSARDataset` for PCM modelling.
 
     It allows specification of a column with protein identifiers
@@ -152,7 +152,7 @@ class PCMDataSet(QSPRDataset):
             name: str | None = None,
             path: str | None = None,
             **kwargs,
-    ) -> "QSPRDataset":
+    ) -> "QSPRTable":
         ds = super().getSubset(subset, ids, name, path, **kwargs)
         ds.__class__ = PCMDataSet
         ds.attachProteins(self.proteins)
@@ -193,7 +193,7 @@ class PCMDataSet(QSPRDataset):
                 `PCMDataset` instance containing the PCM data.
         """
         name = name or f"{mol_table.name}_PCM"
-        ret = QSPRDataset.fromMolTable(
+        ret = QSPRTable.fromMolTable(
             mol_table,
             target_props,
             *args,

@@ -10,7 +10,7 @@ from ...data import (
     BootstrapSplit,
     ScaffoldSplit,
     ClusterSplit,
-    QSPRDataset,
+    QSPRTable,
 )
 from ...data.chem.clustering import (
     FPSimilarityLeaderPickerClusters,
@@ -224,7 +224,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
         test_ids = dataset.X_ind.index.values
         train_ids = dataset.y_ind.index.values
         dataset.save()
-        dataset_new = QSPRDataset.fromFile(dataset.metaFile)
+        dataset_new = QSPRTable.fromFile(dataset.metaFile)
         self.validate_split(dataset_new)
         self.assertTrue(dataset_new.descriptorSets)
         self.assertTrue(dataset_new.featureStandardizer)

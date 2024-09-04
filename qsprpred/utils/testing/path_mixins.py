@@ -32,7 +32,7 @@ from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianc
 from ...data.processing.feature_standardizers import SKLearnStandardizer
 from ...data.sampling.splits import RandomSplit
 from ...data.storage.tabular.basic_storage import TabularStorageBasic
-from ...data.tables.qspr import QSPRDataset
+from ...data.tables.qspr import QSPRTable
 from ...models import SklearnModel
 from ...tasks import TargetTasks
 
@@ -347,7 +347,7 @@ class DataSetsPathMixIn(PathMixIn):
             QSPRDataSet: a `QSPRDataSet` object
         """
         storage = self.getStorage(df, f"{name}_storage", n_jobs, chunk_size)
-        ret = QSPRDataset(
+        ret = QSPRTable(
             storage,
             name,
             target_props=target_props,

@@ -9,8 +9,7 @@ import scipy as sp
 
 from qsprpred.models.early_stopping import EarlyStoppingMode
 from qsprpred.models.monitors import FitMonitor
-
-from ...data.tables.qspr import QSPRDataset
+from ...data.tables.qspr import QSPRTable
 from ...models.model import QSPRModel
 
 
@@ -45,6 +44,7 @@ class RatioDistributionAlgorithm(RandomDistributionAlgorithm):
         ratios (pd.DataFrame): ratio of each category in y
         random_state (int): random state for reproducibility
     """
+
     def __init__(self, random_state=None):
         self.ratios = None
         self.random_state = random_state
@@ -69,7 +69,8 @@ class RatioDistributionAlgorithm(RandomDistributionAlgorithm):
         """Get probabilities of each category for each sample in X_test"""
         y_list = [
             np.array(
-                [[ratio[col] for ratio in self.ratios.values] for _ in range(len(X_test))]
+                [[ratio[col] for ratio in self.ratios.values] for _ in
+                 range(len(X_test))]
             ) for col in range(len(self.ratios.values[0]))
         ]
         return y_list
@@ -132,10 +133,10 @@ class MedianDistributionAlgorithm(RandomDistributionAlgorithm):
 
 class ScipyDistributionAlgorithm(RandomDistributionAlgorithm):
     def __init__(
-        self,
-        distribution: sp.stats.rv_continuous = sp.stats.norm,
-        params={},
-        random_state=None,
+            self,
+            distribution: sp.stats.rv_continuous = sp.stats.norm,
+            params={},
+            random_state=None,
     ):
         self.fitted_parameters = None
         self.distribution = distribution
@@ -183,13 +184,13 @@ class ScipyDistributionAlgorithm(RandomDistributionAlgorithm):
 
 class RandomModel(QSPRModel):
     def __init__(
-        self,
-        base_dir: str,
-        alg: RandomDistributionAlgorithm,
-        name: Optional[str] = None,
-        parameters: Optional[dict] = None,
-        autoload=True,
-        random_state: int | None = None,
+            self,
+            base_dir: str,
+            alg: RandomDistributionAlgorithm,
+            name: Optional[str] = None,
+            parameters: Optional[dict] = None,
+            autoload=True,
+            random_state: int | None = None,
     ):
         """Initialize a QSPR model instance.
 
@@ -220,19 +221,19 @@ class RandomModel(QSPRModel):
         return False
 
     def fit(
-        self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        y: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Type[RandomDistributionAlgorithm] = None,
-        mode: EarlyStoppingMode = None,
-        monitor: FitMonitor | None = None,
-        **kwargs,
+            self,
+            X: pd.DataFrame | np.ndarray | QSPRTable,
+            y: pd.DataFrame | np.ndarray | QSPRTable,
+            estimator: Type[RandomDistributionAlgorithm] = None,
+            mode: EarlyStoppingMode = None,
+            monitor: FitMonitor | None = None,
+            **kwargs,
     ) -> RandomDistributionAlgorithm:
-        """Fit the model to the given data matrix or `QSPRDataset`.
+        """Fit the model to the given data matrix or `QSPRTable`.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
-            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
+            X (pd.DataFrame, np.ndarray, QSPRTable): data matrix to fit
+            y (pd.DataFrame, np.ndarray, QSPRTable): target matrix to fit
             estimator (Any): estimator instance to use for fitting
             mode (EarlyStoppingMode): early stopping mode, unused
             monitor (FitMonitor): monitor instance to track the fitting process, unused
@@ -254,14 +255,14 @@ class RandomModel(QSPRModel):
         return estimator
 
     def predict(
-        self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Any = None
+            self,
+            X: pd.DataFrame | np.ndarray | QSPRTable,
+            estimator: Any = None
     ) -> np.ndarray:
-        """Make predictions for the given data matrix or `QSPRDataset`.
+        """Make predictions for the given data matrix or `QSPRTable`.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to predict
+            X (pd.DataFrame, np.ndarray, QSPRTable): data matrix to predict
             estimator (Any): estimator instance to use for fitting
 
         Returns:
@@ -273,7 +274,7 @@ class RandomModel(QSPRModel):
         return estimator(X)
 
     def predictProba(
-        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
+            self, X: pd.DataFrame | np.ndarray | QSPRTable, estimator: Any = None
     ):
         estimator = self.estimator if estimator is None else estimator
         return estimator.get_probas(X)
@@ -298,7 +299,7 @@ class RandomModel(QSPRModel):
             return self.alg()
 
     def loadEstimatorFromFile(
-        self, params: Optional[dict] = None, fallback_load=True
+            self, params: Optional[dict] = None, fallback_load=True
     ) -> object:
         """Load estimator instance from file and apply the given parameters.
 

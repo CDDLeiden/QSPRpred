@@ -8,7 +8,7 @@ import pandas as pd
 from .settings.benchmark import DataPrepSettings
 from ..data.descriptors.sets import DescriptorSet
 from ..data.sources.data_source import DataSource
-from ..data.tables.qspr import QSPRDataset
+from ..data.tables.qspr import QSPRTable
 from ..logs import logger
 from ..models.assessment.methods import ModelAssessor
 from ..models.hyperparam_optimization import HyperparameterOptimization
@@ -203,7 +203,7 @@ class Replica(JSONSerializable):
         # attempt to load the data set with descriptors
         if os.path.exists(self.ds.metaFile) and not reload:
             logger.info(f"Reloading existing {self.ds.name} from cache...")
-            self.ds = QSPRDataset.fromFile(self.ds.metaFile)
+            self.ds = QSPRTable.fromFile(self.ds.metaFile)
             self.ds.randomState = self.randomSeed
             self.ds.setTargetProperties(deepcopy(self.targetProps))
         else:

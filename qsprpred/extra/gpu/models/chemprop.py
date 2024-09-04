@@ -17,7 +17,7 @@ from tqdm import trange
 from qsprpred.data.sampling.splits import DataSplit
 from qsprpred.tasks import ModelTasks
 from .base_torch import QSPRModelPyTorchGPU, DEFAULT_TORCH_GPUS
-from ....data.tables.qspr import QSPRDataset
+from ....data.tables.qspr import QSPRTable
 from ....logs import logger
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
 from ....models.model import QSPRModel
@@ -193,7 +193,7 @@ class ChempropModel(QSPRModelPyTorchGPU):
             monitor: FitMonitor | None = None,
             keep_logs: bool = False,
     ) -> Any | tuple[ChempropMoleculeModel, int | None]:
-        """Fit the model to the given data matrix or `QSPRDataset`.
+        """Fit the model to the given data matrix or `QSPRTable`.
 
         Note. convertToNumpy can be called here, to convert the input data to
         np.ndarray format.
@@ -425,13 +425,13 @@ class ChempropModel(QSPRModelPyTorchGPU):
 
     def predict(
             self,
-            X: pd.DataFrame | np.ndarray | QSPRDataset,
+            X: pd.DataFrame | np.ndarray | QSPRTable,
             estimator: ChempropMoleculeModel | None = None,
     ) -> np.ndarray:
-        """Make predictions for the given data matrix or `QSPRDataset`.
+        """Make predictions for the given data matrix or `QSPRTable`.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to predict
+            X (pd.DataFrame, np.ndarray, QSPRTable): data matrix to predict
             estimator (MoleculeModel): estimator instance to use for fitting
 
         Returns:
@@ -452,16 +452,16 @@ class ChempropModel(QSPRModelPyTorchGPU):
 
     def predictProba(
             self,
-            X: pd.DataFrame | np.ndarray | QSPRDataset,
+            X: pd.DataFrame | np.ndarray | QSPRTable,
             estimator: ChempropMoleculeModel | None = None,
     ) -> list[np.ndarray]:
-        """Make predictions for the given data matrix or `QSPRDataset`,
+        """Make predictions for the given data matrix or `QSPRTable`,
         but use probabilities for classification models.
 
         In case of regression models, this method is equivalent to `predict`.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predict
+            X (pd.DataFrame, np.ndarray, QSPRTable): data matrix to make predict
             estimator (MoleculeModel, None): estimator instance to use for fitting
 
         Returns:
@@ -616,14 +616,14 @@ class ChempropModel(QSPRModelPyTorchGPU):
 
     def convertToMoleculeDataset(
             self,
-            X: pd.DataFrame | np.ndarray | QSPRDataset,
-            y: pd.DataFrame | np.ndarray | QSPRDataset | None = None,
+            X: pd.DataFrame | np.ndarray | QSPRTable,
+            y: pd.DataFrame | np.ndarray | QSPRTable | None = None,
     ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
         """Convert the given data matrix and target matrix to chemprop Molecule Dataset.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix
-            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix
+            X (pd.DataFrame, np.ndarray, QSPRTable): data matrix
+            y (pd.DataFrame, np.ndarray, QSPRTable): target matrix
 
         Returns:
                 data matrix and/or target matrix in np.ndarray format

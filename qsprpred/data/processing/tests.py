@@ -23,7 +23,7 @@ from ...data.processing.feature_filters import (
     LowVarianceFilter,
 )
 from ...data.processing.feature_standardizers import SKLearnStandardizer
-from ...data.tables.qspr import QSPRDataset
+from ...data.tables.qspr import QSPRTable
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn, PathMixIn
 
@@ -122,7 +122,7 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
             data=np.array([["C", 1], ["C", 2], ["C", 3], ["C", 4], ["C", 5], ["C", 6]]),
             columns=["SMILES", "y"],
         )
-        self.dataset = QSPRDataset.fromDF(
+        self.dataset = QSPRTable.fromDF(
             "TestFeatureFilters",
             target_props=[{"name": "y", "task": TargetTasks.REGRESSION}],
             df=self.df,

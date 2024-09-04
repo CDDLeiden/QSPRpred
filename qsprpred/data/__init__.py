@@ -7,4 +7,4 @@ from .sampling.splits import (
     BootstrapSplit,
 )
 from .tables.mol import MoleculeTable
-from .tables.qspr import QSPRDataset
+from .tables.qspr import QSPRTable

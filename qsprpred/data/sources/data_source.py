@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from qsprpred import TargetProperty
-from qsprpred.data import QSPRDataset, MoleculeTable
+from qsprpred.data import QSPRTable, MoleculeTable
 
 
 class DataSource(ABC):
@@ -26,7 +26,7 @@ class DataSource(ABC):
             target_props: list[TargetProperty | dict],
             name: str | None = None,
             **kwargs
-    ) -> QSPRDataset:
+    ) -> QSPRTable:
         """Get the dataset from the source as a `QSPRDataSet`. Essentially
         just creates a `QSPRDataSet` from the `MoleculeTable` obtained from
         the `getData` method.
@@ -45,5 +45,5 @@ class DataSource(ABC):
         """
         mt = self.getData(name, **kwargs)
         name = name or mt.name
-        return QSPRDataset.fromMolTable(mt, target_props, name=name, path=mt.rootDir,
-                                        **kwargs)
+        return QSPRTable.fromMolTable(mt, target_props, name=name, path=mt.rootDir,
+                                      **kwargs)

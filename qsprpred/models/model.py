@@ -16,7 +16,7 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import Mol
 
-from qsprpred.data import QSPRDataset
+from qsprpred.data import QSPRTable
 from ..data.storage.tabular.basic_storage import TabularStorageBasic
 from ..data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ..data.tables.mol import MoleculeTable
@@ -495,7 +495,7 @@ class QSPRModel(JSONSerializable, ABC):
             target_property.imputer = None
             dataset.addProperty(target_property.name, np.nan)
         # create the dataset and get failed molecules
-        dataset = QSPRDataset.fromMolTable(
+        dataset = QSPRTable.fromMolTable(
             dataset,
             self.targetProperties,
             drop_empty_target_props=False,

@@ -47,7 +47,7 @@ from qsprpred.data.sampling.splits import (
     ScaffoldSplit,
     TemporalSplit,
 )
-from qsprpred.data.tables.qspr import QSPRDataset
+from qsprpred.data.tables.qspr import QSPRTable
 from qsprpred.tasks import TargetTasks
 from .data.chem.scaffolds import BemisMurckoRDKit
 from .extra.gpu.models.dnn import DNNModel
@@ -371,7 +371,7 @@ def QSPR_dataprep(args):
                 if args.data_suffix
                 else f"{props_name}_{task}"
             )
-            mydataset = QSPRDataset.fromDF(
+            mydataset = QSPRTable.fromDF(
                 dataset_name,
                 target_props=target_props,
                 df=df,

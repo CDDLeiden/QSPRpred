@@ -9,6 +9,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from sklearn import metrics
 
+from ..data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ..models import QSPRModel
 from ..plotting.base_plot import ModelPlot
 from ..tasks import ModelTasks

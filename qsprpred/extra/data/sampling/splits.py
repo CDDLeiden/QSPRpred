@@ -14,7 +14,7 @@ from qsprpred.data.sampling.splits import (
     RandomSplit,
     ScaffoldSplit,
 )
-from qsprpred.data.tables.qspr import QSPRDataset
+from qsprpred.data.tables.qspr import QSPRTable
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.tasks import TargetProperty
 
@@ -90,7 +90,7 @@ class PCMSplit(DataSplit):
             for target in proteins
         ]
         # temporarily create multi-task dataset and split it with the given splitter
-        ds_mt = QSPRDataset.fromDF(
+        ds_mt = QSPRTable.fromDF(
             name=f"PCM_{self.splitter.__class__.__name__}_{hash(self)}",
             df=df_mt,
             smiles_col=ds.smilesProp,

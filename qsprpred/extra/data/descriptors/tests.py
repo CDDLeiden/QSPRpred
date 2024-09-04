@@ -46,7 +46,7 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, QSPRTestCase):
     """Test descriptor sets with extra features.
 
     Attributes:
-        dataset (QSPRDataset): dataset for testing, shuffled
+        dataset (QSPRTable): dataset for testing, shuffled
     """
 
     def setUp(self):
@@ -122,7 +122,7 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
     """Test the PCM data set features.
 
     Attributes:
-        dataset (QSPRDataset): dataset for testing
+        dataset (QSPRTable): dataset for testing
         sampleDescSet (DescriptorSet): descriptor set for testing
         defaultMSA (BioPythonMSA): MSA provider for testing
     """

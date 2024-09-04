@@ -15,7 +15,7 @@ from .mol import MoleculeTable
 from ..chem.standardizers.papyrus import PapyrusStandardizer
 from ..descriptors.fingerprints import MorganFP
 from ... import TargetProperty, TargetTasks
-from ...data.tables.qspr import QSPRDataset
+from ...data.tables.qspr import QSPRTable
 from ...utils.stopwatch import StopWatch
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import DataPrepCheckMixIn
@@ -285,7 +285,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             n_jobs=self.nCPU,
             chunk_size=self.chunkSize,
         )
-        dataset = QSPRDataset(
+        dataset = QSPRTable(
             storage,
             "test_defaults",
             [{
@@ -305,17 +305,17 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         # load the data set again and check if everything is consistent after loading
         # creation from file
         stopwatch.reset()
-        dataset_new = QSPRDataset.fromFile(dataset.metaFile)
+        dataset_new = QSPRTable.fromFile(dataset.metaFile)
         stopwatch.stop("Loading from file took: ")
         self.checkConsistency(dataset_new)
         # creation by reinitialization
         stopwatch.reset()
-        dataset_new = QSPRDataset.fromFile(dataset.metaFile)
+        dataset_new = QSPRTable.fromFile(dataset.metaFile)
         stopwatch.stop("Reinitialization took: ")
         self.checkConsistency(dataset_new)
         # creation from a table file
         stopwatch.reset()
-        dataset_new = QSPRDataset.fromTableFile(
+        dataset_new = QSPRTable.fromTableFile(
             "test_defaults",
             f"{self.inputDataPath}/test_data.tsv",
             path=self.generatedDataPath,
@@ -325,10 +325,10 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             }]
         )
         stopwatch.stop("Loading from table file took: ")
-        self.assertTrue(isinstance(dataset_new, QSPRDataset))
+        self.assertTrue(isinstance(dataset_new, QSPRTable))
         self.checkConsistency(dataset_new)
         # creation from a table file with a new name
-        dataset_new = QSPRDataset.fromTableFile(
+        dataset_new = QSPRTable.fromTableFile(
             "test_defaults_new",  # new name implies HBD below should exist again
             f"{self.inputDataPath}/test_data.tsv",
             target_props=[{
@@ -337,7 +337,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             }],
             path=self.generatedDataPath,
         )
-        self.assertTrue(isinstance(dataset_new, QSPRDataset))
+        self.assertTrue(isinstance(dataset_new, QSPRTable))
         self.assertIn("HBD", dataset_new.getProperties())
         dataset_new.removeProperty("HBD")
         self.assertEqual(dataset_new.X.shape[1], 0)
@@ -383,7 +383,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             n_jobs=self.nCPU,
             chunk_size=self.chunkSize,
         )
-        dataset = QSPRDataset(
+        dataset = QSPRTable(
             storage,
             "testMultitask",
             [
@@ -421,7 +421,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             n_jobs=self.nCPU,
             chunk_size=self.chunkSize,
         )
-        dataset = QSPRDataset(
+        dataset = QSPRTable(
             storage,
             "testTargetProperty",
             [
@@ -453,7 +453,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             n_jobs=self.nCPU,
             chunk_size=self.chunkSize,
         )
-        dataset = QSPRDataset(
+        dataset = QSPRTable(
             storage,
             "testTargetProperty-precomputed",
             [{
@@ -470,7 +470,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(dataset.targetProperties[0].th, "precomputed")
         # Check that the dataset is correctly loaded from file for classification
         dataset.save()
-        dataset_new = QSPRDataset.fromFile(dataset.metaFile)
+        dataset_new = QSPRTable.fromFile(dataset.metaFile)
         self.checkBadInit(dataset_new)
         self.checkClassification(dataset_new, ["CL"], ["precomputed"])
         # Check that the make regression method works as expected
@@ -478,7 +478,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         # Check that the dataset is correctly loaded from file for regression
         self.checkRegression(dataset_new, ["CL"])
         dataset_new.save()
-        dataset_new = QSPRDataset.fromFile(dataset.metaFile)
+        dataset_new = QSPRTable.fromFile(dataset.metaFile)
         self.checkRegression(dataset_new, ["CL"])
 
     def testRandomStateShuffle(self):
@@ -499,7 +499,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         dataset.shuffle()
         order_next = dataset.X.index.tolist()
         # reload and check if seed and order are the same
-        dataset = QSPRDataset.fromFile(dataset.metaFile)
+        dataset = QSPRTable.fromFile(dataset.metaFile)
         self.assertEqual(dataset.randomState, seed)
         self.assertListEqual(dataset.X.index.tolist(), order)
         # shuffle the reloaded set and check if we got the same order as before
@@ -523,7 +523,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         test_order = test.index.tolist()
         # reload and check if orders are the same if we redo the split
         # and featurization with the same random state
-        dataset = QSPRDataset.fromFile(dataset.metaFile)
+        dataset = QSPRTable.fromFile(dataset.metaFile)
         split = ShuffleSplit(1, test_size=0.5, random_state=dataset.randomState)
         dataset.split(split, featurize=False)
         dataset.featurizeSplits(shuffle=True)
@@ -544,7 +544,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         for _, _, _, _, train_index, test_index in dataset.iterFolds(split):
             order_folds.append(train.iloc[train_index].index.tolist())
         # reload and check if orders are the same if we redo the folds from saved data
-        dataset = QSPRDataset.fromFile(dataset.metaFile)
+        dataset = QSPRTable.fromFile(dataset.metaFile)
         dataset.prepareDataset(feature_calculators=[MorganFP(radius=2, nBits=128)])
         train, _ = dataset.getFeatures()
         self.assertListEqual(train.index.tolist(), order_train)
@@ -791,7 +791,7 @@ class TestTargetImputation(PathMixIn, QSPRTestCase):
 
     def testImputation(self):
         """Test the imputation of missing values in the target properties."""
-        self.dataset = QSPRDataset.fromDF(
+        self.dataset = QSPRTable.fromDF(
             "TestImputation",
             self.df,
             target_props=[

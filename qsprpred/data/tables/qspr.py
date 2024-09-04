@@ -28,7 +28,7 @@ from ...logs import logger
 from ...tasks import TargetProperty, TargetTasks
 
 
-class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
+class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
     """Implementation of `QSPRDataSet` using a collection of `PandasDataTable` objects.
 
     It splits the data in train and test set, as well as creating cross-validation
@@ -93,7 +93,7 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             ]
         elif target_props is None:
             raise ValueError(
-                "Target properties must be specified for a new QSPRDataset."
+                "Target properties must be specified for a new QSPRTable."
             )
         # load names of descriptors to use as training features
         self.featureNames = self.getFeatureNames()
@@ -145,8 +145,8 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             path: str = ".",
             smiles_col: str = "SMILES",
             **kwargs,
-    ) -> "QSPRDataset":
-        """Create `QSPRDataset` from a pandas DataFrame.
+    ) -> "QSPRTable":
+        """Create `QSPRTable` from a pandas DataFrame.
         
         Args:
             name (str): name of the data set
@@ -154,13 +154,13 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             target_props (list[TargetProperty | dict]): target properties to use
             path (str): path to the directory where the data set will be saved
             smiles_col (str): name of the column containing SMILES
-            **kwargs: additional keyword arguments for `QSPRDataset` constructor
+            **kwargs: additional keyword arguments for `QSPRTable` constructor
             
         Returns:
-            QSPRDataset: created data set
+            QSPRTable: created data set
         """
         mt = super().fromDF(name, df, path, smiles_col, **kwargs)
-        return QSPRDataset.fromMolTable(mt, target_props, name=name, path=path)
+        return QSPRTable.fromMolTable(mt, target_props, name=name, path=path)
 
     @classmethod
     def fromTableFile(
@@ -173,40 +173,40 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             target_props: list[TargetProperty | dict] | None = None,
             **kwargs
     ):
-        r"""Create `QSPRDataset` from table file (i.e. CSV or TSV).
+        r"""Create `QSPRTable` from table file (i.e. CSV or TSV).
 
         Args:
             name (str): name of the data set
             filename (str): path to the table file
             path (str): path to the directory where the data set will be saved
-            *args: additional arguments for `QSPRDataset` constructor
+            *args: additional arguments for `QSPRTable` constructor
             sep (str, optional): separator in the table file. Defaults to "\t".
             target_props (list[TargetProperty | dict], optional): target properties to
                 use. Defaults to `None`.
-            **kwargs: additional keyword arguments for `QSPRDataset` constructor
+            **kwargs: additional keyword arguments for `QSPRTable` constructor
         
         Returns:
-            QSPRDataset: `QSPRDataset` object
+            QSPRTable: `QSPRTable` object
         """
         mt = super().fromTableFile(name, filename, path, *args, sep=sep, **kwargs)
-        return QSPRDataset.fromMolTable(mt, target_props, name=mt.name, path=path)
+        return QSPRTable.fromMolTable(mt, target_props, name=mt.name, path=path)
 
     @classmethod
     def fromSDF(cls, name: str, filename: str, smiles_prop: str, *args, **kwargs):
-        """Create `QSPRDataset` from SDF file.
+        """Create `QSPRTable` from SDF file.
 
-        It is currently not implemented for `QSPRDataset`, but you can convert from
+        It is currently not implemented for `QSPRTable`, but you can convert from
         'MoleculeTable' with the 'fromMolTable' method.
 
         Args:
             name (str): name of the data set
             filename (str): path to the SDF file
             smiles_prop (str): name of the property in the SDF file containing SMILES
-            *args: additional arguments for `QSPRDataset` constructor
-            **kwargs: additional keyword arguments for `QSPRDataset` constructor
+            *args: additional arguments for `QSPRTable` constructor
+            **kwargs: additional keyword arguments for `QSPRTable` constructor
         """
         raise NotImplementedError(
-            f"SDF loading not implemented for {QSPRDataset.__name__}, yet. You can "
+            f"SDF loading not implemented for {QSPRTable.__name__}, yet. You can "
             "convert from 'MoleculeTable' with 'fromMolTable'."
         )
 
@@ -422,7 +422,7 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             name: str | None = None,
             path: str = ".",
             **kwargs,
-    ) -> "QSPRDataset":
+    ) -> "QSPRTable":
         """Get a subset of the data set.
         
         Args:
@@ -432,10 +432,10 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             name (str, optional): name of the subset. Defaults to `None`.
             path (str, optional): path to the directory where the subset will be saved.
                 Defaults to ".".
-            **kwargs: additional keyword arguments for the constructor of `QSPRDataset`.
+            **kwargs: additional keyword arguments for the constructor of `QSPRTable`.
             
         Returns:
-            QSPRDataset: subset of the data set
+            QSPRTable: subset of the data set
         """
         mt = super().getSubset(subset, ids, name, path, **kwargs)
         ds = self.fromMolTable(mt, self.targetProperties, name=mt.name, path=path,
@@ -455,22 +455,22 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             path: str = ".",
             name: str | None = None,
             **kwargs,
-    ) -> "QSPRDataset":
-        """Create QSPRDataset from a MoleculeTable.
+    ) -> "QSPRTable":
+        """Create QSPRTable from a MoleculeTable.
 
         Args:
             mol_table (MoleculeTable): `MoleculeTable` to use as the data source
             target_props (list): list of target properties to use
             *args:
                 additional positional arguments to pass to the constructor of
-                `QSPRDataset`
+                `QSPRTable`
             path (str): path to the directory where the data set will be saved
             name (str): name of the data set
             **kwargs:
-                additional keyword arguments to pass to the constructor of `QSPRDataset`
+                additional keyword arguments to pass to the constructor of `QSPRTable`
 
         Returns:
-            QSPRDataset: created data set
+            QSPRTable: created data set
         """
         name = mol_table.name if name is None else name
         kwargs["random_state"] = (
@@ -483,7 +483,7 @@ class QSPRDataset(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             if "store_format" not in kwargs
             else kwargs["store_format"]
         )
-        ds = QSPRDataset(
+        ds = QSPRTable(
             mol_table.storage,
             name,
             target_props,

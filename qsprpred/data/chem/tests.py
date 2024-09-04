@@ -5,7 +5,7 @@ from ... import TargetTasks
 from ...data.chem.clustering import RandomClusters, FPSimilarityMaxMinClusters, \
     FPSimilarityLeaderPickerClusters, ScaffoldClusters
 from ...data.chem.scaffolds import BemisMurckoRDKit, BemisMurcko
-from ...data.tables.qspr import QSPRDataset
+from ...data.tables.qspr import QSPRTable
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn
 
@@ -84,7 +84,7 @@ class TestStandardizers(DataSetsPathMixIn, QSPRTestCase):
         mask = [False] * orig_len
         mask[0] = True
         df.loc[mask, "SMILES"] = "C(C)(C)(C)(C)(C)(C)(C)(C)(C)"  # bad valence example
-        dataset = QSPRDataset.fromDF(
+        dataset = QSPRTable.fromDF(
             "standardization_test_invalid_filter",
             df=df,
             target_props=[{"name": "VDss", "task": TargetTasks.REGRESSION}],

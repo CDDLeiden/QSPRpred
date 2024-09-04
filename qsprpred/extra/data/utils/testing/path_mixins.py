@@ -167,7 +167,7 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
             random_state (int, optional):
                 random seed to use in the dataset. Defaults to `None`
         Returns:
-            QSPRDataset: a `QSPRDataset` object
+            QSPRTable: a `QSPRTable` object
         """
         storage = self.getStorage(
             self.getPCMDF(),

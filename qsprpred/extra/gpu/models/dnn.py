@@ -14,7 +14,7 @@ from sklearn.model_selection import ShuffleSplit
 from qsprpred.tasks import ModelTasks
 from .base_torch import QSPRModelPyTorchGPU, DEFAULT_TORCH_GPUS
 from ....data.sampling.splits import DataSplit
-from ....data.tables.qspr import QSPRDataset
+from ....data.tables.qspr import QSPRTable
 from ....extra.gpu.models.neural_network import STFullyConnected, Base
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
 from ....models.monitors import BaseMonitor, FitMonitor
@@ -144,7 +144,7 @@ class DNNModel(QSPRModelPyTorchGPU):
         """Whether the model supports early stopping or not."""
         return True
 
-    def initFromDataset(self, data: QSPRDataset | None):
+    def initFromDataset(self, data: QSPRTable | None):
         super().initFromDataset(data)
         if self.targetProperties[0].task.isRegression():
             self.nClass = 1
@@ -234,7 +234,7 @@ class DNNModel(QSPRModelPyTorchGPU):
             monitor: FitMonitor | None = None,
             **kwargs,
     ):
-        """Fit the model to the given data matrix or `QSPRDataset`.
+        """Fit the model to the given data matrix or `QSPRTable`.
 
         Args:
             X (pd.DataFrame, np.ndarray): data matrix to fit
@@ -289,7 +289,7 @@ class DNNModel(QSPRModelPyTorchGPU):
         return estimator_fit
 
     def predict(
-            self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
+            self, X: pd.DataFrame | np.ndarray | QSPRTable, estimator: Any = None
     ) -> np.ndarray:
         """See `QSPRModel.predict`."""
         estimator = self.estimator if estimator is None else estimator
@@ -303,7 +303,7 @@ class DNNModel(QSPRModelPyTorchGPU):
             return scores[0]
 
     def predictProba(
-            self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
+            self, X: pd.DataFrame | np.ndarray | QSPRTable, estimator: Any = None
     ) -> np.ndarray:
         """See `QSPRModel.predictProba`."""
         estimator = self.estimator if estimator is None else estimator
