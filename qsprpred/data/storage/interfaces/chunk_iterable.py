@@ -42,8 +42,6 @@ class ChunkIterable(ABC):
             func (callable): The function to apply.
             func_args (list, optional): The positional arguments of the function.
             func_kwargs (dict, optional): The keyword arguments of the function.
-            *args: Additional positional arguments to the function.
-            **kwargs: Additional keyword arguments to the function.
             
         Returns:
             A generator that yields the results of the function applied to each chunk.

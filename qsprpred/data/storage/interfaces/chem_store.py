@@ -12,7 +12,13 @@ from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 
 
 class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, ABC):
-    """Interface for storing and managing chemical data."""
+    """Interface for storing and managing chemical data.
+
+    It can be used as an abstraction layer for different storage backends that
+    store data about molecules and their properties or other metadata. Check the
+    documentation of the specific implementation for more details on how to use it and
+    the base classes this class inherits from for more details on its functionality.
+    """
 
     @property
     @abstractmethod
@@ -20,9 +26,9 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
         """Get the name of the property that contains the SMILES strings."""
 
     @property
-    def n_mols(self) -> int:
+    def nMols(self) -> int:
         """Number of molecules in storage."""
-        return self.get_mol_count()
+        return self.getMolCount()
 
     @property
     def smiles(self) -> Generator[str, None, None]:
@@ -30,7 +36,7 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
         return (x.smiles for x in self)
 
     @abstractmethod
-    def get_mol(self, mol_id: str) -> StoredMol:
+    def getMol(self, mol_id: str) -> StoredMol:
         """Get a molecule from the store using its ID.
 
         Args:
@@ -41,8 +47,8 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
         """
 
     @abstractmethod
-    def add_mols(self, smiles: Iterable[str], props: dict[str, list] | None = None,
-                 *args, **kwargs) -> list[StoredMol]:
+    def addMols(self, smiles: Iterable[str], props: dict[str, list] | None = None,
+                *args, **kwargs) -> list[StoredMol]:
         """Add a molecule to the store. 
         
         This method should not perform any standardization or identifier calculation.
@@ -63,7 +69,7 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
         """
 
     @abstractmethod
-    def remove_mol(self, mol_id: str):
+    def removeMol(self, mol_id: str):
         """Remove a molecule from the store.
         
         Args:
@@ -71,7 +77,7 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
         """
 
     @abstractmethod
-    def get_mol_ids(self) -> tuple[str]:
+    def getMolIDs(self) -> tuple[str]:
         """Get all molecule IDs in the store.
 
         Returns:
@@ -79,7 +85,7 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
         """
 
     @abstractmethod
-    def get_mol_count(self):
+    def getMolCount(self):
         """Get the number of molecules in the store.
 
         Returns:
@@ -87,7 +93,7 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
         """
 
     @abstractmethod
-    def iter_mols(self) -> Generator[StoredMol, None, None]:
+    def iterMols(self) -> Generator[StoredMol, None, None]:
         """Iterate over all molecules in the store.
 
         Returns:
@@ -139,19 +145,19 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
         """
 
     def __len__(self):
-        return self.get_mol_count()
+        return self.getMolCount()
 
     def __contains__(self, item):
-        return item in self.get_mol_ids()
+        return item in self.getMolIDs()
 
     def __iter__(self):
-        return self.iter_mols()
+        return self.iterMols()
 
     def __getitem__(self, item):
-        return self.get_mol(item)
+        return self.getMol(item)
 
     def __delitem__(self, key):
-        return self.remove_mol(key)
+        return self.removeMol(key)
 
     def __bool__(self):
         return len(self) > 0

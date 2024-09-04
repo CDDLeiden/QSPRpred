@@ -9,7 +9,12 @@ from qsprpred.data.storage.interfaces.searchable import PropSearchable
 
 
 class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
-    """A simple `DataStorage` that maps property names to arbitrary data."""
+    """A simple `DataStorage` that maps property names to arbitrary data.
+    It is assumed that `PropertyStorage` stores entries with one or more properties
+    attached to each entry. It is up to the downstream implementation to decide how
+    the data is stored and how it is accessed as long as the interface is respected.
+    See the methods of this class and the base classes for more details.
+    """
 
     @property
     @abstractmethod

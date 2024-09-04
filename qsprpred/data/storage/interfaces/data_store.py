@@ -5,10 +5,10 @@ from qsprpred.utils.serialization import JSONSerializable
 
 class DataStorage(JSONSerializable, ABC):
     """Abstract base class defining an API to interact with persistent data storage.
-
-    Attributes:
-        _notJSON (list):
-            list of attributes that should not be serialized to JSON explicitly
+    This does not mean that the data is all stored locally, but only database or
+    REST API connection details can be saved into this file as well. It assumes
+    existence of `metaFile` attribute that points to a metadata file that describes
+    this instance and it should be possible to initialize it from this file.
     """
 
     @abstractmethod

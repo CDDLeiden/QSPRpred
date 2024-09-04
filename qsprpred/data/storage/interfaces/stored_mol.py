@@ -5,10 +5,15 @@ from rdkit import Chem
 
 
 class StoredMol(ABC):
-    """A simple interface for a molecule that can be stored in a chemstore."""
+    """A simple interface for a molecule that can be stored in a `ChemStore`.
+    Molecules in the `ChemStore` have properties, representations, and
+    can also have a parent molecule. Representations can be for example
+    conformers, tautomers, or protomers of the parent molecule. Representations
+    can also be used to encode docked poses with metadata attached as properties.
+    """
 
     def __str__(self) -> str:
-        return f"{self.__class__.__name__}({self.id}, {self.smiles})"
+        return f"{self.__class__.__name__} ({self.id}, {self.smiles})"
 
     @property
     @abstractmethod

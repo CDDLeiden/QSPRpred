@@ -6,22 +6,8 @@ from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 
 
 class TabularMol(StoredMol):
-    """Molecule stored in a tabular format.
-    
-    Attributes:
-        parent (TabularMol): parent molecule
-        id (str): identifier of the molecule
-        smiles (str): SMILES of the molecule
-        props (dict): properties of the molecule
-        representations (tuple): representations of the molecule
-    
-        _parent (TabularMol): parent molecule
-        _id (str): identifier of the molecule
-        _smiles (str): SMILES of the molecule
-        _rd_mol (Chem.Mol): rdkit molecule object
-        _props (dict): properties of the molecule
-        _representations (tuple): representations of the molecule
-    """
+    """Simple implementation of a molecule that is stored in a tabular storage."""
+
     def __init__(
             self,
             mol_id: str,

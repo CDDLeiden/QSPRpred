@@ -6,6 +6,11 @@ from qsprpred.data.descriptors.sets import DescriptorSet
 
 
 class DescriptorProvider(ABC):
+    """Classes that implement this interface provide a way to store and retrieve
+    molecular descriptors or other high-dimensional embeddings of molecules. It
+    assumes that descriptors are divided into sets of related descriptors and
+    described by a `DescriptorSet` object.
+    """
 
     @property
     @abstractmethod

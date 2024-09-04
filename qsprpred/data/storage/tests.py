@@ -42,7 +42,7 @@ class TabularStorageTest(StorageTest, TestCase):
             standardizer=PapyrusStandardizer(),
             identifier=InchiIdentifier(),
         )
-        store.add_library(
+        store.addLibrary(
             f"{store.name}_2",
             pd.read_csv(self.exampleFileIndex),
             smiles_col="smiles",
@@ -63,7 +63,7 @@ class TabularStorageTest(StorageTest, TestCase):
         self.assertListEqual(list(store2.smiles), list(store.smiles))
         # add a new library and check consistency after reload
         len_before = len(store)
-        added = store.add_mols(
+        added = store.addMols(
             ["CN1[C@H]2CC[C@@H]1[C@@H](C(OC)=O)[C@@H](OC(C3=CC=CC=C3)=O)C2"],
         )
         self.assertEqual(len(added), 1)
@@ -88,12 +88,12 @@ class TabularStorageTest(StorageTest, TestCase):
         self.assertEqual(len(store_default), 2)
         self.checkSerialization(store_default)
         # try to add store with the same name
-        self.assertRaises(ValueError, lambda: store_default.add_library(
+        self.assertRaises(ValueError, lambda: store_default.addLibrary(
             f"{store_default.name}_library",
             pd.read_csv(self.exampleFileBasic),
         ))
         # add a library with duplicated molecules
-        store_default.add_library(
+        store_default.addLibrary(
             f"{store_default.name}_2",
             pd.read_csv(self.exampleFileBasic),
         )
@@ -101,7 +101,7 @@ class TabularStorageTest(StorageTest, TestCase):
         self.assertEqual(len(store_default), 2)
         self.checkSerialization(store_default)
         # add a new library with additional compounds
-        store_default.add_library(
+        store_default.addLibrary(
             f"{store_default.name}_3",
             pd.read_csv(self.exampleFileIndex),
             smiles_col="smiles",
@@ -145,14 +145,14 @@ class TabularStorageTest(StorageTest, TestCase):
     def testAddMols(self):
         store = self.getStorage()
         len_before = len(store)
-        added = store.add_mols(
+        added = store.addMols(
             ["O=C(OCCN(CC)CC)c1ccc(N)cc1"],
         )
         self.assertEqual(len(added), 1)
         self.assertEqual(len(store), len_before + 1)
         self.checkSerialization(store)
         # add to a new library
-        store.add_mols(
+        store.addMols(
             ["O=C(OC(C)CN(CC)CC)c1ccc(N)cc1"],
             library=f"{store.name}_2",
         )
@@ -160,7 +160,7 @@ class TabularStorageTest(StorageTest, TestCase):
         self.assertEqual(len(store), len_before + 2)
         self.checkSerialization(store)
         # add with new properties
-        mols = store.add_mols(
+        mols = store.addMols(
             [
                 "O=C(OC(CCC)CN(CC)CC)c1ccc(N)cc1",
                 "O=C(OC(CCC)CN(CC)CC)c1ccc(N)cc1C"
@@ -176,7 +176,7 @@ class TabularStorageTest(StorageTest, TestCase):
         self.assertEqual(len(store), len_before + 4)
         self.checkSerialization(store)
         # add with existing properties
-        mols = store.add_mols(
+        mols = store.addMols(
             [
                 "O=C(OC(CCC)CN(CC)CC)c1ccc(N)cc1C(C)C",
                 "O=C(OC(CCC)CN(C(C)C)CC)c1ccc(N)cc1C"
@@ -190,7 +190,7 @@ class TabularStorageTest(StorageTest, TestCase):
         self.assertEqual(len(store), len_before + 6)
         self.checkSerialization(store)
         # add with existing properties and new ones
-        mols = store.add_mols(
+        mols = store.addMols(
             [
                 "O=C(OC(C(O)C)CN(CC)CC)c1ccc(N)cc1C(C)C",
                 "O=C(OC(CC(N)C)CN(C(C)C)CC)c1ccc(N)cc1C"
@@ -287,10 +287,10 @@ class TabularStorageTest(StorageTest, TestCase):
         self.assertEqual(len(result), 1)
         # get single molecule and check that is has all the props
         result_mol = list(result)[0]
-        result_mol = store.get_mol(result_mol.id)
+        result_mol = store.getMol(result_mol.id)
         for prop in store.getProperties():
             self.assertIn(prop, result_mol.props)
         # drop it and check that it is not there
-        result.remove_mol(result_mol.id)
+        result.removeMol(result_mol.id)
         self.assertNotIn(result_mol.id, result)
         self.assertEqual(len(result), 0)

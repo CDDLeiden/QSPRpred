@@ -11,7 +11,7 @@ from qsprpred.data.chem.standardizers import ChemStandardizer
 from qsprpred.data.chem.standardizers.base import ChemStandardizationException
 from qsprpred.data.processing.mol_processor import MolProcessor
 from qsprpred.data.storage.interfaces.chem_store import ChemStore
-from qsprpred.data.storage.interfaces.searchable import SMARTSSearchable, PropSearchable
+from qsprpred.data.storage.interfaces.searchable import SMARTSSearchable
 from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 from qsprpred.data.storage.tabular.stored_mol import TabularMol
 from qsprpred.data.tables.pandas import PandasDataTable
@@ -25,9 +25,10 @@ from qsprpred.utils.parallel import (
 
 
 class TabularStorageBasic(
-    ChemStore, SMARTSSearchable, PropSearchable, Summarizable, Parallelizable
+    ChemStore, SMARTSSearchable, Summarizable, Parallelizable
 ):
-    """Tabular storage for molecules.
+    """Tabular storage for molecules. An example implementations of `ChemStore`
+    that uses `PandasDataTable` to store the data.
     
     Attributes:
         name (str): Name of the storage.
@@ -36,20 +37,6 @@ class TabularStorageBasic(
         nJobs (int): Number of parallel jobs to use for processing.
         chunkSize (int): Size of the chunks to use for processing.
         chunkProcessor (ParallelGenerator): Parallel generator to use for processing.
-        libsPath (str): Path to the libraries directory.
-        smilesProp (str): Name of the column containing the SMILES.
-        originalSmilesProp (str): Name of the column containing the original SMILES.
-        idProp (str): Name of the column containing the molecule IDs.
-        metaFile (str): Path to the meta file.
-        standardizer (ChemStandardizer): Standardizer to use for the molecules.
-        identifier (ChemIdentifier): Identifier to use for the molecules.
-        nLibs (int): Number of libraries in the storage.
-        
-        _chunkSize (int): Size of the chunks to use for processing.
-        _nJobs (int): Number of parallel jobs to use for processing.
-        _libraries (dict[str, PandasDataTable]): Dictionary of libraries in the storage.
-        _standardizer (ChemStandardizer): Standardizer to use for the molecules.
-        _identifier (ChemIdentifier): Identifier to use for the molecules.
     """
     _notJSON: ClassVar = ChemStore._notJSON + ["_libraries"]
 
@@ -70,7 +57,8 @@ class TabularStorageBasic(
             chunk_size: int | None = None,
             n_jobs: int = 1,
     ):
-        """Initialize the storage.
+        """Initialize the storage. If the storage with the given name already exists
+        in the destination it will be reloaded.
         
         Args:
             name (str): Name of the storage.
@@ -119,7 +107,7 @@ class TabularStorageBasic(
             ]
             if df is None:
                 df = pd.DataFrame(columns=columns)
-            self.add_library(
+            self.addLibrary(
                 f"{self.name}_library",
                 df,
                 smiles_col,
@@ -133,22 +121,24 @@ class TabularStorageBasic(
 
     @property
     def libsPath(self):
-        """Path to the libraries directory."""
+        """Path to the directory where the primary library tables are stored."""
         return os.path.join(self.path, "libs")
 
     @property
     def smilesProp(self) -> str:
-        """Name of the column containing the SMILES."""
+        """Name of the property containing the SMILES."""
         return "SMILES"
 
     @property
     def originalSmilesProp(self) -> str:
-        """Name of the column containing the original SMILES."""
+        """Name of the column containing the original SMILES before standardization."""
         return "original_smiles"
 
     @property
     def idProp(self) -> str:
-        """Name of the column containing the molecule IDs."""
+        """Name of the property containing unique molecule IDs.
+        The values are determined by the attached `identifier`.
+        """
         return "ID"
 
     @property
@@ -186,7 +176,7 @@ class TabularStorageBasic(
             lib.chunkProcessor = self.chunkProcessor
         self.chunkSize = None
 
-    def add_library(
+    def addLibrary(
             self,
             name: str,
             df: pd.DataFrame,
@@ -196,7 +186,8 @@ class TabularStorageBasic(
             store_format="pkl",
             save=False,
     ):
-        """Reads molecules from a file and adds standardized SMILES to the store.
+        """Reads molecules from a file and adds standardized SMILES to the store
+        as a new library.
 
         Args:
             name (str): name of the library
@@ -315,7 +306,7 @@ class TabularStorageBasic(
         return cls(df=df, *args, name=name, **kwargs)
 
     @staticmethod
-    def apply_standardizer_to_data_frame(
+    def _apply_standardizer_to_data_frame(
             df: pd.DataFrame, smiles_prop: str, standardizer: ChemStandardizer
     ) -> list[tuple[int, str, str]]:
         """Apply a standardizer to the SMILES in a data frame.
@@ -444,7 +435,7 @@ class TabularStorageBasic(
         lib = self._libraries[library] if library else self._libraries[self.name]
         lib.addEntries(ids, props, raise_on_existing)
 
-    def add_mols(
+    def addMols(
             self,
             smiles: Iterable[str],
             props: dict[str, list] | None = None,
@@ -484,7 +475,7 @@ class TabularStorageBasic(
         df = pd.DataFrame(data)
         library = library or f"{self.name}_library"
         if library not in self._libraries:
-            self.add_library(
+            self.addLibrary(
                 name=library,
                 df=df,
                 smiles_col=self.smilesProp,
@@ -494,7 +485,7 @@ class TabularStorageBasic(
             )
         else:
             random_temp_name = f"{library}_temp"
-            self.add_library(
+            self.addLibrary(
                 name=random_temp_name,
                 df=df,
                 smiles_col=self.smilesProp,
@@ -516,7 +507,7 @@ class TabularStorageBasic(
             )
             return []
         return [
-            self.get_mol(x)
+            self.getMol(x)
             for x in self._libraries[library].getProperty(self.idProp)
             if x in df.index
         ]
@@ -566,13 +557,14 @@ class TabularStorageBasic(
         to provide from the data set can be specified with 'add_props', which will be
         a dictionary supplied as an additional positional argument to the function.
 
-        IMPORTANT: For successful parallel processing, the processor must be picklable.
+        IMPORTANT: For successful parallel processing with `multiprocessing`,
+        the processor must be picklable.
         Also note that
-        the returned generator will produce results as soon as they are ready,
-        which means that the chunks of data will
+        the returned generator may only produce results as soon as they are ready,
+        which means that the chunks of data may
         not be in the same order as the original data frame. However, you can pass the
-        value of `idProp` in `add_props` to identify the processed molecules.
-        See `CheckSmilesValid` for an example.
+        value of `idProp` in `add_props` to identify the processed molecules or
+        use `MolProcessorWithID` as the processor.
 
         Args:
             processor (MolProcessor):
@@ -966,7 +958,7 @@ class TabularStorageBasic(
         """Number of libraries in this storage."""
         return len(self._libraries)
 
-    def get_mol(self, mol_id) -> TabularMol:
+    def getMol(self, mol_id) -> TabularMol:
         """Get a molecule from the store by its ID.
         
         Args:
@@ -988,7 +980,7 @@ class TabularStorageBasic(
                 break
         return TabularMol(mol_id, smiles.iloc[0], props=props)
 
-    def remove_mol(self, mol_id):
+    def removeMol(self, mol_id):
         """Remove a molecule from the store.
         
         Args:
@@ -997,7 +989,7 @@ class TabularStorageBasic(
         for lib in self._libraries.values():
             lib.dropEntries([mol_id], ignore_missing=True)
 
-    def get_mol_ids(self) -> tuple[str, ...]:
+    def getMolIDs(self) -> tuple[str, ...]:
         """Returns a set of all molecule IDs in the store.
         
         Good for checking possible overlaps between stores.
@@ -1010,7 +1002,7 @@ class TabularStorageBasic(
             ids.extend(list(lib.getProperty(self.idProp)))
         return tuple(ids)
 
-    def get_mol_count(self) -> int:
+    def getMolCount(self) -> int:
         """Get the number of molecules in the store."""
         return sum(len(lib) for lib in self._libraries.values())
 
@@ -1106,7 +1098,7 @@ class TabularStorageBasic(
             mols.append(mol)
         return mols
 
-    def iter_mols(self) -> Generator[TabularMol, None, None]:
+    def iterMols(self) -> Generator[TabularMol, None, None]:
         """Iterate over the molecules in the store.	
         
         Yields:
@@ -1158,7 +1150,7 @@ class TabularStorageBasic(
         """
         output = []
         for chunk in pd_table.apply(
-                self.apply_standardizer_to_data_frame,
+                self._apply_standardizer_to_data_frame,
                 func_args=(self.smilesProp, self._standardizer),
                 on_props=(self.smilesProp, self.idProp),
                 as_df=True,
