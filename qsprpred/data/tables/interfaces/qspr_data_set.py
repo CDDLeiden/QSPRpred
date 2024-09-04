@@ -14,12 +14,7 @@ from qsprpred.data.tables.interfaces.molecule_data_set import MoleculeDataSet
 
 
 class QSPRDataSet(MoleculeDataSet, ABC):
-    """Interface for storing and managing QSPR data sets.
-    
-    Attributes:
-        hasFeatures (bool): Indicates if the dataset has features
-        isMultiTask (bool): Indicates if the dataset is a multi-task dataset
-    """
+    """Interface for storing and managing QSPR-specific data sets."""
 
     @abstractmethod
     def setTargetProperties(

@@ -15,7 +15,7 @@ from sklearn.exceptions import NotFittedError
 from sklearn.utils.validation import check_is_fitted
 
 from .model import QSPRModel
-from ..data.tables.qspr import QSPRDataset
+from ..data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ..logs import logger
 from ..tasks import ModelTasks
 
@@ -156,7 +156,7 @@ class SklearnModel(QSPRModel):
         return estimator.fit(X, y)
 
     def predict(
-            self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
+            self, X: pd.DataFrame | np.ndarray | QSPRDataSet, estimator: Any = None
     ):
         """See `QSPRModel.predict`."""
         estimator = self.estimator if estimator is None else estimator
@@ -170,7 +170,7 @@ class SklearnModel(QSPRModel):
         return preds
 
     def predictProba(
-            self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
+            self, X: pd.DataFrame | np.ndarray | QSPRDataSet, estimator: Any = None
     ):
         """See `QSPRModel.predictProba`."""
         estimator = self.estimator if estimator is None else estimator

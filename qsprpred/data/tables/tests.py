@@ -10,6 +10,7 @@ from sklearn.model_selection import KFold, ShuffleSplit
 
 from qsprpred.data.descriptors.sets import DrugExPhyschem
 from qsprpred.data.storage.tabular.basic_storage import TabularStorageBasic
+from .interfaces.qspr_data_set import QSPRDataSet
 from .mol import MoleculeTable
 from ..chem.standardizers.papyrus import PapyrusStandardizer
 from ..descriptors.fingerprints import MorganFP
@@ -200,7 +201,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         super().setUp()
         self.setUpPaths()
 
-    def checkConsistency(self, ds: QSPRDataset):
+    def checkConsistency(self, ds: QSPRDataSet):
         self.assertNotIn("Notes", ds.getProperties())
         self.assertNotIn("HBD", ds.getProperties())
         self.assertTrue(len(self.getSmallDF()) - 1 == len(ds))
@@ -559,7 +560,7 @@ class TestSearchFeatures(DataSetsPathMixIn, QSPRTestCase):
         super().setUp()
         self.setUpPaths()
 
-    def validateSearch(self, dataset: QSPRDataset, result: QSPRDataset, name: str):
+    def validateSearch(self, dataset: QSPRDataSet, result: QSPRDataSet, name: str):
         """Validate the results of a search."""
         self.assertTrue(len(result) < len(dataset))
         self.assertTrue(isinstance(result, type(dataset)))

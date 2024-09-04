@@ -274,7 +274,7 @@ class DataSetsPathMixIn(PathMixIn):
             preparation_settings (dict): dictionary containing preparation settings
 
         Returns:
-            QSPRDataset: a `QSPRDataset` object
+            QSPRDataSet: a `QSPRDataSet` object
         """
         return self.createTestDataSetFromFrame(
             self.getBigDF(),
@@ -302,7 +302,7 @@ class DataSetsPathMixIn(PathMixIn):
             preparation_settings (dict): dictionary containing preparation settings
 
         Returns:
-            QSPRDataset: a `QSPRDataset` object
+            QSPRDataSet: a `QSPRDataSet` object
         """
         return self.createTestDataSetFromFrame(
             self.getSmallDF(),
@@ -344,7 +344,7 @@ class DataSetsPathMixIn(PathMixIn):
             chunk_size (int): size of chunks to use per job in parallel processing
 
         Returns:
-            QSPRDataset: a `QSPRDataset` object
+            QSPRDataSet: a `QSPRDataSet` object
         """
         storage = self.getStorage(df, f"{name}_storage", n_jobs, chunk_size)
         ret = QSPRDataset(
@@ -377,7 +377,7 @@ class DataSetsPathMixIn(PathMixIn):
             random_state (int): random state to use for splitting and shuffling
 
         Returns:
-            QSPRDataset: a `QSPRDataset` object
+            QSPRDataSet: a `QSPRDataSet` object
         """
         return self.createTestDataSetFromFrame(
             self.getBigDF(),

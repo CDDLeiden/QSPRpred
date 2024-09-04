@@ -9,7 +9,7 @@ import optuna.trial
 from sklearn.model_selection import ParameterGrid
 
 from qsprpred.models.assessment.methods import ModelAssessor
-from ..data.tables.qspr import QSPRDataset
+from ..data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ..logs import logger
 from ..models.model import QSPRModel
 from ..models.monitors import BaseMonitor, HyperparameterOptimizationMonitor
@@ -58,14 +58,14 @@ class HyperparameterOptimization(ABC):
 
     @abstractmethod
     def optimize(
-            self, model: QSPRModel, ds: QSPRDataset, refit_optimal: bool = False
+            self, model: QSPRModel, ds: QSPRDataSet, refit_optimal: bool = False
     ) -> dict:
         """Optimize the model hyperparameters.
 
         Args:
             model (QSPRModel):
                 model to optimize
-            ds (QSPRDataset):
+            ds (QSPRDataSet):
                 dataset to use for the optimization
             refit_optimal (bool):
                 whether to refit the model with the optimal parameters
@@ -75,7 +75,7 @@ class HyperparameterOptimization(ABC):
         """
 
     def saveResults(
-            self, model: QSPRModel, ds: QSPRDataset, save_params: bool,
+            self, model: QSPRModel, ds: QSPRDataSet, save_params: bool,
             refit_optimal: bool
     ):
         """Handles saving of optimization results.
@@ -83,7 +83,7 @@ class HyperparameterOptimization(ABC):
         Args:
             model (QSPRModel):
                 model that was optimized
-            ds (QSPRDataset):
+            ds (QSPRDataSet):
                 dataset used in the optimization
             save_params (bool):
                 whether to re-initialize the model with the best parameters
@@ -126,7 +126,7 @@ class OptunaOptimization(HyperparameterOptimization):
         >>>     param_grid=search_space,
         >>>     n_trials=10
         >>> )
-        >>> best_params = optimizer.optimize(model, dataset) # dataset is a QSPRDataset
+        >>> best_params = optimizer.optimize(model, dataset) # dataset is a QSPRDataSet
 
     Available suggestion types:
         ["categorical", "discrete_uniform", "float", "int", "loguniform", "uniform"]
@@ -204,7 +204,7 @@ class OptunaOptimization(HyperparameterOptimization):
     def optimize(
             self,
             model: QSPRModel,
-            ds: QSPRDataset,
+            ds: QSPRDataSet,
             save_params: bool = True,
             refit_optimal: bool = False,
             **kwargs,
@@ -213,7 +213,7 @@ class OptunaOptimization(HyperparameterOptimization):
 
         Args:
             model (QSPRModel): the model to optimize
-            ds (QSPRDataset): dataset to use for the optimization
+            ds (QSPRDataSet): dataset to use for the optimization
             save_params (bool):
                 whether to set and save the best parameters to the model
                 after optimization
@@ -265,14 +265,14 @@ class OptunaOptimization(HyperparameterOptimization):
         return self.bestParams
 
     def objective(
-            self, trial: optuna.trial.Trial, model: QSPRModel, ds: QSPRDataset, **kwargs
+            self, trial: optuna.trial.Trial, model: QSPRModel, ds: QSPRDataSet, **kwargs
     ) -> float:
         """Objective for bayesian optimization.
 
         Arguments:
             trial (optuna.trial.Trial): trial object for the optimization
             model (QSPRModel): the model to optimize
-            ds (QSPRDataset): dataset to use for the optimization
+            ds (QSPRDataSet): dataset to use for the optimization
             **kwargs: additional arguments for the assessment method
 
         Returns:
@@ -345,7 +345,7 @@ class GridSearchOptimization(HyperparameterOptimization):
     def optimize(
             self,
             model: QSPRModel,
-            ds: QSPRDataset,
+            ds: QSPRDataSet,
             save_params: bool = True,
             refit_optimal: bool = False,
             **kwargs,
@@ -355,7 +355,7 @@ class GridSearchOptimization(HyperparameterOptimization):
         Args:
             model (QSPRModel):
                 the model to optimize
-            ds (QSPRDataset):
+            ds (QSPRDataSet):
                 dataset to use for the optimization
             save_params (bool):
                 whether to set and save the best parameters to the model

@@ -55,18 +55,18 @@ class SklearnBaseModelTestCase(ModelDataSetsPathMixIn, ModelCheckMixIn, QSPRTest
         self.nCPU = 2
 
     def getModel(
-        self,
-        name: str,
-        alg: Type | None = None,
-        parameters: dict | None = None,
-        random_state: int | None = None,
+            self,
+            name: str,
+            alg: Type | None = None,
+            parameters: dict | None = None,
+            random_state: int | None = None,
     ):
         """Create a SklearnModel model.
 
         Args:
             name (str): the name of the model
             alg (Type, optional): the algorithm to use. Defaults to None.
-            dataset (QSPRDataset, optional): the dataset to use. Defaults to None.
+            dataset (QSPRDataSet, optional): the dataset to use. Defaults to None.
             parameters (dict, optional): the parameters to use. Defaults to None.
             random_state(int, optional):
                 Random state to use for shuffling and other random operations. Defaults
@@ -97,9 +97,9 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
         ] + [
             (alg_name, TargetTasks.REGRESSION, alg_name, alg, [None])
             for alg, alg_name in (
-                (PLSRegression, "PLSR"),
-                (SVR, "SVR"),
-                (KNeighborsRegressor, "KNNR"),
+                    (PLSRegression, "PLSR"),
+                    (SVR, "SVR"),
+                    (KNeighborsRegressor, "KNNR"),
             )
         ]
     )

@@ -5,7 +5,7 @@ from typing import Any, Callable
 import numpy as np
 import pandas as pd
 
-from ..data.tables.qspr import QSPRDataset
+from ..data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ..logs import logger
 from ..utils.serialization import JSONSerializable
 
@@ -60,10 +60,10 @@ class EarlyStopping(JSONSerializable):
     """
 
     def __init__(
-        self,
-        mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
-        num_epochs: int | None = None,
-        aggregate_func: Callable[[list[int]], int] = np.mean,
+            self,
+            mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+            num_epochs: int | None = None,
+            aggregate_func: Callable[[list[int]], int] = np.mean,
     ):
         """Initialize early stopping.
 
@@ -151,20 +151,20 @@ def early_stopping(func: Callable) -> Callable:
     """
 
     def wrapper_fit(
-        self,
-        X: pd.DataFrame | np.ndarray | QSPRDataset,
-        y: pd.DataFrame | np.ndarray | QSPRDataset,
-        estimator: Any | None = None,
-        mode: EarlyStoppingMode | None = None,
-        split: "DataSplit" = None,
-        monitor: "FitMonitor" = None,
-        **kwargs,
+            self,
+            X: pd.DataFrame | np.ndarray | QSPRDataSet,
+            y: pd.DataFrame | np.ndarray | QSPRDataSet,
+            estimator: Any | None = None,
+            mode: EarlyStoppingMode | None = None,
+            split: "DataSplit" = None,
+            monitor: "FitMonitor" = None,
+            **kwargs,
     ) -> Any:
         """Wrapper for fit method of models that support early stopping.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to fit
-            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix to fit
+            X (pd.DataFrame, np.ndarray, QSPRDataSet): data matrix to fit
+            y (pd.DataFrame, np.ndarray, QSPRDataSet): target matrix to fit
             estimator (Any): estimator instance to use for fitting
             mode (EarlyStoppingMode): early stopping mode
             split (DataSplit): data split to use for early stopping,

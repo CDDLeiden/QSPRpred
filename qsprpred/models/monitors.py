@@ -10,7 +10,7 @@ from rdkit import Chem
 from rdkit.Chem import Draw
 
 from .model import QSPRModel
-from ..data.tables.qspr import QSPRDataset
+from ..data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ..utils.serialization import JSONSerializable
 
 
@@ -86,13 +86,13 @@ class AssessorMonitor(FitMonitor):
 
     @abstractmethod
     def onAssessmentStart(
-            self, model: QSPRModel, data: QSPRDataset, assesment_type: str
+            self, model: QSPRModel, data: QSPRDataSet, assesment_type: str
     ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
-            data (QSPRDataset): data set used in assessment
+            data (QSPRDataSet): data set used in assessment
             assesment_type (str): type of assessment
         """
 
@@ -141,14 +141,14 @@ class HyperparameterOptimizationMonitor(AssessorMonitor):
 
     @abstractmethod
     def onOptimizationStart(
-            self, model: QSPRModel, data: QSPRDataset, config: dict,
+            self, model: QSPRModel, data: QSPRDataSet, config: dict,
             optimization_type: str
     ):
         """Called before the hyperparameter optimization has started.
 
         Args:
             model (QSPRModel): model to optimize
-            data (QSPRDataset): data set used in optimization
+            data (QSPRDataSet): data set used in optimization
             config (dict): configuration of the hyperparameter optimization
             optimization_type (str): type of hyperparameter optimization
         """
@@ -242,13 +242,13 @@ class NullMonitor(HyperparameterOptimizationMonitor):
         """
 
     def onAssessmentStart(
-            self, model: QSPRModel, data: QSPRDataset, assesment_type: str
+            self, model: QSPRModel, data: QSPRDataSet, assesment_type: str
     ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
-            data (QSPRDataset): data set used in assessment
+            data (QSPRDataSet): data set used in assessment
             assesment_type (str): type of assessment
         """
 
@@ -289,14 +289,14 @@ class NullMonitor(HyperparameterOptimizationMonitor):
         """
 
     def onOptimizationStart(
-            self, model: QSPRModel, data: QSPRDataset, config: dict,
+            self, model: QSPRModel, data: QSPRDataSet, config: dict,
             optimization_type: str
     ):
         """Called before the hyperparameter optimization has started.
 
         Args:
             model (QSPRModel): model to optimize
-            data (QSPRDataset): data set used in optimization
+            data (QSPRDataSet): data set used in optimization
             config (dict): configuration of the hyperparameter optimization
             optimization_type (str): type of hyperparameter optimization
         """
@@ -411,13 +411,13 @@ class ListMonitor(HyperparameterOptimizationMonitor):
             monitor.onBatchEnd(batch, loss)
 
     def onAssessmentStart(
-            self, model: QSPRModel, data: QSPRDataset, assesment_type: str
+            self, model: QSPRModel, data: QSPRDataSet, assesment_type: str
     ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
-            data (QSPRDataset): data set used in assessment
+            data (QSPRDataSet): data set used in assessment
             assesment_type (str): type of assessment
         """
         for monitor in self.monitors:
@@ -466,14 +466,14 @@ class ListMonitor(HyperparameterOptimizationMonitor):
             monitor.onFoldEnd(model_fit, fold_predictions)
 
     def onOptimizationStart(
-            self, model: QSPRModel, data: QSPRDataset, config: dict,
+            self, model: QSPRModel, data: QSPRDataSet, config: dict,
             optimization_type: str
     ):
         """Called before the hyperparameter optimization has started.
 
         Args:
             model (QSPRModel): model to optimize
-            data (QSPRDataset): data set used in optimization
+            data (QSPRDataSet): data set used in optimization
             config (dict): configuration of the hyperparameter optimization
             optimization_type (str): type of hyperparameter optimization
         """
@@ -532,11 +532,11 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
                 predictions, estimators, fits)
         scores (pd.DataFrame): scores for each hyperparameter search iteration
         model (QSPRModel): model to optimize
-        data (QSPRDataset): dataset used in optimization
+        data (QSPRDataSet): dataset used in optimization
 
         assessmentType (str): type of current assessment
         assessmentModel (QSPRModel): model to assess in current assessment
-        assessmentDataset (QSPRDataset): data set used in current assessment
+        assessmentDataset (QSPRDataSet): data set used in current assessment
         foldData (dict): dictionary of input data, keyed by the fold index, of the
             current assessment
         predictions (pd.DataFrame): predictions for the dataset of the current assessment
@@ -615,14 +615,14 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         super().__setstate__(state)
 
     def onOptimizationStart(
-            self, model: QSPRModel, data: QSPRDataset, config: dict,
+            self, model: QSPRModel, data: QSPRDataSet, config: dict,
             optimization_type: str
     ):
         """Called before the hyperparameter optimization has started.
 
         Args:
             model (QSPRModel): model to optimize
-            data (QSPRDataset): data set used in optimization
+            data (QSPRDataSet): data set used in optimization
             config (dict): configuration of the hyperparameter optimization
             optimization_type (str): type of hyperparameter optimization
         """
@@ -664,13 +664,13 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         self.iteration += 1
 
     def onAssessmentStart(
-            self, model: QSPRModel, data: QSPRDataset, assesment_type: str
+            self, model: QSPRModel, data: QSPRDataSet, assesment_type: str
     ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
-            data (QSPRDataset): data set used in assessment
+            data (QSPRDataSet): data set used in assessment
             assesment_type (str): type of assessment
         """
         self.assessmentModel = model
@@ -734,7 +734,7 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         self.estimators = {}
         self.fits = {}
 
-    def _get_assessment(self) -> tuple[QSPRModel, QSPRDataset, pd.DataFrame, dict]:
+    def _get_assessment(self) -> tuple[QSPRModel, QSPRDataSet, pd.DataFrame, dict]:
         """Return the assessment data."""
         return {
             "assessmentModel": self.assessmentModel,
@@ -757,7 +757,7 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
 
         Args:
             model (QSPRModel): model to be fitted
-            data (QSPRDataset): data set used in training
+            data (QSPRDataSet): data set used in training
             X_train (np.ndarray): training data
             y_train (np.ndarray): training targets
             X_val (np.ndarray | None): validation data, used for early stopping
@@ -859,14 +859,14 @@ class FileMonitor(BaseMonitor):
         self.outDir = None
 
     def onOptimizationStart(
-            self, model: QSPRModel, data: QSPRDataset, config: dict,
+            self, model: QSPRModel, data: QSPRDataSet, config: dict,
             optimization_type: str
     ):
         """Called before the hyperparameter optimization has started.
 
         Args:
             model (QSPRModel): model to optimize
-            data (QSPRDataset): data set used in optimization
+            data (QSPRDataSet): data set used in optimization
             config (dict): configuration of the hyperparameter optimization
             optimization_type (str): type of hyperparameter optimization
         """
@@ -908,13 +908,13 @@ class FileMonitor(BaseMonitor):
             )
 
     def onAssessmentStart(
-            self, model: QSPRModel, data: QSPRDataset, assesment_type: str
+            self, model: QSPRModel, data: QSPRDataSet, assesment_type: str
     ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
-            data (QSPRDataset): data set used in assessment
+            data (QSPRDataSet): data set used in assessment
             assesment_type (str): type of assessment
         """
         super().onAssessmentStart(model, data, assesment_type)

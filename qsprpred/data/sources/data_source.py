@@ -6,7 +6,7 @@ from qsprpred.data import QSPRDataset, MoleculeTable
 
 class DataSource(ABC):
     """General definition of a data source. It is essentially a factory
-    for creating `MoleculeTable` and `QSPRDataset` instances.
+    for creating `MoleculeTable` and `QSPRDataSet` instances.
     """
 
     @abstractmethod
@@ -27,8 +27,8 @@ class DataSource(ABC):
             name: str | None = None,
             **kwargs
     ) -> QSPRDataset:
-        """Get the dataset from the source as a `QSPRDataset`. Essentially
-        just creates a `QSPRDataset` from the `MoleculeTable` obtained from
+        """Get the dataset from the source as a `QSPRDataSet`. Essentially
+        just creates a `QSPRDataSet` from the `MoleculeTable` obtained from
         the `getData` method.
 
         Args:
@@ -38,10 +38,10 @@ class DataSource(ABC):
                 The name of the dataset.
             kwargs:
                 Additional keyword arguments to pass to the `getData`
-                method and the `QSPRDataset` constructor.
+                method and the `QSPRDataSet` constructor.
 
         Returns:
-            QSPRDataset: The dataset.
+            QSPRDataSet: The dataset.
         """
         mt = self.getData(name, **kwargs)
         name = name or mt.name

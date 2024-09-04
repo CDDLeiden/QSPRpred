@@ -22,7 +22,8 @@ from ...utils.parallel import Parallelizable
 
 
 class MoleculeTable(MoleculeDataSet, Parallelizable):
-    """Class that holds and prepares molecule data for modelling and other analyses.
+    """Class that holds and prepares molecule data for modelling and other analyses
+    organized as a collection of `PandasDataTable` objects.
 
     Attributes:
         descriptors (list[DescriptorTable]): List of descriptor tables attached to this
@@ -33,23 +34,6 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         storage (ChemStore): The storage object that holds the molecule data.
         path (str): Path to the directory where the data set will be stored.
         name (str): Name of the data set.
-        identifier (ChemIdentifier): Identifier to use for the data set.
-        standardizer (ChemStandardizer): Standardizer to use for the data set.
-        chunkSize (int): Size of chunks to use per job in parallel processing.
-        nJobs (int): Number of jobs to use for parallel processing.
-        smilesProp (str): Name of the property that contains the SMILES strings.
-        smiles (Generator[str, None, None]): 
-            Generator of SMILES strings of all molecules in the data set.
-        hasScaffolds (bool): Whether the data frame contains scaffolds.
-        hasScaffoldGroups (bool): Whether the data frame contains scaffold groups.
-        descPath (str): Path to the directory where the descriptor data is stored.
-        descriptorSets (list[DescriptorSet]): 
-            List of descriptor calculators for this table.
-        idProp (str): Name of the property that contains the molecule IDs.
-        metaFile (str): Path to the meta file for the data set.
-        hasClusters (bool): Whether the data frame contains clusters.
-        
-        _name (str): Name of the data set.
     """
 
     _notJSON: ClassVar = [*PropertyStorage._notJSON, "descriptors", "storage"]
@@ -453,7 +437,8 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
             )
             self.storage.addProperty(name, groups)
 
-    def getScaffoldGroups(self, scaffold_name: str, mol_per_group: int = 10) -> pd.Series:
+    def getScaffoldGroups(self, scaffold_name: str,
+                          mol_per_group: int = 10) -> pd.Series:
         """Get the scaffold groups for a given combination of scaffold and number of
         molecules per scaffold group.
 
@@ -844,9 +829,9 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         return ret
 
     def transformProperties(
-        self,
-        names: list[str],
-        transformer: Callable[[Iterable[Any]], Iterable[Any]]
+            self,
+            names: list[str],
+            transformer: Callable[[Iterable[Any]], Iterable[Any]]
     ):
         """Transform the properties of the data frame.
         
@@ -899,10 +884,10 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
             dset.dropEntries(ids)
 
     def addEntries(
-        self, 
-        ids: list[str], 
-        props: dict[str, list],
-        raise_on_existing: bool = True
+            self,
+            ids: list[str],
+            props: dict[str, list],
+            raise_on_existing: bool = True
     ):
         """Add entries to the data set.
         
@@ -989,12 +974,12 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         raise NotImplementedError("Summary not yet available for MoleculeTable.")
 
     def searchWithSMARTS(
-        self,
-        patterns: list[str],
-        operator: Literal["or", "and"] = "or",
-        use_chirality: bool = False,
-        name: str | None = None,
-        path: str = "."
+            self,
+            patterns: list[str],
+            operator: Literal["or", "and"] = "or",
+            use_chirality: bool = False,
+            name: str | None = None,
+            path: str = "."
     ) -> "MoleculeTable":
         """Search the data set with SMARTS patterns.
         
@@ -1022,11 +1007,11 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         )
 
     def searchOnProperty(
-        self,
-        prop_name: str,
-        values: list[float | int | str],
-        exact=False, name: str | None = None,
-        path: str = "."
+            self,
+            prop_name: str,
+            values: list[float | int | str],
+            exact=False, name: str | None = None,
+            path: str = "."
     ) -> "MoleculeTable":
         """Search the data set based on a property.	
         
@@ -1045,9 +1030,9 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         return self.getSubset(self.getProperties(), mol_ids, name=name, path=path)
 
     def addClusters(
-        self,
-        clusters: list[MoleculeClusters],
-        recalculate: bool = False,
+            self,
+            clusters: list[MoleculeClusters],
+            recalculate: bool = False,
     ):
         """Add clusters to the data frame.
 

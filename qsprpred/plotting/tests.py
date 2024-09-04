@@ -11,7 +11,6 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 from qsprpred.models.assessment.methods import CrossValAssessor, TestSetAssessor
 from ..data.processing.feature_filters import LowVarianceFilter
-from ..data.tables.qspr import QSPRDataset
 from ..models.scikit_learn import SklearnModel
 from ..plotting.classification import ConfusionMatrixPlot, MetricsPlot, ROCPlot
 from ..plotting.regression import CorrelationPlot, WilliamsPlot
@@ -29,8 +28,6 @@ class PlottingTest(ModelDataSetsPathMixIn, QSPRTestCase):
         """Get a model for testing.
 
         Args:
-            dataset (QSPRDataset):
-                Dataset to use for model.
             name (str):
                 Name of model.
             alg (Type, optional):
@@ -92,7 +89,7 @@ class MetricsPlotTest(PlottingTest):
             for task, th in (
                 ("binary", [6.5]),
                 ("multi_class", [0, 2, 10, 1100]),
-            )
+        )
         ]
     )
     def testPlotSingle(self, _, task, th):
@@ -195,7 +192,7 @@ class ConfusionMatrixPlotTest(PlottingTest):
             for task, th in (
                 ("binary", [6.5]),
                 ("multi_class", [0, 2, 10, 1100]),
-            )
+        )
         ]
     )
     def testPlotSingle(self, _, task, th):

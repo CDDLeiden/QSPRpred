@@ -9,7 +9,6 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 from sklearn import metrics
 
-from ..data.tables.qspr import QSPRDataset
 from ..models import QSPRModel
 from ..plotting.base_plot import ModelPlot
 from ..tasks import ModelTasks
@@ -194,7 +193,7 @@ class CorrelationPlot(RegressionPlot):
 class WilliamsPlot(RegressionPlot):
     """Williams plot; plot of standardized residuals versus leverages"""
 
-    def __init__(self, models: list[QSPRModel], datasets: list[QSPRDataset]):
+    def __init__(self, models: list[QSPRModel], datasets: list[QSPRDataSet]):
         super().__init__(models)
         self.datasets = datasets
 

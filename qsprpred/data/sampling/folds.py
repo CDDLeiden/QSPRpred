@@ -13,7 +13,7 @@ class FoldGenerator(ABC):
     @abstractmethod
     def iterFolds(
             self,
-            dataset: "QSPRDataset",
+            dataset: "QSPRDataSet",
             concat=False
     ) -> Generator[tuple[
         pd.DataFrame,
@@ -27,7 +27,7 @@ class FoldGenerator(ABC):
         Returns the generator of folds to iterate over.
 
         Args:
-            dataset (QSPRDataset):
+            dataset (QSPRDataSet):
                 the data set to generate the splits for
             concat (bool, optional):
                 whether to concatenate the features in the test
@@ -39,7 +39,7 @@ class FoldGenerator(ABC):
                 (X_train, X_test, y_train, y_test, train_index, test_index)
         """
 
-    def getFolds(self, dataset: "QSPRDataset"):
+    def getFolds(self, dataset: "QSPRDataSet"):
         """Directly converts the output of `iterFolds` to a `list`."""
         return list(self.iterFolds(dataset))
 
@@ -112,7 +112,7 @@ class FoldsFromDataSplit(FoldGenerator):
 
     def iterFolds(
             self,
-            dataset: "QSPRDataset",
+            dataset: "QSPRDataSet",
             concat=False
     ) -> Generator[tuple[
         pd.DataFrame,
@@ -136,7 +136,7 @@ class FoldsFromDataSplit(FoldGenerator):
         )
 
         Arguments:
-            dataset (QSPRDataset):
+            dataset (QSPRDataSet):
                 the data set to generate the splits for
         Returns:
             generator:

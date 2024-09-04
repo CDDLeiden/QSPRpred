@@ -9,8 +9,8 @@ import pandas as pd
 from sklearn.model_selection import KFold
 
 from .metrics.scikit_learn import SklearnMetrics
-from ...data import QSPRDataset
 from ...data.sampling.splits import DataSplit
+from ...data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ...logs import logger
 from ...models.early_stopping import EarlyStoppingMode
 from ...models.model import QSPRModel
@@ -61,7 +61,7 @@ class ModelAssessor(ABC):
     def __call__(
             self,
             model: QSPRModel,
-            ds: QSPRDataset,
+            ds: QSPRDataSet,
             save: bool = True,
             parameters: dict | None = None,
             monitor: AssessorMonitor | None = None,
@@ -71,7 +71,7 @@ class ModelAssessor(ABC):
 
         Args:
             model (QSPRModel): model to evaluate
-            ds (QSPRDataset): dataset to evaluate on
+            ds (QSPRDataSet): dataset to evaluate on
             save (bool): save predictions to file
             parameters (dict): parameters to use for the evaluation
             monitor (AssessorMonitor): monitor to track the evaluation, overrides
@@ -162,7 +162,7 @@ class CrossValAssessor(ModelAssessor):
     def __call__(
             self,
             model: QSPRModel,
-            ds: QSPRDataset,
+            ds: QSPRDataSet,
             save: bool = True,
             parameters: dict | None = None,
             monitor: AssessorMonitor | None = None,
@@ -172,7 +172,7 @@ class CrossValAssessor(ModelAssessor):
 
         Arguments:
             model (QSPRModel): model to assess
-            ds (QSPRDataset): dataset to assess on
+            ds (QSPRDataSet): dataset to assess on
             scoring (str | Callable): scoring function to use
             save (bool): whether to save predictions to file
             parameters (dict): optional model parameters to use in assessment
@@ -294,7 +294,7 @@ class TestSetAssessor(ModelAssessor):
     def __call__(
             self,
             model: QSPRModel,
-            ds: QSPRDataset,
+            ds: QSPRDataSet,
             save: bool = True,
             parameters: dict | None = None,
             monitor: AssessorMonitor | None = None,
@@ -304,7 +304,7 @@ class TestSetAssessor(ModelAssessor):
 
         Arguments:
             model (QSPRModel): model to assess
-            ds (QSPRDataset): dataset to assess on
+            ds (QSPRDataSet): dataset to assess on
             scoring (str | Callable): scoring function to use
             save (bool): whether to save predictions to file
             parameters (dict): optional model parameters to use in assessment

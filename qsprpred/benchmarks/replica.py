@@ -43,7 +43,7 @@ class Replica(JSONSerializable):
             Model assessors to use.
         randomSeed (int):
             Random seed to use for all random operations withing the replica.
-        ds (QSPRDataset):
+        ds (QSPRDataSet):
             Initialized data set. Only available after `initData` has been called.
         results (pd.DataFrame):
             Results from the replica. Only available after

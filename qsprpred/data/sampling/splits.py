@@ -67,9 +67,8 @@ class DataSplit(DataSetDependent, ABC):
 
 
 class RandomizedDataSplit(DataSplit, Randomized, ABC):
-    pass
 
-    def setDataSet(self, dataset: QSPRDataSet):
+    def setDataSet(self, dataset: QSPRDataSet | None):
         super().setDataSet(dataset)
         if self.dataSet and self.randomState is None:
             self.randomState = dataset.randomState
@@ -150,7 +149,7 @@ class BootstrapSplit(RandomizedDataSplit):
     def randomState(self, seed: int | None):
         self._seed = seed
 
-    def setDataSet(self, dataset: QSPRDataSet):
+    def setDataSet(self, dataset: QSPRDataSet | None):
         super().setDataSet(dataset)
         if hasattr(self._split, "setDataSet") and self.hasDataSet:
             self._split.setDataSet(self.getDataSet())

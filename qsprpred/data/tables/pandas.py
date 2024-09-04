@@ -16,8 +16,7 @@ from ...utils.stringops import generate_padded_index
 
 
 class PandasDataTable(PropertyStorage, Randomized):
-    """A Pandas DataFrame wrapper class to enable data processing functions on
-    QSPRpred data.
+    """A `pandas.DataFrame` wrapper class for integration with QSPRpred API.
 
     Attributes:
         name (str):
@@ -249,7 +248,7 @@ class PandasDataTable(PropertyStorage, Randomized):
 
     @property
     def chunkSize(self) -> int:
-        """Size of chunks to use per job in parallel processing."""	
+        """Size of chunks to use per job in parallel processing."""
         return self._chunkSize
 
     @chunkSize.setter
@@ -746,10 +745,10 @@ class PandasDataTable(PropertyStorage, Randomized):
         self.chunkSize = len(self) // self.nJobs
 
     def addEntries(
-        self, 
-        ids: list[str], 
-        props: dict[str, list],
-        raise_on_existing: bool = True
+            self,
+            ids: list[str],
+            props: dict[str, list],
+            raise_on_existing: bool = True
     ):
         """Add entries to the data set.
         

@@ -22,13 +22,7 @@ class MoleculeDataSet(
     Standardizable,
     ABC
 ):
-    """Interface for storing and managing chemical data.
-    
-    Attributes:
-        smilesProp (str): name of the property that contains the SMILES strings
-        smiles (Generator[str, None, None]): 
-            generator of SMILES strings of all molecules in storage
-    """
+    """Interface for storing and managing chemical data sets for machine learning."""
 
     @property
     @abstractmethod
@@ -38,7 +32,7 @@ class MoleculeDataSet(
     @property
     @abstractmethod
     def smiles(self) -> Generator[str, None, None]:
-        """Get the SMILES strings of the molecules in the data frame.
+        """Get the SMILES strings of the molecules in this instance.
 
         Returns:
             Generator[str, None, None]: Generator of SMILES strings.
@@ -46,7 +40,7 @@ class MoleculeDataSet(
 
     @abstractmethod
     def imputeProperties(self, names: list[str], imputer: Callable):
-        """Impute missing values in the target properties using the given imputer.
+        """Impute missing values in the given properties using the given imputer.
 
         Args:
             names (list[str]): list of target properties names to impute
@@ -55,9 +49,8 @@ class MoleculeDataSet(
 
     @abstractmethod
     def transformProperties(
-        self, 
-        names: list[str],
-        transformer: Callable[[Iterable[Any]], Iterable[Any]]
-        ):
-        """Transform the target properties using the given transformer."""
-        pass
+            self,
+            names: list[str],
+            transformer: Callable[[Iterable[Any]], Iterable[Any]]
+    ):
+        """Transform the target properties using the given transformer function."""

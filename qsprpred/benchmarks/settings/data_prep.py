@@ -8,7 +8,7 @@ from ...data.sampling.splits import DataSplit
 @dataclass
 class DataPrepSettings:
     """Class that determines settings for data preparation. These are arguments
-    passed to `QSPRDataset.prepareDataset`.
+    passed to `QSPRDataSet.prepareDataset`.
 
     Attributes:
         data_filters (list):

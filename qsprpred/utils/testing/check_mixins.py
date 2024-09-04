@@ -12,7 +12,7 @@ from .path_mixins import ModelDataSetsPathMixIn
 from ... import TargetTasks
 from ...data.descriptors.sets import DescriptorSet
 from ...data.processing.feature_standardizers import SKLearnStandardizer
-from ...data.tables.qspr import QSPRDataset
+from ...data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ...models import (
     QSPRModel,
     OptunaOptimization,
@@ -35,12 +35,12 @@ from ...tasks import TargetProperty
 class DescriptorCheckMixIn:
     """Mixin class for common descriptor checks."""
 
-    def checkFeatures(self, ds: QSPRDataset, expected_length: int):
+    def checkFeatures(self, ds: QSPRDataSet, expected_length: int):
         """Check if the feature names and the feature matrix of a data set is consistent
         with expected number of variables.
 
         Args:
-            ds (QSPRDataset): The data set to check.
+            ds (QSPRDataSet): The data set to check.
             expected_length (int): The expected number of features.
 
         Raises:
@@ -78,7 +78,7 @@ class DescriptorCheckMixIn:
             self.assertEqual(X_ind.shape[0], expected_num_samples)
 
     def checkDescriptors(
-            self, dataset: QSPRDataset, target_props: list[dict | TargetProperty]
+            self, dataset: QSPRDataSet, target_props: list[dict | TargetProperty]
     ):
         """
         Check if information about descriptors is consistent in the data set. Checks
@@ -86,7 +86,7 @@ class DescriptorCheckMixIn:
         This is tested also before and after serialization.
 
         Args:
-            dataset (QSPRDataset): The data set to check.
+            dataset (QSPRDataSet): The data set to check.
             target_props (List of dicts or TargetProperty): list of target properties
 
         Raises:
@@ -235,7 +235,7 @@ class ModelCheckMixIn:
         return grid_params[grid_params[:, 0] == mname, 1][0]
 
     def checkOptimization(
-            self, model: QSPRModel, ds: QSPRDataset,
+            self, model: QSPRModel, ds: QSPRDataSet,
             optimizer: HyperparameterOptimization
     ):
         model_path, est_path = model.save(save_estimator=True)
@@ -254,12 +254,12 @@ class ModelCheckMixIn:
         for param in model.parameters:
             self.assertEqual(model_new.parameters[param], model.parameters[param])
 
-    def fitTest(self, model: QSPRModel, ds: QSPRDataset):
+    def fitTest(self, model: QSPRModel, ds: QSPRDataSet):
         """Test model fitting, optimization and evaluation.
 
         Args:
             model (QSPRModel): The model to test.
-            ds (QSPRDataset): The dataset to use for testing.
+            ds (QSPRDataSet): The dataset to use for testing.
         """
         # perform bayes optimization
         model.initFromDataset(ds)
@@ -318,7 +318,7 @@ class ModelCheckMixIn:
     def predictorTest(
             self,
             model: QSPRModel,
-            dataset: QSPRDataset,
+            dataset: QSPRDataSet,
             comparison_model: QSPRModel | None = None,
             expect_equal_result=True,
             **pred_kwargs,
@@ -332,7 +332,7 @@ class ModelCheckMixIn:
 
         Args:
             model (QSPRModel): The model to make predictions with.
-            dataset (QSPRDataset): The dataset to make predictions for.
+            dataset (QSPRDataSet): The dataset to make predictions for.
             comparison_model (QSPRModel): another model to compare the predictions with.
             expect_equal_result (bool): Whether the expected result should be equal or
                 not equal to the predictions of the comparison model.
@@ -408,7 +408,7 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
     def trainModelWithMonitoring(
             self,
             model: QSPRModel,
-            ds: QSPRDataset,
+            ds: QSPRDataSet,
             hyperparam_monitor: HyperparameterOptimizationMonitor,
             crossval_monitor: AssessorMonitor,
             test_monitor: AssessorMonitor,

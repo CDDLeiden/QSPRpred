@@ -34,7 +34,6 @@ class QSPRModel(JSONSerializable, ABC):
 
     Attributes:
         name (str): name of the model
-        data (QSPRDataset): data set used to train the model
         alg (Type): estimator class
         parameters (dict): dictionary of algorithm specific parameters
         estimator (Any):
@@ -392,7 +391,7 @@ class QSPRModel(JSONSerializable, ABC):
         """Check if the model has a data set.
 
         Args:
-            ds (QSPRDataset): data set to check
+            ds (QSPRDataSet): data set to check
             exception (bool): if true, an exception is raised if no data is set
 
         Returns:
@@ -403,7 +402,7 @@ class QSPRModel(JSONSerializable, ABC):
             raise ValueError(
                 "No data set specified. "
                 "Make sure you initialized this model "
-                "with a 'QSPRDataset' instance to train on."
+                "with a 'QSPRDataSet' instance to train on."
             )
         return has_data
 
@@ -415,8 +414,8 @@ class QSPRModel(JSONSerializable, ABC):
         """Convert the given data matrix and target matrix to np.ndarray format.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix
-            y (pd.DataFrame, np.ndarray, QSPRDataset): target matrix
+            X (pd.DataFrame, np.ndarray, QSPRDataSet): data matrix
+            y (pd.DataFrame, np.ndarray, QSPRDataSet): target matrix
 
         Returns:
                 data matrix and/or target matrix in np.ndarray format
@@ -459,7 +458,7 @@ class QSPRModel(JSONSerializable, ABC):
             n_jobs: int = 1,
             fill_value: float = np.nan,
     ) -> tuple[QSPRDataSet, np.ndarray]:
-        """Create a `QSPRDataset` instance from a list of SMILES strings.
+        """Create a `QSPRDataSet` instance from a list of SMILES strings.
 
         Args:
             mols (list[str | Mol]): list of SMILES strings
@@ -468,7 +467,7 @@ class QSPRModel(JSONSerializable, ABC):
 
         Returns:
             tuple:
-                a tuple containing the `QSPRDataset` instance and a boolean mask
+                a tuple containing the `QSPRDataSet` instance and a boolean mask
                 indicating which molecules failed to be processed
         """
         # make a molecule table first and add the target properties
@@ -518,7 +517,7 @@ class QSPRModel(JSONSerializable, ABC):
         Make predictions for the given dataset.
 
         Args:
-            dataset: a `QSPRDataset` instance
+            dataset: a `QSPRDataSet` instance
             use_probas: use probabilities if this is a classification model
 
         Returns:
@@ -608,7 +607,7 @@ class QSPRModel(JSONSerializable, ABC):
         cross-validation with early stopping can be used for fitting the model.
 
         Args:
-            ds (QSPRDataset): data set to fit this model on
+            ds (QSPRDataSet): data set to fit this model on
             monitor (FitMonitor): monitor for the fitting process, if None, the base
                 monitor is used
             mode (EarlyStoppingMode): early stopping mode for models that support
@@ -698,7 +697,7 @@ class QSPRModel(JSONSerializable, ABC):
             monitor: "FitMonitor" = None,
             **kwargs,
     ) -> Any | tuple[Any, int] | None:
-        """Fit the model to the given data matrix or `QSPRDataset`.
+        """Fit the model to the given data matrix or `QSPRDataSet`.
 
         Note. convertToNumpy can be called here, to convert the input data to
             np.ndarray format.
@@ -729,7 +728,7 @@ class QSPRModel(JSONSerializable, ABC):
     def predict(
             self, X: pd.DataFrame | np.ndarray | QSPRDataSet, estimator: Any = None
     ) -> np.ndarray:
-        """Make predictions for the given data matrix or `QSPRDataset`.
+        """Make predictions for the given data matrix or `QSPRDataSet`.
 
         Note. convertToNumpy can be called here, to convert the input data to
         np.ndarray format.
@@ -738,7 +737,7 @@ class QSPRModel(JSONSerializable, ABC):
               is used.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to predict
+            X (pd.DataFrame, np.ndarray, QSPRDataSet): data matrix to predict
             estimator (Any): estimator instance to use for fitting
 
         Returns:
@@ -751,7 +750,7 @@ class QSPRModel(JSONSerializable, ABC):
     def predictProba(
             self, X: pd.DataFrame | np.ndarray | QSPRDataSet, estimator: Any = None
     ) -> list[np.ndarray]:
-        """Make predictions for the given data matrix or `QSPRDataset`,
+        """Make predictions for the given data matrix or `QSPRDataSet`,
         but use probabilities for classification models. Does not work with
         regression models.
 
@@ -762,7 +761,7 @@ class QSPRModel(JSONSerializable, ABC):
               is used.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataset): data matrix to make predict
+            X (pd.DataFrame, np.ndarray, QSPRDataSet): data matrix to make predict
             estimator (Any): estimator instance to use for fitting
 
         Returns:
