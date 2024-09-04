@@ -10,12 +10,8 @@ from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 
 
 class CheckSmilesValid(MolProcessorWithID):
-    """Processor to check the validity of the SMILES.
-    
-    Attributes:
-        supportsParallel (bool): Whether the processor supports parallel processing
-    """
-    
+    """Processor to check the validity of the SMILES."""
+
     def __call__(
             self, mols: list[StoredMol | str | Mol], props: dict | None = None, *args,
             **kwargs
@@ -75,11 +71,11 @@ class CheckSmilesValid(MolProcessorWithID):
 
 
 class ValidationStandardizer(ChemStandardizer):
-    """Standardizer that checks the validity of the SMILES.
+    """Standardizer that checks the validity of the SMILES by
+    attempting to sanitize the molecule using RDKit.
     
     Attributes:
         checker (CheckSmilesValid): Processor to check the validity of the SMILES
-        settings (dict): Settings of the standardizer
     """
 
     def __init__(self):
@@ -91,34 +87,37 @@ class ValidationStandardizer(ChemStandardizer):
         super().__init__()
         self.checker = CheckSmilesValid(id_prop="index")
 
-    def convert_smiles(self, smiles: str) -> tuple[str | None, str]:
+    def convertSMILES(self, smiles: str) -> str | None:
         """Check the validity of the SMILES.
         
         Args:
             smiles (str): SMILES to be checked
         
         Returns:
-            (tuple[str | None, str]): 
-                a tuple where the first element is the standardized SMILES and the 
-                second element is the original SMILES
+            str | None:
+                the standardized SMILES
         """
         checks = self.checker([smiles], {"index": [0]})
         if not checks[0]:
             raise ValueError(f"Invalid SMILES found: {smiles}")
-        return smiles, smiles
+        return smiles
 
     @property
     def settings(self):
-        """Settings of the standardizer."""
+        """Settings of the standardizer.
+        Empty in this case since there is nothing to set except the default settings.
+        """
         return {}
 
-    def get_id(self):
-        """Return the unique identifier of the standardizer."""
+    def getID(self):
+        """Return the unique identifier of the standardizer. In this case, it is
+        just "ValidationStandardizer". There are no settings to consider.
+        """
         return "ValidationStandardizer"
 
     @classmethod
-    def from_settings(cls, settings: dict) -> "ValidationStandardizer":
-        """Create a standardizer from settings.
+    def fromSettings(cls, settings: dict) -> "ValidationStandardizer":
+        """Create a standardizer from settings. In this case, the settings are ignored.
         
         Args:
             settings (dict): Settings of the standardizer

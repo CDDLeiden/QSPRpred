@@ -1,59 +1,87 @@
 from abc import ABC, abstractmethod
 
 
+class ChemStandardizationException(Exception):
+    """Exception raised when standardization fails."""
+    pass
+
+
 class ChemStandardizer(ABC):
     """Standardizer to convert SMILES to a standardized form.
-    
-    Attributes:
-        settings (dict): Settings of the standardizer
+
+    This class defines an interface of a uniquely identifiable standardizer.
+    The `getID` method should return a unique identifier for the standardizer
+    based on its settings. Standardizes that have the same ID should produce
+    the same standardized form for a given SMILES.
+
+    The main method of the class is `convertSMILES`, which should convert
+    a given SMILES to a standardized form based on the settings of the standardizer.
     """
 
-    def __call__(self, smiles: str) -> tuple[str | None, str]:
-        """Convert the SMILES to a standardized form.
+    def __call__(self, smiles: str) -> str | None:
+        """Convert the SMILES to a standardized form. Simply calls `convertSMILES`.
         
         Args:
             smiles (str): SMILES to be converted
         
         Returns:
-            (tuple[str | None, str]): 
-                a tuple where the first element is the 
-                standardized SMILES and the second element is the original SMILES
+            str | None:
+                The standardized SMILES string or `None` if standardization fails or
+                the molecule is deemed invalid.
+
+        Raises:
+            ChemStandardizationException:
+                if standardization fails, but the upstream code should be notified
+                and handle the exception.
         """
-        return self.convert_smiles(smiles)
+        return self.convertSMILES(smiles)
 
     @abstractmethod
-    def convert_smiles(self, smiles: str) -> tuple[str | None, str]:
+    def convertSMILES(self, smiles: str) -> str | None:
         """Convert the SMILES to a standardized form.
 
         Args:
             smiles (str): SMILES to be converted
             
         Returns:
-            (tuple[str | None, str]): 
-                a tuple where the first element is the 
-                standardized SMILES and the second element is the original SMILES
+            str | None:
+                The standardized SMILES string or `None` if standardization fails or
+                the molecule is deemed invalid.
+
+        Raises:
+            ChemStandardizationException:
+                if standardization fails, but the upstream code should be notified
+                and handle the exception.
         """
         pass
 
     @property
     @abstractmethod
-    def settings(self):
-        """Settings of the standardizer."""
-        pass
+    def settings(self) -> dict:
+        """Settings of the standardizer. It should contain complete
+        information needed to initialize another equivalent standardizer.
+        """
 
     @abstractmethod
-    def get_id(self) -> str:
-        """Return the unique identifier of the standardizer."""
-        pass
+    def getID(self) -> str:
+        """Return the unique identifier of the standardizer. This method should
+        return a unique identifier based on the settings of the standardizer.
+
+        Two standardizers with the same settings should have the same ID and
+        produce the same standardized form for a given SMILES.
+
+        Returns:
+            str: The unique identifier of the standardizer.
+        """
 
     @classmethod
     @abstractmethod
-    def from_settings(cls, settings: dict) -> "ChemStandardizer":
-        """Create a standardizer from settings."""
+    def fromSettings(cls, settings: dict) -> "ChemStandardizer":
+        """Create a new standardizer from a settings dictionary."""
         pass
 
     @classmethod
-    def from_settings_file(cls, path: str) -> "ChemStandardizer":
+    def fromSettingsFile(cls, path: str) -> "ChemStandardizer":
         """Load the standardizer from a settings file in JSON format.
 
         Args:
@@ -66,21 +94,24 @@ class ChemStandardizer(ABC):
 
         with open(path, "r") as f:
             settings = json.load(f)
-        return cls.from_settings(settings)
+        return cls.fromSettings(settings)
 
-    def get_hash_id(self) -> str:
-        """Get the hash ID of the standardizer.
+    def getHashID(self) -> str:
+        """Get the hash ID of the standardizer. This is simply the MD5 hash of the
+        unique identifier of the standardizer.
         
         Returns:
             str: The hash ID of the standardizer
         """
         import hashlib
 
-        return hashlib.md5(self.get_id()).hexdigest()
+        return hashlib.md5(self.getID()).hexdigest()
 
 
 class Standardizable(ABC):
-    """Interface for objects that can be standardized."""
+    """Interface for objects that use chemical standardization with `
+    `ChemStandardizer` objects.
+    """
 
     @property
     @abstractmethod
@@ -99,8 +130,3 @@ class Standardizable(ABC):
             standardizer (ChemStandardizer): The standardizer to apply
         """
         pass
-
-
-class ChemStandardizationException(Exception):
-    """Exception raised when standardization fails."""
-    pass

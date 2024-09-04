@@ -54,21 +54,21 @@ class TabularStorageBasic(
     _notJSON: ClassVar = ChemStore._notJSON + ["_libraries"]
 
     def __init__(
-        self,
-        name: str,
-        path: str,
-        df: pd.DataFrame | None = None,
-        smiles_col: str = "SMILES",
-        add_rdkit: bool = False,
-        overwrite: bool = False,
-        save: bool = False,
-        standardizer=None,
-        identifier=None,
-        id_col: str = "ID",
-        store_format: str = "pkl",
-        chunk_processor: ParallelGenerator = None,
-        chunk_size: int | None = None,
-        n_jobs: int = 1,
+            self,
+            name: str,
+            path: str,
+            df: pd.DataFrame | None = None,
+            smiles_col: str = "SMILES",
+            add_rdkit: bool = False,
+            overwrite: bool = False,
+            save: bool = False,
+            standardizer=None,
+            identifier=None,
+            id_col: str = "ID",
+            store_format: str = "pkl",
+            chunk_processor: ParallelGenerator = None,
+            chunk_size: int | None = None,
+            n_jobs: int = 1,
     ):
         """Initialize the storage.
         
@@ -187,14 +187,14 @@ class TabularStorageBasic(
         self.chunkSize = None
 
     def add_library(
-        self,
-        name: str,
-        df: pd.DataFrame,
-        smiles_col: str = "SMILES",
-        id_col: str = "ID",
-        add_rdkit=False,
-        store_format="pkl",
-        save=False,
+            self,
+            name: str,
+            df: pd.DataFrame,
+            smiles_col: str = "SMILES",
+            id_col: str = "ID",
+            add_rdkit=False,
+            store_format="pkl",
+            save=False,
     ):
         """Reads molecules from a file and adds standardized SMILES to the store.
 
@@ -298,7 +298,7 @@ class TabularStorageBasic(
 
     @classmethod
     def fromDF(
-        cls, df: pd.DataFrame, *args, name: str | None = None, **kwargs
+            cls, df: pd.DataFrame, *args, name: str | None = None, **kwargs
     ) -> "TabularStorageBasic":
         """Create a new instance from a pandas DataFrame.
 
@@ -316,7 +316,7 @@ class TabularStorageBasic(
 
     @staticmethod
     def apply_standardizer_to_data_frame(
-        df: pd.DataFrame, smiles_prop: str, standardizer: ChemStandardizer
+            df: pd.DataFrame, smiles_prop: str, standardizer: ChemStandardizer
     ) -> list[tuple[int, str, str]]:
         """Apply a standardizer to the SMILES in a data frame.
         
@@ -334,7 +334,7 @@ class TabularStorageBasic(
         output = []
         for i, smi in enumerate(smiles):
             try:
-                standardized = standardizer(smi)[0]
+                standardized = standardizer(smi)
                 if standardized is None:
                     raise ChemStandardizationException(
                         f"Standardizer {standardizer} returned None."
@@ -405,10 +405,10 @@ class TabularStorageBasic(
 
     @staticmethod
     def _apply_identifier_to_data_frame(
-        df: pd.DataFrame,
-        smiles_col: str,
-        id_prop: str,
-        identifier: Callable[[str], str],
+            df: pd.DataFrame,
+            smiles_col: str,
+            id_prop: str,
+            identifier: Callable[[str], str],
     ) -> pd.Series:
         """Apply an identifier to the SMILES in a data frame.
         
@@ -426,11 +426,11 @@ class TabularStorageBasic(
         return pd.Series(identifiers, index=ids)
 
     def addEntries(
-        self,
-        ids: list[str],
-        props: dict[str, list],
-        raise_on_existing: bool = True,
-        library: str | None = None,
+            self,
+            ids: list[str],
+            props: dict[str, list],
+            raise_on_existing: bool = True,
+            library: str | None = None,
     ):
         """Add entries to the storage.
         
@@ -445,16 +445,16 @@ class TabularStorageBasic(
         lib.addEntries(ids, props, raise_on_existing)
 
     def add_mols(
-        self,
-        smiles: Iterable[str],
-        props: dict[str, list] | None = None,
-        library: str | None = None,
-        raise_on_existing: bool = True,
-        add_rdkit: bool = False,
-        store_format: str = "pkl",
-        save: bool = False,
-        chunk_size: int | None = None,
-        chunk_processor: ParallelGenerator | None = None,
+            self,
+            smiles: Iterable[str],
+            props: dict[str, list] | None = None,
+            library: str | None = None,
+            raise_on_existing: bool = True,
+            add_rdkit: bool = False,
+            store_format: str = "pkl",
+            save: bool = False,
+            chunk_size: int | None = None,
+            chunk_processor: ParallelGenerator | None = None,
     ) -> list[TabularMol]:
         """Add a molecule to the store using its raw SMILES. 
         
@@ -552,13 +552,13 @@ class TabularStorageBasic(
         return self.toFile(self.metaFile)
 
     def processMols(
-        self,
-        processor: MolProcessor,
-        proc_args: Iterable[Any] | None = None,
-        proc_kwargs: dict[str, Any] | None = None,
-        mol_type: Literal["smiles", "mol", "rdkit"] = "mol",
-        add_props: Iterable[str] | None = None,
-        chunk_processor: ParallelGenerator | None = None,
+            self,
+            processor: MolProcessor,
+            proc_args: Iterable[Any] | None = None,
+            proc_kwargs: dict[str, Any] | None = None,
+            mol_type: Literal["smiles", "mol", "rdkit"] = "mol",
+            add_props: Iterable[str] | None = None,
+            chunk_processor: ParallelGenerator | None = None,
     ) -> Generator:
         """Apply a function to the molecules in the data frame.
         The SMILES  or an RDKit molecule will be supplied as the first
@@ -612,13 +612,13 @@ class TabularStorageBasic(
                     "data set."
                 )
         for result in self.apply(
-            processor,
-            func_args=proc_args,
-            func_kwargs=proc_kwargs,
-            on_props=add_props,
-            chunk_type=mol_type,
-            chunk_processor=chunk_processor,
-            no_parallel=not processor.supportsParallel,
+                processor,
+                func_args=proc_args,
+                func_kwargs=proc_kwargs,
+                on_props=add_props,
+                chunk_type=mol_type,
+                chunk_processor=chunk_processor,
+                no_parallel=not processor.supportsParallel,
         ):
             yield result
 
@@ -676,7 +676,8 @@ class TabularStorageBasic(
             lib.removeProperty(name)
 
     def getSubset(
-        self, subset: list[str], ids: list[str] | None = None, name: str | None = None
+            self, subset: list[str], ids: list[str] | None = None,
+            name: str | None = None
     ) -> "TabularStorageBasic":
         """Get a subset of the storage for the given properties.
         
@@ -735,14 +736,14 @@ class TabularStorageBasic(
         return os.path.join(self.path, "meta.json")
 
     def apply(
-        self,
-        func: callable,
-        func_args: list | None = None,
-        func_kwargs: dict | None = None,
-        on_props: tuple[str, ...] | None = None,
-        chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
-        chunk_processor: ParallelGenerator | None = None,
-        no_parallel: bool = False,
+            self,
+            func: callable,
+            func_args: list | None = None,
+            func_kwargs: dict | None = None,
+            on_props: tuple[str, ...] | None = None,
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
+            chunk_processor: ParallelGenerator | None = None,
+            no_parallel: bool = False,
     ) -> Generator[Iterable[Any], None, None]:
         """Apply a function to the molecules in the data frame.
         
@@ -773,27 +774,27 @@ class TabularStorageBasic(
         func_kwargs = func_kwargs or {}
         if self.nJobs > 1 and not no_parallel:
             for result in chunk_processor(
-                self.iterChunks(
-                    self.chunkSize, chunk_type=chunk_type, on_props=on_props
-                ),
-                func,
-                *func_args,
-                **func_kwargs,
+                    self.iterChunks(
+                        self.chunkSize, chunk_type=chunk_type, on_props=on_props
+                    ),
+                    func,
+                    *func_args,
+                    **func_kwargs,
             ):
                 yield result
         else:
             # do not use the parallel generator if n_jobs is 1
             for chunk in self.iterChunks(
-                self.chunkSize, chunk_type=chunk_type, on_props=on_props
+                    self.chunkSize, chunk_type=chunk_type, on_props=on_props
             ):
                 yield func(chunk, *func_args, **func_kwargs)
 
     def searchOnProperty(
-        self,
-        prop_name: str,
-        values: list[float | int | str],
-        exact=False,
-        name: str | None = None,
+            self,
+            prop_name: str,
+            values: list[float | int | str],
+            exact=False,
+            name: str | None = None,
     ) -> "TabularStorageBasic":
         """Search in this table using a property name and a list of values.
         It is assumed that the property is searchable with string matching
@@ -866,10 +867,10 @@ class TabularStorageBasic(
 
     @staticmethod
     def _apply_match_function(
-        iterable: Iterable[StoredMol],
-        match_function: Callable[[Chem.Mol, list[str], ...], bool],
-        *args: list[str],
-        **kwargs: dict[str, Any],
+            iterable: Iterable[StoredMol],
+            match_function: Callable[[Chem.Mol, list[str], ...], bool],
+            *args: list[str],
+            **kwargs: dict[str, Any],
     ):
         """Apply a match function to an iterable of molecules.
         
@@ -890,12 +891,12 @@ class TabularStorageBasic(
         return res
 
     def searchWithSMARTS(
-        self,
-        patterns: list[str],
-        operator: Literal["or", "and"] = "or",
-        use_chirality: bool = False,
-        name: str | None = None,
-        match_function: MolProcessor | None = None,
+            self,
+            patterns: list[str],
+            operator: Literal["or", "and"] = "or",
+            use_chirality: bool = False,
+            name: str | None = None,
+            match_function: MolProcessor | None = None,
     ) -> "TabularStorageBasic":
         """Search the molecules in the table with a SMARTS pattern.
 
@@ -919,8 +920,8 @@ class TabularStorageBasic(
         match_function = match_function or SMARTSMatchProcessor()
         results = []
         for result in self.processMols(
-            match_function,
-            proc_args=(patterns, operator, use_chirality),
+                match_function,
+                proc_args=(patterns, operator, use_chirality),
         ):
             results.append(result)
         results = pd.concat(results)
@@ -1014,10 +1015,10 @@ class TabularStorageBasic(
         return sum(len(lib) for lib in self._libraries.values())
 
     def iterChunks(
-        self,
-        size: int = 1000,
-        on_props: Iterable[str] | None = None,
-        chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
+            self,
+            size: int = 1000,
+            on_props: Iterable[str] | None = None,
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
     ) -> Generator[list[StoredMol | str | Chem.Mol | pd.DataFrame], None, None]:
         """Iterate over the molecules in the store in chunks.
         
@@ -1052,7 +1053,8 @@ class TabularStorageBasic(
         """
         return chunk[list({self.idProp, self.smilesProp, *on_props})]
 
-    def _convert_chunk_mol(self, chunk: pd.DataFrame, on_props: list) -> list[TabularMol]:
+    def _convert_chunk_mol(self, chunk: pd.DataFrame, on_props: list) -> list[
+        TabularMol]:
         """Convert a chunk to a list of `TabularMol` objects.
         
         Args:
@@ -1085,7 +1087,8 @@ class TabularStorageBasic(
         """
         return chunk[self.smilesProp]
 
-    def _convert_chunk_rdkit(self, chunk: pd.DataFrame, on_props: list) -> list[Chem.Mol]:
+    def _convert_chunk_rdkit(self, chunk: pd.DataFrame, on_props: list) -> list[
+        Chem.Mol]:
         """Convert a chunk to a list of RDKit molecules.
         
         Args:
@@ -1133,11 +1136,11 @@ class TabularStorageBasic(
         """
         ids = []
         for chunk in pd_table.apply(
-            self._apply_identifier_to_data_frame,
-            func_args=(self.smilesProp, self.idProp, self._identifier),
-            on_props=(self.smilesProp, self.idProp),
-            as_df=True,
-            n_jobs=self.nJobs,
+                self._apply_identifier_to_data_frame,
+                func_args=(self.smilesProp, self.idProp, self._identifier),
+                on_props=(self.smilesProp, self.idProp),
+                as_df=True,
+                n_jobs=self.nJobs,
         ):
             ids.append(chunk)
         ids = (
@@ -1155,11 +1158,11 @@ class TabularStorageBasic(
         """
         output = []
         for chunk in pd_table.apply(
-            self.apply_standardizer_to_data_frame,
-            func_args=(self.smilesProp, self._standardizer),
-            on_props=(self.smilesProp, self.idProp),
-            as_df=True,
-            n_jobs=self.nJobs,
+                self.apply_standardizer_to_data_frame,
+                func_args=(self.smilesProp, self._standardizer),
+                on_props=(self.smilesProp, self.idProp),
+                as_df=True,
+                n_jobs=self.nJobs,
         ):
             output.extend(chunk)
         pd_table.addProperty(

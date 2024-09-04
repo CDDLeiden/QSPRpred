@@ -54,45 +54,35 @@ class NaiveStandardizer(ChemStandardizer):
        Briefly, the standardization process involves disconnecting metals, normalizing,
        removing salts (largest fragment) and charges. See 
        `qsprpred.data.chem.standardizers.naive.standardize_mol` for more details.
-       
-        Attributes:
-            settings (dict): Settings of the standardizer
     """
-    
-    def convert_smiles(self, smiles: str) -> tuple[str | None, str]:
+
+    def convertSMILES(self, smiles: str) -> str | None:
         """Standardize SMILES using `standardize_mol`.
         
         Args:
             smiles (str): SMILES to be standardized
         
         Returns:
-            (tuple[str | None, str]): 
-                a tuple where the first element is the 
-                standardized SMILES and the second element is the original SMILES
+            str | None: standardized SMILES or `None` if SMILES could not be standardized
         """
         mol = Chem.MolFromSmiles(smiles)
-        return standardize_mol(mol), smiles
+        return standardize_mol(mol)
 
     @property
     def settings(self) -> dict:
-        """Settings of the standardizer.
-        
-        Returns:
-            dict: settings of the standardizer
-        """
+        """Settings of the standardizer. They are empty in this case."""
         return {}
 
-    def get_id(self) -> str:
-        """Get the ID of the standardizer.
-        
-        Returns:
-            str: ID of the standardizer
+    def getID(self) -> str:
+        """Return the unique identifier of the standardizer, which
+        in this case is "NaiveStandardizer" without any settings.
         """
         return "NaiveStandardizer"
 
     @classmethod
-    def from_settings(cls, settings: dict) -> "NaiveStandardizer":
+    def fromSettings(cls, settings: dict) -> "NaiveStandardizer":
         """Create a naive standardizer from settings.
+        In this case, the settings are ignored.
         
         Args:
             settings (dict): settings of the standardizer

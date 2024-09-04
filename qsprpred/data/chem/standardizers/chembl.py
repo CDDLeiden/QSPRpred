@@ -42,7 +42,6 @@ class ChemblStandardizer(ChemStandardizer):
     Attributes:
         isomericSmiles (bool): return the isomeric smiles.
         sanitize (bool): sanitize SMILES before standardization.
-        settings (dict): Settings of the standardizer
     """
 
     def __init__(
@@ -59,45 +58,41 @@ class ChemblStandardizer(ChemStandardizer):
         self.isomericSmiles = isomeric_smiles
         self.sanitize = sanitize
 
-    def convert_smiles(self, smiles: str) -> tuple[str | None, str]:
+    def convertSMILES(self, smiles: str) -> str | None:
         """Standardize SMILES using the ChEMBL standardizer.
         
         Args:
             smiles (str): SMILES to be standardized
         
         Returns:
-            (tuple[str | None, str]): 
-                a tuple where the first element is the standardized SMILES and the 
-                second element is the original SMILES
+            (str): standardized SMILES string or `None` if standardization failed.
         """
         return chembl_smi_standardizer(
             smiles, isomeric_smiles=self.isomericSmiles, sanitize=self.sanitize
-        ), smiles
+        )
 
     @property
     def settings(self) -> dict:
-        """Settings of the standardizer.
-        
-        Returns:
-            (dict): settings of the standardizer
-        """
         return {
             "isomeric_smiles": self.isomericSmiles,
             "sanitize": self.sanitize,
         }
 
-    def get_id(self) -> str:
+    def getID(self) -> str:
         """Return the unique identifier of the standardizer.
+
+        In this case, the identifier starts with "ChEMBLStandardizer" followed by
+        the settings of the standardizer concatenated with "~".
         
         Returns:
             (str): unique identifier of the standardizer
         """
         return ("ChEMBLStandardizer"
-                "~isomeric_smiles={self.isomeric_smiles}"
-                "~sanitize={self.sanitize}")
+                f"~isomeric_smiles={self.isomericSmiles}"
+                f"~sanitize={self.sanitize}")
 
     @classmethod
-    def from_settings(cls, settings: dict) -> "ChemblStandardizer":
+    def fromSettings(cls, settings: dict) -> "ChemblStandardizer":
         """Create a standardizer from settings.	
         
         Args:

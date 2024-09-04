@@ -73,7 +73,7 @@ class PapyrusStandardizer(ChemStandardizer):
                 (Papyrus_standardizer.SALTS).
             uncharge (bool, optional): Uncharge molecules.            
         """
-        
+
         self._settings = {
             "keep_stereo": keep_stereo,
             "canonize": canonize,
@@ -103,7 +103,8 @@ class PapyrusStandardizer(ChemStandardizer):
         if self._settings["extra_salts"]:
             Papyrus_standardizer.SALTS.extend(self._settings["extra_salts"])
 
-    def fix_errors(self, mol: Chem.Mol, error: StandardizationResult) -> Chem.Mol | None:
+    def _fix_errors(self, mol: Chem.Mol,
+                    error: StandardizationResult) -> Chem.Mol | None:
         """Attempts to fix mixture molecules by keeping the largest fragment.
         
         Args:
@@ -121,7 +122,7 @@ class PapyrusStandardizer(ChemStandardizer):
             return mol
         return None
 
-    def convert_smiles(self, smiles: str, verbose: bool =False) -> tuple[str | None, str]:
+    def convertSMILES(self, smiles: str, verbose: bool = False) -> str | None:
         """Standardize SMILES using Papyrus standardization protocol.	
         
         Args:
@@ -155,45 +156,37 @@ class PapyrusStandardizer(ChemStandardizer):
         )
         results = [x for x in out[1:]]
         if StandardizationResult.CORRECT_MOLECULE not in results:
-            mol = self.fix_errors(mol, results[-1])
+            mol = self._fix_errors(mol, results[-1])
             if not mol:
                 if verbose:
                     print("SMILES rejected", smiles)
                     print("\tCause:", results)
-                return None, smiles
+                return None
             else:
-                return (
-                    self.convert_smiles(
-                        Chem.MolToSmiles(
-                            mol,
-                            isomericSmiles=self._settings["keep_stereo"],
-                            canonical=self._settings["canonize"],
-                        )
-                    ),
-                    smiles,
+                return self.convertSMILES(
+                    Chem.MolToSmiles(
+                        mol,
+                        isomericSmiles=self._settings["keep_stereo"],
+                        canonical=self._settings["canonize"],
+                    )
                 )
         else:
-            return (
-                Chem.MolToSmiles(
-                    out[0],
-                    canonical=self._settings["canonize"],
-                    isomericSmiles=self._settings["keep_stereo"],
-                )
-                if out[0]
-                else None
-            ), smiles
+            return Chem.MolToSmiles(
+                out[0],
+                canonical=self._settings["canonize"],
+                isomericSmiles=self._settings["keep_stereo"]
+            ) if out[0] else None
 
     @property
     def settings(self) -> dict:
-        """Settings of the standardizer.
-        
-        Returns:
-            dict: settings of the standardizer
-        """
         return self._settings
 
-    def get_id(self) -> str:
-        """Get the ID of the standardizer.	
+    def getID(self) -> str:
+        """Get the ID of the standardizer.
+
+        In this case, the ID is based on the settings of the standardizer.
+        It starts with 'PapyrusStandardizer' followed by a tilde and
+        the settings concatenated with a colon.
         
         Returns:
             str: ID of the standardizer
@@ -203,7 +196,7 @@ class PapyrusStandardizer(ChemStandardizer):
             [f"{key}={self._settings[key]!s}" for key in sorted_keys]
         )
 
-    def from_settings(self, settings: dict) -> "PapyrusStandardizer":
+    def fromSettings(self, settings: dict) -> "PapyrusStandardizer":
         """Create a Papyrus standardizer from settings.	
         
         Args:
