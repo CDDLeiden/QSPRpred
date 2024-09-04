@@ -15,17 +15,17 @@ from qsprpred.logs import logger
 
 
 def papyrus_filter(
-    acc_key: list[str],
-    quality: str,
-    outdir: str,
-    activity_types: list[str] | str = "all",
-    prefix: str | None = None,
-    drop_duplicates: bool = True,
-    chunk_size: int = 1e5,
-    use_existing: bool = True,
-    stereo: bool = False,
-    plusplus: bool = False,
-    papyrus_dir: str | None = None,
+        acc_key: list[str],
+        quality: str,
+        out_dir: str,
+        activity_types: list[str] | str = "all",
+        prefix: str | None = None,
+        drop_duplicates: bool = True,
+        chunk_size: int = 1e5,
+        use_existing: bool = True,
+        stereo: bool = False,
+        plusplus: bool = False,
+        papyrus_dir: str | None = None,
 ):
     """Filters the downloaded Papyrus dataset for quality and accession key (UniProt)
     and outputs a .tsv file of all compounds fulfilling these requirements.
@@ -33,7 +33,7 @@ def papyrus_filter(
     Args:
         acc_key (list): list of UniProt accession keys
         quality (str): str with minimum quality of dataset to keep
-        outdir (str): path to the location of Papyrus data
+        out_dir (str): path to the location of Papyrus data
         activity_types (list, str): list of activity types to keep
         prefix (str): prefix for the output file
         drop_duplicates (bool): boolean to drop duplicates from the final dataset
@@ -48,9 +48,9 @@ def papyrus_filter(
         outfile (str): path to the output file
     """
     prefix = prefix or f"{'_'.join(acc_key)}_{quality}"
-    outfile = os.path.join(outdir, f"{prefix}.tsv")
+    outfile = os.path.join(out_dir, f"{prefix}.tsv")
 
-    papyrus_dir = outdir if not papyrus_dir else papyrus_dir
+    papyrus_dir = out_dir if not papyrus_dir else papyrus_dir
 
     if use_existing and os.path.exists(outfile):
         logger.info(f"Using existing data from {outfile}...")

@@ -389,7 +389,7 @@ class GBMTDataSplit(DataSplit):
             df
         ), "X and the current data in the dataset must have same length"
         # Get clusters
-        clusters = self.clustering.get_clusters(df[ds.smilesProp].tolist())
+        clusters = self.clustering.getClusters(df[ds.smilesProp].tolist())
         # Pre-assign smiles of custom_test_list to test set
         preassigned_smiles = (
             {

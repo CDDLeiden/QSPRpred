@@ -26,8 +26,9 @@ class ApplicabilityDomain(JSONSerializable, ABC):
     in the applicability domain or just to check if a molecule is in the applicability
     domain.
     """
+
     def __init__(
-        self, threshold: float | None = None, direction: str | None = None
+            self, threshold: float | None = None, direction: str | None = None
     ) -> None:
         """Initialize the applicability domain with a threshold.
 
@@ -140,10 +141,11 @@ class MLChemADWrapper(ApplicabilityDomain):
         applicabilityDomain (MLChemApplicabilityDomain): applicability domain object
         fitted (bool): whether the applicability domain is fitted or not
     """
+
     def __init__(
-        self,
-        applicability_domain: MLChemADApplicabilityDomain,
-        astype: str | None = "float64",
+            self,
+            applicability_domain: MLChemADApplicabilityDomain,
+            astype: str | None = "float64",
     ) -> None:
         """Initialize the MLChemADFilter with the domain_type attribute.
 
@@ -219,30 +221,38 @@ class KNNApplicabilityDomain(ApplicabilityDomain):
     This class is adapted from the `KNNApplicabilityDomain` class in the
     `mlchemad` package.
     """
+
     def __init__(
-        self,
-        k: int = 5,
-        alpha: float = None,
-        hard_threshold: float = None,
-        scaling: str | None = "robust",
-        dist: str = "euclidean",
-        scaler_kwargs=None,
-        njobs: int = 1,
-        astype: str | None = "float64",
+            self,
+            k: int = 5,
+            alpha: float = None,
+            hard_threshold: float = None,
+            scaling: str | None = "robust",
+            dist: str = "euclidean",
+            scaler_kwargs=None,
+            n_jobs: int = 1,
+            astype: str | None = "float64",
     ):
         f"""Create the k-Nearest Neighbor applicability domain.
 
-        :param k: number of nearest neighbors
-        :param alpha: ratio of inlier samples calculated from the training set;
-            ignored if hard_threshold is set
-        :param hard_threshold: samples with a distance greater or equal to this
-            threshold will be considered outliers
-        :param scaling: scaling method; must be one of 'robust', 'minmax', 'maxabs',
-            'standard' or None (default: 'robust')
-        :param dist: kNN distance to be calculated (default: euclidean); one of
-            {list(dist_fns.keys())}; jaccard is recommended for binary fingerprints.
-        :param scaler_kwargs: additional parameters to supply to the scaler
-        :param njobs: number of parallel processes used to fit the kNN model
+        Args:
+            k (int): number of nearest neighbors
+            alpha (float): 
+                ratio of inlier samples calculated from the training set;
+                ignored if hard_threshold is set
+            hard_threshold (float): 
+                samples with a distance greater or equal to this
+                threshold will be considered outliers
+            scaling (str):
+                scaling method; must be one of 'robust', 'minmax', 'maxabs',
+                'standard' or None (default: 'robust')
+            dist (str):
+                kNN distance to be calculated (default: euclidean); one of
+                {list(dist_fns.keys())}; jaccard is recommended for binary fingerprints.
+            scaler_kwargs (dict):
+                additional parameters to supply to the scaler
+            n_jobs (int):
+                number of parallel processes used to fit the kNN model
         """
         super().__init__()
         if scaler_kwargs is None:
@@ -272,7 +282,7 @@ class KNNApplicabilityDomain(ApplicabilityDomain):
         self.k = k
         self.alpha = alpha
         self.hard_threshold = hard_threshold
-        self.nn = NearestNeighbors(n_neighbors=k, metric=dist, n_jobs=njobs)
+        self.nn = NearestNeighbors(n_neighbors=k, metric=dist, n_jobs=n_jobs)
         self._fitted = False
         self.astype = astype
 
@@ -316,7 +326,7 @@ class KNNApplicabilityDomain(ApplicabilityDomain):
             logger.warning(
                 f"Cannot convert X to {self.astype}, fitting with raw data"
             )
-        
+
         # Scale input features
 
         if self.scaler is not None:
@@ -324,7 +334,8 @@ class KNNApplicabilityDomain(ApplicabilityDomain):
         else:
             X_scaled = X.copy()
 
-        X_transformed = self.nn.kneighbors(X_scaled, return_distance=True)[0].mean(axis=1)
+        X_transformed = self.nn.kneighbors(X_scaled, return_distance=True)[0].mean(
+            axis=1)
         return pd.Series(X_transformed, index=X.index)
 
     @property

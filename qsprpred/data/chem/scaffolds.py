@@ -10,11 +10,7 @@ from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 
 
 class Scaffold(MolProcessorWithID, ABC):
-    """Abstract base class for calculating molecular scaffolds of different kinds.
-    
-    Attributes:
-        supportsParallel (bool): Whether the processor supports parallel processing
-    """
+    """Abstract base class for calculating molecular scaffolds of different kinds."""
 
     @abstractmethod
     def __call__(
@@ -27,13 +23,14 @@ class Scaffold(MolProcessorWithID, ABC):
         """Calculate the scaffold for a molecule.
 
         Args:
-            mol (str | Mol): SMILES or RDKit molecule to calculate the scaffold for.
+            mol (str | Mol | StoredMol):
+                SMILES, RDKit molecule or a `StoredMol` instances
+                to calculate the scaffolds for.
             props (dict[str, list], optional): 
                 A dictionary of properties related to the molecules to process. The
                 dictionary uses property names as keys and lists of values as values.
                 Each value in the list corresponds to a molecule in the list of
-                molecules. Should be the same length as the list of molecules. Should
-                contain the idProp key. Defaults to None.
+                molecules. This can be empty depending on the implementation.
             args: Additional positional arguments.
             kwargs: Additional keyword arguments.
             

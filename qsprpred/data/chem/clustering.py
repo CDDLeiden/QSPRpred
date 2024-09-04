@@ -51,7 +51,7 @@ class MoleculeClusters(MolProcessorWithID, ABC):
             for mol, _id in self.iterMolsAndIDs(mols, props):
                 ids.append(_id)
                 smiles.append(Chem.MolToSmiles(mol))
-        clusters = self.get_clusters(smiles)
+        clusters = self.getClusters(smiles)
 
         # map clusters to molecules
         output = np.array([-1] * len(mols))
@@ -61,7 +61,7 @@ class MoleculeClusters(MolProcessorWithID, ABC):
         return pd.Series(output, index=pd.Index(ids, name=self.idProp))
 
     @abstractmethod
-    def get_clusters(self, smiles_list: list[str]) -> dict:
+    def getClusters(self, smiles_list: list[str]) -> dict:
         """Cluster molecules.
 
         Args:
@@ -114,7 +114,7 @@ class RandomClusters(MoleculeClusters):
         self.seed = seed
         self.nClusters = n_clusters
 
-    def get_clusters(self, smiles_list: list[str]) -> dict[str, list[int]]:
+    def getClusters(self, smiles_list: list[str]) -> dict[str, list[int]]:
         """Cluster molecules.
 
         Args:
@@ -161,7 +161,7 @@ class ScaffoldClusters(MoleculeClusters):
         super().__init__(id_prop=id_prop)
         self.scaffold = scaffold
 
-    def get_clusters(self, smiles_list: list[str]) -> dict[int, list[int]]:
+    def getClusters(self, smiles_list: list[str]) -> dict[int, list[int]]:
         """Cluster molecules.
 
         Args:
@@ -205,7 +205,7 @@ class FPSimilarityClusters(MoleculeClusters):
     Attributes:
         fp_calculator (Fingerprint): fingerprint calculator
     """
-    
+
     def __init__(
             self,
             fp_calculator: Fingerprint = MorganFP(radius=3, nBits=2048),
@@ -220,7 +220,7 @@ class FPSimilarityClusters(MoleculeClusters):
         super().__init__(id_prop=id_prop)
         self.fp_calculator = fp_calculator
 
-    def get_clusters(self, smiles_list: list[str]) -> dict[int, list[int]]:
+    def getClusters(self, smiles_list: list[str]) -> dict[int, list[int]]:
         """Cluster a list of SMILES strings based on molecular dissimilarity.
 
         Args:

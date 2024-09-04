@@ -1,4 +1,4 @@
-from typing import Literal, Any
+from typing import Literal
 
 import pandas as pd
 from rdkit import Chem
@@ -43,12 +43,8 @@ def match_mol_to_smarts(
 
 
 class SMARTSMatchProcessor(MolProcessorWithID):
-    """Processor that checks if a molecule matches a SMARTS pattern.
-    
-    Attributes:
-        supportsParallel (bool): Whether the processor supports parallel processing
-    """
-    
+    """Processor that checks if molecules match a SMARTS pattern."""
+
     def __call__(
             self,
             mols: list[str | Mol | StoredMol],

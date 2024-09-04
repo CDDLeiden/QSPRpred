@@ -119,7 +119,7 @@ class Papyrus(DataSource):
             kwargs: additional keyword arguments passed to `MoleculeTable.fromTableFile`
 
         Returns:
-            MolculeTable: the filtered data set
+            MoleculeTable: the filtered data set
         """
         logger.debug("Getting data from Papyrus data source...")
         assert acc_keys is not None, "Please provide a list of accession keys."
@@ -133,7 +133,7 @@ class Papyrus(DataSource):
         data, path = papyrus_filter(
             acc_key=acc_keys,
             quality=quality,
-            outdir=output_dir,
+            out_dir=output_dir,
             activity_types=activity_types,
             prefix=name,
             drop_duplicates=drop_duplicates,

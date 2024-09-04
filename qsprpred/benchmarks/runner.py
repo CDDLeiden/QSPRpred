@@ -63,14 +63,10 @@ class BenchmarkRunner:
             Benchmark settings.
         parallelGeneratorCPU (ParallelGenerator):
             Parallel generator for CPU replicas.
-        nProc (int):
-            Number of processes to use.
         resultsFile (str):
             Path to the results file.
         dataDir (str):
             Path to the directory to store data.
-        nRuns (int):
-            Total number of benchmarking runs.
         lock_data_t (Any):
             Lock for data set operations.
         lock_report_t (Any):

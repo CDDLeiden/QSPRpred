@@ -4,11 +4,13 @@ from rdkit import Chem
 
 
 class ChemIdentifier(ABC):
-    """Interface for identifiers of molecules."""
+    """Interface for identifiers of molecules. This should be a simple callable
+    that given a SMILES string returns a unique identifier.
+    """
 
     @abstractmethod
     def __call__(self, smiles: str) -> str:
-        """ Get the identifier of the molecule represented by the given SMILES.
+        """Get the identifier of the molecule represented by the given SMILES.
 
         Args:
             smiles (str): input SMILES
@@ -19,24 +21,22 @@ class ChemIdentifier(ABC):
 
 
 class Identifiable(ABC):
-    """Interface for objects which have molecule identifiers.
-    
-    Attributes:
-        identifier (ChemIdentifier): The identifier used by the store.
+    """Interface for objects that use a `ChemIdentifier` to identify duplicate
+    molecules.
     """
 
     @property
     @abstractmethod
     def identifier(self) -> ChemIdentifier:
-        """Get the identifier used by the store.
+        """Get the identifier used by this instance.
 
         Returns:
-            ChemIdentifier: The identifier used by the store.
+            ChemIdentifier: The identifier used by this instance.
         """
 
     @abstractmethod
     def applyIdentifier(self, identifier: ChemIdentifier):
-        """Apply an identifier to the SMILES in the store.
+        """Apply an identifier to the SMILES in this instance (i.e. remove duplicates).
         
         Args:
             identifier (ChemIdentifier): The identifier to apply.
