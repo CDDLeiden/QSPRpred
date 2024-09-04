@@ -9,7 +9,7 @@ from qsprpred.data.chem.identifiers import InchiIdentifier
 from qsprpred.data.chem.standardizers.check_smiles import CheckSmilesValid
 from qsprpred.data.chem.standardizers.papyrus import PapyrusStandardizer
 from qsprpred.data.storage.interfaces.chem_store import ChemStore
-from qsprpred.data.storage.tabular.basic_storage import TabularStorageBasic
+from qsprpred.data.storage.tabular.basic_storage import PandasChemStore
 
 
 class StorageTest(ABC):
@@ -34,8 +34,8 @@ class StorageTest(ABC):
 
 class TabularStorageTest(StorageTest, TestCase):
 
-    def getStorage(self) -> TabularStorageBasic:
-        store = TabularStorageBasic(
+    def getStorage(self) -> PandasChemStore:
+        store = PandasChemStore(
             f"{self.__class__.__name__}_test_basic",
             self.outputPath,
             pd.read_csv(self.exampleFileBasic),
@@ -52,12 +52,12 @@ class TabularStorageTest(StorageTest, TestCase):
     def checkSerialization(self, store):
         store.save()
         # create new and check consistency
-        store2 = TabularStorageBasic(store.name, self.outputPath)
+        store2 = PandasChemStore(store.name, self.outputPath)
         self.assertEqual(store2.nLibs, store.nLibs)
         self.assertEqual(len(store2), len(store))
         self.assertListEqual(list(store2.smiles), list(store.smiles))
         # create from meta file and check consistency
-        store2 = TabularStorageBasic.fromFile(store.metaFile)
+        store2 = PandasChemStore.fromFile(store.metaFile)
         self.assertEqual(store2.nLibs, store.nLibs)
         self.assertEqual(len(store2), len(store))
         self.assertListEqual(list(store2.smiles), list(store.smiles))
@@ -77,7 +77,7 @@ class TabularStorageTest(StorageTest, TestCase):
 
     def testInitsAndSaves(self):
         # test default
-        store_default = TabularStorageBasic(
+        store_default = PandasChemStore(
             f"{self.__class__.__name__}_test_basic",
             self.outputPath,
             pd.read_csv(self.exampleFileBasic),
@@ -110,7 +110,7 @@ class TabularStorageTest(StorageTest, TestCase):
         self.assertEqual(len(store_default), 3)
         self.checkSerialization(store_default)
         # test empty init
-        store_empty = TabularStorageBasic(
+        store_empty = PandasChemStore(
             f"{self.__class__.__name__}_test_empty",
             self.outputPath,
             standardizer=PapyrusStandardizer(),
@@ -121,7 +121,7 @@ class TabularStorageTest(StorageTest, TestCase):
         self.checkSerialization(store_empty)
         # test with defaults
         df = pd.read_csv(self.exampleFileIndex)
-        store_default = TabularStorageBasic(
+        store_default = PandasChemStore(
             f"{self.__class__.__name__}_test_default",
             self.outputPath,
             df,
@@ -132,7 +132,7 @@ class TabularStorageTest(StorageTest, TestCase):
         self.checkSerialization(store_default)
         # try from DF
         df = pd.read_csv(self.exampleFileIndex)
-        TabularStorageBasic.fromDF(
+        PandasChemStore.fromDF(
             df,
             name=f"{self.__class__.__name__}_test_default_df",
             path=self.outputPath,

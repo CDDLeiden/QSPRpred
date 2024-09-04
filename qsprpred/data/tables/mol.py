@@ -11,7 +11,7 @@ from qsprpred.data.processing.mol_processor import MolProcessor
 from qsprpred.data.storage.interfaces.chem_store import ChemStore
 from qsprpred.data.storage.interfaces.property_storage import PropertyStorage
 from qsprpred.data.storage.interfaces.stored_mol import StoredMol
-from qsprpred.data.storage.tabular.basic_storage import TabularStorageBasic
+from qsprpred.data.storage.tabular.basic_storage import PandasChemStore
 from .descriptor import DescriptorTable
 from .interfaces.molecule_data_set import MoleculeDataSet
 from ..chem.identifiers import ChemIdentifier
@@ -245,8 +245,8 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         Returns:
             (MoleculeTable): The created data set.
         """
-        storage = TabularStorageBasic(f"{name}_storage", path, df,
-                                      smiles_col=smiles_col, **kwargs)
+        storage = PandasChemStore(f"{name}_storage", path, df,
+                                  smiles_col=smiles_col, **kwargs)
         return MoleculeTable(storage, name=name, path=path)
 
     @classmethod
@@ -266,7 +266,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         """
         smiles_col = "SMILES"
         df = pd.DataFrame({smiles_col: smiles})
-        storage = TabularStorageBasic(name, path, df, *args, **kwargs)
+        storage = PandasChemStore(name, path, df, *args, **kwargs)
         return cls(storage, path=os.path.dirname(storage.path))
 
     @classmethod
@@ -288,7 +288,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
             (MoleculeTable): The created data set.
         """
         df = pd.read_table(filename, sep=sep)
-        storage = TabularStorageBasic(f"{name}_storage", path, df)
+        storage = PandasChemStore(f"{name}_storage", path, df)
         return MoleculeTable(storage, name, path=path, *args, **kwargs)
 
     @classmethod
@@ -309,7 +309,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         # FIXME: the RDKit mols are always added here, which might be unnecessary
         from rdkit.Chem import PandasTools
         df = PandasTools.LoadSDF(filename, molColName="RDMol")
-        storage = TabularStorageBasic(
+        storage = PandasChemStore(
             name,
             path,
             df,

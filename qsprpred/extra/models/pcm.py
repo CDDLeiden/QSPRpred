@@ -12,7 +12,7 @@ from rdkit.Chem import Mol
 from qsprpred.data import MoleculeTable
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 from ..data.descriptors.sets import ProteinDescriptorSet
-from ...data.storage.tabular.basic_storage import TabularStorageBasic
+from ...data.storage.tabular.basic_storage import PandasChemStore
 from ...models.model import QSPRModel
 from ...models.scikit_learn import SklearnModel
 
@@ -64,7 +64,7 @@ class PCMModel(QSPRModel, ABC):
         # make a molecule table first and add the target properties
         if isinstance(mols[0], Mol):
             mols = [Chem.MolToSmiles(mol) for mol in mols]
-        storage = TabularStorageBasic(
+        storage = PandasChemStore(
             f"{self.__class__.__name__}_{hash(self)}_store",
             self.baseDir,
             pd.DataFrame({"SMILES": mols}),

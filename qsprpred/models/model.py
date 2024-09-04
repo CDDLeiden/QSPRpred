@@ -17,7 +17,7 @@ from rdkit import Chem
 from rdkit.Chem import Mol
 
 from qsprpred.data import QSPRTable
-from ..data.storage.tabular.basic_storage import TabularStorageBasic
+from ..data.storage.tabular.basic_storage import PandasChemStore
 from ..data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ..data.tables.mol import MoleculeTable
 from ..logs import logger
@@ -473,7 +473,7 @@ class QSPRModel(JSONSerializable, ABC):
         # make a molecule table first and add the target properties
         if isinstance(mols[0], Mol):
             mols = [Chem.MolToSmiles(mol) for mol in mols]
-        storage = TabularStorageBasic(
+        storage = PandasChemStore(
             f"{self.__class__.__name__}_{hash(self)}_store",
             self.baseDir,
             pd.DataFrame({"SMILES": mols}),

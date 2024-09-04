@@ -24,7 +24,7 @@ from qsprpred.utils.parallel import (
 )
 
 
-class TabularStorageBasic(
+class PandasChemStore(
     ChemStore, SMARTSSearchable, Summarizable, Parallelizable
 ):
     """Tabular storage for molecules. An example implementations of `ChemStore`
@@ -290,7 +290,7 @@ class TabularStorageBasic(
     @classmethod
     def fromDF(
             cls, df: pd.DataFrame, *args, name: str | None = None, **kwargs
-    ) -> "TabularStorageBasic":
+    ) -> "PandasChemStore":
         """Create a new instance from a pandas DataFrame.
 
         Args:
@@ -670,7 +670,7 @@ class TabularStorageBasic(
     def getSubset(
             self, subset: list[str], ids: list[str] | None = None,
             name: str | None = None
-    ) -> "TabularStorageBasic":
+    ) -> "PandasChemStore":
         """Get a subset of the storage for the given properties.
         
         Args:
@@ -679,7 +679,7 @@ class TabularStorageBasic(
             name (str, optional): Name of the new table.
             
         Returns:
-            (TabularStorageBasic): New table containing the subset.
+            (PandasChemStore): New table containing the subset.
         """
         name = name or f"{self.name}_subset"
         if self.smilesProp not in subset:
@@ -787,7 +787,7 @@ class TabularStorageBasic(
             values: list[float | int | str],
             exact=False,
             name: str | None = None,
-    ) -> "TabularStorageBasic":
+    ) -> "PandasChemStore":
         """Search in this table using a property name and a list of values.
         It is assumed that the property is searchable with string matching
         or direct comparison if a number is supplied.
@@ -889,7 +889,7 @@ class TabularStorageBasic(
             use_chirality: bool = False,
             name: str | None = None,
             match_function: MolProcessor | None = None,
-    ) -> "TabularStorageBasic":
+    ) -> "PandasChemStore":
         """Search the molecules in the table with a SMARTS pattern.
 
         Args:

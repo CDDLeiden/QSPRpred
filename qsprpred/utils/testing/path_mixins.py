@@ -31,7 +31,7 @@ from ...data.processing.data_filters import RepeatsFilter
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
 from ...data.processing.feature_standardizers import SKLearnStandardizer
 from ...data.sampling.splits import RandomSplit
-from ...data.storage.tabular.basic_storage import TabularStorageBasic
+from ...data.storage.tabular.basic_storage import PandasChemStore
 from ...data.tables.qspr import QSPRTable
 from ...models import SklearnModel
 from ...tasks import TargetTasks
@@ -313,7 +313,7 @@ class DataSetsPathMixIn(PathMixIn):
         )
 
     def getStorage(self, df, name, n_jobs=1, chunk_size=None):
-        return TabularStorageBasic(
+        return PandasChemStore(
             name,
             self.generatedDataPath,
             df,

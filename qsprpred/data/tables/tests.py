@@ -9,7 +9,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.model_selection import KFold, ShuffleSplit
 
 from qsprpred.data.descriptors.sets import DrugExPhyschem
-from qsprpred.data.storage.tabular.basic_storage import TabularStorageBasic
+from qsprpred.data.storage.tabular.basic_storage import PandasChemStore
 from .interfaces.qspr_data_set import QSPRDataSet
 from .mol import MoleculeTable
 from ..chem.standardizers.papyrus import PapyrusStandardizer
@@ -32,7 +32,7 @@ class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
 
     def getStorage(self):
         df = self.getSmallDF()
-        return TabularStorageBasic(
+        return PandasChemStore(
             "test",
             self.generatedDataPath,
             df,
