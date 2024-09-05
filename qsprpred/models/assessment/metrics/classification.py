@@ -4,10 +4,10 @@ from rdkit.ML.Scoring.Scoring import CalcBEDROC, CalcEnrichment, CalcRIE
 
 from qsprpred.models.assessment.metrics.base import Metric
 
-
 # ------------------------------------------
 #   Classification Metrics (Probabilistic)
 # ------------------------------------------
+
 
 class CalibrationError(Metric):
     """Compute the calibration error of a classifier.
@@ -22,7 +22,6 @@ class CalibrationError(Metric):
     Attributes:
         name (str): Name of the scoring function (calibration_error).
     """
-
     def __init__(self, n_bins: int = 10, norm: str = "L1"):
         """Initialize the calibration error scorer.
 
@@ -40,9 +39,9 @@ class CalibrationError(Metric):
         self.norm = norm
 
     def __call__(
-            self,
-            y_true: np.array,
-            y_pred: list[np.ndarray],
+        self,
+        y_true: np.array,
+        y_pred: list[np.ndarray],
     ) -> float:
         """Compute the calibration error of a classifier.
 
@@ -85,7 +84,7 @@ class CalibrationError(Metric):
         # Compute the calibration error by iterating over the bins
         calibration_error = 0.0
         for bin_y_true, bin_y_pred_max, bin_y_pred_class in zip(
-                binned_y_true, binned_y_pred_max, binned_y_pred_class
+            binned_y_true, binned_y_pred_max, binned_y_pred_class
         ):
             # Compute the accuracy and the mean probability for the bin
             mean_prob = np.mean(bin_y_pred_max)
@@ -93,12 +92,11 @@ class CalibrationError(Metric):
             # Compute the calibration error for the bin based on the norm
             if self.norm == "L1":
                 calibration_error += (
-                        np.abs(mean_prob - accuracy) * len(bin_y_true) / len(y_true)
+                    np.abs(mean_prob - accuracy) * len(bin_y_true) / len(y_true)
                 )
             elif self.norm == "L2":
                 calibration_error += (
-                        np.square(mean_prob - accuracy) ** 2 * len(bin_y_true) / len(
-                    y_true)
+                    np.square(mean_prob - accuracy)**2 * len(bin_y_true) / len(y_true)
                 )
             elif self.norm == "infinity":
                 calibration_error = max(calibration_error, np.abs(mean_prob - accuracy))
@@ -122,7 +120,6 @@ class BEDROC(Metric):
     Attributes:
         name (str): Name of the scoring function (bedroc).
     """
-
     def __init__(self, alpha: float = 20):
         """Initialize the BEDROC scorer.
 
@@ -148,7 +145,8 @@ class BEDROC(Metric):
         return CalcBEDROC(
             [[y] for _, y in sorted(zip(y_pred[1], y_true), reverse=True)],
             col=0,
-            alpha=self.alpha)
+            alpha=self.alpha,
+        )
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
@@ -161,7 +159,6 @@ class EnrichmentFactor(Metric):
     Attributes:
         name (str): Name of the scoring function (enrichment_factor).
     """
-
     def __init__(self, chi: float = 0.05):
         """Initialize the enrichment factor scorer.
 
@@ -184,11 +181,11 @@ class EnrichmentFactor(Metric):
         """
         if isinstance(y_pred, list):
             y_pred = y_pred[0]
-        return \
-            CalcEnrichment(
-                [[y] for _, y in sorted(zip(y_pred[1], y_true), reverse=True)],
-                col=0,
-                fractions=[self.chi])[0]
+        return CalcEnrichment(
+            [[y] for _, y in sorted(zip(y_pred[1], y_true), reverse=True)],
+            col=0,
+            fractions=[self.chi],
+        )[0]
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
@@ -203,7 +200,6 @@ class RobustInitialEnhancement(Metric):
     Attributes:
         name (str): Name of the scoring function (robust_initial_enhancement).
     """
-
     def __init__(self, alpha: float = 100):
         """Initialize the robust initial enhancement scorer.
 
@@ -226,9 +222,11 @@ class RobustInitialEnhancement(Metric):
         """
         if isinstance(y_pred, list):
             y_pred = y_pred[0]
-        return CalcRIE([[y] for _, y in sorted(zip(y_pred[1], y_true), reverse=True)],
-                       col=0,
-                       alpha=self.alpha)
+        return CalcRIE(
+            [[y] for _, y in sorted(zip(y_pred[1], y_true), reverse=True)],
+            col=0,
+            alpha=self.alpha,
+        )
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
@@ -239,13 +237,13 @@ class RobustInitialEnhancement(Metric):
 #   Classification Metrics (Discrete)
 # ------------------------------------------
 
+
 class Prevalence(Metric):
     """Calculate the prevalence.
 
     Attributes:
         name (str): Name of the scoring function (prevalence).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the prevalence.
 
@@ -270,7 +268,6 @@ class Sensitivity(Metric):
     Attributes:
         name (str): Name of the scoring function (sensitivity).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the sensitivity (recall).
 
@@ -296,7 +293,6 @@ class Specificity(Metric):
     Attributes:
         name (str): Name of the scoring function (specificity).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the specificity (selectivity).
 
@@ -322,7 +318,6 @@ class PositivePredictivity(Metric):
     Attributes:
         name (str): Name of the scoring function (Positive_predictivity).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the Positive predictivity.
 
@@ -348,7 +343,6 @@ class NegativePredictivity(Metric):
     Attributes:
         name (str): Name of the scoring function (negative_predictivity).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the negative predictivity.
 
@@ -374,7 +368,6 @@ class CohenKappa(Metric):
     Attributes:
         name (str): Name of the scoring function (cohen_kappa).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the Cohen kappa coefficient.
 
@@ -387,8 +380,8 @@ class CohenKappa(Metric):
 
         """
         tn, fp, fn, tp = sklearn.metrics.confusion_matrix(y_true, y_pred).ravel()
-        return (2 * (tp * tn - fp * fn)) / (
-                (tp + fp) * (tn + fp) + (tp + fn) * (tn + fn))
+        return (2 *
+                (tp * tn - fp * fn)) / ((tp + fp) * (tn + fp) + (tp + fn) * (tn + fn))
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
@@ -404,7 +397,6 @@ class BalancedPositivePredictivity(Metric):
     Attributes:
         name (str): Name of the scoring function (balanced_positive_predictivity).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the balanced positive predictivity.
 
@@ -433,7 +425,6 @@ class BalancedNegativePredictivity(Metric):
     Attributes:
         name (str): Name of the scoring function (balanced_negative_predictivity).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the balanced negative predictivity.
 
@@ -462,7 +453,6 @@ class BalancedMatthewsCorrcoeff(Metric):
     Attributes:
         name (str): Name of the scoring function (balanced_matthews_corrcoeff).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the balanced Matthews correlation coefficient.
 
@@ -475,7 +465,7 @@ class BalancedMatthewsCorrcoeff(Metric):
 
         """
         _, sen, spe = derived_confusion_matrix(y_true, y_pred)
-        return (sen + spe - 1) / np.sqrt(1 - (sen - spe) ** 2)
+        return (sen + spe - 1) / np.sqrt(1 - (sen - spe)**2)
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
@@ -491,7 +481,6 @@ class BalancedCohenKappa(Metric):
     Attributes:
         name (str): Name of the scoring function (balanced_cohen_kappa).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the balanced Cohen kappa coefficient.
 

@@ -17,25 +17,13 @@ from sklearn.metrics import (
     make_scorer,
     mean_squared_error,
     roc_auc_score,
-    top_k_accuracy_score
+    top_k_accuracy_score,
 )
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
-from . import SklearnMetrics
-from .assessment.classification import create_metrics_summary
-from .assessment.metrics.classification import CalibrationError, BEDROC, \
-    EnrichmentFactor, \
-    RobustInitialEnhancement, Prevalence, Sensitivity, Specificity, \
-    PositivePredictivity, NegativePredictivity, CohenKappa, \
-    BalancedPositivePredictivity, BalancedNegativePredictivity, \
-    BalancedMatthewsCorrcoeff, BalancedCohenKappa
-from .assessment.metrics.masked import MaskedMetric
-from .assessment.metrics.regression import Pearson, Kendall, KSlope, R20, KPrimeSlope, \
-    AverageFoldError, AbsoluteAverageFoldError, PercentageWithinFoldError, RPrime20
-from .assessment.regression import create_correlation_summary
 from ..data.processing.applicability_domain import MLChemADWrapper
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stopping
 from ..models.monitors import BaseMonitor, FileMonitor, ListMonitor
@@ -44,28 +32,59 @@ from ..tasks import ModelTasks, TargetTasks
 from ..utils.testing.base import QSPRTestCase
 from ..utils.testing.check_mixins import ModelCheckMixIn, MonitorsCheckMixIn
 from ..utils.testing.path_mixins import ModelDataSetsPathMixIn
+from . import SklearnMetrics
+from .assessment.classification import create_metrics_summary
+from .assessment.metrics.classification import (
+    BEDROC,
+    BalancedCohenKappa,
+    BalancedMatthewsCorrcoeff,
+    BalancedNegativePredictivity,
+    BalancedPositivePredictivity,
+    CalibrationError,
+    CohenKappa,
+    EnrichmentFactor,
+    NegativePredictivity,
+    PositivePredictivity,
+    Prevalence,
+    RobustInitialEnhancement,
+    Sensitivity,
+    Specificity,
+)
+from .assessment.metrics.masked import MaskedMetric
+from .assessment.metrics.regression import (
+    R20,
+    AbsoluteAverageFoldError,
+    AverageFoldError,
+    Kendall,
+    KPrimeSlope,
+    KSlope,
+    Pearson,
+    PercentageWithinFoldError,
+    RPrime20,
+)
+from .assessment.regression import create_correlation_summary
 
 
 class SklearnBaseModelTestCase(ModelDataSetsPathMixIn, ModelCheckMixIn, QSPRTestCase):
     """This class holds the tests for the SklearnModel class."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
+        self.nCPU = 2
 
     def getModel(
-            self,
-            name: str,
-            alg: Type | None = None,
-            parameters: dict | None = None,
-            random_state: int | None = None,
+        self,
+        name: str,
+        alg: Type | None = None,
+        parameters: dict | None = None,
+        random_state: int | None = None,
     ):
         """Create a SklearnModel model.
 
         Args:
             name (str): the name of the model
             alg (Type, optional): the algorithm to use. Defaults to None.
-            dataset (QSPRDataset, optional): the dataset to use. Defaults to None.
+            dataset (QSPRDataSet, optional): the dataset to use. Defaults to None.
             parameters (dict, optional): the parameters to use. Defaults to None.
             random_state(int, optional):
                 Random state to use for shuffling and other random operations. Defaults
@@ -85,20 +104,19 @@ class SklearnBaseModelTestCase(ModelDataSetsPathMixIn, ModelCheckMixIn, QSPRTest
 
 class TestSklearnRegression(SklearnBaseModelTestCase):
     """Test the SklearnModel class for regression models."""
-
     @parameterized.expand(
         [
             (alg_name, TargetTasks.REGRESSION, alg_name, alg, random_state)
             for alg, alg_name in (
                 (RandomForestRegressor, "RFR"),
                 (XGBRegressor, "XGBR"),
-        ) for random_state in ([None], [1, 42], [42, 42])
+            ) for random_state in ([None], [1, 42], [42, 42])
         ] + [
             (alg_name, TargetTasks.REGRESSION, alg_name, alg, [None])
             for alg, alg_name in (
-                    (PLSRegression, "PLSR"),
-                    (SVR, "SVR"),
-                    (KNeighborsRegressor, "KNNR"),
+                (PLSRegression, "PLSR"),
+                (SVR, "SVR"),
+                (KNeighborsRegressor, "KNNR"),
             )
         ]
     )
@@ -186,15 +204,14 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
 
 class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
     """Test the SklearnModel class for multi-task regression models."""
-
     @parameterized.expand(
         [
             (alg_name, alg_name, alg, random_state)
-            for alg, alg_name in ((RandomForestRegressor, "RFR"),)
+            for alg, alg_name in ((RandomForestRegressor, "RFR"), )
             for random_state in ([None], [1, 42], [42, 42])
         ] + [
             (alg_name, alg_name, alg, [None])
-            for alg, alg_name in ((KNeighborsRegressor, "KNNR"),)
+            for alg, alg_name in ((KNeighborsRegressor, "KNNR"), )
         ]
     )
     def testRegressionMultiTaskFit(self, _, model_name, model_class, random_state):
@@ -251,14 +268,6 @@ class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
 
 class TestSklearnSerialization(SklearnBaseModelTestCase):
     def testJSON(self):
-        dataset = self.createLargeTestDataSet(
-            target_props=[{
-                "name": "CL",
-                "task": TargetTasks.SINGLECLASS,
-                "th": [6.5]
-            }],
-            preparation_settings=self.getDefaultPrep(),
-        )
         model = self.getModel(
             name="TestSerialization",
             alg=RandomForestClassifier,
@@ -284,31 +293,30 @@ class TestSklearnSerialization(SklearnBaseModelTestCase):
 
 class TestSklearnClassification(SklearnBaseModelTestCase):
     """Test the SklearnModel class for classification models."""
-
     @parameterized.expand(
         [
             (f"{alg_name}_{task}", task, th, alg_name, alg, random_state)
             for alg, alg_name in (
                 (RandomForestClassifier, "RFC"),
                 (XGBClassifier, "XGBC"),
-        ) for task, th in (
+            ) for task, th in (
                 (TargetTasks.SINGLECLASS, [6.5]),
                 (TargetTasks.MULTICLASS, [0, 2, 10, 1100]),
-        ) for random_state in ([None], [1, 42], [42, 42])
+            ) for random_state in ([None], [1, 42], [42, 42])
         ] + [
             (f"{alg_name}_{task}", task, th, alg_name, alg, [None])
             for alg, alg_name in (
-                    (SVC, "SVC"),
-                    (KNeighborsClassifier, "KNNC"),
-                    (GaussianNB, "NB"),
+                (SVC, "SVC"),
+                (KNeighborsClassifier, "KNNC"),
+                (GaussianNB, "NB"),
             ) for task, th in (
-                    (TargetTasks.SINGLECLASS, [6.5]),
-                    (TargetTasks.MULTICLASS, [0, 2, 10, 1100]),
+                (TargetTasks.SINGLECLASS, [6.5]),
+                (TargetTasks.MULTICLASS, [0, 2, 10, 1100]),
             )
         ]
     )
     def testClassificationBasicFit(
-            self, _, task, th, model_name, model_class, random_state
+        self, _, task, th, model_name, model_class, random_state
     ):
         """Test model training for classification models."""
         if model_name not in ["NB", "SVC"]:
@@ -323,7 +331,7 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
                 parameters = {"probability": True}
         # special case for XGB, set subsample to 0.6 to introduce randomness
         if model_name == "XGBC":
-            parameters = {"subsample": 0.3}
+            parameters.update({"subsample": 0.3})
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             target_props=[{
@@ -408,15 +416,14 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
 
 class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
     """Test the SklearnModel class for multi-task classification models."""
-
     @parameterized.expand(
         [
             (alg_name, alg_name, alg, random_state)
-            for alg, alg_name in ((RandomForestClassifier, "RFC"),)
+            for alg, alg_name in ((RandomForestClassifier, "RFC"), )
             for random_state in ([None], [1, 42], [42, 42])
         ] + [
             (alg_name, alg_name, alg, [None])
-            for alg, alg_name in ((KNeighborsClassifier, "KNNC"),)
+            for alg, alg_name in ((KNeighborsClassifier, "KNNC"), )
         ]
     )
     def testClassificationMultiTaskFit(self, _, model_name, model_class, random_state):
@@ -484,7 +491,6 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
 
 class TestMetrics(TestCase):
     """Test the SklearnMetrics from the metrics module."""
-
     def sample_data(self, task: ModelTasks, use_proba: bool = False):
         """Sample data for testing."""
         if task == ModelTasks.REGRESSION:
@@ -511,11 +517,15 @@ class TestMetrics(TestCase):
         elif task == ModelTasks.MULTICLASS and use_proba:
             y_true = np.array([1, 2, 1, 0, 1])
             y_pred = [
-                np.array([[0.9, 0.1, 0.0],
-                          [0.1, 0.8, 0.1],
-                          [0.0, 0.1, 0.9],
-                          [0.1, 0.8, 0.1],
-                          [0.1, 0.8, 0.1]])
+                np.array(
+                    [
+                        [0.9, 0.1, 0.0],
+                        [0.1, 0.8, 0.1],
+                        [0.0, 0.1, 0.9],
+                        [0.1, 0.8, 0.1],
+                        [0.1, 0.8, 0.1],
+                    ]
+                )
             ]
         elif task == ModelTasks.MULTITASK_SINGLECLASS and not use_proba:
             y_true = np.array([[1, 0], [1, 1], [1, 0], [0, 0], [1, 0]])
@@ -696,14 +706,16 @@ class TestMetrics(TestCase):
         metric = MaskedMetric(SklearnMetrics("neg_mean_squared_error"))
         self.assertIsInstance(metric(y_true, y_pred), float)
 
-        y_true, y_pred = self.sample_data(ModelTasks.MULTITASK_SINGLECLASS,
-                                          use_proba=False)
+        y_true, y_pred = self.sample_data(
+            ModelTasks.MULTITASK_SINGLECLASS, use_proba=False
+        )
         y_true = y_true.astype(float)
         y_true[0, :] = None
         y_true[1, 1] = None
 
-        y_true, y_pred = self.sample_data(ModelTasks.MULTITASK_SINGLECLASS,
-                                          use_proba=True)
+        y_true, y_pred = self.sample_data(
+            ModelTasks.MULTITASK_SINGLECLASS, use_proba=True
+        )
         y_true = y_true.astype(float)
         y_true[0, :] = None
         y_true[1, 1] = None
@@ -785,7 +797,6 @@ class TestEarlyStopping(ModelDataSetsPathMixIn, TestCase):
 
     def test_early_stopping_decorator(self):
         """Test the early stopping decorator."""
-
         class test_class:
             def __init__(self, support=True):
                 self.earlyStopping = EarlyStopping(EarlyStoppingMode.RECORDING)
@@ -793,14 +804,14 @@ class TestEarlyStopping(ModelDataSetsPathMixIn, TestCase):
 
             @early_stopping
             def test_func(
-                    self,
-                    X,
-                    y,
-                    estimator=None,
-                    mode=EarlyStoppingMode.NOT_RECORDING,
-                    split=None,
-                    monitor=None,
-                    **kwargs,
+                self,
+                X,
+                y,
+                estimator=None,
+                mode=EarlyStoppingMode.NOT_RECORDING,
+                split=None,
+                monitor=None,
+                **kwargs,
             ):
                 return None, kwargs["best_epoch"]
 
@@ -944,12 +955,12 @@ class TestAttachedApplicabilityDomain(ModelDataSetsPathMixIn, QSPRTestCase):
 
         # check if the applicability domain predictions from the dataset are equal to the ones from the model
         _, ap_preds_model = model.predictMols(
-            dataset.df["SMILES"], use_applicability_domain=True
+            dataset.getProperty(dataset.smilesProp), use_applicability_domain=True
         )
         self.assertTrue(np.array_equal(ap_pred, ap_preds_model))
 
         # check if the applicability domain predictions arrays are equal after saving and loading
         _, ap_preds_model2 = model2.predictMols(
-            dataset.df["SMILES"], use_applicability_domain=True
+            dataset.getProperty(dataset.smilesProp), use_applicability_domain=True
         )
         self.assertTrue(np.array_equal(ap_pred, ap_preds_model2))

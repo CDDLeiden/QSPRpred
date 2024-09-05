@@ -5,20 +5,19 @@ import marshal
 import os
 import types
 from abc import ABC, abstractmethod
-from typing import Any, Callable
+from typing import Any, Callable, ClassVar
 
 import jsonpickle
 
 from ..logs import logger
 from ..utils.inspect import dynamic_import
 
-jsonpickle.set_encoder_options('json', indent=4)
+jsonpickle.set_encoder_options("json", indent=4)
 
 
 class FileSerializable(ABC):
     """
     A class that can be serialized to a file and reconstructed from a file."""
-
     @abstractmethod
     def toFile(self, filename: str) -> str:
         """Serialize object to a metafile. This metafile should contain all
@@ -52,7 +51,7 @@ class JSONSerializable(FileSerializable):
             list of attributes that should not be serialized to JSON explicitly
     """
 
-    _notJSON = []
+    _notJSON: ClassVar = ["_json_main"]
 
     def __getstate__(self) -> dict:
         """Get state of object for JSON serialization. Whatever
@@ -61,7 +60,7 @@ class JSONSerializable(FileSerializable):
         Returns:
             o_dict (dict): dictionary of object attributes serializable to JSON
         """
-        o_dict = dict()
+        o_dict = {}
         for key in self.__dict__:
             if key in self._notJSON:
                 continue
@@ -91,7 +90,7 @@ class JSONSerializable(FileSerializable):
             filename (str): absolute path to the saved JSON file of the object
         """
         json = self.toJSON()
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             f.write(json)
         return os.path.abspath(filename)
 
@@ -105,9 +104,13 @@ class JSONSerializable(FileSerializable):
         Returns:
             instance (object): new instance of the class
         """
-        with open(filename, 'r') as f:
-            json = f.read()
-        return cls.fromJSON(json)
+        with open(filename, "r") as f:
+            json_str = f.read()
+        # inject the path to the JSON file itself as a hidden attribute
+        new_dict = json.loads(json_str)
+        new_dict["py/state"]["_json_main"] = os.path.abspath(filename)
+        json_str = json.dumps(new_dict)
+        return cls.fromJSON(json_str)
 
     def toJSON(self) -> str:
         """Serialize object to a JSON string. This JSON string should
@@ -139,11 +142,7 @@ def function_as_string(func: Callable) -> str:
     """
     json_form = json.loads(jsonpickle.encode(func, unpicklable=True))
     if not json_form or "__main__" in json_form:
-        return base64.b64encode(
-            marshal.dumps(
-                func.__code__
-            )
-        ).decode("ascii")
+        return base64.b64encode(marshal.dumps(func.__code__)).decode("ascii")
     elif "py/function" in json_form:
         return json_form["py/function"]
     elif "py/object" in json_form:
@@ -162,11 +161,6 @@ def function_from_string(func_str: str) -> Callable:
         processor (Callable): function
     """
     try:
-        return types.FunctionType(
-            marshal.loads(
-                base64.b64decode(func_str)
-            ),
-            globals()
-        )
-    except:
+        return types.FunctionType(marshal.loads(base64.b64decode(func_str)), globals())
+    except Exception:
         return dynamic_import(func_str)

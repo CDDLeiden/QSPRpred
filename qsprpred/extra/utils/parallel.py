@@ -11,7 +11,6 @@ class DaskJITGenerator(JITParallelGenerator):
     The main benefit of using `dask` is that it supports distributed
     computing across multiple machines.
     """
-
     def getPool(self) -> Any:
         return Client(n_workers=self.nWorkers, threads_per_worker=1)
 
@@ -30,8 +29,4 @@ class DaskJITGenerator(JITParallelGenerator):
         return exception
 
     def createJob(self, pool: Client, process_func: Callable, *args, **kwargs) -> Any:
-        return pool.submit(
-            process_func,
-            *args,
-            **kwargs
-        )
+        return pool.submit(process_func, *args, **kwargs)

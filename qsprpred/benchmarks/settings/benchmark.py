@@ -2,13 +2,14 @@ from dataclasses import dataclass
 from typing import ClassVar
 
 from qsprpred.models.assessment.methods import ModelAssessor
-from .data_prep import DataPrepSettings
+
 from ...data.descriptors.sets import DescriptorSet
 from ...data.sources.data_source import DataSource
 from ...models.hyperparam_optimization import HyperparameterOptimization
 from ...models.model import QSPRModel
 from ...tasks import TargetProperty
 from ...utils.serialization import JSONSerializable
+from .data_prep import DataPrepSettings
 
 
 @dataclass
@@ -49,7 +50,7 @@ class BenchmarkSettings(JSONSerializable):
     prep_settings: list[DataPrepSettings]
     models: list[QSPRModel]
     assessors: list[ModelAssessor]
-    optimizers: list[HyperparameterOptimization] = tuple()
+    optimizers: list[HyperparameterOptimization] = ()
 
     def __getstate__(self):
         o_dict = super().__getstate__()

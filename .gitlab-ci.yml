@@ -33,3 +33,11 @@ stages:
 test:python3.12:
   extends: .test
   image: python:3.12
+
+#test:python3.11:
+#  extends: .test
+#  image: python:3.11
+
+test:python3.10:
+  extends: .test
+  image: python:3.10

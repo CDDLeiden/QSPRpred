@@ -1,0 +1,84 @@
+from abc import ABC, abstractmethod
+
+from rdkit import Chem
+
+
+class ChemIdentifier(ABC):
+    """Interface for identifiers of molecules. This should be a simple callable
+    that given a SMILES string returns a unique identifier.
+    """
+    @abstractmethod
+    def __call__(self, smiles: str) -> str:
+        """Get the identifier of the molecule represented by the given SMILES.
+
+        Args:
+            smiles (str): input SMILES
+
+        Returns:
+            str: calculated identifier
+        """
+
+
+class Identifiable(ABC):
+    """Interface for objects that use a `ChemIdentifier` to identify duplicate
+    molecules.
+    """
+    @property
+    @abstractmethod
+    def identifier(self) -> ChemIdentifier:
+        """Get the identifier used by this instance.
+
+        Returns:
+            ChemIdentifier: The identifier used by this instance.
+        """
+
+    @abstractmethod
+    def applyIdentifier(self, identifier: ChemIdentifier):
+        """Apply an identifier to the SMILES in this instance (i.e. remove duplicates).
+
+        Args:
+            identifier (ChemIdentifier): The identifier to apply.
+        """
+
+
+class InchiIdentifier(ChemIdentifier):
+    """Class for InChI identifiers of molecules."""
+    def __call__(self, smiles: str) -> str:
+        """Get the InChIKey of the molecule represented by the given SMILES.
+
+        Args:
+            smiles (str): input SMILES
+
+        Returns:
+            str: calculated InChIKey
+        """
+        return Chem.MolToInchiKey(Chem.MolFromSmiles(smiles))
+
+
+class IndexIdentifier(ChemIdentifier):
+    """Implementation of a `ChemIdentifier` that returns an index as the identifier.
+
+    Attributes:
+        index (int): The current index.
+        zfill (int): The number of digits to zero-fill the index
+    """
+    def __init__(self, zfill: int = 5):
+        """Initialize the index identifier.
+
+        Args:
+            zfill (int): The number of digits to zero-fill the index
+        """
+        self.index = 0
+        self.zfill = zfill
+
+    def __call__(self, smiles: str) -> str:
+        """Get the index as the molecule identifier.
+
+        Args:
+            smiles (str): input SMILES
+
+        Returns:
+            str: calculated identifier
+        """
+        self.index += 1
+        return str(self.index).zfill(self.zfill)

@@ -9,9 +9,10 @@ import papyrus_scripts
 from papyrus_scripts.download import download_papyrus
 
 from qsprpred.logs import logger
-from .papyrus_filter import papyrus_filter
-from ..data_source import DataSource
+
 from ...tables.mol import MoleculeTable
+from ..data_source import DataSource
+from .papyrus_filter import papyrus_filter
 
 
 class Papyrus(DataSource):
@@ -119,7 +120,7 @@ class Papyrus(DataSource):
             kwargs: additional keyword arguments passed to `MoleculeTable.fromTableFile`
 
         Returns:
-            MolculeTable: the filtered data set
+            MoleculeTable: the filtered data set
         """
         logger.debug("Getting data from Papyrus data source...")
         assert acc_keys is not None, "Please provide a list of accession keys."
@@ -133,7 +134,7 @@ class Papyrus(DataSource):
         data, path = papyrus_filter(
             acc_key=acc_keys,
             quality=quality,
-            outdir=output_dir,
+            out_dir=output_dir,
             activity_types=activity_types,
             prefix=name,
             drop_duplicates=drop_duplicates,
@@ -145,7 +146,7 @@ class Papyrus(DataSource):
         )
         logger.debug("Finished filtering Papyrus data set.")
         logger.debug(f"Creating MoleculeTable from '{path}'.")
-        ret = MoleculeTable.fromTableFile(name, path, store_dir=output_dir, **kwargs)
+        ret = MoleculeTable.fromTableFile(name, path, path=output_dir, **kwargs)
         logger.debug(f"Finished creating MoleculeTable from '{path}'.")
         return ret
 

@@ -29,7 +29,7 @@ the [documentation pages](https://cddleiden.github.io/QSPRpred/docs/).
         - [Data Preparation](basics/data/data_preparation.ipynb): How to prepare data
           for QSPRpred.
         - [Data Representation](basics/data/data_representation.ipynb): How data is
-          represented in QSPRpred (MolTable, QSPRDataset, etc.).
+          represented in QSPRpred (MolTable, QSPRTable, etc.).
         - [Data Splitting](basics/data/data_splitting.ipynb): How to split data into
           training, validation, and test sets.
         - [Descriptors](basics/data/descriptors.ipynb): How to calculate descriptors for

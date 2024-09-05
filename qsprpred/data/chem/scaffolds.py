@@ -6,47 +6,76 @@ from rdkit.Chem import Mol, ReplaceSubstructs
 from rdkit.Chem.Scaffolds import MurckoScaffold
 
 from qsprpred.data.processing.mol_processor import MolProcessorWithID
+from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 
 
 class Scaffold(MolProcessorWithID, ABC):
-    """
-    Abstract base class for calculating molecular scaffolds of different kinds.
-    """
-
+    """Abstract base class for calculating molecular scaffolds of different kinds."""
     @abstractmethod
-    def __call__(self, mols: list[str | Mol], props, *args, **kwargs):
-        """
-        Calculate the scaffold for a molecule.
+    def __call__(
+        self,
+        mols: list[str | Mol | StoredMol],
+        props: dict[str, list] | None = None,
+        *args,
+        **kwargs
+    ) -> pd.Series:
+        """Calculate the scaffold for a molecule.
 
         Args:
-            mol (str | Mol): SMILES or RDKit molecule to calculate the scaffold for.
+            mol (str | Mol | StoredMol):
+                SMILES, RDKit molecule or a `StoredMol` instances
+                to calculate the scaffolds for.
+            props (dict[str, list], optional):
+                A dictionary of properties related to the molecules to process. The
+                dictionary uses property names as keys and lists of values as values.
+                Each value in the list corresponds to a molecule in the list of
+                molecules. This can be empty depending on the implementation.
+            args: Additional positional arguments.
+            kwargs: Additional keyword arguments.
 
         Returns:
-            smiles of the scaffold
+            (pd.Series): smiles of the scaffold
         """
 
     @abstractmethod
     def __str__(self):
         pass
 
+    @property
     def supportsParallel(self) -> bool:
+        """Check if the processor supports parallel processing.
+
+        Returns:
+            bool: True if the processor supports parallel processing, False otherwise.
+        """
         return True
 
 
 class BemisMurckoRDKit(Scaffold):
     """Class for calculating Murcko scaffolds of a given molecule
-    using the default implementation in RDKit. If you want, an implementation
+    using the default implementation in RDKit. If you want an implementation
     closer to the original paper, see the `BemisMurcko` class.
-
     """
+    def __call__(self, mols, props=None, *args, **kwargs) -> pd.Series:
+        """Calculate the scaffold for a molecule.
 
-    def __call__(self, mols, props, *args, **kwargs):
+        Args:
+            mols (list[str or Mol or StoredMol]): Molecules to calculate the scaffold for.
+            props (dict[str, list], optional):
+                Dictionary of properties. Should contain the idProp key.
+            args: Additional positional arguments (not used).
+            kwargs: Additional keyword arguments (not used).
+
+        Returns:
+            (pd.Series): smiles of the scaffold
+        """
         res = []
-        for mol in mols:
-            mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
+        ids = []
+        for mol, _id in self.iterMolsAndIDs(mols, props):
+            ids.append(_id)
             scaff = MurckoScaffold.GetScaffoldForMol(mol)
-            res.append(Chem.MolToSmiles(scaff))
-        return pd.Series(res, index=props[self.idProp])
+            res.append(Chem.MolToSmiles(scaff, canonical=True, isomericSmiles=True))
+        return pd.Series(res, index=pd.Index(ids, name=self.idProp))
 
     def __str__(self):
         return "BemisMurckoRDKit"
@@ -77,40 +106,66 @@ class BemisMurcko(Scaffold):
     Related RDKit issue: https://github.com/rdkit/rdkit/discussions/6844
 
     Credit: Original code provided by Wim Dehaen (@dehaenw)
-    """
 
+    Attributes:
+        realBemisMurcko (bool): Use guidelines from Bemis murcko paper.
+            otherwise, use native rdkit implementation.
+        useCSK (bool): Make scaffold generic (convert all bonds to single
+            and all atoms to carbon). If realBemismurcko is on, also
+            remove all flattened exo bonds.
+    """
     def __init__(
         self,
         real_bemismurcko: bool = True,
         use_csk: bool = False,
         id_prop: str | None = None,
     ):
-        """
-        Initialize the scaffold generator.
+        """Initialize the scaffold generator.
 
         Args:
             real_bemismurcko (bool): Use guidelines from Bemis murcko paper.
                 otherwise, use native rdkit implementation.
             use_csk (bool): Make scaffold generic (convert all bonds to single
-                and all atoms to carbon). If real_bemismurcko is on, also
-                remove all flattened exo bonds.
+                and all atoms to carbon).
+            id_prop (str): Name of the property to use as the index.
         """
         super().__init__(id_prop=id_prop)
         self.realBemisMurcko = real_bemismurcko
         self.useCSK = use_csk
 
     @staticmethod
-    def findTerminalAtoms(mol):
+    def findTerminalAtoms(mol) -> list[Chem.Atom]:
+        """Find terminal atoms in a molecule.
+
+        Args:
+            mol (Mol): RDKit molecule.
+
+        Returns:
+            list[Atom]: List of terminal atoms.
+        """
         res = []
         for a in mol.GetAtoms():
             if len(a.GetBonds()) == 1:
                 res.append(a)
         return res
 
-    def __call__(self, mols, props, *args, **kwargs):
+    def __call__(self, mols, props=None, *args, **kwargs) -> pd.Series:
+        """Calculate the scaffold for a molecule.
+
+        Args:
+            mols (list[str or Mol or StoredMol]): Molecules to calculate the scaffold for.
+            props (dict[str, list], optional):
+                Dictionary of properties. Should contain the idProp key.
+            args: Additional positional arguments (not used).
+            kwargs: Additional keyword arguments (not used).
+
+        Returns:
+            (pd.Series): smiles of the scaffold
+        """
         res = []
-        for mol in mols:
-            mol = Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol
+        ids = []
+        for mol, _id in self.iterMolsAndIDs(mols, props):
+            ids.append(_id)
             Chem.RemoveStereochemistry(mol)  # important for canonization !
             scaff = MurckoScaffold.GetScaffoldForMol(mol)
 
@@ -127,8 +182,8 @@ class BemisMurcko(Scaffold):
                 if self.realBemisMurcko:
                     scaff = MurckoScaffold.GetScaffoldForMol(scaff)
             Chem.SanitizeMol(scaff)
-            res.append(Chem.MolToSmiles(scaff))
-        return pd.Series(res, index=props[self.idProp])
+            res.append(Chem.MolToSmiles(scaff, canonical=True, isomericSmiles=True))
+        return pd.Series(res, index=pd.Index(ids, name=self.idProp))
 
     def __str__(self):
         return "Bemis-Murcko"

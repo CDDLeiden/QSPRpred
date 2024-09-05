@@ -1,0 +1,8 @@
+SMILES,TestProp1,TestProp2
+C=CCC(=O)N[C@H](C)C(=O)N[C@H](C)C(N)=O,1.0,2.0
+C[Si](C)(C)O,2.0,3.0
+C=C1CC(C(=O)NC(C)C(=O)NC(C)C(N)=O)C1,2.0,3.0
+C=C1CC(C(=O)NC(C)C(=O)NC(C)C(N)=O)C1,3.0,4.0
+invalid,1.0,2.0
+C12C3C4C1C5C2C3C45,3.0,4.0
+invalid,1.0,2.0

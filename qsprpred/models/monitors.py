@@ -9,22 +9,21 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import Draw
 
-from .model import QSPRModel
-from ..data.tables.qspr import QSPRDataset
+from ..data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ..utils.serialization import JSONSerializable
+from .model import QSPRModel
 
 
 class FitMonitor(JSONSerializable, ABC):
     """Base class for monitoring the fitting of a model."""
-
     @abstractmethod
     def onFitStart(
-            self,
-            model: QSPRModel,
-            X_train: np.ndarray,
-            y_train: np.ndarray,
-            X_val: np.ndarray | None = None,
-            y_val: np.ndarray | None = None,
+        self,
+        model: QSPRModel,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_val: np.ndarray | None = None,
+        y_val: np.ndarray | None = None,
     ):
         """Called before the training has started.
 
@@ -83,16 +82,15 @@ class FitMonitor(JSONSerializable, ABC):
 
 class AssessorMonitor(FitMonitor):
     """Base class for monitoring the assessment of a model."""
-
     @abstractmethod
     def onAssessmentStart(
-            self, model: QSPRModel, data: QSPRDataset, assesment_type: str
+        self, model: QSPRModel, data: QSPRDataSet, assesment_type: str
     ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
-            data (QSPRDataset): data set used in assessment
+            data (QSPRDataSet): data set used in assessment
             assesment_type (str): type of assessment
         """
 
@@ -106,12 +104,12 @@ class AssessorMonitor(FitMonitor):
 
     @abstractmethod
     def onFoldStart(
-            self,
-            fold: int,
-            X_train: np.ndarray,
-            y_train: np.ndarray,
-            X_test: np.ndarray,
-            y_test: np.ndarray,
+        self,
+        fold: int,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_test: np.ndarray,
+        y_test: np.ndarray,
     ):
         """Called before each fold of the assessment.
 
@@ -125,7 +123,7 @@ class AssessorMonitor(FitMonitor):
 
     @abstractmethod
     def onFoldEnd(
-            self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
+        self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
     ):
         """Called after each fold of the assessment.
 
@@ -138,17 +136,15 @@ class AssessorMonitor(FitMonitor):
 
 class HyperparameterOptimizationMonitor(AssessorMonitor):
     """Base class for monitoring the hyperparameter optimization of a model."""
-
     @abstractmethod
     def onOptimizationStart(
-            self, model: QSPRModel, data: QSPRDataset, config: dict,
-            optimization_type: str
+        self, model: QSPRModel, data: QSPRDataSet, config: dict, optimization_type: str
     ):
         """Called before the hyperparameter optimization has started.
 
         Args:
             model (QSPRModel): model to optimize
-            data (QSPRDataset): data set used in optimization
+            data (QSPRDataSet): data set used in optimization
             config (dict): configuration of the hyperparameter optimization
             optimization_type (str): type of hyperparameter optimization
         """
@@ -183,14 +179,13 @@ class HyperparameterOptimizationMonitor(AssessorMonitor):
 
 class NullMonitor(HyperparameterOptimizationMonitor):
     """Monitor that does nothing."""
-
     def onFitStart(
-            self,
-            model: QSPRModel,
-            X_train: np.ndarray,
-            y_train: np.ndarray,
-            X_val: np.ndarray | None = None,
-            y_val: np.ndarray | None = None,
+        self,
+        model: QSPRModel,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_val: np.ndarray | None = None,
+        y_val: np.ndarray | None = None,
     ):
         """Called before the training has started.
 
@@ -242,13 +237,13 @@ class NullMonitor(HyperparameterOptimizationMonitor):
         """
 
     def onAssessmentStart(
-            self, model: QSPRModel, data: QSPRDataset, assesment_type: str
+        self, model: QSPRModel, data: QSPRDataSet, assesment_type: str
     ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
-            data (QSPRDataset): data set used in assessment
+            data (QSPRDataSet): data set used in assessment
             assesment_type (str): type of assessment
         """
 
@@ -260,12 +255,12 @@ class NullMonitor(HyperparameterOptimizationMonitor):
         """
 
     def onFoldStart(
-            self,
-            fold: int,
-            X_train: np.ndarray,
-            y_train: np.ndarray,
-            X_test: np.ndarray,
-            y_test: np.ndarray,
+        self,
+        fold: int,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_test: np.ndarray,
+        y_test: np.ndarray,
     ):
         """Called before each fold of the assessment.
 
@@ -278,7 +273,7 @@ class NullMonitor(HyperparameterOptimizationMonitor):
         """
 
     def onFoldEnd(
-            self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
+        self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
     ):
         """Called after each fold of the assessment.
 
@@ -289,14 +284,13 @@ class NullMonitor(HyperparameterOptimizationMonitor):
         """
 
     def onOptimizationStart(
-            self, model: QSPRModel, data: QSPRDataset, config: dict,
-            optimization_type: str
+        self, model: QSPRModel, data: QSPRDataSet, config: dict, optimization_type: str
     ):
         """Called before the hyperparameter optimization has started.
 
         Args:
             model (QSPRModel): model to optimize
-            data (QSPRDataset): data set used in optimization
+            data (QSPRDataSet): data set used in optimization
             config (dict): configuration of the hyperparameter optimization
             optimization_type (str): type of hyperparameter optimization
         """
@@ -332,7 +326,6 @@ class ListMonitor(HyperparameterOptimizationMonitor):
     Attributes:
         monitors (list[HyperparameterOptimizationMonitor]): list of monitors
     """
-
     def __init__(self, monitors: list[HyperparameterOptimizationMonitor]):
         """Initialize the monitor.
 
@@ -342,12 +335,12 @@ class ListMonitor(HyperparameterOptimizationMonitor):
         self.monitors = monitors
 
     def onFitStart(
-            self,
-            model: QSPRModel,
-            X_train: np.ndarray,
-            y_train: np.ndarray,
-            X_val: np.ndarray | None = None,
-            y_val: np.ndarray | None = None,
+        self,
+        model: QSPRModel,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_val: np.ndarray | None = None,
+        y_val: np.ndarray | None = None,
     ):
         """Called before the training has started.
 
@@ -411,13 +404,13 @@ class ListMonitor(HyperparameterOptimizationMonitor):
             monitor.onBatchEnd(batch, loss)
 
     def onAssessmentStart(
-            self, model: QSPRModel, data: QSPRDataset, assesment_type: str
+        self, model: QSPRModel, data: QSPRDataSet, assesment_type: str
     ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
-            data (QSPRDataset): data set used in assessment
+            data (QSPRDataSet): data set used in assessment
             assesment_type (str): type of assessment
         """
         for monitor in self.monitors:
@@ -433,12 +426,12 @@ class ListMonitor(HyperparameterOptimizationMonitor):
             monitor.onAssessmentEnd(predictions)
 
     def onFoldStart(
-            self,
-            fold: int,
-            X_train: np.ndarray,
-            y_train: np.ndarray,
-            X_test: np.ndarray,
-            y_test: np.ndarray,
+        self,
+        fold: int,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_test: np.ndarray,
+        y_test: np.ndarray,
     ):
         """Called before each fold of the assessment.
 
@@ -453,7 +446,7 @@ class ListMonitor(HyperparameterOptimizationMonitor):
             monitor.onFoldStart(fold, X_train, y_train, X_test, y_test)
 
     def onFoldEnd(
-            self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
+        self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
     ):
         """Called after each fold of the assessment.
 
@@ -466,14 +459,13 @@ class ListMonitor(HyperparameterOptimizationMonitor):
             monitor.onFoldEnd(model_fit, fold_predictions)
 
     def onOptimizationStart(
-            self, model: QSPRModel, data: QSPRDataset, config: dict,
-            optimization_type: str
+        self, model: QSPRModel, data: QSPRDataSet, config: dict, optimization_type: str
     ):
         """Called before the hyperparameter optimization has started.
 
         Args:
             model (QSPRModel): model to optimize
-            data (QSPRDataset): data set used in optimization
+            data (QSPRDataSet): data set used in optimization
             config (dict): configuration of the hyperparameter optimization
             optimization_type (str): type of hyperparameter optimization
         """
@@ -532,11 +524,11 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
                 predictions, estimators, fits)
         scores (pd.DataFrame): scores for each hyperparameter search iteration
         model (QSPRModel): model to optimize
-        data (QSPRDataset): dataset used in optimization
+        data (QSPRDataSet): dataset used in optimization
 
         assessmentType (str): type of current assessment
         assessmentModel (QSPRModel): model to assess in current assessment
-        assessmentDataset (QSPRDataset): data set used in current assessment
+        assessmentDataset (QSPRDataSet): data set used in current assessment
         foldData (dict): dictionary of input data, keyed by the fold index, of the
             current assessment
         predictions (pd.DataFrame): predictions for the dataset of the current assessment
@@ -564,7 +556,6 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         bestEpoch (int): index of the best epoch of the current fit of the current
             assessment
     """
-
     def __init__(self):
         self.data = None
         self.model = None
@@ -575,9 +566,8 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         self.bestParameters = None
         self.parameters = {}
         self.assessments = {}
-        self.scores = pd.DataFrame(
-            columns=["aggregated_score", "fold_scores"]
-        ).rename_axis("Iteration")
+        self.scores = pd.DataFrame(columns=["aggregated_score", "fold_scores"]
+                                  ).rename_axis("Iteration")
         self.iteration = None
 
         # assessment data
@@ -615,14 +605,13 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         super().__setstate__(state)
 
     def onOptimizationStart(
-            self, model: QSPRModel, data: QSPRDataset, config: dict,
-            optimization_type: str
+        self, model: QSPRModel, data: QSPRDataSet, config: dict, optimization_type: str
     ):
         """Called before the hyperparameter optimization has started.
 
         Args:
             model (QSPRModel): model to optimize
-            data (QSPRDataset): data set used in optimization
+            data (QSPRDataSet): data set used in optimization
             config (dict): configuration of the hyperparameter optimization
             optimization_type (str): type of hyperparameter optimization
         """
@@ -664,13 +653,13 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         self.iteration += 1
 
     def onAssessmentStart(
-            self, model: QSPRModel, data: QSPRDataset, assesment_type: str
+        self, model: QSPRModel, data: QSPRDataSet, assesment_type: str
     ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
-            data (QSPRDataset): data set used in assessment
+            data (QSPRDataSet): data set used in assessment
             assesment_type (str): type of assessment
         """
         self.assessmentModel = model
@@ -686,12 +675,12 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         self.predictions = predictions
 
     def onFoldStart(
-            self,
-            fold: int,
-            X_train: np.ndarray,
-            y_train: np.ndarray,
-            X_test: np.ndarray,
-            y_test: np.ndarray,
+        self,
+        fold: int,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_test: np.ndarray,
+        y_test: np.ndarray,
     ):
         """Called before each fold of the assessment.
 
@@ -711,7 +700,7 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         }
 
     def onFoldEnd(
-            self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
+        self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
     ):
         """Called after each fold of the assessment.
 
@@ -734,7 +723,7 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         self.estimators = {}
         self.fits = {}
 
-    def _get_assessment(self) -> tuple[QSPRModel, QSPRDataset, pd.DataFrame, dict]:
+    def _get_assessment(self) -> tuple[QSPRModel, QSPRDataSet, pd.DataFrame, dict]:
         """Return the assessment data."""
         return {
             "assessmentModel": self.assessmentModel,
@@ -746,18 +735,18 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         }
 
     def onFitStart(
-            self,
-            model: QSPRModel,
-            X_train: np.ndarray,
-            y_train: np.ndarray,
-            X_val: np.ndarray | None = None,
-            y_val: np.ndarray | None = None,
+        self,
+        model: QSPRModel,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_val: np.ndarray | None = None,
+        y_val: np.ndarray | None = None,
     ):
         """Called before the training has started.
 
         Args:
             model (QSPRModel): model to be fitted
-            data (QSPRDataset): data set used in training
+            data (QSPRDataSet): data set used in training
             X_train (np.ndarray): training data
             y_train (np.ndarray): training targets
             X_val (np.ndarray | None): validation data, used for early stopping
@@ -839,10 +828,10 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
 
 class FileMonitor(BaseMonitor):
     def __init__(
-            self,
-            save_optimization: bool = True,
-            save_assessments: bool = True,
-            save_fits: bool = True,
+        self,
+        save_optimization: bool = True,
+        save_assessments: bool = True,
+        save_fits: bool = True,
     ):
         """Monitor hyperparameter optimization, assessment and fitting to files.
 
@@ -859,14 +848,13 @@ class FileMonitor(BaseMonitor):
         self.outDir = None
 
     def onOptimizationStart(
-            self, model: QSPRModel, data: QSPRDataset, config: dict,
-            optimization_type: str
+        self, model: QSPRModel, data: QSPRDataSet, config: dict, optimization_type: str
     ):
         """Called before the hyperparameter optimization has started.
 
         Args:
             model (QSPRModel): model to optimize
-            data (QSPRDataset): data set used in optimization
+            data (QSPRDataSet): data set used in optimization
             config (dict): configuration of the hyperparameter optimization
             optimization_type (str): type of hyperparameter optimization
         """
@@ -908,13 +896,13 @@ class FileMonitor(BaseMonitor):
             )
 
     def onAssessmentStart(
-            self, model: QSPRModel, data: QSPRDataset, assesment_type: str
+        self, model: QSPRModel, data: QSPRDataSet, assesment_type: str
     ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
-            data (QSPRDataset): data set used in assessment
+            data (QSPRDataSet): data set used in assessment
             assesment_type (str): type of assessment
         """
         super().onAssessmentStart(model, data, assesment_type)
@@ -935,16 +923,17 @@ class FileMonitor(BaseMonitor):
         super().onAssessmentEnd(predictions)
         if self.saveAssessments:
             predictions.to_csv(
-                f"{self.assessmentPath}/{self.assessmentType}_predictions.tsv", sep="\t"
+                f"{self.assessmentPath}/{self.assessmentType}_predictions.tsv",
+                sep="\t"
             )
 
     def onFitStart(
-            self,
-            model: QSPRModel,
-            X_train: np.ndarray,
-            y_train: np.ndarray,
-            X_val: np.ndarray | None = None,
-            y_val: np.ndarray | None = None,
+        self,
+        model: QSPRModel,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_val: np.ndarray | None = None,
+        y_val: np.ndarray | None = None,
     ):
         """Called before the training has started.
 
@@ -982,7 +971,6 @@ class FileMonitor(BaseMonitor):
 
 class WandBMonitor(BaseMonitor):
     """Monitor hyperparameter optimization to weights and biases."""
-
     def __init__(self, project_name: str, **kwargs):
         """Monitor assessment to weights and biases.
 
@@ -1003,12 +991,12 @@ class WandBMonitor(BaseMonitor):
         self.kwargs = kwargs
 
     def onFoldStart(
-            self,
-            fold: int,
-            X_train: np.ndarray,
-            y_train: np.ndarray,
-            X_test: np.ndarray,
-            y_test: np.ndarray,
+        self,
+        fold: int,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_test: np.ndarray,
+        y_test: np.ndarray,
     ):
         """Called before each fold of the assessment.
 
@@ -1035,8 +1023,7 @@ class WandBMonitor(BaseMonitor):
 
         group = (
             f"{self.model.name}_{self.optimizationType}_{self.iteration}"
-            if hasattr(self, "optimizationType")
-            else f"{self.assessmentModel.name}"
+            if hasattr(self, "optimizationType") else f"{self.assessmentModel.name}"
         )
         name = f"{group}_{self.assessmentType}_{fold}"
 
@@ -1050,7 +1037,7 @@ class WandBMonitor(BaseMonitor):
         )
 
     def onFoldEnd(
-            self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
+        self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
     ):
         """Called after each fold of the assessment.
 
@@ -1064,15 +1051,14 @@ class WandBMonitor(BaseMonitor):
 
         # add smiles to fold predictions by merging on index
         dataset_smiles = self.assessmentDataset.getDF()[
-            self.assessmentDataset.smilesCol
-        ]
+            self.assessmentDataset.smilesProp]
         fold_predictions_copy = fold_predictions_copy.merge(
             dataset_smiles, left_index=True, right_index=True
         )
 
         fold_predictions_copy["molecule"] = None
         for index, row in fold_predictions_copy.iterrows():
-            mol = Chem.MolFromSmiles(row[self.assessmentDataset.smilesCol])
+            mol = Chem.MolFromSmiles(row[self.assessmentDataset.smilesProp])
             if mol is not None:
                 fold_predictions_copy.at[index, "molecule"] = self.wandb.Image(
                     Draw.MolToImage(mol, size=(200, 200))
@@ -1084,12 +1070,12 @@ class WandBMonitor(BaseMonitor):
         self.wandb.finish()
 
     def onFitStart(
-            self,
-            model: QSPRModel,
-            X_train: np.ndarray,
-            y_train: np.ndarray,
-            X_val: np.ndarray | None = None,
-            y_val: np.ndarray | None = None,
+        self,
+        model: QSPRModel,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_val: np.ndarray | None = None,
+        y_val: np.ndarray | None = None,
     ):
         """Called before the training has started.
 

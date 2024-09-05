@@ -1,14 +1,14 @@
 import json
 import os
 from copy import deepcopy
+from typing import ClassVar
 
 import numpy as np
 import pandas as pd
 
-from .settings.benchmark import DataPrepSettings
-from ..data import QSPRDataset
 from ..data.descriptors.sets import DescriptorSet
 from ..data.sources.data_source import DataSource
+from ..data.tables.qspr import QSPRTable
 from ..logs import logger
 from ..models.assessment.methods import ModelAssessor
 from ..models.hyperparam_optimization import HyperparameterOptimization
@@ -16,6 +16,7 @@ from ..models.model import QSPRModel
 from ..models.monitors import NullMonitor
 from ..tasks import TargetProperty
 from ..utils.serialization import JSONSerializable
+from .settings.benchmark import DataPrepSettings
 
 
 class Replica(JSONSerializable):
@@ -43,28 +44,56 @@ class Replica(JSONSerializable):
             Model assessors to use.
         randomSeed (int):
             Random seed to use for all random operations withing the replica.
-        ds (QSPRDataset):
+        ds (QSPRDataSet):
             Initialized data set. Only available after `initData` has been called.
         results (pd.DataFrame):
             Results from the replica. Only available after
             `runAssessment` has been called.
+        model (QSPRModel):
+            Model to use for the replica. This is a deep copy of the model
+            provided in the constructor.
     """
 
-    _notJSON = JSONSerializable._notJSON + ["ds", "results", "model"]
+    _notJSON: ClassVar = [*JSONSerializable._notJSON, "ds", "results", "model"]
 
     def __init__(
-            self,
-            idx: int,
-            name: str,
-            data_source: DataSource,
-            descriptors: list[DescriptorSet],
-            target_props: list[TargetProperty],
-            prep_settings: DataPrepSettings,
-            model: QSPRModel,
-            optimizer: HyperparameterOptimization,
-            assessors: list[ModelAssessor],
-            random_seed: int,
+        self,
+        idx: int,
+        name: str,
+        data_source: DataSource,
+        descriptors: list[DescriptorSet],
+        target_props: list[TargetProperty],
+        prep_settings: DataPrepSettings,
+        model: QSPRModel,
+        optimizer: HyperparameterOptimization,
+        assessors: list[ModelAssessor],
+        random_seed: int,
     ):
+        """Initializes the replica.
+
+        Args:
+            idx (int):
+                Index of the replica. This is not an identifier, but rather a number
+                that indicates the order of the replica in the benchmarking run.
+            name (str):
+                Name of the replica.
+            data_source (DataSource):
+                Data source to use.
+            descriptors (list[DescriptorSet]):
+                Descriptor sets to use.
+            target_props (list[TargetProperty]):
+                Target properties to use.
+            prep_settings (DataPrepSettings):
+                Data preparation settings to use.
+            model (QSPRModel):
+                Model to use for the replica.
+            optimizer (HyperparameterOptimization):
+                Hyperparameter optimizer to use.
+            assessors (list[ModelAssessor]):
+                Model assessors to use.
+            random_seed (int):
+                Random seed to use for all random operations withing the replica.
+        """
         self.idx = idx
         self.name = name
         self.dataSource = data_source
@@ -138,7 +167,7 @@ class Replica(JSONSerializable):
         """
         return f"{self.name}_{self.randomSeed}"
 
-    def initData(self, reload=False):
+    def initData(self, reload: bool = False):
         """Initializes the data set for this replica.
 
         Args:
@@ -146,12 +175,10 @@ class Replica(JSONSerializable):
                 Whether to overwrite all existing data and
                 reinitialize from scratch. Defaults to `False`.
         """
-        self.ds = self.dataSource.getDataSet(
-            deepcopy(self.targetProps),
-            overwrite=reload,
-            random_state=self.randomSeed,
-        )
-        self.ds.dropInvalids()
+        self.ds = self.dataSource.getDataSet(deepcopy(self.targetProps), )
+        if not reload:
+            self.ds.clear()
+        self.ds.randomState = self.randomSeed
 
     def addDescriptors(self, reload: bool = False):
         """Adds descriptors to the current data set. Make sure to call
@@ -175,8 +202,8 @@ class Replica(JSONSerializable):
         # attempt to load the data set with descriptors
         if os.path.exists(self.ds.metaFile) and not reload:
             logger.info(f"Reloading existing {self.ds.name} from cache...")
-            self.ds = QSPRDataset.fromFile(self.ds.metaFile)
-            self.ds.setRandomState(self.randomSeed)
+            self.ds = QSPRTable.fromFile(self.ds.metaFile)
+            self.ds.randomState = self.randomSeed
             self.ds.setTargetProperties(deepcopy(self.targetProps))
         else:
             logger.info(f"Data set {self.ds.name} not yet found. It will be created.")
@@ -184,7 +211,7 @@ class Replica(JSONSerializable):
             logger.info(f"Calculating descriptors for {self.ds.name}.")
             self.ds.addDescriptors(deepcopy(self.descriptors), recalculate=True)
             self.ds.setTargetProperties(deepcopy(self.targetProps))
-            self.ds.setRandomState(self.randomSeed)
+            self.ds.randomState = self.randomSeed
             self.ds.save()
 
     def prepData(self):
@@ -196,9 +223,7 @@ class Replica(JSONSerializable):
         """
         if self.ds is None:
             raise ValueError("Data set not initialized. Call initData first.")
-        self.ds.prepareDataset(
-            **deepcopy(self.prepSettings.__dict__),
-        )
+        self.ds.prepareDataset(**deepcopy(self.prepSettings.__dict__), )
 
     def initModel(self):
         """Initializes the model for this replica. This includes
@@ -249,13 +274,14 @@ class Replica(JSONSerializable):
                     score_df = pd.DataFrame(
                         {
                             "Assessor": [assessor.__class__.__name__],
-                            "ScoreFunc": [
-                                (
-                                    assessor.scoreFunc.name
-                                    if hasattr(assessor.scoreFunc, "name")
-                                    else assessor.scoreFunc.__name__
-                                )
-                            ],
+                            "ScoreFunc":
+                                [
+                                    (
+                                        assessor.scoreFunc.name
+                                        if hasattr(assessor.scoreFunc, "name") else
+                                        assessor.scoreFunc.__name__
+                                    )
+                                ],
                             "Score": [fold_score],
                             "TargetProperty": [tp.name],
                             "TargetTask": [tp.task.name],
@@ -267,13 +293,14 @@ class Replica(JSONSerializable):
                         score_df = pd.DataFrame(
                             {
                                 "Assessor": [assessor.__class__.__name__],
-                                "ScoreFunc": [
-                                    (
-                                        assessor.scoreFunc.name
-                                        if hasattr(assessor.scoreFunc, "name")
-                                        else assessor.scoreFunc.__name__
-                                    )
-                                ],
+                                "ScoreFunc":
+                                    [
+                                        (
+                                            assessor.scoreFunc.name
+                                            if hasattr(assessor.scoreFunc, "name") else
+                                            assessor.scoreFunc.__name__
+                                        )
+                                    ],
                                 "Score": [tp_score],
                                 "TargetProperty": [tp.name],
                                 "TargetTask": [tp.task.name],

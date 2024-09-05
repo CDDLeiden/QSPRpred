@@ -14,10 +14,10 @@ import pandas as pd
 from sklearn.exceptions import NotFittedError
 from sklearn.utils.validation import check_is_fitted
 
-from .model import QSPRModel
-from ..data.tables.qspr import QSPRDataset
+from ..data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ..logs import logger
 from ..tasks import ModelTasks
+from .model import QSPRModel
 
 
 class SklearnModel(QSPRModel):
@@ -26,7 +26,6 @@ class SklearnModel(QSPRModel):
     Wrap your sklearn model class in this class
     to use it with the `QSPRModel` interface.
     """
-
     def __init__(
         self,
         base_dir: str,
@@ -61,9 +60,8 @@ class SklearnModel(QSPRModel):
             raise
         # set parameters if defined
         if (
-            (self.parameters not in [None, {}])
-            and hasattr(self, "estimator")
-            and self.estimator is not None
+            (self.parameters not in [None, {}]) and hasattr(self, "estimator") and
+            self.estimator is not None
         ):
             try:
                 check_is_fitted(self.estimator)
@@ -156,7 +154,7 @@ class SklearnModel(QSPRModel):
         return estimator.fit(X, y)
 
     def predict(
-        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
+        self, X: pd.DataFrame | np.ndarray | QSPRDataSet, estimator: Any = None
     ):
         """See `QSPRModel.predict`."""
         estimator = self.estimator if estimator is None else estimator
@@ -170,7 +168,7 @@ class SklearnModel(QSPRModel):
         return preds
 
     def predictProba(
-        self, X: pd.DataFrame | np.ndarray | QSPRDataset, estimator: Any = None
+        self, X: pd.DataFrame | np.ndarray | QSPRDataSet, estimator: Any = None
     ):
         """See `QSPRModel.predictProba`."""
         estimator = self.estimator if estimator is None else estimator

@@ -6,15 +6,14 @@ import numpy as np
 import pandas as pd
 from mlchemad.applicability_domains import KNNApplicabilityDomain as KNNAD
 from parameterized import parameterized
-from rdkit.Chem import Mol
+from rdkit import Chem
 from sklearn.preprocessing import StandardScaler
 
-from .mol_processor import MolProcessor
-from ..descriptors.fingerprints import MorganFP
-from ..descriptors.sets import DataFrameDescriptorSet
 from ... import TargetTasks
-from ...data import QSPRDataset
-from ...data.processing.applicability_domain import MLChemADWrapper, KNNApplicabilityDomain
+from ...data.processing.applicability_domain import (
+    KNNApplicabilityDomain,
+    MLChemADWrapper,
+)
 from ...data.processing.data_filters import CategoryFilter, RepeatsFilter
 from ...data.processing.feature_filters import (
     BorutaFilter,
@@ -22,8 +21,13 @@ from ...data.processing.feature_filters import (
     LowVarianceFilter,
 )
 from ...data.processing.feature_standardizers import SKLearnStandardizer
+from ...data.tables.qspr import QSPRTable
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn, PathMixIn
+from ..descriptors.fingerprints import MorganFP
+from ..descriptors.sets import DataFrameDescriptorSet
+from ..storage.interfaces.stored_mol import StoredMol
+from .mol_processor import MolProcessor
 
 
 class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
@@ -31,7 +35,6 @@ class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
 
     The tests here should be used to check for all their specific parameters and
     edge cases."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -40,13 +43,13 @@ class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
         """Test the category filter, which drops specific values from dataset
         properties."""
         remove_cation = CategoryFilter(name="moka_ionState7.4", values=["cationic"])
-        df_anion = remove_cation(self.getBigDF())
+        df_anion = remove_cation(self.getBigDF(), self.getBigDF())
         self.assertTrue((df_anion["moka_ionState7.4"] == "cationic").sum() == 0)
 
         only_cation = CategoryFilter(
             name="moka_ionState7.4", values=["cationic"], keep=True
         )
-        df_cation = only_cation(self.getBigDF())
+        df_cation = only_cation(self.getBigDF(), self.getBigDF())
         self.assertTrue((df_cation["moka_ionState7.4"] != "cationic").sum() == 0)
 
     def testRepeatsFilter(self):
@@ -109,13 +112,25 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
     Note: This also tests the `DataframeDescriptorSet`,
     as it is used to add test descriptors.
     """
-
     def setUp(self):
         """Set up the small test Dataframe."""
         super().setUp()
         self.nCPU = 2  # just to test parallel processing
         self.chunkSize = 2
         self.setUpPaths()
+        self.df = pd.DataFrame(
+            data=np.array([["C", 1], ["C", 2], ["C", 3], ["C", 4], ["C", 5], ["C", 6]]),
+            columns=["SMILES", "y"],
+        )
+        self.dataset = QSPRTable.fromDF(
+            "TestFeatureFilters",
+            target_props=[{
+                "name": "y",
+                "task": TargetTasks.REGRESSION
+            }],
+            df=self.df,
+            path=self.generatedPath,
+        )
         descriptors = [
             "Descriptor_F1",
             "Descriptor_F2",
@@ -136,46 +151,30 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
             ),
             columns=descriptors,
         )
-        self.df = pd.DataFrame(
-            data=np.array([["C", 1], ["C", 2], ["C", 3], ["C", 4], ["C", 5], ["C", 6]]),
-            columns=["SMILES", "y"],
+        self.df_descriptors[self.dataset.idProp] = list(
+            self.dataset.getProperty(self.dataset.idProp)
         )
-        self.dataset = QSPRDataset(
-            "TestFeatureFilters",
-            target_props=[{"name": "y", "task": TargetTasks.REGRESSION}],
-            df=self.df,
-            store_dir=self.generatedPath,
-            n_jobs=self.nCPU,
-            chunk_size=self.chunkSize,
-        )
-        self.df_descriptors["QSPRID"] = self.dataset.getProperty(
-            self.dataset.idProp
-        ).values
-        self.df_descriptors.set_index("QSPRID", inplace=True, drop=True)
+        self.df_descriptors.set_index(self.dataset.idProp, inplace=True, drop=True)
         self.dataset.addDescriptors([DataFrameDescriptorSet(self.df_descriptors)])
         self.descriptors = self.dataset.featureNames
 
     def recalculateWithMultiIndex(self):
         self.dataset.dropDescriptorSets(self.dataset.descriptorSets, full_removal=True)
         self.df_descriptors["ID_COL1"] = (
-            self.dataset.getProperty(self.dataset.idProp)
-            .apply(lambda x: x.split("_")[0])
-            .to_list()
+            self.dataset.getProperty(self.dataset.idProp
+                                    ).apply(lambda x: x.split("_")[0]).to_list()
         )
         self.df_descriptors["ID_COL2"] = (
-            self.dataset.getProperty(self.dataset.idProp)
-            .apply(lambda x: x.split("_")[1])
-            .to_list()
+            self.dataset.getProperty(self.dataset.idProp
+                                    ).apply(lambda x: x.split("_")[-1]).to_list()
         )
         self.dataset.addProperty("ID_COL1", self.df_descriptors["ID_COL1"].values)
         self.dataset.addProperty("ID_COL2", self.df_descriptors["ID_COL2"].values)
         self.dataset.addDescriptors(
-            [
-                DataFrameDescriptorSet(
-                    self.df_descriptors,
-                    ["ID_COL1", "ID_COL2"],
-                )
-            ]
+            [DataFrameDescriptorSet(
+                self.df_descriptors,
+                ["ID_COL1", "ID_COL2"],
+            )]
         )
 
     def testDefaultDescriptorAdd(self):
@@ -185,12 +184,10 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         calc = DataFrameDescriptorSet(df_new, suffix="new_df_desc")
         self.dataset.addDescriptors([calc])
 
-    @parameterized.expand(
-        [
-            (True,),
-            (False,),
-        ]
-    )
+    @parameterized.expand([
+        (True, ),
+        (False, ),
+    ])
     def testLowVarianceFilter(self, use_index_cols):
         """Test the low variance filter, which drops features with a variance below
         a threshold."""
@@ -201,12 +198,10 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         self.assertListEqual(list(self.dataset.featureNames), self.descriptors[1:])
         self.assertListEqual(list(self.dataset.X.columns), self.descriptors[1:])
 
-    @parameterized.expand(
-        [
-            (True,),
-            (False,),
-        ]
-    )
+    @parameterized.expand([
+        (True, ),
+        (False, ),
+    ])
     def testHighCorrelationFilter(self, use_index_cols):
         """Test the high correlation filter, which drops features with a correlation
         above a threshold."""
@@ -218,14 +213,12 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         self.assertListEqual(list(self.dataset.featureNames), self.descriptors)
         self.assertListEqual(list(self.dataset.X.columns), self.descriptors)
 
-    @parameterized.expand(
-        [
-            (True,),
-            (False,),
-        ]
-    )
+    @parameterized.expand([
+        (True, ),
+        (False, ),
+    ])
     @skipIf(
-        int(np.__version__.split(".")[1]) >= 24,
+        int(np.__version__.split(".")[1]) >= int(24),
         "numpy 1.24.0 not compatible with boruta",
     )
     def testBorutaFilter(self, use_index_cols):
@@ -241,7 +234,6 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
 
 class TestFeatureStandardizer(DataSetsPathMixIn, QSPRTestCase):
     """Test the feature standardizer."""
-
     def setUp(self):
         """Create a small test dataset with MorganFP descriptors."""
         super().setUp()
@@ -273,7 +265,9 @@ def getCombos():
             [None, ["fu", "CL"], ["SMILES"]],
             [True, False],
             [None, [1, 2]],
-            [None, {"a": 1}],
+            [None, {
+                "a": 1
+            }],
         )
     )
 
@@ -284,11 +278,17 @@ class TestMolProcessor(DataSetsPathMixIn, QSPRTestCase):
         self.setUpPaths()
 
     class TestingProcessor(MolProcessor):
-        def __call__(self, mols, props, *args, **kwargs):
-            assert "QSPRID" in props, "QSPRID not in props"
+        def __init__(self, id_prop):
+            self.id_prop = id_prop
+
+        def __call__(self, mols, *args, **kwargs):
             result = []
             for mol in mols:
-                result.append((mol, *props.keys(), *args, *kwargs.keys()))
+                if not isinstance(mol, Chem.Mol):
+                    assert self.id_prop in mol.props
+                    result.append((mol, mol.props, {"args": args}, {"kwargs": kwargs}))
+                else:
+                    result.append((mol, None, {"args": args}, {"kwargs": kwargs}))
             return np.array(result)
 
         @property
@@ -297,55 +297,45 @@ class TestMolProcessor(DataSetsPathMixIn, QSPRTestCase):
 
         @property
         def requiredProps(self) -> list[str]:
-            return ["QSPRID"]
+            return [self.id_prop]
 
     @parameterized.expand([["_".join([str(i) for i in x]), *x] for x in getCombos()])
     def testMolProcess(self, _, n_jobs, chunk_size, props, add_rdkit, args, kwargs):
         dataset = self.createLargeTestDataSet()
-        dataset.nJobs = n_jobs
-        dataset.chunkSize = chunk_size
-        self.assertTrue(dataset.nJobs is not None)
-        self.assertTrue(dataset.chunkSize is not None)
-        self.assertTrue(dataset.nJobs > 0)
-        self.assertTrue(dataset.chunkSize > 0)
+        dataset.storage.nJobs = n_jobs
+        dataset.storage.chunkSize = chunk_size
+        self.assertTrue(dataset.storage.nJobs is not None)
+        self.assertTrue(dataset.storage.nJobs > 0)
         result = dataset.processMols(
-            self.TestingProcessor(),
+            self.TestingProcessor(dataset.idProp),
             add_props=props,
-            as_rdkit=add_rdkit,
             proc_args=args,
             proc_kwargs=kwargs,
+            mol_type="rdkit" if add_rdkit else "mol",
         )
         expected_props = (
-            [*props, "QSPRID", "SMILES"]
-            if props is not None
-            else dataset.getProperties()
+            [*props, dataset.idProp] if props is not None else dataset.getProperties()
         )
         expected_props = set(expected_props)
         expected_args = set(args) if args is not None else set()
         expected_kwargs = set(kwargs) if kwargs is not None else set()
-        expected_cols = (
-            len(expected_props) + len(expected_args) + len(expected_kwargs) + 1
-        )
         for item in result:
-            if dataset.nJobs > 1:
-                self.assertTrue(item.shape[0] <= dataset.chunkSize)
-            else:
-                self.assertTrue(item.shape[0] == len(dataset))
-            self.assertEqual(
-                item.shape[1],
-                expected_cols,
-            )
-            for prop in expected_props:
-                self.assertIn(prop, item)
+            if dataset.storage.chunkSize is not None:
+                self.assertTrue(item.shape[0] <= dataset.storage.chunkSize)
             if add_rdkit:
-                self.assertIsInstance(item[0, 0], Mol)
+                self.assertIsInstance(item[0, 0], Chem.Mol)
             else:
-                self.assertIsInstance(item[0, 0], str)
+                self.assertIsInstance(item[0, 0], StoredMol)
+            if not add_rdkit:
+                self.assertEqual(len(expected_props), len(item[0, 1]))
+                for prop in expected_props:
+                    self.assertIn(prop, item[0, 1])
+            self.assertEqual(len(expected_args), len(item[0, 2]["args"]))
+            self.assertEqual(len(expected_kwargs), len(item[0, 3]["kwargs"]))
 
 
-class testApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
+class TestApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
     """Test the applicability domain."""
-
     def setUp(self):
         """Create a small test dataset with MorganFP descriptors."""
         super().setUp()
@@ -355,30 +345,27 @@ class testApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
 
     def testApplicabilityDomain(self):
         """Test the applicability domain fitting, transforming and serialization."""
-        ad = MLChemADWrapper(
-            KNNAD(dist="jaccard", scaling=None, alpha=0.95)
-        )
+        ad = MLChemADWrapper(KNNAD(dist="jaccard", scaling=None, alpha=0.95))
         ad.fit(self.dataset.X)
         self.assertIsInstance(ad.contains(self.dataset.X), pd.Series)
 
         ad.toFile(f"{self.generatedPath}/test_ad.json")
         ad_fromfile = MLChemADWrapper.fromFile(f"{self.generatedPath}/test_ad.json")
         self.assertIsInstance(ad_fromfile.contains(self.dataset.X), pd.Series)
-        
+
     def testContinousAD(self):
         """Test the applicability domain for continuous data."""
         ad = KNNApplicabilityDomain(dist="euclidean", scaling="standard", alpha=0.95)
         ad.fit(self.dataset.X)
-        
+
         with self.assertRaises(ValueError):
             ad.contains(ad.contains(self.dataset.X))
-        
+
         self.assertIsInstance(ad.transform(self.dataset.X), pd.Series)
-        
+
         ad.threshold = 0.3
         ad.direction = "<"
         self.assertIsInstance(ad.contains(self.dataset.X), pd.Series)
 
         ad.toFile(f"{self.generatedPath}/test_ad.json")
-        ad_fromfile = MLChemADWrapper.fromFile(f"{self.generatedPath}/test_ad.json")
-
+        MLChemADWrapper.fromFile(f"{self.generatedPath}/test_ad.json")

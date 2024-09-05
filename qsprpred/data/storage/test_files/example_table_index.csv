@@ -1,0 +1,9 @@
+smiles,TestProp1,TestProp2,ExtraIndexColumn
+C=CCC(=O)N[C@H](C)C(=O)N[C@H](C)C(N)=O,1.0,2.0,Molecule1
+CC=CCC(=O)N[C@H](C)C(=O)N[C@H](C)C(N)=O,1.0,2.0,Molecule8
+C=C1CC(C(=O)NC(C)C(=O)NC(C)C(N)=O)C1,2.0,3.0,Molecule2
+C=C1CC(C(=O)NC(C)C(=O)NC(C)C(N)=O)C1,3.0,4.0,Molecule3
+invalid,1.0,2.0,Molecule4
+C[Si](C)(C)O,2.0,3.0,Molecule5
+C12C3C4C1C5C2C3C45,3.0,4.0,Molecule6
+invalid,1.0,2.0,Molecule7

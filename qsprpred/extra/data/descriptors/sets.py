@@ -6,26 +6,25 @@
 - `ProDec`: Protein descriptors from the ProDec package.
 
 """
-import logging
+
 import os
-import zipfile
 from abc import abstractmethod
-from typing import Optional, Any
+from typing import Any, ClassVar, Optional
 
 import mordred
 import numpy as np
 import pandas as pd
 import prodec
 from Mold2_pywrapper import Mold2 as Mold2_calculator
+from mordred import descriptors as Mordred_descriptors
 from PaDEL_pywrapper import PaDEL as PaDELCalculator
 from PaDEL_pywrapper import descriptors as PaDEL_descriptors
-from Signature_pywrapper import Signature as Signature_calculator
-from mordred import descriptors as Mordred_descriptors
 from rdkit import Chem
 from rdkit.Chem import Mol
+from Signature_pywrapper import Signature as Signature_calculator
 
 from qsprpred.data.descriptors.sets import DescriptorSet
-from qsprpred.extra.data.utils.msa_calculator import MSAProvider, ClustalMSA
+from qsprpred.extra.data.utils.msa_calculator import ClustalMSA, MSAProvider
 
 
 class Mordred(DescriptorSet):
@@ -41,7 +40,6 @@ class Mordred(DescriptorSet):
         config (str): path to config file if available
 
     """
-
     def __init__(
         self,
         descs: list[str] | None = None,
@@ -123,7 +121,6 @@ class Mold2(DescriptorSet):
     Arguments:
         descs: names of Mold2 descriptors to be calculated (e.g. D001)
     """
-
     def __init__(self, descs: list[str] | None = None):
         """Initialize a Mold2 descriptor calculator.
 
@@ -196,7 +193,12 @@ class PaDEL(DescriptorSet):
         descriptors (list[str]): list of PaDEL descriptor names
     """
 
-    _notJSON = ["_nameMapping", "_padel", "_descriptors", *DescriptorSet._notJSON]
+    _notJSON: ClassVar = [
+        "_nameMapping",
+        "_padel",
+        "_descriptors",
+        *DescriptorSet._notJSON,
+    ]
 
     def __init__(
         self,
@@ -278,8 +280,7 @@ class PaDEL(DescriptorSet):
         if names is None:
             self._keep = [
                 name
-                for name, desc in self._nameMapping.items()
-                if desc in self._descriptors
+                for name, desc in self._nameMapping.items() if desc in self._descriptors
             ]
         else:
             self._keep = names
@@ -298,7 +299,6 @@ class ExtendedValenceSignature(DescriptorSet):
     Journal of Chemical Information and Computer Sciences 2003 43 (3), 707-720
     DOI: 10.1021/ci020345w
     """
-
     def __init__(self, depth: int | list[int]):
         """Initialize a ExtendedValenceSignature calculator
 
@@ -327,8 +327,9 @@ class ExtendedValenceSignature(DescriptorSet):
             self.descriptors = df.columns.tolist()
             self._descriptors_init = True
         else:
-            intersection = list(set(self.descriptors).intersection(df.columns))
+            intersection = [col for col in df.columns if col in self.descriptors]
             df = df[intersection]
+            self.descriptors = intersection
         return df.values
 
     @property
@@ -349,10 +350,12 @@ class ExtendedValenceSignature(DescriptorSet):
 
 class ProteinDescriptorSet(DescriptorSet):
     """Abstract base class for protein descriptor sets."""
-
     @abstractmethod
     def getProteinDescriptors(
-        self, acc_keys: list[str], sequences: Optional[dict[str, str]] = None, **kwargs
+        self,
+        acc_keys: list[str],
+        sequences: Optional[dict[str, str]] = None,
+        **kwargs
     ) -> pd.DataFrame:
         """
         Calculate the protein descriptors for a given target.
@@ -392,21 +395,17 @@ class ProteinDescriptorSet(DescriptorSet):
             np.ndarray: array of calculated protein descriptors
         """
         # Get array of calculated protein descriptors
-        acc_keys = sorted(set(props["acc_keys"]))
+        acc_keys = kwargs["protein_ids"]
+        protein_id_prop = kwargs["protein_id_prop"]
         values = self.getProteinDescriptors(acc_keys, **kwargs).reset_index()
-        values.rename(columns={"ID": "acc_keys"}, inplace=True)
+        values.rename(columns={"ID": protein_id_prop}, inplace=True)
         # create a data frame with the same order of acc_keys as in props
-        df = pd.DataFrame({"acc_keys": props["acc_keys"]})
+        df = pd.DataFrame({protein_id_prop: props[protein_id_prop]})
         # merge the calculated values with the data frame to attach them to the rows
         df = df.merge(
-            values, left_on="acc_keys", right_on="acc_keys", how="left"
-        ).set_index("acc_keys")
+            values, left_on=protein_id_prop, right_on=protein_id_prop, how="left"
+        ).set_index(protein_id_prop)
         return df.values
-
-    @property
-    def requiredProps(self) -> list[str]:
-        existing = super().requiredProps
-        return ["acc_keys", *existing]
 
     def supportsParallel(self) -> bool:
         return False
@@ -423,7 +422,6 @@ class ProDec(ProteinDescriptorSet):
         factory (prodec.ProteinDescriptors):
             factory to calculate descriptors
     """
-
     def __init__(
         self, sets: list[str] | None = None, msa_provider: MSAProvider = ClustalMSA()
     ):
@@ -481,7 +479,10 @@ class ProDec(ProteinDescriptorSet):
         return protein_features
 
     def getProteinDescriptors(
-        self, acc_keys: list[str], sequences: Optional[dict[str, str]] = None, **kwargs
+        self,
+        acc_keys: list[str],
+        sequences: Optional[dict[str, str]] = None,
+        **kwargs
     ) -> pd.DataFrame:
         """
         Calculate the protein descriptors for a given target.

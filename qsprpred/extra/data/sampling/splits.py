@@ -3,18 +3,19 @@
 To add a new data splitter:
 * Add a datasplit subclass for your new splitter
 """
+
 from typing import Iterable
 
 import numpy as np
 from sklearn.impute import SimpleImputer
 
 from qsprpred.data.sampling.splits import (
-    DataSplit,
     ClusterSplit,
+    DataSplit,
     RandomSplit,
     ScaffoldSplit,
 )
-from qsprpred.data.tables.qspr import QSPRDataset
+from qsprpred.data.tables.qspr import QSPRTable
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.tasks import TargetProperty
 
@@ -31,7 +32,6 @@ class PCMSplit(DataSplit):
         dataset (PCMDataSet): The dataset to split.
         splitter (DataSplit): The splitter to use on the initial clusters.
     """
-
     def __init__(self, splitter: DataSplit, dataset: PCMDataSet | None = None) -> None:
         super().__init__(dataset)
         self.splitter = splitter
@@ -42,7 +42,9 @@ class PCMSplit(DataSplit):
         ), "Splitter must be either RandomSplit, ScaffoldSplit or ClusterSplit!"
 
         if isinstance(self.splitter, (RandomSplit, ClusterSplit)):
-            self.splitter.setSeed(dataset.randomState if dataset is not None else None)
+            self.splitter.randomState = (
+                dataset.randomState if dataset is not None else None
+            )
 
     def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
         """
@@ -66,7 +68,7 @@ class PCMSplit(DataSplit):
         ds = self.getDataSet()
         df = ds.getDF()
         indices = df.index.tolist()
-        proteins = df[ds.proteinCol].unique()
+        proteins = df[ds.proteinIDProp].unique()
         task = ds.targetProperties[0].task
         th = ds.targetProperties[0].th if task.isClassification() else None
         assert (
@@ -77,37 +79,36 @@ class PCMSplit(DataSplit):
         # dataset with the given splitter
         # Pivot dataframe to get a matrix with protein targets as columns
         df_mt = df.pivot(
-            index=ds.smilesCol,
-            columns=ds.proteinCol,
+            index=ds.smilesProp,
+            columns=ds.proteinIDProp,
             values=ds.targetProperties[0].name,
         ).reset_index()
         # Create target properties for multi-task dataset
         mt_targetProperties = [
             TargetProperty(
                 name=target, task=task, th=th, imputer=SimpleImputer(strategy="median")
-            )
-            for target in proteins
+            ) for target in proteins
         ]
         # temporarily create multi-task dataset and split it with the given splitter
-        ds_mt = QSPRDataset(
+        ds_mt = QSPRTable.fromDF(
             name=f"PCM_{self.splitter.__class__.__name__}_{hash(self)}",
             df=df_mt,
-            smiles_col=ds.smilesCol,
+            smiles_col=ds.smilesProp,
             target_props=mt_targetProperties,
-            random_state=ds.randomState,
         )
+        ds_mt.randomState = ds.randomState
         ds_mt.split(self.splitter)
         # Convert MT indices to indices of original PCM dataset
         test_indices = []
         for i in ds_mt.X_ind.index:
             # Get SMILES and non-NaN targets for index i
-            smiles = df_mt.loc[i, ds_mt.smilesCol]
+            smiles = df_mt.loc[i, ds_mt.smilesProp]
             cols = df_mt.loc[i, :].dropna().index
             targets = [col for col in cols if col in proteins]
             for target in targets:
                 # Get index in the original PCM dataset the SMILES-target pair
-                a = df[ds.smilesCol] == smiles
-                b = df[ds.proteinCol] == target
+                a = df[ds.smilesProp] == smiles
+                b = df[ds.proteinIDProp] == target
                 if any(a & b):
                     ds_idx = df[a & b].index.astype(str)[0]
                     # Convert to numeric index
@@ -134,7 +135,7 @@ class LeaveTargetsOut(DataSplit):
         for target in self.targets:
             assert target in ds_targets, f"Target key '{target}' not in dataset!"
             ds_targets.remove(target)
-        mask = ds.getProperty(ds.proteinCol).isin(ds_targets).values
+        mask = ds.getProperty(ds.proteinIDProp).isin(ds_targets).values
         indices = np.array(list(range(len(ds))))
         train = indices[mask]
         test = indices[~mask]
@@ -177,15 +178,15 @@ class TemporalPerTarget(DataSplit):
         # Set the first year a compound appears in the dataset as the year
         # of the compound for all targets
         if self.firstYearPerCompound:
-            first_years = df.groupby(ds.smilesCol)[self.yearCol].min()
-            df[self.yearCol + "_first"] = df[ds.smilesCol].map(first_years)
+            first_years = df.groupby(ds.smilesProp)[self.yearCol].min()
+            df[self.yearCol + "_first"] = df[ds.smilesProp].map(first_years)
             self.yearCol += "_first"
 
         train_indices = []
         test_indices = []
 
         for target, split_year in self.splitYears.items():
-            df_target = df[df[ds.proteinCol] == target]
+            df_target = df[df[ds.proteinIDProp] == target]
             # Get indices of the train and test set
             train = df_target[df_target[self.yearCol] <= split_year].index.tolist()
             test = df_target[df_target[self.yearCol] > split_year].index.tolist()
@@ -202,8 +203,8 @@ class TemporalPerTarget(DataSplit):
             train_indices.extend([indices.index(i) for i in train])
             test_indices.extend([indices.index(i) for i in test])
 
-        assert len(set(train_indices)) + len(set(test_indices)) == len(
-            ds
-        ), "Train and test set do not cover the whole dataset!"
+        assert len(set(train_indices)) + len(
+            set(test_indices)
+        ) == len(ds), "Train and test set do not cover the whole dataset!"
 
         return iter([(train_indices, test_indices)])

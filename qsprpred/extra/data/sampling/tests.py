@@ -2,12 +2,12 @@ from unittest import TestCase
 
 from parameterized import parameterized
 
-from qsprpred.data import RandomSplit, ScaffoldSplit, ClusterSplit
+from qsprpred.data import ClusterSplit, RandomSplit, ScaffoldSplit
 from qsprpred.data.descriptors.sets import RDKitDescs
 from qsprpred.extra.data.descriptors.sets import ProDec
 from qsprpred.extra.data.sampling.splits import (
-    PCMSplit,
     LeaveTargetsOut,
+    PCMSplit,
     TemporalPerTarget,
 )
 from qsprpred.extra.data.tables.pcm import PCMDataSet
@@ -23,16 +23,16 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         self.dataset.addDescriptors([ProDec(["Zscale Hellberg"], self.msaProvider)])
         self.dataset.addDescriptors([RDKitDescs()])
 
-    @parameterized.expand([(RandomSplit(),), (ScaffoldSplit(),), (ClusterSplit(),)])
+    @parameterized.expand([(RandomSplit(), ), (ScaffoldSplit(), ), (ClusterSplit(), )])
     def testPCMSplit(self, splitter):
         splitter = PCMSplit(splitter)
         self.dataset.split(splitter, featurize=True)
         train, test = self.dataset.getFeatures()
         train, test = train.index, test.index
-        test_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[test]
-        train_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[train]
-        test_smiles = self.dataset.getProperty(self.dataset.smilesCol).loc[test]
-        train_smiles = self.dataset.getProperty(self.dataset.smilesCol).loc[train]
+        test_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[test]
+        train_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[train]
+        test_smiles = self.dataset.getProperty(self.dataset.smilesProp).loc[test]
+        train_smiles = self.dataset.getProperty(self.dataset.smilesProp).loc[train]
         self.assertEqual(len(test_targets), len(test))
         self.assertEqual(len(train_targets), len(train))
         self.assertTrue(
@@ -62,8 +62,8 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         self.dataset.split(splitter, featurize=True)
         train, test = self.dataset.getFeatures()
         train, test = train.index, test.index
-        test_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[test]
-        train_targets = self.dataset.getProperty(self.dataset.proteinCol).loc[train]
+        test_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[test]
+        train_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[train]
         self.assertEqual(len(test_targets), len(test))
         self.assertEqual(len(train_targets), len(train))
         self.assertTrue(
@@ -75,7 +75,8 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         year = 2015
         splitter = TemporalPerTarget(
             year_col=year_col,
-            split_years={key: year for key in self.dataset.getProteinKeys()},
+            split_years={key: year
+                         for key in self.dataset.getProteinKeys()},
         )
         self.dataset.split(splitter, featurize=True)
         train, test = self.dataset.getFeatures()

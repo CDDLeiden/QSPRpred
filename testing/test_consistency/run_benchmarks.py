@@ -40,15 +40,16 @@ class DataSourceTesting(DataSource):
         This code could also be simplified so that reloading of the file is not necessary.
         """
         name = name or self.name
-        return MoleculeTable(
+        mt = MoleculeTable.fromDF(
             df=pd.read_table("../../tutorials/tutorial_data/A2A_LIGANDS.tsv").sample(
                 300, random_state=SEED
             ),
             name=name,
-            store_dir=self.storeDir,
-            store_format="csv",
+            path=self.storeDir,
             **kwargs,
         )
+        mt.storeFormat = "csv"
+        return mt
 
 
 # run classification
@@ -110,7 +111,6 @@ settings = BenchmarkSettings(
 )
 runner = BenchmarkRunner(settings, data_dir=f"{BASE_DIR}/CLS")
 runner.run(raise_errors=True)
-
 
 # run regression
 settings.name = "ConsistencyChecksREG"

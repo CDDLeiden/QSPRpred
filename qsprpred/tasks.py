@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Literal, Optional, Callable
+from typing import Callable, ClassVar, Literal, Optional
 
 from qsprpred.utils.serialization import (
     JSONSerializable,
@@ -112,14 +112,13 @@ class TargetProperty(JSONSerializable):
         imputer (Callable): function to impute the target property
     """
 
-    _notJSON = ["transformer", *JSONSerializable._notJSON]
+    _notJSON: ClassVar = ["transformer", *JSONSerializable._notJSON]
 
     def __init__(
         self,
         name: str,
-        task: Literal[
-            TargetTasks.REGRESSION, TargetTasks.SINGLECLASS, TargetTasks.MULTICLASS
-        ],
+        task: Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS,
+                      TargetTasks.MULTICLASS],
         th: Optional[list[float] | str] = None,
         n_classes: Optional[int] = None,
         transformer: Optional[Callable] = None,
@@ -143,12 +142,11 @@ class TargetProperty(JSONSerializable):
         self.name = name
         self.task = task
         if task.isClassification():
-            assert (
-                th is not None
-            ), (f"Threshold not specified for classification task `{name}`. "
+            assert th is not None, (
+                f"Threshold not specified for classification task `{name}`. "
                 "If the task is already precomputed, set `th` to `precomputed`, and "
                 "define the correct number of classes with `n_classes."
-                )
+            )
             self.th = th
             if isinstance(th, str) and th == "precomputed":
                 self.nClasses = n_classes
@@ -157,7 +155,9 @@ class TargetProperty(JSONSerializable):
 
     def __getstate__(self):
         o_dict = super().__getstate__()
-        o_dict["transformer"] = function_as_string(self.transformer) if self.transformer else None
+        o_dict["transformer"] = (
+            function_as_string(self.transformer) if self.transformer else None
+        )
         return o_dict
 
     def __setstate__(self, state):
@@ -289,7 +289,10 @@ class TargetProperty(JSONSerializable):
             )
             if target_prop.task.isClassification():
                 target_props[-1].update(
-                    {"th": target_prop.th, "n_classes": target_prop.nClasses}
+                    {
+                        "th": target_prop.th,
+                        "n_classes": target_prop.nClasses
+                    }
                 )
             if not drop_transformer:
                 target_props[-1].update({"transformer": target_prop.transformer})

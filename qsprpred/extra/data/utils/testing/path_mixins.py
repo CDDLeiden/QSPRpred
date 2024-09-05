@@ -1,5 +1,4 @@
 import os
-import platform
 import tempfile
 from typing import Callable
 
@@ -9,32 +8,30 @@ from qsprpred import TargetProperty, TargetTasks
 from qsprpred.data.descriptors.sets import DescriptorSet
 from qsprpred.extra.data.descriptors.fingerprints import (
     CDKFP,
-    CDKExtendedFP,
-    CDKEStateFP,
-    CDKGraphOnlyFP,
     CDKMACCSFP,
+    CDKAtomPairs2DFP,
+    CDKEStateFP,
+    CDKExtendedFP,
+    CDKGraphOnlyFP,
+    CDKKlekotaRothFP,
     CDKPubchemFP,
     CDKSubstructureFP,
-    CDKKlekotaRothFP,
-    CDKAtomPairs2DFP,
 )
 from qsprpred.extra.data.descriptors.sets import (
-    Mordred,
-    Mold2,
-    PaDEL,
     ExtendedValenceSignature,
-    ProteinDescriptorSet,
+    Mordred,
+    PaDEL,
     ProDec,
+    ProteinDescriptorSet,
 )
+from qsprpred.extra.data.storage.protein.tabular_pcm import TabularProteinStorage
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.extra.data.utils.msa_calculator import ClustalMSA
-from qsprpred.logs import logger
 from qsprpred.utils.testing.path_mixins import DataSetsPathMixIn
 
 
 class DataSetsMixInExtras(DataSetsPathMixIn):
     """MixIn class for testing data sets in extras."""
-
     def setUpPaths(self):
         super().setUpPaths()
         self.dataPathPCM = f"{os.path.dirname(__file__)}/test_files/data"
@@ -136,8 +133,14 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
             }
 
         return lambda acc_keys: (
-            {acc: mapper[acc] for acc in acc_keys},
-            {acc: kwargs_map[acc] for acc in acc_keys},
+            {
+                acc: mapper[acc]
+                for acc in acc_keys
+            },
+            {
+                acc: kwargs_map[acc]
+                for acc in acc_keys
+            },
         )
 
     @classmethod
@@ -147,9 +150,11 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
     def createPCMDataSet(
         self,
         name: str = "QSPRDataset_test_pcm",
-        target_props: list[TargetProperty]
-        | list[dict] = [
-            {"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}
+        target_props: list[TargetProperty] | list[dict] = [
+            {
+                "name": "pchembl_value_Median",
+                "task": TargetTasks.REGRESSION
+            }
         ],
         preparation_settings: dict | None = None,
         protein_col: str = "accession",
@@ -169,17 +174,27 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
             random_state (int, optional):
                 random seed to use in the dataset. Defaults to `None`
         Returns:
-            QSPRDataset: a `QSPRDataset` object
+            QSPRTable: a `QSPRTable` object
         """
-        df = self.getPCMDF()
-        ret = PCMDataSet(
-            name,
-            protein_col=protein_col,
-            protein_seq_provider=self.getPCMSeqProvider(),
-            target_props=target_props,
-            df=df,
+        storage = self.getStorage(
+            self.getPCMDF(),
+            f"{name}_data",
+        )
+        proteins = TabularProteinStorage(
+            name=f"{name}_proteins",
+            df=self.getPCMTargetsDF(),
+            sequence_provider=self.getPCMSeqProvider(),
             store_dir=self.generatedDataPath,
             random_state=random_state,
+            index_cols=[protein_col],
+        )
+        ret = PCMDataSet(
+            storage=storage,
+            proteins=proteins,
+            name=name,
+            target_props=target_props,
+            random_state=random_state,
+            path=self.generatedDataPath,
         )
         if preparation_settings:
             ret.prepareDataset(**preparation_settings)

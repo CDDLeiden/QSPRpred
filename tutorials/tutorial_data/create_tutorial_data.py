@@ -1,7 +1,7 @@
+import argparse
 import os
 
 from qsprpred.data.sources.papyrus import Papyrus
-import argparse
 
 
 def SingleTaskTutorialData(data_dir: str | None = None):
@@ -31,7 +31,7 @@ def SingleTaskTutorialData(data_dir: str | None = None):
     )
 
     dataset = papyrus.getData(
-        dataset_name, acc_keys, quality, use_existing=True, overwrite=True
+        dataset_name, acc_keys, quality, use_existing=False
     )
 
     print(f"Number of samples loaded: {len(dataset.getDF())}")
@@ -76,7 +76,7 @@ def MultiTaskTutorialData(data_dir: str | None = None):
     )
 
     dataset = papyrus.getData(
-        dataset_name, acc_keys, quality, use_existing=True, overwrite=True
+        dataset_name, acc_keys, quality, use_existing=False
     )
 
     print(f"Number of samples loaded: {len(dataset.getDF())}")
@@ -88,6 +88,7 @@ def MultiTaskTutorialData(data_dir: str | None = None):
     df.to_csv(os.path.join(data_dir, "AR_LIGANDS.tsv"), index=False, sep="\t")
 
     return dataset
+
 
 def prepare_multitask(file_path: str):
     import pandas as pd

@@ -13,7 +13,6 @@ class SklearnMetrics(Metric):
         name (str): Name of the scoring function.
         scorer: Sklearn scorer object.
     """
-
     def __init__(self, scorer: str | _BaseScorer):
         """Initialize the scoring function.
 

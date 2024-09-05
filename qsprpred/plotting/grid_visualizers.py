@@ -3,7 +3,7 @@ from typing import Callable
 from rdkit import Chem
 from rdkit.Chem import AllChem, Draw
 
-from qsprpred.data.tables.base import MoleculeDataTable
+from qsprpred.data.storage.interfaces.chem_store import ChemStore
 
 standard_grid = Draw.MolsToGridImage
 
@@ -30,14 +30,14 @@ def smiles_to_grid(
                 mols.append(m)
             else:
                 raise Exception(f"Molecule empty for SMILES: {smile}")
-        except Exception as exp:
+        except Exception:
             pass
 
     return impl(mols, *args, molsPerRow=mols_per_row, **kwargs)
 
 
 def table_to_grid(
-    table: MoleculeDataTable,
+    table: ChemStore,
     mols_per_row: int = 5,
     impl: Callable = standard_grid,
     *args,

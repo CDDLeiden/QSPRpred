@@ -1,24 +1,20 @@
-class Randomized:
-    """An object with one or more pseudorandom actions that can be fixed with a seed.
+from abc import abstractmethod
 
-    Attributes:
-        seed (int | None):
-            The seed to use to randomize the action. If `None`,
-            a random seed is used instead of a fixed one (default: `None`).
-    """
-    def __init__(self, seed: int | None = None) -> None:
-        """Create a new randomized action.
+
+class Randomized:
+    """An object with one or more pseudorandom actions that can be fixed with a seed."""
+    @property
+    @abstractmethod
+    def randomState(self) -> int:
+        """Get the random state for the object."""
+
+    @randomState.setter
+    @abstractmethod
+    def randomState(self, seed: int | None):
+        """Set the random state for the object.
 
         Args:
-            seed:
-                the seed to use to randomize the action. If `None`,
-                a random seed is used instead of a fixed one (default: `None`).
+            seed (int | None):
+                The seed to use to randomize the action. If `None`,
+                a random seed is used instead of a fixed one.
         """
-        self.seed = seed
-
-    def setSeed(self, seed: int | None = None):
-        self.seed = seed
-
-    def getSeed(self):
-        """Get the seed used to randomize the action."""
-        return self.seed

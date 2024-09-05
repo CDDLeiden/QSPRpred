@@ -28,12 +28,12 @@ for f in os.listdir("expected"):
 
             expected_values = (
                 pd.read_csv(expected_file_path, sep="\t")
-                .set_index("QSPRID", drop=True)
+                .set_index("ID", drop=True)
                 .sort_index()
             )
             actual_values = (
                 pd.read_csv(actual_file_path, sep="\t")
-                .set_index("QSPRID", drop=True)
+                .set_index("ID", drop=True)
                 .sort_index()
             )
             assert expected_values.columns.equals(

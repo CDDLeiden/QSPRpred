@@ -16,17 +16,17 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
 from qsprpred.data.chem.clustering import (
-    FPSimilarityMaxMinClusters,
     FPSimilarityLeaderPickerClusters,
+    FPSimilarityMaxMinClusters,
 )
 from qsprpred.data.descriptors.fingerprints import (
-    MorganFP,
-    RDKitMACCSFP,
     AtomPairFP,
+    AvalonFP,
     LayeredFP,
+    MorganFP,
     PatternFP,
     RDKitFP,
-    AvalonFP,
+    RDKitMACCSFP,
 )
 from qsprpred.data.descriptors.sets import (
     DrugExPhyschem,
@@ -47,8 +47,9 @@ from qsprpred.data.sampling.splits import (
     ScaffoldSplit,
     TemporalSplit,
 )
-from qsprpred.data.tables.qspr import QSPRDataset
+from qsprpred.data.tables.qspr import QSPRTable
 from qsprpred.tasks import TargetTasks
+
 from .data.chem.scaffolds import BemisMurckoRDKit
 from .extra.gpu.models.dnn import DNNModel
 from .logs.utils import backup_files, enable_file_logger
@@ -132,7 +133,8 @@ def QSPRArgParser(txt=None):
         "--regression",
         type=str,
         default=None,
-        help="If True, only regression model, if False, only classification, default both",
+        help=
+        "If True, only regression model, if False, only classification, default both",
     )
     parser.add_argument(
         "-th",
@@ -333,8 +335,7 @@ def QSPR_dataprep(args):
                 else:
                     task = (
                         TargetTasks.SINGLECLASS
-                        if len(th) == 1
-                        else TargetTasks.MULTICLASS
+                        if len(th) == 1 else TargetTasks.MULTICLASS
                     )
                 if task == TargetTasks.REGRESSION and th:
                     log.warning(
@@ -355,34 +356,39 @@ def QSPR_dataprep(args):
                 }
                 target_props.append(
                     {
-                        "name": prop,
-                        "task": task,
-                        "th": th,
-                        "transformer": transform_dict[args.transform_data[prop]]
-                        if prop in args.transform_data
-                        else None,
-                        "imputer": SimpleImputer(strategy=args.imputation[prop])
-                        if prop in args.imputation
-                        else None,
+                        "name":
+                            prop,
+                        "task":
+                            task,
+                        "th":
+                            th,
+                        "transformer":
+                            (
+                                transform_dict[args.transform_data[prop]]
+                                if prop in args.transform_data else None
+                            ),
+                        "imputer":
+                            (
+                                SimpleImputer(strategy=args.imputation[prop])
+                                if prop in args.imputation else None
+                            ),
                     }
                 )
             dataset_name = (
                 f"{props_name}_{task}_{args.data_suffix}"
-                if args.data_suffix
-                else f"{props_name}_{task}"
+                if args.data_suffix else f"{props_name}_{task}"
             )
-            mydataset = QSPRDataset(
+            mydataset = QSPRTable.fromDF(
                 dataset_name,
                 target_props=target_props,
                 df=df,
                 smiles_col=args.smiles_col,
-                n_jobs=args.ncpu,
-                store_dir=args.output_dir,
-                overwrite=True,
-                random_state=args.random_state
-                if args.random_state is not None
-                else None,
+                path=args.output_dir,
             )
+            mydataset.randomState = (
+                args.random_state if args.random_state is not None else None
+            )
+            mydataset.storage.nJobs = args.ncpu
             # data filters
             data_filters = []
             if args.low_quality:
@@ -490,8 +496,7 @@ def QSPR_dataprep(args):
                     )
                 boruta_estimator = (
                     RandomForestRegressor(n_jobs=args.ncpu)
-                    if args.regression
-                    else RandomForestClassifier(n_jobs=args.ncpu)
+                    if args.regression else RandomForestClassifier(n_jobs=args.ncpu)
                 )
                 featurefilters.append(
                     BorutaFilter(
@@ -505,9 +510,9 @@ def QSPR_dataprep(args):
                 data_filters=data_filters,
                 split=split,
                 feature_filters=featurefilters,
-                feature_standardizer=StandardScaler()
-                if "Smiles" not in args.features
-                else None,
+                feature_standardizer=(
+                    StandardScaler() if "Smiles" not in args.features else None
+                ),
                 feature_fill_value=args.fill_value,
             )
 
@@ -527,8 +532,7 @@ if __name__ == "__main__":
     # get a list of all the folders in the output directory
     folders = [
         f
-        for f in os.listdir(args.output_dir)
-        if os.path.isdir(f"{args.output_dir}/{f}")
+        for f in os.listdir(args.output_dir) if os.path.isdir(f"{args.output_dir}/{f}")
     ]
 
     # remove folders that start with backup

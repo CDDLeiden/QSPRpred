@@ -1,7 +1,8 @@
 """This module is used for standardizing feature sets."""
+
+import ml2json
 import numpy as np
 import pandas as pd
-import ml2json
 
 from ...logs import logger
 from ...utils.serialization import JSONSerializable
