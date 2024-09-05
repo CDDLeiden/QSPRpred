@@ -105,7 +105,7 @@ class ChemStandardizer(ABC):
         """
         import hashlib
 
-        return hashlib.md5(self.getID()).hexdigest()
+        return hashlib.md5(self.getID().encode('utf-8')).hexdigest()
 
 
 class Standardizable(ABC):
