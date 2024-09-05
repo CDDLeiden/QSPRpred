@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.chem.tests &mdash; QSPRpred 3.1.2.dev40+g2513259a documentation</title>
+  <title>qsprpred.data.chem.tests &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=1905640d"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=ae990675"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev40+g2513259a
+                v3.2.1.dev95+g5c50f5f6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -100,16 +100,21 @@
 <span></span><span class="kn">from</span> <span class="nn">parameterized</span> <span class="kn">import</span> <span class="n">parameterized</span>
 
 <span class="kn">from</span> <span class="nn">...</span> <span class="kn">import</span> <span class="n">TargetTasks</span>
-<span class="kn">from</span> <span class="nn">...data</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
-<span class="kn">from</span> <span class="nn">...data.chem.scaffolds</span> <span class="kn">import</span> <span class="n">BemisMurckoRDKit</span><span class="p">,</span> <span class="n">BemisMurcko</span>
-<span class="kn">from</span> <span class="nn">...data.chem.clustering</span> <span class="kn">import</span> <span class="n">RandomClusters</span><span class="p">,</span> <span class="n">FPSimilarityMaxMinClusters</span><span class="p">,</span> <span class="n">FPSimilarityLeaderPickerClusters</span><span class="p">,</span> <span class="n">ScaffoldClusters</span>
+<span class="kn">from</span> <span class="nn">...data.chem.clustering</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">FPSimilarityLeaderPickerClusters</span><span class="p">,</span>
+    <span class="n">FPSimilarityMaxMinClusters</span><span class="p">,</span>
+    <span class="n">RandomClusters</span><span class="p">,</span>
+    <span class="n">ScaffoldClusters</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">...data.chem.scaffolds</span> <span class="kn">import</span> <span class="n">BemisMurcko</span><span class="p">,</span> <span class="n">BemisMurckoRDKit</span>
+<span class="kn">from</span> <span class="nn">...data.tables.qspr</span> <span class="kn">import</span> <span class="n">QSPRTable</span>
 <span class="kn">from</span> <span class="nn">...utils.testing.base</span> <span class="kn">import</span> <span class="n">QSPRTestCase</span>
 <span class="kn">from</span> <span class="nn">...utils.testing.path_mixins</span> <span class="kn">import</span> <span class="n">DataSetsPathMixIn</span>
+<span class="kn">from</span> <span class="nn">.standardizers.chembl</span> <span class="kn">import</span> <span class="n">ChemblStandardizer</span>
 
 
 <div class="viewcode-block" id="TestScaffolds"><a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.tests.TestScaffolds">[docs]</a><span class="k">class</span> <span class="nc">TestScaffolds</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test calculation of scaffolds.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="TestScaffolds.setUp"><a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.tests.TestScaffolds.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a small dataset.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
@@ -131,18 +136,16 @@
         <span class="n">scaffs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getScaffolds</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">scaffs</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addScaffolds</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">scaffold</span><span class="p">],</span>
-            <span class="n">add_rdkit_scaffold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">recalculate</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">[</span><span class="n">scaffold</span><span class="p">],</span> <span class="n">add_rdkit_scaffold</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">recalculate</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
         <span class="n">scaffs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getScaffolds</span><span class="p">(</span><span class="n">include_mols</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">scaffs</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span></div>
         <span class="c1"># for mol in scaffs[f&quot;Scaffold_{scaffold}_RDMol&quot;]:</span>
         <span class="c1">#     self.assertTrue(isinstance(mol, Chem.rdchem.Mol))</span>
 
+
 <div class="viewcode-block" id="TestClusters"><a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.tests.TestClusters">[docs]</a><span class="k">class</span> <span class="nc">TestClusters</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test calculation of clusters.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="TestClusters.setUp"><a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.tests.TestClusters.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a test dataset.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
@@ -168,7 +171,6 @@
 
 <div class="viewcode-block" id="TestStandardizers"><a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.tests.TestStandardizers">[docs]</a><span class="k">class</span> <span class="nc">TestStandardizers</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the standardizers.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="TestStandardizers.setUp"><a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.tests.TestStandardizers.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
@@ -180,16 +182,17 @@
         <span class="n">mask</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="n">orig_len</span>
         <span class="n">mask</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="s2">&quot;SMILES&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;C(C)(C)(C)(C)(C)(C)(C)(C)(C)&quot;</span>  <span class="c1"># bad valence example</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="p">(</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">QSPRTable</span><span class="o">.</span><span class="n">fromDF</span><span class="p">(</span>
             <span class="s2">&quot;standardization_test_invalid_filter&quot;</span><span class="p">,</span>
             <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
-            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
-            <span class="n">drop_invalids</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-            <span class="n">drop_empty</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;VDss&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+            <span class="p">}],</span>
+            <span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">dataset</span><span class="o">.</span><span class="n">standardizeSmiles</span><span class="p">(</span><span class="s2">&quot;chembl&quot;</span><span class="p">,</span> <span class="n">drop_invalid</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
-        <span class="n">dataset</span><span class="o">.</span><span class="n">standardizeSmiles</span><span class="p">(</span><span class="s2">&quot;chembl&quot;</span><span class="p">,</span> <span class="n">drop_invalid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">applyStandardizer</span><span class="p">(</span><span class="n">ChemblStandardizer</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">),</span> <span class="n">orig_len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span></div></div>
 </pre></div>
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.plotting.grid_visualizers &mdash; QSPRpred 3.1.2.dev40+g2513259a documentation</title>
+  <title>qsprpred.plotting.grid_visualizers &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -16,7 +16,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=1905640d"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=ae990675"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev40+g2513259a
+                v3.2.1.dev95+g5c50f5f6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -102,7 +102,7 @@
 <span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
 <span class="kn">from</span> <span class="nn">rdkit.Chem</span> <span class="kn">import</span> <span class="n">AllChem</span><span class="p">,</span> <span class="n">Draw</span>
 
-<span class="kn">from</span> <span class="nn">qsprpred.data.tables.base</span> <span class="kn">import</span> <span class="n">MoleculeDataTable</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.storage.interfaces.chem_store</span> <span class="kn">import</span> <span class="n">ChemStore</span>
 
 <span class="n">standard_grid</span> <span class="o">=</span> <span class="n">Draw</span><span class="o">.</span><span class="n">MolsToGridImage</span>
 
@@ -129,14 +129,14 @@
                 <span class="n">mols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Molecule empty for SMILES: </span><span class="si">{</span><span class="n">smile</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exp</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">pass</span>
 
     <span class="k">return</span> <span class="n">impl</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">molsPerRow</span><span class="o">=</span><span class="n">mols_per_row</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="table_to_grid"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.grid_visualizers.table_to_grid">[docs]</a><span class="k">def</span> <span class="nf">table_to_grid</span><span class="p">(</span>
-    <span class="n">table</span><span class="p">:</span> <span class="n">MoleculeDataTable</span><span class="p">,</span>
+    <span class="n">table</span><span class="p">:</span> <span class="n">ChemStore</span><span class="p">,</span>
     <span class="n">mols_per_row</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="n">impl</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">standard_grid</span><span class="p">,</span>
     <span class="o">*</span><span class="n">args</span><span class="p">,</span>

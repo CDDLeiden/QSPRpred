@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.sources.papyrus package &mdash; QSPRpred 3.1.2.dev40+g2513259a documentation</title>
+  <title>qsprpred.data.sources.papyrus package &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=1905640d"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=ae990675"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -27,7 +27,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="qsprpred.data.tables package" href="qsprpred.data.tables.html" />
+    <link rel="next" title="qsprpred.data.storage package" href="qsprpred.data.storage.html" />
     <link rel="prev" title="qsprpred.data.sources package" href="qsprpred.data.sources.html" />
  
 
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev40+g2513259a
+                v3.2.1.dev95+g5c50f5f6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -196,22 +196,41 @@ reload the data completely.</p>
 <li><p><strong>drop_duplicates</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – remove duplicates after filtering</p></li>
 <li><p><strong>chunk_size</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – data is read in chunks of this size (see <a class="reference internal" href="#module-qsprpred.data.sources.papyrus.papyrus_filter" title="qsprpred.data.sources.papyrus.papyrus_filter"><code class="xref any py py-mod docutils literal notranslate"><span class="pre">papyrus_filter</span></code></a>)</p></li>
 <li><p><strong>use_existing</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – use existing if available</p></li>
-<li><p><strong>kwargs</strong> – additional keyword arguments passed to <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable.fromTableFile" title="qsprpred.data.tables.mol.MoleculeTable.fromTableFile"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">MoleculeTable.fromTableFile</span></code></a></p></li>
+<li><p><strong>kwargs</strong> – additional keyword arguments passed to <a class="reference internal" href="qsprpred.data.html#qsprpred.data.MoleculeTable.fromTableFile" title="qsprpred.data.MoleculeTable.fromTableFile"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">MoleculeTable.fromTableFile</span></code></a></p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>the filtered data set</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>MolculeTable</p>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.html#qsprpred.data.MoleculeTable" title="qsprpred.data.MoleculeTable">MoleculeTable</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.papyrus_class.Papyrus.getDataSet">
-<span class="sig-name descname"><span class="pre">getDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><span class="pre">qsprpred.tasks.TargetProperty</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></span><a class="headerlink" href="#qsprpred.data.sources.papyrus.papyrus_class.Papyrus.getDataSet" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">getDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><span class="pre">qsprpred.tasks.TargetProperty</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRTable" title="qsprpred.data.tables.qspr.QSPRTable"><span class="pre">QSPRTable</span></a></span></span><a class="headerlink" href="#qsprpred.data.sources.papyrus.papyrus_class.Papyrus.getDataSet" title="Permalink to this definition"></a></dt>
+<dd><p>Get the dataset from the source as a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a>. Essentially
+just creates a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> from the <a class="reference internal" href="qsprpred.data.html#qsprpred.data.MoleculeTable" title="qsprpred.data.MoleculeTable"><code class="xref any py py-class docutils literal notranslate"><span class="pre">MoleculeTable</span></code></a> obtained from
+the <a class="reference internal" href="#qsprpred.data.sources.papyrus.papyrus_class.Papyrus.getData" title="qsprpred.data.sources.papyrus.papyrus_class.Papyrus.getData"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">getData</span></code></a> method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_props</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a><em>]</em>) – The target properties to add.</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><em>optional</em>) – The name of the dataset.</p></li>
+<li><p><strong>kwargs</strong> – Additional keyword arguments to pass to the <a class="reference internal" href="#qsprpred.data.sources.papyrus.papyrus_class.Papyrus.getData" title="qsprpred.data.sources.papyrus.papyrus_class.Papyrus.getData"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">getData</span></code></a>
+method and the <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> constructor.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The dataset.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.papyrus_class.Papyrus.getProteinData">
@@ -243,7 +262,7 @@ reload the data completely.</p>
 <p>Filter Papyrus data.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.papyrus_filter.papyrus_filter">
-<span class="sig-prename descclassname"><span class="pre">qsprpred.data.sources.papyrus.papyrus_filter.</span></span><span class="sig-name descname"><span class="pre">papyrus_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acc_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">outdir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">activity_types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_duplicates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_existing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stereo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plusplus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">papyrus_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/sources/papyrus/papyrus_filter.html#papyrus_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.sources.papyrus.papyrus_filter.papyrus_filter" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">qsprpred.data.sources.papyrus.papyrus_filter.</span></span><span class="sig-name descname"><span class="pre">papyrus_filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acc_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quality</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">activity_types</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_duplicates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_existing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stereo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plusplus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">papyrus_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/sources/papyrus/papyrus_filter.html#papyrus_filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.sources.papyrus.papyrus_filter.papyrus_filter" title="Permalink to this definition"></a></dt>
 <dd><p>Filters the downloaded Papyrus dataset for quality and accession key (UniProt)
 and outputs a .tsv file of all compounds fulfilling these requirements.</p>
 <dl class="field-list simple">
@@ -251,7 +270,7 @@ and outputs a .tsv file of all compounds fulfilling these requirements.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>acc_key</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a>) – list of UniProt accession keys</p></li>
 <li><p><strong>quality</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – str with minimum quality of dataset to keep</p></li>
-<li><p><strong>outdir</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – path to the location of Papyrus data</p></li>
+<li><p><strong>out_dir</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – path to the location of Papyrus data</p></li>
 <li><p><strong>activity_types</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – list of activity types to keep</p></li>
 <li><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – prefix for the output file</p></li>
 <li><p><strong>drop_duplicates</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – boolean to drop duplicates from the final dataset</p></li>
@@ -273,6 +292,770 @@ outfile (str): path to the output file</p>
 </dd></dl>
 
 </section>
+<section id="module-qsprpred.data.sources.papyrus.tests">
+<span id="qsprpred-data-sources-papyrus-tests-module"></span><h2>qsprpred.data.sources.papyrus.tests module<a class="headerlink" href="#module-qsprpred.data.sources.papyrus.tests" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.sources.papyrus.tests.</span></span><span class="sig-name descname"><span class="pre">PapyrusSourceTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/sources/papyrus/tests.html#PapyrusSourceTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSetsPathMixIn</span></code></a>, <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.base.QSPRTestCase" title="qsprpred.utils.testing.base.QSPRTestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSPRTestCase</span></code></a></p>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.addClassCleanup">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">addClassCleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.addClassCleanup" title="Permalink to this definition"></a></dt>
+<dd><p>Same as addCleanup, except the cleanup items are called even if
+setUpClass fails (unlike tearDownClass).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.addCleanup">
+<span class="sig-name descname"><span class="pre">addCleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.addCleanup" title="Permalink to this definition"></a></dt>
+<dd><p>Add a function, with arguments, to be called when the test is
+completed. Functions added are called on a LIFO basis and are
+called after tearDown on test failure or success.</p>
+<p>Cleanup items are called even if setUp fails (unlike tearDown).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.addTypeEqualityFunc">
+<span class="sig-name descname"><span class="pre">addTypeEqualityFunc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typeobj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.addTypeEqualityFunc" title="Permalink to this definition"></a></dt>
+<dd><p>Add a type specific assertEqual style function to compare a type.</p>
+<p>This method is for use by TestCase subclasses that need to register
+their own type equality functions to provide nicer error messages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>typeobj</strong> – The data type to call this function on when both values
+are of the same type in assertEqual().</p></li>
+<li><p><strong>function</strong> – The callable taking two arguments and an optional
+msg= argument that raises self.failureException with a
+useful error message when the two arguments are not equal.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertAlmostEqual">
+<span class="sig-name descname"><span class="pre">assertAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">places</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertAlmostEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Fail if the two objects are unequal as determined by their
+difference rounded to the given number of decimal places
+(default 7) and comparing to zero, or by comparing that the
+difference between the two objects is more than the given
+delta.</p>
+<p>Note that decimal places (from zero) are usually not the same
+as significant digits (measured from the most significant digit).</p>
+<p>If the two objects compare equal then they will automatically
+compare almost equal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertCountEqual">
+<span class="sig-name descname"><span class="pre">assertCountEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertCountEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Asserts that two iterables have the same elements, the same number of
+times, without regard to order.</p>
+<blockquote>
+<div><blockquote>
+<div><dl class="simple">
+<dt>self.assertEqual(Counter(list(first)),</dt><dd><p>Counter(list(second)))</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="simple">
+<dt>Example:</dt><dd><ul class="simple">
+<li><p>[0, 1, 1] and [1, 0, 1] compare equal.</p></li>
+<li><p>[0, 0, 1] and [0, 1] compare unequal.</p></li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertDictEqual">
+<span class="sig-name descname"><span class="pre">assertDictEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertDictEqual" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertEqual">
+<span class="sig-name descname"><span class="pre">assertEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Fail if the two objects are unequal as determined by the ‘==’
+operator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertFalse">
+<span class="sig-name descname"><span class="pre">assertFalse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertFalse" title="Permalink to this definition"></a></dt>
+<dd><p>Check that the expression is false.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertGreater">
+<span class="sig-name descname"><span class="pre">assertGreater</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertGreater" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &gt; b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertGreaterEqual">
+<span class="sig-name descname"><span class="pre">assertGreaterEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertGreaterEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &gt;= b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertIn">
+<span class="sig-name descname"><span class="pre">assertIn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">member</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertIn" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a in b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertIs">
+<span class="sig-name descname"><span class="pre">assertIs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertIs" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a is b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertIsInstance">
+<span class="sig-name descname"><span class="pre">assertIsInstance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertIsInstance" title="Permalink to this definition"></a></dt>
+<dd><p>Same as self.assertTrue(isinstance(obj, cls)), with a nicer
+default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertIsNone">
+<span class="sig-name descname"><span class="pre">assertIsNone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertIsNone" title="Permalink to this definition"></a></dt>
+<dd><p>Same as self.assertTrue(obj is None), with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertIsNot">
+<span class="sig-name descname"><span class="pre">assertIsNot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertIsNot" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a is not b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertIsNotNone">
+<span class="sig-name descname"><span class="pre">assertIsNotNone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertIsNotNone" title="Permalink to this definition"></a></dt>
+<dd><p>Included for symmetry with assertIsNone.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertLess">
+<span class="sig-name descname"><span class="pre">assertLess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertLess" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &lt; b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertLessEqual">
+<span class="sig-name descname"><span class="pre">assertLessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertLessEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &lt;= b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertListEqual">
+<span class="sig-name descname"><span class="pre">assertListEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertListEqual" title="Permalink to this definition"></a></dt>
+<dd><p>A list-specific equality assertion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>list1</strong> – The first list to compare.</p></li>
+<li><p><strong>list2</strong> – The second list to compare.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertLogs">
+<span class="sig-name descname"><span class="pre">assertLogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertLogs" title="Permalink to this definition"></a></dt>
+<dd><p>Fail unless a log message of level <em>level</em> or higher is emitted
+on <em>logger_name</em> or its children.  If omitted, <em>level</em> defaults to
+INFO and <em>logger</em> defaults to the root logger.</p>
+<p>This method must be used as a context manager, and will yield
+a recording object with two attributes: <code class="xref any docutils literal notranslate"><span class="pre">output</span></code> and <code class="xref any docutils literal notranslate"><span class="pre">records</span></code>.
+At the end of the context manager, the <code class="xref any docutils literal notranslate"><span class="pre">output</span></code> attribute will
+be a list of the matching formatted log messages and the
+<code class="xref any docutils literal notranslate"><span class="pre">records</span></code> attribute will be a list of the corresponding LogRecord
+objects.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertLogs</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INFO&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cm</span><span class="p">:</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;first message&#39;</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;foo.bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;second message&#39;</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;INFO:foo:first message&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;ERROR:foo.bar:second message&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertMultiLineEqual">
+<span class="sig-name descname"><span class="pre">assertMultiLineEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertMultiLineEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Assert that two multi-line strings are equal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertNoLogs">
+<span class="sig-name descname"><span class="pre">assertNoLogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertNoLogs" title="Permalink to this definition"></a></dt>
+<dd><p>Fail unless no log messages of level <em>level</em> or higher are emitted
+on <em>logger_name</em> or its children.</p>
+<p>This method must be used as a context manager.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertNotAlmostEqual">
+<span class="sig-name descname"><span class="pre">assertNotAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">places</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertNotAlmostEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Fail if the two objects are equal as determined by their
+difference rounded to the given number of decimal places
+(default 7) and comparing to zero, or by comparing that the
+difference between the two objects is less than the given delta.</p>
+<p>Note that decimal places (from zero) are usually not the same
+as significant digits (measured from the most significant digit).</p>
+<p>Objects that are equal automatically fail.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertNotEqual">
+<span class="sig-name descname"><span class="pre">assertNotEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertNotEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Fail if the two objects are equal as determined by the ‘!=’
+operator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertNotIn">
+<span class="sig-name descname"><span class="pre">assertNotIn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">member</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertNotIn" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a not in b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertNotIsInstance">
+<span class="sig-name descname"><span class="pre">assertNotIsInstance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertNotIsInstance" title="Permalink to this definition"></a></dt>
+<dd><p>Included for symmetry with assertIsInstance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertNotRegex">
+<span class="sig-name descname"><span class="pre">assertNotRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unexpected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertNotRegex" title="Permalink to this definition"></a></dt>
+<dd><p>Fail the test if the text matches the regular expression.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertRaises">
+<span class="sig-name descname"><span class="pre">assertRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_exception</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertRaises" title="Permalink to this definition"></a></dt>
+<dd><p>Fail unless an exception of class expected_exception is raised
+by the callable when invoked with specified positional and
+keyword arguments. If a different type of exception is
+raised, it will not be caught, and the test case will be
+deemed to have suffered an error, exactly as for an
+unexpected exception.</p>
+<p>If called with the callable and arguments omitted, will return a
+context object used like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">SomeException</span><span class="p">):</span>
+    <span class="n">do_something</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>An optional keyword argument ‘msg’ can be provided when assertRaises
+is used as a context object.</p>
+<p>The context manager keeps a reference to the exception as
+the ‘exception’ attribute. This allows you to inspect the
+exception after the assertion:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">SomeException</span><span class="p">)</span> <span class="k">as</span> <span class="n">cm</span><span class="p">:</span>
+    <span class="n">do_something</span><span class="p">()</span>
+<span class="n">the_exception</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">exception</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">the_exception</span><span class="o">.</span><span class="n">error_code</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertRaisesRegex">
+<span class="sig-name descname"><span class="pre">assertRaisesRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_exception</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertRaisesRegex" title="Permalink to this definition"></a></dt>
+<dd><p>Asserts that the message in a raised exception matches a regex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expected_exception</strong> – Exception class expected to be raised.</p></li>
+<li><p><strong>expected_regex</strong> – Regex (re.Pattern object or string) expected
+to be found in error message.</p></li>
+<li><p><strong>args</strong> – Function to be called and extra positional args.</p></li>
+<li><p><strong>kwargs</strong> – Extra kwargs.</p></li>
+<li><p><strong>msg</strong> – Optional message used in case of failure. Can only be used
+when assertRaisesRegex is used as a context manager.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertRegex">
+<span class="sig-name descname"><span class="pre">assertRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertRegex" title="Permalink to this definition"></a></dt>
+<dd><p>Fail the test unless the text matches the regular expression.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertSequenceEqual">
+<span class="sig-name descname"><span class="pre">assertSequenceEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertSequenceEqual" title="Permalink to this definition"></a></dt>
+<dd><p>An equality assertion for ordered sequences (like lists and tuples).</p>
+<p>For the purposes of this function, a valid ordered sequence type is one
+which can be indexed, has a length, and has an equality operator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq1</strong> – The first sequence to compare.</p></li>
+<li><p><strong>seq2</strong> – The second sequence to compare.</p></li>
+<li><p><strong>seq_type</strong> – The expected datatype of the sequences, or None if no
+datatype should be enforced.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertSetEqual">
+<span class="sig-name descname"><span class="pre">assertSetEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertSetEqual" title="Permalink to this definition"></a></dt>
+<dd><p>A set-specific equality assertion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>set1</strong> – The first set to compare.</p></li>
+<li><p><strong>set2</strong> – The second set to compare.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+<p>assertSetEqual uses ducktyping to support different types of sets, and
+is optimized for sets specifically (parameters must support a
+difference method).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertTrue">
+<span class="sig-name descname"><span class="pre">assertTrue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertTrue" title="Permalink to this definition"></a></dt>
+<dd><p>Check that the expression is true.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertTupleEqual">
+<span class="sig-name descname"><span class="pre">assertTupleEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tuple1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tuple2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertTupleEqual" title="Permalink to this definition"></a></dt>
+<dd><p>A tuple-specific equality assertion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tuple1</strong> – The first tuple to compare.</p></li>
+<li><p><strong>tuple2</strong> – The second tuple to compare.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertWarns">
+<span class="sig-name descname"><span class="pre">assertWarns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_warning</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertWarns" title="Permalink to this definition"></a></dt>
+<dd><p>Fail unless a warning of class warnClass is triggered
+by the callable when invoked with specified positional and
+keyword arguments.  If a different type of warning is
+triggered, it will not be handled: depending on the other
+warning filtering rules in effect, it might be silenced, printed
+out, or raised as an exception.</p>
+<p>If called with the callable and arguments omitted, will return a
+context object used like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertWarns</span><span class="p">(</span><span class="n">SomeWarning</span><span class="p">):</span>
+    <span class="n">do_something</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>An optional keyword argument ‘msg’ can be provided when assertWarns
+is used as a context object.</p>
+<p>The context manager keeps a reference to the first matching
+warning as the ‘warning’ attribute; similarly, the ‘filename’
+and ‘lineno’ attributes give you information about the line
+of Python code from which the warning was triggered.
+This allows you to inspect the warning after the assertion:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertWarns</span><span class="p">(</span><span class="n">SomeWarning</span><span class="p">)</span> <span class="k">as</span> <span class="n">cm</span><span class="p">:</span>
+    <span class="n">do_something</span><span class="p">()</span>
+<span class="n">the_warning</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">warning</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">the_warning</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">,</span> <span class="mi">147</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertWarnsRegex">
+<span class="sig-name descname"><span class="pre">assertWarnsRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_warning</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.assertWarnsRegex" title="Permalink to this definition"></a></dt>
+<dd><p>Asserts that the message in a triggered warning matches a regexp.
+Basic functioning is similar to assertWarns() with the addition
+that only warnings whose messages also match the regular expression
+are considered successful matches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expected_warning</strong> – Warning class expected to be triggered.</p></li>
+<li><p><strong>expected_regex</strong> – Regex (re.Pattern object or string) expected
+to be found in error message.</p></li>
+<li><p><strong>args</strong> – Function to be called and extra positional args.</p></li>
+<li><p><strong>kwargs</strong> – Extra kwargs.</p></li>
+<li><p><strong>msg</strong> – Optional message used in case of failure. Can only be used
+when assertWarnsRegex is used as a context manager.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.clearGenerated">
+<span class="sig-name descname"><span class="pre">clearGenerated</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.clearGenerated" title="Permalink to this definition"></a></dt>
+<dd><p>Remove the directories that are used for testing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.countTestCases">
+<span class="sig-name descname"><span class="pre">countTestCases</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.countTestCases" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.createLargeMultitaskDataSet">
+<span class="sig-name descname"><span class="pre">createLargeMultitaskDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">name='QSPRDataset_multi_test',</span> <span class="pre">target_props=[{'name':</span> <span class="pre">'HBD',</span> <span class="pre">'task':</span> <span class="pre">&lt;TargetTasks.MULTICLASS:</span> <span class="pre">'MULTICLASS'&gt;,</span> <span class="pre">'th':</span> <span class="pre">[-1,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">100]},</span> <span class="pre">{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">&lt;TargetTasks.REGRESSION:</span> <span class="pre">'REGRESSION'&gt;}],</span> <span class="pre">preparation_settings=None,</span> <span class="pre">random_state=42</span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.createLargeMultitaskDataSet" title="Permalink to this definition"></a></dt>
+<dd><p>Create a large dataset for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
+<li><p><strong>preparation_settings</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.createLargeTestDataSet">
+<span class="sig-name descname"><span class="pre">createLargeTestDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">name='QSPRDataset_test_large',</span> <span class="pre">target_props=[{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">&lt;TargetTasks.REGRESSION:</span> <span class="pre">'REGRESSION'&gt;}],</span> <span class="pre">preparation_settings=None,</span> <span class="pre">random_state=42,</span> <span class="pre">n_jobs=1,</span> <span class="pre">chunk_size=None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.createLargeTestDataSet" title="Permalink to this definition"></a></dt>
+<dd><p>Create a large dataset for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>preparation_settings</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.createSmallTestDataSet">
+<span class="sig-name descname"><span class="pre">createSmallTestDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">name='QSPRDataset_test_small',</span> <span class="pre">target_props=[{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">&lt;TargetTasks.REGRESSION:</span> <span class="pre">'REGRESSION'&gt;}],</span> <span class="pre">preparation_settings=None,</span> <span class="pre">random_state=42</span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.createSmallTestDataSet" title="Permalink to this definition"></a></dt>
+<dd><p>Create a small dataset for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>preparation_settings</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.createTestDataSetFromFrame">
+<span class="sig-name descname"><span class="pre">createTestDataSetFromFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">df,</span> <span class="pre">name='QSPRDataset_test',</span> <span class="pre">target_props=[{'name':</span> <span class="pre">'CL',</span> <span class="pre">'task':</span> <span class="pre">&lt;TargetTasks.REGRESSION:</span> <span class="pre">'REGRESSION'&gt;}],</span> <span class="pre">random_state=None,</span> <span class="pre">prep=None,</span> <span class="pre">n_jobs=1,</span> <span class="pre">chunk_size=None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.createTestDataSetFromFrame" title="Permalink to this definition"></a></dt>
+<dd><p>Create a dataset for testing purposes from the given data frame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – data frame containing the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>prep</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of jobs to use for parallel processing</p></li>
+<li><p><strong>chunk_size</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – size of chunks to use per job in parallel processing</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.debug">
+<span class="sig-name descname"><span class="pre">debug</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.debug" title="Permalink to this definition"></a></dt>
+<dd><p>Run the test without collecting errors in a TestResult</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.defaultTestResult">
+<span class="sig-name descname"><span class="pre">defaultTestResult</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.defaultTestResult" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.doClassCleanups">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">doClassCleanups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.doClassCleanups" title="Permalink to this definition"></a></dt>
+<dd><p>Execute all class cleanup functions. Normally called for you after
+tearDownClass.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.doCleanups">
+<span class="sig-name descname"><span class="pre">doCleanups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.doCleanups" title="Permalink to this definition"></a></dt>
+<dd><p>Execute all cleanup functions. Normally called for you after
+tearDown.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.enterClassContext">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enterClassContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.enterClassContext" title="Permalink to this definition"></a></dt>
+<dd><p>Same as enterContext, but class-wide.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.enterContext">
+<span class="sig-name descname"><span class="pre">enterContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.enterContext" title="Permalink to this definition"></a></dt>
+<dd><p>Enters the supplied context manager.</p>
+<p>If successful, also adds its __exit__ method as a cleanup
+function and returns the result of the __enter__ method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.fail">
+<span class="sig-name descname"><span class="pre">fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.fail" title="Permalink to this definition"></a></dt>
+<dd><p>Fail immediately, with the given message.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.failureException">
+<span class="sig-name descname"><span class="pre">failureException</span></span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.failureException" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#AssertionError" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AssertionError</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getAllDescriptors">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getAllDescriptors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getAllDescriptors" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of (ideally) all available descriptor sets. For now
+they need to be added manually to the list below.</p>
+<p>TODO: would be nice to create the list automatically by implementing a
+descriptor set registry that would hold all installed descriptor sets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getBigDF">
+<span class="sig-name descname"><span class="pre">getBigDF</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getBigDF" title="Permalink to this definition"></a></dt>
+<dd><p>Get a large data frame for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a <code class="xref any docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> containing the dataset</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDataPrepGrid">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDataPrepGrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDataPrepGrid" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of many possible combinations of descriptor calculators,
+splits, feature standardizers, feature filters and data filters. Again, this is
+not exhaustive, but should cover a lot of cases.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a generator that yields tuples of all possible combinations as stated
+above, each tuple is defined as: (descriptor_calculator, split,
+feature_standardizer, feature_filters, data_filters)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>grid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDefaultCalculatorCombo">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDefaultCalculatorCombo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDefaultCalculatorCombo" title="Permalink to this definition"></a></dt>
+<dd><p>Makes a list of default descriptor calculators that can be used in tests.
+It creates a calculator with only morgan fingerprints and rdkit descriptors,
+but also one with them both to test behaviour with multiple descriptor sets.
+Override this method if you want to test with other descriptor sets and
+calculator combinations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of created <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDefaultPrep">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDefaultPrep</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDefaultPrep" title="Permalink to this definition"></a></dt>
+<dd><p>Return a dictionary with default preparation settings.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getPrepCombos">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getPrepCombos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getPrepCombos" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of all possible preparation combinations as generated by
+<a class="reference internal" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDataPrepGrid" title="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDataPrepGrid"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">getDataPrepGrid</span></code></a> as well as their names. The generated list can be used
+to parameterize tests with the given named combinations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id1"><span class="problematic" id="id2">`</span></a>list`s of all possible combinations of preparation</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getSmallDF">
+<span class="sig-name descname"><span class="pre">getSmallDF</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getSmallDF" title="Permalink to this definition"></a></dt>
+<dd><p>Get a small data frame for testing purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>a <code class="xref any docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> containing the dataset</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getStorage">
+<span class="sig-name descname"><span class="pre">getStorage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getStorage" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.id">
+<span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.longMessage">
+<span class="sig-name descname"><span class="pre">longMessage</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.longMessage" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.maxDiff">
+<span class="sig-name descname"><span class="pre">maxDiff</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">640</span></em><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.maxDiff" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.run" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.setUp">
+<span class="sig-name descname"><span class="pre">setUp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/sources/papyrus/tests.html#PapyrusSourceTest.setUp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.setUp" title="Permalink to this definition"></a></dt>
+<dd><p>Hook method for setting up the test fixture before exercising it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.setUpClass">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setUpClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.setUpClass" title="Permalink to this definition"></a></dt>
+<dd><p>Hook method for setting up class fixture before running tests in the class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.setUpPaths">
+<span class="sig-name descname"><span class="pre">setUpPaths</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.setUpPaths" title="Permalink to this definition"></a></dt>
+<dd><p>Create the directories that are used for testing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.shortDescription">
+<span class="sig-name descname"><span class="pre">shortDescription</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.shortDescription" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a one-line description of the test, or None if no
+description has been provided.</p>
+<p>The default implementation of this method returns the first line of
+the specified test method’s docstring.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.skipTest">
+<span class="sig-name descname"><span class="pre">skipTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reason</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.skipTest" title="Permalink to this definition"></a></dt>
+<dd><p>Skip this test.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.subTest">
+<span class="sig-name descname"><span class="pre">subTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg=&lt;object</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.subTest" title="Permalink to this definition"></a></dt>
+<dd><p>Return a context manager that will return the enclosed block
+of code in a subtest identified by the optional message and
+keyword parameters.  A failure in the subtest marks the test
+case as failed but resumes execution at the end of the enclosed
+block, allowing further test code to be executed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.tearDown">
+<span class="sig-name descname"><span class="pre">tearDown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.tearDown" title="Permalink to this definition"></a></dt>
+<dd><p>Remove all files and directories that are used for testing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.tearDownClass">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tearDownClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.tearDownClass" title="Permalink to this definition"></a></dt>
+<dd><p>Hook method for deconstructing the class fixture after running all tests in the class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.test_papyrus_source">
+<span class="sig-name descname"><span class="pre">test_papyrus_source</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/sources/papyrus/tests.html#PapyrusSourceTest.test_papyrus_source"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.test_papyrus_source" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.validate_split">
+<span class="sig-name descname"><span class="pre">validate_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.validate_split" title="Permalink to this definition"></a></dt>
+<dd><p>Check if the split has the data it should have after splitting.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 <section id="module-qsprpred.data.sources.papyrus">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qsprpred.data.sources.papyrus" title="Permalink to this heading"></a></h2>
 </section>
@@ -283,7 +1066,7 @@ outfile (str): path to the output file</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="qsprpred.data.sources.html" class="btn btn-neutral float-left" title="qsprpred.data.sources package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qsprpred.data.tables.html" class="btn btn-neutral float-right" title="qsprpred.data.tables package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qsprpred.data.storage.html" class="btn btn-neutral float-right" title="qsprpred.data.storage package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

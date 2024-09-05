@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.benchmarks.tests &mdash; QSPRpred 3.1.2.dev40+g2513259a documentation</title>
+  <title>qsprpred.benchmarks.tests &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -16,7 +16,7 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=1905640d"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=ae990675"></script>
         <script src="../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev40+g2513259a
+                v3.2.1.dev95+g5c50f5f6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -105,22 +105,22 @@
 <span class="kn">from</span> <span class="nn">sklearn.neural_network</span> <span class="kn">import</span> <span class="n">MLPClassifier</span>
 
 <span class="kn">from</span> <span class="nn">qsprpred.models.assessment.methods</span> <span class="kn">import</span> <span class="n">CrossValAssessor</span><span class="p">,</span> <span class="n">TestSetAssessor</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">BenchmarkRunner</span><span class="p">,</span> <span class="n">BenchmarkSettings</span><span class="p">,</span> <span class="n">DataPrepSettings</span>
+
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">TargetProperty</span><span class="p">,</span> <span class="n">TargetTasks</span>
-<span class="kn">from</span> <span class="nn">..data</span> <span class="kn">import</span> <span class="n">MoleculeTable</span><span class="p">,</span> <span class="n">QSPRDataset</span>
+<span class="kn">from</span> <span class="nn">..data</span> <span class="kn">import</span> <span class="n">MoleculeTable</span><span class="p">,</span> <span class="n">QSPRTable</span>
 <span class="kn">from</span> <span class="nn">..data.descriptors.sets</span> <span class="kn">import</span> <span class="n">RDKitDescs</span>
 <span class="kn">from</span> <span class="nn">..data.sources.data_source</span> <span class="kn">import</span> <span class="n">DataSource</span>
 <span class="kn">from</span> <span class="nn">..models.scikit_learn</span> <span class="kn">import</span> <span class="n">SklearnModel</span>
 <span class="kn">from</span> <span class="nn">..utils.stringops</span> <span class="kn">import</span> <span class="n">get_random_string</span>
 <span class="kn">from</span> <span class="nn">..utils.testing.base</span> <span class="kn">import</span> <span class="n">QSPRTestCase</span>
 <span class="kn">from</span> <span class="nn">..utils.testing.path_mixins</span> <span class="kn">import</span> <span class="n">DataSetsPathMixIn</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">BenchmarkRunner</span><span class="p">,</span> <span class="n">BenchmarkSettings</span><span class="p">,</span> <span class="n">DataPrepSettings</span>
 
 
 <div class="viewcode-block" id="DataSourceTesting"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.DataSourceTesting">[docs]</a><span class="k">class</span> <span class="nc">DataSourceTesting</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">DataSource</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data source for testing purposes. Simply prepares the default</span>
 <span class="sd">    data set from`DataSetsPathMixIn`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span>
@@ -131,11 +131,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DataSourceTesting.getDataSet"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.DataSourceTesting.getDataSet">[docs]</a>    <span class="k">def</span> <span class="nf">getDataSet</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetProperty</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">],</span>
-            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QSPRDataset</span><span class="p">:</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetProperty</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">],</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QSPRTable</span><span class="p">:</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">target_props</span><span class="o">=</span><span class="n">target_props</span><span class="p">)</span></div></div>
 
@@ -149,7 +149,6 @@
 <span class="sd">        benchmark (BenchmarkRunner):</span>
 <span class="sd">            Benchmark runner.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="BenchMarkTestCase.setUp"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchMarkTestCase.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span>
@@ -175,12 +174,20 @@
             <span class="n">target_props</span><span class="o">=</span><span class="p">[</span>
                 <span class="p">[</span>
                     <span class="n">TargetProperty</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span>
-                        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">]}</span>
+                        <span class="p">{</span>
+                            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
+                            <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">]</span>
+                        <span class="p">}</span>
                     <span class="p">)</span>
                 <span class="p">],</span>
                 <span class="p">[</span>
                     <span class="n">TargetProperty</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span>
-                        <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.3</span><span class="p">]}</span>
+                        <span class="p">{</span>
+                            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
+                            <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.3</span><span class="p">]</span>
+                        <span class="p">}</span>
                     <span class="p">)</span>
                 <span class="p">],</span>
             <span class="p">],</span>
@@ -228,10 +235,9 @@
             <span class="k">for</span> <span class="n">assessor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">assessors</span><span class="p">:</span>
                 <span class="n">score</span> <span class="o">=</span> <span class="n">assessor</span><span class="o">.</span><span class="n">scoreFunc</span><span class="o">.</span><span class="n">name</span>
                 <span class="n">score_results</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span>
-                    <span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;ScoreFunc&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">score</span><span class="p">)</span>
-                    <span class="o">&amp;</span> <span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;Assessor&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">assessor</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-                    <span class="o">&amp;</span> <span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;TargetProperty&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="n">tp</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="n">tps</span><span class="p">]))</span>
-                    <span class="p">]</span>
+                    <span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;ScoreFunc&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">score</span><span class="p">)</span> <span class="o">&amp;</span>
+                    <span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;Assessor&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">assessor</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span> <span class="o">&amp;</span>
+                    <span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;TargetProperty&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="n">tp</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="n">tps</span><span class="p">]))]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">score_results</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BenchMarkTestCase.checkSettings"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchMarkTestCase.checkSettings">[docs]</a>    <span class="k">def</span> <span class="nf">checkSettings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -263,14 +269,10 @@
 
 <div class="viewcode-block" id="BenchmarkingTest.testSingleTaskREG"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchmarkingTest.testSingleTaskREG">[docs]</a>    <span class="k">def</span> <span class="nf">testSingleTaskREG</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">target_props</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">[</span>
-                <span class="n">TargetProperty</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span>
-                    <span class="p">{</span>
-                        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
-                        <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span>
-                    <span class="p">}</span>
-                <span class="p">)</span>
-            <span class="p">]</span>
+            <span class="p">[</span><span class="n">TargetProperty</span><span class="o">.</span><span class="n">fromDict</span><span class="p">({</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span>
+            <span class="p">})]</span>
         <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">SklearnModel</span><span class="p">(</span>

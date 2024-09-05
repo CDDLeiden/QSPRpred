@@ -12,6 +12,7 @@ Subpackages
    qsprpred.data.processing
    qsprpred.data.sampling
    qsprpred.data.sources
+   qsprpred.data.storage
    qsprpred.data.tables
 
 Module contents

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra package &mdash; QSPRpred 3.1.2.dev40+g2513259a documentation</title>
+  <title>qsprpred.extra package &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=1905640d"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=ae990675"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -28,7 +28,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="qsprpred.extra.data package" href="qsprpred.extra.data.html" />
-    <link rel="prev" title="qsprpred.data.tables package" href="qsprpred.data.tables.html" />
+    <link rel="prev" title="qsprpred.data.tables.interfaces package" href="qsprpred.data.tables.interfaces.html" />
  
 
 <!-- Google tag (gtag.js) -->
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev40+g2513259a
+                v3.2.1.dev95+g5c50f5f6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -142,6 +142,11 @@
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.sampling.html#module-qsprpred.extra.data.sampling.splits">qsprpred.extra.data.sampling.splits module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.sampling.html#module-qsprpred.extra.data.sampling.tests">qsprpred.extra.data.sampling.tests module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.sampling.html#module-qsprpred.extra.data.sampling">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.storage.html">qsprpred.extra.data.storage package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.storage.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.data.storage.html#module-qsprpred.extra.data.storage">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qsprpred.extra.data.tables.html">qsprpred.extra.data.tables package</a><ul>
@@ -349,6 +354,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.getPCMTargetsDF"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.getPCMTargetsDF()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.getPrepCombos"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.getPrepCombos()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.getSmallDF"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.getSmallDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.getStorage"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.getStorage()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.setUpPaths"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.setUpPaths()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.tearDown"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.tearDown()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.ModelDataSetsMixInExtras.validate_split"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsMixInExtras.validate_split()</span></code></a></li>
@@ -422,6 +428,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.RandomBaseModelTestCase.getParamGrid"><code class="docutils literal notranslate"><span class="pre">RandomBaseModelTestCase.getParamGrid()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.RandomBaseModelTestCase.getPrepCombos"><code class="docutils literal notranslate"><span class="pre">RandomBaseModelTestCase.getPrepCombos()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.RandomBaseModelTestCase.getSmallDF"><code class="docutils literal notranslate"><span class="pre">RandomBaseModelTestCase.getSmallDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.RandomBaseModelTestCase.getStorage"><code class="docutils literal notranslate"><span class="pre">RandomBaseModelTestCase.getStorage()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.RandomBaseModelTestCase.gridFile"><code class="docutils literal notranslate"><span class="pre">RandomBaseModelTestCase.gridFile</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.RandomBaseModelTestCase.id"><code class="docutils literal notranslate"><span class="pre">RandomBaseModelTestCase.id()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.RandomBaseModelTestCase.longMessage"><code class="docutils literal notranslate"><span class="pre">RandomBaseModelTestCase.longMessage</span></code></a></li>
@@ -507,6 +514,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getParamGrid"><code class="docutils literal notranslate"><span class="pre">TestPCM.getParamGrid()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getPrepCombos"><code class="docutils literal notranslate"><span class="pre">TestPCM.getPrepCombos()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getSmallDF"><code class="docutils literal notranslate"><span class="pre">TestPCM.getSmallDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.getStorage"><code class="docutils literal notranslate"><span class="pre">TestPCM.getStorage()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.gridFile"><code class="docutils literal notranslate"><span class="pre">TestPCM.gridFile</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.id"><code class="docutils literal notranslate"><span class="pre">TestPCM.id()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestPCM.longMessage"><code class="docutils literal notranslate"><span class="pre">TestPCM.longMessage</span></code></a></li>
@@ -600,6 +608,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelClassification.getParamGrid"><code class="docutils literal notranslate"><span class="pre">TestRandomModelClassification.getParamGrid()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelClassification.getPrepCombos"><code class="docutils literal notranslate"><span class="pre">TestRandomModelClassification.getPrepCombos()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelClassification.getSmallDF"><code class="docutils literal notranslate"><span class="pre">TestRandomModelClassification.getSmallDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelClassification.getStorage"><code class="docutils literal notranslate"><span class="pre">TestRandomModelClassification.getStorage()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelClassification.gridFile"><code class="docutils literal notranslate"><span class="pre">TestRandomModelClassification.gridFile</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelClassification.id"><code class="docutils literal notranslate"><span class="pre">TestRandomModelClassification.id()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelClassification.longMessage"><code class="docutils literal notranslate"><span class="pre">TestRandomModelClassification.longMessage</span></code></a></li>
@@ -690,6 +699,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelClassificationMultiTask.getParamGrid"><code class="docutils literal notranslate"><span class="pre">TestRandomModelClassificationMultiTask.getParamGrid()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelClassificationMultiTask.getPrepCombos"><code class="docutils literal notranslate"><span class="pre">TestRandomModelClassificationMultiTask.getPrepCombos()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelClassificationMultiTask.getSmallDF"><code class="docutils literal notranslate"><span class="pre">TestRandomModelClassificationMultiTask.getSmallDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelClassificationMultiTask.getStorage"><code class="docutils literal notranslate"><span class="pre">TestRandomModelClassificationMultiTask.getStorage()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelClassificationMultiTask.gridFile"><code class="docutils literal notranslate"><span class="pre">TestRandomModelClassificationMultiTask.gridFile</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelClassificationMultiTask.id"><code class="docutils literal notranslate"><span class="pre">TestRandomModelClassificationMultiTask.id()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelClassificationMultiTask.longMessage"><code class="docutils literal notranslate"><span class="pre">TestRandomModelClassificationMultiTask.longMessage</span></code></a></li>
@@ -778,6 +788,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelRegression.getParamGrid"><code class="docutils literal notranslate"><span class="pre">TestRandomModelRegression.getParamGrid()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelRegression.getPrepCombos"><code class="docutils literal notranslate"><span class="pre">TestRandomModelRegression.getPrepCombos()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelRegression.getSmallDF"><code class="docutils literal notranslate"><span class="pre">TestRandomModelRegression.getSmallDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelRegression.getStorage"><code class="docutils literal notranslate"><span class="pre">TestRandomModelRegression.getStorage()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelRegression.gridFile"><code class="docutils literal notranslate"><span class="pre">TestRandomModelRegression.gridFile</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelRegression.id"><code class="docutils literal notranslate"><span class="pre">TestRandomModelRegression.id()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.models.html#qsprpred.extra.models.tests.TestRandomModelRegression.longMessage"><code class="docutils literal notranslate"><span class="pre">TestRandomModelRegression.longMessage</span></code></a></li>
@@ -904,7 +915,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="qsprpred.data.tables.html" class="btn btn-neutral float-left" title="qsprpred.data.tables package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qsprpred.data.tables.interfaces.html" class="btn btn-neutral float-left" title="qsprpred.data.tables.interfaces package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="qsprpred.extra.data.html" class="btn btn-neutral float-right" title="qsprpred.extra.data package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

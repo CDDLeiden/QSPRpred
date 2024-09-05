@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.utils package &mdash; QSPRpred 3.1.2.dev40+g2513259a documentation</title>
+  <title>qsprpred.utils package &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=1905640d"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=ae990675"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev40+g2513259a
+                v3.2.1.dev95+g5c50f5f6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -131,8 +131,7 @@
 <li class="toctree-l2"><a class="reference internal" href="qsprpred.utils.interfaces.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="qsprpred.utils.interfaces.html#module-qsprpred.utils.interfaces.randomized">qsprpred.utils.interfaces.randomized module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qsprpred.utils.interfaces.html#qsprpred.utils.interfaces.randomized.Randomized"><code class="docutils literal notranslate"><span class="pre">Randomized</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.interfaces.html#qsprpred.utils.interfaces.randomized.Randomized.getSeed"><code class="docutils literal notranslate"><span class="pre">Randomized.getSeed()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.interfaces.html#qsprpred.utils.interfaces.randomized.Randomized.setSeed"><code class="docutils literal notranslate"><span class="pre">Randomized.setSeed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.interfaces.html#qsprpred.utils.interfaces.randomized.Randomized.randomState"><code class="docutils literal notranslate"><span class="pre">Randomized.randomState</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -256,6 +255,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getParamGrid"><code class="docutils literal notranslate"><span class="pre">MonitorsCheckMixIn.getParamGrid()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getPrepCombos"><code class="docutils literal notranslate"><span class="pre">MonitorsCheckMixIn.getPrepCombos()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getSmallDF"><code class="docutils literal notranslate"><span class="pre">MonitorsCheckMixIn.getSmallDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getStorage"><code class="docutils literal notranslate"><span class="pre">MonitorsCheckMixIn.getStorage()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.gridFile"><code class="docutils literal notranslate"><span class="pre">MonitorsCheckMixIn.gridFile</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.listMonitorTest"><code class="docutils literal notranslate"><span class="pre">MonitorsCheckMixIn.listMonitorTest()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.predictorTest"><code class="docutils literal notranslate"><span class="pre">MonitorsCheckMixIn.predictorTest()</span></code></a></li>
@@ -282,6 +282,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep"><code class="docutils literal notranslate"><span class="pre">DataSetsPathMixIn.getDefaultPrep()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getPrepCombos"><code class="docutils literal notranslate"><span class="pre">DataSetsPathMixIn.getPrepCombos()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getSmallDF"><code class="docutils literal notranslate"><span class="pre">DataSetsPathMixIn.getSmallDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getStorage"><code class="docutils literal notranslate"><span class="pre">DataSetsPathMixIn.getStorage()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.setUpPaths"><code class="docutils literal notranslate"><span class="pre">DataSetsPathMixIn.setUpPaths()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.tearDown"><code class="docutils literal notranslate"><span class="pre">DataSetsPathMixIn.tearDown()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.validate_split"><code class="docutils literal notranslate"><span class="pre">DataSetsPathMixIn.validate_split()</span></code></a></li>
@@ -300,6 +301,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getDefaultPrep"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsPathMixIn.getDefaultPrep()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getPrepCombos"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsPathMixIn.getPrepCombos()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getSmallDF"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsPathMixIn.getSmallDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getStorage"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsPathMixIn.getStorage()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.setUpPaths"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsPathMixIn.setUpPaths()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.tearDown"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsPathMixIn.tearDown()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.validate_split"><code class="docutils literal notranslate"><span class="pre">ModelDataSetsPathMixIn.validate_split()</span></code></a></li>
@@ -663,6 +665,19 @@ iterate over the generator to get the results.</p>
 in the iterable in parallel.</p>
 </dd>
 </dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.utils.parallel.Parallelizable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.parallel.</span></span><span class="sig-name descname"><span class="pre">Parallelizable</span></span><a class="reference internal" href="../_modules/qsprpred/utils/parallel.html#Parallelizable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.parallel.Parallelizable" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>An abstract class to facilitate parallel processing of an arbitrary function.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.utils.parallel.Parallelizable.nJobs">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nJobs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></em><a class="headerlink" href="#qsprpred.utils.parallel.Parallelizable.nJobs" title="Permalink to this definition"></a></dt>
+<dd><p>Get the number of jobs to run in parallel.</p>
 </dd></dl>
 
 </dd></dl>

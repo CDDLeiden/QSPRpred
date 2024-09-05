@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.data.storage package &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=ae990675"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script>
+    </script>
+        <script src="../_static/design-tabs.js?v=f930bc37"></script>
+        <script src="../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="qsprpred.data.storage.interfaces package" href="qsprpred.data.storage.interfaces.html" />
+    <link rel="prev" title="qsprpred.data.sources.papyrus package" href="qsprpred.data.sources.papyrus.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.2.1.dev95+g5c50f5f6
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features.html">Overview of available features</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qsprpred.html">qsprpred package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="qsprpred.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.benchmarks.html">qsprpred.benchmarks package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="qsprpred.data.html">qsprpred.data package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.html">qsprpred.extra package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html">qsprpred.logs package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html">qsprpred.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html">qsprpred.plotting package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html">qsprpred.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.data_CLI">qsprpred.data_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.model_CLI">qsprpred.model_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.predict_CLI">qsprpred.predict_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.tasks">qsprpred.tasks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Python API</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.html">qsprpred package</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.data.html">qsprpred.data package</a></li>
+      <li class="breadcrumb-item active">qsprpred.data.storage package</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qsprpred-data-storage-package">
+<h1>qsprpred.data.storage package<a class="headerlink" href="#qsprpred-data-storage-package" title="Permalink to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qsprpred.data.storage.interfaces.html">qsprpred.data.storage.interfaces package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#module-qsprpred.data.storage.interfaces.chem_store">qsprpred.data.storage.interfaces.chem_store module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore"><code class="docutils literal notranslate"><span class="pre">ChemStore</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.addEntries"><code class="docutils literal notranslate"><span class="pre">ChemStore.addEntries()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.addMols"><code class="docutils literal notranslate"><span class="pre">ChemStore.addMols()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.addProperty"><code class="docutils literal notranslate"><span class="pre">ChemStore.addProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.apply"><code class="docutils literal notranslate"><span class="pre">ChemStore.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.applyIdentifier"><code class="docutils literal notranslate"><span class="pre">ChemStore.applyIdentifier()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.applyStandardizer"><code class="docutils literal notranslate"><span class="pre">ChemStore.applyStandardizer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.chunkSize"><code class="docutils literal notranslate"><span class="pre">ChemStore.chunkSize</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.clear"><code class="docutils literal notranslate"><span class="pre">ChemStore.clear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.dropEntries"><code class="docutils literal notranslate"><span class="pre">ChemStore.dropEntries()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.fromFile"><code class="docutils literal notranslate"><span class="pre">ChemStore.fromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.fromJSON"><code class="docutils literal notranslate"><span class="pre">ChemStore.fromJSON()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.getDF"><code class="docutils literal notranslate"><span class="pre">ChemStore.getDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.getMol"><code class="docutils literal notranslate"><span class="pre">ChemStore.getMol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.getMolCount"><code class="docutils literal notranslate"><span class="pre">ChemStore.getMolCount()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.getMolIDs"><code class="docutils literal notranslate"><span class="pre">ChemStore.getMolIDs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.getProperties"><code class="docutils literal notranslate"><span class="pre">ChemStore.getProperties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.getProperty"><code class="docutils literal notranslate"><span class="pre">ChemStore.getProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.getSubset"><code class="docutils literal notranslate"><span class="pre">ChemStore.getSubset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.hasProperty"><code class="docutils literal notranslate"><span class="pre">ChemStore.hasProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.idProp"><code class="docutils literal notranslate"><span class="pre">ChemStore.idProp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.identifier"><code class="docutils literal notranslate"><span class="pre">ChemStore.identifier</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.iterChunks"><code class="docutils literal notranslate"><span class="pre">ChemStore.iterChunks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.iterMols"><code class="docutils literal notranslate"><span class="pre">ChemStore.iterMols()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.metaFile"><code class="docutils literal notranslate"><span class="pre">ChemStore.metaFile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.nMols"><code class="docutils literal notranslate"><span class="pre">ChemStore.nMols</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.processMols"><code class="docutils literal notranslate"><span class="pre">ChemStore.processMols()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.reload"><code class="docutils literal notranslate"><span class="pre">ChemStore.reload()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.removeMol"><code class="docutils literal notranslate"><span class="pre">ChemStore.removeMol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.removeProperty"><code class="docutils literal notranslate"><span class="pre">ChemStore.removeProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.save"><code class="docutils literal notranslate"><span class="pre">ChemStore.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.searchOnProperty"><code class="docutils literal notranslate"><span class="pre">ChemStore.searchOnProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.smiles"><code class="docutils literal notranslate"><span class="pre">ChemStore.smiles</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.smilesProp"><code class="docutils literal notranslate"><span class="pre">ChemStore.smilesProp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.standardizer"><code class="docutils literal notranslate"><span class="pre">ChemStore.standardizer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.toFile"><code class="docutils literal notranslate"><span class="pre">ChemStore.toFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.toJSON"><code class="docutils literal notranslate"><span class="pre">ChemStore.toJSON()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#module-qsprpred.data.storage.interfaces.chunk_iterable">qsprpred.data.storage.interfaces.chunk_iterable module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chunk_iterable.ChunkIterable"><code class="docutils literal notranslate"><span class="pre">ChunkIterable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chunk_iterable.ChunkIterable.apply"><code class="docutils literal notranslate"><span class="pre">ChunkIterable.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chunk_iterable.ChunkIterable.chunkSize"><code class="docutils literal notranslate"><span class="pre">ChunkIterable.chunkSize</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chunk_iterable.ChunkIterable.iterChunks"><code class="docutils literal notranslate"><span class="pre">ChunkIterable.iterChunks()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#module-qsprpred.data.storage.interfaces.data_store">qsprpred.data.storage.interfaces.data_store module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.data_store.DataStorage"><code class="docutils literal notranslate"><span class="pre">DataStorage</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.data_store.DataStorage.clear"><code class="docutils literal notranslate"><span class="pre">DataStorage.clear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.data_store.DataStorage.fromFile"><code class="docutils literal notranslate"><span class="pre">DataStorage.fromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.data_store.DataStorage.fromJSON"><code class="docutils literal notranslate"><span class="pre">DataStorage.fromJSON()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.data_store.DataStorage.metaFile"><code class="docutils literal notranslate"><span class="pre">DataStorage.metaFile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.data_store.DataStorage.reload"><code class="docutils literal notranslate"><span class="pre">DataStorage.reload()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.data_store.DataStorage.save"><code class="docutils literal notranslate"><span class="pre">DataStorage.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.data_store.DataStorage.toFile"><code class="docutils literal notranslate"><span class="pre">DataStorage.toFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.data_store.DataStorage.toJSON"><code class="docutils literal notranslate"><span class="pre">DataStorage.toJSON()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#module-qsprpred.data.storage.interfaces.descriptor_provider">qsprpred.data.storage.interfaces.descriptor_provider module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider"><code class="docutils literal notranslate"><span class="pre">DescriptorProvider</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider.addDescriptors"><code class="docutils literal notranslate"><span class="pre">DescriptorProvider.addDescriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider.descriptorSets"><code class="docutils literal notranslate"><span class="pre">DescriptorProvider.descriptorSets</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider.dropDescriptorSets"><code class="docutils literal notranslate"><span class="pre">DescriptorProvider.dropDescriptorSets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider.getDescriptorNames"><code class="docutils literal notranslate"><span class="pre">DescriptorProvider.getDescriptorNames()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider.getDescriptors"><code class="docutils literal notranslate"><span class="pre">DescriptorProvider.getDescriptors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider.hasDescriptors"><code class="docutils literal notranslate"><span class="pre">DescriptorProvider.hasDescriptors()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#module-qsprpred.data.storage.interfaces.mol_processable">qsprpred.data.storage.interfaces.mol_processable module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.mol_processable.MolProcessable"><code class="docutils literal notranslate"><span class="pre">MolProcessable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.mol_processable.MolProcessable.processMols"><code class="docutils literal notranslate"><span class="pre">MolProcessable.processMols()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#module-qsprpred.data.storage.interfaces.property_storage">qsprpred.data.storage.interfaces.property_storage module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage"><code class="docutils literal notranslate"><span class="pre">PropertyStorage</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.addEntries"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.addEntries()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.addProperty"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.addProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.apply"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.chunkSize"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.chunkSize</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.clear"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.clear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.dropEntries"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.dropEntries()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.fromFile"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.fromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.fromJSON"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.fromJSON()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.getDF"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.getDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.getProperties"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.getProperties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.getProperty"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.getProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.getSubset"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.getSubset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.hasProperty"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.hasProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.idProp"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.idProp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.iterChunks"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.iterChunks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.metaFile"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.metaFile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.reload"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.reload()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.removeProperty"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.removeProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.save"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.searchOnProperty"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.searchOnProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.toFile"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.toFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.property_storage.PropertyStorage.toJSON"><code class="docutils literal notranslate"><span class="pre">PropertyStorage.toJSON()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#module-qsprpred.data.storage.interfaces.searchable">qsprpred.data.storage.interfaces.searchable module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.searchable.PropSearchable"><code class="docutils literal notranslate"><span class="pre">PropSearchable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.searchable.PropSearchable.searchOnProperty"><code class="docutils literal notranslate"><span class="pre">PropSearchable.searchOnProperty()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.searchable.SMARTSSearchable"><code class="docutils literal notranslate"><span class="pre">SMARTSSearchable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.searchable.SMARTSSearchable.searchWithSMARTS"><code class="docutils literal notranslate"><span class="pre">SMARTSSearchable.searchWithSMARTS()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#module-qsprpred.data.storage.interfaces.stored_mol">qsprpred.data.storage.interfaces.stored_mol module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.stored_mol.StoredMol"><code class="docutils literal notranslate"><span class="pre">StoredMol</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.stored_mol.StoredMol.as_rd_mol"><code class="docutils literal notranslate"><span class="pre">StoredMol.as_rd_mol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.stored_mol.StoredMol.id"><code class="docutils literal notranslate"><span class="pre">StoredMol.id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.stored_mol.StoredMol.parent"><code class="docutils literal notranslate"><span class="pre">StoredMol.parent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.stored_mol.StoredMol.props"><code class="docutils literal notranslate"><span class="pre">StoredMol.props</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.stored_mol.StoredMol.representations"><code class="docutils literal notranslate"><span class="pre">StoredMol.representations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.stored_mol.StoredMol.smiles"><code class="docutils literal notranslate"><span class="pre">StoredMol.smiles</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#module-qsprpred.data.storage.interfaces">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qsprpred.data.storage.tabular.html">qsprpred.data.storage.tabular package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.storage.tabular.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.storage.tabular.html#module-qsprpred.data.storage.tabular.basic_storage">qsprpred.data.storage.tabular.basic_storage module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore"><code class="docutils literal notranslate"><span class="pre">PandasChemStore</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.addEntries"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.addEntries()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.addLibrary"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.addLibrary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.addMols"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.addMols()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.addProperty"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.addProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.apply"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.applyIdentifier"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.applyIdentifier()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.applyStandardizer"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.applyStandardizer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.chunkSize"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.chunkSize</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.clear"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.clear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.dropEntries"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.dropEntries()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.fromDF"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.fromDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.fromFile"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.fromFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.fromJSON"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.fromJSON()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.getDF"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.getDF()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.getMol"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.getMol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.getMolCount"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.getMolCount()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.getMolIDs"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.getMolIDs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.getProperties"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.getProperties()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.getProperty"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.getProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.getSubset"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.getSubset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.getSummary"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.getSummary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.hasProperty"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.hasProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.idProp"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.idProp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.identifier"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.identifier</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.iterChunks"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.iterChunks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.iterMols"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.iterMols()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.libsPath"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.libsPath</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.metaFile"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.metaFile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.nJobs"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.nJobs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.nLibs"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.nLibs</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.nMols"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.nMols</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.originalSmilesProp"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.originalSmilesProp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.processMols"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.processMols()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.reload"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.reload()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.removeMol"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.removeMol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.removeProperty"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.removeProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.save"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.searchOnProperty"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.searchOnProperty()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.searchWithSMARTS"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.searchWithSMARTS()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.smiles"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.smiles</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.smilesProp"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.smilesProp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.standardizer"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.standardizer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.toFile"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.toFile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.toJSON"><code class="docutils literal notranslate"><span class="pre">PandasChemStore.toJSON()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.storage.tabular.html#module-qsprpred.data.storage.tabular.stored_mol">qsprpred.data.storage.tabular.stored_mol module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.stored_mol.TabularMol"><code class="docutils literal notranslate"><span class="pre">TabularMol</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.stored_mol.TabularMol.as_rd_mol"><code class="docutils literal notranslate"><span class="pre">TabularMol.as_rd_mol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.stored_mol.TabularMol.id"><code class="docutils literal notranslate"><span class="pre">TabularMol.id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.stored_mol.TabularMol.parent"><code class="docutils literal notranslate"><span class="pre">TabularMol.parent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.stored_mol.TabularMol.props"><code class="docutils literal notranslate"><span class="pre">TabularMol.props</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.stored_mol.TabularMol.representations"><code class="docutils literal notranslate"><span class="pre">TabularMol.representations</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.stored_mol.TabularMol.smiles"><code class="docutils literal notranslate"><span class="pre">TabularMol.smiles</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qsprpred.data.storage.tabular.html#module-qsprpred.data.storage.tabular">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-qsprpred.data.storage.tests">
+<span id="qsprpred-data-storage-tests-module"></span><h2>qsprpred.data.storage.tests module<a class="headerlink" href="#module-qsprpred.data.storage.tests" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.StorageTest">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.storage.tests.</span></span><span class="sig-name descname"><span class="pre">StorageTest</span></span><a class="reference internal" href="../_modules/qsprpred/data/storage/tests.html#StorageTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.storage.tests.StorageTest" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.StorageTest.getStorage">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getStorage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore" title="qsprpred.data.storage.interfaces.chem_store.ChemStore"><span class="pre">ChemStore</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/storage/tests.html#StorageTest.getStorage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.storage.tests.StorageTest.getStorage" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.StorageTest.setUp">
+<span class="sig-name descname"><span class="pre">setUp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/storage/tests.html#StorageTest.setUp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.storage.tests.StorageTest.setUp" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.StorageTest.tearDown">
+<span class="sig-name descname"><span class="pre">tearDown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/storage/tests.html#StorageTest.tearDown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.storage.tests.StorageTest.tearDown" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.storage.tests.</span></span><span class="sig-name descname"><span class="pre">TabularStorageTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/storage/tests.html#TabularStorageTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.storage.tests.StorageTest" title="qsprpred.data.storage.tests.StorageTest"><code class="xref py py-class docutils literal notranslate"><span class="pre">StorageTest</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TestCase</span></code></p>
+<p>Create an instance of the class that will use the named test
+method when executed. Raises a ValueError if the instance does
+not have a method with the specified name.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.addClassCleanup">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">addClassCleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.addClassCleanup" title="Permalink to this definition"></a></dt>
+<dd><p>Same as addCleanup, except the cleanup items are called even if
+setUpClass fails (unlike tearDownClass).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.addCleanup">
+<span class="sig-name descname"><span class="pre">addCleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.addCleanup" title="Permalink to this definition"></a></dt>
+<dd><p>Add a function, with arguments, to be called when the test is
+completed. Functions added are called on a LIFO basis and are
+called after tearDown on test failure or success.</p>
+<p>Cleanup items are called even if setUp fails (unlike tearDown).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.addTypeEqualityFunc">
+<span class="sig-name descname"><span class="pre">addTypeEqualityFunc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typeobj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.addTypeEqualityFunc" title="Permalink to this definition"></a></dt>
+<dd><p>Add a type specific assertEqual style function to compare a type.</p>
+<p>This method is for use by TestCase subclasses that need to register
+their own type equality functions to provide nicer error messages.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>typeobj</strong> – The data type to call this function on when both values
+are of the same type in assertEqual().</p></li>
+<li><p><strong>function</strong> – The callable taking two arguments and an optional
+msg= argument that raises self.failureException with a
+useful error message when the two arguments are not equal.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertAlmostEqual">
+<span class="sig-name descname"><span class="pre">assertAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">places</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertAlmostEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Fail if the two objects are unequal as determined by their
+difference rounded to the given number of decimal places
+(default 7) and comparing to zero, or by comparing that the
+difference between the two objects is more than the given
+delta.</p>
+<p>Note that decimal places (from zero) are usually not the same
+as significant digits (measured from the most significant digit).</p>
+<p>If the two objects compare equal then they will automatically
+compare almost equal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertCountEqual">
+<span class="sig-name descname"><span class="pre">assertCountEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertCountEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Asserts that two iterables have the same elements, the same number of
+times, without regard to order.</p>
+<blockquote>
+<div><blockquote>
+<div><dl class="simple">
+<dt>self.assertEqual(Counter(list(first)),</dt><dd><p>Counter(list(second)))</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="simple">
+<dt>Example:</dt><dd><ul class="simple">
+<li><p>[0, 1, 1] and [1, 0, 1] compare equal.</p></li>
+<li><p>[0, 0, 1] and [0, 1] compare unequal.</p></li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertDictEqual">
+<span class="sig-name descname"><span class="pre">assertDictEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertDictEqual" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertEqual">
+<span class="sig-name descname"><span class="pre">assertEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Fail if the two objects are unequal as determined by the ‘==’
+operator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertFalse">
+<span class="sig-name descname"><span class="pre">assertFalse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertFalse" title="Permalink to this definition"></a></dt>
+<dd><p>Check that the expression is false.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertGreater">
+<span class="sig-name descname"><span class="pre">assertGreater</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertGreater" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &gt; b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertGreaterEqual">
+<span class="sig-name descname"><span class="pre">assertGreaterEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertGreaterEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &gt;= b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertIn">
+<span class="sig-name descname"><span class="pre">assertIn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">member</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertIn" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a in b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertIs">
+<span class="sig-name descname"><span class="pre">assertIs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertIs" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a is b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertIsInstance">
+<span class="sig-name descname"><span class="pre">assertIsInstance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertIsInstance" title="Permalink to this definition"></a></dt>
+<dd><p>Same as self.assertTrue(isinstance(obj, cls)), with a nicer
+default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertIsNone">
+<span class="sig-name descname"><span class="pre">assertIsNone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertIsNone" title="Permalink to this definition"></a></dt>
+<dd><p>Same as self.assertTrue(obj is None), with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertIsNot">
+<span class="sig-name descname"><span class="pre">assertIsNot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expr2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertIsNot" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a is not b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertIsNotNone">
+<span class="sig-name descname"><span class="pre">assertIsNotNone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertIsNotNone" title="Permalink to this definition"></a></dt>
+<dd><p>Included for symmetry with assertIsNone.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertLess">
+<span class="sig-name descname"><span class="pre">assertLess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertLess" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &lt; b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertLessEqual">
+<span class="sig-name descname"><span class="pre">assertLessEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertLessEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a &lt;= b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertListEqual">
+<span class="sig-name descname"><span class="pre">assertListEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertListEqual" title="Permalink to this definition"></a></dt>
+<dd><p>A list-specific equality assertion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>list1</strong> – The first list to compare.</p></li>
+<li><p><strong>list2</strong> – The second list to compare.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertLogs">
+<span class="sig-name descname"><span class="pre">assertLogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertLogs" title="Permalink to this definition"></a></dt>
+<dd><p>Fail unless a log message of level <em>level</em> or higher is emitted
+on <em>logger_name</em> or its children.  If omitted, <em>level</em> defaults to
+INFO and <em>logger</em> defaults to the root logger.</p>
+<p>This method must be used as a context manager, and will yield
+a recording object with two attributes: <code class="xref any docutils literal notranslate"><span class="pre">output</span></code> and <code class="xref any docutils literal notranslate"><span class="pre">records</span></code>.
+At the end of the context manager, the <code class="xref any docutils literal notranslate"><span class="pre">output</span></code> attribute will
+be a list of the matching formatted log messages and the
+<code class="xref any docutils literal notranslate"><span class="pre">records</span></code> attribute will be a list of the corresponding LogRecord
+objects.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertLogs</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INFO&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cm</span><span class="p">:</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;first message&#39;</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;foo.bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;second message&#39;</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">cm</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;INFO:foo:first message&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;ERROR:foo.bar:second message&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertMultiLineEqual">
+<span class="sig-name descname"><span class="pre">assertMultiLineEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertMultiLineEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Assert that two multi-line strings are equal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertNoLogs">
+<span class="sig-name descname"><span class="pre">assertNoLogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertNoLogs" title="Permalink to this definition"></a></dt>
+<dd><p>Fail unless no log messages of level <em>level</em> or higher are emitted
+on <em>logger_name</em> or its children.</p>
+<p>This method must be used as a context manager.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertNotAlmostEqual">
+<span class="sig-name descname"><span class="pre">assertNotAlmostEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">places</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertNotAlmostEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Fail if the two objects are equal as determined by their
+difference rounded to the given number of decimal places
+(default 7) and comparing to zero, or by comparing that the
+difference between the two objects is less than the given delta.</p>
+<p>Note that decimal places (from zero) are usually not the same
+as significant digits (measured from the most significant digit).</p>
+<p>Objects that are equal automatically fail.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertNotEqual">
+<span class="sig-name descname"><span class="pre">assertNotEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertNotEqual" title="Permalink to this definition"></a></dt>
+<dd><p>Fail if the two objects are equal as determined by the ‘!=’
+operator.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertNotIn">
+<span class="sig-name descname"><span class="pre">assertNotIn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">member</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">container</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertNotIn" title="Permalink to this definition"></a></dt>
+<dd><p>Just like self.assertTrue(a not in b), but with a nicer default message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertNotIsInstance">
+<span class="sig-name descname"><span class="pre">assertNotIsInstance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertNotIsInstance" title="Permalink to this definition"></a></dt>
+<dd><p>Included for symmetry with assertIsInstance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertNotRegex">
+<span class="sig-name descname"><span class="pre">assertNotRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unexpected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertNotRegex" title="Permalink to this definition"></a></dt>
+<dd><p>Fail the test if the text matches the regular expression.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertRaises">
+<span class="sig-name descname"><span class="pre">assertRaises</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_exception</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertRaises" title="Permalink to this definition"></a></dt>
+<dd><p>Fail unless an exception of class expected_exception is raised
+by the callable when invoked with specified positional and
+keyword arguments. If a different type of exception is
+raised, it will not be caught, and the test case will be
+deemed to have suffered an error, exactly as for an
+unexpected exception.</p>
+<p>If called with the callable and arguments omitted, will return a
+context object used like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">SomeException</span><span class="p">):</span>
+    <span class="n">do_something</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>An optional keyword argument ‘msg’ can be provided when assertRaises
+is used as a context object.</p>
+<p>The context manager keeps a reference to the exception as
+the ‘exception’ attribute. This allows you to inspect the
+exception after the assertion:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="n">SomeException</span><span class="p">)</span> <span class="k">as</span> <span class="n">cm</span><span class="p">:</span>
+    <span class="n">do_something</span><span class="p">()</span>
+<span class="n">the_exception</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">exception</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">the_exception</span><span class="o">.</span><span class="n">error_code</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertRaisesRegex">
+<span class="sig-name descname"><span class="pre">assertRaisesRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_exception</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertRaisesRegex" title="Permalink to this definition"></a></dt>
+<dd><p>Asserts that the message in a raised exception matches a regex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expected_exception</strong> – Exception class expected to be raised.</p></li>
+<li><p><strong>expected_regex</strong> – Regex (re.Pattern object or string) expected
+to be found in error message.</p></li>
+<li><p><strong>args</strong> – Function to be called and extra positional args.</p></li>
+<li><p><strong>kwargs</strong> – Extra kwargs.</p></li>
+<li><p><strong>msg</strong> – Optional message used in case of failure. Can only be used
+when assertRaisesRegex is used as a context manager.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertRegex">
+<span class="sig-name descname"><span class="pre">assertRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertRegex" title="Permalink to this definition"></a></dt>
+<dd><p>Fail the test unless the text matches the regular expression.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertSequenceEqual">
+<span class="sig-name descname"><span class="pre">assertSequenceEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seq1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertSequenceEqual" title="Permalink to this definition"></a></dt>
+<dd><p>An equality assertion for ordered sequences (like lists and tuples).</p>
+<p>For the purposes of this function, a valid ordered sequence type is one
+which can be indexed, has a length, and has an equality operator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>seq1</strong> – The first sequence to compare.</p></li>
+<li><p><strong>seq2</strong> – The second sequence to compare.</p></li>
+<li><p><strong>seq_type</strong> – The expected datatype of the sequences, or None if no
+datatype should be enforced.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertSetEqual">
+<span class="sig-name descname"><span class="pre">assertSetEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">set1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertSetEqual" title="Permalink to this definition"></a></dt>
+<dd><p>A set-specific equality assertion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>set1</strong> – The first set to compare.</p></li>
+<li><p><strong>set2</strong> – The second set to compare.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+<p>assertSetEqual uses ducktyping to support different types of sets, and
+is optimized for sets specifically (parameters must support a
+difference method).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertTrue">
+<span class="sig-name descname"><span class="pre">assertTrue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertTrue" title="Permalink to this definition"></a></dt>
+<dd><p>Check that the expression is true.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertTupleEqual">
+<span class="sig-name descname"><span class="pre">assertTupleEqual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tuple1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tuple2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertTupleEqual" title="Permalink to this definition"></a></dt>
+<dd><p>A tuple-specific equality assertion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tuple1</strong> – The first tuple to compare.</p></li>
+<li><p><strong>tuple2</strong> – The second tuple to compare.</p></li>
+<li><p><strong>msg</strong> – Optional message to use on failure instead of a list of
+differences.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertWarns">
+<span class="sig-name descname"><span class="pre">assertWarns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_warning</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertWarns" title="Permalink to this definition"></a></dt>
+<dd><p>Fail unless a warning of class warnClass is triggered
+by the callable when invoked with specified positional and
+keyword arguments.  If a different type of warning is
+triggered, it will not be handled: depending on the other
+warning filtering rules in effect, it might be silenced, printed
+out, or raised as an exception.</p>
+<p>If called with the callable and arguments omitted, will return a
+context object used like this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertWarns</span><span class="p">(</span><span class="n">SomeWarning</span><span class="p">):</span>
+    <span class="n">do_something</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>An optional keyword argument ‘msg’ can be provided when assertWarns
+is used as a context object.</p>
+<p>The context manager keeps a reference to the first matching
+warning as the ‘warning’ attribute; similarly, the ‘filename’
+and ‘lineno’ attributes give you information about the line
+of Python code from which the warning was triggered.
+This allows you to inspect the warning after the assertion:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertWarns</span><span class="p">(</span><span class="n">SomeWarning</span><span class="p">)</span> <span class="k">as</span> <span class="n">cm</span><span class="p">:</span>
+    <span class="n">do_something</span><span class="p">()</span>
+<span class="n">the_warning</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">warning</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">the_warning</span><span class="o">.</span><span class="n">some_attribute</span><span class="p">,</span> <span class="mi">147</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.assertWarnsRegex">
+<span class="sig-name descname"><span class="pre">assertWarnsRegex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expected_warning</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_regex</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.assertWarnsRegex" title="Permalink to this definition"></a></dt>
+<dd><p>Asserts that the message in a triggered warning matches a regexp.
+Basic functioning is similar to assertWarns() with the addition
+that only warnings whose messages also match the regular expression
+are considered successful matches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expected_warning</strong> – Warning class expected to be triggered.</p></li>
+<li><p><strong>expected_regex</strong> – Regex (re.Pattern object or string) expected
+to be found in error message.</p></li>
+<li><p><strong>args</strong> – Function to be called and extra positional args.</p></li>
+<li><p><strong>kwargs</strong> – Extra kwargs.</p></li>
+<li><p><strong>msg</strong> – Optional message used in case of failure. Can only be used
+when assertWarnsRegex is used as a context manager.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.checkSerialization">
+<span class="sig-name descname"><span class="pre">checkSerialization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/storage/tests.html#TabularStorageTest.checkSerialization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.checkSerialization" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.countTestCases">
+<span class="sig-name descname"><span class="pre">countTestCases</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.countTestCases" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.debug">
+<span class="sig-name descname"><span class="pre">debug</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.debug" title="Permalink to this definition"></a></dt>
+<dd><p>Run the test without collecting errors in a TestResult</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.defaultTestResult">
+<span class="sig-name descname"><span class="pre">defaultTestResult</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.defaultTestResult" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.doClassCleanups">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">doClassCleanups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.doClassCleanups" title="Permalink to this definition"></a></dt>
+<dd><p>Execute all class cleanup functions. Normally called for you after
+tearDownClass.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.doCleanups">
+<span class="sig-name descname"><span class="pre">doCleanups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.doCleanups" title="Permalink to this definition"></a></dt>
+<dd><p>Execute all cleanup functions. Normally called for you after
+tearDown.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.enterClassContext">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enterClassContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.enterClassContext" title="Permalink to this definition"></a></dt>
+<dd><p>Same as enterContext, but class-wide.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.enterContext">
+<span class="sig-name descname"><span class="pre">enterContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.enterContext" title="Permalink to this definition"></a></dt>
+<dd><p>Enters the supplied context manager.</p>
+<p>If successful, also adds its __exit__ method as a cleanup
+function and returns the result of the __enter__ method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.fail">
+<span class="sig-name descname"><span class="pre">fail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.fail" title="Permalink to this definition"></a></dt>
+<dd><p>Fail immediately, with the given message.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.failureException">
+<span class="sig-name descname"><span class="pre">failureException</span></span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.failureException" title="Permalink to this definition"></a></dt>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#AssertionError" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AssertionError</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.getStorage">
+<span class="sig-name descname"><span class="pre">getStorage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore" title="qsprpred.data.storage.tabular.basic_storage.PandasChemStore"><span class="pre">PandasChemStore</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/storage/tests.html#TabularStorageTest.getStorage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.getStorage" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.id">
+<span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.id" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.longMessage">
+<span class="sig-name descname"><span class="pre">longMessage</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.longMessage" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.maxDiff">
+<span class="sig-name descname"><span class="pre">maxDiff</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">640</span></em><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.maxDiff" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.run" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.setUp">
+<span class="sig-name descname"><span class="pre">setUp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.setUp" title="Permalink to this definition"></a></dt>
+<dd><p>Hook method for setting up the test fixture before exercising it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.setUpClass">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setUpClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.setUpClass" title="Permalink to this definition"></a></dt>
+<dd><p>Hook method for setting up class fixture before running tests in the class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.shortDescription">
+<span class="sig-name descname"><span class="pre">shortDescription</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.shortDescription" title="Permalink to this definition"></a></dt>
+<dd><p>Returns a one-line description of the test, or None if no
+description has been provided.</p>
+<p>The default implementation of this method returns the first line of
+the specified test method’s docstring.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.skipTest">
+<span class="sig-name descname"><span class="pre">skipTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reason</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.skipTest" title="Permalink to this definition"></a></dt>
+<dd><p>Skip this test.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.subTest">
+<span class="sig-name descname"><span class="pre">subTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg=&lt;object</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.subTest" title="Permalink to this definition"></a></dt>
+<dd><p>Return a context manager that will return the enclosed block
+of code in a subtest identified by the optional message and
+keyword parameters.  A failure in the subtest marks the test
+case as failed but resumes execution at the end of the enclosed
+block, allowing further test code to be executed.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.tearDown">
+<span class="sig-name descname"><span class="pre">tearDown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.tearDown" title="Permalink to this definition"></a></dt>
+<dd><p>Hook method for deconstructing the test fixture after testing it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.tearDownClass">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tearDownClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.tearDownClass" title="Permalink to this definition"></a></dt>
+<dd><p>Hook method for deconstructing the class fixture after running all tests in the class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.testAddMols">
+<span class="sig-name descname"><span class="pre">testAddMols</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/storage/tests.html#TabularStorageTest.testAddMols"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.testAddMols" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.testInitsAndSaves">
+<span class="sig-name descname"><span class="pre">testInitsAndSaves</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/storage/tests.html#TabularStorageTest.testInitsAndSaves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.testInitsAndSaves" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.testMolProcess">
+<span class="sig-name descname"><span class="pre">testMolProcess</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/storage/tests.html#TabularStorageTest.testMolProcess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.testMolProcess" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.testSearch">
+<span class="sig-name descname"><span class="pre">testSearch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/storage/tests.html#TabularStorageTest.testSearch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.testSearch" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.storage.tests.TabularStorageTest.testSubsetting">
+<span class="sig-name descname"><span class="pre">testSubsetting</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/storage/tests.html#TabularStorageTest.testSubsetting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.storage.tests.TabularStorageTest.testSubsetting" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.data.storage">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qsprpred.data.storage" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qsprpred.data.sources.papyrus.html" class="btn btn-neutral float-left" title="qsprpred.data.sources.papyrus package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qsprpred.data.storage.interfaces.html" class="btn btn-neutral float-right" title="qsprpred.data.storage.interfaces package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

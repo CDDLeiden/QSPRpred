@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.data.utils.testing.path_mixins &mdash; QSPRpred 3.1.2.dev40+g2513259a documentation</title>
+  <title>qsprpred.extra.data.utils.testing.path_mixins &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../../../" id="documentation_options" src="../../../../../../_static/documentation_options.js?v=1905640d"></script>
+        <script data-url_root="../../../../../../" id="documentation_options" src="../../../../../../_static/documentation_options.js?v=ae990675"></script>
         <script src="../../../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev40+g2513259a
+                v3.2.1.dev95+g5c50f5f6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../../search.html" method="get">
@@ -98,7 +98,6 @@
              
   <h1>Source code for qsprpred.extra.data.utils.testing.path_mixins</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">platform</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
 
@@ -108,32 +107,30 @@
 <span class="kn">from</span> <span class="nn">qsprpred.data.descriptors.sets</span> <span class="kn">import</span> <span class="n">DescriptorSet</span>
 <span class="kn">from</span> <span class="nn">qsprpred.extra.data.descriptors.fingerprints</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">CDKFP</span><span class="p">,</span>
-    <span class="n">CDKExtendedFP</span><span class="p">,</span>
-    <span class="n">CDKEStateFP</span><span class="p">,</span>
-    <span class="n">CDKGraphOnlyFP</span><span class="p">,</span>
     <span class="n">CDKMACCSFP</span><span class="p">,</span>
+    <span class="n">CDKAtomPairs2DFP</span><span class="p">,</span>
+    <span class="n">CDKEStateFP</span><span class="p">,</span>
+    <span class="n">CDKExtendedFP</span><span class="p">,</span>
+    <span class="n">CDKGraphOnlyFP</span><span class="p">,</span>
+    <span class="n">CDKKlekotaRothFP</span><span class="p">,</span>
     <span class="n">CDKPubchemFP</span><span class="p">,</span>
     <span class="n">CDKSubstructureFP</span><span class="p">,</span>
-    <span class="n">CDKKlekotaRothFP</span><span class="p">,</span>
-    <span class="n">CDKAtomPairs2DFP</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">qsprpred.extra.data.descriptors.sets</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">Mordred</span><span class="p">,</span>
-    <span class="n">Mold2</span><span class="p">,</span>
-    <span class="n">PaDEL</span><span class="p">,</span>
     <span class="n">ExtendedValenceSignature</span><span class="p">,</span>
-    <span class="n">ProteinDescriptorSet</span><span class="p">,</span>
+    <span class="n">Mordred</span><span class="p">,</span>
+    <span class="n">PaDEL</span><span class="p">,</span>
     <span class="n">ProDec</span><span class="p">,</span>
+    <span class="n">ProteinDescriptorSet</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">qsprpred.extra.data.storage.protein.tabular_pcm</span> <span class="kn">import</span> <span class="n">TabularProteinStorage</span>
 <span class="kn">from</span> <span class="nn">qsprpred.extra.data.tables.pcm</span> <span class="kn">import</span> <span class="n">PCMDataSet</span>
 <span class="kn">from</span> <span class="nn">qsprpred.extra.data.utils.msa_calculator</span> <span class="kn">import</span> <span class="n">ClustalMSA</span>
-<span class="kn">from</span> <span class="nn">qsprpred.logs</span> <span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">from</span> <span class="nn">qsprpred.utils.testing.path_mixins</span> <span class="kn">import</span> <span class="n">DataSetsPathMixIn</span>
 
 
 <div class="viewcode-block" id="DataSetsMixInExtras"><a class="viewcode-back" href="../../../../../../api/qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras">[docs]</a><span class="k">class</span> <span class="nc">DataSetsMixInExtras</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;MixIn class for testing data sets in extras.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="DataSetsMixInExtras.setUpPaths"><a class="viewcode-back" href="../../../../../../api/qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.setUpPaths">[docs]</a>    <span class="k">def</span> <span class="nf">setUpPaths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataPathPCM</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/data&quot;</span></div>
@@ -235,8 +232,14 @@
             <span class="p">}</span>
 
         <span class="k">return</span> <span class="k">lambda</span> <span class="n">acc_keys</span><span class="p">:</span> <span class="p">(</span>
-            <span class="p">{</span><span class="n">acc</span><span class="p">:</span> <span class="n">mapper</span><span class="p">[</span><span class="n">acc</span><span class="p">]</span> <span class="k">for</span> <span class="n">acc</span> <span class="ow">in</span> <span class="n">acc_keys</span><span class="p">},</span>
-            <span class="p">{</span><span class="n">acc</span><span class="p">:</span> <span class="n">kwargs_map</span><span class="p">[</span><span class="n">acc</span><span class="p">]</span> <span class="k">for</span> <span class="n">acc</span> <span class="ow">in</span> <span class="n">acc_keys</span><span class="p">},</span>
+            <span class="p">{</span>
+                <span class="n">acc</span><span class="p">:</span> <span class="n">mapper</span><span class="p">[</span><span class="n">acc</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">acc</span> <span class="ow">in</span> <span class="n">acc_keys</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="n">acc</span><span class="p">:</span> <span class="n">kwargs_map</span><span class="p">[</span><span class="n">acc</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">acc</span> <span class="ow">in</span> <span class="n">acc_keys</span>
+            <span class="p">},</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="DataSetsMixInExtras.getMSAProvider"><a class="viewcode-back" href="../../../../../../api/qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.getMSAProvider">[docs]</a>    <span class="nd">@classmethod</span>
@@ -246,9 +249,11 @@
 <div class="viewcode-block" id="DataSetsMixInExtras.createPCMDataSet"><a class="viewcode-back" href="../../../../../../api/qsprpred.extra.data.utils.testing.html#qsprpred.extra.data.utils.testing.path_mixins.DataSetsMixInExtras.createPCMDataSet">[docs]</a>    <span class="k">def</span> <span class="nf">createPCMDataSet</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;QSPRDataset_test_pcm&quot;</span><span class="p">,</span>
-        <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetProperty</span><span class="p">]</span>
-        <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;pchembl_value_Median&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}</span>
+        <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetProperty</span><span class="p">]</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;pchembl_value_Median&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+            <span class="p">}</span>
         <span class="p">],</span>
         <span class="n">preparation_settings</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">protein_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;accession&quot;</span><span class="p">,</span>
@@ -268,17 +273,27 @@
 <span class="sd">            random_state (int, optional):</span>
 <span class="sd">                random seed to use in the dataset. Defaults to `None`</span>
 <span class="sd">        Returns:</span>
-<span class="sd">            QSPRDataset: a `QSPRDataset` object</span>
+<span class="sd">            QSPRTable: a `QSPRTable` object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getPCMDF</span><span class="p">()</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="n">PCMDataSet</span><span class="p">(</span>
-            <span class="n">name</span><span class="p">,</span>
-            <span class="n">protein_col</span><span class="o">=</span><span class="n">protein_col</span><span class="p">,</span>
-            <span class="n">protein_seq_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getPCMSeqProvider</span><span class="p">(),</span>
-            <span class="n">target_props</span><span class="o">=</span><span class="n">target_props</span><span class="p">,</span>
-            <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+        <span class="n">storage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getStorage</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">getPCMDF</span><span class="p">(),</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_data&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">proteins</span> <span class="o">=</span> <span class="n">TabularProteinStorage</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_proteins&quot;</span><span class="p">,</span>
+            <span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getPCMTargetsDF</span><span class="p">(),</span>
+            <span class="n">sequence_provider</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getPCMSeqProvider</span><span class="p">(),</span>
             <span class="n">store_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
             <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="n">index_cols</span><span class="o">=</span><span class="p">[</span><span class="n">protein_col</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">PCMDataSet</span><span class="p">(</span>
+            <span class="n">storage</span><span class="o">=</span><span class="n">storage</span><span class="p">,</span>
+            <span class="n">proteins</span><span class="o">=</span><span class="n">proteins</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="n">target_props</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">preparation_settings</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span><span class="o">**</span><span class="n">preparation_settings</span><span class="p">)</span>

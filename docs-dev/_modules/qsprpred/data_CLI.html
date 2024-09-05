@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data_CLI &mdash; QSPRpred 3.1.2.dev40+g2513259a documentation</title>
+  <title>qsprpred.data_CLI &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -16,7 +16,7 @@
   
         <script src="../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=1905640d"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=ae990675"></script>
         <script src="../../_static/doctools.js?v=888ff710"></script>
         <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev40+g2513259a
+                v3.2.1.dev95+g5c50f5f6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -115,17 +115,17 @@
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
 
 <span class="kn">from</span> <span class="nn">qsprpred.data.chem.clustering</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">FPSimilarityMaxMinClusters</span><span class="p">,</span>
     <span class="n">FPSimilarityLeaderPickerClusters</span><span class="p">,</span>
+    <span class="n">FPSimilarityMaxMinClusters</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">qsprpred.data.descriptors.fingerprints</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">MorganFP</span><span class="p">,</span>
-    <span class="n">RDKitMACCSFP</span><span class="p">,</span>
     <span class="n">AtomPairFP</span><span class="p">,</span>
+    <span class="n">AvalonFP</span><span class="p">,</span>
     <span class="n">LayeredFP</span><span class="p">,</span>
+    <span class="n">MorganFP</span><span class="p">,</span>
     <span class="n">PatternFP</span><span class="p">,</span>
     <span class="n">RDKitFP</span><span class="p">,</span>
-    <span class="n">AvalonFP</span><span class="p">,</span>
+    <span class="n">RDKitMACCSFP</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">qsprpred.data.descriptors.sets</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">DrugExPhyschem</span><span class="p">,</span>
@@ -146,8 +146,9 @@
     <span class="n">ScaffoldSplit</span><span class="p">,</span>
     <span class="n">TemporalSplit</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.tables.qspr</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.tables.qspr</span> <span class="kn">import</span> <span class="n">QSPRTable</span>
 <span class="kn">from</span> <span class="nn">qsprpred.tasks</span> <span class="kn">import</span> <span class="n">TargetTasks</span>
+
 <span class="kn">from</span> <span class="nn">.data.chem.scaffolds</span> <span class="kn">import</span> <span class="n">BemisMurckoRDKit</span>
 <span class="kn">from</span> <span class="nn">.extra.gpu.models.dnn</span> <span class="kn">import</span> <span class="n">DNNModel</span>
 <span class="kn">from</span> <span class="nn">.logs.utils</span> <span class="kn">import</span> <span class="n">backup_files</span><span class="p">,</span> <span class="n">enable_file_logger</span>
@@ -231,7 +232,8 @@
         <span class="s2">&quot;--regression&quot;</span><span class="p">,</span>
         <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
         <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;If True, only regression model, if False, only classification, default both&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span>
+        <span class="s2">&quot;If True, only regression model, if False, only classification, default both&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
         <span class="s2">&quot;-th&quot;</span><span class="p">,</span>
@@ -432,8 +434,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">task</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span>
-                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">th</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-                        <span class="k">else</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">th</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span>
                     <span class="p">)</span>
                 <span class="k">if</span> <span class="n">task</span> <span class="o">==</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span> <span class="ow">and</span> <span class="n">th</span><span class="p">:</span>
                     <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
@@ -454,34 +455,39 @@
                 <span class="p">}</span>
                 <span class="n">target_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="p">{</span>
-                        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">prop</span><span class="p">,</span>
-                        <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span>
-                        <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="n">th</span><span class="p">,</span>
-                        <span class="s2">&quot;transformer&quot;</span><span class="p">:</span> <span class="n">transform_dict</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">transform_data</span><span class="p">[</span><span class="n">prop</span><span class="p">]]</span>
-                        <span class="k">if</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">transform_data</span>
-                        <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-                        <span class="s2">&quot;imputer&quot;</span><span class="p">:</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">imputation</span><span class="p">[</span><span class="n">prop</span><span class="p">])</span>
-                        <span class="k">if</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">imputation</span>
-                        <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="s2">&quot;name&quot;</span><span class="p">:</span>
+                            <span class="n">prop</span><span class="p">,</span>
+                        <span class="s2">&quot;task&quot;</span><span class="p">:</span>
+                            <span class="n">task</span><span class="p">,</span>
+                        <span class="s2">&quot;th&quot;</span><span class="p">:</span>
+                            <span class="n">th</span><span class="p">,</span>
+                        <span class="s2">&quot;transformer&quot;</span><span class="p">:</span>
+                            <span class="p">(</span>
+                                <span class="n">transform_dict</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">transform_data</span><span class="p">[</span><span class="n">prop</span><span class="p">]]</span>
+                                <span class="k">if</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">transform_data</span> <span class="k">else</span> <span class="kc">None</span>
+                            <span class="p">),</span>
+                        <span class="s2">&quot;imputer&quot;</span><span class="p">:</span>
+                            <span class="p">(</span>
+                                <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">imputation</span><span class="p">[</span><span class="n">prop</span><span class="p">])</span>
+                                <span class="k">if</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">imputation</span> <span class="k">else</span> <span class="kc">None</span>
+                            <span class="p">),</span>
                     <span class="p">}</span>
                 <span class="p">)</span>
             <span class="n">dataset_name</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">props_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">data_suffix</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">data_suffix</span>
-                <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">props_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">data_suffix</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">props_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
-            <span class="n">mydataset</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="p">(</span>
+            <span class="n">mydataset</span> <span class="o">=</span> <span class="n">QSPRTable</span><span class="o">.</span><span class="n">fromDF</span><span class="p">(</span>
                 <span class="n">dataset_name</span><span class="p">,</span>
                 <span class="n">target_props</span><span class="o">=</span><span class="n">target_props</span><span class="p">,</span>
                 <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
                 <span class="n">smiles_col</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">smiles_col</span><span class="p">,</span>
-                <span class="n">n_jobs</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ncpu</span><span class="p">,</span>
-                <span class="n">store_dir</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="p">,</span>
-                <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">random_state</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">random_state</span>
-                <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">random_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="n">mydataset</span><span class="o">.</span><span class="n">randomState</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">random_state</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">random_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">)</span>
+            <span class="n">mydataset</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">nJobs</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">ncpu</span>
             <span class="c1"># data filters</span>
             <span class="n">data_filters</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">low_quality</span><span class="p">:</span>
@@ -589,8 +595,7 @@
                     <span class="p">)</span>
                 <span class="n">boruta_estimator</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ncpu</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">regression</span>
-                    <span class="k">else</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ncpu</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">regression</span> <span class="k">else</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ncpu</span><span class="p">)</span>
                 <span class="p">)</span>
                 <span class="n">featurefilters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="n">BorutaFilter</span><span class="p">(</span>
@@ -604,9 +609,9 @@
                 <span class="n">data_filters</span><span class="o">=</span><span class="n">data_filters</span><span class="p">,</span>
                 <span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">,</span>
                 <span class="n">feature_filters</span><span class="o">=</span><span class="n">featurefilters</span><span class="p">,</span>
-                <span class="n">feature_standardizer</span><span class="o">=</span><span class="n">StandardScaler</span><span class="p">()</span>
-                <span class="k">if</span> <span class="s2">&quot;Smiles&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">features</span>
-                <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">feature_standardizer</span><span class="o">=</span><span class="p">(</span>
+                    <span class="n">StandardScaler</span><span class="p">()</span> <span class="k">if</span> <span class="s2">&quot;Smiles&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">features</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="p">),</span>
                 <span class="n">feature_fill_value</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">fill_value</span><span class="p">,</span>
             <span class="p">)</span>
 
@@ -626,8 +631,7 @@
     <span class="c1"># get a list of all the folders in the output directory</span>
     <span class="n">folders</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">f</span>
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="p">]</span>
 
     <span class="c1"># remove folders that start with backup</span>

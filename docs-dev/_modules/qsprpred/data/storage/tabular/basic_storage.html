@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.data.storage.tabular.basic_storage &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=ae990675"></script>
+        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script>
+    </script>
+        <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
+        <script src="../../../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.2.1.dev95+g5c50f5f6
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../features.html">Overview of available features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.data.storage.tabular.basic_storage</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.data.storage.tabular.basic_storage</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Sized</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
+
+<span class="kn">from</span> <span class="nn">qsprpred.data.chem.identifiers</span> <span class="kn">import</span> <span class="n">ChemIdentifier</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.chem.matching</span> <span class="kn">import</span> <span class="n">SMARTSMatchProcessor</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.chem.standardizers</span> <span class="kn">import</span> <span class="n">ChemStandardizer</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.chem.standardizers.base</span> <span class="kn">import</span> <span class="n">ChemStandardizationException</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.processing.mol_processor</span> <span class="kn">import</span> <span class="n">MolProcessor</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.storage.interfaces.chem_store</span> <span class="kn">import</span> <span class="n">ChemStore</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.storage.interfaces.searchable</span> <span class="kn">import</span> <span class="n">SMARTSSearchable</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.storage.interfaces.stored_mol</span> <span class="kn">import</span> <span class="n">StoredMol</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.storage.tabular.stored_mol</span> <span class="kn">import</span> <span class="n">TabularMol</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.tables.pandas</span> <span class="kn">import</span> <span class="n">PandasDataTable</span>
+<span class="kn">from</span> <span class="nn">qsprpred.logs</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">qsprpred.utils.interfaces.summarizable</span> <span class="kn">import</span> <span class="n">Summarizable</span>
+<span class="kn">from</span> <span class="nn">qsprpred.utils.parallel</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MultiprocessingJITGenerator</span><span class="p">,</span>
+    <span class="n">ParallelGenerator</span><span class="p">,</span>
+    <span class="n">Parallelizable</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="PandasChemStore"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore">[docs]</a><span class="k">class</span> <span class="nc">PandasChemStore</span><span class="p">(</span><span class="n">ChemStore</span><span class="p">,</span> <span class="n">SMARTSSearchable</span><span class="p">,</span> <span class="n">Summarizable</span><span class="p">,</span> <span class="n">Parallelizable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Tabular storage for molecules. An example implementations of `ChemStore`</span>
+<span class="sd">    that uses `PandasDataTable` to store the data.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        name (str): Name of the storage.</span>
+<span class="sd">        path (str): Path to the storage directory.</span>
+<span class="sd">        storeFormat (str): Format to use for storing the data.</span>
+<span class="sd">        nJobs (int): Number of parallel jobs to use for processing.</span>
+<span class="sd">        chunkSize (int): Size of the chunks to use for processing.</span>
+<span class="sd">        chunkProcessor (ParallelGenerator): Parallel generator to use for processing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_notJSON</span><span class="p">:</span> <span class="n">ClassVar</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">ChemStore</span><span class="o">.</span><span class="n">_notJSON</span><span class="p">,</span> <span class="s2">&quot;_libraries&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">smiles_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;SMILES&quot;</span><span class="p">,</span>
+        <span class="n">add_rdkit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">standardizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">identifier</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">id_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ID&quot;</span><span class="p">,</span>
+        <span class="n">store_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pkl&quot;</span><span class="p">,</span>
+        <span class="n">chunk_processor</span><span class="p">:</span> <span class="n">ParallelGenerator</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the storage. If the storage with the given name already exists</span>
+<span class="sd">        in the destination it will be reloaded.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of the storage.</span>
+<span class="sd">            path (str): Path to the storage directory.</span>
+<span class="sd">            df (pd.DataFrame, optional): Data frame to initialize the storage with.</span>
+<span class="sd">            smiles_col (str, optional): Name of the column containing the SMILES.</span>
+<span class="sd">            add_rdkit (bool, optional): Whether to add RDKit molecules to the storage.</span>
+<span class="sd">            overwrite (bool, optional):</span>
+<span class="sd">                Whether to overwrite the storage if it already exists.</span>
+<span class="sd">            save (bool, optional): Whether to save the storage after initialization.</span>
+<span class="sd">            standardizer (ChemStandardizer, optional):</span>
+<span class="sd">                Standardizer to use for the molecules.</span>
+<span class="sd">            identifier (ChemIdentifier, optional): Identifier to use for the molecules.</span>
+<span class="sd">            id_col (str, optional): Name of the column containing the molecule IDs.</span>
+<span class="sd">            store_format (str, optional): Format to use for storing the data.</span>
+<span class="sd">            chunk_processor (ParallelGenerator, optional):</span>
+<span class="sd">                Parallel generator to use for processing.</span>
+<span class="sd">            chunk_size (int, optional): Size of the chunks to use for processing.</span>
+<span class="sd">            n_jobs (int, optional): Number of parallel jobs to use for processing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">smiles_col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Column &#39;</span><span class="si">{</span><span class="n">smiles_col</span><span class="si">}</span><span class="s2">&#39; not found in the data frame. &quot;</span>
+                <span class="s2">&quot;Please provide a valid column name for the SMILES representations.&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">storeFormat</span> <span class="o">=</span> <span class="n">store_format</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span> <span class="o">=</span> <span class="n">n_jobs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span> <span class="o">=</span> <span class="n">chunk_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkProcessor</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">MultiprocessingJITGenerator</span><span class="p">(</span><span class="n">n_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">chunk_processor</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">chunk_processor</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_standardizer</span> <span class="o">=</span> <span class="n">standardizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_identifier</span> <span class="o">=</span> <span class="n">identifier</span>
+        <span class="k">if</span> <span class="n">overwrite</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">):</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">,</span>
+            <span class="p">]</span>
+            <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addLibrary</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_library&quot;</span><span class="p">,</span>
+                <span class="n">df</span><span class="p">,</span>
+                <span class="n">smiles_col</span><span class="p">,</span>
+                <span class="n">id_col</span><span class="p">,</span>
+                <span class="n">add_rdkit</span><span class="p">,</span>
+                <span class="n">store_format</span><span class="p">,</span>
+                <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reload</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">libsPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Path to the directory where the primary library tables are stored.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;libs&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">smilesProp</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of the property containing the SMILES.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;SMILES&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">originalSmilesProp</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of the column containing the original SMILES before standardization.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;original_smiles&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">idProp</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of the property containing unique molecule IDs.</span>
+<span class="sd">        The values are determined by the attached `identifier`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;ID&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">chunkSize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Size of the chunks to use for processing.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chunkSize</span>
+
+    <span class="nd">@chunkSize</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">chunkSize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the size of the chunks to use for processing.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (int): Size of the chunks.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_chunkSize</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">lib</span><span class="o">.</span><span class="n">chunkSize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chunkSize</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nJobs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of parallel jobs to use for processing.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nJobs</span>
+
+    <span class="nd">@nJobs</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">nJobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the number of parallel jobs to use for processing.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (int): Number of parallel jobs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nJobs</span> <span class="o">=</span> <span class="n">value</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">cpu_count</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkProcessor</span> <span class="o">=</span> <span class="n">MultiprocessingJITGenerator</span><span class="p">(</span><span class="n">n_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">lib</span><span class="o">.</span><span class="n">nJobs</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="n">lib</span><span class="o">.</span><span class="n">chunkProcessor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkProcessor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="PandasChemStore.addLibrary"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.addLibrary">[docs]</a>    <span class="k">def</span> <span class="nf">addLibrary</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">smiles_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;SMILES&quot;</span><span class="p">,</span>
+        <span class="n">id_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ID&quot;</span><span class="p">,</span>
+        <span class="n">add_rdkit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">store_format</span><span class="o">=</span><span class="s2">&quot;pkl&quot;</span><span class="p">,</span>
+        <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reads molecules from a file and adds standardized SMILES to the store</span>
+<span class="sd">        as a new library.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): name of the library</span>
+<span class="sd">            df (pd.DataFrame): data frame containing the molecules</span>
+<span class="sd">            smiles_col (str): name of the column containing the SMILES</span>
+<span class="sd">            id_col (str): name of the column containing the molecule IDs</span>
+<span class="sd">            add_rdkit (bool): whether to add RDKit molecules to the store</span>
+<span class="sd">            store_format (str): format to use for storing the data</span>
+<span class="sd">            save (bool): whether to save the store after adding the library</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;No valid or unique molecules found in the data frame.&quot;</span>
+                <span class="s2">&quot;Nothing will be added.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">if</span> <span class="n">add_rdkit</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Adding RDKit molecules is not yet implemented.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Library with name </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> already exists in the store. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Remove it first or use a different name for the new library.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">smiles_col</span><span class="p">]</span>
+        <span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">originalSmilesProp</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">smiles_col</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">smiles_col</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">df</span><span class="p">[</span><span class="n">smiles_col</span><span class="p">]</span>
+        <span class="n">pd_table</span> <span class="o">=</span> <span class="n">PandasDataTable</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+            <span class="n">store_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">libsPath</span><span class="p">,</span>
+            <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">autoindex_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">,</span>
+            <span class="n">index_cols</span><span class="o">=</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">id_col</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_identifier</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">id_col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">),</span>
+            <span class="n">store_format</span><span class="o">=</span><span class="n">store_format</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span><span class="p">,</span>
+            <span class="n">chunk_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span><span class="p">,</span>
+            <span class="n">parallel_generator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chunkProcessor</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># apply standardizer</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_standardizer</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">pd_table</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_apply_standardizer_to_library</span><span class="p">(</span><span class="n">pd_table</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_drop_invalids_from_table</span><span class="p">(</span><span class="n">pd_table</span><span class="p">)</span>
+        <span class="c1"># create IDs for compounds</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_identifier</span><span class="p">:</span>
+            <span class="c1"># replace the default ID with own identifier if requested</span>
+            <span class="n">ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_identifier_to_library</span><span class="p">(</span><span class="n">pd_table</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ids</span> <span class="o">=</span> <span class="n">pd_table</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">)</span>
+        <span class="c1"># resolve duplicates within the table by taking only the first occurrence</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_remove_duplicates_from_table</span><span class="p">(</span><span class="n">pd_table</span><span class="p">,</span> <span class="n">ids</span><span class="p">)</span>
+        <span class="c1"># FIXME: add RDKit molecules here if requested</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_remove_duplicates_from_libs</span><span class="p">(</span><span class="n">pd_table</span><span class="p">,</span> <span class="n">pd_table</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="p">[</span><span class="n">pd_table</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd_table</span>
+        <span class="c1"># make sure all properties of the new library are present in all libraries</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">props</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">getProperties</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">props</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">prop</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lib</span><span class="o">.</span><span class="n">getProperties</span><span class="p">():</span>
+                    <span class="n">lib</span><span class="o">.</span><span class="n">addProperty</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">lib</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.applyIdentifier"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.applyIdentifier">[docs]</a>    <span class="k">def</span> <span class="nf">applyIdentifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="n">ChemIdentifier</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply an identifier to the SMILES in the store.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            identifier (ChemIdentifier): Identifier to apply to the SMILES.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_identifier</span> <span class="o">=</span> <span class="n">identifier</span>
+        <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apply_identifier_to_library</span><span class="p">(</span><span class="n">lib</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_duplicates_from_libs</span><span class="p">(</span><span class="n">lib</span><span class="p">,</span> <span class="n">ids</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.applyStandardizer"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.applyStandardizer">[docs]</a>    <span class="k">def</span> <span class="nf">applyStandardizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">standardizer</span><span class="p">:</span> <span class="n">ChemStandardizer</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a standardizer to the SMILES in the store.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            standardizer (ChemStandardizer): Standardizer to apply to the SMILES.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_standardizer</span> <span class="o">=</span> <span class="n">standardizer</span>
+        <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_apply_standardizer_to_library</span><span class="p">(</span><span class="n">lib</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_drop_invalids_from_table</span><span class="p">(</span><span class="n">lib</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_identifier</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">applyIdentifier</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_drop_invalids_from_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pd_table</span><span class="p">:</span> <span class="n">PandasDataTable</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Drop invalid molecules from the table.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pd_table (PandasDataTable): Table to drop invalid molecules from.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pd_table</span><span class="o">.</span><span class="n">dropEmptyProperties</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">])</span>
+
+<div class="viewcode-block" id="PandasChemStore.fromDF"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.fromDF">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">fromDF</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PandasChemStore&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new instance from a pandas DataFrame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): DataFrame to create the instance from.</span>
+<span class="sd">            name (str): Name of the new instance. Defaults to the name of the DataFrame.</span>
+<span class="sd">            *args: Additional arguments to pass to the constructor.</span>
+<span class="sd">            **kwargs: Additional keyword arguments to pass to the constructor.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            PropertyStorage: New instance created from the DataFrame.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="nb">repr</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_apply_standardizer_to_data_frame</span><span class="p">(</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">smiles_prop</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">standardizer</span><span class="p">:</span> <span class="n">ChemStandardizer</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a standardizer to the SMILES in a data frame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): Data frame to apply the standardizer to.</span>
+<span class="sd">            smiles_prop (str): Name of the column containing the SMILES.</span>
+<span class="sd">            standardizer (ChemStandardizer): Standardizer to apply to the SMILES.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list[tuple[int, str, str]]):</span>
+<span class="sd">                List of tuples containing the index, standardized SMILES,</span>
+<span class="sd">                and original SMILES.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">smiles</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">smiles_prop</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">smi</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">smiles</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">standardized</span> <span class="o">=</span> <span class="n">standardizer</span><span class="p">(</span><span class="n">smi</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">standardized</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ChemStandardizationException</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;Standardizer </span><span class="si">{</span><span class="n">standardizer</span><span class="si">}</span><span class="s2"> returned None.&quot;</span>
+                    <span class="p">)</span>
+            <span class="k">except</span> <span class="n">ChemStandardizationException</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Molecule refused by standardizer: </span><span class="si">{</span><span class="n">smi</span><span class="si">}</span><span class="s2">. Molecule removed.&quot;</span>
+                <span class="p">)</span>
+                <span class="n">standardized</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Error (</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">) standardizing SMILES: </span><span class="si">{</span><span class="n">smi</span><span class="si">}</span><span class="s2">. Molecule removed.&quot;</span>
+                <span class="p">)</span>
+                <span class="n">standardized</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">standardized</span><span class="p">,</span> <span class="n">smi</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">output</span>
+
+    <span class="k">def</span> <span class="nf">_remove_duplicates_from_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pd_table</span><span class="p">:</span> <span class="n">PandasDataTable</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove duplicates from the table using a list of identifiers.</span>
+
+<span class="sd">        If duplicates are found, the first occurrence is kept. The index</span>
+<span class="sd">        property of the table is also updated with the ids provided.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pd_table (PandasDataTable):</span>
+<span class="sd">                The table to remove duplicates from.</span>
+<span class="sd">            ids (pd.Series):</span>
+<span class="sd">                A list of values to use as identifiers. Duplicates are</span>
+<span class="sd">                identified based on these values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">duplicated</span> <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">duplicated</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">sum</span><span class="p">(</span><span class="n">duplicated</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">orig_smiles</span> <span class="o">=</span> <span class="n">pd_table</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">originalSmilesProp</span><span class="p">,</span> <span class="n">duplicated</span><span class="p">[</span><span class="n">duplicated</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
+            <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Duplicated identifiers found in </span><span class="si">{</span><span class="n">pd_table</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Dropping duplicates, keeping only the first occurrence.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Molecules dropped (ID, original SMILES): &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ids</span><span class="p">[</span><span class="n">duplicated</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">orig_smiles</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="n">pd_table</span><span class="o">.</span><span class="n">dropEntries</span><span class="p">(</span><span class="n">duplicated</span><span class="p">[</span><span class="n">duplicated</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">ignore_missing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[</span><span class="o">~</span><span class="n">duplicated</span><span class="p">]</span>
+        <span class="n">pd_table</span><span class="o">.</span><span class="n">addProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">ids</span><span class="p">[</span><span class="o">~</span><span class="n">duplicated</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_remove_duplicates_from_libs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pd_table</span><span class="p">:</span> <span class="n">PandasDataTable</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove duplicates from the libraries using a list of identifiers.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pd_table (PandasDataTable): The table to remove duplicates from.</span>
+<span class="sd">            ids (pd.Series): A list of values to use as identifiers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">overlap</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">))</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">ids</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">overlap</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ids</span> <span class="o">=</span> <span class="n">pd_table</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="n">orig_smiles</span> <span class="o">=</span> <span class="n">pd_table</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">originalSmilesProp</span><span class="p">,</span>
+                                                   <span class="n">overlap</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Duplicated identifiers found in library: </span><span class="si">{</span><span class="n">lib</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Dropping duplicates from: </span><span class="si">{</span><span class="n">pd_table</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Molecules dropped (ID, original SMILES): &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ids</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">orig_smiles</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="n">pd_table</span><span class="o">.</span><span class="n">dropEntries</span><span class="p">(</span><span class="n">overlap</span><span class="p">,</span> <span class="n">ignore_missing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_apply_identifier_to_data_frame</span><span class="p">(</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">smiles_col</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">id_prop</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">identifier</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply an identifier to the SMILES in a data frame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): Data frame to apply the identifier to.</span>
+<span class="sd">            smiles_col (str): Name of the column containing the SMILES.</span>
+<span class="sd">            id_prop (str): Name of the column containing the molecule IDs.</span>
+<span class="sd">            identifier (callable): Identifier to apply to the SMILES.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (pd.Series): Series containing the identifiers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">identifiers</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">smiles_col</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">id_prop</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">identifiers</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">ids</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PandasChemStore.addEntries"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.addEntries">[docs]</a>    <span class="k">def</span> <span class="nf">addEntries</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
+        <span class="n">raise_on_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">library</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add entries to the storage.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ids (list): The IDs of the entries to add.</span>
+<span class="sd">            props (dict): The properties to add.</span>
+<span class="sd">            raise_on_existing (bool):</span>
+<span class="sd">                Whether to raise an error if the entry already exists.</span>
+<span class="sd">            library (str): Name of the library to add the entries to.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lib</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="p">[</span><span class="n">library</span><span class="p">]</span> <span class="k">if</span> <span class="n">library</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="n">lib</span><span class="o">.</span><span class="n">addEntries</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">raise_on_existing</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.addMols"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.addMols">[docs]</a>    <span class="k">def</span> <span class="nf">addMols</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">smiles</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">library</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">raise_on_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">add_rdkit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">store_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pkl&quot;</span><span class="p">,</span>
+        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">chunk_processor</span><span class="p">:</span> <span class="n">ParallelGenerator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TabularMol</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a molecule to the store using its raw SMILES.</span>
+
+<span class="sd">        The SMILES will be standardized and an identifier will be calculated.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            smiles (list[str]): SMILES of the molecule to add.</span>
+<span class="sd">            props (dict, optional): Additional properties to store with the molecule.</span>
+<span class="sd">            library (str, optional): Name of the library to add the molecule to.</span>
+<span class="sd">            raise_on_existing (bool, optional):</span>
+<span class="sd">                Whether to raise an error if the molecule already exists in the store.</span>
+<span class="sd">            add_rdkit (bool, optional): Whether to add RDKit molecules to the store.</span>
+<span class="sd">            store_format (str, optional): Format to use for storing the data.</span>
+<span class="sd">            save (bool, optional): Whether to save the store after adding the molecule.</span>
+<span class="sd">            chunk_size (int, optional):</span>
+<span class="sd">                Size of the chunks to use for processing (not used).</span>
+<span class="sd">            chunk_processor (ParallelGenerator, optional):</span>
+<span class="sd">                Parallel generator to use for processing (not used).</span>
+
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list[StoredMol]): Instances of the added molecules.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">:</span> <span class="n">smiles</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">props</span><span class="p">:</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">props</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">library</span> <span class="o">=</span> <span class="n">library</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_library&quot;</span>
+        <span class="k">if</span> <span class="n">library</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addLibrary</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">library</span><span class="p">,</span>
+                <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+                <span class="n">smiles_col</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">,</span>
+                <span class="n">add_rdkit</span><span class="o">=</span><span class="n">add_rdkit</span><span class="p">,</span>
+                <span class="n">store_format</span><span class="o">=</span><span class="n">store_format</span><span class="p">,</span>
+                <span class="n">save</span><span class="o">=</span><span class="n">save</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">random_temp_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">library</span><span class="si">}</span><span class="s2">_temp&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addLibrary</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">random_temp_name</span><span class="p">,</span>
+                <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+                <span class="n">smiles_col</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">,</span>
+                <span class="n">add_rdkit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">store_format</span><span class="o">=</span><span class="s2">&quot;pkl&quot;</span><span class="p">,</span>
+                <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">library</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="p">[</span><span class="n">library</span><span class="p">]</span><span class="o">.</span><span class="n">addEntries</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="p">[</span><span class="n">random_temp_name</span><span class="p">]</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="p">[</span><span class="n">random_temp_name</span><span class="p">]</span><span class="o">.</span><span class="n">getDF</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;list&quot;</span><span class="p">),</span>
+                    <span class="n">raise_on_existing</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">random_temp_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;No new or valid molecules detected in the list of SMILES.&quot;</span>
+                <span class="s2">&quot;Nothing was be added to the store.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">getMol</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="p">[</span><span class="n">library</span><span class="p">]</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span>
+        <span class="p">]</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.hasProperty"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.hasProperty">[docs]</a>    <span class="k">def</span> <span class="nf">hasProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if a property is present in the storage.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getProperties</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">o_dict</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__getstate__</span><span class="p">()</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">libsPath</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">o_dict</span><span class="p">[</span><span class="s2">&quot;_libraries&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">o_dict</span><span class="p">[</span><span class="s2">&quot;_libraries&quot;</span><span class="p">][</span><span class="n">lib</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">save</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">libsPath</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">o_dict</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setstate__</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;_json_main&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_json_main</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">lib</span> <span class="ow">in</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;_libraries&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">lib</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">libsPath</span><span class="p">,</span> <span class="n">lib</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">PandasDataTable</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">lib</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PandasChemStore.save"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save the whole storage to disk.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (str): Path to the saved storage.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">toFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.processMols"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.processMols">[docs]</a>    <span class="k">def</span> <span class="nf">processMols</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">processor</span><span class="p">:</span> <span class="n">MolProcessor</span><span class="p">,</span>
+        <span class="n">proc_args</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">proc_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mol_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;smiles&quot;</span><span class="p">,</span> <span class="s2">&quot;mol&quot;</span><span class="p">,</span> <span class="s2">&quot;rdkit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mol&quot;</span><span class="p">,</span>
+        <span class="n">add_props</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">chunk_processor</span><span class="p">:</span> <span class="n">ParallelGenerator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a function to the molecules in the data frame.</span>
+<span class="sd">        The SMILES  or an RDKit molecule will be supplied as the first</span>
+<span class="sd">        positional argument to the function. Additional properties</span>
+<span class="sd">        to provide from the data set can be specified with &#39;add_props&#39;, which will be</span>
+<span class="sd">        a dictionary supplied as an additional positional argument to the function.</span>
+
+<span class="sd">        IMPORTANT: For successful parallel processing with `multiprocessing`,</span>
+<span class="sd">        the processor must be picklable.</span>
+<span class="sd">        Also note that</span>
+<span class="sd">        the returned generator may only produce results as soon as they are ready,</span>
+<span class="sd">        which means that the chunks of data may</span>
+<span class="sd">        not be in the same order as the original data frame. However, you can pass the</span>
+<span class="sd">        value of `idProp` in `add_props` to identify the processed molecules or</span>
+<span class="sd">        use `MolProcessorWithID` as the processor.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            processor (MolProcessor):</span>
+<span class="sd">                `MolProcessor` object to use for processing.</span>
+<span class="sd">            proc_args (list, optional):</span>
+<span class="sd">                Any additional positional arguments to pass to the processor.</span>
+<span class="sd">            proc_kwargs (dict, optional):</span>
+<span class="sd">                Any additional keyword arguments to pass to the processor.</span>
+<span class="sd">            mol_type (str, optional):</span>
+<span class="sd">                Type of molecule to send to the processor. Can be &#39;smiles&#39;, &#39;mol&#39;, or</span>
+<span class="sd">                &#39;rdkit&#39;. Defaults to &#39;mol&#39;, which implies `TabularMol` objects.</span>
+<span class="sd">            add_props (list, optional):</span>
+<span class="sd">                List of data set properties to send to the processor. If `None`, all</span>
+<span class="sd">                properties will be sent.</span>
+<span class="sd">            chunk_processor (ParallelGenerator, optional):</span>
+<span class="sd">                The parallel generator to use for processing. If not specified,</span>
+<span class="sd">                `self.chunkProcessor` is used.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Generator:</span>
+<span class="sd">                A generator that yields the results of the supplied processor on</span>
+<span class="sd">                the chunked molecules from the data set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">proc_args</span> <span class="o">=</span> <span class="n">proc_args</span> <span class="ow">or</span> <span class="p">()</span>
+        <span class="n">proc_kwargs</span> <span class="o">=</span> <span class="n">proc_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">add_props</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">add_props</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getProperties</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">add_props</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">add_props</span><span class="p">)</span>
+        <span class="n">add_props</span> <span class="o">=</span> <span class="n">add_props</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">processor</span><span class="o">.</span><span class="n">requiredProps</span><span class="p">)</span>
+        <span class="n">chunk_processor</span> <span class="o">=</span> <span class="n">chunk_processor</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkProcessor</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">add_props</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">prop</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getProperties</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Cannot apply function &#39;</span><span class="si">{</span><span class="n">processor</span><span class="si">}</span><span class="s2">&#39; to </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> because &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;it requires the property &#39;</span><span class="si">{</span><span class="n">prop</span><span class="si">}</span><span class="s2">&#39;, which is not present in the &quot;</span>
+                    <span class="s2">&quot;data set.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="n">processor</span><span class="p">,</span>
+            <span class="n">func_args</span><span class="o">=</span><span class="n">proc_args</span><span class="p">,</span>
+            <span class="n">func_kwargs</span><span class="o">=</span><span class="n">proc_kwargs</span><span class="p">,</span>
+            <span class="n">on_props</span><span class="o">=</span><span class="n">add_props</span><span class="p">,</span>
+            <span class="n">chunk_type</span><span class="o">=</span><span class="n">mol_type</span><span class="p">,</span>
+            <span class="n">chunk_processor</span><span class="o">=</span><span class="n">chunk_processor</span><span class="p">,</span>
+            <span class="n">no_parallel</span><span class="o">=</span><span class="ow">not</span> <span class="n">processor</span><span class="o">.</span><span class="n">supportsParallel</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">yield</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.getProperty"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.getProperty">[docs]</a>    <span class="k">def</span> <span class="nf">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a property from the storage.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of the property to get.</span>
+<span class="sd">            ids (list, optional): IDs of the molecules to get the property for.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (pd.Series): Series containing the property values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># find the libraries that contain the specified ids if any</span>
+        <span class="n">subsets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">subset</span> <span class="o">=</span> <span class="n">lib</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">ignore_missing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">subsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">subsets</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">subsets</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">([],</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.getProperties"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.getProperties">[docs]</a>    <span class="k">def</span> <span class="nf">getProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a list of all properties in the storage.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list): List of all properties in the storage.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">getProperties</span><span class="p">())</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.addProperty"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.addProperty">[docs]</a>    <span class="k">def</span> <span class="nf">addProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Sized</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a property to the storage.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of the property to add.</span>
+<span class="sd">            data (list): Data of the property.</span>
+<span class="sd">            ids (list, optional): IDs of the molecules to add the property for.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">lib</span><span class="o">.</span><span class="n">addProperty</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">ignore_missing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.removeProperty"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.removeProperty">[docs]</a>    <span class="k">def</span> <span class="nf">removeProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove a property from the storage.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of the property to remove.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">lib</span><span class="o">.</span><span class="n">removeProperty</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.getSubset"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.getSubset">[docs]</a>    <span class="k">def</span> <span class="nf">getSubset</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">subset</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PandasChemStore&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a subset of the storage for the given properties.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            subset (list): List of property names to include in the subset.</span>
+<span class="sd">            ids (list, optional): IDs of the entries to include in the subset.</span>
+<span class="sd">            name (str, optional): Name of the new table.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (PandasChemStore): New table containing the subset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_subset&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">subset</span><span class="p">:</span>
+            <span class="n">subset</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">,</span> <span class="o">*</span><span class="n">subset</span><span class="p">]</span>
+        <span class="n">subsets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">subsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">getSubset</span><span class="p">(</span><span class="n">subset</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">ignore_missing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">getDF</span><span class="p">())</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">subsets</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fromDF</span><span class="p">(</span>
+            <span class="n">ret</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+            <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">save</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">store_format</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">storeFormat</span><span class="p">,</span>
+            <span class="n">chunk_processor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chunkProcessor</span><span class="p">,</span>
+            <span class="n">standardizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">identifier</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">id_col</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">,</span>
+            <span class="n">smiles_col</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">,</span>
+            <span class="n">chunk_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.getDF"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.getDF">[docs]</a>    <span class="k">def</span> <span class="nf">getDF</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the stored properties as a pandas DataFrame.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">lib</span><span class="o">.</span><span class="n">getDF</span><span class="p">()</span> <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                <span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">([],</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">),</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getProperties</span><span class="p">()</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.reload"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.reload">[docs]</a>    <span class="k">def</span> <span class="nf">reload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reload the storage from disk.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.clear"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear the storage.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">metaFile</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Path to the meta file.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s2">&quot;meta.json&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PandasChemStore.apply"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">func</span><span class="p">:</span> <span class="nb">callable</span><span class="p">,</span>
+        <span class="n">func_args</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">func_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">on_props</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">chunk_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;mol&quot;</span><span class="p">,</span> <span class="s2">&quot;smiles&quot;</span><span class="p">,</span> <span class="s2">&quot;rdkit&quot;</span><span class="p">,</span> <span class="s2">&quot;df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mol&quot;</span><span class="p">,</span>
+        <span class="n">chunk_processor</span><span class="p">:</span> <span class="n">ParallelGenerator</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">no_parallel</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a function to the molecules in the data frame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            func (callable): Function to apply to the molecules.</span>
+<span class="sd">            func_args (list, optional): Additional arguments to pass to the function.</span>
+<span class="sd">            func_kwargs (dict, optional):</span>
+<span class="sd">                Additional keyword arguments to pass to the function.</span>
+<span class="sd">            on_props (tuple, optional):</span>
+<span class="sd">                Properties to pass to the function. If `None`, all properties will be</span>
+<span class="sd">                passed.</span>
+<span class="sd">            chunk_type (str, optional):</span>
+<span class="sd">                Type of molecule to send to the function. Can be &#39;smiles&#39;, &#39;mol&#39;, or</span>
+<span class="sd">                &#39;rdkit&#39;. Defaults to &#39;mol&#39;, which implies `TabularMol` objects.</span>
+<span class="sd">            chunk_processor (ParallelGenerator, optional):</span>
+<span class="sd">                The parallel generator to use for processing. If not specified,</span>
+<span class="sd">                `self.chunkProcessor` is used.</span>
+<span class="sd">            no_parallel (bool, optional):</span>
+<span class="sd">                Whether to use parallel processing. Defaults to `False`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (Generator):</span>
+<span class="sd">                A generator that yields the results of the supplied function on the</span>
+<span class="sd">                chunked molecules from the data set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">chunk_processor</span> <span class="o">=</span> <span class="n">chunk_processor</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunkProcessor</span>
+        <span class="n">func_args</span> <span class="o">=</span> <span class="n">func_args</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="n">func_kwargs</span> <span class="o">=</span> <span class="n">func_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">no_parallel</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">chunk_processor</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">iterChunks</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span><span class="p">,</span> <span class="n">chunk_type</span><span class="o">=</span><span class="n">chunk_type</span><span class="p">,</span> <span class="n">on_props</span><span class="o">=</span><span class="n">on_props</span>
+                <span class="p">),</span>
+                <span class="n">func</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">func_args</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">func_kwargs</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="k">yield</span> <span class="n">result</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># do not use the parallel generator if n_jobs is 1</span>
+            <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterChunks</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span><span class="p">,</span> <span class="n">chunk_type</span><span class="o">=</span><span class="n">chunk_type</span><span class="p">,</span> <span class="n">on_props</span><span class="o">=</span><span class="n">on_props</span>
+            <span class="p">):</span>
+                <span class="k">yield</span> <span class="n">func</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="o">*</span><span class="n">func_args</span><span class="p">,</span> <span class="o">**</span><span class="n">func_kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.searchOnProperty"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.searchOnProperty">[docs]</a>    <span class="k">def</span> <span class="nf">searchOnProperty</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">prop_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">values</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">exact</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PandasChemStore&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Search in this table using a property name and a list of values.</span>
+<span class="sd">        It is assumed that the property is searchable with string matching</span>
+<span class="sd">        or direct comparison if a number is supplied.</span>
+<span class="sd">        Note that the types of the query list need to be consistent.</span>
+<span class="sd">        Otherwise, a `ValueError` will be raised.</span>
+
+<span class="sd">        In the case of string comparison,</span>
+<span class="sd">        if &#39;exact&#39; is `False`, the</span>
+<span class="sd">        search will be performed with partial matching, i.e. all molecules that</span>
+<span class="sd">        contain any of the given values in the property will be returned. If</span>
+<span class="sd">        &#39;exact&#39; is `True`, only molecules that have the exact property value for</span>
+<span class="sd">        any of the given values will be returned.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            prop_name (str):</span>
+<span class="sd">                Name of the property to search on.</span>
+<span class="sd">            values (list[str]):</span>
+<span class="sd">                List of values to search for. If any of the values is found in the</span>
+<span class="sd">                property, the molecule will be considered a match.</span>
+<span class="sd">            exact (bool, optional):</span>
+<span class="sd">                Whether to use exact matching, i.e. whether to</span>
+<span class="sd">                search for exact strings or just substrings. Defaults to False.</span>
+<span class="sd">            name (str | None, optional):</span>
+<span class="sd">                Name of the new table. Defaults to the name of</span>
+<span class="sd">                the old table, plus the `_searched` suffix.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (MoleculeTable):</span>
+<span class="sd">                A new table with the molecules from the</span>
+<span class="sd">                old table with the given property values.</span>
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the types of the query list are not consistent.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;No values provided for the search.&quot;</span>
+        <span class="c1"># check type consistency</span>
+        <span class="n">value_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">value_type</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">values</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Inconsistent types in the query list. &quot;</span>
+                <span class="s2">&quot;All values must be of the same type.&quot;</span>
+            <span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">prop_name</span><span class="si">}</span><span class="s2">_searched&quot;</span>
+        <span class="k">if</span> <span class="n">value_type</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="n">prop_name</span><span class="p">)</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">mask</span> <span class="o">|</span> <span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">exact</span> <span class="k">else</span> <span class="n">mask</span> <span class="o">|</span>
+                    <span class="p">(</span><span class="n">prop</span> <span class="o">==</span> <span class="n">value</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">matches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSubset</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">getProperties</span><span class="p">(),</span>
+                <span class="n">ids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">)[</span><span class="n">mask</span><span class="p">],</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">matches</span>
+        <span class="k">elif</span> <span class="n">value_type</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="n">prop_name</span><span class="p">)</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="kc">False</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">prop</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">prop</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span> <span class="o">|</span> <span class="p">(</span><span class="n">prop</span> <span class="o">==</span> <span class="n">value</span><span class="p">)</span>
+            <span class="n">matches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSubset</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">getProperties</span><span class="p">(),</span>
+                <span class="n">ids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">)[</span><span class="n">mask</span><span class="p">],</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">matches</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_apply_match_function</span><span class="p">(</span>
+        <span class="n">iterable</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">StoredMol</span><span class="p">],</span>
+        <span class="n">match_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Chem</span><span class="o">.</span><span class="n">Mol</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">...</span><span class="p">],</span> <span class="nb">bool</span><span class="p">],</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a match function to an iterable of molecules.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            iterable (Iterable[StoredMol]):</span>
+<span class="sd">                Iterable of molecules to apply the function to.</span>
+<span class="sd">            match_function (Callable): Function to apply to the molecules.</span>
+<span class="sd">            *args (list): Additional arguments to pass to the function.</span>
+<span class="sd">            **kwargs (dict): Additional keyword arguments to pass to the function.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list): List of results from the function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">:</span>
+            <span class="n">rd_mol</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">as_rd_mol</span><span class="p">()</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">match_function</span><span class="p">(</span><span class="n">rd_mol</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+<div class="viewcode-block" id="PandasChemStore.searchWithSMARTS"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.searchWithSMARTS">[docs]</a>    <span class="k">def</span> <span class="nf">searchWithSMARTS</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">patterns</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">operator</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;or&quot;</span><span class="p">,</span> <span class="s2">&quot;and&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;or&quot;</span><span class="p">,</span>
+        <span class="n">use_chirality</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">match_function</span><span class="p">:</span> <span class="n">MolProcessor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PandasChemStore&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Search the molecules in the table with a SMARTS pattern.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            patterns:</span>
+<span class="sd">                List of SMARTS patterns to search with.</span>
+<span class="sd">            operator (object):</span>
+<span class="sd">                Whether to use an &quot;or&quot; or &quot;and&quot; operator on patterns. Defaults to &quot;or&quot;.</span>
+<span class="sd">            use_chirality:</span>
+<span class="sd">                Whether to use chirality in the search.</span>
+<span class="sd">            name:</span>
+<span class="sd">                Name of the new table. Defaults to the name of the old table,</span>
+<span class="sd">                plus the `smarts_searched` suffix.</span>
+<span class="sd">            match_function:</span>
+<span class="sd">                Function to use for matching the molecules to the SMARTS patterns.</span>
+<span class="sd">                Defaults to `match_mol_to_smarts`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (MolTable): A dataframe with the molecules that match the pattern.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">match_function</span> <span class="o">=</span> <span class="n">match_function</span> <span class="ow">or</span> <span class="n">SMARTSMatchProcessor</span><span class="p">()</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">processMols</span><span class="p">(</span>
+            <span class="n">match_function</span><span class="p">,</span>
+            <span class="n">proc_args</span><span class="o">=</span><span class="p">(</span><span class="n">patterns</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">use_chirality</span><span class="p">),</span>
+        <span class="p">):</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;match&quot;</span><span class="p">]]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSubset</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">getProperties</span><span class="p">(),</span>
+            <span class="n">ids</span><span class="o">=</span><span class="n">results</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.getSummary"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.getSummary">[docs]</a>    <span class="k">def</span> <span class="nf">getSummary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make a summary with some statistics about the molecules in this table.</span>
+
+<span class="sd">        The summary contains the number of molecules per target and the number of</span>
+<span class="sd">        unique molecules per target.</span>
+<span class="sd">        Requires this data set to be imported from Papyrus for now.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (pd.DataFrame): A dataframe with the summary statistics.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;n_mols&quot;</span><span class="p">:</span> <span class="p">[</span><span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lib</span><span class="p">)</span> <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">())],</span>
+            <span class="s2">&quot;n_libs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="p">)],</span>
+            <span class="s2">&quot;standardizer&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_standardizer</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">],</span>
+            <span class="s2">&quot;identifier&quot;</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_identifier</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">],</span>
+            <span class="s2">&quot;libraries&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">keys</span><span class="p">())],</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">standardizer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChemStandardizer</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Standardizer used in this storage.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_standardizer</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">identifier</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Identifier used in this storage.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_identifier</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nLibs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of libraries in this storage.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PandasChemStore.getMol"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.getMol">[docs]</a>    <span class="k">def</span> <span class="nf">getMol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mol_id</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TabularMol</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a molecule from the store by its ID.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mol_id (str): ID of the molecule to get.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (TabularMol): Molecule with the given ID.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">smiles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">,</span> <span class="p">[</span><span class="n">mol_id</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Molecule with ID </span><span class="si">{</span><span class="n">mol_id</span><span class="si">}</span><span class="s2"> not found.&quot;</span><span class="p">)</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">mol_id</span> <span class="ow">in</span> <span class="n">lib</span><span class="p">:</span>
+                <span class="n">props</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">prop</span><span class="p">:</span> <span class="n">lib</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="p">[</span><span class="n">mol_id</span><span class="p">])</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">lib</span><span class="o">.</span><span class="n">getProperties</span><span class="p">()</span>
+                <span class="p">}</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="n">TabularMol</span><span class="p">(</span><span class="n">mol_id</span><span class="p">,</span> <span class="n">smiles</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">props</span><span class="o">=</span><span class="n">props</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.removeMol"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.removeMol">[docs]</a>    <span class="k">def</span> <span class="nf">removeMol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mol_id</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove a molecule from the store.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mol_id (str): ID of the molecule to remove.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">lib</span><span class="o">.</span><span class="n">dropEntries</span><span class="p">([</span><span class="n">mol_id</span><span class="p">],</span> <span class="n">ignore_missing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.getMolIDs"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.getMolIDs">[docs]</a>    <span class="k">def</span> <span class="nf">getMolIDs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a set of all molecule IDs in the store.</span>
+
+<span class="sd">        Good for checking possible overlaps between stores.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (tuple): Tuple of all molecule IDs in the store.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">ids</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.getMolCount"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.getMolCount">[docs]</a>    <span class="k">def</span> <span class="nf">getMolCount</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of molecules in the store.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lib</span><span class="p">)</span> <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.iterChunks"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.iterChunks">[docs]</a>    <span class="k">def</span> <span class="nf">iterChunks</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+        <span class="n">on_props</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">chunk_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;mol&quot;</span><span class="p">,</span> <span class="s2">&quot;smiles&quot;</span><span class="p">,</span> <span class="s2">&quot;rdkit&quot;</span><span class="p">,</span> <span class="s2">&quot;df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mol&quot;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">StoredMol</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Mol</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterate over the molecules in the store in chunks.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            size (int, optional): Size of the chunks to use for processing.</span>
+<span class="sd">            on_props (list, optional): Properties to pass to the function.</span>
+<span class="sd">            chunk_type (str, optional): Type of molecule to send to the function.</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            (list): List of molecules in the chunk.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">on_props</span> <span class="o">=</span> <span class="n">on_props</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">getProperties</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">lib</span><span class="o">.</span><span class="n">iterChunks</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">on_props</span><span class="o">=</span><span class="n">on_props</span><span class="p">):</span>
+                <span class="n">chunk_converters</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;df&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_chunk_df</span><span class="p">,</span>
+                    <span class="s2">&quot;mol&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_chunk_mol</span><span class="p">,</span>
+                    <span class="s2">&quot;smiles&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_chunk_smiles</span><span class="p">,</span>
+                    <span class="s2">&quot;rdkit&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_chunk_rdkit</span><span class="p">,</span>
+                <span class="p">}</span>
+                <span class="k">yield</span> <span class="n">chunk_converters</span><span class="p">[</span><span class="n">chunk_type</span><span class="p">](</span><span class="n">chunk</span><span class="p">,</span> <span class="n">on_props</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_convert_chunk_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">on_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a chunk to a pandas DataFrame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            chunk (pd.DataFrame): Chunk to convert.</span>
+<span class="sd">            on_props (list): Properties to include in the DataFrame.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (pd.DataFrame): DataFrame containing the chunk.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">chunk</span><span class="p">[</span><span class="nb">list</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">,</span> <span class="o">*</span><span class="n">on_props</span><span class="p">})]</span>
+
+    <span class="k">def</span> <span class="nf">_convert_chunk_mol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                           <span class="n">on_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TabularMol</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a chunk to a list of `TabularMol` objects.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            chunk (pd.DataFrame): Chunk to convert.</span>
+<span class="sd">            on_props (list): Properties to include in the `TabularMol` objects.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list[TabularMol]): List of `TabularMol` objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="n">chunk</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">]</span>
+        <span class="n">smiles</span> <span class="o">=</span> <span class="n">chunk</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">]</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="p">{</span><span class="n">prop</span><span class="p">:</span> <span class="n">chunk</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">on_props</span><span class="p">}</span>
+        <span class="n">mols</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ids</span><span class="p">):</span>
+            <span class="n">mol_props</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="n">prop</span><span class="p">:</span> <span class="n">props</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">on_props</span>
+                <span class="p">}</span> <span class="k">if</span> <span class="n">props</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">)</span>
+            <span class="n">mols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">TabularMol</span><span class="p">(</span><span class="n">_id</span><span class="p">,</span> <span class="n">smiles</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">props</span><span class="o">=</span><span class="n">mol_props</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">mols</span>
+
+    <span class="k">def</span> <span class="nf">_convert_chunk_smiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">on_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a chunk to a list of SMILES strings.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            chunk (pd.DataFrame): Chunk to convert.</span>
+<span class="sd">            on_props (list): ignored</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list): List of SMILES strings.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">chunk</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_convert_chunk_rdkit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+                             <span class="n">on_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Chem</span><span class="o">.</span><span class="n">Mol</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert a chunk to a list of RDKit molecules.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            chunk (pd.DataFrame): Chunk to convert.</span>
+<span class="sd">            on_props (list): ignored</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list): List of RDKit molecules.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mols</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">mol</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">chunk</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">]):</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">on_props</span><span class="p">:</span>
+                <span class="n">mol</span><span class="o">.</span><span class="n">SetProp</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">chunk</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
+            <span class="n">mols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mols</span>
+
+<div class="viewcode-block" id="PandasChemStore.iterMols"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.iterMols">[docs]</a>    <span class="k">def</span> <span class="nf">iterMols</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">TabularMol</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterate over the molecules in the store.</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            (TabularMol): Molecule from the store.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterChunks</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">mol</span></div>
+
+<div class="viewcode-block" id="PandasChemStore.dropEntries"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.basic_storage.PandasChemStore.dropEntries">[docs]</a>    <span class="k">def</span> <span class="nf">dropEntries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Drop entries from the store.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ids (tuple): IDs of the entries to drop.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">lib</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_libraries</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">lib</span><span class="o">.</span><span class="n">dropEntries</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">ignore_missing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_apply_identifier_to_library</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pd_table</span><span class="p">:</span> <span class="n">PandasDataTable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply an identifier to the SMILES in a library.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pd_table (PandasDataTable): Library to apply the identifier to.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (pd.Series): Series containing the identifiers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">pd_table</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_apply_identifier_to_data_frame</span><span class="p">,</span>
+            <span class="n">func_args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_identifier</span><span class="p">),</span>
+            <span class="n">on_props</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">),</span>
+            <span class="n">as_df</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="n">ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">pd_table</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">ids</span>
+
+    <span class="k">def</span> <span class="nf">_apply_standardizer_to_library</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pd_table</span><span class="p">:</span> <span class="n">PandasDataTable</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a standardizer to the SMILES in a library.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pd_table (PandasDataTable): Library to apply the standardizer to.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">pd_table</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_apply_standardizer_to_data_frame</span><span class="p">,</span>
+            <span class="n">func_args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_standardizer</span><span class="p">),</span>
+            <span class="n">on_props</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">),</span>
+            <span class="n">as_df</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nJobs</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+        <span class="n">pd_table</span><span class="o">.</span><span class="n">addProperty</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">output</span><span class="p">],</span>  <span class="c1"># standardized SMILES</span>
+            <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">output</span><span class="p">],</span>  <span class="c1"># IDs</span>
+        <span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

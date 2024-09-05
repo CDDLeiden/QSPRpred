@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.gpu.models.tests &mdash; QSPRpred 3.1.2.dev40+g2513259a documentation</title>
+  <title>qsprpred.extra.gpu.models.tests &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=1905640d"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=ae990675"></script>
         <script src="../../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev40+g2513259a
+                v3.2.1.dev95+g5c50f5f6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -114,12 +114,13 @@
 <span class="kn">from</span> <span class="nn">qsprpred.data.sampling.splits</span> <span class="kn">import</span> <span class="n">RandomSplit</span>
 <span class="kn">from</span> <span class="nn">qsprpred.extra.gpu.utils.parallel</span> <span class="kn">import</span> <span class="n">TorchJITGenerator</span>
 <span class="kn">from</span> <span class="nn">qsprpred.tasks</span> <span class="kn">import</span> <span class="n">ModelTasks</span><span class="p">,</span> <span class="n">TargetTasks</span>
+
 <span class="kn">from</span> <span class="nn">....benchmarks</span> <span class="kn">import</span> <span class="n">BenchmarkRunner</span>
 <span class="kn">from</span> <span class="nn">....benchmarks.tests</span> <span class="kn">import</span> <span class="n">BenchMarkTestCase</span>
 <span class="kn">from</span> <span class="nn">....extra.gpu.models.chemprop</span> <span class="kn">import</span> <span class="n">ChempropModel</span>
 <span class="kn">from</span> <span class="nn">....extra.gpu.models.dnn</span> <span class="kn">import</span> <span class="n">DNNModel</span>
 <span class="kn">from</span> <span class="nn">....extra.gpu.models.neural_network</span> <span class="kn">import</span> <span class="n">STFullyConnected</span>
-<span class="kn">from</span> <span class="nn">....models</span> <span class="kn">import</span> <span class="n">CrossValAssessor</span><span class="p">,</span> <span class="n">SklearnModel</span><span class="p">,</span> <span class="n">SklearnMetrics</span>
+<span class="kn">from</span> <span class="nn">....models</span> <span class="kn">import</span> <span class="n">CrossValAssessor</span><span class="p">,</span> <span class="n">SklearnMetrics</span><span class="p">,</span> <span class="n">SklearnModel</span>
 <span class="kn">from</span> <span class="nn">....models.monitors</span> <span class="kn">import</span> <span class="n">BaseMonitor</span><span class="p">,</span> <span class="n">FileMonitor</span><span class="p">,</span> <span class="n">ListMonitor</span>
 <span class="kn">from</span> <span class="nn">....utils.parallel</span> <span class="kn">import</span> <span class="n">ThreadsJITGenerator</span>
 <span class="kn">from</span> <span class="nn">....utils.testing.check_mixins</span> <span class="kn">import</span> <span class="n">ModelCheckMixIn</span><span class="p">,</span> <span class="n">MonitorsCheckMixIn</span>
@@ -131,11 +132,10 @@
 <div class="viewcode-block" id="BenchMarkTest"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.BenchMarkTest">[docs]</a><span class="nd">@skipIf</span><span class="p">(</span>
     <span class="nb">len</span><span class="p">(</span><span class="n">GPUS</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span>
     <span class="s2">&quot;No GPU is available. &quot;</span>
-    <span class="s2">&quot;Skipping benchmarking tests that require a GPU to run swiftly. &quot;</span>
+    <span class="s2">&quot;Skipping benchmarking tests that require a GPU to run swiftly. &quot;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="k">class</span> <span class="nc">BenchMarkTest</span><span class="p">(</span><span class="n">BenchMarkTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test GPU models with benchmarks.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="BenchMarkTest.testBasicTorchExecution"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.BenchMarkTest.testBasicTorchExecution">[docs]</a>    <span class="k">def</span> <span class="nf">testBasicTorchExecution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run single task tests for classification.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">[</span>
@@ -199,7 +199,6 @@
 
 <div class="viewcode-block" id="NeuralNet"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.NeuralNet">[docs]</a><span class="k">class</span> <span class="nc">NeuralNet</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">ModelCheckMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the tests for the DNNModel class.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="NeuralNet.setUp"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.NeuralNet.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the test case.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
@@ -213,11 +212,11 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/search_space_test.json&quot;</span>
 
 <div class="viewcode-block" id="NeuralNet.getModel"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.NeuralNet.getModel">[docs]</a>    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize model with data set.</span>
 
@@ -245,38 +244,33 @@
             <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span> <span class="ow">in</span> <span class="p">(</span>
                 <span class="p">(</span><span class="n">STFullyConnected</span><span class="p">,</span> <span class="s2">&quot;STFullyConnected&quot;</span><span class="p">,</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]),</span>
                 <span class="p">(</span>
-                        <span class="n">STFullyConnected</span><span class="p">,</span>
-                        <span class="s2">&quot;STFullyConnected&quot;</span><span class="p">,</span>
-                        <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span>
-                        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1100</span><span class="p">],</span>
+                    <span class="n">STFullyConnected</span><span class="p">,</span>
+                    <span class="s2">&quot;STFullyConnected&quot;</span><span class="p">,</span>
+                    <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span>
+                    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1100</span><span class="p">],</span>
                 <span class="p">),</span>
-        <span class="p">)</span>
-        <span class="p">]</span>
-        <span class="o">+</span> <span class="p">[</span>
+            <span class="p">)</span>
+        <span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
             <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">random_state</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                    <span class="n">task</span><span class="p">,</span>
-                    <span class="n">alg_name</span><span class="p">,</span>
-                    <span class="n">alg</span><span class="p">,</span>
-                    <span class="n">th</span><span class="p">,</span>
-                    <span class="n">random_state</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span> <span class="ow">in</span> <span class="p">(</span>
-                    <span class="p">(</span>
-                            <span class="n">STFullyConnected</span><span class="p">,</span> <span class="s2">&quot;STFullyConnected&quot;</span><span class="p">,</span>
-                            <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="p">)</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">random_state</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">task</span><span class="p">,</span>
+                <span class="n">alg_name</span><span class="p">,</span>
+                <span class="n">alg</span><span class="p">,</span>
+                <span class="n">th</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="p">,</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span> <span class="ow">in</span>
+            <span class="p">((</span><span class="n">STFullyConnected</span><span class="p">,</span> <span class="s2">&quot;STFullyConnected&quot;</span><span class="p">,</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">)</span>
             <span class="k">for</span> <span class="n">random_state</span> <span class="ow">in</span> <span class="p">([</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">42</span><span class="p">],</span> <span class="p">[</span><span class="mi">42</span><span class="p">,</span> <span class="mi">42</span><span class="p">])</span>
         <span class="p">]</span>
     <span class="p">)</span>
     <span class="k">def</span> <span class="nf">testSingleTaskModel</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">_</span><span class="p">,</span>
-            <span class="n">task</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="p">,</span>
-            <span class="n">alg_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span>
-            <span class="n">th</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">random_state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">_</span><span class="p">,</span>
+        <span class="n">task</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="p">,</span>
+        <span class="n">alg_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span>
+        <span class="n">th</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the DNNModel model in one configuration.</span>
 
@@ -290,7 +284,11 @@
         <span class="c1"># initialize dataset</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="n">th</span><span class="p">}],</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span>
+                <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="n">th</span>
+            <span class="p">}],</span>
             <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
         <span class="p">)</span>
 
@@ -328,7 +326,6 @@
 
 <div class="viewcode-block" id="ChemPropTest"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.ChemPropTest">[docs]</a><span class="k">class</span> <span class="nc">ChemPropTest</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">ModelCheckMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the tests for the DNNModel class.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="ChemPropTest.setUp"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.ChemPropTest.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
@@ -341,10 +338,10 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="si">}</span><span class="s2">/test_files/search_space_test.json&quot;</span>
 
 <div class="viewcode-block" id="ChemPropTest.getModel"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.ChemPropTest.getModel">[docs]</a>    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize model with data set.</span>
 
@@ -372,27 +369,26 @@
             <span class="k">for</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span> <span class="ow">in</span> <span class="p">(</span>
                 <span class="p">(</span><span class="s2">&quot;MoleculeModel&quot;</span><span class="p">,</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]),</span>
                 <span class="p">(</span><span class="s2">&quot;MoleculeModel&quot;</span><span class="p">,</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1100</span><span class="p">]),</span>
-        <span class="p">)</span>
-        <span class="p">]</span>
-        <span class="o">+</span> <span class="p">[</span>
-            <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">random_state</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                    <span class="n">task</span><span class="p">,</span>
-                    <span class="n">alg_name</span><span class="p">,</span>
-                    <span class="n">th</span><span class="p">,</span>
-                    <span class="n">random_state</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">for</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">&quot;MoleculeModel&quot;</span><span class="p">,</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="kc">None</span><span class="p">),)</span>
+        <span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">random_state</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">task</span><span class="p">,</span>
+                <span class="n">alg_name</span><span class="p">,</span>
+                <span class="n">th</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="p">,</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span> <span class="ow">in</span>
+            <span class="p">((</span><span class="s2">&quot;MoleculeModel&quot;</span><span class="p">,</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">)</span>
             <span class="k">for</span> <span class="n">random_state</span> <span class="ow">in</span> <span class="p">([</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">42</span><span class="p">],</span> <span class="p">[</span><span class="mi">42</span><span class="p">,</span> <span class="mi">42</span><span class="p">])</span>
         <span class="p">]</span>
     <span class="p">)</span>
     <span class="k">def</span> <span class="nf">testSingleTaskModel</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">_</span><span class="p">,</span>
-            <span class="n">task</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="p">,</span>
-            <span class="n">alg_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-            <span class="n">th</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="n">random_state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">],</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">_</span><span class="p">,</span>
+        <span class="n">task</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="p">,</span>
+        <span class="n">alg_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">th</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">],</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the DNNModel model in one configuration.</span>
 
@@ -405,7 +401,11 @@
         <span class="c1"># initialize dataset</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="n">th</span><span class="p">}],</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span>
+                <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="n">th</span>
+            <span class="p">}],</span>
             <span class="n">preparation_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">dataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span>
@@ -442,22 +442,21 @@
 
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
-            <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="p">[</span><span class="kc">None</span><span class="p">])</span>
-            <span class="k">for</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">task</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">&quot;MoleculeModel&quot;</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_REGRESSION</span><span class="p">),)</span>
-        <span class="p">]</span>
-        <span class="o">+</span> <span class="p">[</span>
+            <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">,</span> <span class="p">[</span><span class="kc">None</span><span class="p">])</span> <span class="k">for</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">task</span> <span class="ow">in</span>
+            <span class="p">((</span><span class="s2">&quot;MoleculeModel&quot;</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_REGRESSION</span><span class="p">),</span> <span class="p">)</span>
+        <span class="p">]</span> <span class="o">+</span> <span class="p">[</span>
             <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">random_state</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                    <span class="n">task</span><span class="p">,</span>
-                    <span class="n">alg_name</span><span class="p">,</span>
-                    <span class="n">random_state</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">task</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">&quot;MoleculeModel&quot;</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">),)</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alg_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">random_state</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">task</span><span class="p">,</span>
+                <span class="n">alg_name</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="p">,</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">alg_name</span><span class="p">,</span> <span class="n">task</span> <span class="ow">in</span>
+            <span class="p">((</span><span class="s2">&quot;MoleculeModel&quot;</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">),</span> <span class="p">)</span>
             <span class="k">for</span> <span class="n">random_state</span> <span class="ow">in</span> <span class="p">([</span><span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">42</span><span class="p">],</span> <span class="p">[</span><span class="mi">42</span><span class="p">,</span> <span class="mi">42</span><span class="p">])</span>
         <span class="p">]</span>
     <span class="p">)</span>
     <span class="k">def</span> <span class="nf">testMultiTaskmodel</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">random_state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="p">,</span> <span class="n">alg_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">random_state</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the DNNModel model in one configuration.</span>
 
@@ -467,8 +466,16 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">task</span> <span class="o">==</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_REGRESSION</span><span class="p">:</span>
             <span class="n">target_props</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.3</span><span class="p">]},</span>
-                <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
+                    <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.3</span><span class="p">]</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
+                    <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]</span>
+                <span class="p">},</span>
             <span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">target_props</span> <span class="o">=</span> <span class="p">[</span>
@@ -528,7 +535,10 @@
         <span class="c1"># initialize dataset</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;consistency_data&quot;</span><span class="p">,</span>
-            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
+            <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+            <span class="p">}],</span>
             <span class="n">preparation_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">dataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span>
@@ -618,7 +628,6 @@
 
 <div class="viewcode-block" id="TestNNMonitoring"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestNNMonitoring">[docs]</a><span class="k">class</span> <span class="nc">TestNNMonitoring</span><span class="p">(</span><span class="n">MonitorsCheckMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the tests for the monitoring classes.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="TestNNMonitoring.setUp"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.tests.TestNNMonitoring.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>

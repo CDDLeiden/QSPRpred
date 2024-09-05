@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.chem.scaffolds &mdash; QSPRpred 3.1.2.dev40+g2513259a documentation</title>
+  <title>qsprpred.data.chem.scaffolds &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=1905640d"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=ae990675"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev40+g2513259a
+                v3.2.1.dev95+g5c50f5f6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -105,47 +105,76 @@
 <span class="kn">from</span> <span class="nn">rdkit.Chem.Scaffolds</span> <span class="kn">import</span> <span class="n">MurckoScaffold</span>
 
 <span class="kn">from</span> <span class="nn">qsprpred.data.processing.mol_processor</span> <span class="kn">import</span> <span class="n">MolProcessorWithID</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.storage.interfaces.stored_mol</span> <span class="kn">import</span> <span class="n">StoredMol</span>
 
 
 <div class="viewcode-block" id="Scaffold"><a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.scaffolds.Scaffold">[docs]</a><span class="k">class</span> <span class="nc">Scaffold</span><span class="p">(</span><span class="n">MolProcessorWithID</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Abstract base class for calculating molecular scaffolds of different kinds.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for calculating molecular scaffolds of different kinds.&quot;&quot;&quot;</span>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Calculate the scaffold for a molecule.</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Mol</span> <span class="o">|</span> <span class="n">StoredMol</span><span class="p">],</span>
+        <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the scaffold for a molecule.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            mol (str | Mol): SMILES or RDKit molecule to calculate the scaffold for.</span>
+<span class="sd">            mol (str | Mol | StoredMol):</span>
+<span class="sd">                SMILES, RDKit molecule or a `StoredMol` instances</span>
+<span class="sd">                to calculate the scaffolds for.</span>
+<span class="sd">            props (dict[str, list], optional):</span>
+<span class="sd">                A dictionary of properties related to the molecules to process. The</span>
+<span class="sd">                dictionary uses property names as keys and lists of values as values.</span>
+<span class="sd">                Each value in the list corresponds to a molecule in the list of</span>
+<span class="sd">                molecules. This can be empty depending on the implementation.</span>
+<span class="sd">            args: Additional positional arguments.</span>
+<span class="sd">            kwargs: Additional keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            smiles of the scaffold</span>
+<span class="sd">            (pd.Series): smiles of the scaffold</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
-<div class="viewcode-block" id="Scaffold.supportsParallel"><a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.scaffolds.Scaffold.supportsParallel">[docs]</a>    <span class="k">def</span> <span class="nf">supportsParallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">True</span></div></div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">supportsParallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the processor supports parallel processing.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if the processor supports parallel processing, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
 
 
 <div class="viewcode-block" id="BemisMurckoRDKit"><a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.scaffolds.BemisMurckoRDKit">[docs]</a><span class="k">class</span> <span class="nc">BemisMurckoRDKit</span><span class="p">(</span><span class="n">Scaffold</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for calculating Murcko scaffolds of a given molecule</span>
-<span class="sd">    using the default implementation in RDKit. If you want, an implementation</span>
+<span class="sd">    using the default implementation in RDKit. If you want an implementation</span>
 <span class="sd">    closer to the original paper, see the `BemisMurcko` class.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the scaffold for a molecule.</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="sd">        Args:</span>
+<span class="sd">            mols (list[str or Mol or StoredMol]): Molecules to calculate the scaffold for.</span>
+<span class="sd">            props (dict[str, list], optional):</span>
+<span class="sd">                Dictionary of properties. Should contain the idProp key.</span>
+<span class="sd">            args: Additional positional arguments (not used).</span>
+<span class="sd">            kwargs: Additional keyword arguments (not used).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (pd.Series): smiles of the scaffold</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">mols</span><span class="p">:</span>
-            <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">mol</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">mol</span><span class="p">,</span> <span class="n">_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterMolsAndIDs</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="n">props</span><span class="p">):</span>
+            <span class="n">ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_id</span><span class="p">)</span>
             <span class="n">scaff</span> <span class="o">=</span> <span class="n">MurckoScaffold</span><span class="o">.</span><span class="n">GetScaffoldForMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
-            <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Chem</span><span class="o">.</span><span class="n">MolToSmiles</span><span class="p">(</span><span class="n">scaff</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">props</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">])</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Chem</span><span class="o">.</span><span class="n">MolToSmiles</span><span class="p">(</span><span class="n">scaff</span><span class="p">,</span> <span class="n">canonical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">isomericSmiles</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;BemisMurckoRDKit&quot;</span></div>
@@ -176,40 +205,66 @@
 <span class="sd">    Related RDKit issue: https://github.com/rdkit/rdkit/discussions/6844</span>
 
 <span class="sd">    Credit: Original code provided by Wim Dehaen (@dehaenw)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
+<span class="sd">    Attributes:</span>
+<span class="sd">        realBemisMurcko (bool): Use guidelines from Bemis murcko paper.</span>
+<span class="sd">            otherwise, use native rdkit implementation.</span>
+<span class="sd">        useCSK (bool): Make scaffold generic (convert all bonds to single</span>
+<span class="sd">            and all atoms to carbon). If realBemismurcko is on, also</span>
+<span class="sd">            remove all flattened exo bonds.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">real_bemismurcko</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">use_csk</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">id_prop</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initialize the scaffold generator.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the scaffold generator.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            real_bemismurcko (bool): Use guidelines from Bemis murcko paper.</span>
 <span class="sd">                otherwise, use native rdkit implementation.</span>
 <span class="sd">            use_csk (bool): Make scaffold generic (convert all bonds to single</span>
-<span class="sd">                and all atoms to carbon). If real_bemismurcko is on, also</span>
-<span class="sd">                remove all flattened exo bonds.</span>
+<span class="sd">                and all atoms to carbon).</span>
+<span class="sd">            id_prop (str): Name of the property to use as the index.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">id_prop</span><span class="o">=</span><span class="n">id_prop</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">realBemisMurcko</span> <span class="o">=</span> <span class="n">real_bemismurcko</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">useCSK</span> <span class="o">=</span> <span class="n">use_csk</span>
 
 <div class="viewcode-block" id="BemisMurcko.findTerminalAtoms"><a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.scaffolds.BemisMurcko.findTerminalAtoms">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">findTerminalAtoms</span><span class="p">(</span><span class="n">mol</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">findTerminalAtoms</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Chem</span><span class="o">.</span><span class="n">Atom</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find terminal atoms in a molecule.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mol (Mol): RDKit molecule.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[Atom]: List of terminal atoms.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">GetAtoms</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">GetBonds</span><span class="p">())</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span></div>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the scaffold for a molecule.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mols (list[str or Mol or StoredMol]): Molecules to calculate the scaffold for.</span>
+<span class="sd">            props (dict[str, list], optional):</span>
+<span class="sd">                Dictionary of properties. Should contain the idProp key.</span>
+<span class="sd">            args: Additional positional arguments (not used).</span>
+<span class="sd">            kwargs: Additional keyword arguments (not used).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (pd.Series): smiles of the scaffold</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">mols</span><span class="p">:</span>
-            <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">mol</span>
+        <span class="n">ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">mol</span><span class="p">,</span> <span class="n">_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterMolsAndIDs</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="n">props</span><span class="p">):</span>
+            <span class="n">ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_id</span><span class="p">)</span>
             <span class="n">Chem</span><span class="o">.</span><span class="n">RemoveStereochemistry</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>  <span class="c1"># important for canonization !</span>
             <span class="n">scaff</span> <span class="o">=</span> <span class="n">MurckoScaffold</span><span class="o">.</span><span class="n">GetScaffoldForMol</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
 
@@ -226,8 +281,8 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">realBemisMurcko</span><span class="p">:</span>
                     <span class="n">scaff</span> <span class="o">=</span> <span class="n">MurckoScaffold</span><span class="o">.</span><span class="n">GetScaffoldForMol</span><span class="p">(</span><span class="n">scaff</span><span class="p">)</span>
             <span class="n">Chem</span><span class="o">.</span><span class="n">SanitizeMol</span><span class="p">(</span><span class="n">scaff</span><span class="p">)</span>
-            <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Chem</span><span class="o">.</span><span class="n">MolToSmiles</span><span class="p">(</span><span class="n">scaff</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">props</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">])</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Chem</span><span class="o">.</span><span class="n">MolToSmiles</span><span class="p">(</span><span class="n">scaff</span><span class="p">,</span> <span class="n">canonical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">isomericSmiles</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;Bemis-Murcko&quot;</span></div>

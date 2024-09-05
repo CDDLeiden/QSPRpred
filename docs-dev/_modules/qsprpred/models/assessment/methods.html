@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models.assessment.methods &mdash; QSPRpred 3.1.2.dev40+g2513259a documentation</title>
+  <title>qsprpred.models.assessment.methods &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=1905640d"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=ae990675"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev40+g2513259a
+                v3.2.1.dev95+g5c50f5f6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -107,16 +107,16 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">KFold</span>
 
-<span class="kn">from</span> <span class="nn">.metrics.scikit_learn</span> <span class="kn">import</span> <span class="n">SklearnMetrics</span>
-<span class="kn">from</span> <span class="nn">...data</span> <span class="kn">import</span> <span class="n">QSPRDataset</span>
 <span class="kn">from</span> <span class="nn">...data.sampling.splits</span> <span class="kn">import</span> <span class="n">DataSplit</span>
+<span class="kn">from</span> <span class="nn">...data.tables.interfaces.qspr_data_set</span> <span class="kn">import</span> <span class="n">QSPRDataSet</span>
 <span class="kn">from</span> <span class="nn">...logs</span> <span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">from</span> <span class="nn">...models.early_stopping</span> <span class="kn">import</span> <span class="n">EarlyStoppingMode</span>
 <span class="kn">from</span> <span class="nn">...models.model</span> <span class="kn">import</span> <span class="n">QSPRModel</span>
 <span class="kn">from</span> <span class="nn">...models.monitors</span> <span class="kn">import</span> <span class="n">AssessorMonitor</span><span class="p">,</span> <span class="n">BaseMonitor</span>
+<span class="kn">from</span> <span class="nn">.metrics.scikit_learn</span> <span class="kn">import</span> <span class="n">SklearnMetrics</span>
 
 
-<div class="viewcode-block" id="ModelAssessor"><a class="viewcode-back" href="../../../../api/qsprpred.models.assessment.html#qsprpred.models.assessment.methods.ModelAssessor">[docs]</a><span class="k">class</span> <span class="nc">ModelAssessor</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelAssessor"><a class="viewcode-back" href="../../../../api/qsprpred.models.assessment.html#qsprpred.models.ModelAssessor">[docs]</a><span class="k">class</span> <span class="nc">ModelAssessor</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for assessment methods.</span>
 
 <span class="sd">    Attributes:</span>
@@ -130,14 +130,13 @@
 <span class="sd">        mode (EarlyStoppingMode): early stopping mode for fitting</span>
 <span class="sd">        splitMultitaskScores (bool): whether to split the scores per task for multitask models</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">scoring</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
-            <span class="n">monitor</span><span class="p">:</span> <span class="n">AssessorMonitor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">use_proba</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="n">mode</span><span class="p">:</span> <span class="n">EarlyStoppingMode</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">split_multitask_scores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">scoring</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
+        <span class="n">monitor</span><span class="p">:</span> <span class="n">AssessorMonitor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_proba</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">mode</span><span class="p">:</span> <span class="n">EarlyStoppingMode</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">split_multitask_scores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the evaluation method class.</span>
 
@@ -158,19 +157,19 @@
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
-            <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span>
-            <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">monitor</span><span class="p">:</span> <span class="n">AssessorMonitor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
+        <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataSet</span><span class="p">,</span>
+        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">monitor</span><span class="p">:</span> <span class="n">AssessorMonitor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate the model.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            model (QSPRModel): model to evaluate</span>
-<span class="sd">            ds (QSPRDataset): dataset to evaluate on</span>
+<span class="sd">            ds (QSPRDataSet): dataset to evaluate on</span>
 <span class="sd">            save (bool): save predictions to file</span>
 <span class="sd">            parameters (dict): parameters to use for the evaluation</span>
 <span class="sd">            monitor (AssessorMonitor): monitor to track the evaluation, overrides</span>
@@ -183,13 +182,13 @@
 <span class="sd">            returned with the scores for each fold.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ModelAssessor.predictionsToDataFrame"><a class="viewcode-back" href="../../../../api/qsprpred.models.assessment.html#qsprpred.models.assessment.methods.ModelAssessor.predictionsToDataFrame">[docs]</a>    <span class="k">def</span> <span class="nf">predictionsToDataFrame</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
-            <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
-            <span class="n">predictions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-            <span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
-            <span class="n">extra_columns</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="ModelAssessor.predictionsToDataFrame"><a class="viewcode-back" href="../../../../api/qsprpred.models.assessment.html#qsprpred.models.ModelAssessor.predictionsToDataFrame">[docs]</a>    <span class="k">def</span> <span class="nf">predictionsToDataFrame</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+        <span class="n">predictions</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+        <span class="n">extra_columns</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a dataframe with true values and predictions.</span>
 
@@ -214,9 +213,8 @@
                 <span class="n">df_out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
                     <span class="p">[</span>
                         <span class="n">df_out</span><span class="p">,</span>
-                        <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">add_prefix</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_ProbabilityClass_&quot;</span>
-                        <span class="p">),</span>
+                        <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span>
+                                    <span class="p">)</span><span class="o">.</span><span class="n">add_prefix</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_ProbabilityClass_&quot;</span><span class="p">),</span>
                     <span class="p">],</span>
                     <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -229,7 +227,7 @@
         <span class="k">return</span> <span class="n">df_out</span></div></div>
 
 
-<div class="viewcode-block" id="CrossValAssessor"><a class="viewcode-back" href="../../../../api/qsprpred.models.assessment.html#qsprpred.models.assessment.methods.CrossValAssessor">[docs]</a><span class="k">class</span> <span class="nc">CrossValAssessor</span><span class="p">(</span><span class="n">ModelAssessor</span><span class="p">):</span>
+<div class="viewcode-block" id="CrossValAssessor"><a class="viewcode-back" href="../../../../api/qsprpred.models.assessment.html#qsprpred.models.CrossValAssessor">[docs]</a><span class="k">class</span> <span class="nc">CrossValAssessor</span><span class="p">(</span><span class="n">ModelAssessor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform cross validation on a model.</span>
 
 <span class="sd">    Attributes:</span>
@@ -241,16 +239,15 @@
 <span class="sd">        round (int): number of decimal places to round predictions to (default: 5)</span>
 <span class="sd">        splitMultitaskScores (bool): whether to split the scores per task for multitask models</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">scoring</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
-            <span class="n">split</span><span class="p">:</span> <span class="n">DataSplit</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">monitor</span><span class="p">:</span> <span class="n">AssessorMonitor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">use_proba</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="n">mode</span><span class="p">:</span> <span class="n">EarlyStoppingMode</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="nb">round</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
-            <span class="n">split_multitask_scores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">scoring</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
+        <span class="n">split</span><span class="p">:</span> <span class="n">DataSplit</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">monitor</span><span class="p">:</span> <span class="n">AssessorMonitor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_proba</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">mode</span><span class="p">:</span> <span class="n">EarlyStoppingMode</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="nb">round</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">split_multitask_scores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">scoring</span><span class="p">,</span> <span class="n">monitor</span><span class="p">,</span> <span class="n">use_proba</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">split_multitask_scores</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">split</span> <span class="o">=</span> <span class="n">split</span>
@@ -259,19 +256,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">round</span> <span class="o">=</span> <span class="nb">round</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
-            <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span>
-            <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">monitor</span><span class="p">:</span> <span class="n">AssessorMonitor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
+        <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataSet</span><span class="p">,</span>
+        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">monitor</span><span class="p">:</span> <span class="n">AssessorMonitor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform cross validation on the model with the given parameters.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            model (QSPRModel): model to assess</span>
-<span class="sd">            ds (QSPRDataset): dataset to assess on</span>
+<span class="sd">            ds (QSPRDataSet): dataset to assess on</span>
 <span class="sd">            scoring (str | Callable): scoring function to use</span>
 <span class="sd">            save (bool): whether to save predictions to file</span>
 <span class="sd">            parameters (dict): optional model parameters to use in assessment</span>
@@ -290,18 +287,18 @@
         <span class="p">)</span>
         <span class="n">evalparams</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">parameters</span>
         <span class="n">X</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()</span>
-        <span class="n">y</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">getTargetPropertiesValues</span><span class="p">()</span>
+        <span class="n">y</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">getTargets</span><span class="p">()</span>
         <span class="n">monitor</span><span class="o">.</span><span class="n">onAssessmentStart</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="c1"># cross validation</span>
         <span class="n">fold_counter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">predictions</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">scores</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">idx_train</span><span class="p">,</span> <span class="n">idx_test</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
-                <span class="n">ds</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">)</span>
+            <span class="n">ds</span><span class="o">.</span><span class="n">iterFolds</span><span class="p">(</span><span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">)</span>
         <span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                <span class="s2">&quot;cross validation fold </span><span class="si">%s</span><span class="s2"> started: </span><span class="si">%s</span><span class="s2">&quot;</span>
-                <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">))</span>
+                <span class="s2">&quot;cross validation fold </span><span class="si">%s</span><span class="s2"> started: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">))</span>
             <span class="p">)</span>
             <span class="n">monitor</span><span class="o">.</span><span class="n">onFoldStart</span><span class="p">(</span>
                 <span class="n">fold</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">X_train</span><span class="o">=</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="o">=</span><span class="n">y_train</span><span class="p">,</span> <span class="n">X_test</span><span class="o">=</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="o">=</span><span class="n">y_test</span>
@@ -343,8 +340,8 @@
             <span class="c1"># save molecule ids and fold number</span>
             <span class="n">fold_counter</span><span class="p">[</span><span class="n">idx_test</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
-                <span class="s2">&quot;cross validation fold </span><span class="si">%s</span><span class="s2"> ended: </span><span class="si">%s</span><span class="s2">&quot;</span>
-                <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">))</span>
+                <span class="s2">&quot;cross validation fold </span><span class="si">%s</span><span class="s2"> ended: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">))</span>
             <span class="p">)</span>
             <span class="n">fold_predictions_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictionsToDataFrame</span><span class="p">(</span>
                 <span class="n">model</span><span class="p">,</span>
@@ -357,14 +354,13 @@
             <span class="n">predictions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fold_predictions_df</span><span class="p">)</span>
         <span class="c1"># save results</span>
         <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
-            <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">round</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">.cv.tsv&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">round</span>
+                                        <span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">.cv.tsv&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">monitor</span><span class="o">.</span><span class="n">onAssessmentEnd</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">predictions</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="TestSetAssessor"><a class="viewcode-back" href="../../../../api/qsprpred.models.assessment.html#qsprpred.models.assessment.methods.TestSetAssessor">[docs]</a><span class="k">class</span> <span class="nc">TestSetAssessor</span><span class="p">(</span><span class="n">ModelAssessor</span><span class="p">):</span>
+<div class="viewcode-block" id="TestSetAssessor"><a class="viewcode-back" href="../../../../api/qsprpred.models.assessment.html#qsprpred.models.TestSetAssessor">[docs]</a><span class="k">class</span> <span class="nc">TestSetAssessor</span><span class="p">(</span><span class="n">ModelAssessor</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Assess a model on a test set.</span>
 
 <span class="sd">    Attributes:+</span>
@@ -375,15 +371,14 @@
 <span class="sd">        round (int): number of decimal places to round predictions to (default: 3)</span>
 <span class="sd">        splitMultitaskScores (bool): whether to split the scores per task for multitask models</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">scoring</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
-            <span class="n">monitor</span><span class="p">:</span> <span class="n">AssessorMonitor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">use_proba</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="n">mode</span><span class="p">:</span> <span class="n">EarlyStoppingMode</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="nb">round</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
-            <span class="n">split_multitask_scores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">scoring</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
+        <span class="n">monitor</span><span class="p">:</span> <span class="n">AssessorMonitor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_proba</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">mode</span><span class="p">:</span> <span class="n">EarlyStoppingMode</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="nb">round</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">split_multitask_scores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">scoring</span><span class="p">,</span> <span class="n">monitor</span><span class="p">,</span> <span class="n">use_proba</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">split_multitask_scores</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">monitor</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -391,19 +386,19 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">round</span> <span class="o">=</span> <span class="nb">round</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span>
-            <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
-            <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataset</span><span class="p">,</span>
-            <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">monitor</span><span class="p">:</span> <span class="n">AssessorMonitor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
+        <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataSet</span><span class="p">,</span>
+        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">monitor</span><span class="p">:</span> <span class="n">AssessorMonitor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make predictions for independent test set.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            model (QSPRModel): model to assess</span>
-<span class="sd">            ds (QSPRDataset): dataset to assess on</span>
+<span class="sd">            ds (QSPRDataSet): dataset to assess on</span>
 <span class="sd">            scoring (str | Callable): scoring function to use</span>
 <span class="sd">            save (bool): whether to save predictions to file</span>
 <span class="sd">            parameters (dict): optional model parameters to use in assessment</span>
@@ -420,7 +415,7 @@
         <span class="n">monitor</span> <span class="o">=</span> <span class="n">monitor</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">monitor</span>
         <span class="n">evalparams</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">parameters</span>
         <span class="n">X</span><span class="p">,</span> <span class="n">X_ind</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()</span>
-        <span class="n">y</span><span class="p">,</span> <span class="n">y_ind</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">getTargetPropertiesValues</span><span class="p">()</span>
+        <span class="n">y</span><span class="p">,</span> <span class="n">y_ind</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">getTargets</span><span class="p">()</span>
         <span class="n">monitor</span><span class="o">.</span><span class="n">onAssessmentStart</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="n">monitor</span><span class="o">.</span><span class="n">onFoldStart</span><span class="p">(</span><span class="n">fold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">X_train</span><span class="o">=</span><span class="n">X</span><span class="p">,</span> <span class="n">y_train</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">X_test</span><span class="o">=</span><span class="n">X_ind</span><span class="p">,</span> <span class="n">y_test</span><span class="o">=</span><span class="n">y_ind</span><span class="p">)</span>
         <span class="c1"># fit model</span>
@@ -455,9 +450,8 @@
         <span class="n">monitor</span><span class="o">.</span><span class="n">onFoldEnd</span><span class="p">(</span><span class="n">ind_estimator</span><span class="p">,</span> <span class="n">predictions_df</span><span class="p">)</span>
         <span class="c1"># predict values for independent test set and save results</span>
         <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
-            <span class="n">predictions_df</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">round</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">.ind.tsv&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
-            <span class="p">)</span>
+            <span class="n">predictions_df</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">round</span>
+                                <span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">.ind.tsv&quot;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">monitor</span><span class="o">.</span><span class="n">onAssessmentEnd</span><span class="p">(</span><span class="n">predictions_df</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">score</span><span class="p">)</span></div>
 </pre></div>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.data.sampling.tests &mdash; QSPRpred 3.1.2.dev40+g2513259a documentation</title>
+  <title>qsprpred.extra.data.sampling.tests &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=1905640d"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=ae990675"></script>
         <script src="../../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev40+g2513259a
+                v3.2.1.dev95+g5c50f5f6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -101,12 +101,12 @@
 
 <span class="kn">from</span> <span class="nn">parameterized</span> <span class="kn">import</span> <span class="n">parameterized</span>
 
-<span class="kn">from</span> <span class="nn">qsprpred.data</span> <span class="kn">import</span> <span class="n">RandomSplit</span><span class="p">,</span> <span class="n">ScaffoldSplit</span><span class="p">,</span> <span class="n">ClusterSplit</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data</span> <span class="kn">import</span> <span class="n">ClusterSplit</span><span class="p">,</span> <span class="n">RandomSplit</span><span class="p">,</span> <span class="n">ScaffoldSplit</span>
 <span class="kn">from</span> <span class="nn">qsprpred.data.descriptors.sets</span> <span class="kn">import</span> <span class="n">RDKitDescs</span>
 <span class="kn">from</span> <span class="nn">qsprpred.extra.data.descriptors.sets</span> <span class="kn">import</span> <span class="n">ProDec</span>
 <span class="kn">from</span> <span class="nn">qsprpred.extra.data.sampling.splits</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">PCMSplit</span><span class="p">,</span>
     <span class="n">LeaveTargetsOut</span><span class="p">,</span>
+    <span class="n">PCMSplit</span><span class="p">,</span>
     <span class="n">TemporalPerTarget</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">qsprpred.extra.data.tables.pcm</span> <span class="kn">import</span> <span class="n">PCMDataSet</span>
@@ -122,16 +122,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">([</span><span class="n">ProDec</span><span class="p">([</span><span class="s2">&quot;Zscale Hellberg&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">msaProvider</span><span class="p">)])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">([</span><span class="n">RDKitDescs</span><span class="p">()])</span></div>
 
-    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">([(</span><span class="n">RandomSplit</span><span class="p">(),),</span> <span class="p">(</span><span class="n">ScaffoldSplit</span><span class="p">(),),</span> <span class="p">(</span><span class="n">ClusterSplit</span><span class="p">(),)])</span>
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">([(</span><span class="n">RandomSplit</span><span class="p">(),</span> <span class="p">),</span> <span class="p">(</span><span class="n">ScaffoldSplit</span><span class="p">(),</span> <span class="p">),</span> <span class="p">(</span><span class="n">ClusterSplit</span><span class="p">(),</span> <span class="p">)])</span>
     <span class="k">def</span> <span class="nf">testPCMSplit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">splitter</span><span class="p">):</span>
         <span class="n">splitter</span> <span class="o">=</span> <span class="n">PCMSplit</span><span class="p">(</span><span class="n">splitter</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span> <span class="n">featurize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()</span>
         <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">test</span><span class="o">.</span><span class="n">index</span>
-        <span class="n">test_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">test</span><span class="p">]</span>
-        <span class="n">train_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train</span><span class="p">]</span>
-        <span class="n">test_smiles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">smilesCol</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">test</span><span class="p">]</span>
-        <span class="n">train_smiles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">smilesCol</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train</span><span class="p">]</span>
+        <span class="n">test_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">proteinIDProp</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">test</span><span class="p">]</span>
+        <span class="n">train_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">proteinIDProp</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train</span><span class="p">]</span>
+        <span class="n">test_smiles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">test</span><span class="p">]</span>
+        <span class="n">train_smiles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test_targets</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">train_targets</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
@@ -161,8 +161,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span> <span class="n">featurize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()</span>
         <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">test</span><span class="o">.</span><span class="n">index</span>
-        <span class="n">test_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">test</span><span class="p">]</span>
-        <span class="n">train_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">proteinCol</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train</span><span class="p">]</span>
+        <span class="n">test_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">proteinIDProp</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">test</span><span class="p">]</span>
+        <span class="n">train_targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">proteinIDProp</span><span class="p">)</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test_targets</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">train_targets</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span>
@@ -174,7 +174,8 @@
         <span class="n">year</span> <span class="o">=</span> <span class="mi">2015</span>
         <span class="n">splitter</span> <span class="o">=</span> <span class="n">TemporalPerTarget</span><span class="p">(</span>
             <span class="n">year_col</span><span class="o">=</span><span class="n">year_col</span><span class="p">,</span>
-            <span class="n">split_years</span><span class="o">=</span><span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">year</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProteinKeys</span><span class="p">()},</span>
+            <span class="n">split_years</span><span class="o">=</span><span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">year</span>
+                         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProteinKeys</span><span class="p">()},</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">splitter</span><span class="p">,</span> <span class="n">featurize</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">()</span>

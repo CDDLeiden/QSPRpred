@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.utils.testing.path_mixins &mdash; QSPRpred 3.1.2.dev40+g2513259a documentation</title>
+  <title>qsprpred.utils.testing.path_mixins &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=1905640d"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=ae990675"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev40+g2513259a
+                v3.2.1.dev95+g5c50f5f6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -108,7 +108,7 @@
 <span class="kn">from</span> <span class="nn">mlchemad.applicability_domains</span> <span class="kn">import</span> <span class="n">TopKatApplicabilityDomain</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
 
-<span class="kn">from</span> <span class="nn">...data</span> <span class="kn">import</span> <span class="n">RandomSplit</span><span class="p">,</span> <span class="n">QSPRDataset</span>
+<span class="kn">from</span> <span class="nn">...data.chem.standardizers.check_smiles</span> <span class="kn">import</span> <span class="n">ValidationStandardizer</span>
 <span class="kn">from</span> <span class="nn">...data.descriptors.fingerprints</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">AtomPairFP</span><span class="p">,</span>
     <span class="n">AvalonFP</span><span class="p">,</span>
@@ -121,14 +121,17 @@
     <span class="n">TopologicalFP</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">...data.descriptors.sets</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">RDKitDescs</span><span class="p">,</span>
     <span class="n">DrugExPhyschem</span><span class="p">,</span>
     <span class="n">PredictorDesc</span><span class="p">,</span>
+    <span class="n">RDKitDescs</span><span class="p">,</span>
     <span class="n">TanimotoDistances</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">...data.processing.data_filters</span> <span class="kn">import</span> <span class="n">RepeatsFilter</span>
 <span class="kn">from</span> <span class="nn">...data.processing.feature_filters</span> <span class="kn">import</span> <span class="n">HighCorrelationFilter</span><span class="p">,</span> <span class="n">LowVarianceFilter</span>
 <span class="kn">from</span> <span class="nn">...data.processing.feature_standardizers</span> <span class="kn">import</span> <span class="n">SKLearnStandardizer</span>
+<span class="kn">from</span> <span class="nn">...data.sampling.splits</span> <span class="kn">import</span> <span class="n">RandomSplit</span>
+<span class="kn">from</span> <span class="nn">...data.storage.tabular.basic_storage</span> <span class="kn">import</span> <span class="n">PandasChemStore</span>
+<span class="kn">from</span> <span class="nn">...data.tables.qspr</span> <span class="kn">import</span> <span class="n">QSPRTable</span>
 <span class="kn">from</span> <span class="nn">...models</span> <span class="kn">import</span> <span class="n">SklearnModel</span>
 <span class="kn">from</span> <span class="nn">...tasks</span> <span class="kn">import</span> <span class="n">TargetTasks</span>
 
@@ -143,7 +146,6 @@
 <span class="sd">            created before and cleared after each test</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="PathMixIn.setUpPaths"><a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.PathMixIn.setUpPaths">[docs]</a>    <span class="k">def</span> <span class="nf">setUpPaths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the directories that are used for testing.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">generatedPath</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;qsprpred_test_&quot;</span><span class="p">)</span>
@@ -164,7 +166,6 @@
 <div class="viewcode-block" id="DataSetsPathMixIn"><a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.DataSetsPathMixIn">[docs]</a><span class="k">class</span> <span class="nc">DataSetsPathMixIn</span><span class="p">(</span><span class="n">PathMixIn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Mix-in class that provides a small and large testing data set and some common</span>
 <span class="sd">    preparation settings to use in tests.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="DataSetsPathMixIn.setUpPaths"><a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.DataSetsPathMixIn.setUpPaths">[docs]</a>    <span class="k">def</span> <span class="nf">setUpPaths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create the directories that are used for testing.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span>
@@ -181,7 +182,8 @@
             <span class="s2">&quot;feature_calculators&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">MorganFP</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">128</span><span class="p">)],</span>
             <span class="s2">&quot;split&quot;</span><span class="p">:</span> <span class="n">RandomSplit</span><span class="p">(</span><span class="n">test_fraction</span><span class="o">=</span><span class="mf">0.2</span><span class="p">),</span>
             <span class="s2">&quot;feature_standardizer&quot;</span><span class="p">:</span> <span class="n">StandardScaler</span><span class="p">(),</span>
-            <span class="s2">&quot;feature_filters&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">LowVarianceFilter</span><span class="p">(</span><span class="mf">0.05</span><span class="p">),</span> <span class="n">HighCorrelationFilter</span><span class="p">(</span><span class="mf">0.8</span><span class="p">)],</span>
+            <span class="s2">&quot;feature_filters&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">LowVarianceFilter</span><span class="p">(</span><span class="mf">0.05</span><span class="p">),</span>
+                                <span class="n">HighCorrelationFilter</span><span class="p">(</span><span class="mf">0.8</span><span class="p">)],</span>
         <span class="p">}</span></div>
 
 <div class="viewcode-block" id="DataSetsPathMixIn.getAllDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.DataSetsPathMixIn.getAllDescriptors">[docs]</a>    <span class="nd">@classmethod</span>
@@ -275,8 +277,7 @@
         <span class="c1"># All combinations of the above preparation settings (passed to prepareDataset)</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="c1"># deep copy to avoid conflicts cayed by operating on one instance twice</span>
-            <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">combo</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">combo</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span>
+            <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">combo</span><span class="p">)</span> <span class="k">for</span> <span class="n">combo</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span>
                 <span class="n">descriptor_calculators</span><span class="p">,</span>
                 <span class="n">splits</span><span class="p">,</span>
                 <span class="n">feature_standardizers</span><span class="p">,</span>
@@ -296,7 +297,6 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            list: `list` of `list`s of all possible combinations of preparation</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="nb">object</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Get the name of a data preparation object,</span>
@@ -309,11 +309,10 @@
 <span class="sd">                str: the generated name of the object</span>
 <span class="sd">            &quot;&quot;&quot;</span>
             <span class="k">return</span> <span class="p">(</span>
-                <span class="nb">str</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span>
-                <span class="k">else</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
-                <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">SKLearnStandardizer</span><span class="p">))</span>
-                <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                <span class="nb">str</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">if</span>
+                    <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">SKLearnStandardizer</span><span class="p">))</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                <span class="p">)</span>
             <span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">get_name_list</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Iterable</span> <span class="o">|</span> <span class="nb">object</span><span class="p">):</span>
@@ -355,7 +354,10 @@
 <div class="viewcode-block" id="DataSetsPathMixIn.createLargeTestDataSet"><a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.DataSetsPathMixIn.createLargeTestDataSet">[docs]</a>    <span class="k">def</span> <span class="nf">createLargeTestDataSet</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;QSPRDataset_test_large&quot;</span><span class="p">,</span>
-        <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
+        <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+        <span class="p">}],</span>
         <span class="n">preparation_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
         <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
@@ -370,7 +372,7 @@
 <span class="sd">            preparation_settings (dict): dictionary containing preparation settings</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            QSPRDataset: a `QSPRDataset` object</span>
+<span class="sd">            QSPRDataSet: a `QSPRDataSet` object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createTestDataSetFromFrame</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">getBigDF</span><span class="p">(),</span>
@@ -385,7 +387,10 @@
 <div class="viewcode-block" id="DataSetsPathMixIn.createSmallTestDataSet"><a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.DataSetsPathMixIn.createSmallTestDataSet">[docs]</a>    <span class="k">def</span> <span class="nf">createSmallTestDataSet</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;QSPRDataset_test_small&quot;</span><span class="p">,</span>
-        <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
+        <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+        <span class="p">}],</span>
         <span class="n">preparation_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
     <span class="p">):</span>
@@ -398,7 +403,7 @@
 <span class="sd">            preparation_settings (dict): dictionary containing preparation settings</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            QSPRDataset: a `QSPRDataset` object</span>
+<span class="sd">            QSPRDataSet: a `QSPRDataSet` object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createTestDataSetFromFrame</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">getSmallDF</span><span class="p">(),</span>
@@ -408,11 +413,24 @@
             <span class="n">prep</span><span class="o">=</span><span class="n">preparation_settings</span><span class="p">,</span>
         <span class="p">)</span></div>
 
+<div class="viewcode-block" id="DataSetsPathMixIn.getStorage"><a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.DataSetsPathMixIn.getStorage">[docs]</a>    <span class="k">def</span> <span class="nf">getStorage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">PandasChemStore</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
+            <span class="n">df</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+            <span class="n">chunk_size</span><span class="o">=</span><span class="n">chunk_size</span><span class="p">,</span>
+            <span class="n">standardizer</span><span class="o">=</span><span class="n">ValidationStandardizer</span><span class="p">(),</span>
+        <span class="p">)</span></div>
+
 <div class="viewcode-block" id="DataSetsPathMixIn.createTestDataSetFromFrame"><a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.DataSetsPathMixIn.createTestDataSetFromFrame">[docs]</a>    <span class="k">def</span> <span class="nf">createTestDataSetFromFrame</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">df</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;QSPRDataset_test&quot;</span><span class="p">,</span>
-        <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">}],</span>
+        <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+        <span class="p">}],</span>
         <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">prep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
@@ -426,18 +444,19 @@
 <span class="sd">            target_props (List of dicts or TargetProperty): list of target properties</span>
 <span class="sd">            random_state (int): random state to use for splitting and shuffling</span>
 <span class="sd">            prep (dict): dictionary containing preparation settings</span>
+<span class="sd">            n_jobs (int): number of jobs to use for parallel processing</span>
+<span class="sd">            chunk_size (int): size of chunks to use per job in parallel processing</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            QSPRDataset: a `QSPRDataset` object</span>
+<span class="sd">            QSPRDataSet: a `QSPRDataSet` object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="n">QSPRDataset</span><span class="p">(</span>
+        <span class="n">storage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getStorage</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_storage&quot;</span><span class="p">,</span> <span class="n">n_jobs</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">)</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">QSPRTable</span><span class="p">(</span>
+            <span class="n">storage</span><span class="p">,</span>
             <span class="n">name</span><span class="p">,</span>
             <span class="n">target_props</span><span class="o">=</span><span class="n">target_props</span><span class="p">,</span>
-            <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
-            <span class="n">store_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
+            <span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">,</span>
             <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
-            <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
-            <span class="n">chunk_size</span><span class="o">=</span><span class="n">chunk_size</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">prep</span><span class="p">:</span>
             <span class="n">ret</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span><span class="o">**</span><span class="n">prep</span><span class="p">)</span>
@@ -447,8 +466,15 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;QSPRDataset_multi_test&quot;</span><span class="p">,</span>
         <span class="n">target_props</span><span class="o">=</span><span class="p">[</span>
-            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;HBD&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">]},</span>
-            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;HBD&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span>
+                <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+            <span class="p">},</span>
         <span class="p">],</span>
         <span class="n">preparation_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
@@ -462,7 +488,7 @@
 <span class="sd">            random_state (int): random state to use for splitting and shuffling</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            QSPRDataset: a `QSPRDataset` object</span>
+<span class="sd">            QSPRDataSet: a `QSPRDataSet` object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createTestDataSetFromFrame</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">getBigDF</span><span class="p">(),</span>
@@ -482,7 +508,6 @@
 
 <div class="viewcode-block" id="ModelDataSetsPathMixIn"><a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.ModelDataSetsPathMixIn">[docs]</a><span class="k">class</span> <span class="nc">ModelDataSetsPathMixIn</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class sets up the datasets for the model tests.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="ModelDataSetsPathMixIn.setUpPaths"><a class="viewcode-back" href="../../../../api/qsprpred.utils.testing.html#qsprpred.utils.testing.check_mixins.ModelDataSetsPathMixIn.setUpPaths">[docs]</a>    <span class="k">def</span> <span class="nf">setUpPaths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the test environment.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.data.sampling package &mdash; QSPRpred 3.1.2.dev40+g2513259a documentation</title>
+  <title>qsprpred.extra.data.sampling package &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=1905640d"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=ae990675"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -27,7 +27,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="qsprpred.extra.data.tables package" href="qsprpred.extra.data.tables.html" />
+    <link rel="next" title="qsprpred.extra.data.storage package" href="qsprpred.extra.data.storage.html" />
     <link rel="prev" title="qsprpred.extra.data.descriptors package" href="qsprpred.extra.data.descriptors.html" />
  
 
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev40+g2513259a
+                v3.2.1.dev95+g5c50f5f6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -148,9 +148,15 @@
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.LeaveTargetsOut.getDataSet">
-<span class="sig-name descname"><span class="pre">getDataSet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.LeaveTargetsOut.getDataSet" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">getDataSet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.LeaveTargetsOut.getDataSet" title="Permalink to this definition"></a></dt>
 <dd><p>Get the data set attached to this object.</p>
 <dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The data set attached to this object</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
+</dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – If no data set is attached to this object.</p>
 </dd>
@@ -165,8 +171,9 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.LeaveTargetsOut.setDataSet">
-<span class="sig-name descname"><span class="pre">setDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.base.MoleculeDataTable" title="qsprpred.data.tables.base.MoleculeDataTable"><span class="pre">MoleculeDataTable</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.LeaveTargetsOut.setDataSet" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">setDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.LeaveTargetsOut.setDataSet" title="Permalink to this definition"></a></dt>
+<dd><p>Set the data set for this object.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.LeaveTargetsOut.split">
@@ -195,7 +202,7 @@ pandas index!)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.LeaveTargetsOut.splitDataset">
-<span class="sig-name descname"><span class="pre">splitDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.LeaveTargetsOut.splitDataset" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">splitDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.LeaveTargetsOut.splitDataset" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -216,11 +223,23 @@ of initial clusters (random-, scaffold- or cluster-based) to get a balanced spli
 </ul>
 </dd>
 </dl>
+<p>Initialize the object with a data set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dataset</strong> (<a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><em>QSPRDataSet</em></a><em>, </em><em>optional</em>) – The data set to attach to this object. Defaults to None.</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.PCMSplit.getDataSet">
-<span class="sig-name descname"><span class="pre">getDataSet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.PCMSplit.getDataSet" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">getDataSet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.PCMSplit.getDataSet" title="Permalink to this definition"></a></dt>
 <dd><p>Get the data set attached to this object.</p>
 <dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The data set attached to this object</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
+</dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – If no data set is attached to this object.</p>
 </dd>
@@ -235,8 +254,9 @@ of initial clusters (random-, scaffold- or cluster-based) to get a balanced spli
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.PCMSplit.setDataSet">
-<span class="sig-name descname"><span class="pre">setDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.base.MoleculeDataTable" title="qsprpred.data.tables.base.MoleculeDataTable"><span class="pre">MoleculeDataTable</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.PCMSplit.setDataSet" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">setDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.PCMSplit.setDataSet" title="Permalink to this definition"></a></dt>
+<dd><p>Set the data set for this object.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.PCMSplit.split">
@@ -264,7 +284,7 @@ pandas index!)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.PCMSplit.splitDataset">
-<span class="sig-name descname"><span class="pre">splitDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.PCMSplit.splitDataset" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">splitDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.PCMSplit.splitDataset" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -289,9 +309,15 @@ for all targets</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.TemporalPerTarget.getDataSet">
-<span class="sig-name descname"><span class="pre">getDataSet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.TemporalPerTarget.getDataSet" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">getDataSet</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.TemporalPerTarget.getDataSet" title="Permalink to this definition"></a></dt>
 <dd><p>Get the data set attached to this object.</p>
 <dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The data set attached to this object</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
+</dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – If no data set is attached to this object.</p>
 </dd>
@@ -306,8 +332,9 @@ for all targets</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.TemporalPerTarget.setDataSet">
-<span class="sig-name descname"><span class="pre">setDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.base.MoleculeDataTable" title="qsprpred.data.tables.base.MoleculeDataTable"><span class="pre">MoleculeDataTable</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.TemporalPerTarget.setDataSet" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">setDataSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.TemporalPerTarget.setDataSet" title="Permalink to this definition"></a></dt>
+<dd><p>Set the data set for this object.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.TemporalPerTarget.split">
@@ -336,7 +363,7 @@ pandas index!)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.sampling.splits.TemporalPerTarget.splitDataset">
-<span class="sig-name descname"><span class="pre">splitDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.TemporalPerTarget.splitDataset" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">splitDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.splits.TemporalPerTarget.splitDataset" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -781,10 +808,10 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -803,10 +830,10 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -826,10 +853,10 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.html#qsprpred.data.QSPRTable" title="qsprpred.data.QSPRTable"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRTable</span></code></a> object</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.html#qsprpred.data.QSPRTable" title="qsprpred.data.QSPRTable">QSPRTable</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -848,10 +875,10 @@ when assertWarnsRegex is used as a context manager.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -868,13 +895,15 @@ when assertWarnsRegex is used as a context manager.</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
 <li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
 <li><p><strong>prep</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of jobs to use for parallel processing</p></li>
+<li><p><strong>chunk_size</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – size of chunks to use per job in parallel processing</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1080,6 +1109,11 @@ to parameterize tests with the given named combinations.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.getStorage">
+<span class="sig-name descname"><span class="pre">getStorage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.getStorage" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.extra.data.sampling.tests.TestPCMSplitters.id">
 <span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.extra.data.sampling.tests.TestPCMSplitters.id" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
@@ -1208,7 +1242,7 @@ block, allowing further test code to be executed.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="qsprpred.extra.data.descriptors.html" class="btn btn-neutral float-left" title="qsprpred.extra.data.descriptors package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qsprpred.extra.data.tables.html" class="btn btn-neutral float-right" title="qsprpred.extra.data.tables package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qsprpred.extra.data.storage.html" class="btn btn-neutral float-right" title="qsprpred.extra.data.storage package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

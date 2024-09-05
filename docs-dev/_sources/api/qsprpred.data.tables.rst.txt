@@ -1,13 +1,21 @@
 qsprpred.data.tables package
 ============================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qsprpred.data.tables.interfaces
+
 Submodules
 ----------
 
-qsprpred.data.tables.base module
---------------------------------
+qsprpred.data.tables.descriptor module
+--------------------------------------
 
-.. automodule:: qsprpred.data.tables.base
+.. automodule:: qsprpred.data.tables.descriptor
    :members:
    :undoc-members:
    :show-inheritance:
@@ -32,14 +40,6 @@ qsprpred.data.tables.qspr module
 --------------------------------
 
 .. automodule:: qsprpred.data.tables.qspr
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-qsprpred.data.tables.searchable module
---------------------------------------
-
-.. automodule:: qsprpred.data.tables.searchable
    :members:
    :undoc-members:
    :show-inheritance:

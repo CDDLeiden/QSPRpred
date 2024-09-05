@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.descriptors.fingerprints &mdash; QSPRpred 3.1.2.dev40+g2513259a documentation</title>
+  <title>qsprpred.data.descriptors.fingerprints &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=1905640d"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=ae990675"></script>
         <script src="../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev40+g2513259a
+                v3.2.1.dev95+g5c50f5f6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -98,16 +98,18 @@
              
   <h1>Source code for qsprpred.data.descriptors.fingerprints</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Fingerprint classes.&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">DataStructs</span><span class="p">,</span> <span class="n">Chem</span>
+<span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span><span class="p">,</span> <span class="n">DataStructs</span>
 <span class="kn">from</span> <span class="nn">rdkit.Avalon</span> <span class="kn">import</span> <span class="n">pyAvalonTools</span>
-<span class="kn">from</span> <span class="nn">rdkit.Chem</span> <span class="kn">import</span> <span class="n">AllChem</span><span class="p">,</span> <span class="n">MACCSkeys</span><span class="p">,</span> <span class="n">rdMolDescriptors</span><span class="p">,</span> <span class="n">rdmolops</span><span class="p">,</span> <span class="n">Mol</span>
+<span class="kn">from</span> <span class="nn">rdkit.Chem</span> <span class="kn">import</span> <span class="n">AllChem</span><span class="p">,</span> <span class="n">MACCSkeys</span><span class="p">,</span> <span class="n">Mol</span><span class="p">,</span> <span class="n">rdMolDescriptors</span><span class="p">,</span> <span class="n">rdmolops</span>
 
 <span class="kn">from</span> <span class="nn">qsprpred.data.descriptors.sets</span> <span class="kn">import</span> <span class="n">DescriptorSet</span>
+<span class="kn">from</span> <span class="nn">qsprpred.data.storage.interfaces.stored_mol</span> <span class="kn">import</span> <span class="n">StoredMol</span>
 
 
 <div class="viewcode-block" id="Fingerprint"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.Fingerprint">[docs]</a><span class="k">class</span> <span class="nc">Fingerprint</span><span class="p">(</span><span class="n">DescriptorSet</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
@@ -115,41 +117,74 @@
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        usedBits (list): list of bits of the fingerprint currently being used</span>
+<span class="sd">        descriptors (list): list of descriptors</span>
+<span class="sd">        isFP (bool): Whether the descriptor is a fingerprint</span>
+<span class="sd">        dtype (type): Data type of the descriptor</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">used_bits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the fingerprint.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            used_bits (list): list of bits of the fingerprint currently being used</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">usedBits</span> <span class="o">=</span> <span class="n">used_bits</span> <span class="ow">or</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">usedBits</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List of bits of the fingerprint currently being used.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_usedBits</span>
 
     <span class="nd">@usedBits</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">usedBits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the list of bits of the fingerprint currently being used.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (list): list of bits of the fingerprint currently being used</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_usedBits</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list of descriptors.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">usedBits</span><span class="p">]</span>
 
     <span class="nd">@descriptors</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">descriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the list of descriptors</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (list[str]): list of descriptors</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">usedBits</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">value</span><span class="p">)]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">isFP</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether the descriptor is a fingerprint.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Data type of the descriptor.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">bool</span>
 
 <div class="viewcode-block" id="Fingerprint.prepMols"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.Fingerprint.prepMols">[docs]</a>    <span class="k">def</span> <span class="nf">prepMols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Mol</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare the molecules by adding hydrogens.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mols (list[str | Mol]): list of SMILES or RDKit molecules</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list[Mol]): list of RDKit molecules</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">Chem</span><span class="o">.</span><span class="n">AddHs</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iterMols</span><span class="p">(</span><span class="n">mols</span><span class="p">)]</span></div>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Mol</span> <span class="o">|</span> <span class="n">StoredMol</span><span class="p">],</span>
+        <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate binary fingerprints for the input molecules. Only the bits</span>
 <span class="sd">        specified by `usedBits` will be returned if more bits are calculated.</span>
@@ -162,25 +197,42 @@
 <span class="sd">        Args:</span>
 <span class="sd">            mols(list): list of SMILES or RDKit molecules</span>
 <span class="sd">            props(dict): dictionary of properties</span>
-<span class="sd">            *args: positional arguments</span>
-<span class="sd">            **kwargs: keyword arguments</span>
+<span class="sd">            *args: positional arguments to pass to `Fingerprint.getDescriptors`</span>
+<span class="sd">            **kwargs: keyword arguments to pass to `Fingerprint.getDescriptors`</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            data frame of descriptor values of shape (n_mols, n_descriptors)</span>
+<span class="sd">            (pd.DataFrame) descriptor values of shape (n_mols, n_descriptors)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mols</span><span class="p">,</span> <span class="n">props</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parsePropsAndMols</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="n">props</span><span class="p">)</span>
         <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prepMols</span><span class="p">(</span><span class="n">mols</span><span class="p">),</span> <span class="n">props</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">usedBits</span><span class="p">]</span>
         <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-            <span class="n">values</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">props</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transformToFeatureNames</span><span class="p">()</span>
+            <span class="n">values</span><span class="p">,</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">props</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">),</span>
+            <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">transformToFeatureNames</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">df</span></div>
 
 
 <div class="viewcode-block" id="MorganFP"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.MorganFP">[docs]</a><span class="k">class</span> <span class="nc">MorganFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Morgan fingerprint.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Morgan fingerprint.</span>
 
+<span class="sd">    Attributes:</span>
+<span class="sd">        radius (int): radius of the fingerprint</span>
+<span class="sd">        nBits (int): number of bits in the fingerprint</span>
+<span class="sd">        kwargs (dict):</span>
+<span class="sd">            additional keyword arguments to pass to RDKit&#39;s</span>
+<span class="sd">            `GetMorganFingerprintAsBitVect` function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the Morgan fingerprint.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            radius (int): radius of the fingerprint</span>
+<span class="sd">            nBits (int): number of bits in the fingerprint</span>
+<span class="sd">            kwargs (dict): additional keyword arguments</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">used_bits</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nBits</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">radius</span> <span class="o">=</span> <span class="n">radius</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nBits</span> <span class="o">=</span> <span class="n">nBits</span>
@@ -189,6 +241,17 @@
 <div class="viewcode-block" id="MorganFP.getDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.MorganFP.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the Morgan fingerprints for the input molecules.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mols (list): list of RDKit molecules</span>
+<span class="sd">            props (dict): dictionary of properties</span>
+<span class="sd">            *args: positional arguments (not used)</span>
+<span class="sd">            **kwargs: keyword arguments (not used, set in the constructor)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (np.ndarray): descriptor values of shape (n_mols, n_descriptors)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">convertFP</span> <span class="o">=</span> <span class="n">DataStructs</span><span class="o">.</span><span class="n">ConvertToNumpyArray</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">mols</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">mol</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mols</span><span class="p">):</span>
@@ -209,10 +272,20 @@
 
 <div class="viewcode-block" id="RDKitMACCSFP"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.RDKitMACCSFP">[docs]</a><span class="k">class</span> <span class="nc">RDKitMACCSFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;RDKits implementation of MACCS keys fingerprint.&quot;&quot;&quot;</span>
-
 <div class="viewcode-block" id="RDKitMACCSFP.getDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.RDKitMACCSFP.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the MACCS keys fingerprints for the input molecules.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mols (list): list of RDKit molecules</span>
+<span class="sd">            props (dict): dictionary of properties (not used)</span>
+<span class="sd">            *args: positional arguments (not used)</span>
+<span class="sd">            **kwargs: keyword arguments (not used)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            np.ndarray of shape (n_mols, n_descriptors)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">convertFP</span> <span class="o">=</span> <span class="n">DataStructs</span><span class="o">.</span><span class="n">ConvertToNumpyArray</span>
 
         <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">mols</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
@@ -232,7 +305,23 @@
 
 
 <div class="viewcode-block" id="MaccsFP"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.MaccsFP">[docs]</a><span class="k">class</span> <span class="nc">MaccsFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;MACCS keys fingerprint.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        nBits (int): number of bits in the fingerprint</span>
+<span class="sd">        kwargs (dict):</span>
+<span class="sd">            additional keyword arguments to pass to RDKit&#39;s `GetMACCSKeysFingerprint`</span>
+<span class="sd">            function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">167</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the MACCS keys fingerprint.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            nBits (int): number of bits in the fingerprint</span>
+<span class="sd">            kwargs (dict):</span>
+<span class="sd">                additional keyword arguments to pass to RDKit&#39;s</span>
+<span class="sd">                `GetMACCSKeysFingerprint` function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">used_bits</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nBits</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nBits</span> <span class="o">=</span> <span class="n">nBits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
@@ -240,6 +329,17 @@
 <div class="viewcode-block" id="MaccsFP.getDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.MaccsFP.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the MACCS keys fingerprints for the input molecules.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mols (list): list of RDKit molecules</span>
+<span class="sd">            props (dict): dictionary of properties (not used)</span>
+<span class="sd">            *args: positional arguments (not used)</span>
+<span class="sd">            **kwargs: keyword arguments (not used, set in the constructor)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (np.ndarray): descriptor values of shape (n_mols, n_descriptors)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">convertFP</span> <span class="o">=</span> <span class="n">DataStructs</span><span class="o">.</span><span class="n">ConvertToNumpyArray</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">mols</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">mol</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mols</span><span class="p">):</span>
@@ -257,7 +357,20 @@
 
 
 <div class="viewcode-block" id="AvalonFP"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.AvalonFP">[docs]</a><span class="k">class</span> <span class="nc">AvalonFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Avalon fingerprint.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        nBits (int): number of bits in the fingerprint</span>
+<span class="sd">        kwargs (dict): additional keyword arguments to pass to Avalon&#39;s `GetAvalonFP`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the Avalon fingerprint.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            nBits (int): number of bits in the fingerprint</span>
+<span class="sd">            kwargs (dict):</span>
+<span class="sd">                additional keyword arguments to pass to Avalon&#39;s `GetAvalonFP`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">used_bits</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nBits</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nBits</span> <span class="o">=</span> <span class="n">nBits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
@@ -265,6 +378,17 @@
 <div class="viewcode-block" id="AvalonFP.getDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.AvalonFP.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the Avalon fingerprints for the input molecules.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mols (list): list of RDKit molecules</span>
+<span class="sd">            props (dict): dictionary of properties (not used)</span>
+<span class="sd">            *args: positional arguments (not used)</span>
+<span class="sd">            **kwargs: keyword arguments (not used, set in the constructor)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (np.ndarray): descriptor values of shape (n_mols, n_descriptors)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">convertFP</span> <span class="o">=</span> <span class="n">DataStructs</span><span class="o">.</span><span class="n">ConvertToNumpyArray</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">mols</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">mol</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mols</span><span class="p">):</span>
@@ -282,7 +406,21 @@
 
 
 <div class="viewcode-block" id="TopologicalFP"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.TopologicalFP">[docs]</a><span class="k">class</span> <span class="nc">TopologicalFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Topological torsion fingerprint.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        nBits (int): number of bits in the fingerprint</span>
+<span class="sd">        kwargs (dict):</span>
+<span class="sd">            additional keyword arguments to pass to RDKit&#39;s</span>
+<span class="sd">            `GetHashedTopologicalTorsionFingerprintAsBitVect` function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the topological torsion fingerprint.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            nBits (int): number of bits in the fingerprint</span>
+<span class="sd">            kwargs (dict): additional keyword arguments</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">used_bits</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nBits</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nBits</span> <span class="o">=</span> <span class="n">nBits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
@@ -290,6 +428,17 @@
 <div class="viewcode-block" id="TopologicalFP.getDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.TopologicalFP.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the topological torsion fingerprints for the input molecules.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mols (list): list of RDKit molecules</span>
+<span class="sd">            props (dict): dictionary of properties (not used)</span>
+<span class="sd">            *args: positional arguments (not used)</span>
+<span class="sd">            **kwargs: keyword arguments (not used)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (np.ndarray): descriptor values of shape (n_mols, n_descriptors)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">convertFP</span> <span class="o">=</span> <span class="n">DataStructs</span><span class="o">.</span><span class="n">ConvertToNumpyArray</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">mols</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">mol</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mols</span><span class="p">):</span>
@@ -309,7 +458,23 @@
 
 
 <div class="viewcode-block" id="AtomPairFP"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.AtomPairFP">[docs]</a><span class="k">class</span> <span class="nc">AtomPairFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Atom pair fingerprint.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        nBits (int): number of bits in the fingerprint</span>
+<span class="sd">        kwargs (dict):</span>
+<span class="sd">            additional keyword arguments to pass to RDKit&#39;s</span>
+<span class="sd">            `GetHashedAtomPairFingerprintAsBitVect` function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the atom pair fingerprint.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            nBits (int): number of bits in the fingerprint</span>
+<span class="sd">            kwargs (dict):</span>
+<span class="sd">                additional keyword arguments to pass to RDKit&#39;s</span>
+<span class="sd">                `GetHashedAtomPairFingerprintAsBitVect`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">used_bits</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nBits</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nBits</span> <span class="o">=</span> <span class="n">nBits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
@@ -317,6 +482,17 @@
 <div class="viewcode-block" id="AtomPairFP.getDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.AtomPairFP.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the atom pair fingerprints for the input molecules.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mols (list): list of RDKit molecules</span>
+<span class="sd">            props (dict): dictionary of properties (not used)</span>
+<span class="sd">            *args: positional arguments (not used)</span>
+<span class="sd">            **kwargs: keyword arguments (not used, set in the constructor)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (np.ndarray): descriptor values of shape (n_mols, n_descriptors)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">convertFP</span> <span class="o">=</span> <span class="n">DataStructs</span><span class="o">.</span><span class="n">ConvertToNumpyArray</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">mols</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">mol</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mols</span><span class="p">):</span>
@@ -336,7 +512,26 @@
 
 
 <div class="viewcode-block" id="RDKitFP"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.RDKitFP">[docs]</a><span class="k">class</span> <span class="nc">RDKitFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;RDKit fingerprint.</span>
+
+<span class="sd">    This is a wrapper around RDKit&#39;s RDKFingerprint function.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        minPath (int): minimum path length</span>
+<span class="sd">        maxPath (int): maximum path length</span>
+<span class="sd">        nBits (int): number of bits in the fingerprint</span>
+<span class="sd">        kwargs (dict): additional keyword arguments to pass to RDKit&#39;s `RDKFingerprint`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minPath</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">maxPath</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the RDKit fingerprint.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            minPath (int): minimum path length</span>
+<span class="sd">            maxPath (int): maximum path length</span>
+<span class="sd">            nBits (int): number of bits in the fingerprint</span>
+<span class="sd">            kwargs (dict):</span>
+<span class="sd">                additional keyword arguments to pass to RDKit&#39;s `RDKFingerprint`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">used_bits</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nBits</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">minPath</span> <span class="o">=</span> <span class="n">minPath</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">maxPath</span> <span class="o">=</span> <span class="n">maxPath</span>
@@ -346,6 +541,17 @@
 <div class="viewcode-block" id="RDKitFP.getDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.RDKitFP.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the RDKit fingerprints for the input molecules.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mols (list): list of RDKit molecules</span>
+<span class="sd">            props (dict): dictionary of properties (not used)</span>
+<span class="sd">            *args: positional arguments (not used)</span>
+<span class="sd">            **kwargs: keyword arguments (not used, set in the constructor)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (np.ndarray): descriptor values of shape (n_mols, n_descriptors)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">convertFP</span> <span class="o">=</span> <span class="n">DataStructs</span><span class="o">.</span><span class="n">ConvertToNumpyArray</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">mols</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">mol</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mols</span><span class="p">):</span>
@@ -369,7 +575,21 @@
 
 
 <div class="viewcode-block" id="PatternFP"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.PatternFP">[docs]</a><span class="k">class</span> <span class="nc">PatternFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pattern fingerprint.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        nBits (int): number of bits in the fingerprint</span>
+<span class="sd">        kwargs (dict):</span>
+<span class="sd">            additional keyword arguments to pass to RDKit&#39;s `PatternFingerprint`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the pattern fingerprint.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            nBits (int): number of bits in the fingerprint</span>
+<span class="sd">            kwargs (dict):</span>
+<span class="sd">                additional keyword arguments to pass to RDKit&#39;s `PatternFingerprint`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">used_bits</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nBits</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nBits</span> <span class="o">=</span> <span class="n">nBits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
@@ -377,6 +597,17 @@
 <div class="viewcode-block" id="PatternFP.getDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.PatternFP.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the pattern fingerprints for the input molecules.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mols (list): list of RDKit molecules</span>
+<span class="sd">            props (dict): dictionary of properties (not used)</span>
+<span class="sd">            *args: positional arguments (not used)</span>
+<span class="sd">            **kwargs: keyword arguments (not used, set in the constructor)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (np.ndarray): descriptor values of shape (n_mols, n_descriptors)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">convertFP</span> <span class="o">=</span> <span class="n">DataStructs</span><span class="o">.</span><span class="n">ConvertToNumpyArray</span>
 
         <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">mols</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
@@ -396,7 +627,25 @@
 
 
 <div class="viewcode-block" id="LayeredFP"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.LayeredFP">[docs]</a><span class="k">class</span> <span class="nc">LayeredFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Layered fingerprint.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        minPath (int): minimum path length</span>
+<span class="sd">        maxPath (int): maximum path length</span>
+<span class="sd">        nBits (int): number of bits in the fingerprint</span>
+<span class="sd">        kwargs (dict):</span>
+<span class="sd">            additional keyword arguments to pass to RDKit&#39;s `LayeredFingerprint`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">minPath</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">maxPath</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the layered fingerprint.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            minPath (int): minimum path length</span>
+<span class="sd">            maxPath (int): maximum path length</span>
+<span class="sd">            nBits (int): number of bits in the fingerprint</span>
+<span class="sd">            kwargs (dict):</span>
+<span class="sd">                additional keyword arguments to pass to RDKit&#39;s `LayeredFingerprint`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">used_bits</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">nBits</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">minPath</span> <span class="o">=</span> <span class="n">minPath</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">maxPath</span> <span class="o">=</span> <span class="n">maxPath</span>
@@ -406,6 +655,14 @@
 <div class="viewcode-block" id="LayeredFP.getDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.LayeredFP.getDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">getDescriptors</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Mol</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the layered fingerprints for the input molecules.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mols (list): list of RDKit molecules</span>
+<span class="sd">            props (dict): dictionary of properties (not used)</span>
+<span class="sd">            *args: positional arguments (not used)</span>
+<span class="sd">            **kwargs: keyword arguments (not used, set in the constructor)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">convertFP</span> <span class="o">=</span> <span class="n">DataStructs</span><span class="o">.</span><span class="n">ConvertToNumpyArray</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">mols</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">mol</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mols</span><span class="p">):</span>

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.utils.testing package &mdash; QSPRpred 3.1.2.dev40+g2513259a documentation</title>
+  <title>qsprpred.utils.testing package &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -17,7 +17,7 @@
   
         <script src="../_static/jquery.js?v=5d32c60e"></script>
         <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=1905640d"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=ae990675"></script>
         <script src="../_static/doctools.js?v=888ff710"></script>
         <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -55,7 +55,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev40+g2513259a
+                v3.2.1.dev95+g5c50f5f6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -677,14 +677,14 @@ block, allowing further test code to be executed.</p>
 <p>Mixin for testing data preparation.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn.checkDescriptors">
-<span class="sig-name descname"><span class="pre">checkDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><span class="pre">qsprpred.tasks.TargetProperty</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn.checkDescriptors" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">checkDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><span class="pre">qsprpred.tasks.TargetProperty</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn.checkDescriptors" title="Permalink to this definition"></a></dt>
 <dd><p>Check if information about descriptors is consistent in the data set. Checks
 if calculators are consistent with the descriptors contained in the data set.
 This is tested also before and after serialization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dataset</strong> (<a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><em>QSPRDataset</em></a>) – The data set to check.</p></li>
+<li><p><strong>dataset</strong> (<a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><em>QSPRDataSet</em></a>) – The data set to check.</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
 </ul>
 </dd>
@@ -696,13 +696,13 @@ This is tested also before and after serialization.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn.checkFeatures">
-<span class="sig-name descname"><span class="pre">checkFeatures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn.checkFeatures" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">checkFeatures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn.checkFeatures" title="Permalink to this definition"></a></dt>
 <dd><p>Check if the feature names and the feature matrix of a data set is consistent
 with expected number of variables.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ds</strong> (<a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><em>QSPRDataset</em></a>) – The data set to check.</p></li>
+<li><p><strong>ds</strong> (<a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><em>QSPRDataSet</em></a>) – The data set to check.</p></li>
 <li><p><strong>expected_length</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The expected number of features.</p></li>
 </ul>
 </dd>
@@ -727,14 +727,14 @@ with expected number of variables.</p>
 <p>Mixin class for common descriptor checks.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn.checkDescriptors">
-<span class="sig-name descname"><span class="pre">checkDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><span class="pre">qsprpred.tasks.TargetProperty</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#DescriptorCheckMixIn.checkDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn.checkDescriptors" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">checkDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><span class="pre">qsprpred.tasks.TargetProperty</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#DescriptorCheckMixIn.checkDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn.checkDescriptors" title="Permalink to this definition"></a></dt>
 <dd><p>Check if information about descriptors is consistent in the data set. Checks
 if calculators are consistent with the descriptors contained in the data set.
 This is tested also before and after serialization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dataset</strong> (<a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><em>QSPRDataset</em></a>) – The data set to check.</p></li>
+<li><p><strong>dataset</strong> (<a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><em>QSPRDataSet</em></a>) – The data set to check.</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
 </ul>
 </dd>
@@ -746,13 +746,13 @@ This is tested also before and after serialization.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn.checkFeatures">
-<span class="sig-name descname"><span class="pre">checkFeatures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#DescriptorCheckMixIn.checkFeatures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn.checkFeatures" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">checkFeatures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#DescriptorCheckMixIn.checkFeatures"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn.checkFeatures" title="Permalink to this definition"></a></dt>
 <dd><p>Check if the feature names and the feature matrix of a data set is consistent
 with expected number of variables.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ds</strong> (<a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><em>QSPRDataset</em></a>) – The data set to check.</p></li>
+<li><p><strong>ds</strong> (<a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><em>QSPRDataSet</em></a>) – The data set to check.</p></li>
 <li><p><strong>expected_length</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The expected number of features.</p></li>
 </ul>
 </dd>
@@ -777,14 +777,14 @@ with expected number of variables.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.DescriptorInDataCheckMixIn.checkDescriptors">
-<span class="sig-name descname"><span class="pre">checkDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><span class="pre">qsprpred.tasks.TargetProperty</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DescriptorInDataCheckMixIn.checkDescriptors" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">checkDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><span class="pre">qsprpred.tasks.TargetProperty</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DescriptorInDataCheckMixIn.checkDescriptors" title="Permalink to this definition"></a></dt>
 <dd><p>Check if information about descriptors is consistent in the data set. Checks
 if calculators are consistent with the descriptors contained in the data set.
 This is tested also before and after serialization.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dataset</strong> (<a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><em>QSPRDataset</em></a>) – The data set to check.</p></li>
+<li><p><strong>dataset</strong> (<a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><em>QSPRDataSet</em></a>) – The data set to check.</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
 </ul>
 </dd>
@@ -796,13 +796,13 @@ This is tested also before and after serialization.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.DescriptorInDataCheckMixIn.checkFeatures">
-<span class="sig-name descname"><span class="pre">checkFeatures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DescriptorInDataCheckMixIn.checkFeatures" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">checkFeatures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DescriptorInDataCheckMixIn.checkFeatures" title="Permalink to this definition"></a></dt>
 <dd><p>Check if the feature names and the feature matrix of a data set is consistent
 with expected number of variables.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ds</strong> (<a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><em>QSPRDataset</em></a>) – The data set to check.</p></li>
+<li><p><strong>ds</strong> (<a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><em>QSPRDataSet</em></a>) – The data set to check.</p></li>
 <li><p><strong>expected_length</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – The expected number of features.</p></li>
 </ul>
 </dd>
@@ -827,18 +827,18 @@ with expected number of variables.</p>
 <p>This class holds the tests for the QSPRmodel class.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.ModelCheckMixIn.checkOptimization">
-<span class="sig-name descname"><span class="pre">checkOptimization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.hyperparam_optimization.HyperparameterOptimization" title="qsprpred.models.hyperparam_optimization.HyperparameterOptimization"><span class="pre">HyperparameterOptimization</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#ModelCheckMixIn.checkOptimization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.checkOptimization" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">checkOptimization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.hyperparam_optimization.HyperparameterOptimization" title="qsprpred.models.hyperparam_optimization.HyperparameterOptimization"><span class="pre">HyperparameterOptimization</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#ModelCheckMixIn.checkOptimization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.checkOptimization" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.ModelCheckMixIn.fitTest">
-<span class="sig-name descname"><span class="pre">fitTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#ModelCheckMixIn.fitTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.fitTest" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">fitTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#ModelCheckMixIn.fitTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.fitTest" title="Permalink to this definition"></a></dt>
 <dd><p>Test model fitting, optimization and evaluation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><em>QSPRModel</em></a>) – The model to test.</p></li>
-<li><p><strong>ds</strong> (<a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><em>QSPRDataset</em></a>) – The dataset to use for testing.</p></li>
+<li><p><strong>ds</strong> (<a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><em>QSPRDataSet</em></a>) – The dataset to use for testing.</p></li>
 </ul>
 </dd>
 </dl>
@@ -871,7 +871,7 @@ with expected number of variables.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.ModelCheckMixIn.predictorTest">
-<span class="sig-name descname"><span class="pre">predictorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparison_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expect_equal_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">pred_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#ModelCheckMixIn.predictorTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.predictorTest" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">predictorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparison_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expect_equal_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">pred_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#ModelCheckMixIn.predictorTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.predictorTest" title="Permalink to this definition"></a></dt>
 <dd><p>Test model predictions.</p>
 <p>Checks if the shape of the predictions is as expected and if the predictions
 of the predictMols function are consistent with the predictions of the
@@ -881,7 +881,7 @@ the same as the predictions of the comparison model if given.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><em>QSPRModel</em></a>) – The model to make predictions with.</p></li>
-<li><p><strong>dataset</strong> (<a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><em>QSPRDataset</em></a>) – The dataset to make predictions for.</p></li>
+<li><p><strong>dataset</strong> (<a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><em>QSPRDataSet</em></a>) – The dataset to make predictions for.</p></li>
 <li><p><strong>comparison_model</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><em>QSPRModel</em></a>) – another model to compare the predictions with.</p></li>
 <li><p><strong>expect_equal_result</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether the expected result should be equal or
 not equal to the predictions of the comparison model.</p></li>
@@ -905,7 +905,7 @@ not equal to the predictions of the comparison model.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.checkOptimization">
-<span class="sig-name descname"><span class="pre">checkOptimization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.hyperparam_optimization.HyperparameterOptimization" title="qsprpred.models.hyperparam_optimization.HyperparameterOptimization"><span class="pre">HyperparameterOptimization</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.checkOptimization" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">checkOptimization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.hyperparam_optimization.HyperparameterOptimization" title="qsprpred.models.hyperparam_optimization.HyperparameterOptimization"><span class="pre">HyperparameterOptimization</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.checkOptimization" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -928,10 +928,10 @@ not equal to the predictions of the comparison model.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -950,10 +950,10 @@ not equal to the predictions of the comparison model.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -972,10 +972,10 @@ not equal to the predictions of the comparison model.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -992,13 +992,15 @@ not equal to the predictions of the comparison model.</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
 <li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
 <li><p><strong>prep</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of jobs to use for parallel processing</p></li>
+<li><p><strong>chunk_size</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – size of chunks to use per job in parallel processing</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1011,13 +1013,13 @@ not equal to the predictions of the comparison model.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.fitTest">
-<span class="sig-name descname"><span class="pre">fitTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.fitTest" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">fitTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.fitTest" title="Permalink to this definition"></a></dt>
 <dd><p>Test model fitting, optimization and evaluation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><em>QSPRModel</em></a>) – The model to test.</p></li>
-<li><p><strong>ds</strong> (<a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><em>QSPRDataset</em></a>) – The dataset to use for testing.</p></li>
+<li><p><strong>ds</strong> (<a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><em>QSPRDataSet</em></a>) – The dataset to use for testing.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1146,6 +1148,11 @@ to parameterize tests with the given named combinations.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getStorage">
+<span class="sig-name descname"><span class="pre">getStorage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getStorage" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.gridFile">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gridFile</span></span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.gridFile" title="Permalink to this definition"></a></dt>
@@ -1158,7 +1165,7 @@ to parameterize tests with the given named combinations.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.predictorTest">
-<span class="sig-name descname"><span class="pre">predictorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><span class="pre">QSPRDataset</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparison_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expect_equal_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">pred_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.predictorTest" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">predictorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparison_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expect_equal_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">pred_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.predictorTest" title="Permalink to this definition"></a></dt>
 <dd><p>Test model predictions.</p>
 <p>Checks if the shape of the predictions is as expected and if the predictions
 of the predictMols function are consistent with the predictions of the
@@ -1168,7 +1175,7 @@ the same as the predictions of the comparison model if given.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><em>QSPRModel</em></a>) – The model to make predictions with.</p></li>
-<li><p><strong>dataset</strong> (<a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><em>QSPRDataset</em></a>) – The dataset to make predictions for.</p></li>
+<li><p><strong>dataset</strong> (<a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><em>QSPRDataSet</em></a>) – The dataset to make predictions for.</p></li>
 <li><p><strong>comparison_model</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><em>QSPRModel</em></a>) – another model to compare the predictions with.</p></li>
 <li><p><strong>expect_equal_result</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether the expected result should be equal or
 not equal to the predictions of the comparison model.</p></li>
@@ -1197,7 +1204,7 @@ not equal to the predictions of the comparison model.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.trainModelWithMonitoring">
-<span class="sig-name descname"><span class="pre">trainModelWithMonitoring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model:</span> <span class="pre">~qsprpred.models.model.QSPRModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds:</span> <span class="pre">~qsprpred.data.tables.qspr.QSPRDataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparam_monitor:</span> <span class="pre">~qsprpred.models.monitors.HyperparameterOptimizationMonitor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crossval_monitor:</span> <span class="pre">~qsprpred.models.monitors.AssessorMonitor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_monitor:</span> <span class="pre">~qsprpred.models.monitors.AssessorMonitor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_monitor:</span> <span class="pre">~qsprpred.models.monitors.FitMonitor)</span> <span class="pre">-&gt;</span> <span class="pre">(&lt;class</span> <span class="pre">'qsprpred.models.monitors.HyperparameterOptimizationMonitor'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'qsprpred.models.monitors.AssessorMonitor'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'qsprpred.models.monitors.AssessorMonitor'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'qsprpred.models.monitors.FitMonitor'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#MonitorsCheckMixIn.trainModelWithMonitoring"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.trainModelWithMonitoring" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">trainModelWithMonitoring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model:</span> <span class="pre">~qsprpred.models.model.QSPRModel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds:</span> <span class="pre">~qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparam_monitor:</span> <span class="pre">~qsprpred.models.monitors.HyperparameterOptimizationMonitor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crossval_monitor:</span> <span class="pre">~qsprpred.models.monitors.AssessorMonitor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_monitor:</span> <span class="pre">~qsprpred.models.monitors.AssessorMonitor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_monitor:</span> <span class="pre">~qsprpred.models.monitors.FitMonitor)</span> <span class="pre">-&gt;</span> <span class="pre">(&lt;class</span> <span class="pre">'qsprpred.models.monitors.HyperparameterOptimizationMonitor'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'qsprpred.models.monitors.AssessorMonitor'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'qsprpred.models.monitors.AssessorMonitor'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'qsprpred.models.monitors.FitMonitor'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#MonitorsCheckMixIn.trainModelWithMonitoring"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.trainModelWithMonitoring" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1237,10 +1244,10 @@ preparation settings to use in tests.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1259,10 +1266,10 @@ preparation settings to use in tests.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1281,10 +1288,10 @@ preparation settings to use in tests.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1301,13 +1308,15 @@ preparation settings to use in tests.</p>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
 <li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
 <li><p><strong>prep</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of jobs to use for parallel processing</p></li>
+<li><p><strong>chunk_size</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – size of chunks to use per job in parallel processing</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1416,6 +1425,11 @@ to parameterize tests with the given named combinations.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getStorage">
+<span class="sig-name descname"><span class="pre">getStorage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#DataSetsPathMixIn.getStorage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getStorage" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.setUpPaths">
 <span class="sig-name descname"><span class="pre">setUpPaths</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#DataSetsPathMixIn.setUpPaths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.setUpPaths" title="Permalink to this definition"></a></dt>
 <dd><p>Create the directories that are used for testing.</p>
@@ -1460,10 +1474,10 @@ to parameterize tests with the given named combinations.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1482,10 +1496,10 @@ to parameterize tests with the given named combinations.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1504,10 +1518,10 @@ to parameterize tests with the given named combinations.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1524,13 +1538,15 @@ to parameterize tests with the given named combinations.</p>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetProperty" title="qsprpred.tasks.TargetProperty"><em>TargetProperty</em></a>) – list of target properties</p></li>
 <li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
 <li><p><strong>prep</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of jobs to use for parallel processing</p></li>
+<li><p><strong>chunk_size</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – size of chunks to use per job in parallel processing</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataset</span></code></a> object</p>
+<dd class="field-even"><p>a <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> object</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRDataset" title="qsprpred.data.tables.qspr.QSPRDataset">QSPRDataset</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">QSPRDataSet</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1637,6 +1653,11 @@ to parameterize tests with the given named combinations.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getStorage">
+<span class="sig-name descname"><span class="pre">getStorage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getStorage" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.setUpPaths">

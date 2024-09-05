@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.data.descriptors.fingerprints &mdash; QSPRpred 3.1.2.dev40+g2513259a documentation</title>
+  <title>qsprpred.extra.data.descriptors.fingerprints &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=1905640d"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=ae990675"></script>
         <script src="../../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.1.2.dev40+g2513259a
+                v3.2.1.dev95+g5c50f5f6
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -110,12 +110,12 @@
 <span class="sd">- `CDKKlekotaRothFP`: CDK hashed Klekota-Roth fingerprint</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">PaDEL_pywrapper</span> <span class="kn">import</span> <span class="n">PaDEL</span> <span class="k">as</span> <span class="n">PaDEL_calculator</span>
 <span class="kn">from</span> <span class="nn">PaDEL_pywrapper</span> <span class="kn">import</span> <span class="n">descriptor</span> <span class="k">as</span> <span class="n">cdk_fps</span>
-<span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
 <span class="kn">from</span> <span class="nn">rdkit.Chem</span> <span class="kn">import</span> <span class="n">Mol</span>
 
 <span class="kn">from</span> <span class="nn">qsprpred.data.descriptors.fingerprints</span> <span class="kn">import</span> <span class="n">Fingerprint</span>
@@ -128,7 +128,6 @@
 <span class="sd">        size (int): size of the fingerprint</span>
 <span class="sd">        searchDepth (int): search depth of the fingerprint</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span> <span class="n">search_depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">7</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the CDK fingerprint.</span>
 
@@ -170,7 +169,6 @@
 
 <div class="viewcode-block" id="CDKExtendedFP"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKExtendedFP">[docs]</a><span class="k">class</span> <span class="nc">CDKExtendedFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;CDK extended fingerprint with 25 additional ring features and isotopic masses.&quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="n">fp</span> <span class="o">=</span> <span class="n">cdk_fps</span><span class="o">.</span><span class="n">ExtendedFP</span>
@@ -199,7 +197,6 @@
 
 <div class="viewcode-block" id="CDKEStateFP"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKEStateFP">[docs]</a><span class="k">class</span> <span class="nc">CDKEStateFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;CDK EState fingerprint.&quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="n">fp</span> <span class="o">=</span> <span class="n">cdk_fps</span><span class="o">.</span><span class="n">EStateFP</span>
@@ -233,7 +230,6 @@
 <span class="sd">        size (int): Number of bits in the CDK fingerprints (ignored for others)</span>
 <span class="sd">        searchDepth (int): Search depth for the CDK fingerprints (ignored for others)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span> <span class="n">search_depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">7</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -264,7 +260,6 @@
 
 <div class="viewcode-block" id="CDKMACCSFP"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKMACCSFP">[docs]</a><span class="k">class</span> <span class="nc">CDKMACCSFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;CDK MACCS fingerprint.&quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="n">fp</span> <span class="o">=</span> <span class="n">cdk_fps</span><span class="o">.</span><span class="n">MACCSFP</span>
@@ -293,7 +288,6 @@
 
 <div class="viewcode-block" id="CDKPubchemFP"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKPubchemFP">[docs]</a><span class="k">class</span> <span class="nc">CDKPubchemFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;CDK PubChem fingerprint.&quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="n">fp</span> <span class="o">=</span> <span class="n">cdk_fps</span><span class="o">.</span><span class="n">PubchemFP</span>
@@ -328,7 +322,6 @@
 <span class="sd">        useCounts (bool):</span>
 <span class="sd">            whether to use counts instead of presence/absence</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_counts</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">useCounts</span> <span class="o">=</span> <span class="n">use_counts</span>
@@ -363,7 +356,6 @@
 
 <div class="viewcode-block" id="CDKKlekotaRothFP"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKKlekotaRothFP">[docs]</a><span class="k">class</span> <span class="nc">CDKKlekotaRothFP</span><span class="p">(</span><span class="n">Fingerprint</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;CDK Klekota &amp; Roth fingerprint.&quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_counts</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise the fingerprint.</span>
 
@@ -409,7 +401,6 @@
 <span class="sd">        useCounts (bool):</span>
 <span class="sd">            whether to use counts instead of presence/absence</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_counts</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialise the fingerprint.</span>

@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.data.chem.standardizers package &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=ae990675"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script>
+    </script>
+        <script src="../_static/design-tabs.js?v=f930bc37"></script>
+        <script src="../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="qsprpred.data.descriptors package" href="qsprpred.data.descriptors.html" />
+    <link rel="prev" title="qsprpred.data.chem package" href="qsprpred.data.chem.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v3.2.1.dev95+g5c50f5f6
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features.html">Overview of available features</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Python API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qsprpred.html">qsprpred package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="qsprpred.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.benchmarks.html">qsprpred.benchmarks package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="qsprpred.data.html">qsprpred.data package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.extra.html">qsprpred.extra package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.logs.html">qsprpred.logs package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.models.html">qsprpred.models package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.plotting.html">qsprpred.plotting package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qsprpred.utils.html">qsprpred.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.data_CLI">qsprpred.data_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.model_CLI">qsprpred.model_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.predict_CLI">qsprpred.predict_CLI module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred.tasks">qsprpred.tasks module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qsprpred.html#module-qsprpred">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Python API</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.html">qsprpred package</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.data.html">qsprpred.data package</a></li>
+          <li class="breadcrumb-item"><a href="qsprpred.data.chem.html">qsprpred.data.chem package</a></li>
+      <li class="breadcrumb-item active">qsprpred.data.chem.standardizers package</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qsprpred-data-chem-standardizers-package">
+<h1>qsprpred.data.chem.standardizers package<a class="headerlink" href="#qsprpred-data-chem-standardizers-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-qsprpred.data.chem.standardizers.base">
+<span id="qsprpred-data-chem-standardizers-base-module"></span><h2>qsprpred.data.chem.standardizers.base module<a class="headerlink" href="#module-qsprpred.data.chem.standardizers.base" title="Permalink to this heading"></a></h2>
+<dl class="py exception">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.base.ChemStandardizationException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.chem.standardizers.base.</span></span><span class="sig-name descname"><span class="pre">ChemStandardizationException</span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/base.html#ChemStandardizationException"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.base.ChemStandardizationException" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#Exception" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>Exception raised when standardization fails.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.base.ChemStandardizationException.add_note">
+<span class="sig-name descname"><span class="pre">add_note</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.chem.standardizers.base.ChemStandardizationException.add_note" title="Permalink to this definition"></a></dt>
+<dd><p>Exception.add_note(note) –
+add a note to the exception</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.base.ChemStandardizationException.args">
+<span class="sig-name descname"><span class="pre">args</span></span><a class="headerlink" href="#qsprpred.data.chem.standardizers.base.ChemStandardizationException.args" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.base.ChemStandardizationException.with_traceback">
+<span class="sig-name descname"><span class="pre">with_traceback</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.chem.standardizers.base.ChemStandardizationException.with_traceback" title="Permalink to this definition"></a></dt>
+<dd><p>Exception.with_traceback(tb) –
+set self.__traceback__ to tb and return self.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.base.ChemStandardizer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.chem.standardizers.base.</span></span><span class="sig-name descname"><span class="pre">ChemStandardizer</span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/base.html#ChemStandardizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Standardizer to convert SMILES to a standardized form.</p>
+<p>This class defines an interface of a uniquely identifiable standardizer.
+The <a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer.getID" title="qsprpred.data.chem.standardizers.base.ChemStandardizer.getID"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">getID</span></code></a> method should return a unique identifier for the standardizer
+based on its settings. Standardizes that have the same ID should produce
+the same standardized form for a given SMILES.</p>
+<p>The main method of the class is <a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer.convertSMILES" title="qsprpred.data.chem.standardizers.base.ChemStandardizer.convertSMILES"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">convertSMILES</span></code></a>, which should convert
+a given SMILES to a standardized form based on the settings of the standardizer.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.base.ChemStandardizer.convertSMILES">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convertSMILES</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/base.html#ChemStandardizer.convertSMILES"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer.convertSMILES" title="Permalink to this definition"></a></dt>
+<dd><p>Convert the SMILES to a standardized form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>smiles</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – SMILES to be converted</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The standardized SMILES string or <a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">None</span></code></a> if standardization fails or
+the molecule is deemed invalid.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a> | None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizationException" title="qsprpred.data.chem.standardizers.base.ChemStandardizationException"><strong>ChemStandardizationException</strong></a> – if standardization fails, but the upstream code should be notified
+    and handle the exception.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.base.ChemStandardizer.fromSettings">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer"><span class="pre">ChemStandardizer</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/base.html#ChemStandardizer.fromSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer.fromSettings" title="Permalink to this definition"></a></dt>
+<dd><p>Create a new standardizer from a settings dictionary.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.base.ChemStandardizer.fromSettingsFile">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromSettingsFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer"><span class="pre">ChemStandardizer</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/base.html#ChemStandardizer.fromSettingsFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer.fromSettingsFile" title="Permalink to this definition"></a></dt>
+<dd><p>Load the standardizer from a settings file in JSON format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Path to the settings file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The standardizer loaded from the settings file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer">ChemStandardizer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.base.ChemStandardizer.getHashID">
+<span class="sig-name descname"><span class="pre">getHashID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/base.html#ChemStandardizer.getHashID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer.getHashID" title="Permalink to this definition"></a></dt>
+<dd><p>Get the hash ID of the standardizer. This is simply the MD5 hash of the
+unique identifier of the standardizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The hash ID of the standardizer</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.base.ChemStandardizer.getID">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/base.html#ChemStandardizer.getID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer.getID" title="Permalink to this definition"></a></dt>
+<dd><p>Return the unique identifier of the standardizer. This method should
+return a unique identifier based on the settings of the standardizer.</p>
+<p>Two standardizers with the same settings should have the same ID and
+produce the same standardized form for a given SMILES.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The unique identifier of the standardizer.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.base.ChemStandardizer.settings">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></em><a class="headerlink" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Settings of the standardizer. It should contain complete
+information needed to initialize another equivalent standardizer.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.base.Standardizable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.chem.standardizers.base.</span></span><span class="sig-name descname"><span class="pre">Standardizable</span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/base.html#Standardizable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.base.Standardizable" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Interface for objects that use chemical standardization with `
+<a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer"><code class="xref any py py-class docutils literal notranslate"><span class="pre">ChemStandardizer</span></code></a> objects.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.base.Standardizable.applyStandardizer">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">applyStandardizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">standardizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer"><span class="pre">ChemStandardizer</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/base.html#Standardizable.applyStandardizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.base.Standardizable.applyStandardizer" title="Permalink to this definition"></a></dt>
+<dd><p>Apply a standardizer to the SMILES in the store.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>standardizer</strong> (<a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer"><em>ChemStandardizer</em></a>) – The standardizer to apply</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.base.Standardizable.standardizer">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">standardizer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer"><span class="pre">ChemStandardizer</span></a></em><a class="headerlink" href="#qsprpred.data.chem.standardizers.base.Standardizable.standardizer" title="Permalink to this definition"></a></dt>
+<dd><p>Get the standardizer used by the store.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The standardizer used by the store.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer">ChemStandardizer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.data.chem.standardizers.check_smiles">
+<span id="qsprpred-data-chem-standardizers-check-smiles-module"></span><h2>qsprpred.data.chem.standardizers.check_smiles module<a class="headerlink" href="#module-qsprpred.data.chem.standardizers.check_smiles" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.check_smiles.CheckSmilesValid">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.chem.standardizers.check_smiles.</span></span><span class="sig-name descname"><span class="pre">CheckSmilesValid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_prop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/check_smiles.html#CheckSmilesValid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.check_smiles.CheckSmilesValid" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.mol_processor.MolProcessorWithID" title="qsprpred.data.processing.mol_processor.MolProcessorWithID"><code class="xref py py-class docutils literal notranslate"><span class="pre">MolProcessorWithID</span></code></a></p>
+<p>Processor to check the validity of the SMILES.</p>
+<p>Initialize the processor with the name of the property that contains the
+molecule’s unique identifier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>id_prop</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Name of the property that contains the molecule’s unique identifier.
+Defaults to “QSPRID”.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.check_smiles.CheckSmilesValid.iterMolsAndIDs">
+<span class="sig-name descname"><span class="pre">iterMolsAndIDs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mols</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.chem.standardizers.check_smiles.CheckSmilesValid.iterMolsAndIDs" title="Permalink to this definition"></a></dt>
+<dd><p>Iterate over molecules and their corresponding IDs regardless of the input
+molecule format. This is just a helper function that will detect the input
+and yield the molecule and its ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mols</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em> | </em><em>Mol</em><em> | </em><a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.stored_mol.StoredMol" title="qsprpred.data.storage.interfaces.stored_mol.StoredMol"><em>StoredMol</em></a><em>]</em>) – A list of SMILES or RDKit molecules to process.</p></li>
+<li><p><strong>props</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – An optional dictionary of properties
+related to the molecules to process.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple of the molecules and their IDs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>[Mol, <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.check_smiles.CheckSmilesValid.requiredProps">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">requiredProps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qsprpred.data.chem.standardizers.check_smiles.CheckSmilesValid.requiredProps" title="Permalink to this definition"></a></dt>
+<dd><p>The properties required by the processor. This is to inform the caller
+that the processor requires certain properties to be passed to the
+<code class="xref any docutils literal notranslate"><span class="pre">__call__</span></code> method or via the <a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.stored_mol.StoredMol.props" title="qsprpred.data.storage.interfaces.stored_mol.StoredMol.props"><code class="xref any py py-attr docutils literal notranslate"><span class="pre">props</span></code></a> attribute of <a class="reference internal" href="qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.stored_mol.StoredMol" title="qsprpred.data.storage.interfaces.stored_mol.StoredMol"><code class="xref any py py-class docutils literal notranslate"><span class="pre">StoredMol</span></code></a> instances.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.check_smiles.CheckSmilesValid.supportsParallel">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">supportsParallel</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#qsprpred.data.chem.standardizers.check_smiles.CheckSmilesValid.supportsParallel" title="Permalink to this definition"></a></dt>
+<dd><p>Return True if the processor supports parallel processing.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.chem.standardizers.check_smiles.</span></span><span class="sig-name descname"><span class="pre">ValidationStandardizer</span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/check_smiles.html#ValidationStandardizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChemStandardizer</span></code></a></p>
+<p>Standardizer that checks the validity of the SMILES by
+attempting to sanitize the molecule using RDKit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>checker</strong> (<a class="reference internal" href="#qsprpred.data.chem.standardizers.check_smiles.CheckSmilesValid" title="qsprpred.data.chem.standardizers.check_smiles.CheckSmilesValid"><em>CheckSmilesValid</em></a>) – Processor to check the validity of the SMILES</p>
+</dd>
+</dl>
+<p>Initialize the standardizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#ValueError" title="(in Python v3.9)"><strong>ValueError</strong></a> – If the SMILES is invalid</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer.convertSMILES">
+<span class="sig-name descname"><span class="pre">convertSMILES</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/check_smiles.html#ValidationStandardizer.convertSMILES"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer.convertSMILES" title="Permalink to this definition"></a></dt>
+<dd><p>Check the validity of the SMILES.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>smiles</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – SMILES to be checked</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the standardized SMILES</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer.fromSettings">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer" title="qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer"><span class="pre">ValidationStandardizer</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/check_smiles.html#ValidationStandardizer.fromSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer.fromSettings" title="Permalink to this definition"></a></dt>
+<dd><p>Create a standardizer from settings. In this case, the settings are ignored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>settings</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – Settings of the standardizer</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The standardizer created from settings</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer" title="qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer">ValidationStandardizer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer.fromSettingsFile">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromSettingsFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer"><span class="pre">ChemStandardizer</span></a></span></span><a class="headerlink" href="#qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer.fromSettingsFile" title="Permalink to this definition"></a></dt>
+<dd><p>Load the standardizer from a settings file in JSON format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Path to the settings file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The standardizer loaded from the settings file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer">ChemStandardizer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer.getHashID">
+<span class="sig-name descname"><span class="pre">getHashID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer.getHashID" title="Permalink to this definition"></a></dt>
+<dd><p>Get the hash ID of the standardizer. This is simply the MD5 hash of the
+unique identifier of the standardizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The hash ID of the standardizer</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer.getID">
+<span class="sig-name descname"><span class="pre">getID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/check_smiles.html#ValidationStandardizer.getID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer.getID" title="Permalink to this definition"></a></dt>
+<dd><p>Return the unique identifier of the standardizer. In this case, it is
+just “ValidationStandardizer”. There are no settings to consider.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Settings of the standardizer.
+Empty in this case since there is nothing to set except the default settings.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.data.chem.standardizers.chembl">
+<span id="qsprpred-data-chem-standardizers-chembl-module"></span><h2>qsprpred.data.chem.standardizers.chembl module<a class="headerlink" href="#module-qsprpred.data.chem.standardizers.chembl" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.chembl.ChemblStandardizer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.chem.standardizers.chembl.</span></span><span class="sig-name descname"><span class="pre">ChemblStandardizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">isomeric_smiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sanitize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/chembl.html#ChemblStandardizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.chembl.ChemblStandardizer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChemStandardizer</span></code></a></p>
+<p>Standardizer using the ChEMBL standardizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>isomericSmiles</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – return the isomeric smiles.</p></li>
+<li><p><strong>sanitize</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – sanitize SMILES before standardization.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initialize the ChEMBL standardizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>isomeric_smiles</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – return the isomeric smiles. Defaults to True.</p></li>
+<li><p><strong>sanitize</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – sanitize SMILES before standardization. Defaults to True.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.chembl.ChemblStandardizer.convertSMILES">
+<span class="sig-name descname"><span class="pre">convertSMILES</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/chembl.html#ChemblStandardizer.convertSMILES"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.chembl.ChemblStandardizer.convertSMILES" title="Permalink to this definition"></a></dt>
+<dd><p>Standardize SMILES using the ChEMBL standardizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>smiles</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – SMILES to be standardized</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>standardized SMILES string or <a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">None</span></code></a> if standardization failed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.chembl.ChemblStandardizer.fromSettings">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsprpred.data.chem.standardizers.chembl.ChemblStandardizer" title="qsprpred.data.chem.standardizers.chembl.ChemblStandardizer"><span class="pre">ChemblStandardizer</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/chembl.html#ChemblStandardizer.fromSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.chembl.ChemblStandardizer.fromSettings" title="Permalink to this definition"></a></dt>
+<dd><p>Create a standardizer from settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>settings</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – Settings of the standardizer</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The standardizer created from settings</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference internal" href="#qsprpred.data.chem.standardizers.chembl.ChemblStandardizer" title="qsprpred.data.chem.standardizers.chembl.ChemblStandardizer">ChemblStandardizer</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.chembl.ChemblStandardizer.fromSettingsFile">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromSettingsFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer"><span class="pre">ChemStandardizer</span></a></span></span><a class="headerlink" href="#qsprpred.data.chem.standardizers.chembl.ChemblStandardizer.fromSettingsFile" title="Permalink to this definition"></a></dt>
+<dd><p>Load the standardizer from a settings file in JSON format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Path to the settings file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The standardizer loaded from the settings file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer">ChemStandardizer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.chembl.ChemblStandardizer.getHashID">
+<span class="sig-name descname"><span class="pre">getHashID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#qsprpred.data.chem.standardizers.chembl.ChemblStandardizer.getHashID" title="Permalink to this definition"></a></dt>
+<dd><p>Get the hash ID of the standardizer. This is simply the MD5 hash of the
+unique identifier of the standardizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The hash ID of the standardizer</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.chembl.ChemblStandardizer.getID">
+<span class="sig-name descname"><span class="pre">getID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/chembl.html#ChemblStandardizer.getID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.chembl.ChemblStandardizer.getID" title="Permalink to this definition"></a></dt>
+<dd><p>Return the unique identifier of the standardizer.</p>
+<p>In this case, the identifier starts with “ChEMBLStandardizer” followed by
+the settings of the standardizer concatenated with “~”.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>unique identifier of the standardizer</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>(<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.chembl.ChemblStandardizer.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></em><a class="headerlink" href="#qsprpred.data.chem.standardizers.chembl.ChemblStandardizer.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Settings of the standardizer. It should contain complete
+information needed to initialize another equivalent standardizer.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.chembl.chembl_smi_standardizer">
+<span class="sig-prename descclassname"><span class="pre">qsprpred.data.chem.standardizers.chembl.</span></span><span class="sig-name descname"><span class="pre">chembl_smi_standardizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">isomeric_smiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sanitize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/chembl.html#chembl_smi_standardizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.chembl.chembl_smi_standardizer" title="Permalink to this definition"></a></dt>
+<dd><p>Standardize SMILES using ChEMBL standardizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smi</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – SMILES string to be standardized.</p></li>
+<li><p><strong>isomeric_smiles</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – return the isomeric smiles. Defaults to True.</p></li>
+<li><p><strong>sanitize</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – applies sanitization using the ChEMBL standardizer. Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>standardized SMILES string or <a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">None</span></code></a> if standardization failed.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.data.chem.standardizers.naive">
+<span id="qsprpred-data-chem-standardizers-naive-module"></span><h2>qsprpred.data.chem.standardizers.naive module<a class="headerlink" href="#module-qsprpred.data.chem.standardizers.naive" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.naive.NaiveStandardizer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.chem.standardizers.naive.</span></span><span class="sig-name descname"><span class="pre">NaiveStandardizer</span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/naive.html#NaiveStandardizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.naive.NaiveStandardizer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChemStandardizer</span></code></a></p>
+<p>Naive standardizer</p>
+<p>Briefly, the standardization process involves disconnecting metals, normalizing,
+removing salts (largest fragment) and charges. See
+<a class="reference internal" href="#qsprpred.data.chem.standardizers.naive.standardize_mol" title="qsprpred.data.chem.standardizers.naive.standardize_mol"><code class="xref any py py-func docutils literal notranslate"><span class="pre">qsprpred.data.chem.standardizers.naive.standardize_mol</span></code></a> for more details.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.naive.NaiveStandardizer.convertSMILES">
+<span class="sig-name descname"><span class="pre">convertSMILES</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/naive.html#NaiveStandardizer.convertSMILES"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.naive.NaiveStandardizer.convertSMILES" title="Permalink to this definition"></a></dt>
+<dd><p>Standardize SMILES using <a class="reference internal" href="#qsprpred.data.chem.standardizers.naive.standardize_mol" title="qsprpred.data.chem.standardizers.naive.standardize_mol"><code class="xref any py py-func docutils literal notranslate"><span class="pre">standardize_mol</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>smiles</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – SMILES to be standardized</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>standardized SMILES or <a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">None</span></code></a> if SMILES could not be standardized</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a> | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.naive.NaiveStandardizer.fromSettings">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsprpred.data.chem.standardizers.naive.NaiveStandardizer" title="qsprpred.data.chem.standardizers.naive.NaiveStandardizer"><span class="pre">NaiveStandardizer</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/naive.html#NaiveStandardizer.fromSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.naive.NaiveStandardizer.fromSettings" title="Permalink to this definition"></a></dt>
+<dd><p>Create a naive standardizer from settings.
+In this case, the settings are ignored.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>settings</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – settings of the standardizer</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a naive standardizer</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.chem.standardizers.naive.NaiveStandardizer" title="qsprpred.data.chem.standardizers.naive.NaiveStandardizer">NaiveStandardizer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.naive.NaiveStandardizer.fromSettingsFile">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromSettingsFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer"><span class="pre">ChemStandardizer</span></a></span></span><a class="headerlink" href="#qsprpred.data.chem.standardizers.naive.NaiveStandardizer.fromSettingsFile" title="Permalink to this definition"></a></dt>
+<dd><p>Load the standardizer from a settings file in JSON format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Path to the settings file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The standardizer loaded from the settings file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer">ChemStandardizer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.naive.NaiveStandardizer.getHashID">
+<span class="sig-name descname"><span class="pre">getHashID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#qsprpred.data.chem.standardizers.naive.NaiveStandardizer.getHashID" title="Permalink to this definition"></a></dt>
+<dd><p>Get the hash ID of the standardizer. This is simply the MD5 hash of the
+unique identifier of the standardizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The hash ID of the standardizer</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.naive.NaiveStandardizer.getID">
+<span class="sig-name descname"><span class="pre">getID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/naive.html#NaiveStandardizer.getID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.naive.NaiveStandardizer.getID" title="Permalink to this definition"></a></dt>
+<dd><p>Return the unique identifier of the standardizer, which
+in this case is “NaiveStandardizer” without any settings.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.naive.NaiveStandardizer.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></em><a class="headerlink" href="#qsprpred.data.chem.standardizers.naive.NaiveStandardizer.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Settings of the standardizer. They are empty in this case.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.naive.standardize_mol">
+<span class="sig-prename descclassname"><span class="pre">qsprpred.data.chem.standardizers.naive.</span></span><span class="sig-name descname"><span class="pre">standardize_mol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mol</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/naive.html#standardize_mol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.naive.standardize_mol" title="Permalink to this definition"></a></dt>
+<dd><p>Standardizes SMILES and removes fragments</p>
+<p>Standardizes SMILES using RDKit MolStandardize to disconnect metals,
+normalize, remove salts (largest fragment), and uncharge. Followed by a second
+round of disconnecting metals and normalizing. Finally, the SMILES is canonicalized.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mol</strong> (<em>rdkit.Chem.rdchem.Mol</em>) – RDKit molecule object</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Standardized SMILES or None if SMILES could not be standardized or
+if SMILES does not contain carbon or contains salts after standardization</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a> | None)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.data.chem.standardizers.papyrus">
+<span id="qsprpred-data-chem-standardizers-papyrus-module"></span><h2>qsprpred.data.chem.standardizers.papyrus module<a class="headerlink" href="#module-qsprpred.data.chem.standardizers.papyrus" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.chem.standardizers.papyrus.</span></span><span class="sig-name descname"><span class="pre">PapyrusStandardizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keep_stereo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canonize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixture_handling</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Literal" title="(in Python v3.9)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'keep_largest'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'filter'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'keep'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'keep_largest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_additional_salts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_additional_metals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_inorganic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_non_small_molecule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">small_molecule_min_mw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">small_molecule_max_mw</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">800</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canonicalize_tautomer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tautomer_max_tautomers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4294967295</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_organic_atoms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_metals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_salts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uncharge</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/papyrus.html#PapyrusStandardizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChemStandardizer</span></code></a></p>
+<p>Papyrus standardizer</p>
+<p>Uses Papyrus (&gt;v05.6) standardization protecol to standardize SMILES.</p>
+<p>Béquignon, O.J.M., Bongers, B.J., Jespers, W. et al.
+Papyrus: a large-scale curated dataset aimed at bioactivity predictions.
+J Cheminform 15, 3 (2023). <a class="reference external" href="https://doi.org/10.1186/s13321-022-00672-x">https://doi.org/10.1186/s13321-022-00672-x</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>settings</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – Settings of the standardizer</p>
+</dd>
+</dl>
+<p>Initialize Papyrus standardizer</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>keep_stereo</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Keep stereochemistry.</p></li>
+<li><p><strong>canonize</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Canonicalize SMILES.</p></li>
+<li><p><strong>mixture_handling</strong> (<em>Literal</em><em>[</em><em>&quot;keep_largest&quot;</em><em>, </em><em>&quot;filter&quot;</em><em>, </em><em>&quot;keep&quot;</em><em>]</em><em>, </em><em>optional</em>) – How to handle mixtures. Defaults to “keep_largest”.</p></li>
+<li><p><strong>remove_additional_salts</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Removes a custom set of fragments if present in the molecule object.</p></li>
+<li><p><strong>remove_additional_metals</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Removes metal fragments if present in the molecule object.
+Ignored if remove_additional_salts is set to False.</p></li>
+<li><p><strong>filter_inorganic</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Filter inorganic molecules.</p></li>
+<li><p><strong>filter_non_small_molecule</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Filter non-small molecules.</p></li>
+<li><p><strong>small_molecule_min_mw</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – Minimum molecular weight of small molecules.</p></li>
+<li><p><strong>small_molecule_max_mw</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#float" title="(in Python v3.9)"><em>float</em></a><em>, </em><em>optional</em>) – Maximum molecular weight of small molecules.</p></li>
+<li><p><strong>canonicalize_tautomer</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Canonicalize tautomers.</p></li>
+<li><p><strong>tautomer_max_tautomers</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><em>optional</em>) – Maximum number of tautomers to consider by the tautomer search
+algorithm (&lt;2^32).</p></li>
+<li><p><strong>extra_organic_atoms</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>, </em><em>optional</em>) – Extra organic atoms to consider in addition to the default set
+(Papyrus_standardizer.ORGANIC_ATOMS).</p></li>
+<li><p><strong>extra_metals</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>, </em><em>optional</em>) – Extra metals to consider in addition to the default set
+(Papyrus_standardizer.METALS).</p></li>
+<li><p><strong>extra_salts</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><em>list</em></a><em>, </em><em>optional</em>) – Extra salts to consider in addition to the default set
+(Papyrus_standardizer.SALTS).</p></li>
+<li><p><strong>uncharge</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Uncharge molecules.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer.convertSMILES">
+<span class="sig-name descname"><span class="pre">convertSMILES</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/papyrus.html#PapyrusStandardizer.convertSMILES"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer.convertSMILES" title="Permalink to this definition"></a></dt>
+<dd><p>Standardize SMILES using Papyrus standardization protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smiles</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – SMILES to be standardized</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>, </em><em>optional</em>) – Print verbose output. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a tuple where the first element is the standardized SMILES and the
+second element is the original SMILES</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#tuple" title="(in Python v3.9)">tuple</a>[<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a> | None, <a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer.fromSettings">
+<span class="sig-name descname"><span class="pre">fromSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer" title="qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer"><span class="pre">PapyrusStandardizer</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/papyrus.html#PapyrusStandardizer.fromSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer.fromSettings" title="Permalink to this definition"></a></dt>
+<dd><p>Create a Papyrus standardizer from settings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>settings</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – settings of the standardizer</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a Papyrus standardizer</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer" title="qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer">PapyrusStandardizer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer.fromSettingsFile">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromSettingsFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer"><span class="pre">ChemStandardizer</span></a></span></span><a class="headerlink" href="#qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer.fromSettingsFile" title="Permalink to this definition"></a></dt>
+<dd><p>Load the standardizer from a settings file in JSON format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Path to the settings file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The standardizer loaded from the settings file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer">ChemStandardizer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer.getHashID">
+<span class="sig-name descname"><span class="pre">getHashID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer.getHashID" title="Permalink to this definition"></a></dt>
+<dd><p>Get the hash ID of the standardizer. This is simply the MD5 hash of the
+unique identifier of the standardizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The hash ID of the standardizer</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer.getID">
+<span class="sig-name descname"><span class="pre">getID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/papyrus.html#PapyrusStandardizer.getID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer.getID" title="Permalink to this definition"></a></dt>
+<dd><p>Get the ID of the standardizer.</p>
+<p>In this case, the ID is based on the settings of the standardizer.
+It starts with ‘PapyrusStandardizer’ followed by a tilde and
+the settings concatenated with a colon.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ID of the standardizer</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer.settings">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></em><a class="headerlink" href="#qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Settings of the standardizer. It should contain complete
+information needed to initialize another equivalent standardizer.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-qsprpred.data.chem.standardizers">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qsprpred.data.chem.standardizers" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.ChemStandardizer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.chem.standardizers.</span></span><span class="sig-name descname"><span class="pre">ChemStandardizer</span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/base.html#ChemStandardizer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.ChemStandardizer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/abc.html#abc.ABC" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
+<p>Standardizer to convert SMILES to a standardized form.</p>
+<p>This class defines an interface of a uniquely identifiable standardizer.
+The <a class="reference internal" href="#qsprpred.data.chem.standardizers.ChemStandardizer.getID" title="qsprpred.data.chem.standardizers.ChemStandardizer.getID"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">getID</span></code></a> method should return a unique identifier for the standardizer
+based on its settings. Standardizes that have the same ID should produce
+the same standardized form for a given SMILES.</p>
+<p>The main method of the class is <a class="reference internal" href="#qsprpred.data.chem.standardizers.ChemStandardizer.convertSMILES" title="qsprpred.data.chem.standardizers.ChemStandardizer.convertSMILES"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">convertSMILES</span></code></a>, which should convert
+a given SMILES to a standardized form based on the settings of the standardizer.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.ChemStandardizer.convertSMILES">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convertSMILES</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">smiles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/base.html#ChemStandardizer.convertSMILES"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.ChemStandardizer.convertSMILES" title="Permalink to this definition"></a></dt>
+<dd><p>Convert the SMILES to a standardized form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>smiles</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – SMILES to be converted</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The standardized SMILES string or <a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">None</span></code></a> if standardization fails or
+the molecule is deemed invalid.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a> | None</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizationException" title="qsprpred.data.chem.standardizers.base.ChemStandardizationException"><strong>ChemStandardizationException</strong></a> – if standardization fails, but the upstream code should be notified
+    and handle the exception.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.ChemStandardizer.fromSettings">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer"><span class="pre">ChemStandardizer</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/base.html#ChemStandardizer.fromSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.ChemStandardizer.fromSettings" title="Permalink to this definition"></a></dt>
+<dd><p>Create a new standardizer from a settings dictionary.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.ChemStandardizer.fromSettingsFile">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromSettingsFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer"><span class="pre">ChemStandardizer</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/base.html#ChemStandardizer.fromSettingsFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.ChemStandardizer.fromSettingsFile" title="Permalink to this definition"></a></dt>
+<dd><p>Load the standardizer from a settings file in JSON format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Path to the settings file.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The standardizer loaded from the settings file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#qsprpred.data.chem.standardizers.ChemStandardizer" title="qsprpred.data.chem.standardizers.ChemStandardizer">ChemStandardizer</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.ChemStandardizer.getHashID">
+<span class="sig-name descname"><span class="pre">getHashID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/base.html#ChemStandardizer.getHashID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.ChemStandardizer.getHashID" title="Permalink to this definition"></a></dt>
+<dd><p>Get the hash ID of the standardizer. This is simply the MD5 hash of the
+unique identifier of the standardizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The hash ID of the standardizer</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.ChemStandardizer.getID">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getID</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/chem/standardizers/base.html#ChemStandardizer.getID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.chem.standardizers.ChemStandardizer.getID" title="Permalink to this definition"></a></dt>
+<dd><p>Return the unique identifier of the standardizer. This method should
+return a unique identifier based on the settings of the standardizer.</p>
+<p>Two standardizers with the same settings should have the same ID and
+produce the same standardized form for a given SMILES.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The unique identifier of the standardizer.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qsprpred.data.chem.standardizers.ChemStandardizer.settings">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></em><a class="headerlink" href="#qsprpred.data.chem.standardizers.ChemStandardizer.settings" title="Permalink to this definition"></a></dt>
+<dd><p>Settings of the standardizer. It should contain complete
+information needed to initialize another equivalent standardizer.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qsprpred.data.chem.html" class="btn btn-neutral float-left" title="qsprpred.data.chem package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qsprpred.data.descriptors.html" class="btn btn-neutral float-right" title="qsprpred.data.descriptors package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
