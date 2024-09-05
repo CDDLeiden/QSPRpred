@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 
 class ChemStandardizationException(Exception):
     """Exception raised when standardization fails."""
-    pass
 
 
 class ChemStandardizer(ABC):
@@ -17,13 +16,12 @@ class ChemStandardizer(ABC):
     The main method of the class is `convertSMILES`, which should convert
     a given SMILES to a standardized form based on the settings of the standardizer.
     """
-
     def __call__(self, smiles: str) -> str | None:
         """Convert the SMILES to a standardized form. Simply calls `convertSMILES`.
-        
+
         Args:
             smiles (str): SMILES to be converted
-        
+
         Returns:
             str | None:
                 The standardized SMILES string or `None` if standardization fails or
@@ -42,7 +40,7 @@ class ChemStandardizer(ABC):
 
         Args:
             smiles (str): SMILES to be converted
-            
+
         Returns:
             str | None:
                 The standardized SMILES string or `None` if standardization fails or
@@ -53,7 +51,6 @@ class ChemStandardizer(ABC):
                 if standardization fails, but the upstream code should be notified
                 and handle the exception.
         """
-        pass
 
     @property
     @abstractmethod
@@ -78,7 +75,6 @@ class ChemStandardizer(ABC):
     @abstractmethod
     def fromSettings(cls, settings: dict) -> "ChemStandardizer":
         """Create a new standardizer from a settings dictionary."""
-        pass
 
     @classmethod
     def fromSettingsFile(cls, path: str) -> "ChemStandardizer":
@@ -86,7 +82,7 @@ class ChemStandardizer(ABC):
 
         Args:
             path (str): Path to the settings file.
-            
+
         Returns:
             ChemStandardizer: The standardizer loaded from the settings file.
         """
@@ -99,20 +95,19 @@ class ChemStandardizer(ABC):
     def getHashID(self) -> str:
         """Get the hash ID of the standardizer. This is simply the MD5 hash of the
         unique identifier of the standardizer.
-        
+
         Returns:
             str: The hash ID of the standardizer
         """
         import hashlib
 
-        return hashlib.md5(self.getID().encode('utf-8')).hexdigest()
+        return hashlib.md5(self.getID().encode("utf-8")).hexdigest()
 
 
 class Standardizable(ABC):
     """Interface for objects that use chemical standardization with `
     `ChemStandardizer` objects.
     """
-
     @property
     @abstractmethod
     def standardizer(self) -> ChemStandardizer:
@@ -125,8 +120,7 @@ class Standardizable(ABC):
     @abstractmethod
     def applyStandardizer(self, standardizer: ChemStandardizer):
         """Apply a standardizer to the SMILES in the store.
-        
+
         Args:
             standardizer (ChemStandardizer): The standardizer to apply
         """
-        pass

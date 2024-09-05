@@ -4,14 +4,13 @@ from qsprpred.data.tables.interfaces.qspr_data_set import QSPRDataSet
 class DataSetDependent:
     """Classes that need an attached `QSPRDataSet` should inherit from this class,
     and it will be supplied to them via this API.
-    
+
     Attributes:
         dataSet (QSPRDataSet): The data set attached to this object.
     """
-
     def __init__(self, dataset: QSPRDataSet | None = None):
         """Initialize the object with a data set.
-        
+
         Args:
             dataset (QSPRDataSet, optional):
                 The data set to attach to this object. Defaults to None.
@@ -29,7 +28,7 @@ class DataSetDependent:
 
     def getDataSet(self) -> QSPRDataSet:
         """Get the data set attached to this object.
-        
+
         Returns:
             QSPRDataSet: The data set attached to this object
 

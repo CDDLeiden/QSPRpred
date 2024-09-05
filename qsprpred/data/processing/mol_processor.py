@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from rdkit import Chem
-from rdkit.Chem import Mol
 
 from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 
@@ -14,14 +13,13 @@ class MolProcessor(ABC):
     molecules, or `StoredMol` instances. The processor can also accept additional
     properties related to the molecules if specified by the caller.
     """
-
     @abstractmethod
     def __call__(
-            self,
-            mols: list[str | Chem.Mol | StoredMol],
-            *args,
-            props: dict[str, list] | None = None,
-            **kwargs
+        self,
+        mols: list[str | Chem.Mol | StoredMol],
+        *args,
+        props: dict[str, list] | None = None,
+        **kwargs
     ) -> Any:
         """Process molecules.
 
@@ -69,7 +67,6 @@ class MolProcessorWithID(MolProcessor, ABC):
             The name of the passed property that contains
             the molecule's unique identifier.
     """
-
     def __init__(self, id_prop: str | None = None):
         """
         Initialize the processor with the name of the property that contains the

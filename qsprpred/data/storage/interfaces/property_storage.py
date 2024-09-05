@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Iterable, Any, Sized, Generator
+from typing import Any, Generator, Iterable, Sized
 
 import pandas as pd
 
@@ -15,7 +15,6 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
     the data is stored and how it is accessed as long as the interface is respected.
     See the methods of this class and the base classes for more details.
     """
-
     @property
     @abstractmethod
     def idProp(self) -> str:
@@ -66,9 +65,9 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
 
     @abstractmethod
     def getSubset(
-            self,
-            subset: Iterable[str],
-            ids: Iterable[str] | None = None,
+        self,
+        subset: Iterable[str],
+        ids: Iterable[str] | None = None,
     ) -> "PropertyStorage":
         """Get a subset of the storage for the given properties.
 
@@ -76,7 +75,7 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
             subset (list): The list of property names to include in the subset.
             ids (list, optional): The IDs of the entries to include in the subset.
             name (str, optional): The name of the new storage.
-            
+
         Returns:
             PropertyStorage: The subset of the storage.
         """
@@ -90,11 +89,9 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
         """
 
     @abstractmethod
-    def iterChunks(
-            self,
-            size: int | None = None,
-            on_props: list | None = None
-    ) -> Generator[list[Any], None, None]:
+    def iterChunks(self,
+                   size: int | None = None,
+                   on_props: list | None = None) -> Generator[list[Any], None, None]:
         """Iterate over chunks of molecules across the store.
 
         Returns:
@@ -103,12 +100,12 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
 
     @abstractmethod
     def apply(
-            self,
-            func: callable,
-            func_args: list | None = None,
-            func_kwargs: dict | None = None,
-            on_props: tuple[str, ...] | None = None,
-            as_df: bool = False,
+        self,
+        func: callable,
+        func_args: list | None = None,
+        func_kwargs: dict | None = None,
+        on_props: tuple[str, ...] | None = None,
+        as_df: bool = False,
     ) -> Generator[Iterable[Any], None, None]:
         """Apply a function on all or selected properties of the chunks of data.
         The properties are supplied as the first positional argument to the function.
@@ -121,7 +118,7 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
             func_kwargs (dict, optional): The keyword arguments of the function.
             on_props (list, optional): The properties to apply the function on.
             as_df (bool, optional): Provide properties as a DataFrame to the function.
-            
+
         Returns:
             A generator that yields the results of the function applied to each chunk.
         """
@@ -135,8 +132,9 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
         """
 
     @abstractmethod
-    def addEntries(self, ids: list[str], props: dict[str, list],
-                   raise_on_existing: bool = True):
+    def addEntries(
+        self, ids: list[str], props: dict[str, list], raise_on_existing: bool = True
+    ):
         """Add entries to the storage.
 
         Args:
@@ -169,7 +167,7 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
         pass
 
     def __delitem__(self, key):
-        return self.dropEntries((key,))
+        return self.dropEntries((key, ))
 
     def __str__(self):
         return f"{self.__class__.__name__} ({len(self)})"

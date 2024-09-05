@@ -15,12 +15,13 @@ from qsprpred.data.descriptors.sets import SmilesDesc
 from qsprpred.data.sampling.splits import RandomSplit
 from qsprpred.extra.gpu.utils.parallel import TorchJITGenerator
 from qsprpred.tasks import ModelTasks, TargetTasks
+
 from ....benchmarks import BenchmarkRunner
 from ....benchmarks.tests import BenchMarkTestCase
 from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
-from ....models import CrossValAssessor, SklearnModel, SklearnMetrics
+from ....models import CrossValAssessor, SklearnMetrics, SklearnModel
 from ....models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ....utils.parallel import ThreadsJITGenerator
 from ....utils.testing.check_mixins import ModelCheckMixIn, MonitorsCheckMixIn
@@ -32,11 +33,10 @@ GPUS = list(range(torch.cuda.device_count()))
 @skipIf(
     len(GPUS) == 0,
     "No GPU is available. "
-    "Skipping benchmarking tests that require a GPU to run swiftly. "
+    "Skipping benchmarking tests that require a GPU to run swiftly. ",
 )
 class BenchMarkTest(BenchMarkTestCase):
     """Test GPU models with benchmarks."""
-
     def testBasicTorchExecution(self):
         """Run single task tests for classification."""
         self.settings.models = [
@@ -100,7 +100,6 @@ class BenchMarkTest(BenchMarkTestCase):
 
 class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     """This class holds the tests for the DNNModel class."""
-
     def setUp(self):
         """Set up the test case."""
         super().setUp()
@@ -114,11 +113,11 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         return f"{os.path.dirname(__file__)}/test_files/search_space_test.json"
 
     def getModel(
-            self,
-            name: str,
-            alg: Type | None = None,
-            parameters: dict | None = None,
-            random_state: int | None = None,
+        self,
+        name: str,
+        alg: Type | None = None,
+        parameters: dict | None = None,
+        random_state: int | None = None,
     ):
         """Initialize model with data set.
 
@@ -146,38 +145,33 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             for alg, alg_name, task, th in (
                 (STFullyConnected, "STFullyConnected", TargetTasks.SINGLECLASS, [6.5]),
                 (
-                        STFullyConnected,
-                        "STFullyConnected",
-                        TargetTasks.MULTICLASS,
-                        [0, 1, 10, 1100],
+                    STFullyConnected,
+                    "STFullyConnected",
+                    TargetTasks.MULTICLASS,
+                    [0, 1, 10, 1100],
                 ),
-        )
-        ]
-        + [
+            )
+        ] + [
             (
-                    f"{alg_name}_{task}_{'_'.join(map(str, random_state))}",
-                    task,
-                    alg_name,
-                    alg,
-                    th,
-                    random_state,
-            )
-            for alg, alg_name, task, th in (
-                    (
-                            STFullyConnected, "STFullyConnected",
-                            TargetTasks.REGRESSION, None),
-            )
+                f"{alg_name}_{task}_{'_'.join(map(str, random_state))}",
+                task,
+                alg_name,
+                alg,
+                th,
+                random_state,
+            ) for alg, alg_name, task, th in
+            ((STFullyConnected, "STFullyConnected", TargetTasks.REGRESSION, None), )
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
     def testSingleTaskModel(
-            self,
-            _,
-            task: TargetTasks,
-            alg_name: str,
-            alg: Type,
-            th: float,
-            random_state: list[int] | None,
+        self,
+        _,
+        task: TargetTasks,
+        alg_name: str,
+        alg: Type,
+        th: float,
+        random_state: list[int] | None,
     ):
         """Test the DNNModel model in one configuration.
 
@@ -191,7 +185,11 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name=f"{alg_name}_{task}",
-            target_props=[{"name": "CL", "task": task, "th": th}],
+            target_props=[{
+                "name": "CL",
+                "task": task,
+                "th": th
+            }],
             preparation_settings=self.getDefaultPrep(),
         )
 
@@ -229,7 +227,6 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
 
 class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
     """This class holds the tests for the DNNModel class."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -242,10 +239,10 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         return f"{os.path.dirname(__file__)}/test_files/search_space_test.json"
 
     def getModel(
-            self,
-            name: str,
-            parameters: dict | None = None,
-            random_state: int | None = None,
+        self,
+        name: str,
+        parameters: dict | None = None,
+        random_state: int | None = None,
     ):
         """Initialize model with data set.
 
@@ -273,27 +270,26 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             for alg_name, task, th in (
                 ("MoleculeModel", TargetTasks.SINGLECLASS, [6.5]),
                 ("MoleculeModel", TargetTasks.MULTICLASS, [0, 1, 10, 1100]),
-        )
-        ]
-        + [
-            (
-                    f"{alg_name}_{task}_{'_'.join(map(str, random_state))}",
-                    task,
-                    alg_name,
-                    th,
-                    random_state,
             )
-            for alg_name, task, th in (("MoleculeModel", TargetTasks.REGRESSION, None),)
+        ] + [
+            (
+                f"{alg_name}_{task}_{'_'.join(map(str, random_state))}",
+                task,
+                alg_name,
+                th,
+                random_state,
+            ) for alg_name, task, th in
+            (("MoleculeModel", TargetTasks.REGRESSION, None), )
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
     def testSingleTaskModel(
-            self,
-            _,
-            task: TargetTasks,
-            alg_name: str,
-            th: float,
-            random_state: list[int | None],
+        self,
+        _,
+        task: TargetTasks,
+        alg_name: str,
+        th: float,
+        random_state: list[int | None],
     ):
         """Test the DNNModel model in one configuration.
 
@@ -306,7 +302,11 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name=f"{alg_name}_{task}",
-            target_props=[{"name": "CL", "task": task, "th": th}],
+            target_props=[{
+                "name": "CL",
+                "task": task,
+                "th": th
+            }],
             preparation_settings=None,
         )
         dataset.prepareDataset(
@@ -343,22 +343,21 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
 
     @parameterized.expand(
         [
-            (f"{alg_name}_{task}", task, alg_name, [None])
-            for alg_name, task in (("MoleculeModel", ModelTasks.MULTITASK_REGRESSION),)
-        ]
-        + [
+            (f"{alg_name}_{task}", task, alg_name, [None]) for alg_name, task in
+            (("MoleculeModel", ModelTasks.MULTITASK_REGRESSION), )
+        ] + [
             (
-                    f"{alg_name}_{task}_{'_'.join(map(str, random_state))}",
-                    task,
-                    alg_name,
-                    random_state,
-            )
-            for alg_name, task in (("MoleculeModel", ModelTasks.MULTITASK_SINGLECLASS),)
+                f"{alg_name}_{task}_{'_'.join(map(str, random_state))}",
+                task,
+                alg_name,
+                random_state,
+            ) for alg_name, task in
+            (("MoleculeModel", ModelTasks.MULTITASK_SINGLECLASS), )
             for random_state in ([None], [1, 42], [42, 42])
         ]
     )
     def testMultiTaskmodel(
-            self, _, task: TargetTasks, alg_name: str, random_state: list[int | None]
+        self, _, task: TargetTasks, alg_name: str, random_state: list[int | None]
     ):
         """Test the DNNModel model in one configuration.
 
@@ -368,8 +367,16 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         """
         if task == ModelTasks.MULTITASK_REGRESSION:
             target_props = [
-                {"name": "fu", "task": TargetTasks.SINGLECLASS, "th": [0.3]},
-                {"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]},
+                {
+                    "name": "fu",
+                    "task": TargetTasks.SINGLECLASS,
+                    "th": [0.3]
+                },
+                {
+                    "name": "CL",
+                    "task": TargetTasks.SINGLECLASS,
+                    "th": [6.5]
+                },
             ]
         else:
             target_props = [
@@ -429,7 +436,10 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name="consistency_data",
-            target_props=[{"name": "CL", "task": TargetTasks.REGRESSION}],
+            target_props=[{
+                "name": "CL",
+                "task": TargetTasks.REGRESSION
+            }],
             preparation_settings=None,
         )
         dataset.prepareDataset(
@@ -519,7 +529,6 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
 
 class TestNNMonitoring(MonitorsCheckMixIn, TestCase):
     """This class holds the tests for the monitoring classes."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()

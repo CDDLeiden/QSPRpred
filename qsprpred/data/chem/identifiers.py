@@ -7,14 +7,13 @@ class ChemIdentifier(ABC):
     """Interface for identifiers of molecules. This should be a simple callable
     that given a SMILES string returns a unique identifier.
     """
-
     @abstractmethod
     def __call__(self, smiles: str) -> str:
         """Get the identifier of the molecule represented by the given SMILES.
 
         Args:
             smiles (str): input SMILES
-            
+
         Returns:
             str: calculated identifier
         """
@@ -24,7 +23,6 @@ class Identifiable(ABC):
     """Interface for objects that use a `ChemIdentifier` to identify duplicate
     molecules.
     """
-
     @property
     @abstractmethod
     def identifier(self) -> ChemIdentifier:
@@ -37,22 +35,20 @@ class Identifiable(ABC):
     @abstractmethod
     def applyIdentifier(self, identifier: ChemIdentifier):
         """Apply an identifier to the SMILES in this instance (i.e. remove duplicates).
-        
+
         Args:
             identifier (ChemIdentifier): The identifier to apply.
         """
-        pass
 
 
 class InchiIdentifier(ChemIdentifier):
     """Class for InChI identifiers of molecules."""
-
     def __call__(self, smiles: str) -> str:
         """Get the InChIKey of the molecule represented by the given SMILES.
 
         Args:
             smiles (str): input SMILES
-            
+
         Returns:
             str: calculated InChIKey
         """
@@ -61,15 +57,14 @@ class InchiIdentifier(ChemIdentifier):
 
 class IndexIdentifier(ChemIdentifier):
     """Implementation of a `ChemIdentifier` that returns an index as the identifier.
-    
+
     Attributes:
         index (int): The current index.
         zfill (int): The number of digits to zero-fill the index
     """
-
     def __init__(self, zfill: int = 5):
         """Initialize the index identifier.
-        
+
         Args:
             zfill (int): The number of digits to zero-fill the index
         """
@@ -81,7 +76,7 @@ class IndexIdentifier(ChemIdentifier):
 
         Args:
             smiles (str): input SMILES
-            
+
         Returns:
             str: calculated identifier
         """

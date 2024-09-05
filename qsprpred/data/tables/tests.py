@@ -10,20 +10,20 @@ from sklearn.model_selection import KFold, ShuffleSplit
 
 from qsprpred.data.descriptors.sets import DrugExPhyschem
 from qsprpred.data.storage.tabular.basic_storage import PandasChemStore
-from .interfaces.qspr_data_set import QSPRDataSet
-from .mol import MoleculeTable
-from ..chem.standardizers.papyrus import PapyrusStandardizer
-from ..descriptors.fingerprints import MorganFP
+
 from ... import TargetProperty, TargetTasks
 from ...data.tables.qspr import QSPRTable
 from ...utils.stopwatch import StopWatch
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import DataPrepCheckMixIn
 from ...utils.testing.path_mixins import DataSetsPathMixIn, PathMixIn
+from ..chem.standardizers.papyrus import PapyrusStandardizer
+from ..descriptors.fingerprints import MorganFP
+from .interfaces.qspr_data_set import QSPRDataSet
+from .mol import MoleculeTable
 
 
 class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -38,7 +38,7 @@ class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
             df,
             standardizer=PapyrusStandardizer(),
             n_jobs=self.nCPU,
-            chunk_size=self.chunkSize
+            chunk_size=self.chunkSize,
         )
 
     def getTable(self):
@@ -109,8 +109,9 @@ class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
         all_descriptors = mt.getDescriptorNames()
         mt_moved.dropDescriptors([all_descriptors[0], all_descriptors[-1]])
         self.assertEqual(mt_moved.getDescriptors().shape[0], len(mt_moved))
-        self.assertEqual(mt_moved.getDescriptors().shape[1],
-                         len(mt_moved.getDescriptorNames()))
+        self.assertEqual(
+            mt_moved.getDescriptors().shape[1], len(mt_moved.getDescriptorNames())
+        )
         new_shape = mt_moved.getDescriptors().shape
         self.assertEqual(new_shape[1], old_shape[1] - 2)
         self.assertTrue(new_shape[0] == old_shape[0])
@@ -175,13 +176,13 @@ class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
         random_new_folder = tempfile.mkdtemp()
         shutil.move(self.generatedDataPath, random_new_folder)
         mt_moved = MoleculeTable.fromFile(
-            os.path.join(random_new_folder, "datasets",
-                         mt_sub.name, "meta.json")
+            os.path.join(random_new_folder, "datasets", mt_sub.name, "meta.json")
         )
         self.assertEqual(len(mt_sub), len(mt_moved))
         self.assertListEqual(list(mt_sub.smiles), list(mt_moved.smiles))
-        self.assertListEqual(list(mt_sub.getProperties()),
-                             list(mt_moved.getProperties()))
+        self.assertListEqual(
+            list(mt_sub.getProperties()), list(mt_moved.getProperties())
+        )
         # check sampling
         mt_sample = mt.sample(5)
         self.assertEqual(len(mt_sample), 5)
@@ -189,14 +190,14 @@ class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
         mt_sample.dropEntries(mt_sample.getProperty(mt_sample.idProp)[0:2])
         self.assertEqual(len(mt_sample), 3)
         self.assertEqual(mt_sample.getDescriptors().shape[0], len(mt_sample))
-        self.assertEqual(mt_sample.getDescriptors().shape[1],
-                         len(mt_sample.getDescriptorNames()))
+        self.assertEqual(
+            mt_sample.getDescriptors().shape[1], len(mt_sample.getDescriptorNames())
+        )
 
 
 class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
     """Simple tests for dataset creation and serialization under different conditions
     and error states."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -322,7 +323,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             target_props=[{
                 "name": "CL",
                 "task": TargetTasks.REGRESSION
-            }]
+            }],
         )
         stopwatch.stop("Loading from table file took: ")
         self.assertTrue(isinstance(dataset_new, QSPRTable))
@@ -358,22 +359,28 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         self.assertTrue(np.allclose(targets_new, targets))
         # subset only first two ids
         subset = dataset_new.getSubset(
-            ["CL"],
-            ids=list(dataset_new.getProperty(dataset_new.idProp)[0:2])
+            ["CL"], ids=list(dataset_new.getProperty(dataset_new.idProp)[0:2])
         )
         self.assertEqual(len(subset), 2)
         self.assertEqual(subset.getFeatures(concat=True).shape[0], 2)
         self.assertEqual(subset.getTargets(concat=True).shape[0], 2)
-        self.assertListEqual(list(subset.getFeatures(concat=True).index),
-                             list(features.iloc[0:2, :].index))
-        self.assertListEqual(list(subset.getTargets(concat=True).index),
-                             list(targets.iloc[0:2, :].index))
+        self.assertListEqual(
+            list(subset.getFeatures(concat=True).index),
+            list(features.iloc[0:2, :].index),
+        )
+        self.assertListEqual(
+            list(subset.getTargets(concat=True).index),
+            list(targets.iloc[0:2, :].index)
+        )
         self.assertTrue(
-            np.allclose(subset.getFeatures(concat=True, refit_standardizer=False),
-                        features.iloc[0:2, :]))
+            np.allclose(
+                subset.getFeatures(concat=True, refit_standardizer=False),
+                features.iloc[0:2, :],
+            )
+        )
         self.assertTrue(
-            np.allclose(subset.getTargets(concat=True),
-                        targets.iloc[0:2, :]))
+            np.allclose(subset.getTargets(concat=True), targets.iloc[0:2, :])
+        )
 
     def testMultitask(self):
         """Test multi-task dataset creation and functionality."""
@@ -550,7 +557,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         self.assertListEqual(train.index.tolist(), order_train)
         split = KFold(5, shuffle=True, random_state=dataset.randomState)
         for i, (_, _, _, _, train_index, test_index) in enumerate(
-                dataset.iterFolds(split)
+            dataset.iterFolds(split)
         ):
             self.assertListEqual(train.iloc[train_index].index.tolist(), order_folds[i])
 
@@ -633,7 +640,6 @@ def prop_transform(x):
 
 class TestTargetProperty(QSPRTestCase):
     """Test the TargetProperty class."""
-
     def checkTargetProperty(self, target_prop, name, task, th):
         # Check the target property creation consistency
         self.assertEqual(target_prop.name, name)
@@ -725,22 +731,21 @@ class TestDataSetPreparation(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCase
     """Test as many possible combinations of data sets and their preparation
     settings. These can run potentially for a long time so use the ``skip`` decorator
     if you want to skip all these tests to speed things up during development."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
 
     @parameterized.expand(DataSetsPathMixIn.getPrepCombos())
     def testPrepCombos(
-            self,
-            _,
-            name,
-            feature_calculators,
-            split,
-            feature_standardizer,
-            feature_filter,
-            data_filter,
-            applicability_domain,
+        self,
+        _,
+        name,
+        feature_calculators,
+        split,
+        feature_standardizer,
+        feature_filter,
+        data_filter,
+        applicability_domain,
     ):
         """Tests one combination of a data set and its preparation settings.
 
@@ -763,7 +768,6 @@ class TestDataSetPreparation(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCase
 
 class TestTargetImputation(PathMixIn, QSPRTestCase):
     """Small tests to only check if the target imputation works on its own."""
-
     def setUp(self):
         """Set up the test Dataframe."""
         super().setUp()
@@ -818,7 +822,6 @@ class TestTargetImputation(PathMixIn, QSPRTestCase):
 
 class TestTargetTransformation(DataSetsPathMixIn, QSPRTestCase):
     """Tests the transformation of target properties."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -837,13 +840,15 @@ class TestTargetTransformation(DataSetsPathMixIn, QSPRTestCase):
             ]
         )
         self.assertTrue(
-            all(dataset.getDF()["CL"] == np.log10(
-                dataset.getDF()["CL_before_transform"])))
+            all(
+                dataset.getDF()["CL"] ==
+                np.log10(dataset.getDF()["CL_before_transform"])
+            )
+        )
 
 
 class TestApply(DataSetsPathMixIn, QSPRTestCase):
     """Tests the apply method of the data set."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -865,8 +870,11 @@ class TestApply(DataSetsPathMixIn, QSPRTestCase):
         result = dataset.apply(
             self.regularFunc,
             func_args=[1, 2, 3],
-            func_kwargs={"A_col": "A", "B_col": "B"},
-            chunk_type="df"
+            func_kwargs={
+                "A_col": "A",
+                "B_col": "B"
+            },
+            chunk_type="df",
         )
         for item in result:
             self.assertIsInstance(item, pd.DataFrame)

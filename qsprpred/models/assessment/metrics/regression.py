@@ -15,7 +15,6 @@ class KSlope(Metric):
     Attributes:
         name (str): Name of the scoring function (k_slope).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the slope of the regression line through the origin
         between the predicted and observed values.
@@ -31,12 +30,13 @@ class KSlope(Metric):
         num, denom = 0, 0
         for i in range(len(y_true)):
             num += y_true[i] * y_pred[i]
-            denom += y_true[i] ** 2
+            denom += y_true[i]**2
         return num / denom if len(y_pred) >= 2 else 0
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
         return "k_slope"
+
 
 class RPrime20(KSlope):
     """Calculate the coefficient of determination for regression line
@@ -49,7 +49,6 @@ class RPrime20(KSlope):
     Attributes:
         name (str): Name of the scoring function (r_prime_2_0).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the coefficient of determination for regression line
         through the origin between the predicted and observed values.
@@ -68,7 +67,7 @@ class RPrime20(KSlope):
         num, denom = 0, 0
         for i in range(len(y_true)):
             num += y_pred[i] - k * y_true[i]
-            denom += (y_pred[i] - y_pred_mean) ** 2
+            denom += (y_pred[i] - y_pred_mean)**2
         return 1 - num / denom if len(y_pred) >= 2 else 0
 
     def __str__(self) -> str:
@@ -88,7 +87,6 @@ class KPrimeSlope(Metric):
     Attributes:
         name (str): Name of the scoring function (k_prime_slope).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the slope of the regression line through the origin
         between the observed and predicted values.
@@ -104,7 +102,7 @@ class KPrimeSlope(Metric):
         num, denom = 0, 0
         for i in range(len(y_true)):
             num += y_true[i] * y_pred[i]
-            denom += y_pred[i] ** 2
+            denom += y_pred[i]**2
         return num / denom if len(y_pred) >= 2 else 0
 
     def __str__(self) -> str:
@@ -123,7 +121,6 @@ class R20(KPrimeSlope):
     Attributes:
         name (str): Name of the scoring function (r_2_0).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the coefficient of determination for regression line
         through the origin between the observed and predicted values.
@@ -142,7 +139,7 @@ class R20(KPrimeSlope):
         num, denom = 0, 0
         for i in range(len(y_true)):
             num += y_true[i] - k_prime * y_pred[i]
-            denom += (y_true[i] - y_true_mean) ** 2
+            denom += (y_true[i] - y_true_mean)**2
         return 1 - num / denom if len(y_pred) >= 2 else 0
 
     def __str__(self) -> str:
@@ -156,7 +153,6 @@ class Pearson(Metric):
     Attributes:
         name (str): Name of the scoring function (pearson).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the Pearson correlation coefficient.
 
@@ -182,7 +178,6 @@ class Spearman(Metric):
     Attributes:
         name (str): Name of the scoring function (spearman).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the Spearman correlation
 
@@ -207,7 +202,6 @@ class Kendall(Metric):
     Attributes:
         name (str): Name of the scoring function (kendall).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the Kendall rank correlation coefficient.
 
@@ -232,7 +226,6 @@ class AverageFoldError(Metric):
     Attributes:
         name (str): Name of the scoring function (fold_error).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the fold error.
 
@@ -244,7 +237,7 @@ class AverageFoldError(Metric):
             float: The fold error.
 
         """
-        return 10 ** (np.mean(np.log10(y_pred / y_true)))
+        return 10**(np.mean(np.log10(y_pred / y_true)))
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
@@ -259,7 +252,6 @@ class AbsoluteAverageFoldError(Metric):
     Attributes:
         name (str): Name of the scoring function (absolute_average_fold_error).
     """
-
     def __call__(self, y_true: np.array, y_pred: np.array) -> float:
         """Calculate the absolute fold error.
 
@@ -271,7 +263,7 @@ class AbsoluteAverageFoldError(Metric):
             float: The absolute average fold error.
 
         """
-        return 10 ** (np.mean(np.abs(np.log10(y_pred / y_true))))
+        return 10**(np.mean(np.abs(np.log10(y_pred / y_true))))
 
     def __str__(self) -> str:
         """Return the name of the scorer."""
@@ -284,7 +276,6 @@ class PercentageWithinFoldError(Metric):
     Attributes:
         name (str): Name of the scoring function (percentage_within_{x}_fold_error).
     """
-
     def __init__(self, fold_error: float = 2):
         """Initialize the percentage within fold error scorer.
 

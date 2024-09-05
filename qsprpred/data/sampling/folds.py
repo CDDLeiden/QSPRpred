@@ -1,4 +1,5 @@
 """A module that provides a class that creates folds from a given data set."""
+
 from abc import ABC, abstractmethod
 from typing import Generator
 
@@ -9,20 +10,23 @@ from ...data.processing.feature_standardizers import apply_feature_standardizer
 
 class FoldGenerator(ABC):
     """A generator that creates folds from a given data set."""
-
     @abstractmethod
     def iterFolds(
-            self,
-            dataset: "QSPRDataSet",
-            concat=False
-    ) -> Generator[tuple[
-        pd.DataFrame,
-        pd.DataFrame,
-        pd.DataFrame | pd.Series,
-        pd.DataFrame | pd.Series,
-        list[int],
-        list[int]
-    ], None, None]:
+        self,
+        dataset: "QSPRDataSet",
+        concat=False
+    ) -> Generator[
+        tuple[
+            pd.DataFrame,
+            pd.DataFrame,
+            pd.DataFrame | pd.Series,
+            pd.DataFrame | pd.Series,
+            list[int],
+            list[int],
+        ],
+        None,
+        None,
+    ]:
         """
         Returns the generator of folds to iterate over.
 
@@ -39,7 +43,7 @@ class FoldGenerator(ABC):
                 (X_train, X_test, y_train, y_test, train_index, test_index)
         """
 
-    def getFolds(self, dataset: "QSPRDataSet"):
+    def getFolds(self, dataset: "QSPRDataSet"):  # noqa: F821
         """Directly converts the output of `iterFolds` to a `list`."""
         return list(self.iterFolds(dataset))
 
@@ -57,7 +61,6 @@ class FoldsFromDataSplit(FoldGenerator):
             the standardizer to use to standardize the features (this can also
             just be a raw scikit-learn standardizer)
     """
-
     def _standardize_folds(self, folds):
         """A generator that fits and applies feature standardizers to each fold
         returned. They are properly fitted on the training set and applied to the
@@ -69,7 +72,7 @@ class FoldsFromDataSplit(FoldGenerator):
             X_test, _ = apply_feature_standardizer(standardizer, X_test, fit=False)
             yield X_train, X_test, y_train, y_test, train_index, test_index
 
-    def __init__(self, split: "DataSplit", feature_standardizer=None):
+    def __init__(self, split: "DataSplit", feature_standardizer=None):  # noqa: F821
         """Initialize the generator with a splitter and a standardizer.
 
         Args:
@@ -84,17 +87,19 @@ class FoldsFromDataSplit(FoldGenerator):
         self.featureStandardizer = feature_standardizer
 
     def _make_folds(
-            self,
-            X: pd.DataFrame,
-            y: pd.DataFrame | pd.Series
-    ) -> Generator[tuple[
-        pd.DataFrame,
-        pd.DataFrame,
-        pd.DataFrame | pd.Series,
-        pd.DataFrame | pd.Series,
-        list[int],
-        list[int]
-    ], None, None]:
+        self, X: pd.DataFrame, y: pd.DataFrame | pd.Series
+    ) -> Generator[
+        tuple[
+            pd.DataFrame,
+            pd.DataFrame,
+            pd.DataFrame | pd.Series,
+            pd.DataFrame | pd.Series,
+            list[int],
+            list[int],
+        ],
+        None,
+        None,
+    ]:
         """A generator that converts folds as returned by the splitter to a tuple of
         (X_train, X_test, y_train, y_test, train_index, test_index).
 
@@ -111,17 +116,21 @@ class FoldsFromDataSplit(FoldGenerator):
                 train_index], y.iloc[test_index], train_index, test_index
 
     def iterFolds(
-            self,
-            dataset: "QSPRDataSet",
-            concat=False
-    ) -> Generator[tuple[
-        pd.DataFrame,
-        pd.DataFrame,
-        pd.DataFrame | pd.Series,
-        pd.DataFrame | pd.Series,
-        list[int],
-        list[int]
-    ], None, None]:
+        self,
+        dataset: "QSPRDataSet",
+        concat=False
+    ) -> Generator[
+        tuple[
+            pd.DataFrame,
+            pd.DataFrame,
+            pd.DataFrame | pd.Series,
+            pd.DataFrame | pd.Series,
+            list[int],
+            list[int],
+        ],
+        None,
+        None,
+    ]:
         """Create folds from X and y. Can be used either for cross-validation,
         bootstrapping or train-test split.
 

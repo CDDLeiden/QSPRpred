@@ -1,10 +1,11 @@
-from typing import Any, Iterable, Optional, Callable
+from typing import Any, Callable, Iterable, Optional
 
 import pandas as pd
 
 from qsprpred.data.tables.pandas import PandasDataTable
-from qsprpred.extra.data.storage.protein.interfaces.protein_storage import \
-    ProteinStorage
+from qsprpred.extra.data.storage.protein.interfaces.protein_storage import (
+    ProteinStorage,
+)
 from qsprpred.extra.data.storage.protein.interfaces.storedprotein import StoredProtein
 from qsprpred.logs import logger
 from qsprpred.utils.parallel import ParallelGenerator
@@ -13,24 +14,23 @@ from qsprpred.utils.serialization import function_as_string, function_from_strin
 
 class TabularProtein(StoredProtein):
     """A protein object that is stored in a tabular format.
-    
+
     Attributes:
         id (str): id of the protein
         sequence (str): sequence of the protein
         props (dict[str, Any]): properties of the protein
         representations (Iterable[TabularProtein]): representations of the protein
     """
-
     def __init__(
-            self,
-            protein_id: str,
-            sequence: str | None = None,
-            parent: Optional["TabularProtein"] = None,
-            props: dict[str, Any] | None = None,
-            representations: Iterable["TabularProtein"] | None = None,
+        self,
+        protein_id: str,
+        sequence: str | None = None,
+        parent: Optional["TabularProtein"] = None,
+        props: dict[str, Any] | None = None,
+        representations: Iterable["TabularProtein"] | None = None,
     ) -> None:
         """Create a new protein instance.
-        
+
         Args:
             protein_id (str): identifier of the protein
             sequence (str): sequence of the protein
@@ -75,32 +75,31 @@ class TabularProtein(StoredProtein):
 
 class TabularProteinStorage(ProteinStorage, PandasDataTable):
     """A storage class for proteins stored in a tabular format.
-    
+
     Attributes:
         sequenceCol (str): name of the column that contains all protein sequences
         proteinSeqProvider (Callable): function that provides protein
         sequenceProp (str): name of the property that contains all protein sequences
         proteins (Iterable[TabularProtein]): all proteins in the store
     """
-
     def __init__(
-            self,
-            name: str,
-            df: pd.DataFrame | None = None,
-            sequence_col: str = "Sequence",
-            sequence_provider: Optional[Callable] = None,
-            store_dir: str = ".",
-            overwrite: bool = False,
-            index_cols: list[str] | None = None,
-            n_jobs: int = 1,
-            chunk_size: int | None = None,
-            protein_col: str = "accession",
-            random_state: int | None = None,
-            store_format: str = "pkl",
-            parallel_generator: ParallelGenerator | None = None,
+        self,
+        name: str,
+        df: pd.DataFrame | None = None,
+        sequence_col: str = "Sequence",
+        sequence_provider: Optional[Callable] = None,
+        store_dir: str = ".",
+        overwrite: bool = False,
+        index_cols: list[str] | None = None,
+        n_jobs: int = 1,
+        chunk_size: int | None = None,
+        protein_col: str = "accession",
+        random_state: int | None = None,
+        store_format: str = "pkl",
+        parallel_generator: ParallelGenerator | None = None,
     ):
-        """Create a new protein storage instance.	
-        
+        """Create a new protein storage instance.
+
         Args:
             name (str): name of the storage
             df (pd.DataFrame): data frame containing the proteins
@@ -118,10 +117,14 @@ class TabularProteinStorage(ProteinStorage, PandasDataTable):
         """
         super().__init__(
             name,
-            df if df is not None else pd.DataFrame(columns=[sequence_col,
-                                                            *index_cols] if index_cols else [
-                sequence_col,
-                protein_col]),
+            (
+                df if df is not None else pd.DataFrame(
+                    columns=(
+                        [sequence_col, *index_cols]
+                        if index_cols else [sequence_col, protein_col]
+                    )
+                )
+            ),
             store_dir,
             overwrite,
             index_cols or [protein_col],
@@ -176,22 +179,15 @@ class TabularProteinStorage(ProteinStorage, PandasDataTable):
                 f"{set(self.getProperty(self.idProp)) - set(mapping.keys())}"
             )
             for protein_id in mapping:
-                self.addProperty(
-                    self.sequenceProp,
-                    [mapping[protein_id]],
-                    [protein_id]
-                )
+                self.addProperty(self.sequenceProp, [mapping[protein_id]], [protein_id])
                 if props:
                     for prop in props[protein_id]:
                         self.addProperty(prop, [props[protein_id][prop]], [protein_id])
             return mapping, props
         else:
-            return {
-                key: seq for key, seq in zip(
-                    self.getProperty(self.idProp),
-                    self.getProperty(self.sequenceProp)
-                )
-            }, {  # return all remaining props as metadata
+            return dict(
+                zip(self.getProperty(self.idProp), self.getProperty(self.sequenceProp))
+            ), {  # return all remaining props as metadata
                 prop: self.getProperty(prop)
                 for prop in self.getProperties()
                 if prop not in [self.idProp, self.sequenceProp]
@@ -199,29 +195,32 @@ class TabularProteinStorage(ProteinStorage, PandasDataTable):
 
     @property
     def sequenceProp(self) -> str:
-        """Get the name of the property that contains all protein sequences."""	
+        """Get the name of the property that contains all protein sequences."""
         return self._sequenceCol
 
     def add_protein(self, protein: TabularProtein, raise_on_existing=True):
         """Add a protein to the store.
-        
+
         Args:
             protein (TabularProtein): protein sequence
-            raise_on_existing (bool): 
+            raise_on_existing (bool):
                 raise an exception if the protein already exists in the store
         """
         self.addEntries(
             [protein.id],
-            {prop: [val] for prop, val in protein.props},
-            raise_on_existing
+            {
+                prop: [val]
+                for prop, val in protein.props
+            },
+            raise_on_existing,
         )
 
     def _make_proteins_from_chunk(self, df: pd.DataFrame) -> list[TabularProtein]:
         """Create a list of proteins from a chunk of the data frame.
-        
+
         Args:
             df (pd.DataFrame): chunk of the data frame
-            
+
         Returns:
             list[TabularProtein]: list of proteins
         """
@@ -232,15 +231,15 @@ class TabularProteinStorage(ProteinStorage, PandasDataTable):
             TabularProtein(
                 protein_id=ids[i],
                 sequence=sequences[i],
-                props={prop: df[prop].values[i] for prop in props},
-            )
-            for i in range(len(df))
+                props={prop: df[prop].values[i]
+                       for prop in props},
+            ) for i in range(len(df))
         ]
 
     @property
     def proteins(self) -> list[TabularProtein]:
         """Get all proteins in the store.
-        
+
         Returns:
             list[TabularProtein]: list of proteins
         """
@@ -250,14 +249,14 @@ class TabularProteinStorage(ProteinStorage, PandasDataTable):
         return ret
 
     def getProtein(self, protein_id: str) -> TabularProtein:
-        """Get a protein from the store using its name.	
-        
+        """Get a protein from the store using its name.
+
         Args:
             protein_id (str): name of the protein to search
-        
+
         Returns:
             TabularProtein: instance of `Protein`
-            
+
         Raises:
             ValueError: if the protein is not found
         """

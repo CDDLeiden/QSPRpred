@@ -7,18 +7,17 @@ from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 
 class TabularMol(StoredMol):
     """Simple implementation of a molecule that is stored in a tabular storage."""
-
     def __init__(
-            self,
-            mol_id: str,
-            smiles: str,
-            parent: Optional["TabularMol"] = None,
-            rd_mol: Chem.Mol | None = None,
-            props: dict[str, Any] | None = None,
-            representations: tuple["TabularMol", ...] | None = None,
+        self,
+        mol_id: str,
+        smiles: str,
+        parent: Optional["TabularMol"] = None,
+        rd_mol: Chem.Mol | None = None,
+        props: dict[str, Any] | None = None,
+        representations: tuple["TabularMol", ...] | None = None,
     ):
         """Create a new molecule instance.
-        
+
         Args:
             mol_id (str): identifier of the molecule
             smiles (str): SMILES of the molecule
@@ -36,7 +35,7 @@ class TabularMol(StoredMol):
 
     def as_rd_mol(self) -> Chem.Mol:
         """Get the rdkit molecule object.
-        
+
         Returns:
             (Chem.Mol) rdkit molecule object
         """

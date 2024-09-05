@@ -2,7 +2,9 @@ import os
 
 from rdkit import rdBase
 
-from .tasks import ModelTasks, TargetTasks, TargetProperty
+from .tasks import ModelTasks, TargetProperty, TargetTasks
+
+__all__ = ["ModelTasks", "TargetProperty", "TargetTasks"]
 
 rdBase.DisableLog("rdApp.error")
 rdBase.DisableLog("rdApp.info")

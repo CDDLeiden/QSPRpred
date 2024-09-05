@@ -10,6 +10,7 @@ from parameterized import parameterized
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
 from qsprpred.models.assessment.methods import CrossValAssessor, TestSetAssessor
+
 from ..data.processing.feature_filters import LowVarianceFilter
 from ..models.scikit_learn import SklearnModel
 from ..plotting.classification import ConfusionMatrixPlot, MetricsPlot, ROCPlot
@@ -47,7 +48,6 @@ class PlottingTest(ModelDataSetsPathMixIn, QSPRTestCase):
 
 class ROCPlotTest(PlottingTest):
     """Test ROC curve plotting class."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -56,7 +56,11 @@ class ROCPlotTest(PlottingTest):
         """Test plotting ROC curve for single task."""
         dataset = self.createLargeTestDataSet(
             "test_roc_plot_single_data",
-            target_props=[{"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [6.5]}],
+            target_props=[{
+                "name": "CL",
+                "task": TargetTasks.SINGLECLASS,
+                "th": [6.5]
+            }],
             preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel("test_roc_plot_single_model")
@@ -78,18 +82,16 @@ class ROCPlotTest(PlottingTest):
 
 class MetricsPlotTest(PlottingTest):
     """Test metrics plotting class."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
 
     @parameterized.expand(
         [
-            (task, task, th)
-            for task, th in (
+            (task, task, th) for task, th in (
                 ("binary", [6.5]),
                 ("multi_class", [0, 2, 10, 1100]),
-        )
+            )
         ]
     )
     def testPlotSingle(self, _, task, th):
@@ -99,9 +101,11 @@ class MetricsPlotTest(PlottingTest):
             target_props=[
                 {
                     "name": "CL",
-                    "task": TargetTasks.SINGLECLASS
-                    if task == "binary"
-                    else TargetTasks.MULTICLASS,
+                    "task":
+                        (
+                            TargetTasks.SINGLECLASS
+                            if task == "binary" else TargetTasks.MULTICLASS
+                        ),
                     "th": th,
                 }
             ],
@@ -123,7 +127,6 @@ class MetricsPlotTest(PlottingTest):
 
 class CorrPlotTest(PlottingTest):
     """Test correlation plotting class."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -149,7 +152,6 @@ class CorrPlotTest(PlottingTest):
 
 class WilliamsPlotTest(PlottingTest):
     """Test plotting Williams plot for single task."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -157,7 +159,8 @@ class WilliamsPlotTest(PlottingTest):
     def testPlotSingle(self):
         """Test plotting Williams plot for single task."""
         dataset = self.createLargeTestDataSet(
-            "test_williams_plot_single_data", preparation_settings=self.getDefaultPrep()
+            "test_williams_plot_single_data",
+            preparation_settings=self.getDefaultPrep()
         )
         # filter features to below the number of samples in the test set
         # to avoid error in WilliamsPlot
@@ -181,18 +184,16 @@ class WilliamsPlotTest(PlottingTest):
 
 class ConfusionMatrixPlotTest(PlottingTest):
     """Test confusion matrix plotting class."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
 
     @parameterized.expand(
         [
-            (task, task, th)
-            for task, th in (
+            (task, task, th) for task, th in (
                 ("binary", [6.5]),
                 ("multi_class", [0, 2, 10, 1100]),
-        )
+            )
         ]
     )
     def testPlotSingle(self, _, task, th):
@@ -202,9 +203,11 @@ class ConfusionMatrixPlotTest(PlottingTest):
             target_props=[
                 {
                     "name": "CL",
-                    "task": TargetTasks.SINGLECLASS
-                    if task == "binary"
-                    else TargetTasks.MULTICLASS,
+                    "task":
+                        (
+                            TargetTasks.SINGLECLASS
+                            if task == "binary" else TargetTasks.MULTICLASS
+                        ),
                     "th": th,
                 }
             ],
@@ -238,7 +241,6 @@ class ConfusionMatrixPlotTest(PlottingTest):
             os.path.exists(f"{model.outPrefix}_CL_4.0_confusion_matrix.png")
         )
         self.assertTrue(
-            os.path.exists(
-                f"{model.outPrefix}_CL_Independent Test_confusion_matrix.png"
-            )
+            os.path.
+            exists(f"{model.outPrefix}_CL_Independent Test_confusion_matrix.png")
         )

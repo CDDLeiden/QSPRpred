@@ -5,8 +5,9 @@ from qsprpred.data.storage.interfaces.chem_store import ChemStore
 from qsprpred.data.tables.mol import MoleculeTable
 from qsprpred.data.tables.qspr import QSPRTable
 from qsprpred.extra.data.descriptors.sets import ProteinDescriptorSet
-from qsprpred.extra.data.storage.protein.interfaces.protein_storage import \
-    ProteinStorage
+from qsprpred.extra.data.storage.protein.interfaces.protein_storage import (
+    ProteinStorage,
+)
 from qsprpred.logs import logger
 from qsprpred.tasks import TargetProperty
 
@@ -26,17 +27,16 @@ class PCMDataSet(QSPRTable):
             function that takes a list of protein identifiers and returns a `dict`
             mapping those identifiers to their sequences. Defaults to `None`.
     """
-
     def __init__(
-            self,
-            storage: ChemStore | None = None,
-            name: str | None = None,
-            target_props: list[TargetProperty | dict] | None = None,
-            path: str = ".",
-            random_state: int | None = None,
-            store_format: str = "pkl",
-            drop_empty_target_props: bool = True,
-            proteins: ProteinStorage | None = None,
+        self,
+        storage: ChemStore | None = None,
+        name: str | None = None,
+        target_props: list[TargetProperty | dict] | None = None,
+        path: str = ".",
+        random_state: int | None = None,
+        store_format: str = "pkl",
+        drop_empty_target_props: bool = True,
+        proteins: ProteinStorage | None = None,
     ):
         """Construct QSPRdata, also apply transformations of output property if
                 specified.
@@ -97,11 +97,10 @@ class PCMDataSet(QSPRTable):
                 f"storage '{self.storage}' properties: {self.storage.getProperties()}"
             )
         # check if all protein IDs can be found
-        if not set(self.getProteinKeys()).issubset(
-                set(self.storage.getProperty(self.proteins.idProp))
-        ):
-            missing_ids = set(self.getProteinKeys()) - set(
-                self.storage.getProperty(self.proteins.idProp))
+        if not set(self.getProteinKeys()
+                  ).issubset(set(self.storage.getProperty(self.proteins.idProp))):
+            missing_ids = set(self.getProteinKeys()
+                             ) - set(self.storage.getProperty(self.proteins.idProp))
             logger.warning(
                 f"Not all protein IDs found in storage '{self.storage}' properties: "
                 f"{self.storage.getProperty(self.proteins.idProp)}. Missing the"
@@ -125,12 +124,12 @@ class PCMDataSet(QSPRTable):
         return self.proteins.getPCMInfo()
 
     def addDescriptors(
-            self,
-            descriptors: list[DescriptorSet | ProteinDescriptorSet],
-            recalculate: bool = False,
-            featurize: bool = True,
-            *args,
-            **kwargs,
+        self,
+        descriptors: list[DescriptorSet | ProteinDescriptorSet],
+        recalculate: bool = False,
+        featurize: bool = True,
+        *args,
+        **kwargs,
     ):
         # get protein sequences and metadata
         sequences, info = self.proteins.getPCMInfo()
@@ -146,12 +145,12 @@ class PCMDataSet(QSPRTable):
         )
 
     def getSubset(
-            self,
-            subset: list[str],
-            ids: list[str] | None = None,
-            name: str | None = None,
-            path: str | None = None,
-            **kwargs,
+        self,
+        subset: list[str],
+        ids: list[str] | None = None,
+        name: str | None = None,
+        path: str | None = None,
+        **kwargs,
     ) -> "QSPRTable":
         ds = super().getSubset(subset, ids, name, path, **kwargs)
         ds.__class__ = PCMDataSet
@@ -160,14 +159,14 @@ class PCMDataSet(QSPRTable):
 
     @classmethod
     def fromMolTable(
-            cls,
-            mol_table: MoleculeTable,
-            target_props: list[TargetProperty | dict],
-            *args,
-            proteins: ProteinStorage | None = None,
-            name: str | None = None,
-            path: str = ".",
-            **kwargs,
+        cls,
+        mol_table: MoleculeTable,
+        target_props: list[TargetProperty | dict],
+        *args,
+        proteins: ProteinStorage | None = None,
+        name: str | None = None,
+        path: str = ".",
+        **kwargs,
     ) -> "PCMDataSet":
         """Construct a data set to handle PCM data from a `MoleculeTable`.
 
@@ -194,12 +193,7 @@ class PCMDataSet(QSPRTable):
         """
         name = name or f"{mol_table.name}_PCM"
         ret = QSPRTable.fromMolTable(
-            mol_table,
-            target_props,
-            *args,
-            name=name,
-            path=path,
-            **kwargs
+            mol_table, target_props, *args, name=name, path=path, **kwargs
         )
         ret.__class__ = PCMDataSet
         if proteins is not None:

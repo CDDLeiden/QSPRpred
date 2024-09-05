@@ -6,7 +6,7 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.neural_network import MLPClassifier
 
 from qsprpred.models.assessment.methods import CrossValAssessor, TestSetAssessor
-from . import BenchmarkRunner, BenchmarkSettings, DataPrepSettings
+
 from .. import TargetProperty, TargetTasks
 from ..data import MoleculeTable, QSPRTable
 from ..data.descriptors.sets import RDKitDescs
@@ -15,13 +15,13 @@ from ..models.scikit_learn import SklearnModel
 from ..utils.stringops import get_random_string
 from ..utils.testing.base import QSPRTestCase
 from ..utils.testing.path_mixins import DataSetsPathMixIn
+from . import BenchmarkRunner, BenchmarkSettings, DataPrepSettings
 
 
 class DataSourceTesting(DataSetsPathMixIn, DataSource):
     """Data source for testing purposes. Simply prepares the default
     data set from`DataSetsPathMixIn`.
     """
-
     def __init__(self, name):
         super().__init__()
         self.setUpPaths()
@@ -32,10 +32,10 @@ class DataSourceTesting(DataSetsPathMixIn, DataSource):
         return self.createLargeTestDataSet(name)
 
     def getDataSet(
-            self,
-            target_props: list[TargetProperty | dict],
-            name: str | None = None,
-            **kwargs,
+        self,
+        target_props: list[TargetProperty | dict],
+        name: str | None = None,
+        **kwargs,
     ) -> QSPRTable:
         name = name or self.name
         return self.createLargeTestDataSet(name, target_props=target_props)
@@ -50,7 +50,6 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
         benchmark (BenchmarkRunner):
             Benchmark runner.
     """
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -76,12 +75,20 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
             target_props=[
                 [
                     TargetProperty.fromDict(
-                        {"name": "CL", "task": TargetTasks.SINGLECLASS, "th": [10]}
+                        {
+                            "name": "CL",
+                            "task": TargetTasks.SINGLECLASS,
+                            "th": [10]
+                        }
                     )
                 ],
                 [
                     TargetProperty.fromDict(
-                        {"name": "fu", "task": TargetTasks.SINGLECLASS, "th": [0.3]}
+                        {
+                            "name": "fu",
+                            "task": TargetTasks.SINGLECLASS,
+                            "th": [0.3]
+                        }
                     )
                 ],
             ],
@@ -129,10 +136,9 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
             for assessor in self.settings.assessors:
                 score = assessor.scoreFunc.name
                 score_results = results[
-                    (results["ScoreFunc"] == score)
-                    & (results["Assessor"] == assessor.__class__.__name__)
-                    & (results["TargetProperty"].isin([tp.name for tp in tps]))
-                    ]
+                    (results["ScoreFunc"] == score) &
+                    (results["Assessor"] == assessor.__class__.__name__) &
+                    (results["TargetProperty"].isin([tp.name for tp in tps]))]
                 self.assertTrue(len(score_results) > 0)
 
     def checkSettings(self):
@@ -164,14 +170,10 @@ class BenchmarkingTest(BenchMarkTestCase):
 
     def testSingleTaskREG(self):
         self.settings.target_props = [
-            [
-                TargetProperty.fromDict(
-                    {
-                        "name": "CL",
-                        "task": TargetTasks.REGRESSION,
-                    }
-                )
-            ]
+            [TargetProperty.fromDict({
+                "name": "CL",
+                "task": TargetTasks.REGRESSION,
+            })]
         ]
         self.settings.models = [
             SklearnModel(

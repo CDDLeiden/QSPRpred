@@ -9,9 +9,10 @@ import papyrus_scripts
 from papyrus_scripts.download import download_papyrus
 
 from qsprpred.logs import logger
-from .papyrus_filter import papyrus_filter
-from ..data_source import DataSource
+
 from ...tables.mol import MoleculeTable
+from ..data_source import DataSource
+from .papyrus_filter import papyrus_filter
 
 
 class Papyrus(DataSource):
@@ -33,13 +34,13 @@ class Papyrus(DataSource):
     DEFAULT_DIR = os.path.join(Path.home(), ".Papyrus")
 
     def __init__(
-            self,
-            data_dir: str = DEFAULT_DIR,
-            version: str = "latest",
-            descriptors: str | list[str] | None = None,
-            stereo: bool = False,
-            disk_margin: float = 0.01,
-            plus_only: bool = True,
+        self,
+        data_dir: str = DEFAULT_DIR,
+        version: str = "latest",
+        descriptors: str | list[str] | None = None,
+        stereo: bool = False,
+        disk_margin: float = 0.01,
+        plus_only: bool = True,
     ):
         """Create new instance of Papyrus dataset. See `papyrus_filter` and
         `Papyrus.download` and `Papyrus.getData` for more details.
@@ -94,16 +95,16 @@ class Papyrus(DataSource):
             )
 
     def getData(
-            self,
-            name: str | None = None,
-            acc_keys: list[str] | None = None,
-            quality: str = "high",
-            activity_types: list[str] | str = "all",
-            output_dir: Optional[str] = None,
-            drop_duplicates: bool = False,
-            chunk_size: int = 1e5,
-            use_existing: bool = True,
-            **kwargs,
+        self,
+        name: str | None = None,
+        acc_keys: list[str] | None = None,
+        quality: str = "high",
+        activity_types: list[str] | str = "all",
+        output_dir: Optional[str] = None,
+        drop_duplicates: bool = False,
+        chunk_size: int = 1e5,
+        use_existing: bool = True,
+        **kwargs,
     ) -> MoleculeTable:
         """Get the data from the Papyrus database as a `DataSetTSV` instance.
 
@@ -145,17 +146,16 @@ class Papyrus(DataSource):
         )
         logger.debug("Finished filtering Papyrus data set.")
         logger.debug(f"Creating MoleculeTable from '{path}'.")
-        ret = MoleculeTable.fromTableFile(name, path, path=output_dir,
-                                          **kwargs)
+        ret = MoleculeTable.fromTableFile(name, path, path=output_dir, **kwargs)
         logger.debug(f"Finished creating MoleculeTable from '{path}'.")
         return ret
 
     def getProteinData(
-            self,
-            acc_keys: list[str],
-            output_dir: Optional[str] = None,
-            name: Optional[str] = None,
-            use_existing: bool = True,
+        self,
+        acc_keys: list[str],
+        output_dir: Optional[str] = None,
+        name: Optional[str] = None,
+        use_existing: bool = True,
     ) -> pd.DataFrame:
         """Get the protein data from the Papyrus database.
 

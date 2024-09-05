@@ -11,29 +11,26 @@ class DescriptorProvider(ABC):
     assumes that descriptors are divided into sets of related descriptors and
     described by a `DescriptorSet` object.
     """
-
     @property
     @abstractmethod
     def descriptorSets(self) -> list[DescriptorSet]:
         """Get the descriptor sets that are currently in the storage.
-        
+
         Returns:
             a `list` of descriptor sets
         """
-        pass
 
     @abstractmethod
     def dropDescriptorSets(
-            self,
-            descriptors: list[DescriptorSet | str],
+        self,
+        descriptors: list[DescriptorSet | str],
     ):
         """Drop descriptor sets from the storage.
-        
+
         Args:
             descriptors:
                 The descriptor sets to drop.
         """
-        pass
 
     @abstractmethod
     def addDescriptors(self, descriptors: DescriptorSet, *args, **kwargs):

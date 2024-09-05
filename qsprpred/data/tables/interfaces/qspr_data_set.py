@@ -15,12 +15,11 @@ from qsprpred.data.tables.interfaces.molecule_data_set import MoleculeDataSet
 
 class QSPRDataSet(MoleculeDataSet, ABC):
     """Interface for storing and managing QSPR-specific data sets."""
-
     @abstractmethod
     def setTargetProperties(
-            self,
-            target_props: list[TargetProperty | dict],
-            drop_empty: bool = True,
+        self,
+        target_props: list[TargetProperty | dict],
+        drop_empty: bool = True,
     ):
         """Set the target properties for the dataset.
 
@@ -90,9 +89,9 @@ class QSPRDataSet(MoleculeDataSet, ABC):
 
     @abstractmethod
     def iterFolds(
-            self,
-            split: "DataSplit",
-            concat: bool = False,
+        self,
+        split: "DataSplit",  # noqa: F821
+        concat: bool = False,
     ) -> Generator[
         tuple[
             pd.DataFrame,
@@ -141,19 +140,19 @@ class QSPRDataSet(MoleculeDataSet, ABC):
 
     @abstractmethod
     def prepareDataset(
-            self,
-            split: Optional["DataSplit"] = None,
-            feature_calculators: list["DescriptorSet"] | None = None,
-            feature_filters: list | None = None,
-            feature_standardizer: SKLearnStandardizer | None = None,
-            feature_fill_value: float = np.nan,
-            applicability_domain: (
-                    ApplicabilityDomain | MLChemADApplicabilityDomain | None
-            ) = None,
-            drop_outliers: bool = False,
-            recalculate_features: bool = False,
-            shuffle: bool = True,
-            random_state: int | None = None,
+        self,
+        split: Optional["DataSplit"] = None,  # noqa: F821
+        feature_calculators: list["DescriptorSet"] | None = None,  # noqa: F821
+        feature_filters: list | None = None,
+        feature_standardizer: SKLearnStandardizer | None = None,
+        feature_fill_value: float = np.nan,
+        applicability_domain: (
+            ApplicabilityDomain | MLChemADApplicabilityDomain | None
+        ) = None,
+        drop_outliers: bool = False,
+        recalculate_features: bool = False,
+        shuffle: bool = True,
+        random_state: int | None = None,
     ):
         """Prepare the dataset for training.
 
@@ -182,12 +181,12 @@ class QSPRDataSet(MoleculeDataSet, ABC):
 
     @abstractmethod
     def getFeatures(
-            self,
-            inplace: bool = False,
-            concat: bool = False,
-            raw: bool = False,
-            ordered: bool = False,
-            refit_standardizer: bool = True,
+        self,
+        inplace: bool = False,
+        concat: bool = False,
+        raw: bool = False,
+        ordered: bool = False,
+        refit_standardizer: bool = True,
     ) -> pd.DataFrame | tuple[pd.DataFrame, pd.DataFrame]:
         """Get the current feature sets (training and test) from the dataset.
 
@@ -216,7 +215,7 @@ class QSPRDataSet(MoleculeDataSet, ABC):
                 fitted standardizer will be used. Defaults to `True`. Use `False` if
                 this dataset is used for prediction only and the standardizer has
                 been initialized already.
-                
+
         Returns:
             (pd.DataFrame) if `concat` is `True` or (tuple[pd.DataFrame, pd.DataFrame]):
                 feature matrices for training and test sets
@@ -224,9 +223,9 @@ class QSPRDataSet(MoleculeDataSet, ABC):
 
     @abstractmethod
     def getTargets(
-            self,
-            concat: bool = False,
-            ordered: bool = False
+        self,
+        concat: bool = False,
+        ordered: bool = False
     ) -> pd.DataFrame | tuple[pd.DataFrame, pd.DataFrame]:
         """Get the response values (training and test) for the set target property.
 

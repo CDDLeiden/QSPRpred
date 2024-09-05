@@ -12,12 +12,13 @@ import torch
 from sklearn.model_selection import ShuffleSplit
 
 from qsprpred.tasks import ModelTasks
-from .base_torch import QSPRModelPyTorchGPU, DEFAULT_TORCH_GPUS
+
 from ....data.sampling.splits import DataSplit
 from ....data.tables.qspr import QSPRTable
-from ....extra.gpu.models.neural_network import STFullyConnected, Base
+from ....extra.gpu.models.neural_network import Base, STFullyConnected
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
 from ....models.monitors import BaseMonitor, FitMonitor
+from .base_torch import DEFAULT_TORCH_GPUS, QSPRModelPyTorchGPU
 
 
 class DNNModel(QSPRModelPyTorchGPU):
@@ -54,7 +55,6 @@ class DNNModel(QSPRModelPyTorchGPU):
             number of epochs to wait before early stop
             if no progress on validation set score
     """
-
     def getGPUs(self):
         return self.gpus
 
@@ -76,16 +76,16 @@ class DNNModel(QSPRModelPyTorchGPU):
             self.estimator.device = self.device
 
     def __init__(
-            self,
-            base_dir: str,
-            alg: Type = STFullyConnected,
-            name: str | None = None,
-            parameters: dict | None = None,
-            random_state: int | None = None,
-            autoload: bool = True,
-            gpus: list[int] = DEFAULT_TORCH_GPUS,
-            patience: int = 50,
-            tol: float = 0,
+        self,
+        base_dir: str,
+        alg: Type = STFullyConnected,
+        name: str | None = None,
+        parameters: dict | None = None,
+        random_state: int | None = None,
+        autoload: bool = True,
+        gpus: list[int] = DEFAULT_TORCH_GPUS,
+        patience: int = 50,
+        tol: float = 0,
     ):
         """Initialize a DNNModel model.
 
@@ -181,7 +181,7 @@ class DNNModel(QSPRModelPyTorchGPU):
         return estimator
 
     def loadEstimatorFromFile(
-            self, params: dict | None = None, fallback_load: bool = True
+        self, params: dict | None = None, fallback_load: bool = True
     ) -> object:
         """Load estimator from file.
 
@@ -225,14 +225,14 @@ class DNNModel(QSPRModelPyTorchGPU):
 
     @early_stopping
     def fit(
-            self,
-            X: pd.DataFrame | np.ndarray,
-            y: pd.DataFrame | np.ndarray,
-            estimator: Any | None = None,
-            mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
-            split: DataSplit | None = None,
-            monitor: FitMonitor | None = None,
-            **kwargs,
+        self,
+        X: pd.DataFrame | np.ndarray,
+        y: pd.DataFrame | np.ndarray,
+        estimator: Any | None = None,
+        mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+        split: DataSplit | None = None,
+        monitor: FitMonitor | None = None,
+        **kwargs,
     ):
         """Fit the model to the given data matrix or `QSPRTable`.
 
@@ -289,7 +289,9 @@ class DNNModel(QSPRModelPyTorchGPU):
         return estimator_fit
 
     def predict(
-            self, X: pd.DataFrame | np.ndarray | QSPRTable, estimator: Any = None
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRTable,
+        estimator: Any = None
     ) -> np.ndarray:
         """See `QSPRModel.predict`."""
         estimator = self.estimator if estimator is None else estimator
@@ -303,7 +305,9 @@ class DNNModel(QSPRModelPyTorchGPU):
             return scores[0]
 
     def predictProba(
-            self, X: pd.DataFrame | np.ndarray | QSPRTable, estimator: Any = None
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRTable,
+        estimator: Any = None
     ) -> np.ndarray:
         """See `QSPRModel.predictProba`."""
         estimator = self.estimator if estimator is None else estimator

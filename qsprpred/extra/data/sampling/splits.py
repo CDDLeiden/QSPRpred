@@ -3,14 +3,15 @@
 To add a new data splitter:
 * Add a datasplit subclass for your new splitter
 """
+
 from typing import Iterable
 
 import numpy as np
 from sklearn.impute import SimpleImputer
 
 from qsprpred.data.sampling.splits import (
-    DataSplit,
     ClusterSplit,
+    DataSplit,
     RandomSplit,
     ScaffoldSplit,
 )
@@ -31,7 +32,6 @@ class PCMSplit(DataSplit):
         dataset (PCMDataSet): The dataset to split.
         splitter (DataSplit): The splitter to use on the initial clusters.
     """
-
     def __init__(self, splitter: DataSplit, dataset: PCMDataSet | None = None) -> None:
         super().__init__(dataset)
         self.splitter = splitter
@@ -42,8 +42,9 @@ class PCMSplit(DataSplit):
         ), "Splitter must be either RandomSplit, ScaffoldSplit or ClusterSplit!"
 
         if isinstance(self.splitter, (RandomSplit, ClusterSplit)):
-            self.splitter.randomState = \
+            self.splitter.randomState = (
                 dataset.randomState if dataset is not None else None
+            )
 
     def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
         """
@@ -71,7 +72,7 @@ class PCMSplit(DataSplit):
         task = ds.targetProperties[0].task
         th = ds.targetProperties[0].th if task.isClassification() else None
         assert (
-                len(ds.targetProperties) == 1
+            len(ds.targetProperties) == 1
         ), "PCMSplit only works for single-task datasets!"
         # TODO: Add support for multi-target (create a multi-task PCM dataset)
         # with all target-task combinations as different columns and split that
@@ -86,8 +87,7 @@ class PCMSplit(DataSplit):
         mt_targetProperties = [
             TargetProperty(
                 name=target, task=task, th=th, imputer=SimpleImputer(strategy="median")
-            )
-            for target in proteins
+            ) for target in proteins
         ]
         # temporarily create multi-task dataset and split it with the given splitter
         ds_mt = QSPRTable.fromDF(
@@ -144,11 +144,11 @@ class LeaveTargetsOut(DataSplit):
 
 class TemporalPerTarget(DataSplit):
     def __init__(
-            self,
-            year_col: str,
-            split_years: dict[str, int],
-            firts_year_per_compound: bool = True,
-            dataset: PCMDataSet | None = None,
+        self,
+        year_col: str,
+        split_years: dict[str, int],
+        firts_year_per_compound: bool = True,
+        dataset: PCMDataSet | None = None,
     ):
         """Creates a temporal split that is consistent across targets.
 
@@ -203,8 +203,8 @@ class TemporalPerTarget(DataSplit):
             train_indices.extend([indices.index(i) for i in train])
             test_indices.extend([indices.index(i) for i in test])
 
-        assert len(set(train_indices)) + len(set(test_indices)) == len(
-            ds
-        ), "Train and test set do not cover the whole dataset!"
+        assert len(set(train_indices)) + len(
+            set(test_indices)
+        ) == len(ds), "Train and test set do not cover the whole dataset!"
 
         return iter([(train_indices, test_indices)])

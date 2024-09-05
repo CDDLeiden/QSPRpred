@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Any
+from typing import Any, Optional
 
 from rdkit import Chem
 
@@ -11,7 +11,6 @@ class StoredMol(ABC):
     conformers, tautomers, or protomers of the parent molecule. Representations
     can also be used to encode docked poses with metadata attached as properties.
     """
-
     def __str__(self) -> str:
         return f"{self.__class__.__name__} ({self.id}, {self.smiles})"
 
@@ -55,11 +54,10 @@ class StoredMol(ABC):
     @abstractmethod
     def representations(self) -> list["StoredMol"] | None:
         """Get the representations of the molecule.
-        
+
         Returns:
             list: The representations of the molecule.
         """
-        pass
 
     def as_rd_mol(self) -> Chem.Mol:
         """Get the RDKit molecule object of the standardized representation of this instance.

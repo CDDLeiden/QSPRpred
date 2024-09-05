@@ -3,7 +3,7 @@
 import os
 import shutil
 from copy import deepcopy
-from typing import Any
+from typing import Any, ClassVar
 
 import chemprop
 import numpy as np
@@ -16,12 +16,13 @@ from tqdm import trange
 
 from qsprpred.data.sampling.splits import DataSplit
 from qsprpred.tasks import ModelTasks
-from .base_torch import QSPRModelPyTorchGPU, DEFAULT_TORCH_GPUS
+
 from ....data.tables.qspr import QSPRTable
 from ....logs import logger
 from ....models.early_stopping import EarlyStoppingMode, early_stopping
 from ....models.model import QSPRModel
 from ....models.monitors import BaseMonitor, FitMonitor
+from .base_torch import DEFAULT_TORCH_GPUS, QSPRModelPyTorchGPU
 
 
 class ChempropMoleculeModel(chemprop.models.MoleculeModel):
@@ -32,11 +33,10 @@ class ChempropMoleculeModel(chemprop.models.MoleculeModel):
         scaler (chemprop.data.scaler.StandardScaler):
             scaler for scaling the targets
     """
-
     def __init__(
-            self,
-            args: chemprop.args.TrainArgs,
-            scaler: chemprop.data.scaler.StandardScaler | None = None,
+        self,
+        args: chemprop.args.TrainArgs,
+        scaler: chemprop.data.scaler.StandardScaler | None = None,
     ):
         """Initialize a MoleculeModel instance.
 
@@ -120,7 +120,6 @@ class ChempropModel(QSPRModelPyTorchGPU):
             base directory of the model,
             the model files are stored in a subdirectory `{baseDir}/{outDir}/`
     """
-
     def getGPUs(self):
         return self.gpus
 
@@ -137,16 +136,16 @@ class ChempropModel(QSPRModelPyTorchGPU):
     def setDevice(self, device: str):
         self.device = device
 
-    _notJSON = [*QSPRModel._notJSON, "chempropLogger"]
+    _notJSON: ClassVar = [*QSPRModel._notJSON, "chempropLogger"]
 
     def __init__(
-            self,
-            base_dir: str,
-            name: str | None = None,
-            parameters: dict | None = None,
-            autoload=True,
-            random_state: int | None = None,
-            quiet_logger: bool = True,
+        self,
+        base_dir: str,
+        name: str | None = None,
+        parameters: dict | None = None,
+        autoload=True,
+        random_state: int | None = None,
+        quiet_logger: bool = True,
     ):
         """Initialize a Chemprop instance.
 
@@ -184,14 +183,14 @@ class ChempropModel(QSPRModelPyTorchGPU):
 
     @early_stopping
     def fit(
-            self,
-            X: pd.DataFrame | np.ndarray,
-            y: pd.DataFrame | np.ndarray,
-            estimator: Any = None,
-            mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
-            split: DataSplit | None = None,
-            monitor: FitMonitor | None = None,
-            keep_logs: bool = False,
+        self,
+        X: pd.DataFrame | np.ndarray,
+        y: pd.DataFrame | np.ndarray,
+        estimator: Any = None,
+        mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+        split: DataSplit | None = None,
+        monitor: FitMonitor | None = None,
+        keep_logs: bool = False,
     ) -> Any | tuple[ChempropMoleculeModel, int | None]:
         """Fit the model to the given data matrix or `QSPRTable`.
 
@@ -396,10 +395,8 @@ class ChempropModel(QSPRModelPyTorchGPU):
                 )
                 monitor.onEpochEnd(epoch, mean_val_score)
                 if (
-                        args.minimize_score
-                        and mean_val_score < best_score
-                        or not args.minimize_score
-                        and mean_val_score > best_score
+                    args.minimize_score and mean_val_score < best_score or
+                    not args.minimize_score and mean_val_score > best_score
                 ):
                     best_score, best_epoch = mean_val_score, epoch
                     best_estimator = deepcopy(estimator)
@@ -424,9 +421,9 @@ class ChempropModel(QSPRModelPyTorchGPU):
         return estimator, None
 
     def predict(
-            self,
-            X: pd.DataFrame | np.ndarray | QSPRTable,
-            estimator: ChempropMoleculeModel | None = None,
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRTable,
+        estimator: ChempropMoleculeModel | None = None,
     ) -> np.ndarray:
         """Make predictions for the given data matrix or `QSPRTable`.
 
@@ -451,9 +448,9 @@ class ChempropModel(QSPRModelPyTorchGPU):
         return self.predictProba(X, estimator)
 
     def predictProba(
-            self,
-            X: pd.DataFrame | np.ndarray | QSPRTable,
-            estimator: ChempropMoleculeModel | None = None,
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRTable,
+        estimator: ChempropMoleculeModel | None = None,
     ) -> list[np.ndarray]:
         """Make predictions for the given data matrix or `QSPRTable`,
         but use probabilities for classification models.
@@ -546,7 +543,7 @@ class ChempropModel(QSPRModelPyTorchGPU):
         return self.alg(args)
 
     def loadEstimatorFromFile(
-            self, params: dict | None = None, fallback_load=True
+        self, params: dict | None = None, fallback_load=True
     ) -> object:
         """Load estimator instance from file and apply the given parameters.
 
@@ -565,7 +562,9 @@ class ChempropModel(QSPRModelPyTorchGPU):
         if os.path.isfile(path):
             if not hasattr(self, "chempropLogger"):
                 self.chempropLogger = chemprop.utils.create_logger(
-                    name="chemprop_logger", save_dir=self.outDir, quiet=self.quietLogger
+                    name="chemprop_logger",
+                    save_dir=self.outDir,
+                    quiet=self.quietLogger
                 )
             if not self.targetProperties:
                 return "Unititialized estimator, no target properties found yet."
@@ -615,9 +614,9 @@ class ChempropModel(QSPRModelPyTorchGPU):
         return f"{self.outPrefix}.pt"
 
     def convertToMoleculeDataset(
-            self,
-            X: pd.DataFrame | np.ndarray | QSPRTable,
-            y: pd.DataFrame | np.ndarray | QSPRTable | None = None,
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRTable,
+        y: pd.DataFrame | np.ndarray | QSPRTable | None = None,
     ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
         """Convert the given data matrix and target matrix to chemprop Molecule Dataset.
 
@@ -678,8 +677,7 @@ class ChempropModel(QSPRModelPyTorchGPU):
                     smiles=[smile],
                     targets=targets,
                     features=features_data[i] if features_data is not None else None,
-                )
-                for i, (smile, targets) in enumerate(zip(smiles, y))
+                ) for i, (smile, targets) in enumerate(zip(smiles, y))
             ]
         )
 
@@ -715,7 +713,10 @@ class ChempropModel(QSPRModelPyTorchGPU):
 
         # Create dummy args to check what default argument values are in chemprop
         default_args = chemprop.args.TrainArgs().from_dict(
-            args_dict={"dataset_type": "regression", "data_path": ""}
+            args_dict={
+                "dataset_type": "regression",
+                "data_path": ""
+            }
         )
         default_args.process_args()
         default_args = default_args.as_dict()
@@ -765,45 +766,71 @@ class ChempropModel(QSPRModelPyTorchGPU):
         (https://github.com/chemprop/chemprop/blob/master/chemprop/args.py)
         """
         return {
-            "no_cuda": "Turn off cuda (i.e., use CPU instead of GPU).",
-            "gpu": "Which GPU to use.",
-            "num_workers": "Number of workers for the parallel data loading (0 means sequential).",
-            "batch_size": "Batch size.",
-            "no_cache_mol": "Whether to not cache the RDKit molecule for each SMILES string to "
-                            "reduce memory usage (cached by default).",
-            "empty_cache": "Whether to empty all caches before training or predicting. This is "
-                           "necessary if multiple jobs are run within a single script and the "
-                           "atom or bond features change.",
-            "loss_function": "Choice of loss function. Loss functions are limited to compatible "
-                             "dataset types.",
-            "metric": "Metric to use with the validation set for early stopping. Defaults "
-                      "to 'auc' for classification, 'rmse' for regression. Note. In Chemprop "
-                      "this metric is also used for test-set evaluation, but in QSPRpred "
-                      "this is determined by the scoring parameter in assessment.",
-            "bias": "Whether to add bias to linear layers.",
-            "hidden_size": "Dimensionality of hidden layers in MPN.",
-            "depth": "Number of message passing steps.",
-            "mpn_shared": "Whether to use the same message passing neural network for all input "
-                          "molecule Only relevant if 'number_of_molecules > 1'",
-            "dropout": "Dropout probability.",
-            "activation": "Activation function.",
-            "atom_messages": "Centers messages on atoms instead of on bonds.",
-            "undirected": "Undirected edges (always sum the two relevant bond vectors).",
-            "ffn_hidden_size": "Hidden dim for higher-capacity FFN (defaults to hidden_size).",
-            "ffn_num_layers": "Number of layers in FFN after MPN encoding.",
-            "epochs": "Number of epochs to run.",
-            "warmup_epochs": "Number of epochs during which learning rate increases linearly from "
-                             "'init_lr' to 'max_lr'. Afterwards, learning rate decreases "
-                             "exponentially from 'max_lr' to 'final_lr'.",
-            "init_lr": "Initial learning rate.",
-            "max_lr": "Maximum learning rate.",
-            "final_lr": "Final learning rate.",
-            "grad_clip": "Maximum magnitude of gradient during training.",
-            "class_balance": "Trains with an equal number of positives and negatives in each batch.",
-            "evidential_regularization": "Value used in regularization for evidential loss function. The "
-                                         "default value recommended by Soleimany et al.(2021) is 0.2. Optimal "
-                                         "value is dataset-dependent; it is recommended that users test "
-                                         "different values to find the best value for their model.",
+            "no_cuda":
+                "Turn off cuda (i.e., use CPU instead of GPU).",
+            "gpu":
+                "Which GPU to use.",
+            "num_workers":
+                "Number of workers for the parallel data loading (0 means sequential).",
+            "batch_size":
+                "Batch size.",
+            "no_cache_mol":
+                "Whether to not cache the RDKit molecule for each SMILES string to "
+                "reduce memory usage (cached by default).",
+            "empty_cache":
+                "Whether to empty all caches before training or predicting. This is "
+                "necessary if multiple jobs are run within a single script and the "
+                "atom or bond features change.",
+            "loss_function":
+                "Choice of loss function. Loss functions are limited to compatible "
+                "dataset types.",
+            "metric":
+                "Metric to use with the validation set for early stopping. Defaults "
+                "to 'auc' for classification, 'rmse' for regression. Note. In Chemprop "
+                "this metric is also used for test-set evaluation, but in QSPRpred "
+                "this is determined by the scoring parameter in assessment.",
+            "bias":
+                "Whether to add bias to linear layers.",
+            "hidden_size":
+                "Dimensionality of hidden layers in MPN.",
+            "depth":
+                "Number of message passing steps.",
+            "mpn_shared":
+                "Whether to use the same message passing neural network for all input "
+                "molecule Only relevant if 'number_of_molecules > 1'",
+            "dropout":
+                "Dropout probability.",
+            "activation":
+                "Activation function.",
+            "atom_messages":
+                "Centers messages on atoms instead of on bonds.",
+            "undirected":
+                "Undirected edges (always sum the two relevant bond vectors).",
+            "ffn_hidden_size":
+                "Hidden dim for higher-capacity FFN (defaults to hidden_size).",
+            "ffn_num_layers":
+                "Number of layers in FFN after MPN encoding.",
+            "epochs":
+                "Number of epochs to run.",
+            "warmup_epochs":
+                "Number of epochs during which learning rate increases linearly from "
+                "'init_lr' to 'max_lr'. Afterwards, learning rate decreases "
+                "exponentially from 'max_lr' to 'final_lr'.",
+            "init_lr":
+                "Initial learning rate.",
+            "max_lr":
+                "Maximum learning rate.",
+            "final_lr":
+                "Final learning rate.",
+            "grad_clip":
+                "Maximum magnitude of gradient during training.",
+            "class_balance":
+                "Trains with an equal number of positives and negatives in each batch.",
+            "evidential_regularization":
+                "Value used in regularization for evidential loss function. The "
+                "default value recommended by Soleimany et al.(2021) is 0.2. Optimal "
+                "value is dataset-dependent; it is recommended that users test "
+                "different values to find the best value for their model.",
         }
 
     @classmethod

@@ -3,6 +3,7 @@
 To add a new feature filters:
 * Add a FeatureFilter subclass for your new filter
 """
+
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -17,7 +18,6 @@ from ...utils.interfaces.randomized import Randomized
 
 class FeatureFilter(ABC):
     """Filter out uninformative featureNames from a dataframe."""
-
     @abstractmethod
     def __call__(self, df: pd.DataFrame, y_col: pd.DataFrame = None):
         """Filter out uninformative features from a dataframe.
@@ -38,7 +38,6 @@ class LowVarianceFilter(FeatureFilter):
     Attributes:
         th (float): threshold for removing features
     """
-
     def __init__(self, th: float) -> None:
         self.th = th
 
@@ -66,7 +65,6 @@ class HighCorrelationFilter(FeatureFilter):
     Attributes:
         th (float): threshold for correlation
     """
-
     def __init__(self, th: float) -> None:
         self.th = th
 
@@ -98,7 +96,6 @@ class BorutaFilter(FeatureFilter, Randomized):
         seed (int):
             Random state to use for shuffling and other random operations.
     """
-
     @property
     def randomState(self) -> int:
         """Get the random state for the object."""
@@ -136,7 +133,7 @@ class BorutaFilter(FeatureFilter, Randomized):
         self.randomState = self.featSelector.random_state
 
     def __call__(
-            self, features: pd.DataFrame, y_col: pd.DataFrame = None
+        self, features: pd.DataFrame, y_col: pd.DataFrame = None
     ) -> pd.DataFrame:
         """Filter out uninformative features from a dataframe using BorutaPy.
 

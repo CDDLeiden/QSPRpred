@@ -6,37 +6,34 @@ import numpy as np
 from parameterized import parameterized
 from sklearn.preprocessing import StandardScaler
 
-from qsprpred import TargetTasks, TargetProperty
+from qsprpred import TargetProperty, TargetTasks
 from qsprpred.data import RandomSplit
 from qsprpred.data.descriptors.fingerprints import MorganFP
-from qsprpred.data.descriptors.sets import (
-    DrugExPhyschem,
-    DescriptorSet,
-)
+from qsprpred.data.descriptors.sets import DescriptorSet, DrugExPhyschem
 from qsprpred.data.processing.feature_filters import (
-    LowVarianceFilter,
     HighCorrelationFilter,
+    LowVarianceFilter,
 )
 from qsprpred.extra.data.descriptors.fingerprints import (
     CDKFP,
+    CDKMACCSFP,
+    CDKAtomPairs2DFP,
+    CDKEStateFP,
     CDKExtendedFP,
     CDKGraphOnlyFP,
-    CDKMACCSFP,
-    CDKPubchemFP,
-    CDKEStateFP,
-    CDKSubstructureFP,
     CDKKlekotaRothFP,
-    CDKAtomPairs2DFP,
+    CDKPubchemFP,
+    CDKSubstructureFP,
 )
 from qsprpred.extra.data.descriptors.sets import (
-    Mold2,
-    PaDEL,
-    Mordred,
     ExtendedValenceSignature,
+    Mold2,
+    Mordred,
+    PaDEL,
     ProDec,
 )
 from qsprpred.extra.data.tables.pcm import PCMDataSet
-from qsprpred.extra.data.utils.msa_calculator import MAFFT, ClustalMSA, BioPythonMSA
+from qsprpred.extra.data.utils.msa_calculator import MAFFT, BioPythonMSA, ClustalMSA
 from qsprpred.extra.data.utils.testing.path_mixins import DataSetsMixInExtras
 from qsprpred.utils.testing.base import QSPRTestCase
 from qsprpred.utils.testing.check_mixins import DescriptorInDataCheckMixIn
@@ -48,7 +45,6 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, QSPRTestCase):
     Attributes:
         dataset (QSPRTable): dataset for testing, shuffled
     """
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -126,7 +122,6 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         sampleDescSet (DescriptorSet): descriptor set for testing
         defaultMSA (BioPythonMSA): MSA provider for testing
     """
-
     def setUp(self):
         """Set up the test Dataframe."""
         super().setUp()
@@ -137,12 +132,10 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
             sets=["Zscale Hellberg"], msa_provider=self.defaultMSA
         )
 
-    @parameterized.expand(
-        [
-            ("MAFFT", MAFFT),
-            ("ClustalMSA", ClustalMSA),
-        ]
-    )
+    @parameterized.expand([
+        ("MAFFT", MAFFT),
+        ("ClustalMSA", ClustalMSA),
+    ])
     def testSerialization(self, _, msa_provider_cls: Type[BioPythonMSA]):
         """Test the serialization of dataset with data split.
 
@@ -157,7 +150,8 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
             split=split,
             feature_calculators=[self.sampleDescSet],
             feature_standardizer=StandardScaler(),
-            feature_filters=[LowVarianceFilter(0.05), HighCorrelationFilter(0.9)],
+            feature_filters=[LowVarianceFilter(0.05),
+                             HighCorrelationFilter(0.9)],
         )
         ndata = dataset.getDF().shape[0]
         self.validate_split(dataset)
@@ -235,19 +229,18 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         self.assertEqual(self.dataset.X.shape[1], expected_length)
         # filter features and test if they are there after saving and loading
         self.dataset.filterFeatures(
-            [LowVarianceFilter(0.05), HighCorrelationFilter(0.9)]
+            [LowVarianceFilter(0.05),
+             HighCorrelationFilter(0.9)]
         )
         feats_left = self.dataset.X.shape[1]
         self.dataset.save()
         dataset_new = PCMDataSet.fromFile(self.dataset.metaFile)
         self.assertEqual(dataset_new.X.shape[1], feats_left)
 
-    @parameterized.expand(
-        [
-            ("MAFFT", MAFFT),
-            ("ClustalMSA", ClustalMSA),
-        ]
-    )
+    @parameterized.expand([
+        ("MAFFT", MAFFT),
+        ("ClustalMSA", ClustalMSA),
+    ])
     def testProDec(self, _, provider_class):
         provider = provider_class(out_dir=self.generatedDataPath)
         descset = ProDec(sets=["Zscale Hellberg"], msa_provider=provider)
@@ -267,18 +260,20 @@ class TestDescriptorsExtra(
     @parameterized.expand(
         [
             (
-                    f"{desc_set}",
-                    desc_set,
-                    [{"name": "CL", "task": TargetTasks.REGRESSION}],
-            )
-            for desc_set in DataSetsMixInExtras.getAllDescriptors()
+                f"{desc_set}",
+                desc_set,
+                [{
+                    "name": "CL",
+                    "task": TargetTasks.REGRESSION
+                }],
+            ) for desc_set in DataSetsMixInExtras.getAllDescriptors()
         ]
     )
     def testDescriptorsExtraAll(
-            self,
-            _,
-            desc_set: DescriptorSet,
-            target_props: list[dict | TargetProperty],
+        self,
+        _,
+        desc_set: DescriptorSet,
+        target_props: list[dict | TargetProperty],
     ):
         """Test the calculation of extra descriptors with data preparation."""
         dataset = self.createLargeTestDataSet(
@@ -298,7 +293,6 @@ class TestDescriptorsPCM(DataSetsMixInExtras, DescriptorInDataCheckMixIn, TestCa
     Attributes:
         defaultMSA (MSAProvider): Default MSA provider.
     """
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -307,41 +301,41 @@ class TestDescriptorsPCM(DataSetsMixInExtras, DescriptorInDataCheckMixIn, TestCa
     @parameterized.expand(
         [
             (
-                    f"{desc_set}_{TargetTasks.MULTICLASS}",
-                    desc_set,
-                    [
-                        {
-                            "name": "pchembl_value_Median",
-                            "task": TargetTasks.MULTICLASS,
-                            "th": [2.0, 5.5, 6.5, 12.0],
-                        }
-                    ],
-            )
-            for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
-        ]
-        + [
+                f"{desc_set}_{TargetTasks.MULTICLASS}",
+                desc_set,
+                [
+                    {
+                        "name": "pchembl_value_Median",
+                        "task": TargetTasks.MULTICLASS,
+                        "th": [2.0, 5.5, 6.5, 12.0],
+                    }
+                ],
+            ) for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
+        ] + [
             (
-                    f"{desc_set}_{TargetTasks.REGRESSION}",
-                    desc_set,
-                    [{"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}],
-            )
-            for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
-        ]
-        + [
+                f"{desc_set}_{TargetTasks.REGRESSION}",
+                desc_set,
+                [{
+                    "name": "pchembl_value_Median",
+                    "task": TargetTasks.REGRESSION
+                }],
+            ) for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
+        ] + [
             (
-                    f"{desc_set}_Multitask",
-                    desc_set,
-                    [
-                        {"name": "pchembl_value_Median",
-                         "task": TargetTasks.REGRESSION},
-                        {
-                            "name": "pchembl_value_Mean",
-                            "task": TargetTasks.SINGLECLASS,
-                            "th": [6.5],
-                        },
-                    ],
-            )
-            for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
+                f"{desc_set}_Multitask",
+                desc_set,
+                [
+                    {
+                        "name": "pchembl_value_Median",
+                        "task": TargetTasks.REGRESSION
+                    },
+                    {
+                        "name": "pchembl_value_Mean",
+                        "task": TargetTasks.SINGLECLASS,
+                        "th": [6.5],
+                    },
+                ],
+            ) for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
         ]
     )
     def testDescriptorsPCMAll(self, _, desc_set, target_props):

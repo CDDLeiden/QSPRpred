@@ -9,6 +9,7 @@ import scipy as sp
 
 from qsprpred.models.early_stopping import EarlyStoppingMode
 from qsprpred.models.monitors import FitMonitor
+
 from ...data.tables.qspr import QSPRTable
 from ...models.model import QSPRModel
 
@@ -37,14 +38,13 @@ class RandomDistributionAlgorithm(ABC):
 
 class RatioDistributionAlgorithm(RandomDistributionAlgorithm):
     """Categorical distribution using ratio of categories as probabilities
-    
+
     Values of X are irrelevant, only distribution of y is used
-    
+
     Attributes:
         ratios (pd.DataFrame): ratio of each category in y
         random_state (int): random state for reproducibility
     """
-
     def __init__(self, random_state=None):
         self.ratios = None
         self.random_state = random_state
@@ -69,8 +69,10 @@ class RatioDistributionAlgorithm(RandomDistributionAlgorithm):
         """Get probabilities of each category for each sample in X_test"""
         y_list = [
             np.array(
-                [[ratio[col] for ratio in self.ratios.values] for _ in
-                 range(len(X_test))]
+                [
+                    [ratio[col] for ratio in self.ratios.values]
+                    for _ in range(len(X_test))
+                ]
             ) for col in range(len(self.ratios.values[0]))
         ]
         return y_list
@@ -78,8 +80,10 @@ class RatioDistributionAlgorithm(RandomDistributionAlgorithm):
     def fit(self, y_df: pd.DataFrame):
         """Calculate ratio of each category in y_df and store as probability distribution"""
         self.ratios = pd.DataFrame.from_dict(
-            {col: y_df[col].value_counts() / y_df.shape[0]
-             for col in list(y_df)}
+            {
+                col: y_df[col].value_counts() / y_df.shape[0]
+                for col in list(y_df)
+            }
         ).sort_index()
 
     def from_dict(self, loaded_dict):
@@ -133,10 +137,10 @@ class MedianDistributionAlgorithm(RandomDistributionAlgorithm):
 
 class ScipyDistributionAlgorithm(RandomDistributionAlgorithm):
     def __init__(
-            self,
-            distribution: sp.stats.rv_continuous = sp.stats.norm,
-            params={},
-            random_state=None,
+        self,
+        distribution: sp.stats.rv_continuous = sp.stats.norm,
+        params={},
+        random_state=None,
     ):
         self.fitted_parameters = None
         self.distribution = distribution
@@ -176,21 +180,23 @@ class ScipyDistributionAlgorithm(RandomDistributionAlgorithm):
         param_dictionary = {
             "parameters": {},
             "fitted_parameters":
-                self.fitted_parameters.to_json()
-                if self.fitted_parameters is not None else None,
+                (
+                    self.fitted_parameters.to_json()
+                    if self.fitted_parameters is not None else None
+                ),
         }
         return param_dictionary
 
 
 class RandomModel(QSPRModel):
     def __init__(
-            self,
-            base_dir: str,
-            alg: RandomDistributionAlgorithm,
-            name: Optional[str] = None,
-            parameters: Optional[dict] = None,
-            autoload=True,
-            random_state: int | None = None,
+        self,
+        base_dir: str,
+        alg: RandomDistributionAlgorithm,
+        name: Optional[str] = None,
+        parameters: Optional[dict] = None,
+        autoload=True,
+        random_state: int | None = None,
     ):
         """Initialize a QSPR model instance.
 
@@ -221,13 +227,13 @@ class RandomModel(QSPRModel):
         return False
 
     def fit(
-            self,
-            X: pd.DataFrame | np.ndarray | QSPRTable,
-            y: pd.DataFrame | np.ndarray | QSPRTable,
-            estimator: Type[RandomDistributionAlgorithm] = None,
-            mode: EarlyStoppingMode = None,
-            monitor: FitMonitor | None = None,
-            **kwargs,
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRTable,
+        y: pd.DataFrame | np.ndarray | QSPRTable,
+        estimator: Type[RandomDistributionAlgorithm] | None = None,
+        mode: EarlyStoppingMode = None,
+        monitor: FitMonitor | None = None,
+        **kwargs,
     ) -> RandomDistributionAlgorithm:
         """Fit the model to the given data matrix or `QSPRTable`.
 
@@ -255,9 +261,9 @@ class RandomModel(QSPRModel):
         return estimator
 
     def predict(
-            self,
-            X: pd.DataFrame | np.ndarray | QSPRTable,
-            estimator: Any = None
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRTable,
+        estimator: Any = None
     ) -> np.ndarray:
         """Make predictions for the given data matrix or `QSPRTable`.
 
@@ -274,7 +280,7 @@ class RandomModel(QSPRModel):
         return estimator(X)
 
     def predictProba(
-            self, X: pd.DataFrame | np.ndarray | QSPRTable, estimator: Any = None
+        self, X: pd.DataFrame | np.ndarray | QSPRTable, estimator: Any = None
     ):
         estimator = self.estimator if estimator is None else estimator
         return estimator.get_probas(X)
@@ -299,7 +305,7 @@ class RandomModel(QSPRModel):
             return self.alg()
 
     def loadEstimatorFromFile(
-            self, params: Optional[dict] = None, fallback_load=True
+        self, params: Optional[dict] = None, fallback_load=True
     ) -> object:
         """Load estimator instance from file and apply the given parameters.
 

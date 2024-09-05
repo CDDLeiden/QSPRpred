@@ -1,16 +1,20 @@
 import json
 import os
 import shutil
-from typing import ClassVar, Callable, Optional, Generator, Any, Iterable
+from typing import Any, Callable, ClassVar, Generator, Iterable, Optional
 
 import numpy as np
 import pandas as pd
 
 from qsprpred.data.storage.interfaces.property_storage import PropertyStorage
 from qsprpred.utils.interfaces.randomized import Randomized
+
 from ...logs import logger
-from ...utils.parallel import batched_generator, ParallelGenerator, \
-    MultiprocessingJITGenerator
+from ...utils.parallel import (
+    MultiprocessingJITGenerator,
+    ParallelGenerator,
+    batched_generator,
+)
 from ...utils.serialization import JSONSerializable
 from ...utils.stringops import generate_padded_index
 
@@ -70,18 +74,18 @@ class PandasDataTable(PropertyStorage, Randomized):
     _notJSON: ClassVar = [*JSONSerializable._notJSON, "df"]
 
     def __init__(
-            self,
-            name: str,
-            df: pd.DataFrame | None = None,
-            store_dir: str = ".",
-            overwrite: bool = False,
-            index_cols: list[str] | None = None,
-            n_jobs: int = 1,
-            chunk_size: int | None = None,
-            autoindex_name: str = "ID",
-            random_state: int | None = None,
-            store_format: str = "pkl",
-            parallel_generator: ParallelGenerator | None = None,
+        self,
+        name: str,
+        df: pd.DataFrame | None = None,
+        store_dir: str = ".",
+        overwrite: bool = False,
+        index_cols: list[str] | None = None,
+        n_jobs: int = 1,
+        chunk_size: int | None = None,
+        autoindex_name: str = "ID",
+        random_state: int | None = None,
+        store_format: str = "pkl",
+        parallel_generator: ParallelGenerator | None = None,
     ):
         """Initialize a `PandasDataTable` object.
         Args
@@ -130,7 +134,8 @@ class PandasDataTable(PropertyStorage, Randomized):
         self.storeFormat = store_format
         self.randomState = None
         self.randomState = random_state or int(
-            np.random.randint(0, 2 ** 31 - 1, dtype=np.int64))
+            np.random.randint(0, 2**31 - 1, dtype=np.int64)
+        )
         self.name = name
         self.indexCols = index_cols
         # paths
@@ -177,17 +182,17 @@ class PandasDataTable(PropertyStorage, Randomized):
     @randomState.setter
     def randomState(self, value: int):
         """Set the random state to use for all random operations for reproducibility.
-        
+
         Args:
             value (int): Random state to use for all random operations.
         """
         self._seed = value
 
     def searchOnProperty(
-            self,
-            prop_name: str,
-            values: list[str],
-            exact: bool = False
+        self,
+        prop_name: str,
+        values: list[str],
+        exact: bool = False
     ) -> "PandasDataTable":
         """Search the molecules within this `MoleculeDataSet` on a property value
         and return the appropriate subset.
@@ -211,7 +216,7 @@ class PandasDataTable(PropertyStorage, Randomized):
             self.getProperties(),
             ids=ids,
             name=f"{self.name}_{prop_name}_searched",
-            path=self.storeDir
+            path=self.storeDir,
         )
 
     def __contains__(self, item):
@@ -254,7 +259,7 @@ class PandasDataTable(PropertyStorage, Randomized):
     @chunkSize.setter
     def chunkSize(self, value: int | None):
         """Set the size of chunks to use per job in parallel processing.
-        
+
         Args:
             value (int): Size of chunks to use per job in parallel processing.
         """
@@ -270,7 +275,7 @@ class PandasDataTable(PropertyStorage, Randomized):
     @nJobs.setter
     def nJobs(self, value: int | None):
         """Set the number of jobs to use for parallel processing.
-        
+
         Args:
             value (int): Number of jobs to use for parallel processing.
         """
@@ -349,9 +354,9 @@ class PandasDataTable(PropertyStorage, Randomized):
         Returns:
             (bool): `True` if the file exists, `False` otherwise.
         """
-        return os.path.exists(self.storePath) and self.storePath.endswith(
-            f"_{name}.{self.storeFormat}"
-        )
+        return os.path.exists(
+            self.storePath
+        ) and self.storePath.endswith(f"_{name}.{self.storeFormat}")
 
     def hasProperty(self, name: str) -> bool:
         """Check whether a property is present in the data frame.
@@ -365,10 +370,10 @@ class PandasDataTable(PropertyStorage, Randomized):
         return name in self.df.columns
 
     def getProperty(
-            self,
-            name: str,
-            ids: tuple[str] | None = None,
-            ignore_missing: bool = False
+        self,
+        name: str,
+        ids: tuple[str] | None = None,
+        ignore_missing: bool = False
     ) -> pd.Series:
         """Get property values from the data set.
 
@@ -384,9 +389,8 @@ class PandasDataTable(PropertyStorage, Randomized):
             raise ValueError(f"Property '{name}' not found in data set.")
         if ids is not None:
             if not ignore_missing:
-                assert sum(
-                    self.df.index.isin(ids)
-                ) == len(ids), "Not all IDs found in data set."
+                assert sum(self.df.index.isin(ids)
+                          ) == len(ids), "Not all IDs found in data set."
             ids = self.df.index.intersection(ids)
             return self.df.loc[ids, name]
         return self.df[name]
@@ -400,11 +404,11 @@ class PandasDataTable(PropertyStorage, Randomized):
         return self.df.columns.tolist()
 
     def addProperty(
-            self,
-            name: str,
-            data: list,
-            ids: list[str] | None = None,
-            ignore_missing: bool = False
+        self,
+        name: str,
+        data: list,
+        ids: list[str] | None = None,
+        ignore_missing: bool = False,
     ):
         """Add a property to the data frame.
 
@@ -458,12 +462,12 @@ class PandasDataTable(PropertyStorage, Randomized):
         self.df.dropna(subset=names, how="all", inplace=True)
 
     def getSubset(
-            self,
-            properties: list[str],
-            ids: list[str] | None = None,
-            name: str | None = None,
-            path: str | None = None,
-            ignore_missing: bool = False
+        self,
+        properties: list[str],
+        ids: list[str] | None = None,
+        name: str | None = None,
+        path: str | None = None,
+        ignore_missing: bool = False,
     ) -> "PandasDataTable":
         """Get a subset of the data set by providing a prefix for the column names or a
         column name directly.
@@ -474,7 +478,7 @@ class PandasDataTable(PropertyStorage, Randomized):
             name (str): Name of the new data set.
             path (str): Path to save the new data set.
             ignore_missing (bool): If `True`, missing IDs are ignored.
-            
+
         Returns:
             (PandasDataTable): A new data set containing the subset of the properties
         """
@@ -485,15 +489,12 @@ class PandasDataTable(PropertyStorage, Randomized):
         mask = self.df.columns.isin(properties)
         if mask.any():
             if ids is not None and not ignore_missing:
-                assert sum(
-                    self.df.index.isin(ids)
-                ) == len(ids), "Not all IDs found in data set."
+                assert sum(self.df.index.isin(ids)
+                          ) == len(ids), "Not all IDs found in data set."
                 ret = self.df.loc[ids, self.df.columns[mask]]
             elif ignore_missing and ids is not None:
                 ids = self.df.index.intersection(ids)
-                ret = self.df.loc[
-                    ids, self.df.columns[mask]
-                ]
+                ret = self.df.loc[ids, self.df.columns[mask]]
             else:
                 ret = self.df.loc[:, self.df.columns[mask]]
             ret = ret.copy()
@@ -513,16 +514,16 @@ class PandasDataTable(PropertyStorage, Randomized):
             raise ValueError(f"None of the properties were found: {properties}")
 
     def iterChunks(
-            self,
-            size: int | None = None,
-            on_props: tuple[str] | None = None,
-            as_dict: bool = False,
+        self,
+        size: int | None = None,
+        on_props: tuple[str] | None = None,
+        as_dict: bool = False,
     ) -> Generator[pd.DataFrame | dict, None, None]:
         """Batch a data frame into chunks of the given size.
 
         Args:
             size (int):
-                Size of chunks to use per job in parallel processing. If `None`, 
+                Size of chunks to use per job in parallel processing. If `None`,
                 `self.chunkSize` is used.
             on_props (list[str]):
                 list of properties to include, if `None`, all properties are included.
@@ -553,14 +554,14 @@ class PandasDataTable(PropertyStorage, Randomized):
                 yield df_batch
 
     def apply(
-            self,
-            func: Callable[[dict[str, list[Any]] | pd.DataFrame, ...], Any],
-            func_args: tuple[Any, ...] | None = None,
-            func_kwargs: dict[str, Any] | None = None,
-            on_props: tuple[str, ...] | None = None,
-            as_df: bool = False,
-            chunk_size: int | None = None,
-            n_jobs: int | None = None,
+        self,
+        func: Callable[[dict[str, list[Any]] | pd.DataFrame, ...], Any],
+        func_args: tuple[Any, ...] | None = None,
+        func_kwargs: dict[str, Any] | None = None,
+        on_props: tuple[str, ...] | None = None,
+        as_df: bool = False,
+        chunk_size: int | None = None,
+        n_jobs: int | None = None,
     ) -> Generator:
         """Apply a function to the data frame. The properties of the data set
         are passed as the first positional argument to the function. This
@@ -612,12 +613,10 @@ class PandasDataTable(PropertyStorage, Randomized):
                 f"using chunk size: {chunk_size} and parameters: {args}, {kwargs}"
             )
             for result in self.parallelGenerator(
-                    self.iterChunks(
-                        on_props=on_props, as_dict=not as_df, size=chunk_size
-                    ),
-                    func,
-                    *args,
-                    **kwargs,
+                self.iterChunks(on_props=on_props, as_dict=not as_df, size=chunk_size),
+                func,
+                *args,
+                **kwargs,
             ):
                 logger.debug(f"Result for chunk returned: {result!r}")
                 if not isinstance(result, Exception):
@@ -627,7 +626,7 @@ class PandasDataTable(PropertyStorage, Randomized):
         else:
             logger.debug(f"Applying function '{func!r}' in serial.")
             for props in self.iterChunks(
-                    on_props=on_props, as_dict=not as_df, size=len(self)
+                on_props=on_props, as_dict=not as_df, size=len(self)
             ):
                 result = func(props, *args, **kwargs)
                 logger.debug(f"Result for chunk returned: {result!r}")
@@ -655,7 +654,7 @@ class PandasDataTable(PropertyStorage, Randomized):
 
         Args:
             filename (str): absolute path to the saved metafile.
-            
+
         Returns:
             (str): Path to the saved data frame.
         """
@@ -718,10 +717,10 @@ class PandasDataTable(PropertyStorage, Randomized):
 
     def shuffle(self, random_state: Optional[int] = None):
         """Shuffle the internal data frame.
-        
+
         Args:
-            random_state (int | None): 
-                Random state to use for shuffling. If `None`, the random state of the 
+            random_state (int | None):
+                Random state to use for shuffling. If `None`, the random state of the
                 data set is used.
         """
         self.df = self.df.sample(
@@ -729,8 +728,8 @@ class PandasDataTable(PropertyStorage, Randomized):
         )
 
     def dropEntries(self, ids: Iterable[str], ignore_missing: bool = False):
-        """Drop entries from the data set by their IDs.	
-        
+        """Drop entries from the data set by their IDs.
+
         Args:
             ids (Iterable[str]): IDs of entries to drop.
             ignore_missing (bool): If `True`, missing IDs are ignored.
@@ -738,20 +737,17 @@ class PandasDataTable(PropertyStorage, Randomized):
         if ignore_missing:
             ids = self.df.index.intersection(ids)
         else:
-            assert sum(self.df.index.isin(ids)) == len(
-                ids), "Not all IDs found in data set."
+            assert sum(self.df.index.isin(ids)
+                      ) == len(ids), "Not all IDs found in data set."
             ids = pd.Index(ids, name=self.idProp)
         self.df.drop(index=ids, inplace=True)
         self.chunkSize = len(self) // self.nJobs
 
     def addEntries(
-            self,
-            ids: list[str],
-            props: dict[str, list],
-            raise_on_existing: bool = True
+        self, ids: list[str], props: dict[str, list], raise_on_existing: bool = True
     ):
         """Add entries to the data set.
-        
+
         Args:
             ids (list[str]): IDs of entries to add.
             props (dict[str, list]): Dictionary of properties to add.
@@ -765,20 +761,17 @@ class PandasDataTable(PropertyStorage, Randomized):
                 "set `raise_on_existing=False` to ignore the new duplicate entries."
             )
         else:
-            logger.warning(
-                f"Duplicate entries found: {duplicates}. Ignoring them."
-            )
+            logger.warning(f"Duplicate entries found: {duplicates}. Ignoring them.")
         for dup in duplicates[self.idProp]:
             idx = ids.index(dup)
             ids.remove(dup)
             for prop in props:
                 props[prop].pop(idx)
-        self.df = pd.concat(
-            [
-                self.df,
-                pd.DataFrame(
-                    {self.idProp: ids, **props},
-                ),
-            ]
-        )
+        self.df = pd.concat([
+            self.df,
+            pd.DataFrame({
+                self.idProp: ids,
+                **props
+            }, ),
+        ])
         self.df.set_index(self.idProp, inplace=True, verify_integrity=True, drop=False)

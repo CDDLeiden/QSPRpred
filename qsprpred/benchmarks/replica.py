@@ -1,11 +1,11 @@
 import json
 import os
 from copy import deepcopy
+from typing import ClassVar
 
 import numpy as np
 import pandas as pd
 
-from .settings.benchmark import DataPrepSettings
 from ..data.descriptors.sets import DescriptorSet
 from ..data.sources.data_source import DataSource
 from ..data.tables.qspr import QSPRTable
@@ -16,6 +16,7 @@ from ..models.model import QSPRModel
 from ..models.monitors import NullMonitor
 from ..tasks import TargetProperty
 from ..utils.serialization import JSONSerializable
+from .settings.benchmark import DataPrepSettings
 
 
 class Replica(JSONSerializable):
@@ -53,23 +54,23 @@ class Replica(JSONSerializable):
             provided in the constructor.
     """
 
-    _notJSON = JSONSerializable._notJSON + ["ds", "results", "model"]
+    _notJSON: ClassVar = [*JSONSerializable._notJSON, "ds", "results", "model"]
 
     def __init__(
-            self,
-            idx: int,
-            name: str,
-            data_source: DataSource,
-            descriptors: list[DescriptorSet],
-            target_props: list[TargetProperty],
-            prep_settings: DataPrepSettings,
-            model: QSPRModel,
-            optimizer: HyperparameterOptimization,
-            assessors: list[ModelAssessor],
-            random_seed: int,
+        self,
+        idx: int,
+        name: str,
+        data_source: DataSource,
+        descriptors: list[DescriptorSet],
+        target_props: list[TargetProperty],
+        prep_settings: DataPrepSettings,
+        model: QSPRModel,
+        optimizer: HyperparameterOptimization,
+        assessors: list[ModelAssessor],
+        random_seed: int,
     ):
-        """ Initializes the replica.
-        
+        """Initializes the replica.
+
         Args:
             idx (int):
                 Index of the replica. This is not an identifier, but rather a number
@@ -174,9 +175,7 @@ class Replica(JSONSerializable):
                 Whether to overwrite all existing data and
                 reinitialize from scratch. Defaults to `False`.
         """
-        self.ds = self.dataSource.getDataSet(
-            deepcopy(self.targetProps),
-        )
+        self.ds = self.dataSource.getDataSet(deepcopy(self.targetProps), )
         if not reload:
             self.ds.clear()
         self.ds.randomState = self.randomSeed
@@ -224,9 +223,7 @@ class Replica(JSONSerializable):
         """
         if self.ds is None:
             raise ValueError("Data set not initialized. Call initData first.")
-        self.ds.prepareDataset(
-            **deepcopy(self.prepSettings.__dict__),
-        )
+        self.ds.prepareDataset(**deepcopy(self.prepSettings.__dict__), )
 
     def initModel(self):
         """Initializes the model for this replica. This includes
@@ -277,13 +274,14 @@ class Replica(JSONSerializable):
                     score_df = pd.DataFrame(
                         {
                             "Assessor": [assessor.__class__.__name__],
-                            "ScoreFunc": [
-                                (
-                                    assessor.scoreFunc.name
-                                    if hasattr(assessor.scoreFunc, "name")
-                                    else assessor.scoreFunc.__name__
-                                )
-                            ],
+                            "ScoreFunc":
+                                [
+                                    (
+                                        assessor.scoreFunc.name
+                                        if hasattr(assessor.scoreFunc, "name") else
+                                        assessor.scoreFunc.__name__
+                                    )
+                                ],
                             "Score": [fold_score],
                             "TargetProperty": [tp.name],
                             "TargetTask": [tp.task.name],
@@ -295,13 +293,14 @@ class Replica(JSONSerializable):
                         score_df = pd.DataFrame(
                             {
                                 "Assessor": [assessor.__class__.__name__],
-                                "ScoreFunc": [
-                                    (
-                                        assessor.scoreFunc.name
-                                        if hasattr(assessor.scoreFunc, "name")
-                                        else assessor.scoreFunc.__name__
-                                    )
-                                ],
+                                "ScoreFunc":
+                                    [
+                                        (
+                                            assessor.scoreFunc.name
+                                            if hasattr(assessor.scoreFunc, "name") else
+                                            assessor.scoreFunc.__name__
+                                        )
+                                    ],
                                 "Score": [tp_score],
                                 "TargetProperty": [tp.name],
                                 "TargetTask": [tp.task.name],

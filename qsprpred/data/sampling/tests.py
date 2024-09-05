@@ -1,26 +1,26 @@
 import numpy as np
 from parameterized import parameterized
 from sklearn.model_selection import KFold, StratifiedKFold
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
-from ..descriptors.fingerprints import MorganFP
 from ...data import (
-    RandomSplit,
-    TemporalSplit,
     BootstrapSplit,
-    ScaffoldSplit,
     ClusterSplit,
     QSPRTable,
+    RandomSplit,
+    ScaffoldSplit,
+    TemporalSplit,
 )
 from ...data.chem.clustering import (
     FPSimilarityLeaderPickerClusters,
     FPSimilarityMaxMinClusters,
 )
-from ...data.chem.scaffolds import BemisMurckoRDKit, BemisMurcko
+from ...data.chem.scaffolds import BemisMurcko, BemisMurckoRDKit
 from ...data.sampling.folds import FoldsFromDataSplit
 from ...data.sampling.splits import ManualSplit
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn
+from ..descriptors.fingerprints import MorganFP
 
 
 class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
@@ -28,7 +28,6 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
 
     The tests here should be used to check for all their specific parameters and edge
     cases."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -49,12 +48,10 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
         dataset.prepareDataset(split=split)
         self.validate_split(dataset)
 
-    @parameterized.expand(
-        [
-            (False,),
-            (True,),
-        ]
-    )
+    @parameterized.expand([
+        (False, ),
+        (True, ),
+    ])
     def testRandomSplit(self, multitask):
         """Test the random split function."""
         if multitask:
@@ -64,12 +61,10 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
         dataset.prepareDataset(split=RandomSplit(test_fraction=0.1))
         self.validate_split(dataset)
 
-    @parameterized.expand(
-        [
-            (False,),
-            (True,),
-        ]
-    )
+    @parameterized.expand([
+        (False, ),
+        (True, ),
+    ])
     def testTemporalSplit(self, multitask):
         """Test the temporal split function, where the split is done based on a time
         property."""
@@ -104,7 +99,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
             n_bootstraps=10,
         )
         for time, fold_info in zip(
-                split.timeSplit, list(dataset.iterFolds(bootstrap_split))
+            split.timeSplit, list(dataset.iterFolds(bootstrap_split))
         ):
             years = dataset.getDF().loc[fold_info[1].index, "Year of first disclosure"]
             self.assertTrue(all(years > time))
@@ -113,10 +108,12 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
         [
             (False, BemisMurckoRDKit(), None),
             (
-                    False,
-                    BemisMurcko(use_csk=True),
-                    ["ScaffoldSplit_storage_library_000",
-                     "ScaffoldSplit_storage_library_001"],
+                False,
+                BemisMurcko(use_csk=True),
+                [
+                    "ScaffoldSplit_storage_library_000",
+                    "ScaffoldSplit_storage_library_001",
+                ],
             ),
             (True, BemisMurckoRDKit(), None),
         ]
@@ -151,7 +148,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
         )
         test_index_all = []
         for k, (X_train, X_test, y_train, y_test, train_index, test_index) in enumerate(
-                dataset.iterFolds(split)
+            dataset.iterFolds(split)
         ):
             self.assertTrue(all(x not in test_index_all for x in test_index))
             self.assertTrue(len(X_train) > len(X_test))
@@ -162,32 +159,34 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
     @parameterized.expand(
         [
             (
-                    False,
-                    FPSimilarityLeaderPickerClusters(
-                        fp_calculator=MorganFP(radius=2, nBits=128)
-                    ),
-                    None,
+                False,
+                FPSimilarityLeaderPickerClusters(
+                    fp_calculator=MorganFP(radius=2, nBits=128)
+                ),
+                None,
             ),
             (
-                    False,
-                    FPSimilarityMaxMinClusters(
-                        fp_calculator=MorganFP(radius=2, nBits=128)),
-                    ["ClusterSplit_storage_library_000",
-                     "ClusterSplit_storage_library_001"],
+                False,
+                FPSimilarityMaxMinClusters(fp_calculator=MorganFP(radius=2, nBits=128)),
+                [
+                    "ClusterSplit_storage_library_000",
+                    "ClusterSplit_storage_library_001",
+                ],
             ),
             (
-                    True,
-                    FPSimilarityMaxMinClusters(
-                        fp_calculator=MorganFP(radius=2, nBits=128)),
-                    None,
+                True,
+                FPSimilarityMaxMinClusters(fp_calculator=MorganFP(radius=2, nBits=128)),
+                None,
             ),
             (
-                    True,
-                    FPSimilarityLeaderPickerClusters(
-                        fp_calculator=MorganFP(radius=2, nBits=128)
-                    ),
-                    ["ClusterSplit_storage_library_000",
-                     "ClusterSplit_storage_library_001"],
+                True,
+                FPSimilarityLeaderPickerClusters(
+                    fp_calculator=MorganFP(radius=2, nBits=128)
+                ),
+                [
+                    "ClusterSplit_storage_library_000",
+                    "ClusterSplit_storage_library_001",
+                ],
             ),
         ]
     )
@@ -239,7 +238,6 @@ class TestFoldSplitters(DataSetsPathMixIn, QSPRTestCase):
 
     The tests here should be used to check for all their specific parameters and
     edge cases."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -249,12 +247,12 @@ class TestFoldSplitters(DataSetsPathMixIn, QSPRTestCase):
         k = 0
         tested_indices = []
         for (
-                X_train,
-                X_test,
-                y_train,
-                y_test,
-                train_index,
-                test_index,
+            X_train,
+            X_test,
+            y_train,
+            y_test,
+            train_index,
+            test_index,
         ) in folds:
             k += 1
             self.assertEqual(len(X_train), len(y_train))

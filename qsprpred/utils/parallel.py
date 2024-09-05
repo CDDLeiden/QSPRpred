@@ -3,7 +3,7 @@ import time
 from abc import ABC, abstractmethod
 from concurrent import futures
 from concurrent.futures import Future
-from typing import Iterable, Callable, Literal, Generator, Any
+from typing import Any, Callable, Generator, Iterable, Literal
 
 from pebble import ProcessFuture
 
@@ -33,7 +33,6 @@ def batched_generator(iterable: Iterable, batch_size: int) -> Generator:
 
 class Parallelizable(ABC):
     """An abstract class to facilitate parallel processing of an arbitrary function."""
-
     @property
     @abstractmethod
     def nJobs(self) -> int:
@@ -47,14 +46,9 @@ class Parallelizable(ABC):
 
 class ParallelGenerator(ABC):
     """An abstract class to facilitate parallel processing of an arbitrary generator."""
-
     @abstractmethod
     def make(
-            self,
-            generator: Generator,
-            process_func: Callable,
-            *args,
-            **kwargs
+        self, generator: Generator, process_func: Callable, *args, **kwargs
     ) -> Generator:
         """
         This method is used to wrap an input generator or an iterable
@@ -75,11 +69,11 @@ class ParallelGenerator(ABC):
         """
 
     def __call__(
-            self,
-            generator: Generator[Any, None, None],
-            process_func: Callable,
-            *args,
-            **kwargs
+        self,
+        generator: Generator[Any, None, None],
+        process_func: Callable,
+        *args,
+        **kwargs,
     ) -> Generator:
         """
         This method is used to wrap the `make` method and call it with the
@@ -105,13 +99,12 @@ class JITParallelGenerator(ParallelGenerator, ABC):
     over a pool of CPU or GPU workers. The generator will yield the results of the
     function applied in parallel to each item of a supplied generator.
     """
-
     def __init__(
-            self,
-            n_workers: int | None = None,
-            worker_type: Literal["cpu", "gpu"] = "cpu",
-            use_gpus: list[int] | None = None,
-            jobs_per_gpu: int = 1
+        self,
+        n_workers: int | None = None,
+        worker_type: Literal["cpu", "gpu"] = "cpu",
+        use_gpus: list[int] | None = None,
+        jobs_per_gpu: int = 1,
     ):
         """Configures the multiprocessing pool generator.
 
@@ -128,8 +121,10 @@ class JITParallelGenerator(ParallelGenerator, ABC):
         """
         self.workerType = worker_type
         if self.workerType not in ["cpu", "gpu"]:
-            raise ValueError(f"The 'worker_type' must be one of 'cpu' "
-                             f"or 'gpu', got {self.workerType} instead.")
+            raise ValueError(
+                f"The 'worker_type' must be one of 'cpu' "
+                f"or 'gpu', got {self.workerType} instead."
+            )
         if self.workerType == "gpu" and n_workers is not None:
             logger.warning(
                 "The 'n_workers' argument is ignored when 'worker_type' is 'gpu'."
@@ -220,8 +215,7 @@ class JITParallelGenerator(ParallelGenerator, ABC):
         """
 
     @abstractmethod
-    def createJob(self, pool: Any, process_func: Callable, *args,
-                  **kwargs) -> Any:
+    def createJob(self, pool: Any, process_func: Callable, *args, **kwargs) -> Any:
         """Submit a job to the pool that applies the function to a generator item.
 
         Args:
@@ -240,11 +234,7 @@ class JITParallelGenerator(ParallelGenerator, ABC):
         """
 
     def make(
-            self,
-            generator: Generator,
-            process_func: Callable,
-            *args,
-            **kwargs
+        self, generator: Generator, process_func: Callable, *args, **kwargs
     ) -> Generator:
         """A parallel "JIT (Just In Time)" generator that
         yields the results of a function
@@ -293,7 +283,7 @@ class JITParallelGenerator(ParallelGenerator, ABC):
                         pool,
                         process_func,
                         *input_args,
-                        **dict(**kwargs, gpu=gpu) if gpu is not None else kwargs
+                        **dict(**kwargs, gpu=gpu) if gpu is not None else kwargs,
                     )
                     queue.append(job)
                     if self.workerType == "gpu":
@@ -319,11 +309,11 @@ class JITParallelGenerator(ParallelGenerator, ABC):
                             yield result
                             if self.workerType == "gpu":
                                 gpu_pool.append(gpus_to_jobs[process])
-                                logger.debug(
-                                    f"GPU {gpus_to_jobs[process]} is free.")
+                                logger.debug(f"GPU {gpus_to_jobs[process]} is free.")
                                 logger.debug(f"Free GPUs now: {gpu_pool}")
                                 logger.debug(
-                                    f"Deleting job {process} from gpus_to_jobs.")
+                                    f"Deleting job {process} from gpus_to_jobs."
+                                )
                                 del gpus_to_jobs[process]
                             break  # make sure to pop the next item from the generator
                         else:
@@ -345,9 +335,9 @@ class ThreadsJITGenerator(JITParallelGenerator):
     truly parallel due to the Global Interpreter Lock (GIL). However, this can
     still be useful for I/O-bound tasks or tasks that are not CPU-bound downstream.
     """
-
     def getPool(self) -> Any:
         from concurrent.futures import ThreadPoolExecutor
+
         return ThreadPoolExecutor(max_workers=self.nWorkers)
 
     def checkResultAvailable(self, process: Future):
@@ -363,13 +353,8 @@ class ThreadsJITGenerator(JITParallelGenerator):
     def handleException(self, process: Any, exception: Exception) -> Any:
         return exception
 
-    def createJob(self, pool: Any, process_func: Callable, *args,
-                  **kwargs) -> Any:
-        return pool.submit(
-            process_func,
-            *args,
-            **kwargs
-        )
+    def createJob(self, pool: Any, process_func: Callable, *args, **kwargs) -> Any:
+        return pool.submit(process_func, *args, **kwargs)
 
 
 class MultiprocessingJITGenerator(JITParallelGenerator):
@@ -379,11 +364,8 @@ class MultiprocessingJITGenerator(JITParallelGenerator):
     is too large to fit into memory and needs to be processed in parallel over
     a pool of workers.
     """
-
     def getPool(self):
-        return multiprocessing.Pool(
-            processes=self.nWorkers
-        )
+        return multiprocessing.Pool(processes=self.nWorkers)
 
     def checkResultAvailable(self, process):
         try:
@@ -408,11 +390,7 @@ class MultiprocessingJITGenerator(JITParallelGenerator):
         return exception
 
     def createJob(self, pool, process_func, *args, **kwargs):
-        return pool.apply_async(
-            process_func,
-            args=args,
-            kwds=kwargs
-        )
+        return pool.apply_async(process_func, args=args, kwds=kwargs)
 
 
 class PebbleJITGenerator(JITParallelGenerator):
@@ -420,14 +398,13 @@ class PebbleJITGenerator(JITParallelGenerator):
     The main benefit of using `pebble` is that it supports timeouts for each job,
     which makes it easy to handle jobs that take too long to process.
     """
-
     def __init__(
-            self,
-            n_workers: int | None = None,
-            worker_type: Literal["cpu", "gpu"] = "cpu",
-            use_gpus: list[int] | None = None,
-            jobs_per_gpu: int = 1,
-            timeout: int | None = None
+        self,
+        n_workers: int | None = None,
+        worker_type: Literal["cpu", "gpu"] = "cpu",
+        use_gpus: list[int] | None = None,
+        jobs_per_gpu: int = 1,
+        timeout: int | None = None,
     ):
         """Configures the multiprocessing pool generator.
 
@@ -449,17 +426,17 @@ class PebbleJITGenerator(JITParallelGenerator):
             n_workers=n_workers,
             worker_type=worker_type,
             use_gpus=use_gpus,
-            jobs_per_gpu=jobs_per_gpu
+            jobs_per_gpu=jobs_per_gpu,
         )
         self.timeout = timeout
 
     def getPool(self) -> Any:
         try:
             from pebble import ProcessPool
+
             return ProcessPool(max_workers=self.nWorkers)
         except ImportError:
-            raise ImportError(
-                "Failed to import pool type 'pebble'. Install it first.")
+            raise ImportError("Failed to import pool type 'pebble'. Install it first.")
 
     def checkResultAvailable(self, process: ProcessFuture):
         time.sleep(0.01)
@@ -472,7 +449,7 @@ class PebbleJITGenerator(JITParallelGenerator):
         # check if job timed out
         if process.done() and type(process._exception) in [
             TimeoutError,
-            futures.TimeoutError
+            futures.TimeoutError,
         ]:
             raise process._exception
 
@@ -481,8 +458,5 @@ class PebbleJITGenerator(JITParallelGenerator):
 
     def createJob(self, pool: Any, process_func: Callable, *args, **kwargs) -> Any:
         return pool.schedule(
-            process_func,
-            args=args,
-            kwargs=kwargs,
-            timeout=self.timeout
+            process_func, args=args, kwargs=kwargs, timeout=self.timeout
         )

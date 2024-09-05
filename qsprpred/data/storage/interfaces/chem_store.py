@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Iterable, Generator, Literal
+from typing import Generator, Iterable, Literal
 
 import pandas as pd
 from rdkit import Chem
@@ -19,7 +19,6 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
     documentation of the specific implementation for more details on how to use it and
     the base classes this class inherits from for more details on its functionality.
     """
-
     @property
     @abstractmethod
     def smilesProp(self) -> str:
@@ -41,18 +40,23 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
 
         Args:
             mol_id (str): identifier of the molecule to search
-        
+
         Returns:
             StoredMol: instance of the molecule
         """
 
     @abstractmethod
-    def addMols(self, smiles: Iterable[str], props: dict[str, list] | None = None,
-                *args, **kwargs) -> list[StoredMol]:
-        """Add a molecule to the store. 
-        
+    def addMols(
+        self,
+        smiles: Iterable[str],
+        props: dict[str, list] | None = None,
+        *args,
+        **kwargs
+    ) -> list[StoredMol]:
+        """Add a molecule to the store.
+
         This method should not perform any standardization or identifier calculation.
-        The `add_mol_from_smiles` method should be used instead if automatic 
+        The `add_mol_from_smiles` method should be used instead if automatic
         standardization and identification should be performed before storage.
 
         Args:
@@ -63,7 +67,7 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
 
         Returns:
             list[StoredMol]: instances of the added molecules
-            
+
         Raises:
             ValueError: if the molecules cannot be added
         """
@@ -71,7 +75,7 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
     @abstractmethod
     def removeMol(self, mol_id: str):
         """Remove a molecule from the store.
-        
+
         Args:
             mol_id (str): identifier of the molecule to remove
         """
@@ -102,10 +106,10 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
 
     @abstractmethod
     def iterChunks(
-            self,
-            size: int | None = None,
-            on_props: list | None = None,
-            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
+        self,
+        size: int | None = None,
+        on_props: list | None = None,
+        chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
     ) -> Generator[list[StoredMol | str | Chem.Mol | pd.DataFrame], None, None]:
         """Iterate over chunks of molecules across the store.
 
@@ -113,19 +117,19 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
             size (int, optional): The size of the chunks.
             on_props (list, optional): The properties to include in the chunks.
             chunk_type (str, optional): The type of chunks to yield.
-            
+
         Returns:
             an iterable of lists of stored molecules
         """
 
     @abstractmethod
     def apply(
-            self,
-            func: callable,
-            func_args: list | None = None,
-            func_kwargs: dict | None = None,
-            on_props: tuple[str, ...] | None = None,
-            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
+        self,
+        func: callable,
+        func_args: list | None = None,
+        func_kwargs: dict | None = None,
+        on_props: tuple[str, ...] | None = None,
+        chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
     ) -> Generator[Iterable[StoredMol | str | Chem.Mol | pd.DataFrame], None, None]:
         """Apply a function on all or selected properties of the chunks of data.
         The requested chunk type is supplied as the first positional argument
@@ -139,7 +143,7 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
             func_kwargs (dict, optional): The keyword arguments of the function.
             on_props (list, optional): The properties to apply the function on.
             chunk_type (str, optional): The type of chunks to yield.
-            
+
         Returns:
             A generator that yields the results of the function applied to each chunk.
         """

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Iterable, Any, Generator
+from typing import Any, Callable, Generator, Iterable
 
 from qsprpred.data.chem.identifiers import Identifiable
 from qsprpred.data.chem.standardizers.base import Standardizable
@@ -20,10 +20,9 @@ class MoleculeDataSet(
     Randomized,
     Identifiable,
     Standardizable,
-    ABC
+    ABC,
 ):
     """Interface for storing and managing chemical data sets for machine learning."""
-
     @property
     @abstractmethod
     def smilesProp(self) -> str:
@@ -49,8 +48,6 @@ class MoleculeDataSet(
 
     @abstractmethod
     def transformProperties(
-            self,
-            names: list[str],
-            transformer: Callable[[Iterable[Any]], Iterable[Any]]
+        self, names: list[str], transformer: Callable[[Iterable[Any]], Iterable[Any]]
     ):
         """Transform the target properties using the given transformer function."""

@@ -24,7 +24,8 @@ class DataPrepSettings:
         shuffle (bool):
             Whether to shuffle the data.
     """
-    data_filters: list | None = (RepeatsFilter(keep=True),)
+
+    data_filters: list | None = (RepeatsFilter(keep=True), )
     split: DataSplit = None
     feature_filters: list = None
     feature_standardizer: SKLearnStandardizer = None

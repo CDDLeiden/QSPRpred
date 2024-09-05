@@ -5,25 +5,30 @@ import queue
 import random
 import sys
 import traceback
-from threading import Lock as TLock, Thread
-from typing import Generator, Any
+from threading import Lock as TLock
+from threading import Thread
+from typing import Any, Generator
 
 import pandas as pd
 
 from qsprpred.extra.gpu.utils.parallel import TorchJITGenerator
+
+from ..logs import logger
+from ..utils.parallel import (
+    MultiprocessingJITGenerator,
+    ParallelGenerator,
+    PebbleJITGenerator,
+    ThreadsJITGenerator,
+)
 from .replica import Replica
 from .settings.benchmark import BenchmarkSettings
-from ..logs import logger
-from ..utils.parallel import ParallelGenerator, MultiprocessingJITGenerator, \
-    ThreadsJITGenerator, PebbleJITGenerator
 
 
 class ExcThread(Thread):
     """Thread that can catch exceptions from the target function."""
-
     def __init__(self, *args, **kwargs):
         """Initialize the thread.
-        
+
         Args:
             args:
                 Arguments to pass to the `Thread` constructor.
@@ -70,7 +75,7 @@ class BenchmarkRunner:
         lock_data_t (Any):
             Lock for data set operations.
         lock_report_t (Any):
-            Lock for final report file operations.           
+            Lock for final report file operations.
     """
 
     # default locks for threads
@@ -86,7 +91,6 @@ class BenchmarkRunner:
             exception (Exception):
                 Exception that was raised.
         """
-
         def __init__(self, replica_id: str, exception: Exception):
             """Initialize the exception.
 
@@ -102,12 +106,12 @@ class BenchmarkRunner:
     logLevel = logging.DEBUG
 
     def __init__(
-            self,
-            settings: BenchmarkSettings,
-            data_dir: str = "./data",
-            results_file: str | None = None,
-            parallel_generator_cpu: ParallelGenerator | None = None,
-            parallel_generator_gpu: ParallelGenerator | None = None,
+        self,
+        settings: BenchmarkSettings,
+        data_dir: str = "./data",
+        results_file: str | None = None,
+        parallel_generator_cpu: ParallelGenerator | None = None,
+        parallel_generator_gpu: ParallelGenerator | None = None,
     ):
         """Initialize the runner.
 
@@ -127,10 +131,9 @@ class BenchmarkRunner:
         """
         logger.debug("Initializing BenchmarkRunner...")
         self.settings = settings
-        self.parallelGeneratorCPU = (parallel_generator_cpu or
-                                     MultiprocessingJITGenerator(
-                                         os.cpu_count()
-                                     ))
+        self.parallelGeneratorCPU = (
+            parallel_generator_cpu or MultiprocessingJITGenerator(os.cpu_count())
+        )
         self.parallelGeneratorGPU = parallel_generator_gpu
         self.dataDir = data_dir
         self.resultsFile = results_file if results_file else f"{data_dir}/results.tsv"
@@ -151,12 +154,9 @@ class BenchmarkRunner:
         benchmark_settings = self.settings
         benchmark_settings.checkConsistency()
         ret = (
-                benchmark_settings.n_replicas
-                * len(benchmark_settings.data_sources)
-                * len(benchmark_settings.descriptors)
-                * len(benchmark_settings.target_props)
-                * len(benchmark_settings.prep_settings)
-                * len(benchmark_settings.models)
+            benchmark_settings.n_replicas * len(benchmark_settings.data_sources) *
+            len(benchmark_settings.descriptors) * len(benchmark_settings.target_props) *
+            len(benchmark_settings.prep_settings) * len(benchmark_settings.models)
         )
         if len(benchmark_settings.optimizers) > 0:
             ret *= len(benchmark_settings.optimizers)
@@ -184,9 +184,11 @@ class BenchmarkRunner:
         """
         if isinstance(generator, TorchJITGenerator):
             import torch.multiprocessing
+
             manager = torch.multiprocessing.Manager()
         elif isinstance(generator, (MultiprocessingJITGenerator, PebbleJITGenerator)):
             import multiprocessing
+
             manager = multiprocessing.Manager()
         elif isinstance(generator, ThreadsJITGenerator):
             return self.lock_data_t, self.lock_report_t
@@ -199,10 +201,10 @@ class BenchmarkRunner:
         return manager.Lock(), manager.Lock()
 
     def processReplicas(
-            self,
-            generator: ParallelGenerator,
-            replicas: Generator[Replica, None, None],
-            raise_errors: bool = False,
+        self,
+        generator: ParallelGenerator,
+        replicas: Generator[Replica, None, None],
+        raise_errors: bool = False,
     ):
         """Processes replicas in parallel using the given `ParallelGenerator`.
         Each generated replica is run by the `runReplica` method, which
@@ -222,17 +224,14 @@ class BenchmarkRunner:
         """
         lock_data, lock_report = self.createLocks(generator)
         for result in generator(
-                replicas,
-                self.runReplica,
-                self.resultsFile,
-                lock_data,
-                lock_report
+            replicas, self.runReplica, self.resultsFile, lock_data, lock_report
         ):
             if isinstance(result, self.ReplicaException):
                 # show traceback and continue
                 traceback.print_exception(
-                    type(result.exception), result.exception,
-                    result.exception.__traceback__
+                    type(result.exception),
+                    result.exception,
+                    result.exception.__traceback__,
                 )
                 if raise_errors:
                     raise result.exception
@@ -321,7 +320,7 @@ class BenchmarkRunner:
         """
         seed = seed or self.settings.random_seed
         random.seed(seed)
-        return random.sample(range(2 ** 31), self.nRuns)
+        return random.sample(range(2**31), self.nRuns)
 
     def iterReplicas(self) -> Generator[Replica, None, None]:
         """Generator that yields `Replica` objects for each benchmarking run.
@@ -340,8 +339,7 @@ class BenchmarkRunner:
         indices = [x + 1 for x in range(benchmark_settings.n_replicas)]
         optimizers = (
             benchmark_settings.optimizers
-            if len(benchmark_settings.optimizers) > 0
-            else [None]
+            if len(benchmark_settings.optimizers) > 0 else [None]
         )
         product = itertools.product(
             indices,
@@ -463,12 +461,12 @@ class BenchmarkRunner:
 
     @classmethod
     def runReplica(
-            cls,
-            replica: Replica,
-            results_file: str,
-            lock_data: Any,
-            lock_report: Any,
-            gpu: int | None = None,
+        cls,
+        replica: Replica,
+        results_file: str,
+        lock_data: Any,
+        lock_report: Any,
+        gpu: int | None = None,
     ) -> str | ReplicaException:
         """Runs a single replica. This is executed in parallel by the `run` method.
         It is a classmethod so that it can be pickled and executed in parallel

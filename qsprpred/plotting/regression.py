@@ -1,4 +1,5 @@
 """Module for plotting regression models."""
+
 from abc import ABC
 from copy import deepcopy
 from typing import List
@@ -17,7 +18,6 @@ from ..tasks import ModelTasks
 
 class RegressionPlot(ModelPlot, ABC):
     """Base class for all regression plots."""
-
     def getSupportedTasks(self) -> list[ModelTasks]:
         """Return a list of supported model tasks."""
         return [ModelTasks.REGRESSION, ModelTasks.MULTITASK_REGRESSION]
@@ -58,9 +58,7 @@ class RegressionPlot(ModelPlot, ABC):
             df["Set"] = "Cross Validation"
         return df
 
-    def prepareRegressionResults(
-            self,
-    ) -> pd.DataFrame:
+    def prepareRegressionResults(self, ) -> pd.DataFrame:
         """Prepare regression results dataframe for plotting.
 
         Returns:
@@ -81,9 +79,7 @@ class RegressionPlot(ModelPlot, ABC):
         df = (
             pd.concat(
                 model_results.values(), keys=model_results.keys(), names=["Model"]
-            )
-            .reset_index(level=1, drop=True)
-            .reset_index()
+            ).reset_index(level=1, drop=True).reset_index()
         )
 
         self.results = df
@@ -95,23 +91,21 @@ class RegressionPlot(ModelPlot, ABC):
             self.prepareRegressionResults()
         df = deepcopy(self.results)
         df_summary = (
-            df.groupby(["Model", "Fold", "Property"])
-            .apply(
+            df.groupby(["Model", "Fold", "Property"]).apply(
                 lambda x: pd.Series(
                     {
-                        "R2": metrics.r2_score(x["Label"], x["Prediction"]),
-                        "RMSE": metrics.root_mean_squared_error(
-                            x["Label"], x["Prediction"]
-                        ),
+                        "R2":
+                            metrics.r2_score(x["Label"], x["Prediction"]),
+                        "RMSE":
+                            metrics.
+                            root_mean_squared_error(x["Label"], x["Prediction"]),
                     }
                 )
-            )
-            .reset_index()
+            ).reset_index()
         )
         df_summary["Set"] = df_summary["Fold"].apply(
-            lambda x: "Independent Test"
-            if x == "Independent Test"
-            else "Cross Validation"
+            lambda x:
+            ("Independent Test" if x == "Independent Test" else "Cross Validation")
         )
         self.summary = df_summary
         return df_summary
@@ -119,12 +113,11 @@ class RegressionPlot(ModelPlot, ABC):
 
 class CorrelationPlot(RegressionPlot):
     """Class to plot the results of regression models. Plot predicted pX_train vs real pX_train."""
-
     def make(
-            self,
-            save: bool = True,
-            show: bool = False,
-            out_path: str | None = None,
+        self,
+        save: bool = True,
+        show: bool = False,
+        out_path: str | None = None,
     ) -> tuple[sns.FacetGrid, pd.DataFrame]:
         """Plot the results of regression models. Plot predicted pX_train vs real pX_train.
 
@@ -193,16 +186,15 @@ class CorrelationPlot(RegressionPlot):
 
 class WilliamsPlot(RegressionPlot):
     """Williams plot; plot of standardized residuals versus leverages"""
-
     def __init__(self, models: list[QSPRModel], datasets: list[QSPRDataSet]):
         super().__init__(models)
         self.datasets = datasets
 
     def make(
-            self,
-            save: bool = True,
-            show: bool = False,
-            out_path: str | None = None,
+        self,
+        save: bool = True,
+        show: bool = False,
+        out_path: str | None = None,
     ) -> tuple[sns.FacetGrid, pd.DataFrame, List[float]]:
         """make Williams plot
 
@@ -223,9 +215,8 @@ class WilliamsPlot(RegressionPlot):
             dict[str, float]:
                 the h* values for the datasets
         """
-
         def calculateLeverages(
-                features_train: pd.DataFrame, features_test: pd.DataFrame
+            features_train: pd.DataFrame, features_test: pd.DataFrame
         ) -> pd.DataFrame:
             """Calculate the leverages for each compound in the dataset.
 
@@ -309,9 +300,8 @@ class WilliamsPlot(RegressionPlot):
         df["residual"] = df["Label"] - df["Prediction"]
 
         # calculate the residuals standard deviation
-        df["n_samples"] = df.groupby(["Model", "Set", "Property"])[
-            "residual"
-        ].transform("count")
+        df["n_samples"] = df.groupby(["Model", "Set",
+                                      "Property"])["residual"].transform("count")
 
         # calculate degrees of freedom
         df["df"] = df["n_samples"] - df["n_features"] - 1
@@ -329,7 +319,7 @@ class WilliamsPlot(RegressionPlot):
                         "number of samples should be greater than the number of features."
                     )
                 RSE[(model, property)] = np.sqrt(
-                    (1 / df_["df"].iloc[0]) * np.sum(df_["residual"] ** 2)
+                    (1 / df_["df"].iloc[0]) * np.sum(df_["residual"]**2)
                 )
 
         # add the residual standard error to the df

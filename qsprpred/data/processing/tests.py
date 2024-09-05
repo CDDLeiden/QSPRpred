@@ -9,13 +9,11 @@ from parameterized import parameterized
 from rdkit import Chem
 from sklearn.preprocessing import StandardScaler
 
-from .mol_processor import MolProcessor
-from ..descriptors.fingerprints import MorganFP
-from ..descriptors.sets import DataFrameDescriptorSet
-from ..storage.interfaces.stored_mol import StoredMol
 from ... import TargetTasks
-from ...data.processing.applicability_domain import MLChemADWrapper, \
-    KNNApplicabilityDomain
+from ...data.processing.applicability_domain import (
+    KNNApplicabilityDomain,
+    MLChemADWrapper,
+)
 from ...data.processing.data_filters import CategoryFilter, RepeatsFilter
 from ...data.processing.feature_filters import (
     BorutaFilter,
@@ -26,6 +24,10 @@ from ...data.processing.feature_standardizers import SKLearnStandardizer
 from ...data.tables.qspr import QSPRTable
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn, PathMixIn
+from ..descriptors.fingerprints import MorganFP
+from ..descriptors.sets import DataFrameDescriptorSet
+from ..storage.interfaces.stored_mol import StoredMol
+from .mol_processor import MolProcessor
 
 
 class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
@@ -33,7 +35,6 @@ class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
 
     The tests here should be used to check for all their specific parameters and
     edge cases."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -111,7 +112,6 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
     Note: This also tests the `DataframeDescriptorSet`,
     as it is used to add test descriptors.
     """
-
     def setUp(self):
         """Set up the small test Dataframe."""
         super().setUp()
@@ -124,7 +124,10 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         )
         self.dataset = QSPRTable.fromDF(
             "TestFeatureFilters",
-            target_props=[{"name": "y", "task": TargetTasks.REGRESSION}],
+            target_props=[{
+                "name": "y",
+                "task": TargetTasks.REGRESSION
+            }],
             df=self.df,
             path=self.generatedPath,
         )
@@ -148,9 +151,9 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
             ),
             columns=descriptors,
         )
-        self.df_descriptors[self.dataset.idProp] = list(self.dataset.getProperty(
-            self.dataset.idProp
-        ))
+        self.df_descriptors[self.dataset.idProp] = list(
+            self.dataset.getProperty(self.dataset.idProp)
+        )
         self.df_descriptors.set_index(self.dataset.idProp, inplace=True, drop=True)
         self.dataset.addDescriptors([DataFrameDescriptorSet(self.df_descriptors)])
         self.descriptors = self.dataset.featureNames
@@ -158,24 +161,20 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
     def recalculateWithMultiIndex(self):
         self.dataset.dropDescriptorSets(self.dataset.descriptorSets, full_removal=True)
         self.df_descriptors["ID_COL1"] = (
-            self.dataset.getProperty(self.dataset.idProp)
-            .apply(lambda x: x.split("_")[0])
-            .to_list()
+            self.dataset.getProperty(self.dataset.idProp
+                                    ).apply(lambda x: x.split("_")[0]).to_list()
         )
         self.df_descriptors["ID_COL2"] = (
-            self.dataset.getProperty(self.dataset.idProp)
-            .apply(lambda x: x.split("_")[-1])
-            .to_list()
+            self.dataset.getProperty(self.dataset.idProp
+                                    ).apply(lambda x: x.split("_")[-1]).to_list()
         )
         self.dataset.addProperty("ID_COL1", self.df_descriptors["ID_COL1"].values)
         self.dataset.addProperty("ID_COL2", self.df_descriptors["ID_COL2"].values)
         self.dataset.addDescriptors(
-            [
-                DataFrameDescriptorSet(
-                    self.df_descriptors,
-                    ["ID_COL1", "ID_COL2"],
-                )
-            ]
+            [DataFrameDescriptorSet(
+                self.df_descriptors,
+                ["ID_COL1", "ID_COL2"],
+            )]
         )
 
     def testDefaultDescriptorAdd(self):
@@ -185,12 +184,10 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         calc = DataFrameDescriptorSet(df_new, suffix="new_df_desc")
         self.dataset.addDescriptors([calc])
 
-    @parameterized.expand(
-        [
-            (True,),
-            (False,),
-        ]
-    )
+    @parameterized.expand([
+        (True, ),
+        (False, ),
+    ])
     def testLowVarianceFilter(self, use_index_cols):
         """Test the low variance filter, which drops features with a variance below
         a threshold."""
@@ -201,12 +198,10 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         self.assertListEqual(list(self.dataset.featureNames), self.descriptors[1:])
         self.assertListEqual(list(self.dataset.X.columns), self.descriptors[1:])
 
-    @parameterized.expand(
-        [
-            (True,),
-            (False,),
-        ]
-    )
+    @parameterized.expand([
+        (True, ),
+        (False, ),
+    ])
     def testHighCorrelationFilter(self, use_index_cols):
         """Test the high correlation filter, which drops features with a correlation
         above a threshold."""
@@ -218,14 +213,12 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         self.assertListEqual(list(self.dataset.featureNames), self.descriptors)
         self.assertListEqual(list(self.dataset.X.columns), self.descriptors)
 
-    @parameterized.expand(
-        [
-            (True,),
-            (False,),
-        ]
-    )
+    @parameterized.expand([
+        (True, ),
+        (False, ),
+    ])
     @skipIf(
-        int(np.__version__.split(".")[1]) >= 24,
+        int(np.__version__.split(".")[1]) >= int(24),
         "numpy 1.24.0 not compatible with boruta",
     )
     def testBorutaFilter(self, use_index_cols):
@@ -241,7 +234,6 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
 
 class TestFeatureStandardizer(DataSetsPathMixIn, QSPRTestCase):
     """Test the feature standardizer."""
-
     def setUp(self):
         """Create a small test dataset with MorganFP descriptors."""
         super().setUp()
@@ -273,7 +265,9 @@ def getCombos():
             [None, ["fu", "CL"], ["SMILES"]],
             [True, False],
             [None, [1, 2]],
-            [None, {"a": 1}],
+            [None, {
+                "a": 1
+            }],
         )
     )
 
@@ -320,9 +314,7 @@ class TestMolProcessor(DataSetsPathMixIn, QSPRTestCase):
             mol_type="rdkit" if add_rdkit else "mol",
         )
         expected_props = (
-            [*props, dataset.idProp]
-            if props is not None
-            else dataset.getProperties()
+            [*props, dataset.idProp] if props is not None else dataset.getProperties()
         )
         expected_props = set(expected_props)
         expected_args = set(args) if args is not None else set()
@@ -335,25 +327,15 @@ class TestMolProcessor(DataSetsPathMixIn, QSPRTestCase):
             else:
                 self.assertIsInstance(item[0, 0], StoredMol)
             if not add_rdkit:
-                self.assertEqual(
-                    len(expected_props),
-                    len(item[0, 1])
-                )
+                self.assertEqual(len(expected_props), len(item[0, 1]))
                 for prop in expected_props:
                     self.assertIn(prop, item[0, 1])
-            self.assertEqual(
-                len(expected_args),
-                len(item[0, 2]["args"])
-            )
-            self.assertEqual(
-                len(expected_kwargs),
-                len(item[0, 3]["kwargs"])
-            )
+            self.assertEqual(len(expected_args), len(item[0, 2]["args"]))
+            self.assertEqual(len(expected_kwargs), len(item[0, 3]["kwargs"]))
 
 
 class TestApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
     """Test the applicability domain."""
-
     def setUp(self):
         """Create a small test dataset with MorganFP descriptors."""
         super().setUp()
@@ -363,9 +345,7 @@ class TestApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
 
     def testApplicabilityDomain(self):
         """Test the applicability domain fitting, transforming and serialization."""
-        ad = MLChemADWrapper(
-            KNNAD(dist="jaccard", scaling=None, alpha=0.95)
-        )
+        ad = MLChemADWrapper(KNNAD(dist="jaccard", scaling=None, alpha=0.95))
         ad.fit(self.dataset.X)
         self.assertIsInstance(ad.contains(self.dataset.X), pd.Series)
 
@@ -388,4 +368,4 @@ class TestApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
         self.assertIsInstance(ad.contains(self.dataset.X), pd.Series)
 
         ad.toFile(f"{self.generatedPath}/test_ad.json")
-        ad_fromfile = MLChemADWrapper.fromFile(f"{self.generatedPath}/test_ad.json")
+        MLChemADWrapper.fromFile(f"{self.generatedPath}/test_ad.json")

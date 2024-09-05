@@ -8,21 +8,21 @@ from qsprpred import TargetProperty, TargetTasks
 from qsprpred.data.descriptors.sets import DescriptorSet
 from qsprpred.extra.data.descriptors.fingerprints import (
     CDKFP,
-    CDKExtendedFP,
-    CDKEStateFP,
-    CDKGraphOnlyFP,
     CDKMACCSFP,
+    CDKAtomPairs2DFP,
+    CDKEStateFP,
+    CDKExtendedFP,
+    CDKGraphOnlyFP,
+    CDKKlekotaRothFP,
     CDKPubchemFP,
     CDKSubstructureFP,
-    CDKKlekotaRothFP,
-    CDKAtomPairs2DFP,
 )
 from qsprpred.extra.data.descriptors.sets import (
+    ExtendedValenceSignature,
     Mordred,
     PaDEL,
-    ExtendedValenceSignature,
-    ProteinDescriptorSet,
     ProDec,
+    ProteinDescriptorSet,
 )
 from qsprpred.extra.data.storage.protein.tabular_pcm import TabularProteinStorage
 from qsprpred.extra.data.tables.pcm import PCMDataSet
@@ -32,7 +32,6 @@ from qsprpred.utils.testing.path_mixins import DataSetsPathMixIn
 
 class DataSetsMixInExtras(DataSetsPathMixIn):
     """MixIn class for testing data sets in extras."""
-
     def setUpPaths(self):
         super().setUpPaths()
         self.dataPathPCM = f"{os.path.dirname(__file__)}/test_files/data"
@@ -114,7 +113,7 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
         return pd.read_csv(f"{self.dataPathPCM}/pcm_sample_targets.csv")
 
     def getPCMSeqProvider(
-            self,
+        self,
     ) -> Callable[[list[str]], tuple[dict[str, str], dict[str, dict]]]:
         """Return a function that provides sequences for given accessions.
 
@@ -134,8 +133,14 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
             }
 
         return lambda acc_keys: (
-            {acc: mapper[acc] for acc in acc_keys},
-            {acc: kwargs_map[acc] for acc in acc_keys},
+            {
+                acc: mapper[acc]
+                for acc in acc_keys
+            },
+            {
+                acc: kwargs_map[acc]
+                for acc in acc_keys
+            },
         )
 
     @classmethod
@@ -143,15 +148,17 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
         return ClustalMSA(out_dir=out_dir)
 
     def createPCMDataSet(
-            self,
-            name: str = "QSPRDataset_test_pcm",
-            target_props: list[TargetProperty]
-                          | list[dict] = [
-                {"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}
-            ],
-            preparation_settings: dict | None = None,
-            protein_col: str = "accession",
-            random_state: int | None = None,
+        self,
+        name: str = "QSPRDataset_test_pcm",
+        target_props: list[TargetProperty] | list[dict] = [
+            {
+                "name": "pchembl_value_Median",
+                "task": TargetTasks.REGRESSION
+            }
+        ],
+        preparation_settings: dict | None = None,
+        protein_col: str = "accession",
+        random_state: int | None = None,
     ):
         """Create a small dataset for testing purposes.
 

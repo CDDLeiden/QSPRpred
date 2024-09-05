@@ -1,4 +1,5 @@
 """Early stopping for training of models."""
+
 from enum import Enum
 from typing import Any, Callable
 
@@ -58,12 +59,11 @@ class EarlyStopping(JSONSerializable):
         trainedEpochs (list[int]): list of number of epochs trained in a model training
             with early stopping on RECORDING mode.
     """
-
     def __init__(
-            self,
-            mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
-            num_epochs: int | None = None,
-            aggregate_func: Callable[[list[int]], int] = np.mean,
+        self,
+        mode: EarlyStoppingMode = EarlyStoppingMode.NOT_RECORDING,
+        num_epochs: int | None = None,
+        aggregate_func: Callable[[list[int]], int] = np.mean,
     ):
         """Initialize early stopping.
 
@@ -149,16 +149,15 @@ def early_stopping(func: Callable) -> Callable:
     Returns:
         function: decorated fit method
     """
-
     def wrapper_fit(
-            self,
-            X: pd.DataFrame | np.ndarray | QSPRDataSet,
-            y: pd.DataFrame | np.ndarray | QSPRDataSet,
-            estimator: Any | None = None,
-            mode: EarlyStoppingMode | None = None,
-            split: "DataSplit" = None,
-            monitor: "FitMonitor" = None,
-            **kwargs,
+        self,
+        X: pd.DataFrame | np.ndarray | QSPRDataSet,
+        y: pd.DataFrame | np.ndarray | QSPRDataSet,
+        estimator: Any | None = None,
+        mode: EarlyStoppingMode | None = None,
+        split: "DataSplit" = None,  # noqa: F821
+        monitor: "FitMonitor" = None,  # noqa: F821
+        **kwargs,
     ) -> Any:
         """Wrapper for fit method of models that support early stopping.
 

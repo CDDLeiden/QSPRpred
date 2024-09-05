@@ -2,18 +2,19 @@ from chembl_structure_pipeline import standardizer as chembl_stand
 from rdkit import Chem
 
 from qsprpred.logs import logger
+
 from .base import ChemStandardizer
 
 
 def chembl_smi_standardizer(
-        smi: str, isomeric_smiles: bool = True, sanitize: bool = True
+    smi: str, isomeric_smiles: bool = True, sanitize: bool = True
 ) -> str | None:
     """Standardize SMILES using ChEMBL standardizer.
 
     Args:
         smi (str): SMILES string to be standardized.
         isomeric_smiles (bool): return the isomeric smiles. Defaults to True.
-        sanitize (bool): 
+        sanitize (bool):
             applies sanitization using the ChEMBL standardizer. Defaults to True.
 
     Returns:
@@ -43,11 +44,10 @@ class ChemblStandardizer(ChemStandardizer):
         isomericSmiles (bool): return the isomeric smiles.
         sanitize (bool): sanitize SMILES before standardization.
     """
-
     def __init__(
-            self,
-            isomeric_smiles: bool = True,
-            sanitize: bool = True,
+        self,
+        isomeric_smiles: bool = True,
+        sanitize: bool = True,
     ):
         """Initialize the ChEMBL standardizer.
 
@@ -60,10 +60,10 @@ class ChemblStandardizer(ChemStandardizer):
 
     def convertSMILES(self, smiles: str) -> str | None:
         """Standardize SMILES using the ChEMBL standardizer.
-        
+
         Args:
             smiles (str): SMILES to be standardized
-        
+
         Returns:
             (str): standardized SMILES string or `None` if standardization failed.
         """
@@ -83,21 +83,23 @@ class ChemblStandardizer(ChemStandardizer):
 
         In this case, the identifier starts with "ChEMBLStandardizer" followed by
         the settings of the standardizer concatenated with "~".
-        
+
         Returns:
             (str): unique identifier of the standardizer
         """
-        return ("ChEMBLStandardizer"
-                f"~isomeric_smiles={self.isomericSmiles}"
-                f"~sanitize={self.sanitize}")
+        return (
+            "ChEMBLStandardizer"
+            f"~isomeric_smiles={self.isomericSmiles}"
+            f"~sanitize={self.sanitize}"
+        )
 
     @classmethod
     def fromSettings(cls, settings: dict) -> "ChemblStandardizer":
-        """Create a standardizer from settings.	
-        
+        """Create a standardizer from settings.
+
         Args:
             settings (dict): Settings of the standardizer
-            
+
         Returns:
             (ChemblStandardizer): The standardizer created from settings
         """

@@ -6,16 +6,16 @@ from .base import ChemStandardizer
 
 def standardize_mol(mol) -> str | None:
     """Standardizes SMILES and removes fragments
-    
-    Standardizes SMILES using RDKit MolStandardize to disconnect metals, 
-    normalize, remove salts (largest fragment), and uncharge. Followed by a second 
+
+    Standardizes SMILES using RDKit MolStandardize to disconnect metals,
+    normalize, remove salts (largest fragment), and uncharge. Followed by a second
     round of disconnecting metals and normalizing. Finally, the SMILES is canonicalized.
 
     Args:
         mol (rdkit.Chem.rdchem.Mol): RDKit molecule object
-        
+
     Returns:
-        (str | None): 
+        (str | None):
             Standardized SMILES or None if SMILES could not be standardized or
             if SMILES does not contain carbon or contains salts after standardization
     """
@@ -41,7 +41,7 @@ def standardize_mol(mol) -> str | None:
         if len(mol.GetSubstructMatches(salts)) > 0:
             return None
         return Chem.CanonSmiles(smileR)
-    except:
+    except Exception:
         # TODO: log error
         print("Parsing Error:", Chem.MolToSmiles(mol))
 
@@ -50,18 +50,17 @@ def standardize_mol(mol) -> str | None:
 
 class NaiveStandardizer(ChemStandardizer):
     """Naive standardizer
-    
-       Briefly, the standardization process involves disconnecting metals, normalizing,
-       removing salts (largest fragment) and charges. See 
-       `qsprpred.data.chem.standardizers.naive.standardize_mol` for more details.
-    """
 
+    Briefly, the standardization process involves disconnecting metals, normalizing,
+    removing salts (largest fragment) and charges. See
+    `qsprpred.data.chem.standardizers.naive.standardize_mol` for more details.
+    """
     def convertSMILES(self, smiles: str) -> str | None:
         """Standardize SMILES using `standardize_mol`.
-        
+
         Args:
             smiles (str): SMILES to be standardized
-        
+
         Returns:
             str | None: standardized SMILES or `None` if SMILES could not be standardized
         """
@@ -83,10 +82,10 @@ class NaiveStandardizer(ChemStandardizer):
     def fromSettings(cls, settings: dict) -> "NaiveStandardizer":
         """Create a naive standardizer from settings.
         In this case, the settings are ignored.
-        
+
         Args:
             settings (dict): settings of the standardizer
-            
+
         Returns:
             NaiveStandardizer: a naive standardizer
         """

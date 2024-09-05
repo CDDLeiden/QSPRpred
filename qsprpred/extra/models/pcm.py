@@ -11,10 +11,11 @@ from rdkit.Chem import Mol
 
 from qsprpred.data import MoleculeTable
 from qsprpred.extra.data.tables.pcm import PCMDataSet
-from ..data.descriptors.sets import ProteinDescriptorSet
+
 from ...data.storage.tabular.basic_storage import PandasChemStore
 from ...models.model import QSPRModel
 from ...models.scikit_learn import SklearnModel
+from ..data.descriptors.sets import ProteinDescriptorSet
 
 
 class PCMModel(QSPRModel, ABC):
@@ -23,7 +24,6 @@ class PCMModel(QSPRModel, ABC):
     Extension of `QSPRModel` for proteochemometric models (PCM). It modifies
     the `predictMols` method to handle PCM descriptors and specification of protein ids.
     """
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if not hasattr(self, "proteins"):
@@ -35,11 +35,11 @@ class PCMModel(QSPRModel, ABC):
             self.proteins = data.proteins
 
     def createPredictionDatasetFromMols(
-            self,
-            mols: list[str | Mol],
-            protein_id: str,
-            n_jobs: int = 1,
-            fill_value: float = np.nan,
+        self,
+        mols: list[str | Mol],
+        protein_id: str,
+        n_jobs: int = 1,
+        fill_value: float = np.nan,
     ) -> tuple[PCMDataSet, np.ndarray]:
         """
         Create a prediction data set of compounds using a PCM model
@@ -103,12 +103,12 @@ class PCMModel(QSPRModel, ABC):
         return dataset, failed_mask
 
     def predictMols(
-            self,
-            mols: list[str],
-            protein_id: str,
-            use_probas: bool = False,
-            n_jobs: int = 1,
-            fill_value: float = np.nan,
+        self,
+        mols: list[str],
+        protein_id: str,
+        use_probas: bool = False,
+        n_jobs: int = 1,
+        fill_value: float = np.nan,
     ) -> np.ndarray:
         """
         Predict the target properties of a list of molecules using a PCM model.
@@ -149,10 +149,9 @@ class PCMModel(QSPRModel, ABC):
                         "must have the same protein ids."
                     )
             if (
-                    isinstance(calc, ProteinDescriptorSet)
-                    and hasattr(calc, "msaProvider")
-                    and calc.msaProvider
-                    and protein_id not in calc.msaProvider.current.keys()
+                isinstance(calc, ProteinDescriptorSet) and
+                hasattr(calc, "msaProvider") and calc.msaProvider and
+                protein_id not in calc.msaProvider.current.keys()
             ):
                 raise ValueError(
                     f"Protein id {protein_id} not found in the available MSA, "

@@ -9,10 +9,10 @@ from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 
 
 def match_mol_to_smarts(
-        mol: Chem.Mol | str,
-        smarts: list[str],
-        operator: Literal["or", "and"] = "or",
-        use_chirality: bool = False
+    mol: Chem.Mol | str,
+    smarts: list[str],
+    operator: Literal["or", "and"] = "or",
+    use_chirality: bool = False,
 ) -> bool:
     """Check if a molecule matches a SMARTS pattern.
 
@@ -44,22 +44,21 @@ def match_mol_to_smarts(
 
 class SMARTSMatchProcessor(MolProcessorWithID):
     """Processor that checks if molecules match a SMARTS pattern."""
-
     def __call__(
-            self,
-            mols: list[str | Mol | StoredMol],
-            *args,
-            props: dict[str, list] | None = None,
-            **kwargs
+        self,
+        mols: list[str | Mol | StoredMol],
+        *args,
+        props: dict[str, list] | None = None,
+        **kwargs
     ) -> pd.DataFrame:
-        """Check if a molecule matches a SMARTS pattern.	
-        
+        """Check if a molecule matches a SMARTS pattern.
+
         Args:
             mols (list[str or Mol or StoredMol]): Molecules to check.
             props (dict[str, list], optional): Dictionary of properties.
             args: SMARTS patterns to check.
             kwargs: Additional arguments to pass to `match_mol_to_smarts`.
-        
+
         Returns:
             pd.DataFrame: DataFrame with the results.
         """
@@ -70,20 +69,13 @@ class SMARTSMatchProcessor(MolProcessorWithID):
             mols = [mol.as_rd_mol() for mol in mols]
         else:
             mols = [
-                mol if isinstance(mol, Mol)
-                else Chem.MolFromSmiles(mol)
-                for mol in mols
+                mol if isinstance(mol, Mol) else Chem.MolFromSmiles(mol) for mol in mols
             ]
             ids = props[self.idProp] if props is not None else list(range(len(mols)))
         res = []
         for mol in mols:
-            res.append(
-                match_mol_to_smarts(mol, *args, **kwargs)
-            )
-        return pd.DataFrame(
-            {"match": res},
-            index=pd.Index(ids, name=self.idProp)
-        )
+            res.append(match_mol_to_smarts(mol, *args, **kwargs))
+        return pd.DataFrame({"match": res}, index=pd.Index(ids, name=self.idProp))
 
     @property
     def supportsParallel(self) -> bool:

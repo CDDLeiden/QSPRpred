@@ -3,35 +3,36 @@ To add a new descriptor or fingerprint calculator:
 * Add a descriptor subclass for your descriptor calculator
 * Add a function to retrieve your descriptor by name to the descriptor retriever class
 """
+
 from abc import ABC, abstractmethod
-from typing import Type, Any, Generator
+from typing import Any, ClassVar, Generator, Type
 
 import numpy as np
 import pandas as pd
 from rdkit import Chem, DataStructs
 from rdkit.Chem import AllChem, Crippen
+from rdkit.Chem import Descriptors
 from rdkit.Chem import Descriptors as desc
-from rdkit.Chem import Lipinski
-from rdkit.Chem import Mol, Descriptors
+from rdkit.Chem import Lipinski, Mol
 from rdkit.ML.Descriptors import MoleculeDescriptors
 
 from qsprpred.data.storage.interfaces.stored_mol import StoredMol
-from ..processing.mol_processor import MolProcessorWithID
+
 from ...logs import logger
 from ...utils.serialization import JSONSerializable
+from ..processing.mol_processor import MolProcessorWithID
 
 
 class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
     """`MolProcessorWithID` that calculates descriptors for a molecule.
-    
+
     Attributes:
         descriptors (list): list of descriptor names
         isFP (bool): whether the descriptor set is a binary fingerprint
-        supportsParallel (bool): 
+        supportsParallel (bool):
             whether the descriptor set supports parallel calculation
         dtype: data type of the descriptor values
     """
-
     @staticmethod
     def treatInfs(df: pd.DataFrame) -> pd.DataFrame:
         """Replace infinite values by NaNs.
@@ -57,9 +58,8 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
         return df
 
     @staticmethod
-    def iterMols(
-            mols: list[str | Mol], to_list=False
-    ) -> list[Mol] | Generator[Mol, None, None]:
+    def iterMols(mols: list[str | Mol],
+                 to_list=False) -> list[Mol] | Generator[Mol, None, None]:
         """Create a molecule generator or list from RDKit molecules or SMILES.
 
         Args:
@@ -67,7 +67,7 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
             to_list: if True, return a list instead of a generator
 
         Returns:
-            (list[Mol] | Generator[Mol, None, None]): 
+            (list[Mol] | Generator[Mol, None, None]):
                 generator or list of RDKit molecules
         """
         ret = (Chem.MolFromSmiles(mol) if isinstance(mol, str) else mol for mol in mols)
@@ -77,10 +77,10 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
 
     def prepMols(self, mols: list[str | Mol]) -> list[Mol]:
         """Prepare the molecules for descriptor calculation.
-        
+
         Args:
             mols: list of SMILES or RDKit molecules
-            
+
         Returns:
             (list[Mol]): list of RDKit molecules
         """
@@ -108,7 +108,7 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
     @abstractmethod
     def descriptors(self, names: list[str]):
         """Set calculated descriptors for this instance.
-        
+
         Args:
             names: list of descriptor names
         """
@@ -135,23 +135,25 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
         """Return the data type of the descriptor values."""
         return np.float32
 
-    def parsePropsAndMols(self, mols: list[str | Mol], props: dict[str, list[Any]] | None) -> tuple[list[Mol], dict[str, list[Any]]]:
+    def parsePropsAndMols(
+        self, mols: list[str | Mol], props: dict[str, list[Any]] | None
+    ) -> tuple[list[Mol], dict[str, list[Any]]]:
         """Parse the properties and molecules passed to the descriptor set.
-        
+
         Args:
             mols: list of SMILES or RDKit molecules
             props: dictionary of properties for the passed molecules
-            
+
         Returns:
-            (list[Mol], dict[str, list]): 
+            (list[Mol], dict[str, list]):
                 list of RDKit molecules and dictionary of properties
-            
+
         Raises:
             AssertionError: if the properties are not provided for a `StoredMol` instance
         """
         if isinstance(mols[0], StoredMol):
             rd_mols = []
-            props = props or dict()
+            props = props or {}
             for mol in mols:
                 rd_mols.append(mol.as_rd_mol())
                 for mol_prop in mol.props:
@@ -160,14 +162,17 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
                     props[mol_prop].append(mol.props[mol_prop])
         else:
             rd_mols = self.iterMols(mols, to_list=True)
-            assert props is not None, "Required properties must be provided if not using a StoredMol instance. See the `requiredProps` property."
+            assert (
+                props is not None
+            ), "Required properties must be provided if not using a StoredMol instance. See the `requiredProps` property."
         return rd_mols, props
 
     def __call__(
-            self, mols: list[str | Mol | StoredMol],
-            props: dict[str, list[Any]] | None = None,
-            *args,
-            **kwargs
+        self,
+        mols: list[str | Mol | StoredMol],
+        props: dict[str, list[Any]] | None = None,
+        *args,
+        **kwargs,
     ) -> pd.DataFrame:
         """Calculate the descriptors for a list of molecules and convert them
         to a data frame with the molecule IDs as index. The values are converted
@@ -185,14 +190,13 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
 
         Returns:
             (pd.Dataframe): descriptor values of shape (n_mols, n_descriptors)
-            
+
         Raises:
             AssertionError: if the descriptor names are not unique
         """
         if not mols:
             return pd.DataFrame(
-                index=pd.Index(name=self.idProp),
-                columns=self.descriptors
+                index=pd.Index(name=self.idProp), columns=self.descriptors
             ).astype(self.dtype)
         mols, props = self.parsePropsAndMols(mols, props)
         values = self.getDescriptors(self.prepMols(mols), props, *args, **kwargs)
@@ -221,9 +225,9 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
         return df
 
     def transformToFeatureNames(self) -> list[str]:
-        """Transform the descriptor names to feature names by adding the descriptor 
+        """Transform the descriptor names to feature names by adding the descriptor
         set name as a prefix.
-        
+
         Returns:
             (list[str]): list of feature names
         """
@@ -231,7 +235,7 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
 
     @abstractmethod
     def getDescriptors(
-            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         """Method to calculate descriptors for a list of molecules.
 
@@ -252,7 +256,7 @@ class DescriptorSet(JSONSerializable, MolProcessorWithID, ABC):
 
 class DataFrameDescriptorSet(DescriptorSet):
     """`DescriptorSet` that uses a `pandas.DataFrame` of precalculated descriptors.
-    
+
     Attributes:
         requiredProps (list): list of required properties
         descriptors (list): list of descriptor names
@@ -260,7 +264,6 @@ class DataFrameDescriptorSet(DescriptorSet):
         _cols (list): list of columns to use as the new multi-index
         _descriptors (list): list of descriptor names
     """
-
     @staticmethod
     def setIndex(df: pd.DataFrame, cols: list[str]) -> pd.DataFrame:
         """Create a multi-index from several columns of the data set.
@@ -268,7 +271,7 @@ class DataFrameDescriptorSet(DescriptorSet):
         Args:
             df (pd.DataFrame): DataFrame to set index for.
             cols (list[str]): List of columns to use as the new multi-index.
-            
+
         Returns:
             pd.DataFrame: DataFrame with the new multi-index set.
         """
@@ -279,11 +282,11 @@ class DataFrameDescriptorSet(DescriptorSet):
         return df
 
     def __init__(
-            self,
-            df: pd.DataFrame,
-            joining_cols: list[str] | None = None,
-            suffix: str = "",
-            source_is_multi_index: bool = False,
+        self,
+        df: pd.DataFrame,
+        joining_cols: list[str] | None = None,
+        suffix: str = "",
+        source_is_multi_index: bool = False,
     ):
         """Initialize the descriptor set with a dataframe of descriptors.
 
@@ -338,7 +341,7 @@ class DataFrameDescriptorSet(DescriptorSet):
         return self._cols if self._df is not None else None
 
     def getDescriptors(
-            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         """Return the descriptors for the input molecules. It simply searches
         for descriptor values in the data frame using the `idProp` as index.
@@ -357,7 +360,8 @@ class DataFrameDescriptorSet(DescriptorSet):
         if index_cols:
             ret = pd.DataFrame(
                 # fetch the join columns from our required props
-                {col: props[col] for col in index_cols}
+                {col: props[col]
+                 for col in index_cols}
             )
             ret = self.setIndex(ret, index_cols)  # set our multi-index
             ret.drop(columns=index_cols, inplace=True)  # only keep the index
@@ -382,7 +386,7 @@ class DataFrameDescriptorSet(DescriptorSet):
     @descriptors.setter
     def descriptors(self, value: list[str]):
         """Set the descriptor names.
-        
+
         Args:
             value (list[str]): list of descriptor names
         """
@@ -394,16 +398,16 @@ class DataFrameDescriptorSet(DescriptorSet):
 
 class DrugExPhyschem(DescriptorSet):
     """Various properties used for scoring in DrugEx.
-        
+
     Attributes:
-        props (list): list of properties to calculate    
+        props (list): list of properties to calculate
         descriptors (list): list of descriptor names
-        _prop_dict (dict): 
+        _prop_dict (dict):
             dictionary of physchem property names and their corresponding functions
 
     """
 
-    _notJSON = [*DescriptorSet._notJSON, "_prop_dict"]
+    _notJSON: ClassVar = [*DescriptorSet._notJSON, "_prop_dict"]
 
     def __init__(self, physchem_props: list[str] | None = None):
         """Initialize the descriptorset with Property arguments (a list of properties to
@@ -421,13 +425,13 @@ class DrugExPhyschem(DescriptorSet):
 
     def getDescriptors(self, mols, props, *args, **kwargs):
         """Calculate the DrugEx properties for a molecule.
-        
+
         Args:
             mols: list of SMILES or RDKit molecules
             props: dictionary of properties for the passed molecules
             args: positional arguments
             kwargs: keyword arguments
-        
+
         Returns:
             np.ndarray: array of descriptor values of shape (n_mols, n_descriptors)
         """
@@ -450,7 +454,7 @@ class DrugExPhyschem(DescriptorSet):
     @property
     def descriptors(self) -> list[str]:
         """Return the list of properties to calculate.
-        
+
         Returns:
             list[str]: list of property names
         """
@@ -497,23 +501,22 @@ class RDKitDescs(DescriptorSet):
         descriptors (list): list of RDKit descriptors to calculate
         include3D (bool): include 3D descriptors
     """
-
     def __init__(
-            self, rdkit_descriptors: list[str] | None = None, include_3d: bool = False
+        self, rdkit_descriptors: list[str] | None = None, include_3d: bool = False
     ):
         """Initialize the descriptorset with a list of RDKit descriptors to calculate.
-        
+
         Args:
-            rdkit_descriptors (list[str]): 
+            rdkit_descriptors (list[str]):
                 list of descriptors to calculate, if none, all 2D rdkit descriptors
                 will be calculated
             include_3d: if True, 3D descriptors will be calculated
         """
         super().__init__()
         self.descriptors = (
-            rdkit_descriptors
-            if rdkit_descriptors is not None
-            else sorted({x[0] for x in Descriptors._descList})
+            rdkit_descriptors if rdkit_descriptors is not None else
+            sorted({x[0]
+                    for x in Descriptors._descList})
         )
         if include_3d:
             self.descriptors = sorted(
@@ -534,17 +537,17 @@ class RDKitDescs(DescriptorSet):
         self.include3D = include_3d
 
     def getDescriptors(
-            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         """Calculate the RDKit descriptors for a molecule.
-        
+
         Args:
             mols (list[Mol]): list of RDKit molecules
-            props (dict[str, list[Any]]): 
+            props (dict[str, list[Any]]):
                 dictionary of properties for the passed molecules
             args: positional arguments
             kwargs: keyword arguments
-            
+
         Returns:
             np.ndarray: array of descriptor values of shape (n_mols, n_descriptors)
         """
@@ -566,7 +569,7 @@ class RDKitDescs(DescriptorSet):
     @descriptors.setter
     def descriptors(self, descriptors):
         """Set the list of RDKit descriptors to calculate.
-        
+
         Args:
             (list[str]): list of descriptor names
         """
@@ -587,8 +590,13 @@ class TanimotoDistances(DescriptorSet):
         _kwargs: `fingerprint` keyword arguments, should contain fingerprint_type
 
     """
-
-    def __init__(self, list_of_smiles: list[str], fingerprint_type: Type["Fingerprint"], *args, **kwargs):
+    def __init__(
+        self,
+        list_of_smiles: list[str],
+        fingerprint_type: Type["Fingerprint"],  # noqa: F821
+        *args,
+        **kwargs,
+    ):
         """Initialize the descriptorset with a list of SMILES sequences and a
         fingerprint type.
 
@@ -609,12 +617,12 @@ class TanimotoDistances(DescriptorSet):
         self.fps = self.calculate_fingerprints(list_of_smiles)
 
     def getDescriptors(
-            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         """Calculate the Tanimoto distances to the list of SMILES sequences.
 
         Args:
-            mols (List[str] or List[rdkit.Chem.rdchem.Mol]): 
+            mols (List[str] or List[rdkit.Chem.rdchem.Mol]):
                 SMILES sequences or RDKit molecules to calculate the distances.
             props (dict): dictionary of properties for the passed molecules
             args: positional arguments for the fingerprint calculator
@@ -635,12 +643,14 @@ class TanimotoDistances(DescriptorSet):
             ]
         )
 
-    def calculate_fingerprints(self, list_of_smiles: list[str]) -> list[DataStructs.ExplicitBitVect]:
+    def calculate_fingerprints(
+        self, list_of_smiles: list[str]
+    ) -> list[DataStructs.ExplicitBitVect]:
         """Calculate the fingerprints for the list of SMILES sequences
-        
+
         Args:
             list_of_smiles (list[str]): list of SMILES sequences
-            
+
         Returns:
             list[DataStructs.ExplicitBitVect]: list of fingerprints
         """
@@ -655,13 +665,13 @@ class TanimotoDistances(DescriptorSet):
 
     @property
     def descriptors(self) -> list[str]:
-        """Return the list of SMILES sequences to calculate the distances."""	
+        """Return the list of SMILES sequences to calculate the distances."""
         return self._descriptors
 
     @descriptors.setter
     def descriptors(self, list_of_smiles: list[str]):
         """Set new list of SMILES sequences to calculate distance to.
-        
+
         Args:
             (list[str]): list of SMILES sequences
         """
@@ -676,16 +686,16 @@ class TanimotoDistances(DescriptorSet):
 class PredictorDesc(DescriptorSet):
     """MoleculeDescriptorSet that uses a Predictor object to calculate descriptors from
     a molecule.
-    
+
     Attributes:
         model (QSPRModel): a fitted model instance
         descriptors (list): list of descriptor names
         _descriptors (list): list of descriptors
     """
 
-    _notJSON = [*DescriptorSet._notJSON, "model"]
+    _notJSON: ClassVar = [*DescriptorSet._notJSON, "model"]
 
-    def __init__(self, model: Type["QSPRModel"] | str):
+    def __init__(self, model: Type["QSPRModel"] | str):  # noqa: F821
         """Initialize the descriptorset with a `QSPRModel` object.
 
         Args:
@@ -712,7 +722,9 @@ class PredictorDesc(DescriptorSet):
 
         self.model = QSPRModel.fromFile(self.model)
 
-    def getDescriptors(self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs) -> np.ndarray:
+    def getDescriptors(
+        self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
         """Calculate the descriptor for a list of molecules.
 
         Args:
@@ -743,24 +755,23 @@ class PredictorDesc(DescriptorSet):
 
 class SmilesDesc(DescriptorSet):
     """Descriptorset that calculates descriptors from a SMILES sequence.
-    
+
     Attributes:
         descriptors (list): list of descriptor
     """
-
     @staticmethod
     def treatInfs(df: pd.DataFrame) -> pd.DataFrame:
         """handle infinite values in the dataframe
-        
+
         Just return the dataframe as is since SMILES are strings.
-        
+
         Args:
             (pd.DataFrame): dataframe to treat
         """
         return df
 
     def getDescriptors(
-            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         """Return smiles as descriptors.
 
@@ -793,13 +804,12 @@ class SmilesDesc(DescriptorSet):
     @descriptors.setter
     def descriptors(self, descriptors):
         """Set the descriptor names.
-        
+
         Ignore the input since SMILES are the only descriptor.
-        
+
         Args:
             (list[str]): list of descriptor names to set
         """
-        pass
 
     def __str__(self):
         return "SmilesDesc"

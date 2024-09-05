@@ -19,7 +19,7 @@ def interactive_grid(mols, *args, molsPerRow=5, **kwargs):
 
 
 def smiles_to_grid(
-        smiles, *args, mols_per_row=5, impl: Callable = standard_grid, **kwargs
+    smiles, *args, mols_per_row=5, impl: Callable = standard_grid, **kwargs
 ):
     mols = []
     for smile in smiles:
@@ -37,11 +37,11 @@ def smiles_to_grid(
 
 
 def table_to_grid(
-        table: ChemStore,
-        mols_per_row: int = 5,
-        impl: Callable = standard_grid,
-        *args,
-        **kwargs,
+    table: ChemStore,
+    mols_per_row: int = 5,
+    impl: Callable = standard_grid,
+    *args,
+    **kwargs,
 ):
     return smiles_to_grid(
         table.smiles, *args, mols_per_row=mols_per_row, impl=impl, **kwargs

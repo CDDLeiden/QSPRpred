@@ -18,6 +18,7 @@ from xgboost import XGBClassifier, XGBRegressor
 from qsprpred.data.tables.qspr import QSPRTable
 from qsprpred.models.assessment.methods import CrossValAssessor, TestSetAssessor
 from qsprpred.tasks import TargetTasks
+
 from .extra.gpu.models.dnn import DNNModel
 from .logs.utils import backup_files, enable_file_logger
 from .models.early_stopping import EarlyStoppingMode
@@ -54,7 +55,7 @@ def QSPRArgParser(txt=None):
         "--skip_backup",
         action="store_true",
         help="Skip backup of files. WARNING: this may overwrite "
-             "previous results, use with caution.",
+        "previous results, use with caution.",
     )
     parser.add_argument(
         "-ran", "--random_state", type=int, default=1, help="Seed for the random state"
@@ -129,7 +130,8 @@ def QSPRArgParser(txt=None):
         "--optimization",
         type=str,
         default=None,
-        help="Hyperparameter optimization, if 'None' no optimization, if 'grid' gridsearch, \
+        help=
+        "Hyperparameter optimization, if 'None' no optimization, if 'grid' gridsearch, \
                             if 'bayes' bayesian optimization",
     )
     parser.add_argument(
@@ -258,13 +260,10 @@ def QSPR_modelling(args):
                     parameters["class_weight"] = class_weight
                 counts = dataset.y.value_counts()
                 scale_pos_weight = (
-                    counts[0] / counts[1]
-                    if (
-                            args.sample_weighing
-                            and len(tasks) == 1
-                            and not tasks[0].isMultiClass()
-                    )
-                    else 1
+                    counts[0] / counts[1] if (
+                        args.sample_weighing and len(tasks) == 1 and
+                        not tasks[0].isMultiClass()
+                    ) else 1
                 )
                 if alg_dict[model_type] == XGBClassifier:
                     parameters["scale_pos_weight"] = scale_pos_weight
@@ -281,9 +280,8 @@ def QSPR_modelling(args):
 
             # Create QSPR model object
             model_name = (
-                f"{model_type}_{dataset.name}"
-                if not args.model_suffix
-                else f"{model_type}_{dataset.name}_{args.model_suffix}"
+                f"{model_type}_{dataset.name}" if not args.model_suffix else
+                f"{model_type}_{dataset.name}_{args.model_suffix}"
             )
             if model_type == "DNN":
                 qspr_model = DNNModel(
@@ -307,8 +305,7 @@ def QSPR_modelling(args):
             # if desired run parameter optimization
             score_func = (
                 "r2"
-                if dataset.targetProperties[0].task.isRegression()
-                else "roc_auc_ovr"
+                if dataset.targetProperties[0].task.isRegression() else "roc_auc_ovr"
             )
             best_params = None
             if args.optimization == "grid":
@@ -329,7 +326,10 @@ def QSPR_modelling(args):
                         )
                     else:
                         search_space_bs.update(
-                            {"criterion": ["categorical", ["squared_error", "poisson"]]}
+                            {
+                                "criterion":
+                                    ["categorical", ["squared_error", "poisson"]]
+                            }
                         )
                 elif model_type == "RF":
                     search_space_bs.update(

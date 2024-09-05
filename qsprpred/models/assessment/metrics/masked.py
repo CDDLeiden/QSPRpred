@@ -5,7 +5,6 @@ from qsprpred.models.assessment.metrics.base import Metric
 
 class MaskedMetric(Metric):
     """Wrapper for Metrics to handle missing target values."""
-
     def __init__(self, metric: Metric):
         """Initialize the masked metric.
 
@@ -15,7 +14,7 @@ class MaskedMetric(Metric):
         self.metric = metric
 
     def __call__(
-            self, y_true: np.ndarray, y_pred: np.ndarray | list[np.ndarray]
+        self, y_true: np.ndarray, y_pred: np.ndarray | list[np.ndarray]
     ) -> float:
         """Calculate the score.
 

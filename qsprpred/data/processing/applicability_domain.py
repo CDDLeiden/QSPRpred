@@ -26,9 +26,8 @@ class ApplicabilityDomain(JSONSerializable, ABC):
     in the applicability domain or just to check if a molecule is in the applicability
     domain.
     """
-
     def __init__(
-            self, threshold: float | None = None, direction: str | None = None
+        self, threshold: float | None = None, direction: str | None = None
     ) -> None:
         """Initialize the applicability domain with a threshold.
 
@@ -141,11 +140,10 @@ class MLChemADWrapper(ApplicabilityDomain):
         applicabilityDomain (MLChemApplicabilityDomain): applicability domain object
         fitted (bool): whether the applicability domain is fitted or not
     """
-
     def __init__(
-            self,
-            applicability_domain: MLChemADApplicabilityDomain,
-            astype: str | None = "float64",
+        self,
+        applicability_domain: MLChemADApplicabilityDomain,
+        astype: str | None = "float64",
     ) -> None:
         """Initialize the MLChemADFilter with the domain_type attribute.
 
@@ -221,26 +219,25 @@ class KNNApplicabilityDomain(ApplicabilityDomain):
     This class is adapted from the `KNNApplicabilityDomain` class in the
     `mlchemad` package.
     """
-
     def __init__(
-            self,
-            k: int = 5,
-            alpha: float = None,
-            hard_threshold: float = None,
-            scaling: str | None = "robust",
-            dist: str = "euclidean",
-            scaler_kwargs=None,
-            n_jobs: int = 1,
-            astype: str | None = "float64",
+        self,
+        k: int = 5,
+        alpha: float | None = None,
+        hard_threshold: float | None = None,
+        scaling: str | None = "robust",
+        dist: str = "euclidean",
+        scaler_kwargs=None,
+        n_jobs: int = 1,
+        astype: str | None = "float64",
     ):
-        f"""Create the k-Nearest Neighbor applicability domain.
+        """Create the k-Nearest Neighbor applicability domain.
 
         Args:
             k (int): number of nearest neighbors
-            alpha (float): 
+            alpha (float):
                 ratio of inlier samples calculated from the training set;
                 ignored if hard_threshold is set
-            hard_threshold (float): 
+            hard_threshold (float):
                 samples with a distance greater or equal to this
                 threshold will be considered outliers
             scaling (str):
@@ -323,9 +320,7 @@ class KNNApplicabilityDomain(ApplicabilityDomain):
         try:
             X = X.astype(self.astype)
         except ValueError:
-            logger.warning(
-                f"Cannot convert X to {self.astype}, fitting with raw data"
-            )
+            logger.warning(f"Cannot convert X to {self.astype}, fitting with raw data")
 
         # Scale input features
 
@@ -334,8 +329,8 @@ class KNNApplicabilityDomain(ApplicabilityDomain):
         else:
             X_scaled = X.copy()
 
-        X_transformed = self.nn.kneighbors(X_scaled, return_distance=True)[0].mean(
-            axis=1)
+        X_transformed = self.nn.kneighbors(X_scaled,
+                                           return_distance=True)[0].mean(axis=1)
         return pd.Series(X_transformed, index=X.index)
 
     @property

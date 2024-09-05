@@ -118,10 +118,13 @@ def config_logger(log_file_path, debug=None, disable_existing_loggers=True):
                 None:
                     {
                         "handlers":
-                            ["stream_handler", "file_handler", "file_handler_debug"]
-                            if debug else ["stream_handler", "file_handler"],
-                        "level":
-                            "DEBUG",
+                            (
+                                [
+                                    "stream_handler", "file_handler",
+                                    "file_handler_debug"
+                                ] if debug else ["stream_handler", "file_handler"]
+                            ),
+                        "level": "DEBUG",
                     }
             },
     }

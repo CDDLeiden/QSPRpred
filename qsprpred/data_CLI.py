@@ -16,17 +16,17 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
 from qsprpred.data.chem.clustering import (
-    FPSimilarityMaxMinClusters,
     FPSimilarityLeaderPickerClusters,
+    FPSimilarityMaxMinClusters,
 )
 from qsprpred.data.descriptors.fingerprints import (
-    MorganFP,
-    RDKitMACCSFP,
     AtomPairFP,
+    AvalonFP,
     LayeredFP,
+    MorganFP,
     PatternFP,
     RDKitFP,
-    AvalonFP,
+    RDKitMACCSFP,
 )
 from qsprpred.data.descriptors.sets import (
     DrugExPhyschem,
@@ -49,6 +49,7 @@ from qsprpred.data.sampling.splits import (
 )
 from qsprpred.data.tables.qspr import QSPRTable
 from qsprpred.tasks import TargetTasks
+
 from .data.chem.scaffolds import BemisMurckoRDKit
 from .extra.gpu.models.dnn import DNNModel
 from .logs.utils import backup_files, enable_file_logger
@@ -88,7 +89,7 @@ def QSPRArgParser(txt=None):
         "--skip_backup",
         action="store_true",
         help="Skip backup of files. WARNING: this may overwrite "
-             "previous results, use with caution.",
+        "previous results, use with caution.",
     )
     parser.add_argument(
         "-ran", "--random_state", type=int, default=1, help="Seed for the random state"
@@ -132,7 +133,8 @@ def QSPRArgParser(txt=None):
         "--regression",
         type=str,
         default=None,
-        help="If True, only regression model, if False, only classification, default both",
+        help=
+        "If True, only regression model, if False, only classification, default both",
     )
     parser.add_argument(
         "-th",
@@ -154,7 +156,7 @@ def QSPRArgParser(txt=None):
         "--low_quality",
         action="store_true",
         help="If lq, than low quality data will be should be a column 'Quality' where "
-             "all 'Low' will be removed",
+        "all 'Low' will be removed",
     )
     parser.add_argument(
         "-tr",
@@ -279,8 +281,8 @@ def QSPRArgParser(txt=None):
         type=float,
         default=None,
         help="Boruta filter with random forest estimator, value between 0 and 100 "
-             "for percentile threshold for comparison between shadow and real features"
-             "see https://github.com/scikit-learn-contrib/boruta_py for more info.",
+        "for percentile threshold for comparison between shadow and real features"
+        "see https://github.com/scikit-learn-contrib/boruta_py for more info.",
     )
     # other
     parser.add_argument(
@@ -333,8 +335,7 @@ def QSPR_dataprep(args):
                 else:
                     task = (
                         TargetTasks.SINGLECLASS
-                        if len(th) == 1
-                        else TargetTasks.MULTICLASS
+                        if len(th) == 1 else TargetTasks.MULTICLASS
                     )
                 if task == TargetTasks.REGRESSION and th:
                     log.warning(
@@ -355,21 +356,27 @@ def QSPR_dataprep(args):
                 }
                 target_props.append(
                     {
-                        "name": prop,
-                        "task": task,
-                        "th": th,
-                        "transformer": transform_dict[args.transform_data[prop]]
-                        if prop in args.transform_data
-                        else None,
-                        "imputer": SimpleImputer(strategy=args.imputation[prop])
-                        if prop in args.imputation
-                        else None,
+                        "name":
+                            prop,
+                        "task":
+                            task,
+                        "th":
+                            th,
+                        "transformer":
+                            (
+                                transform_dict[args.transform_data[prop]]
+                                if prop in args.transform_data else None
+                            ),
+                        "imputer":
+                            (
+                                SimpleImputer(strategy=args.imputation[prop])
+                                if prop in args.imputation else None
+                            ),
                     }
                 )
             dataset_name = (
                 f"{props_name}_{task}_{args.data_suffix}"
-                if args.data_suffix
-                else f"{props_name}_{task}"
+                if args.data_suffix else f"{props_name}_{task}"
             )
             mydataset = QSPRTable.fromDF(
                 dataset_name,
@@ -378,9 +385,9 @@ def QSPR_dataprep(args):
                 smiles_col=args.smiles_col,
                 path=args.output_dir,
             )
-            mydataset.randomState = args.random_state \
-                if args.random_state is not None \
-                else None
+            mydataset.randomState = (
+                args.random_state if args.random_state is not None else None
+            )
             mydataset.storage.nJobs = args.ncpu
             # data filters
             data_filters = []
@@ -489,8 +496,7 @@ def QSPR_dataprep(args):
                     )
                 boruta_estimator = (
                     RandomForestRegressor(n_jobs=args.ncpu)
-                    if args.regression
-                    else RandomForestClassifier(n_jobs=args.ncpu)
+                    if args.regression else RandomForestClassifier(n_jobs=args.ncpu)
                 )
                 featurefilters.append(
                     BorutaFilter(
@@ -504,9 +510,9 @@ def QSPR_dataprep(args):
                 data_filters=data_filters,
                 split=split,
                 feature_filters=featurefilters,
-                feature_standardizer=StandardScaler()
-                if "Smiles" not in args.features
-                else None,
+                feature_standardizer=(
+                    StandardScaler() if "Smiles" not in args.features else None
+                ),
                 feature_fill_value=args.fill_value,
             )
 
@@ -526,8 +532,7 @@ if __name__ == "__main__":
     # get a list of all the folders in the output directory
     folders = [
         f
-        for f in os.listdir(args.output_dir)
-        if os.path.isdir(f"{args.output_dir}/{f}")
+        for f in os.listdir(args.output_dir) if os.path.isdir(f"{args.output_dir}/{f}")
     ]
 
     # remove folders that start with backup

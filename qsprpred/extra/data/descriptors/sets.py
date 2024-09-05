@@ -6,24 +6,25 @@
 - `ProDec`: Protein descriptors from the ProDec package.
 
 """
+
 import os
 from abc import abstractmethod
-from typing import Optional, Any
+from typing import Any, ClassVar, Optional
 
 import mordred
 import numpy as np
 import pandas as pd
 import prodec
 from Mold2_pywrapper import Mold2 as Mold2_calculator
+from mordred import descriptors as Mordred_descriptors
 from PaDEL_pywrapper import PaDEL as PaDELCalculator
 from PaDEL_pywrapper import descriptors as PaDEL_descriptors
-from Signature_pywrapper import Signature as Signature_calculator
-from mordred import descriptors as Mordred_descriptors
 from rdkit import Chem
 from rdkit.Chem import Mol
+from Signature_pywrapper import Signature as Signature_calculator
 
 from qsprpred.data.descriptors.sets import DescriptorSet
-from qsprpred.extra.data.utils.msa_calculator import MSAProvider, ClustalMSA
+from qsprpred.extra.data.utils.msa_calculator import ClustalMSA, MSAProvider
 
 
 class Mordred(DescriptorSet):
@@ -39,13 +40,12 @@ class Mordred(DescriptorSet):
         config (str): path to config file if available
 
     """
-
     def __init__(
-            self,
-            descs: list[str] | None = None,
-            version: str | None = None,
-            ignore_3D: bool = False,
-            config: str | None = None,
+        self,
+        descs: list[str] | None = None,
+        version: str | None = None,
+        ignore_3D: bool = False,
+        config: str | None = None,
     ):
         """
         Initialize the descriptor with the same arguments as you would pass
@@ -78,7 +78,7 @@ class Mordred(DescriptorSet):
         self.descriptors = [str(d) for d in descs]
 
     def getDescriptors(
-            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         df = self._mordred.pandas(self.iterMols(mols), quiet=True, nproc=1)
         df = df.apply(pd.to_numeric, errors="coerce")  # replace errors by nan values
@@ -121,7 +121,6 @@ class Mold2(DescriptorSet):
     Arguments:
         descs: names of Mold2 descriptors to be calculated (e.g. D001)
     """
-
     def __init__(self, descs: list[str] | None = None):
         """Initialize a Mold2 descriptor calculator.
 
@@ -143,7 +142,7 @@ class Mold2(DescriptorSet):
         return False
 
     def getDescriptors(
-            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         values = self._mold2.calculate(self.iterMols(mols), show_banner=False)
         # Drop columns
@@ -194,13 +193,18 @@ class PaDEL(DescriptorSet):
         descriptors (list[str]): list of PaDEL descriptor names
     """
 
-    _notJSON = ["_nameMapping", "_padel", "_descriptors", *DescriptorSet._notJSON]
+    _notJSON: ClassVar = [
+        "_nameMapping",
+        "_padel",
+        "_descriptors",
+        *DescriptorSet._notJSON,
+    ]
 
     def __init__(
-            self,
-            descs: list[str] | None = None,
-            ignore_3d: bool = True,
-            n_jobs: int | None = None,
+        self,
+        descs: list[str] | None = None,
+        ignore_3d: bool = True,
+        n_jobs: int | None = None,
     ):
         """Initialize a PaDEL calculator
 
@@ -240,7 +244,7 @@ class PaDEL(DescriptorSet):
         self.descriptors = state["_keep"]
 
     def getDescriptors(
-            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
         df = self._padel.calculate(mols, show_banner=False, njobs=self.nJobs)
@@ -276,8 +280,7 @@ class PaDEL(DescriptorSet):
         if names is None:
             self._keep = [
                 name
-                for name, desc in self._nameMapping.items()
-                if desc in self._descriptors
+                for name, desc in self._nameMapping.items() if desc in self._descriptors
             ]
         else:
             self._keep = names
@@ -296,7 +299,6 @@ class ExtendedValenceSignature(DescriptorSet):
     Journal of Chemical Information and Computer Sciences 2003 43 (3), 707-720
     DOI: 10.1021/ci020345w
     """
-
     def __init__(self, depth: int | list[int]):
         """Initialize a ExtendedValenceSignature calculator
 
@@ -315,7 +317,7 @@ class ExtendedValenceSignature(DescriptorSet):
         return False
 
     def getDescriptors(
-            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         mols = [Chem.AddHs(mol) for mol in self.iterMols(mols)]
         df = self._signature.calculate(
@@ -348,11 +350,12 @@ class ExtendedValenceSignature(DescriptorSet):
 
 class ProteinDescriptorSet(DescriptorSet):
     """Abstract base class for protein descriptor sets."""
-
     @abstractmethod
     def getProteinDescriptors(
-            self, acc_keys: list[str], sequences: Optional[dict[str, str]] = None,
-            **kwargs
+        self,
+        acc_keys: list[str],
+        sequences: Optional[dict[str, str]] = None,
+        **kwargs
     ) -> pd.DataFrame:
         """
         Calculate the protein descriptors for a given target.
@@ -373,11 +376,11 @@ class ProteinDescriptorSet(DescriptorSet):
         """
 
     def getDescriptors(
-            self,
-            mols: list[Mol],
-            props: dict[str, list[Any] | dict[str, str]],
-            *args,
-            **kwargs,
+        self,
+        mols: list[Mol],
+        props: dict[str, list[Any] | dict[str, str]],
+        *args,
+        **kwargs,
     ) -> np.ndarray:
         """Get array of calculated protein descriptors for given targets.
 
@@ -419,10 +422,8 @@ class ProDec(ProteinDescriptorSet):
         factory (prodec.ProteinDescriptors):
             factory to calculate descriptors
     """
-
     def __init__(
-            self, sets: list[str] | None = None,
-            msa_provider: MSAProvider = ClustalMSA()
+        self, sets: list[str] | None = None, msa_provider: MSAProvider = ClustalMSA()
     ):
         """Initialize a ProDec calculator.
 
@@ -451,7 +452,7 @@ class ProDec(ProteinDescriptorSet):
 
     @staticmethod
     def calculateDescriptor(
-            factory: prodec.ProteinDescriptors, msa: dict[str, str], descriptor: str
+        factory: prodec.ProteinDescriptors, msa: dict[str, str], descriptor: str
     ):
         """
         Calculate a protein descriptor for given targets
@@ -478,8 +479,10 @@ class ProDec(ProteinDescriptorSet):
         return protein_features
 
     def getProteinDescriptors(
-            self, acc_keys: list[str], sequences: Optional[dict[str, str]] = None,
-            **kwargs
+        self,
+        acc_keys: list[str],
+        sequences: Optional[dict[str, str]] = None,
+        **kwargs
     ) -> pd.DataFrame:
         """
         Calculate the protein descriptors for a given target.
