@@ -4,7 +4,7 @@ From v3.2.0 to v4.0.0
 
 ## Fixes
 
-None.
+- Add variable version to papyrus_filter for consistent version use.
 
 ## Changes
 
