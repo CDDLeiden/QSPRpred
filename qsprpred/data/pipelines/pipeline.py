@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 import pandas as pd
 
 class Step(ABC):
-    """"A data preprocessing step that can be applied to a dataset"""
+    """A data preprocessing step that can be applied to a dataset"""
     
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
-        """"Fit the step to the dataset
+        """Fit the step to the dataset
         
         If the step requires fitting to the data, this method should be implemented.
         
@@ -16,8 +16,32 @@ class Step(ABC):
         pass
     
     @abstractmethod
-    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Apply the step to the dataset
+        
+        Args:
+            X (pd.DataFrame): data to be transformed
+            y (pd.DataFrame): target data to be transformed
+        
+        Returns:
+            pd.DataFrame: transformed data
+            pd.DataFrame: (transformed) target data
+        """
         pass
+    
+    def fitTransform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Fit the step to the dataset and apply it
+        
+        Args:
+            X (pd.DataFrame): training data
+            y (pd.DataFrame): training targets
+            
+        Returns:
+            pd.DataFrame: transformed data
+            pd.DataFrame: (transformed) target data
+        """
+        self.fit(X, y)
+        return self.transform(X, y)
 
 class Pipeline(ABC):
     """Pipeline class for data preprocessing steps
@@ -50,7 +74,7 @@ class QSPRPipeline(Pipeline):
     """
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
         for step in self.steps.values():
-            step.fit(X, y)
+            X, y = step.fitTransform(X, y)
     
     def apply(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> pd.DataFrame:
         for step in self.steps.values():

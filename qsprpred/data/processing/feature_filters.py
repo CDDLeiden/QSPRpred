@@ -40,20 +40,6 @@ class FeatureFilter(Step):
         Returns:
             The filtered pd.DataFrame
         """
-        
-    def fitTransform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> pd.DataFrame:
-        """Fit the filter to the data and transform the data.
-        
-        Args:
-            X (pd.DataFrame): dataframe to be filtered
-            y (pd.DataFrame, optional): output dataframe if the filtering method
-                requires it
-
-        Returns:
-            The filtered pd.DataFrame
-        """
-        self.fit(X, y)
-        return self.transform(X, y)
 
 
 class LowVarianceFilter(FeatureFilter):
@@ -83,7 +69,7 @@ class LowVarianceFilter(FeatureFilter):
         )
         logger.info(f"Number of columns left: {X.shape[1] - len(self.low_var_cols)}")
         
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Filter out low variance features from a dataframe.
 
         Args:
@@ -92,14 +78,15 @@ class LowVarianceFilter(FeatureFilter):
                 requires it
 
         Returns:
-            The filtered pd.DataFrame
+            pd.DataFrame: The filtered dataframe
+            pd.DataFrame: The target dataframe
         """
         assert hasattr(self, "low_var_cols"), "Filter has not been fitted yet."
         assert self.low_var_cols.isin(X.columns).all(), "Columns do not match fitted columns."
         
         X = X.drop(columns=self.low_var_cols)
 
-        return X
+        return X, y
 
 
 class HighCorrelationFilter(FeatureFilter):
@@ -127,7 +114,7 @@ class HighCorrelationFilter(FeatureFilter):
         )
         logger.info(f"Number of columns left: {X.shape[1] - len(self.high_corr_cols)}")
         
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Filter out high correlation features from a dataframe.
 
         Args:
@@ -136,14 +123,15 @@ class HighCorrelationFilter(FeatureFilter):
                 requires it
 
         Returns:
-            The filtered pd.DataFrame
+            pd.DataFrame: The filtered dataframe
+            pd.DataFrame: The target dataframe
         """
         assert hasattr(self, "high_corr_cols"), "Filter has not been fitted yet."
         assert self.high_corr_cols.isin(X.columns).all(), "Columns do not match fitted columns."
         
         X = X.drop(columns=self.high_corr_cols)
 
-        return X
+        return X, y
 
 
 class BorutaFilter(FeatureFilter, Randomized):
@@ -212,7 +200,7 @@ class BorutaFilter(FeatureFilter, Randomized):
         )
         logger.info(f"Number of columns left: {X.shape[1] - len(self.dropped_features)}")
         
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Filter out uninformative features from a dataframe using BorutaPy.
 
         Args:
@@ -221,11 +209,12 @@ class BorutaFilter(FeatureFilter, Randomized):
                 requires it
 
         Returns:
-            The filtered pd.DataFrame
+            pd.DataFrame: The filtered dataframe
+            pd.DataFrame: The target dataframe
         """
         assert hasattr(self, "dropped_features"), "Filter has not been fitted yet."
         assert self.dropped_features.isin(X.columns).all(), "Columns do not match fitted columns."
         
         X = X.drop(columns=self.dropped_features)
 
-        return X
+        return X, y
