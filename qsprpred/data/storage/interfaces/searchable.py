@@ -1,15 +1,14 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 
 
 class SMARTSSearchable(ABC):
-
+    """Instances of this class can be searched with SMARTS patterns."""
     @abstractmethod
     def searchWithSMARTS(
-            self,
-            patterns: list[str],
+        self,
+        patterns: list[str],
     ) -> "SMARTSSearchable":
-        """
-        Search the molecules within this `MoleculeDataSet` with SMARTS patterns.
+        """Search the molecules within this instance with SMARTS patterns.
 
         Args:
             patterns:
@@ -21,12 +20,13 @@ class SMARTSSearchable(ABC):
 
 
 class PropSearchable(ABC):
+    """Interface for searching on properties."""
     @abstractmethod
     def searchOnProperty(
-            self,
-            prop_name: str,
-            values: list[float | int | str],
-            exact=False
+        self,
+        prop_name: str,
+        values: list[float | int | str],
+        exact=False
     ) -> "PropSearchable":
         """Search the molecules within this `MoleculeDataSet` on a property value.
 

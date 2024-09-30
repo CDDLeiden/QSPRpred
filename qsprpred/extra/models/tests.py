@@ -12,13 +12,18 @@ from xgboost import XGBClassifier, XGBRegressor
 
 from qsprpred.extra.data.descriptors.sets import ProDec
 from qsprpred.tasks import TargetProperty, TargetTasks
-from .random import ScipyDistributionAlgorithm, RandomModel, RatioDistributionAlgorithm, \
-    MedianDistributionAlgorithm
-from ..data.utils.testing.path_mixins import DataSetsMixInExtras
-from ..models.pcm import SklearnPCMModel
+
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import ModelCheckMixIn
 from ...utils.testing.path_mixins import ModelDataSetsPathMixIn
+from ..data.utils.testing.path_mixins import DataSetsMixInExtras
+from ..models.pcm import SklearnPCMModel
+from .random import (
+    MedianDistributionAlgorithm,
+    RandomModel,
+    RatioDistributionAlgorithm,
+    ScipyDistributionAlgorithm,
+)
 
 
 class ModelDataSetsMixInExtras(ModelDataSetsPathMixIn, DataSetsMixInExtras):
@@ -27,18 +32,17 @@ class ModelDataSetsMixInExtras(ModelDataSetsPathMixIn, DataSetsMixInExtras):
 
 class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
     """Test class for testing PCM models."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
         self.nCPU = 1
 
     def getModel(
-            self,
-            name: str,
-            alg: Type | None = None,
-            parameters: dict | None = None,
-            random_state: int | None = None,
+        self,
+        name: str,
+        alg: Type | None = None,
+        parameters: dict | None = None,
+        random_state: int | None = None,
     ):
         """Initialize dataset and model.
 
@@ -62,50 +66,51 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
     @parameterized.expand(
         [
             (
-                    alg_name,
-                    [{"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}],
-                    alg_name,
-                    alg,
-                    random_state,
-            )
-            for alg, alg_name in ((XGBRegressor, "XGBR"),)
+                alg_name,
+                [{
+                    "name": "pchembl_value_Median",
+                    "task": TargetTasks.REGRESSION
+                }],
+                alg_name,
+                alg,
+                random_state,
+            ) for alg, alg_name in ((XGBRegressor, "XGBR"), )
             for random_state in ([None], [1, 42], [42, 42])
-        ]
-        + [
+        ] + [
             (
-                    alg_name,
-                    [{"name": "pchembl_value_Median", "task": TargetTasks.REGRESSION}],
-                    alg_name,
-                    alg,
-                    [None],
-            )
-            for alg, alg_name in ((PLSRegression, "PLSR"),)
-        ]
-        + [
+                alg_name,
+                [{
+                    "name": "pchembl_value_Median",
+                    "task": TargetTasks.REGRESSION
+                }],
+                alg_name,
+                alg,
+                [None],
+            ) for alg, alg_name in ((PLSRegression, "PLSR"), )
+        ] + [
             (
-                    alg_name,
-                    [
-                        {
-                            "name": "pchembl_value_Median",
-                            "task": TargetTasks.SINGLECLASS,
-                            "th": [6.5],
-                        }
-                    ],
-                    alg_name,
-                    alg,
-                    random_state,
-            )
-            for alg, alg_name in ((XGBClassifier, "XGBC"),)
+                alg_name,
+                [
+                    {
+                        "name": "pchembl_value_Median",
+                        "task": TargetTasks.SINGLECLASS,
+                        "th": [6.5],
+                    }
+                ],
+                alg_name,
+                alg,
+                random_state,
+            ) for alg, alg_name in ((XGBClassifier, "XGBC"), )
             for random_state in ([None], [21, 42], [42, 42])
         ]
     )
     def testFittingPCM(
-            self,
-            _,
-            props: list[TargetProperty | dict],
-            model_name: str,
-            model_class: Type,
-            random_state: list[int | None],
+        self,
+        _,
+        props: list[TargetProperty | dict],
+        model_name: str,
+        model_class: Type,
+        random_state: list[int | None],
     ):
         """Test model training for regression models.
 
@@ -149,8 +154,10 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
         # check if the output is the same before and after saving and loading
         for protein_id in sorted(set(dataset.getProperty(dataset.proteinIDProp))):
             subset = dataset.searchOnProperty(
-                dataset.proteinIDProp, [protein_id], exact=True,
-                path=self.generatedDataPath
+                dataset.proteinIDProp,
+                [protein_id],
+                exact=True,
+                path=self.generatedDataPath,
             )
             if random_state[0] is not None:
                 comparison_model = self.getModel(
@@ -181,11 +188,12 @@ class RandomBaseModelTestCase(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTes
         self.setUpPaths()
 
     def getModel(
-            self,
-            name: str,
-            alg: ScipyDistributionAlgorithm | RatioDistributionAlgorithm = ScipyDistributionAlgorithm,
-            parameters: dict | None = None,
-            random_state: int | None = None,
+        self,
+        name: str,
+        alg: (ScipyDistributionAlgorithm |
+              RatioDistributionAlgorithm) = ScipyDistributionAlgorithm,
+        parameters: dict | None = None,
+        random_state: int | None = None,
     ):
         """Initialize dataset and model.
 
@@ -209,7 +217,6 @@ class RandomBaseModelTestCase(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTes
 
 class TestRandomModelRegression(RandomBaseModelTestCase):
     """Test the RandomModel class for regression models."""
-
     @parameterized.expand(
         [
             ("RandomModel", TargetTasks.REGRESSION, random_state)
@@ -219,7 +226,10 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
     def testRegressionBasicFit(self, model_name, task, random_state):
         # initialize dataset
         dataset = self.createLargeTestDataSet(
-            target_props=[{"name": "CL", "task": task}],
+            target_props=[{
+                "name": "CL",
+                "task": task
+            }],
             preparation_settings=self.getDefaultPrep(),
         )
         # initialize model for training from class
@@ -232,7 +242,7 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
         predictor = RandomModel(
             name=f"{model_name}_{task}",
             base_dir=model.baseDir,
-            alg=MedianDistributionAlgorithm
+            alg=MedianDistributionAlgorithm,
         )
         self.predictorTest(predictor, dataset)
 
@@ -252,10 +262,7 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
             )
 
     @parameterized.expand(
-        [
-            ("RandomModel", random_state)
-            for random_state in ([None], [1, 42], [42, 42])
-        ]
+        [("RandomModel", random_state) for random_state in ([None], [1, 42], [42, 42])]
     )
     def testRegressionMultiTaskFit(self, model_name, random_state: list[int | None]):
         """Test model training for multitask regression models."""
@@ -285,7 +292,7 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
         predictor = RandomModel(
             name=f"{model_name}_multitask_regression",
             base_dir=model.baseDir,
-            alg=MedianDistributionAlgorithm
+            alg=MedianDistributionAlgorithm,
         )
         self.predictorTest(predictor, dataset)
 
@@ -307,29 +314,29 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
 
 class TestRandomModelClassification(RandomBaseModelTestCase):
     """Test the RandomModel class for regression models."""
-
     @parameterized.expand(
         [
             (f"{alg_name}_{task}", task, th, alg_name, alg, random_state)
-            for alg, alg_name in (
-                (RatioDistributionAlgorithm, "RandomModel"),
-        )
+            for alg, alg_name in ((RatioDistributionAlgorithm, "RandomModel"), )
             for task, th in (
                 (TargetTasks.SINGLECLASS, [6.5]),
                 (TargetTasks.MULTICLASS, [0, 2, 10, 1100]),
-        )
-            for random_state in ([None], [42, 42])
+            ) for random_state in ([None], [42, 42])
         ]
     )
     def testClassificationBasicFit(
-            self, _, task, th, model_name, model_class, random_state
+        self, _, task, th, model_name, model_class, random_state
     ):
         """Test model training for classification models."""
         parameters = None
 
         # initialize dataset
         dataset = self.createLargeTestDataSet(
-            target_props=[{"name": "CL", "task": task, "th": th}],
+            target_props=[{
+                "name": "CL",
+                "task": task,
+                "th": th
+            }],
             preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
@@ -344,7 +351,7 @@ class TestRandomModelClassification(RandomBaseModelTestCase):
         predictor = RandomModel(
             name=f"{model_name}_{task}",
             base_dir=model.baseDir,
-            alg=RatioDistributionAlgorithm
+            alg=RatioDistributionAlgorithm,
         )
 
         self.predictorTest(predictor, dataset)
@@ -369,11 +376,10 @@ class TestRandomModelClassification(RandomBaseModelTestCase):
 
 class TestRandomModelClassificationMultiTask(RandomBaseModelTestCase):
     """Test the SklearnModel class for multi-task classification models."""
-
     @parameterized.expand(
         [
             (alg_name, alg_name, alg, random_state)
-            for alg, alg_name in ((RatioDistributionAlgorithm, "RandomModel"),)
+            for alg, alg_name in ((RatioDistributionAlgorithm, "RandomModel"), )
             for random_state in ([None], [42, 42])
         ]
     )
@@ -411,7 +417,7 @@ class TestRandomModelClassificationMultiTask(RandomBaseModelTestCase):
         predictor = RandomModel(
             name=f"{model_name}_multitask_classification",
             base_dir=model.baseDir,
-            alg=RatioDistributionAlgorithm
+            alg=RatioDistributionAlgorithm,
         )
 
         self.predictorTest(predictor, dataset)

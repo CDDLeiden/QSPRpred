@@ -3,7 +3,8 @@
 To add a new feature filters:
 * Add a FeatureFilter subclass for your new filter
 """
-from abc import abstractmethod
+
+from abc import ABC, abstractmethod
 
 import numpy as np
 import pandas as pd
@@ -18,7 +19,6 @@ from ..pipelines.pipeline import Step
 
 class FeatureFilter(Step):
     """Filter out uninformative featureNames from a dataframe."""
-    
     @abstractmethod
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
         """Fit the filter to the data.
@@ -62,7 +62,6 @@ class LowVarianceFilter(FeatureFilter):
     Attributes:
         th (float): threshold for removing features
     """
-
     def __init__(self, th: float) -> None:
         self.th = th
         
@@ -109,7 +108,6 @@ class HighCorrelationFilter(FeatureFilter):
     Attributes:
         th (float): threshold for correlation
     """
-
     def __init__(self, th: float) -> None:
         self.th = th
         
@@ -160,7 +158,6 @@ class BorutaFilter(FeatureFilter, Randomized):
         seed (int):
             Random state to use for shuffling and other random operations.
     """
-
     @property
     def randomState(self) -> int:
         """Get the random state for the object."""

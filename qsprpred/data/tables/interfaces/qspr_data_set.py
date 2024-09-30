@@ -14,12 +14,12 @@ from qsprpred.data.tables.interfaces.molecule_data_set import MoleculeDataSet
 
 
 class QSPRDataSet(MoleculeDataSet, ABC):
-
+    """Interface for storing and managing QSPR-specific data sets."""
     @abstractmethod
     def setTargetProperties(
-            self,
-            target_props: list[TargetProperty | dict],
-            drop_empty: bool = True,
+        self,
+        target_props: list[TargetProperty | dict],
+        drop_empty: bool = True,
     ):
         """Set the target properties for the dataset.
 
@@ -38,7 +38,7 @@ class QSPRDataSet(MoleculeDataSet, ABC):
         """Get the names of the features that are currently in the dataset.
 
         Returns:
-            a `list` of feature names
+            (list): list of feature names
         """
 
     @abstractmethod
@@ -89,9 +89,9 @@ class QSPRDataSet(MoleculeDataSet, ABC):
 
     @abstractmethod
     def iterFolds(
-            self,
-            split: "DataSplit",
-            concat: bool = False,
+        self,
+        split: "DataSplit",  # noqa: F821
+        concat: bool = False,
     ) -> Generator[
         tuple[
             pd.DataFrame,
@@ -113,7 +113,7 @@ class QSPRDataSet(MoleculeDataSet, ABC):
                 whether to concatenate the training and test feature matrices
 
         Yields:
-            tuple:
+            (tuple):
                 training and test feature matrices and target vectors
                 for each fold
         """
@@ -140,19 +140,19 @@ class QSPRDataSet(MoleculeDataSet, ABC):
 
     @abstractmethod
     def prepareDataset(
-            self,
-            split: Optional["DataSplit"] = None,
-            feature_calculators: list["DescriptorSet"] | None = None,
-            feature_filters: list | None = None,
-            feature_standardizer: SKLearnStandardizer | None = None,
-            feature_fill_value: float = np.nan,
-            applicability_domain: (
-                    ApplicabilityDomain | MLChemADApplicabilityDomain | None
-            ) = None,
-            drop_outliers: bool = False,
-            recalculate_features: bool = False,
-            shuffle: bool = True,
-            random_state: int | None = None,
+        self,
+        split: Optional["DataSplit"] = None,  # noqa: F821
+        feature_calculators: list["DescriptorSet"] | None = None,  # noqa: F821
+        feature_filters: list | None = None,
+        feature_standardizer: SKLearnStandardizer | None = None,
+        feature_fill_value: float = np.nan,
+        applicability_domain: (
+            ApplicabilityDomain | MLChemADApplicabilityDomain | None
+        ) = None,
+        drop_outliers: bool = False,
+        recalculate_features: bool = False,
+        shuffle: bool = True,
+        random_state: int | None = None,
     ):
         """Prepare the dataset for training.
 
@@ -181,13 +181,13 @@ class QSPRDataSet(MoleculeDataSet, ABC):
 
     @abstractmethod
     def getFeatures(
-            self,
-            inplace: bool = False,
-            concat: bool = False,
-            raw: bool = False,
-            ordered: bool = False,
-            refit_standardizer: bool = True,
-    ):
+        self,
+        inplace: bool = False,
+        concat: bool = False,
+        raw: bool = False,
+        ordered: bool = False,
+        refit_standardizer: bool = True,
+    ) -> pd.DataFrame | tuple[pd.DataFrame, pd.DataFrame]:
         """Get the current feature sets (training and test) from the dataset.
 
         This method also applies any feature standardizers that have been set on the
@@ -215,14 +215,18 @@ class QSPRDataSet(MoleculeDataSet, ABC):
                 fitted standardizer will be used. Defaults to `True`. Use `False` if
                 this dataset is used for prediction only and the standardizer has
                 been initialized already.
+
+        Returns:
+            (pd.DataFrame) if `concat` is `True` or (tuple[pd.DataFrame, pd.DataFrame]):
+                feature matrices for training and test sets
         """
 
     @abstractmethod
     def getTargets(
-            self,
-            concat: bool = False,
-            ordered: bool = False
-    ) -> pd.DataFrame:
+        self,
+        concat: bool = False,
+        ordered: bool = False
+    ) -> pd.DataFrame | tuple[pd.DataFrame, pd.DataFrame]:
         """Get the response values (training and test) for the set target property.
 
         Args:
@@ -231,8 +235,8 @@ class QSPRDataSet(MoleculeDataSet, ABC):
             ordered (bool): if `True`, return the target properties in the original
                 order of the data set. This is only relevant if `concat` is `True`.
         Returns:
-            `tuple` of (train_responses, test_responses) or `pandas.DataFrame` of all
-            target property values
+            (pd.DataFrame) if `concat` is `True` or (tuple[pd.DataFrame, pd.DataFrame):
+                target properties values for training and test sets
         """
 
     @abstractmethod
@@ -243,7 +247,7 @@ class QSPRDataSet(MoleculeDataSet, ABC):
             names (list): list of target property names
 
         Returns:
-            list of target properties
+            (list): list of target properties
         """
 
     @property
@@ -256,5 +260,5 @@ class QSPRDataSet(MoleculeDataSet, ABC):
         """Unset the target property with the given name.
 
         Args:
-            name (str | TargetProperty): name of the target property to unset
+            (str | TargetProperty): name of the target property to unset
         """

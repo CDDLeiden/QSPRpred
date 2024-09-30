@@ -1,10 +1,10 @@
 import pandas as pd
 from sklearn.metrics import (
+    accuracy_score,
     f1_score,
     matthews_corrcoef,
     precision_score,
     recall_score,
-    accuracy_score,
 )
 
 

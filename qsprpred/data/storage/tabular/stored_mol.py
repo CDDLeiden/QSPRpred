@@ -6,23 +6,25 @@ from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 
 
 class TabularMol(StoredMol):
-
+    """Simple implementation of a molecule that is stored in a tabular storage."""
     def __init__(
-            self,
-            mol_id: str,
-            smiles: str,
-            parent: Optional["TabularMol"] = None,
-            rd_mol: Chem.Mol | None = None,
-            props: dict[str, Any] | None = None,
-            representations: tuple["TabularMol", ...] | None = None,
-    ) -> None:
-        """
-        Create a new molecule instance.
+        self,
+        mol_id: str,
+        smiles: str,
+        parent: Optional["TabularMol"] = None,
+        rd_mol: Chem.Mol | None = None,
+        props: dict[str, Any] | None = None,
+        representations: tuple["TabularMol", ...] | None = None,
+    ):
+        """Create a new molecule instance.
 
-        :param parent: parent molecule
-        :param mol_id: identifier of the molecule
-        :param smiles: SMILES of the molecule
-        :param rd_mol: rdkit molecule object
+        Args:
+            mol_id (str): identifier of the molecule
+            smiles (str): SMILES of the molecule
+            parent (TabularMol, optional): parent molecule
+            rd_mol (Chem.Mol, optional): rdkit molecule object
+            props (dict, optional): properties of the molecule
+            representations (tuple, optional): representations of the molecule
         """
         self._parent = parent
         self._id = mol_id
@@ -32,37 +34,38 @@ class TabularMol(StoredMol):
         self._representations = representations
 
     def as_rd_mol(self) -> Chem.Mol:
+        """Get the rdkit molecule object.
+
+        Returns:
+            (Chem.Mol) rdkit molecule object
+        """
         if self._rd_mol is None:
             self._rd_mol = Chem.MolFromSmiles(self.smiles)
         return self._rd_mol
 
     @property
     def parent(self) -> "TabularMol":
+        """Get the parent molecule."""
         return self._parent
 
     @property
     def id(self) -> str:
-        """
-        Get the identifier of the molecule.
-        """
+        """Get the identifier of the molecule."""
         return self._id
 
     @property
     def smiles(self) -> str:
-        """
-        Get the SMILES of the molecule.
-        """
+        """Get the SMILES of the molecule."""
         return self._smiles
 
     @property
     def props(self) -> dict[str, Any] | None:
-        """
-        Get the row of the dataframe corresponding to this molecule.
-        """
+        """Get the row of the dataframe corresponding to this molecule."""
         return self._props
 
     @property
     def representations(self) -> list["TabularMol"] | None:
+        """Get the representations of the molecule."""
         return self._representations
         # sdfs = self.sdf()
         # ret = []

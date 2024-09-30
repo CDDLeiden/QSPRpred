@@ -1,14 +1,10 @@
 from qsprpred.data import MoleculeTable
-
 from qsprpred.data.sources.papyrus import Papyrus
-
 from qsprpred.utils.testing.base import QSPRTestCase
-
 from qsprpred.utils.testing.path_mixins import DataSetsPathMixIn
 
 
 class PapyrusSourceTest(DataSetsPathMixIn, QSPRTestCase):
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -29,8 +25,6 @@ class PapyrusSourceTest(DataSetsPathMixIn, QSPRTestCase):
             plus_only=True,
         )
 
-        dataset = papyrus.getData(
-            dataset_name, acc_keys, quality, use_existing=True
-        )
+        dataset = papyrus.getData(dataset_name, acc_keys, quality, use_existing=True)
         self.assertTrue(isinstance(dataset, MoleculeTable))
         self.assertTrue(len(dataset) > 0)

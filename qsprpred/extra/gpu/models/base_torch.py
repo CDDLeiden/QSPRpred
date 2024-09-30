@@ -10,7 +10,7 @@ torch.set_num_threads(1)
 DEFAULT_TORCH_DEVICE = (
     torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
 )
-DEFAULT_TORCH_GPUS = (0,)
+DEFAULT_TORCH_GPUS = (0, )
 
 
 class QSPRModelPyTorchGPU(QSPRModelGPU, ABC):

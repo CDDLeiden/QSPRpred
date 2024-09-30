@@ -4,8 +4,8 @@ from unittest import TestCase
 from parameterized import parameterized
 
 from qsprpred.data.descriptors.sets import DescriptorSet
-from qsprpred.data.processing.feature_standardizers import SKLearnStandardizer
 from qsprpred.data.processing.applicability_domain import ApplicabilityDomain
+from qsprpred.data.processing.feature_standardizers import SKLearnStandardizer
 from qsprpred.data.sampling.splits import DataSplit
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.extra.data.utils.testing.path_mixins import DataSetsMixInExtras
@@ -14,7 +14,6 @@ from qsprpred.utils.testing.check_mixins import DataPrepCheckMixIn
 
 class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepCheckMixIn, TestCase):
     """Test the preparation of the PCMDataSet."""
-
     def setUp(self):
         super().setUp()
         super().setUpPaths()

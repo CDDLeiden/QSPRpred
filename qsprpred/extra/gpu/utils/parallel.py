@@ -10,8 +10,8 @@ class TorchJITGenerator(MultiprocessingJITGenerator):
     which require the `torch.multiprocessing` and using the
     `spawn` start method.
     """
-
     def getPool(self):
         from torch.multiprocessing import Pool, set_start_method
+
         set_start_method("spawn", force=True)
         return Pool(self.nWorkers)

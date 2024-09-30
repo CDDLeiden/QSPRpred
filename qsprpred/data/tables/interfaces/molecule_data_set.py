@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Iterable, Any, Generator
+from typing import Any, Callable, Generator, Iterable
 
 from qsprpred.data.chem.identifiers import Identifiable
 from qsprpred.data.chem.standardizers.base import Standardizable
@@ -20,9 +20,9 @@ class MoleculeDataSet(
     Randomized,
     Identifiable,
     Standardizable,
-    ABC
+    ABC,
 ):
-
+    """Interface for storing and managing chemical data sets for machine learning."""
     @property
     @abstractmethod
     def smilesProp(self) -> str:
@@ -31,7 +31,7 @@ class MoleculeDataSet(
     @property
     @abstractmethod
     def smiles(self) -> Generator[str, None, None]:
-        """Get the SMILES strings of the molecules in the data frame.
+        """Get the SMILES strings of the molecules in this instance.
 
         Returns:
             Generator[str, None, None]: Generator of SMILES strings.
@@ -39,7 +39,7 @@ class MoleculeDataSet(
 
     @abstractmethod
     def imputeProperties(self, names: list[str], imputer: Callable):
-        """Impute missing values in the target properties using the given imputer.
+        """Impute missing values in the given properties using the given imputer.
 
         Args:
             names (list[str]): list of target properties names to impute
@@ -47,6 +47,7 @@ class MoleculeDataSet(
         """
 
     @abstractmethod
-    def transformProperties(self, names: list[str],
-                            transformer: Callable[[Iterable[Any]], Iterable[Any]]):
-        pass
+    def transformProperties(
+        self, names: list[str], transformer: Callable[[Iterable[Any]], Iterable[Any]]
+    ):
+        """Transform the target properties using the given transformer function."""

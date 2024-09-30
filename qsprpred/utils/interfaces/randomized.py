@@ -2,9 +2,7 @@ from abc import abstractmethod
 
 
 class Randomized:
-    """An object with one or more pseudorandom actions that can be fixed with a seed.
-    """
-
+    """An object with one or more pseudorandom actions that can be fixed with a seed."""
     @property
     @abstractmethod
     def randomState(self) -> int:

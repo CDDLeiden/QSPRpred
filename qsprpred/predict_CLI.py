@@ -120,28 +120,23 @@ def QSPR_predict(args):
                     for i in range(predictions[idx].shape[1]):
                         results.update(
                             {
-                                f"preds_{predictor.name}_{target.name}_class_{i}": predictions[
-                                    idx
-                                ][
-                                    :, i
-                                ].flatten()
+                                f"preds_{predictor.name}_{target.name}_class_{i}":
+                                    predictions[idx][:, i].flatten()
                             }
                         )
                 else:
                     for i in range(predictions.shape[1]):
                         results.update(
                             {
-                                f"preds_{predictor.name}_{target.name}_class_{i}": predictions[
-                                    :, i
-                                ].flatten()
+                                f"preds_{predictor.name}_{target.name}_class_{i}":
+                                    predictions[:, i].flatten()
                             }
                         )
             else:
                 results.update(
                     {
-                        f"preds_{predictor.name}_{target.name}": predictions[
-                            :, idx
-                        ].flatten()
+                        f"preds_{predictor.name}_{target.name}":
+                            predictions[:, idx].flatten()
                     }
                 )
 

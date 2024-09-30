@@ -1,4 +1,5 @@
 """This module contains the base class for all model plots."""
+
 import os
 from abc import ABC, abstractmethod
 from typing import Any
@@ -21,7 +22,6 @@ class ModelPlot(ABC):
         indPaths (dict[QSPRModel, str]):
             dictionary of models mapped to their independent test set results paths
     """
-
     def __init__(self, models: list[QSPRModel]):
         """Initialize the base class for all model plots.
 

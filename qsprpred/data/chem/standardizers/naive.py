@@ -4,19 +4,26 @@ from rdkit.Chem.MolStandardize import rdMolStandardize
 from .base import ChemStandardizer
 
 
-def standardize_mol(mol):
-    """
-    Standardizes SMILES and removes fragments
-    Arguments:
-        mols (lst)                : list of rdkit-molecules
+def standardize_mol(mol) -> str | None:
+    """Standardizes SMILES and removes fragments
+
+    Standardizes SMILES using RDKit MolStandardize to disconnect metals,
+    normalize, remove salts (largest fragment), and uncharge. Followed by a second
+    round of disconnecting metals and normalizing. Finally, the SMILES is canonicalized.
+
+    Args:
+        mol (rdkit.Chem.rdchem.Mol): RDKit molecule object
+
     Returns:
-        smiles (set)              : set of SMILES
+        (str | None):
+            Standardized SMILES or None if SMILES could not be standardized or
+            if SMILES does not contain carbon or contains salts after standardization
     """
 
-    charger = rdMolStandardize.Uncharger()
-    chooser = rdMolStandardize.LargestFragmentChooser()
     disconnector = rdMolStandardize.MetalDisconnector()
     normalizer = rdMolStandardize.Normalizer()
+    chooser = rdMolStandardize.LargestFragmentChooser()
+    charger = rdMolStandardize.Uncharger()
     carbon = Chem.MolFromSmarts("[#6]")
     salts = Chem.MolFromSmarts("[Na,Zn]")
     try:
@@ -34,24 +41,52 @@ def standardize_mol(mol):
         if len(mol.GetSubstructMatches(salts)) > 0:
             return None
         return Chem.CanonSmiles(smileR)
-    except:
+    except Exception:
+        # TODO: log error
         print("Parsing Error:", Chem.MolToSmiles(mol))
 
     return None
 
 
 class NaiveStandardizer(ChemStandardizer):
-    def convert_smiles(self, smiles):
+    """Naive standardizer
+
+    Briefly, the standardization process involves disconnecting metals, normalizing,
+    removing salts (largest fragment) and charges. See
+    `qsprpred.data.chem.standardizers.naive.standardize_mol` for more details.
+    """
+    def convertSMILES(self, smiles: str) -> str | None:
+        """Standardize SMILES using `standardize_mol`.
+
+        Args:
+            smiles (str): SMILES to be standardized
+
+        Returns:
+            str | None: standardized SMILES or `None` if SMILES could not be standardized
+        """
         mol = Chem.MolFromSmiles(smiles)
-        return standardize_mol(mol), smiles
+        return standardize_mol(mol)
 
     @property
-    def settings(self):
+    def settings(self) -> dict:
+        """Settings of the standardizer. They are empty in this case."""
         return {}
 
-    def get_id(self):
+    def getID(self) -> str:
+        """Return the unique identifier of the standardizer, which
+        in this case is "NaiveStandardizer" without any settings.
+        """
         return "NaiveStandardizer"
 
     @classmethod
-    def from_settings(cls, settings: dict):
+    def fromSettings(cls, settings: dict) -> "NaiveStandardizer":
+        """Create a naive standardizer from settings.
+        In this case, the settings are ignored.
+
+        Args:
+            settings (dict): settings of the standardizer
+
+        Returns:
+            NaiveStandardizer: a naive standardizer
+        """
         return cls()

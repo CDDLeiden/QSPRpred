@@ -11,12 +11,12 @@
 - `CDKKlekotaRothFP`: CDK hashed Klekota-Roth fingerprint
 
 """
+
 from typing import Any
 
 import numpy as np
 from PaDEL_pywrapper import PaDEL as PaDEL_calculator
 from PaDEL_pywrapper import descriptor as cdk_fps
-from rdkit import Chem
 from rdkit.Chem import Mol
 
 from qsprpred.data.descriptors.fingerprints import Fingerprint
@@ -29,7 +29,6 @@ class CDKFP(Fingerprint):
         size (int): size of the fingerprint
         searchDepth (int): search depth of the fingerprint
     """
-
     def __init__(self, size: int = 1024, search_depth: int = 7):
         """Initialize the CDK fingerprint.
 
@@ -71,7 +70,6 @@ class CDKFP(Fingerprint):
 
 class CDKExtendedFP(Fingerprint):
     """CDK extended fingerprint with 25 additional ring features and isotopic masses."""
-
     def __init__(self):
         super().__init__()
         fp = cdk_fps.ExtendedFP
@@ -100,7 +98,6 @@ class CDKExtendedFP(Fingerprint):
 
 class CDKEStateFP(Fingerprint):
     """CDK EState fingerprint."""
-
     def __init__(self):
         super().__init__()
         fp = cdk_fps.EStateFP
@@ -134,7 +131,6 @@ class CDKGraphOnlyFP(Fingerprint):
         size (int): Number of bits in the CDK fingerprints (ignored for others)
         searchDepth (int): Search depth for the CDK fingerprints (ignored for others)
     """
-
     def __init__(self, size: int = 1024, search_depth: int = 7):
         self.size = size
         super().__init__()
@@ -165,7 +161,6 @@ class CDKGraphOnlyFP(Fingerprint):
 
 class CDKMACCSFP(Fingerprint):
     """CDK MACCS fingerprint."""
-
     def __init__(self):
         super().__init__()
         fp = cdk_fps.MACCSFP
@@ -194,7 +189,6 @@ class CDKMACCSFP(Fingerprint):
 
 class CDKPubchemFP(Fingerprint):
     """CDK PubChem fingerprint."""
-
     def __init__(self):
         super().__init__()
         fp = cdk_fps.PubchemFP
@@ -229,7 +223,6 @@ class CDKSubstructureFP(Fingerprint):
         useCounts (bool):
             whether to use counts instead of presence/absence
     """
-
     def __init__(self, use_counts: bool = False):
         super().__init__()
         self.useCounts = use_counts
@@ -264,7 +257,6 @@ class CDKSubstructureFP(Fingerprint):
 
 class CDKKlekotaRothFP(Fingerprint):
     """CDK Klekota & Roth fingerprint."""
-
     def __init__(self, use_counts: bool = False):
         """Initialise the fingerprint.
 
@@ -310,7 +302,6 @@ class CDKAtomPairs2DFP(Fingerprint):
         useCounts (bool):
             whether to use counts instead of presence/absence
     """
-
     def __init__(self, use_counts: bool = False):
         """
         Initialise the fingerprint.

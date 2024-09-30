@@ -8,8 +8,8 @@ QSPRpred
 <img src='figures/QSPRpred_logo.jpg' width=10% align=right>
 <p align=left width=70%>
 
-QSPRpred is open-source software libary for building **Quantitative Structure Property
-Relationship (QSPR)** model developed by Gerard van Westen's Computational Drug
+QSPRpred is open-source software libary for building **Quantitative Structure Property/Activity
+Relationship (QSPR/QSAR)** models developed by Gerard van Westen's Computational Drug
 Discovery group. It provides a unified interface for building QSPR models based on
 different types of descriptors and machine learning algorithms. We developed this
 package to support our research, recognizing the necessity to reduce repetition in our

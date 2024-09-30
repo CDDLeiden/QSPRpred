@@ -12,21 +12,20 @@ class DescriptorTable(PandasDataTable):
         calculator (DescriptorSet):
             `DescriptorSet` used for descriptor calculation.
     """
-
     def __init__(
-            self,
-            calculator: DescriptorSet,
-            name: str,
-            df: pd.DataFrame | None = None,
-            store_dir: str = ".",
-            overwrite: bool = False,
-            index_cols: list[str] | None = None,
-            n_jobs: int = 1,
-            chunk_size: int | None = None,
-            autoindex_name: str = "ID",
-            random_state: int | None = None,
-            store_format: str = "pkl",
-            parallel_generator: ParallelGenerator | None = None,
+        self,
+        calculator: DescriptorSet,
+        name: str,
+        df: pd.DataFrame | None = None,
+        store_dir: str = ".",
+        overwrite: bool = False,
+        index_cols: list[str] | None = None,
+        n_jobs: int = 1,
+        chunk_size: int | None = None,
+        autoindex_name: str = "ID",
+        random_state: int | None = None,
+        store_format: str = "pkl",
+        parallel_generator: ParallelGenerator | None = None,
     ):
         """Initialize a `DescriptorTable` object.
 
@@ -61,6 +60,9 @@ class DescriptorTable(PandasDataTable):
                 Random state to use for shuffling and other random ops.
             store_format (str):
                 Format to use for storing the data ('pkl' or 'csv').
+            parallel_generator (ParallelGenerator):
+                Generator to use for parallel processing. If None, a new
+                generator will be created.
         """
         super().__init__(
             name,
@@ -78,23 +80,42 @@ class DescriptorTable(PandasDataTable):
         self.calculator = calculator
 
     def getSubset(
-            self,
-            properties: list[str],
-            ids: list[str] | None = None,
-            name: str | None = None,
-            path: str | None = None,
-            ignore_missing: bool = False
+        self,
+        properties: list[str],
+        ids: list[str] | None = None,
+        name: str | None = None,
+        path: str | None = None,
+        ignore_missing: bool = False,
     ) -> "DescriptorTable":
+        """Get a subset of the descriptor table.
+
+        Args:
+            properties (list): List of properties to include in the subset.
+            ids (list, optional): List of IDs to include in the subset.
+            name (str, optional): Name of the new descriptor table.
+            path (str, optional): Path to store the new descriptor table.
+            ignore_missing (bool, optional): Whether to ignore missing IDs.
+
+        Returns:
+            DescriptorTable: The subset of the descriptor table.
+        """
         pd_data = super().getSubset(properties, ids, name, path, ignore_missing)
         pd_data.calculator = self.calculator
         pd_data.__class__ = DescriptorTable
         return pd_data
 
-    def getDescriptors(self, active_only=True):
-        """Get the descriptors stored in this table."""
+    def getDescriptors(self, active_only: bool = True) -> pd.DataFrame:
+        """Get the descriptors stored in this table.
+
+        Args:
+            active_only (bool): Whether to return only active descriptors.
+
+        Returns:
+            pd.DataFrame: The descriptors.
+        """
         return self.df[self.getDescriptorNames(active_only=active_only)]
 
-    def getDescriptorNames(self, active_only=True):
+    def getDescriptorNames(self, active_only: bool = True) -> list[str]:
         """Get the names of the descriptors in this represented by this table.
         By default, only active descriptors are returned. You can use active_only=False
         to get all descriptors saved in the table.
@@ -103,13 +124,15 @@ class DescriptorTable(PandasDataTable):
             active_only (bool): Whether to return only descriptors that are active in
                 the current descriptor set. Defaults to `True`.
 
+        Returns:
+            (list): list of descriptor names
         """
         if active_only:
             return self.calculator.transformToFeatureNames()
         else:
             return self.df.columns[~self.df.columns.isin(self.indexCols)].tolist()
 
-    def fillMissing(self, fill_value, names):
+    def fillMissing(self, fill_value: float, names: list[str] | None = None):
         """Fill missing values in the descriptor table.
 
         Args:
@@ -137,13 +160,16 @@ class DescriptorTable(PandasDataTable):
         prefix = str(self.calculator) + "_"
         self.calculator.descriptors = [
             x.replace(prefix, "", 1)  # remove prefix
-            for x in self.calculator.transformToFeatureNames()
-            if x in to_keep
+            for x in self.calculator.transformToFeatureNames() if x in to_keep
         ]
         return self.getDescriptorNames()
 
     def restoreDescriptors(self) -> list[str]:
-        """Restore all descriptors to active in this set."""
+        """Restore all descriptors to active in this set.
+
+        Returns:
+            list[str]: list of all active descriptor names
+        """
         all_descs = self.getDescriptorNames(active_only=False)
         prefix = str(self.calculator) + "_"
         self.calculator.descriptors = [

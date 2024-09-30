@@ -2,26 +2,25 @@ import numpy as np
 from parameterized import parameterized
 from rdkit.Chem import Descriptors
 
-from .fingerprints import MorganFP
-from .sets import (
-    DrugExPhyschem,
-    PredictorDesc,
-    TanimotoDistances,
-    RDKitDescs,
-    SmilesDesc,
-)
 from ... import TargetTasks
 from ...data import RandomSplit
-from ...data.processing.feature_filters import LowVarianceFilter, HighCorrelationFilter
+from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
 from ...models import SklearnModel
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import DescriptorInDataCheckMixIn
 from ...utils.testing.path_mixins import DataSetsPathMixIn
+from .fingerprints import MorganFP
+from .sets import (
+    DrugExPhyschem,
+    PredictorDesc,
+    RDKitDescs,
+    SmilesDesc,
+    TanimotoDistances,
+)
 
 
 class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
     """Test the calculation of descriptors."""
-
     def setUp(self):
         """Set up the test Dataframe."""
         super().setUp()
@@ -104,7 +103,6 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
 
 class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
     """Test the descriptor sets."""
-
     def setUp(self):
         """Create the test Dataframe."""
         super().setUp()
@@ -201,7 +199,6 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
 
 class TestDescriptorsAll(DataSetsPathMixIn, DescriptorInDataCheckMixIn, QSPRTestCase):
     """Test all descriptor sets in all data sets."""
-
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -211,9 +208,11 @@ class TestDescriptorsAll(DataSetsPathMixIn, DescriptorInDataCheckMixIn, QSPRTest
             (
                 f"{desc_set}_{TargetTasks.REGRESSION}",
                 desc_set,
-                [{"name": "CL", "task": TargetTasks.REGRESSION}],
-            )
-            for desc_set in DataSetsPathMixIn.getAllDescriptors()
+                [{
+                    "name": "CL",
+                    "task": TargetTasks.REGRESSION
+                }],
+            ) for desc_set in DataSetsPathMixIn.getAllDescriptors()
         ]
     )
     def testDescriptorsAll(self, _, desc_set, target_props):

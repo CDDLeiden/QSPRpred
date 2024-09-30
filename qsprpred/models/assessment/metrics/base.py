@@ -9,10 +9,9 @@ class Metric(ABC):
     Attributes:
         name (str): Name of the scoring function.
     """
-
     @abstractmethod
     def __call__(
-            self, y_true: np.ndarray, y_pred: np.ndarray | list[np.ndarray]
+        self, y_true: np.ndarray, y_pred: np.ndarray | list[np.ndarray]
     ) -> float:
         """Calculate the score.
 

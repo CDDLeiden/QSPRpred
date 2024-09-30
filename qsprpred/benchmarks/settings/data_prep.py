@@ -8,15 +8,13 @@ from ...data.sampling.splits import DataSplit
 @dataclass
 class DataPrepSettings:
     """Class that determines settings for data preparation. These are arguments
-    passed to `QSPRDataset.prepareDataset`.
+    passed to `QSPRDataSet.prepareDataset`.
 
     Attributes:
         data_filters (list):
             Data filters to use.
         split (DataSplit):
             Data split to use.
-        smiles_standardizer (str or callable):
-            Standardizer to use for SMILES strings.
         feature_filters (list):
             Feature filters to use.
         feature_standardizer (SKLearnStandardizer):
@@ -26,7 +24,8 @@ class DataPrepSettings:
         shuffle (bool):
             Whether to shuffle the data.
     """
-    data_filters: list | None = (RepeatsFilter(keep=True),)
+
+    data_filters: list | None = (RepeatsFilter(keep=True), )
     split: DataSplit = None
     feature_filters: list = None
     feature_standardizer: SKLearnStandardizer = None

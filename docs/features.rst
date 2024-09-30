@@ -17,7 +17,36 @@ Overview of available features
 
                 * :class:`~qsprpred.data.sources.papyrus.papyrus_class.Papyrus`: Papyrus (See `data collection with Papyrus tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/data/data_collection_with_papyrus.ipynb>`_.)
 
-    .. dropdown:: Data Filters
+    .. dropdown:: Storage
+
+        :class:`~qsprpred.data.storage.interfaces.chem_store.ChemStore`: Interface for storing and managing chemical data.
+
+        Data storage classes are used to store and manage chemical data.
+        More information can be found in the `basic data representation tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/data/data_representation.ipynb>`
+        and the `advanced data representation tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/advanced/data/data_representation.ipynb>`.
+
+        .. tab-set::
+
+            .. tab-item:: Core
+
+                * :class:`~qsprpred.data.storage.tabular.basic_storage.PandasChemStore`: PandasChemStore
+
+
+    .. dropdown:: SMILES Standardizers
+
+        :class:`~qsprpred.data.chem.standardizers.base.ChemStandardizer`: Base class for SMILES standardizers.
+
+        Standardizers to convert SMILES to a standardized form.
+
+        .. tab-set::
+
+            .. tab-item:: Core
+
+                * :class:`~qsprpred.data.chem.standardizers.chembl.ChemblStandardizer`: ChemblStandardizer
+                * :class:`~qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer`: PapyrusStandardizer
+                * :class:`~qsprpred.data.chem.standardizers.naive.NaiveStandardizer`: NaiveStandardizer
+
+    .. dropdown:: Data Filters 
 
         :class:`~qsprpred.data.processing.data_filters.DataFilter`: Base class for data filters.
 
@@ -118,7 +147,7 @@ Overview of available features
 
                 * :class:`~qsprpred.data.processing.feature_filters.HighCorrelationFilter`: HighCorrelationFilter
                 * :class:`~qsprpred.data.processing.feature_filters.LowVarianceFilter`: LowVarianceFilter
-                * :class:`~qsprpred.data.processing.feature_filters.BorutaFilter`: BorutaFilter (:code:`numpy` version restricted to :code:`numpy<1.24.0`)
+                * :class:`~qsprpred.data.processing.feature_filters.BorutaFilter`: BorutaFilter
 
     .. dropdown:: Models
 
@@ -157,32 +186,32 @@ Overview of available features
 
             .. tab-item:: Core
 
-                * :class:`~qsprpred.models.metrics.SklearnMetrics`: SklearnMetrics
-                * :class:`~qsprpred.models.metrics.MaskedMetric`: MaskedMetric
-                * :class:`~qsprpred.models.metrics.CalibrationError`: CalibrationError
-                * :class:`~qsprpred.models.metrics.BEDROC`: BEDROC
-                * :class:`~qsprpred.models.metrics.EnrichmentFactor`: EnrichmentFactor
-                * :class:`~qsprpred.models.metrics.RobustInitialEnhancement`: RobustInitialEnhancement
-                * :class:`~qsprpred.models.metrics.Prevalence`: Prevalence
-                * :class:`~qsprpred.models.metrics.Sensitivity`: Sensitivity
-                * :class:`~qsprpred.models.metrics.Specificity`: Specificity
-                * :class:`~qsprpred.models.metrics.PositivePredictivity`: PositivePredictivity
-                * :class:`~qsprpred.models.metrics.NegativePredictivity`: NegativePredictivity
-                * :class:`~qsprpred.models.metrics.CohenKappa`: CohenKappa
-                * :class:`~qsprpred.models.metrics.BalancedPositivePredictivity`: BalancedPositivePredictivity
-                * :class:`~qsprpred.models.metrics.BalancedNegativePredictivity`: BalancedNegativePredictivity
-                * :class:`~qsprpred.models.metrics.BalancedMatthewsCorrcoeff`: BalancedMatthewsCorrcoeff
-                * :class:`~qsprpred.models.metrics.BalancedCohenKappa`: BalancedCohenKappa
-                * :class:`~qsprpred.models.metrics.KSlope`: KSlope
-                * :class:`~qsprpred.models.metrics.R20`: R20
-                * :class:`~qsprpred.models.metrics.KPrimeSlope`: KPrimeSlope
-                * :class:`~qsprpred.models.metrics.RPrime20`: RPrime20
-                * :class:`~qsprpred.models.metrics.Pearson`: Pearson
-                * :class:`~qsprpred.models.metrics.Spearman`: Spearman
-                * :class:`~qsprpred.models.metrics.Kendall`: Kendall
-                * :class:`~qsprpred.models.metrics.AverageFoldError`: AverageFoldError
-                * :class:`~qsprpred.models.metrics.AbsoluteAverageFoldError`: AbsoluteAverageFoldError
-                * :class:`~qsprpred.models.metrics.PercentageWithinFoldError`: PercentageWithinFoldError
+                * :class:`~qsprpred.models.assessment.metrics.scikit_learn.SklearnMetrics`: SklearnMetrics
+                * :class:`~qsprpred.models.assessment.metrics.masked.MaskedMetric`: MaskedMetric
+                * :class:`~qsprpred.models.assessment.metrics.classification.CalibrationError`: CalibrationError
+                * :class:`~qsprpred.models.assessment.metrics.classification.BEDROC`: BEDROC
+                * :class:`~qsprpred.models.assessment.metrics.classification.EnrichmentFactor`: EnrichmentFactor
+                * :class:`~qsprpred.models.assessment.metrics.classification.RobustInitialEnhancement`: RobustInitialEnhancement
+                * :class:`~qsprpred.models.assessment.metrics.classification.Prevalence`: Prevalence
+                * :class:`~qsprpred.models.assessment.metrics.classification.Sensitivity`: Sensitivity
+                * :class:`~qsprpred.models.assessment.metrics.classification.Specificity`: Specificity
+                * :class:`~qsprpred.models.assessment.metrics.classification.PositivePredictivity`: PositivePredictivity
+                * :class:`~qsprpred.models.assessment.metrics.classification.NegativePredictivity`: NegativePredictivity
+                * :class:`~qsprpred.models.assessment.metrics.classification.CohenKappa`: CohenKappa
+                * :class:`~qsprpred.models.assessment.metrics.classification.BalancedPositivePredictivity`: BalancedPositivePredictivity
+                * :class:`~qsprpred.models.assessment.metrics.classification.BalancedNegativePredictivity`: BalancedNegativePredictivity
+                * :class:`~qsprpred.models.assessment.metrics.classification.BalancedMatthewsCorrcoeff`: BalancedMatthewsCorrcoeff
+                * :class:`~qsprpred.models.assessment.metrics.classification.BalancedCohenKappa`: BalancedCohenKappa
+                * :class:`~qsprpred.models.assessment.metrics.regression.KSlope`: KSlope
+                * :class:`~qsprpred.models.assessment.metrics.regression.R20`: R20
+                * :class:`~qsprpred.models.assessment.metrics.regression.KPrimeSlope`: KPrimeSlope
+                * :class:`~qsprpred.models.assessment.metrics.regression.RPrime20`: RPrime20
+                * :class:`~qsprpred.models.assessment.metrics.regression.Pearson`: Pearson
+                * :class:`~qsprpred.models.assessment.metrics.regression.Spearman`: Spearman
+                * :class:`~qsprpred.models.assessment.metrics.regression.Kendall`: Kendall
+                * :class:`~qsprpred.models.assessment.metrics.regression.AverageFoldError`: AverageFoldError
+                * :class:`~qsprpred.models.assessment.metrics.regression.AbsoluteAverageFoldError`: AbsoluteAverageFoldError
+                * :class:`~qsprpred.models.assessment.metrics.regression.PercentageWithinFoldError`: PercentageWithinFoldError
 
 
     .. dropdown:: Model Assessors

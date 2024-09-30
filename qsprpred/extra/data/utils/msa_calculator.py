@@ -22,11 +22,10 @@ class MSAProvider(FileSerializable, ABC):
     This interface defines how calculation and storage of
     multiple sequence alignments (MSAs) is handled.
     """
-
     @abstractmethod
-    def __call__(
-        self, sequences: dict[str:str] | None = None, **kwargs
-    ) -> dict[str:str] | None:
+    def __call__(self,
+                 sequences: dict[str:str] | None = None,
+                 **kwargs) -> dict[str:str] | None:
         """
         Aligns the sequences and returns the alignment.
 
@@ -69,7 +68,6 @@ class BioPythonMSA(MSAProvider, JSONSerializable, ABC):
         fname: file name of the alignment file
         cache: cache of alignments performed so far by the provider
     """
-
     def __init__(self, out_dir: str = ".", fname: str = "alignment.aln-fasta.fasta"):
         """Initializes the MSA provider.
 
@@ -79,7 +77,8 @@ class BioPythonMSA(MSAProvider, JSONSerializable, ABC):
         """
         if not self.checkTool():
             raise RuntimeError(
-                f"The tool commnad '{self.cmd}' " f"was not found. Please install it."
+                f"The tool commnad '{self.cmd}' "
+                f"was not found. Please install it."
             )
         self.outDir = out_dir
         self.fName = fname
@@ -195,10 +194,9 @@ class MAFFT(BioPythonMSA):
     Uses the BioPython wrapper for MAFFT:
     - https://biopython.org/docs/1.76/api/Bio.Align.Applications.html#Bio.Align.Applications.MafftCommandline
     """
-
-    def __call__(
-        self, sequences: dict[str:str] | None = None, **kwargs
-    ) -> dict[str, str] | None:
+    def __call__(self,
+                 sequences: dict[str:str] | None = None,
+                 **kwargs) -> dict[str, str] | None:
         """
         MSA with MAFFT and BioPython.
 
@@ -252,10 +250,9 @@ class ClustalMSA(BioPythonMSA):
     Uses the BioPython wrapper for Clustal Omega
     - https://biopython.org/docs/1.76/api/Bio.Align.Applications.html#Bio.Align.Applications.ClustalOmegaCommandline
     """
-
-    def __call__(
-        self, sequences: dict[str:str] = None, **kwargs
-    ) -> dict[str, str] | None:
+    def __call__(self,
+                 sequences: dict[str:str] | None = None,
+                 **kwargs) -> dict[str, str] | None:
         """
         MSA with Clustal Omega and BioPython.
 

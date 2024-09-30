@@ -2,24 +2,38 @@ from qsprpred.data.tables.interfaces.qspr_data_set import QSPRDataSet
 
 
 class DataSetDependent:
-    """Classes that need a molecule storage attached can derive from this."""
+    """Classes that need an attached `QSPRDataSet` should inherit from this class,
+    and it will be supplied to them via this API.
 
-    def __init__(self, dataset: QSPRDataSet | None = None) -> None:
+    Attributes:
+        dataSet (QSPRDataSet): The data set attached to this object.
+    """
+    def __init__(self, dataset: QSPRDataSet | None = None):
+        """Initialize the object with a data set.
+
+        Args:
+            dataset (QSPRDataSet, optional):
+                The data set to attach to this object. Defaults to None.
+        """
         self.dataSet = dataset
 
-    def setDataSet(self, dataset: QSPRDataSet):
+    def setDataSet(self, dataset: QSPRDataSet | None) -> None:
+        """Set the data set for this object."""
         self.dataSet = dataset
 
     @property
     def hasDataSet(self) -> bool:
-        """Indicates if this object has a storage attached to it."""
+        """Indicates if this object has a data set attached to it."""
         return self.dataSet is not None
 
-    def getDataSet(self):
-        """Get the storage attached to this object.
+    def getDataSet(self) -> QSPRDataSet:
+        """Get the data set attached to this object.
+
+        Returns:
+            QSPRDataSet: The data set attached to this object
 
         Raises:
-            ValueError: If no storage is attached to this object.
+            ValueError: If no data set is attached to this object.
         """
         if self.hasDataSet:
             return self.dataSet
