@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.sources.papyrus.papyrus_class &mdash; QSPRpred 3.2.1.dev95+g5c50f5f6 documentation</title>
+  <title>qsprpred.data.sources.papyrus.papyrus_class &mdash; QSPRpred 4.0.0a2.dev3+gdd1d34be documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=ae990675"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=81d23b05"></script>
         <script src="../../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.2.1.dev95+g5c50f5f6
+                v4.0.0a2.dev3+gdd1d34be
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -231,6 +231,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Output directory &#39;</span><span class="si">{</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">&#39; does not exist.&quot;</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Filtering Papyrus for accession keys: </span><span class="si">{</span><span class="n">acc_keys</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">data</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="n">papyrus_filter</span><span class="p">(</span>
+            <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
             <span class="n">acc_key</span><span class="o">=</span><span class="n">acc_keys</span><span class="p">,</span>
             <span class="n">quality</span><span class="o">=</span><span class="n">quality</span><span class="p">,</span>
             <span class="n">out_dir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">,</span>
