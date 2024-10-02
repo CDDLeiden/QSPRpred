@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.sources.papyrus.papyrus_filter &mdash; QSPRpred 3.2.0 documentation</title>
+  <title>qsprpred.data.sources.papyrus.papyrus_filter &mdash; QSPRpred 3.2.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=87e54e7c" />
@@ -16,7 +16,7 @@
   
         <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=6d170d0f"></script>
+        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=c96f8916"></script>
         <script src="../../../../../_static/doctools.js?v=888ff710"></script>
         <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
         <script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.2.0
+                v3.2.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -114,6 +114,7 @@
 
 
 <div class="viewcode-block" id="papyrus_filter"><a class="viewcode-back" href="../../../../../api/qsprpred.data.sources.papyrus.html#qsprpred.data.sources.papyrus.papyrus_filter.papyrus_filter">[docs]</a><span class="k">def</span> <span class="nf">papyrus_filter</span><span class="p">(</span>
+    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">acc_key</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">quality</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">outdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -130,6 +131,7 @@
 <span class="sd">    and outputs a .tsv file of all compounds fulfilling these requirements.</span>
 
 <span class="sd">    Args:</span>
+<span class="sd">        version (str): Papyrus database version</span>
 <span class="sd">        acc_key (list): list of UniProt accession keys</span>
 <span class="sd">        quality (str): str with minimum quality of dataset to keep</span>
 <span class="sd">        outdir (str): path to the location of Papyrus data</span>
@@ -158,7 +160,7 @@
     <span class="c1"># read data</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading data from </span><span class="si">{</span><span class="n">papyrus_dir</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
     <span class="n">sample_data</span> <span class="o">=</span> <span class="n">read_papyrus</span><span class="p">(</span>
-        <span class="n">is3d</span><span class="o">=</span><span class="n">stereo</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="n">chunk_size</span><span class="p">,</span> <span class="n">source_path</span><span class="o">=</span><span class="n">papyrus_dir</span><span class="p">,</span> <span class="n">plusplus</span><span class="o">=</span><span class="n">plusplus</span>
+        <span class="n">is3d</span><span class="o">=</span><span class="n">stereo</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="n">chunk_size</span><span class="p">,</span> <span class="n">source_path</span><span class="o">=</span><span class="n">papyrus_dir</span><span class="p">,</span> <span class="n">plusplus</span><span class="o">=</span><span class="n">plusplus</span>
     <span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Read all data.&quot;</span><span class="p">)</span>
 
