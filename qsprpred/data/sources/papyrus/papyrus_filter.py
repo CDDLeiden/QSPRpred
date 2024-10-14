@@ -15,6 +15,7 @@ from qsprpred.logs import logger
 
 
 def papyrus_filter(
+    version: str,
     acc_key: list[str],
     quality: str,
     out_dir: str,
@@ -31,6 +32,7 @@ def papyrus_filter(
     and outputs a .tsv file of all compounds fulfilling these requirements.
 
     Args:
+        version (str): Papyrus database version
         acc_key (list): list of UniProt accession keys
         quality (str): str with minimum quality of dataset to keep
         out_dir (str): path to the location of Papyrus data
@@ -59,7 +61,7 @@ def papyrus_filter(
     # read data
     logger.info(f"Reading data from {papyrus_dir}...")
     sample_data = read_papyrus(
-        is3d=stereo, chunksize=chunk_size, source_path=papyrus_dir, plusplus=plusplus
+        is3d=stereo, version=version, chunksize=chunk_size, source_path=papyrus_dir, plusplus=plusplus
     )
     logger.info("Read all data.")
 

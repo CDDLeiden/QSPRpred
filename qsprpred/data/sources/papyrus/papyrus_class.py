@@ -132,6 +132,7 @@ class Papyrus(DataSource):
             raise ValueError(f"Output directory '{output_dir}' does not exist.")
         logger.debug(f"Filtering Papyrus for accession keys: {acc_keys}")
         data, path = papyrus_filter(
+            version=self.version,
             acc_key=acc_keys,
             quality=quality,
             out_dir=output_dir,

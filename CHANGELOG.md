@@ -1,10 +1,10 @@
 # Change Log
 
-From v3.2.0 to v4.0.0
+From v3.2.1 to v4.0.0
 
 ## Fixes
 
-None.
+- None.
 
 ## Changes
 
