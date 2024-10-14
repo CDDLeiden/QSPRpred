@@ -4,8 +4,9 @@ To add a new feature filters:
 * Add a FeatureFilter subclass for your new filter
 """
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
+from typing import ClassVar
 import numpy as np
 import pandas as pd
 from boruta import BorutaPy
@@ -15,6 +16,9 @@ from sklearn.preprocessing import MinMaxScaler
 from ...logs import logger
 from ...utils.interfaces.randomized import Randomized
 from ..pipelines.pipeline import Step
+import os
+from pickle import dump, load
+import json
 
 
 class FeatureFilter(Step):
@@ -47,6 +51,7 @@ class LowVarianceFilter(FeatureFilter):
 
     Attributes:
         th (float): threshold for removing features
+        low_var_cols (pd.Index): columns with low variance (if fitted)
     """
     def __init__(self, th: float) -> None:
         self.th = th
@@ -94,6 +99,7 @@ class HighCorrelationFilter(FeatureFilter):
 
     Attributes:
         th (float): threshold for correlation
+        high_corr_cols (pd.Index): columns with high correlation (if fitted)
     """
     def __init__(self, th: float) -> None:
         self.th = th
@@ -137,15 +143,14 @@ class HighCorrelationFilter(FeatureFilter):
 class BorutaFilter(FeatureFilter, Randomized):
     """Boruta filter from BorutaPy: Boruta all-relevant feature selection.
 
-    Uses BorutaPy implementation from https://github.com/scikit-learn-contrib/boruta_py.
-    Note that the `boruta` package is not compatible with numpy 1.24.0 and above.
-    Therefore, make sure to downgrade numpy to 1.23.0 or older before using this filter.
-
     Attributes:
         featSelector (BorutaPy): BorutaPy feature selector
+        droppedFeatures (pd.Index): columns dropped by Boruta filter
         seed (int):
             Random state to use for shuffling and other random operations.
     """
+    _notJSON: ClassVar = ["featSelector"]
+    
     @property
     def randomState(self) -> int:
         """Get the random state for the object."""
@@ -161,6 +166,34 @@ class BorutaFilter(FeatureFilter, Randomized):
                 a random seed is used instead of a fixed one.
         """
         self.seed = seed
+    
+    def toFile(self, filename: str) -> str:
+        """Serialize object to a JSON file. This JSON file should
+        contain all  data necessary to reconstruct the object.
+
+        Args:
+            filename (str): filename to save object to
+
+        Returns:
+            filename (str): absolute path to the saved JSON file of the object
+        """
+        with open(f"{filename.removesuffix(".json")}_featSelector.pkl", "wb") as f:
+            dump(self.featSelector, f)
+            
+        o_dict = json.loads(self.toJSON())
+        o_dict["py/state"]["featSelector"] = os.path.basename(
+            f"{filename.removesuffix(".json")}_featSelector.pkl"
+        )
+        with open(filename, "w") as fh:
+            json.dump(o_dict, fh, indent=4)
+        return os.path.abspath(filename)
+    
+    @classmethod
+    def fromFile(cls, filename: str) -> "BorutaFilter":
+        ret = super().fromFile(filename)
+        with open(f"{filename.removesuffix(".json")}_featSelector.pkl", "rb") as f:
+            ret.featSelector = load(f)
+        return ret
 
     def __init__(self, boruta_feat_selector: BorutaPy = None, seed: int | None = None):
         """Initialize the BorutaFilter class.
@@ -192,13 +225,13 @@ class BorutaFilter(FeatureFilter, Randomized):
         assert y.shape[1] == 1, "Boruta filter only works with one target column."
         
         self.featSelector.fit(X.values, y.values.ravel())
-        self.dropped_features = X.columns[~self.featSelector.support_]
+        self.droppedFeatures = X.columns[~self.featSelector.support_]
 
         logger.info(
             "Number of columns dropped Boruta filter: "
-            f"{len(self.dropped_features)}"
+            f"{len(self.droppedFeatures)}"
         )
-        logger.info(f"Number of columns left: {X.shape[1] - len(self.dropped_features)}")
+        logger.info(f"Number of columns left: {X.shape[1] - len(self.droppedFeatures)}")
         
     def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Filter out uninformative features from a dataframe using BorutaPy.
@@ -212,9 +245,9 @@ class BorutaFilter(FeatureFilter, Randomized):
             pd.DataFrame: The filtered dataframe
             pd.DataFrame: The target dataframe
         """
-        assert hasattr(self, "dropped_features"), "Filter has not been fitted yet."
-        assert self.dropped_features.isin(X.columns).all(), "Columns do not match fitted columns."
+        assert hasattr(self, "droppedFeatures"), "Filter has not been fitted yet."
+        assert self.droppedFeatures.isin(X.columns).all(), "Columns do not match fitted columns."
         
-        X = X.drop(columns=self.dropped_features)
+        X = X.drop(columns=self.droppedFeatures)
 
         return X, y

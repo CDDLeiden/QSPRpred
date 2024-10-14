@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 import pandas as pd
+from ...utils.serialization import JSONSerializable
 
-class Step(ABC):
+class Step(JSONSerializable):
     """A data preprocessing step that can be applied to a dataset"""
     
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
