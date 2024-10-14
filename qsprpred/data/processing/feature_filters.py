@@ -111,14 +111,19 @@ class HighCorrelationFilter(FeatureFilter):
             X (pd.DataFrame): training data
             y (pd.DataFrame, optional): training targets
         """
-        correlation = np.triu(np.abs(np.corrcoef(X.values.astype(float).T)), k=1)
-        high_corr = np.where(np.any(correlation > self.th, axis=0))
+        # stop if only 1 column
+        if X.shape[1] == 1:
+            logger.info("Only one column in the dataframe. No correlation check.")
+            self.high_corr_cols = None
+        else:
+            correlation = np.triu(np.abs(np.corrcoef(X.values.astype(float).T)), k=1)
+            high_corr = np.where(np.any(correlation > self.th, axis=0))
 
-        self.high_corr_cols = X.columns[high_corr[0]]
-        logger.info(
-            f"Number of columns dropped high correlation filter: {len(self.high_corr_cols)}"
-        )
-        logger.info(f"Number of columns left: {X.shape[1] - len(self.high_corr_cols)}")
+            self.high_corr_cols = X.columns[high_corr[0]]
+            logger.info(
+                f"Number of columns dropped high correlation filter: {len(self.high_corr_cols)}"
+            )
+            logger.info(f"Number of columns left: {X.shape[1] - len(self.high_corr_cols)}")
         
     def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Filter out high correlation features from a dataframe.
@@ -133,9 +138,9 @@ class HighCorrelationFilter(FeatureFilter):
             pd.DataFrame: The target dataframe
         """
         assert hasattr(self, "high_corr_cols"), "Filter has not been fitted yet."
-        assert self.high_corr_cols.isin(X.columns).all(), "Columns do not match fitted columns."
-        
-        X = X.drop(columns=self.high_corr_cols)
+        if self.high_corr_cols is not None:
+            assert self.high_corr_cols.isin(X.columns).all(), "Columns do not match fitted columns."
+            X = X.drop(columns=self.high_corr_cols)
 
         return X, y
 
