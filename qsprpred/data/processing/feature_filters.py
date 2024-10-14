@@ -177,12 +177,12 @@ class BorutaFilter(FeatureFilter, Randomized):
         Returns:
             filename (str): absolute path to the saved JSON file of the object
         """
-        with open(f"{filename.removesuffix(".json")}_featSelector.pkl", "wb") as f:
+        with open(f"{filename.removesuffix('.json')}_featSelector.pkl", "wb") as f:
             dump(self.featSelector, f)
             
         o_dict = json.loads(self.toJSON())
         o_dict["py/state"]["featSelector"] = os.path.basename(
-            f"{filename.removesuffix(".json")}_featSelector.pkl"
+            f"{filename.removesuffix('.json')}_featSelector.pkl"
         )
         with open(filename, "w") as fh:
             json.dump(o_dict, fh, indent=4)
@@ -191,7 +191,7 @@ class BorutaFilter(FeatureFilter, Randomized):
     @classmethod
     def fromFile(cls, filename: str) -> "BorutaFilter":
         ret = super().fromFile(filename)
-        with open(f"{filename.removesuffix(".json")}_featSelector.pkl", "rb") as f:
+        with open(f"{filename.removesuffix('.json')}_featSelector.pkl", "rb") as f:
             ret.featSelector = load(f)
         return ret
 

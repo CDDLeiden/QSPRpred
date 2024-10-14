@@ -807,7 +807,7 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             return
         else:
             for featurefilter in feature_filters:
-                self._X = featurefilter.fitTransform(self.X, self.y)
+                self._X, _ = featurefilter.fitTransform(self.X, self.y)
             # update features
             self.featureNames = self.X.columns.to_list()
             if self.X_ind is not None:
