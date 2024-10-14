@@ -4,8 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Generator
 
 import pandas as pd
-
-from ...data.processing.feature_standardizers import apply_feature_standardizer
+from copy import deepcopy
 
 
 class FoldGenerator(ABC):
@@ -66,10 +65,10 @@ class FoldsFromDataSplit(FoldGenerator):
         returned. They are properly fitted on the training set and applied to the
         test set."""
         for X_train, X_test, y_train, y_test, train_index, test_index in folds:
-            X_train, standardizer = apply_feature_standardizer(
-                self.featureStandardizer, X_train, fit=True
-            )
-            X_test, _ = apply_feature_standardizer(standardizer, X_test, fit=False)
+            standardizer_copy = deepcopy(self.featureStandardizer)
+            X_train, y_train = standardizer_copy.fitTransform(X_train, y_train)
+            X_test, y_test = standardizer_copy.transform(X_test, y_test)
+            
             yield X_train, X_test, y_train, y_test, train_index, test_index
 
     def __init__(self, split: "DataSplit", feature_standardizer=None):  # noqa: F821

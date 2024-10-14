@@ -16,10 +16,7 @@ from qsprpred.data.sampling.splits import DataSplit
 from qsprpred.data.tables.interfaces.qspr_data_set import QSPRDataSet
 
 from ...data.processing.applicability_domain import ApplicabilityDomain, MLChemADWrapper
-from ...data.processing.feature_standardizers import (
-    SKLearnStandardizer,
-    apply_feature_standardizer,
-)
+from ...data.processing.feature_standardizers import SKLearnStandardizer
 from ...data.sampling.folds import FoldsFromDataSplit
 from ...logs import logger
 from ...tasks import TargetProperty, TargetTasks
@@ -993,36 +990,26 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
         # get feature matrices using feature names
         if concat:
             if len(self.X.columns) != 0:
-                df_X = pd.concat(
+                X = pd.concat(
                     [self.X[self.featureNames], self.X_ind[self.featureNames]], axis=0
                 )
-                df_X_ind = None
+                X_ind = None
             else:
-                df_X = pd.concat([self.X, self.X_ind], axis=0)
-                df_X_ind = None
+                X = pd.concat([self.X, self.X_ind], axis=0)
+                X_ind = None
         elif len(self.X.columns) != 0:
-            df_X = self.X[self.featureNames]
-            df_X_ind = self.X_ind[self.featureNames]
+            X = self.X[self.featureNames]
+            X_ind = self.X_ind[self.featureNames]
         else:
-            df_X = self.X
-            df_X_ind = self.X_ind
-        # convert to numpy arrays and standardize
-        X = df_X.values
-        X_ind = df_X_ind.values if df_X_ind is not None else None
+            X = self.X
+            X_ind = self.X_ind
+        # standardize features
         if not raw and self.featureStandardizer:
-            X, self.featureStandardizer = apply_feature_standardizer(
-                self.featureStandardizer,
-                df_X,
-                fit=True if refit_standardizer else False,
-            )
+            if refit_standardizer:
+                self.featureStandardizer.fit(X)
+            X, _ = self.featureStandardizer.transform(X)
             if X_ind is not None and X_ind.shape[0] > 0:
-                X_ind, _ = apply_feature_standardizer(
-                    self.featureStandardizer, df_X_ind, fit=False
-                )
-        # convert to data frames and make sure column order is correct
-        X = pd.DataFrame(X, index=df_X.index, columns=df_X.columns)
-        if X_ind is not None:
-            X_ind = pd.DataFrame(X_ind, index=df_X_ind.index, columns=df_X_ind.columns)
+                X_ind, _ = self.featureStandardizer.transform(X_ind)
         # drop outliers from test set
         if "Split_IsOutlier" in df.columns and not concat:
             if X_ind is not None:
