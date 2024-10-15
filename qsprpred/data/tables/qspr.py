@@ -498,7 +498,9 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             table_filters (list[Callable]): list of filters to apply
         """
         for filter in table_filters:
-            ret, _ = filter.transform(self.getDescriptors(), self.targetProperties)
+            ret, _ = filter.transform(
+                self.getDescriptors(), self.getTargets(concat=True, ordered=True)
+            )
             ids = pd.Series(
                 self.getProperty(self.idProp), index=self.getProperty(self.idProp)
             )
@@ -830,24 +832,6 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
         if not hasattr(feature_standardizer, "toFile"):
             feature_standardizer = SKLearnStandardizer(feature_standardizer)
         self.featureStandardizer = feature_standardizer
-
-    # def addFeatures(
-    #         self,
-    #         feature_calculators: list[DescriptorSet],
-    #         recalculate: bool = False,
-    # ):
-    #     """Add features to the data set.
-    #
-    #     Args:
-    #         feature_calculators (list[DescriptorSet]): list of
-    #             feature calculators to add. Defaults to None.
-    #         recalculate (bool): if True, recalculate features even if they are already
-    #             present in the data set. Defaults to False.
-    #     """
-    #     self.addDescriptors(
-    #         feature_calculators, recalculate=recalculate, featurize=False
-    #     )
-    #     self.featurize()
 
     def reset(self):
         """Reset the data set.
