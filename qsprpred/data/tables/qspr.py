@@ -498,7 +498,7 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             table_filters (list[Callable]): list of filters to apply
         """
         for filter in table_filters:
-            ret = filter(self.getDF(), self.getDescriptors())
+            ret, _ = filter.transform(self.getDescriptors(), self.targetProperties)
             ids = pd.Series(
                 self.getProperty(self.idProp), index=self.getProperty(self.idProp)
             )

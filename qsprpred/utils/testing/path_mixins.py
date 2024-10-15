@@ -250,7 +250,7 @@ class DataSetsPathMixIn(PathMixIn):
         Returns:
             pd.DataFrame: a `pandas.DataFrame` containing the dataset
         """
-        return pd.read_csv(f"{self.inputDataPath}/test_data.tsv", sep="\t").sample(10)
+        return pd.read_csv(f"{self.inputDataPath}/test_data.tsv", sep="\t")
 
     def createLargeTestDataSet(
         self,

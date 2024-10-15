@@ -38,68 +38,78 @@ class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
     def setUp(self):
         super().setUp()
         self.setUpPaths()
+        self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
+        self.dataset.addDescriptors([MorganFP(radius=2, nBits=20)])
 
     def testCategoryFilter(self):
         """Test the category filter, which drops specific values from dataset
         properties."""
-        remove_cation = CategoryFilter(name="moka_ionState7.4", values=["cationic"])
-        df_anion = remove_cation(self.getBigDF(), self.getBigDF())
-        self.assertTrue((df_anion["moka_ionState7.4"] == "cationic").sum() == 0)
-
-        only_cation = CategoryFilter(
-            name="moka_ionState7.4", values=["cationic"], keep=True
+        self.assertTrue(
+            (self.dataset.getDF()["moka_ionState7.4"] == "cationic").sum() > 0
         )
-        df_cation = only_cation(self.getBigDF(), self.getBigDF())
-        self.assertTrue((df_cation["moka_ionState7.4"] != "cationic").sum() == 0)
+        
+        # Test with keep=False
+        remove_cation = CategoryFilter(
+            prop=self.dataset.getDF()["moka_ionState7.4"], values=["cationic"]
+        )
+        filtered_df, _ = remove_cation.transform(self.dataset.getDF())
+        self.assertTrue((filtered_df["moka_ionState7.4"] == "cationic").sum() == 0)
+
+        # Test with keep=True
+        only_cation = CategoryFilter(
+            prop=self.dataset.getDF()["moka_ionState7.4"],
+            values=["cationic"],
+            keep=True
+        )
+        filtered_df, _ = only_cation.transform(self.dataset.getDF())
+        self.assertTrue((filtered_df["moka_ionState7.4"] != "cationic").sum() == 0)
 
     def testRepeatsFilter(self):
         """Test the duplicate filter, which drops rows with identical descriptors
         from dataset."""
-        descriptor_names = [f"Descriptor_{i}" for i in range(3)]
-        df = pd.DataFrame(
-            data=np.array(
-                [
-                    ["C", 1, 2, 1, 1],
-                    ["CC", 1, 2, 2, 2],
-                    ["CCC", 1, 2, 3, 3],
-                    ["C", 1, 2, 1, 4],
-                    ["C", 1, 2, 1, 5],
-                    ["CC", 1, 2, 2, 6],  # 3rd "descriptor" is length of SMILES
-                ]
-            ),
-            columns=["SMILES", *descriptor_names, "Year"],
+        ## check assumptions about the test data
+        # check that the descriptor rows 0, 3 and 5 are identical
+        descriptors = self.dataset.getDescriptors()
+        self.assertTrue(np.array_equal(descriptors.iloc[0], descriptors.iloc[3]))
+        self.assertTrue(np.array_equal(descriptors.iloc[0], descriptors.iloc[5]))
+        
+        # check all other rows are unique
+        self.assertEqual(
+            len(descriptors.drop_duplicates(keep=False)), len(descriptors)-3
         )
-        # only warnings
-        df_copy = copy.deepcopy(df)
-        dup_filter1 = RepeatsFilter(keep=True)
-        df_copy = dup_filter1(df_copy, df_copy[descriptor_names])
-        self.assertEqual(len(df_copy), len(df))
-        self.assertTrue(df_copy.equals(df))
-        # drop duplicates
-        df_copy = copy.deepcopy(df)
-        dup_filter2 = RepeatsFilter(keep=False)
-        df_copy = dup_filter2(df_copy, df_copy[descriptor_names])
-        self.assertEqual(len(df_copy), 1)  # only CCC has one occurence
-        self.assertTrue(df_copy.equals(df.iloc[[2]]))
-        # keep first, by year
-        df_copy = copy.deepcopy(df)
-        dup_filter3 = RepeatsFilter(keep="first", timecol="Year")
-        df_copy = dup_filter3(df_copy, df_copy[descriptor_names])
-        self.assertEqual(len(df_copy), 3)  # three unique SMILES
-        self.assertTrue(df_copy.equals(df.iloc[[0, 1, 2]]))  # keep first by year
 
-        # check with additional columns
-        df_copy = copy.deepcopy(df)
-        df_copy["proteinid"] = ["A", "B", "B", "B", "B", "B"]
-        dup_filter4 = RepeatsFilter(additional_cols=["proteinid"])
-        df_copy = dup_filter4(df_copy, df_copy[descriptor_names])
-        self.assertEqual(len(df_copy), 2)  # C (protein A, idx 0) and CCC are unique,
-        # but C (protein B, idx 3) is a duplicate
-        # of C (protein B, idx 4) and is dropped
+        ## test the filter
+        # only warnings
+        warn_reps = RepeatsFilter(keep=True)
+        filtered_df, _ = warn_reps.transform(descriptors)
+        self.assertEqual(len(filtered_df), len(descriptors))
+        self.assertTrue(filtered_df.equals(descriptors))
+        
+        # drop duplicates
+        drop_reps = RepeatsFilter(keep=False)
+        filtered_df, _ = drop_reps.transform(descriptors)
+        self.assertEqual(len(filtered_df), len(descriptors)-3)
+        
+        # keep first, by year
+        keep_first = RepeatsFilter(
+            keep="first", timecol=self.dataset.getDF()["Year of first disclosure"]
+        )
+        filtered_df, _ = keep_first.transform(descriptors)
+        self.assertEqual(len(filtered_df), len(descriptors)-2)
+        self.assertIn(descriptors.iloc[0].name, filtered_df.index)
+
+        # check with additional columns 
+        proteinid = ["A", "B", "B", "A", "B", "B", "B", "B", "B"]
+        drop_reps_protein = RepeatsFilter(
+            keep=False,
+            additional_cols={"proteinid": pd.Series(proteinid, index=descriptors.index)}
+        )
+        filtered_df, _ = drop_reps_protein.transform(descriptors)
+        self.assertEqual(len(filtered_df), len(descriptors)-2)
 
     def testConsistency(self):
         dataset = self.createLargeTestDataSet()
-        remove_cation = CategoryFilter(name="moka_ionState7.4", values=["cationic"])
+        remove_cation = CategoryFilter(prop=dataset.getDF()["moka_ionState7.4"], values=["cationic"])
         self.assertTrue((dataset.getDF()["moka_ionState7.4"] == "cationic").sum() > 0)
         dataset.filter([remove_cation])
         self.assertEqual(len(dataset.getDF()), len(dataset.getFeatures(concat=True)))
