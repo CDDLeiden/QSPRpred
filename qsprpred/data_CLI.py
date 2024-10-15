@@ -34,7 +34,6 @@ from qsprpred.data.descriptors.sets import (
     RDKitDescs,
     SmilesDesc,
 )
-from qsprpred.data.processing.data_filters import papyrusLowQualityFilter
 from qsprpred.data.processing.feature_filters import (
     BorutaFilter,
     HighCorrelationFilter,
@@ -149,14 +148,6 @@ def QSPRArgParser(txt=None):
             "\"{'CL':[6.5],'fu':[0,1,2,3,4]}\". Note: no spaces and surround "
             "by single quotes"
         ),
-    )
-    # Data pre-processing arguments
-    parser.add_argument(
-        "-lq",
-        "--low_quality",
-        action="store_true",
-        help="If lq, than low quality data will be should be a column 'Quality' where "
-        "all 'Low' will be removed",
     )
     parser.add_argument(
         "-tr",
@@ -389,10 +380,6 @@ def QSPR_dataprep(args):
                 args.random_state if args.random_state is not None else None
             )
             mydataset.storage.nJobs = args.ncpu
-            # data filters
-            data_filters = []
-            if args.low_quality:
-                data_filters.append(papyrusLowQualityFilter())
             # data splitter
             if args.split == "scaffold":
                 split = ScaffoldSplit(
@@ -507,7 +494,6 @@ def QSPR_dataprep(args):
             # prepare dataset for modelling
             mydataset.prepareDataset(
                 feature_calculators=descriptorsets,
-                data_filters=data_filters,
                 split=split,
                 feature_filters=featurefilters,
                 feature_standardizer=(
