@@ -241,14 +241,14 @@ class TestFeatureStandardizer(DataSetsPathMixIn, QSPRTestCase):
 
     def testFeaturesStandardizer(self):
         """Test the feature standardizer fitting, transforming and serialization."""
-        scaler = SKLearnStandardizer.fromFit(self.dataset.X, StandardScaler())
-        scaled_features = scaler(self.dataset.X)
+        scaler = SKLearnStandardizer(StandardScaler())
+        scaled_features, _ = scaler.fitTransform(self.dataset.X)
         scaler.toFile(f"{self.generatedPath}/test_scaler.json")
         scaler_fromfile = SKLearnStandardizer.fromFile(
             f"{self.generatedPath}/test_scaler.json"
         )
-        scaled_features_fromfile = scaler_fromfile(self.dataset.X)
-        self.assertIsInstance(scaled_features, np.ndarray)
+        scaled_features_fromfile, _ = scaler_fromfile.transform(self.dataset.X)
+        self.assertIsInstance(scaled_features, pd.DataFrame)
         self.assertEqual(scaled_features.shape, (len(self.dataset), 128))
         self.assertEqual(
             np.array_equal(scaled_features, scaled_features_fromfile), True
