@@ -174,7 +174,9 @@ class RepeatsFilter(DataFilter):
             # Return list of lists of indices of duplicate rows
             return [sort_idxs[i:j] for i, j in zip(idx[::2], idx[1::2] + 1)]
 
-        assert X.shape[1] > 0, "X must have at least one column"
+        if X.shape[1] == 0:
+            logger.warning("Dataframe is empty, nothing to filter.")
+            return X, y
 
         X_copy = X.copy()
 
@@ -191,22 +193,27 @@ class RepeatsFilter(DataFilter):
                     "Dataframe contains compounds with duplicate features."
                     f"\nThe following rows contain duplicates: {allrepeats}"
                 )
-        elif self.keep is False:
+        else:
+            if self.keep in ["first", "last"]:
+                assert (
+                    self.timeCol is not None
+                ), "timecol must be specified if keep is 'first' or 'last'"
+                self.timeCol = pd.to_numeric(self.timeCol, errors="coerce")
+                for repeat in allrepeats:
+                    repeat_time = self.timeCol.loc[repeat]
+                    if self.keep == "first":
+                        tokeep = repeat_time.idxmin()  # Use the first occurance
+                    else:
+                        tokeep = repeat_time.idxmax()
+                    # Remove the data point to keep from the allrepeats list
+                    repeat.remove(tokeep)  
+            
             to_drop = list(chain(*allrepeats))
             logger.info(f"{len(to_drop)} duplicate rows filtered out.")
-            X = X.drop(to_drop)
-        elif self.keep in ["first", "last"]:
-            assert (
-                self.timeCol is not None
-            ), "timecol must be specified if keep is 'first' or 'last'"
-            self.timeCol = pd.to_numeric(self.timeCol, errors="coerce")
-            for repeat in allrepeats:
-                repeat_time = self.timeCol.loc[repeat]
-                if self.keep == "first":
-                    tokeep = repeat_time.idxmin()  # Use the first occurance
-                else:
-                    tokeep = repeat_time.idxmax()
-                repeat.remove(tokeep)  # Remove the one to keep from the allrepeats list
             X = X.drop(list(chain(*allrepeats)))
+            if y is not None:
+                y = y.drop(list(chain(*allrepeats)))
 
         return X, y
+    
+    # class outlier
