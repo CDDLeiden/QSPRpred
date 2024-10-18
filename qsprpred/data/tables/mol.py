@@ -100,7 +100,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
     @randomState.setter
     def randomState(self, seed: int | None):
         """Set the random state to use for shuffling and other random ops."""
-        self._randomState = seed or np.random.randint(0, 2**32 - 1)
+        self._randomState = seed or int(np.random.randint(0, 2**31 - 1, dtype=np.int64))
 
     @property
     def name(self) -> str:

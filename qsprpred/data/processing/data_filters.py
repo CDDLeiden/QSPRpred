@@ -12,6 +12,7 @@ import pandas as pd
 
 from ...logs import logger
 from ..pipelines.pipeline import Step
+from typing import Optional
 
 
 class DataFilter(Step):
@@ -20,7 +21,7 @@ class DataFilter(Step):
     @abstractmethod
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
         """Fit the filter to the data.
-        
+
         Args:
             X (pd.DataFrame): training data
             y (pd.DataFrame, optional): training targets
@@ -29,7 +30,7 @@ class DataFilter(Step):
     @abstractmethod
     def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
         """Remove rows from a dataframe.
-        
+
         Args:
             X (pd.DataFrame): dataframe to be standardized
             y (pd.DataFrame, optional): output dataframe if the standardization method
@@ -57,7 +58,7 @@ class CategoryFilter(Step):
         self.prop = prop
         self.values = values
         self.keep = keep
-        
+
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
         """Fit the filter to the data.
 
@@ -65,8 +66,7 @@ class CategoryFilter(Step):
             X (pd.DataFrame): training data
             y (pd.DataFrame, optional): training targets
         """
-        pass
-    
+
     def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
         """Filter rows from dataframe.
 
@@ -83,7 +83,7 @@ class CategoryFilter(Step):
             idx_to_keep = self.prop.isin(self.values)
         else:
             idx_to_keep = ~self.prop.isin(self.values)
-        X = X[idx_to_keep]
+        X = X.loc[idx_to_keep]
         logger.info(f"{old_len - X.shape[0]} rows filtered out.")
 
         return X, y
@@ -108,7 +108,7 @@ class RepeatsFilter(DataFilter):
         self,
         keep: str | bool = False,
         timecol: pd.Series | None = None,
-        additional_cols: dict[str, pd.Series] = None
+        additional_cols: Optional[dict[str, pd.Series]] = None
     ) -> None:
         """Initialize the RepeatsFilter with the keep, timecol and additional_cols
         attributes.
@@ -128,7 +128,7 @@ class RepeatsFilter(DataFilter):
         self.keep = keep
         self.timeCol = timecol
         self.additionalCols = additional_cols
-        
+
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
         """Fit the filter to the data.
 
@@ -136,7 +136,6 @@ class RepeatsFilter(DataFilter):
             X (pd.DataFrame): training data
             y (pd.DataFrame, optional): training targets
         """
-        pass
 
     def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
         """Filter rows from dataframe.
@@ -206,8 +205,8 @@ class RepeatsFilter(DataFilter):
                     else:
                         tokeep = repeat_time.idxmax()
                     # Remove the data point to keep from the allrepeats list
-                    repeat.remove(tokeep)  
-            
+                    repeat.remove(tokeep)
+
             to_drop = list(chain(*allrepeats))
             logger.info(f"{len(to_drop)} duplicate rows filtered out.")
             X = X.drop(list(chain(*allrepeats)))
@@ -215,5 +214,5 @@ class RepeatsFilter(DataFilter):
                 y = y.drop(list(chain(*allrepeats)))
 
         return X, y
-    
+
     # class outlier
