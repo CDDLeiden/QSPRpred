@@ -198,8 +198,8 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(128, self.dataset.getDescriptors().shape[1])
         self.assertEqual(128, self.dataset.X.shape[1])
         self.assertEqual(128, self.dataset.X_ind.shape[1])
-        self.assertEqual(128, self.dataset.getFeatures(concat=True).shape[1])
-        self.assertEqual(len_prev, self.dataset.getFeatures(concat=True).shape[0])
+        self.assertEqual(128, self.dataset.getFeatures(concat=True)[0].shape[1])
+        self.assertEqual(len_prev, self.dataset.getFeatures(concat=True)[0].shape[0])
 
 
 class TestDescriptorsAll(DataSetsPathMixIn, DescriptorInDataCheckMixIn, QSPRTestCase):
