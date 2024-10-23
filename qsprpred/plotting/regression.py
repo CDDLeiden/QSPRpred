@@ -279,11 +279,11 @@ class WilliamsPlot(RegressionPlot):
         for model, dataset in zip(self.models, self.datasets):
             model_name = model.name
             if dataset.hasFeatures:
-                features = dataset.getFeatures()
-                leverages, h_star = calculateLeverages(*features)
+                X, X_ind, _, _ = dataset.getFeatures(refit_pipeline=False)
+                leverages, h_star = calculateLeverages(X, X_ind)
                 model_leverages[model_name] = leverages
                 model_h_star[model_name] = h_star
-                model_p[model_name] = features[0].shape[1]
+                model_p[model_name] = X.shape[1]
             else:
                 raise ValueError(
                     f"Dataset {dataset.name} does not have features, to"

@@ -259,7 +259,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             else:
                 self.assertEqual(target_prop.task, TargetTasks.MULTICLASS)
             self.assertEqual(target_prop.name, target_names[idx])
-            y = ds.getTargets(concat=True)
+            y = ds.getFeatures(concat=True)[1]
             self.assertTrue(y.columns[idx] == target_prop.name)
             if target_prop.task == TargetTasks.SINGLECLASS:
                 self.assertEqual(y[target_prop.name].unique().shape[0], 2)
@@ -275,7 +275,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             self.assertEqual(target_prop.task, TargetTasks.REGRESSION)
             self.assertTrue(ds.hasProperty(target_names[idx]))
             self.assertEqual(target_prop.name, target_names[idx])
-            ds.getTargets(concat=True)
+            ds.getFeatures(concat=True)[1]
 
     def testDefaults(self):
         """Test basic dataset creation and serialization with mostly default options."""
@@ -345,41 +345,40 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         dataset_new.addDescriptors([MorganFP(radius=2, nBits=128)])
         self.checkConsistency(dataset_new)
         # test subset creation
-        features = dataset_new.getFeatures(concat=True, refit_standardizer=False)
-        targets = dataset_new.getTargets(concat=True)
+        features, targets = dataset_new.getFeatures(concat=True, refit_pipeline=False)
         subset = dataset_new.getSubset(["CL"], path=self.generatedDataPath)
         props = subset.getProperties()
         self.assertIn("CL", props)
         self.assertNotIn("HBD", props)
         self.assertNotIn("Notes", props)
         self.assertEqual(len(subset), len(dataset_new))
-        features_new = subset.getFeatures(concat=True, refit_standardizer=False)
+        features_new, targets_new = subset.getFeatures(concat=True, refit_pipeline=False)
         self.assertTrue(np.allclose(features_new, features))
-        targets_new = subset.getTargets(concat=True)
         self.assertTrue(np.allclose(targets_new, targets))
         # subset only first two ids
         subset = dataset_new.getSubset(
             ["CL"], ids=list(dataset_new.getProperty(dataset_new.idProp)[0:2])
         )
         self.assertEqual(len(subset), 2)
-        self.assertEqual(subset.getFeatures(concat=True).shape[0], 2)
-        self.assertEqual(subset.getTargets(concat=True).shape[0], 2)
+        features_subset, targets_subset = subset.getFeatures(concat=True)
+        self.assertEqual(features_subset.shape[0], 2)
+        self.assertEqual(targets_subset.shape[0], 2)
         self.assertListEqual(
-            list(subset.getFeatures(concat=True).index),
+            list(features_subset.index),
             list(features.iloc[0:2, :].index),
         )
         self.assertListEqual(
-            list(subset.getTargets(concat=True).index),
+            list(targets_subset.index),
             list(targets.iloc[0:2, :].index)
         )
         self.assertTrue(
             np.allclose(
-                subset.getFeatures(concat=True, refit_standardizer=False),
+                features_subset,
                 features.iloc[0:2, :],
             )
         )
         self.assertTrue(
-            np.allclose(subset.getTargets(concat=True), targets.iloc[0:2, :])
+            np.allclose(targets_subset, targets.iloc[0:2, :])
         )
 
     def testMultitask(self):
@@ -525,7 +524,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         split = ShuffleSplit(1, test_size=0.5, random_state=dataset.randomState)
         dataset.split(split, featurize=False)
         dataset.featurizeSplits(shuffle=True)
-        train, test = dataset.getFeatures()
+        train, test, _, _ = dataset.getFeatures()
         train_order = train.index.tolist()
         test_order = test.index.tolist()
         # reload and check if orders are the same if we redo the split
@@ -534,7 +533,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         split = ShuffleSplit(1, test_size=0.5, random_state=dataset.randomState)
         dataset.split(split, featurize=False)
         dataset.featurizeSplits(shuffle=True)
-        train, test = dataset.getFeatures()
+        train, test, _, _ = dataset.getFeatures()
         self.assertListEqual(train.index.tolist(), train_order)
         self.assertListEqual(test.index.tolist(), test_order)
 
@@ -544,7 +543,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         dataset.save()
         # calculate descriptors and iterate over folds
         dataset.prepareDataset(feature_calculators=[MorganFP(radius=2, nBits=128)])
-        train, _ = dataset.getFeatures()
+        train, _, _, _  = dataset.getFeatures()
         order_train = train.index.tolist()
         order_folds = []
         split = KFold(5, shuffle=True, random_state=dataset.randomState)
@@ -553,7 +552,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         # reload and check if orders are the same if we redo the folds from saved data
         dataset = QSPRTable.fromFile(dataset.metaFile)
         dataset.prepareDataset(feature_calculators=[MorganFP(radius=2, nBits=128)])
-        train, _ = dataset.getFeatures()
+        train, _, _, _ = dataset.getFeatures()
         self.assertListEqual(train.index.tolist(), order_train)
         split = KFold(5, shuffle=True, random_state=dataset.randomState)
         for i, (_, _, _, _, train_index, test_index) in enumerate(

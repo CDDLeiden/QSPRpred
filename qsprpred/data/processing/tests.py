@@ -21,6 +21,7 @@ from ...data.processing.feature_filters import (
     LowVarianceFilter,
 )
 from ...data.processing.feature_standardizers import SKLearnStandardizer
+from ...data.pipelines.pipeline import QSPRPipeline
 from ...data.tables.qspr import QSPRTable
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn, PathMixIn
@@ -112,7 +113,7 @@ class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
         remove_cation = CategoryFilter(prop=dataset.getDF()["moka_ionState7.4"], values=["cationic"])
         self.assertTrue((dataset.getDF()["moka_ionState7.4"] == "cationic").sum() > 0)
         dataset.filter([remove_cation])
-        self.assertEqual(len(dataset.getDF()), len(dataset.getFeatures(concat=True)))
+        self.assertEqual(len(dataset.getDF()), len(dataset.getFeatures(concat=True)[0]))
         self.assertTrue((dataset.getDF()["moka_ionState7.4"] == "cationic").sum() == 0)
 
 
@@ -190,7 +191,7 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
     def testDefaultDescriptorAdd(self):
         """Test adding without index columns."""
         self.dataset.nJobs = 1
-        df_new = self.dataset.getFeatures(concat=True).copy()
+        df_new = self.dataset.getFeatures(concat=True)[0].copy()
         calc = DataFrameDescriptorSet(df_new, suffix="new_df_desc")
         self.dataset.addDescriptors([calc])
 
@@ -203,7 +204,7 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         a threshold."""
         if use_index_cols:
             self.recalculateWithMultiIndex()
-        self.dataset.filterFeatures([LowVarianceFilter(0.01)])
+        self.dataset.applyPipeline(LowVarianceFilter(0.01), inplace=True)
         # check if correct columns selected and values still original
         self.assertListEqual(list(self.dataset.featureNames), self.descriptors[1:])
         self.assertListEqual(list(self.dataset.X.columns), self.descriptors[1:])
@@ -217,7 +218,7 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         above a threshold."""
         if use_index_cols:
             self.recalculateWithMultiIndex()
-        self.dataset.filterFeatures([HighCorrelationFilter(0.8)])
+        self.dataset.applyPipeline(HighCorrelationFilter(0.8), inplace=True)
         # check if correct columns selected and values still original
         self.descriptors.pop(2)
         self.assertListEqual(list(self.dataset.featureNames), self.descriptors)
@@ -234,7 +235,7 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         relevant as random features."""
         if use_index_cols:
             self.recalculateWithMultiIndex()
-        self.dataset.filterFeatures([BorutaFilter()])
+        self.dataset.applyPipeline(BorutaFilter(), inplace=True)
         # check if correct columns selected and values still original
         self.assertListEqual(list(self.dataset.featureNames), self.descriptors[-1:])
         self.assertListEqual(list(self.dataset.X.columns), self.descriptors[-1:])

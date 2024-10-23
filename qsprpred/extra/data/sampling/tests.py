@@ -27,7 +27,7 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
     def testPCMSplit(self, splitter):
         splitter = PCMSplit(splitter)
         self.dataset.split(splitter, featurize=True)
-        train, test = self.dataset.getFeatures()
+        train, test, _, _ = self.dataset.getFeatures()
         train, test = train.index, test.index
         test_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[test]
         train_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[train]
@@ -44,14 +44,14 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         self.dataset.save()
         splitter = PCMSplit(RandomSplit(), dataset=self.dataset)
         self.dataset.split(splitter, featurize=True)
-        train, test = self.dataset.getFeatures()
+        train, test, _, _ = self.dataset.getFeatures()
         train_order = train.index.tolist()
         test_order = test.index.tolist()
         # reload and check if orders are the same if we redo the split
         dataset = PCMDataSet.fromFile(self.dataset.metaFile)
         splitter = PCMSplit(RandomSplit(), dataset=dataset)
         dataset.split(splitter, featurize=True)
-        train, test = dataset.getFeatures()
+        train, test, _, _ = dataset.getFeatures()
         self.assertEqual(dataset.randomState, seed)
         self.assertListEqual(train.index.tolist(), train_order)
         self.assertListEqual(test.index.tolist(), test_order)
@@ -60,7 +60,7 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         target = self.dataset.getProteinKeys()[0:2]
         splitter = LeaveTargetsOut(targets=target)
         self.dataset.split(splitter, featurize=True)
-        train, test = self.dataset.getFeatures()
+        train, test, _, _ = self.dataset.getFeatures()
         train, test = train.index, test.index
         test_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[test]
         train_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[train]
@@ -79,6 +79,6 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
                          for key in self.dataset.getProteinKeys()},
         )
         self.dataset.split(splitter, featurize=True)
-        train, test = self.dataset.getFeatures()
+        train, test, _, _ = self.dataset.getFeatures()
         self.assertTrue(self.dataset.getDF()[year_col].loc[train.index].max() <= year)
         self.assertTrue(self.dataset.getDF()[year_col].loc[test.index].min() > year)

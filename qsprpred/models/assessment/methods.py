@@ -187,8 +187,7 @@ class CrossValAssessor(ModelAssessor):
             n_splits=5, shuffle=True, random_state=model.randomState
         )
         evalparams = model.parameters if parameters is None else parameters
-        X, _ = ds.getFeatures()
-        y, _ = ds.getTargets()
+        X, _, y, _ = ds.getFeatures()
         monitor.onAssessmentStart(model, ds, self.__class__.__name__)
         # cross validation
         fold_counter = np.zeros(y.shape[0])
@@ -315,8 +314,7 @@ class TestSetAssessor(ModelAssessor):
         model.initFromDataset(ds)
         monitor = monitor or self.monitor
         evalparams = model.parameters if parameters is None else parameters
-        X, X_ind = ds.getFeatures()
-        y, y_ind = ds.getTargets()
+        X, X_ind, y, y_ind = ds.getFeatures()
         monitor.onAssessmentStart(model, ds, self.__class__.__name__)
         monitor.onFoldStart(fold=0, X_train=X, y_train=y, X_test=X_ind, y_test=y_ind)
         # fit model

@@ -13,6 +13,7 @@ import pandas as pd
 from ...logs import logger
 from ..pipelines.pipeline import Step
 from typing import Optional
+from .applicability_domain import ApplicabilityDomain
 
 
 class DataFilter(Step):
@@ -84,6 +85,8 @@ class CategoryFilter(Step):
         else:
             idx_to_keep = ~self.prop.isin(self.values)
         X = X.loc[idx_to_keep]
+        if y is not None:
+            y = y.loc[idx_to_keep]
         logger.info(f"{old_len - X.shape[0]} rows filtered out.")
 
         return X, y
@@ -215,4 +218,4 @@ class RepeatsFilter(DataFilter):
 
         return X, y
 
-    # class outlier
+# class outlier

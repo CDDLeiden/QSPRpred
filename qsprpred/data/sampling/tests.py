@@ -18,6 +18,7 @@ from ...data.chem.clustering import (
 from ...data.chem.scaffolds import BemisMurcko, BemisMurckoRDKit
 from ...data.sampling.folds import FoldsFromDataSplit
 from ...data.sampling.splits import ManualSplit
+from ...data.pipelines.pipeline import QSPRPipeline
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn
 from ..descriptors.fingerprints import MorganFP
@@ -154,7 +155,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
             self.assertTrue(len(X_train) > len(X_test))
             test_index_all.extend(X_test.index.tolist())
         self.assertEqual(k, n_folds - 1)
-        self.assertEqual(len(test_index_all), len(dataset.getFeatures(concat=True)))
+        self.assertEqual(len(test_index_all), len(dataset.getFeatures(concat=True)[0]))
 
     @parameterized.expand(
         [
@@ -214,10 +215,13 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
         dataset = self.createLargeTestDataSet()
         split = ScaffoldSplit()
         n_bits = 128
+        pipeline = QSPRPipeline(
+            steps={"standardizer": StandardScaler()}
+        )
         dataset.prepareDataset(
             split=split,
             feature_calculators=[MorganFP(radius=3, nBits=n_bits)],
-            feature_standardizer=StandardScaler(),
+            pipeline=pipeline,
         )
         self.validate_split(dataset)
         test_ids = dataset.X_ind.index.values
@@ -226,7 +230,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
         dataset_new = QSPRTable.fromFile(dataset.metaFile)
         self.validate_split(dataset_new)
         self.assertTrue(dataset_new.descriptorSets)
-        self.assertTrue(dataset_new.featureStandardizer)
+        self.assertTrue(dataset_new.pipeline)
         self.assertTrue(len(dataset_new.featureNames) == n_bits)
         self.assertTrue(all(mol_id in dataset_new.X_ind.index for mol_id in test_ids))
         self.assertTrue(all(mol_id in dataset_new.y_ind.index for mol_id in train_ids))
@@ -289,7 +293,7 @@ class TestFoldSplitters(DataSetsPathMixIn, QSPRTestCase):
         MAX_VAL = 2
         MIN_VAL = 1
         scaler = MinMaxScaler(feature_range=(MIN_VAL, MAX_VAL))
-        dataset.prepareDataset(feature_standardizer=scaler)
+        dataset.prepareDataset(pipeline=QSPRPipeline(steps={"standardizer": scaler}))
         k, indices = self.validateFolds(dataset.iterFolds(fold))
         self.assertEqual(k, 5)
         self.assertFalse(set(df.index) - set(indices))

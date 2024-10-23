@@ -69,10 +69,18 @@ class LowVarianceFilter(FeatureFilter):
         
         low_var_cols_idx = np.where(variance <= self.th)[0]
         self.low_var_cols = colnames[low_var_cols_idx]
-        logger.info(
-            f"Number of columns dropped low variance filter: {len(self.low_var_cols)}"
-        )
-        logger.info(f"Number of columns left: {X.shape[1] - len(self.low_var_cols)}")
+        
+        if len(self.low_var_cols) == len(colnames):
+            logger.warning(
+                "All columns have low variance, no columns will be dropped, this filter"
+                " will be skipped."
+            )
+            self.low_var_cols = None
+        else:
+            logger.info(
+                f"Number of columns dropped low variance filter: {len(self.low_var_cols)}"
+            )
+            logger.info(f"Number of columns left: {X.shape[1] - len(self.low_var_cols)}")
         
     def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Filter out low variance features from a dataframe.
@@ -87,9 +95,11 @@ class LowVarianceFilter(FeatureFilter):
             pd.DataFrame: The target dataframe
         """
         assert hasattr(self, "low_var_cols"), "Filter has not been fitted yet."
-        assert self.low_var_cols.isin(X.columns).all(), "Columns do not match fitted columns."
-        
-        X = X.drop(columns=self.low_var_cols)
+        # assert self.low_var_cols.isin(X.columns).all(), "Columns do not match fitted columns."
+        if self.low_var_cols is not None:
+            columns_to_drop = self.low_var_cols.intersection(X.columns)
+            
+            X = X.drop(columns=columns_to_drop)
 
         return X, y
 
@@ -120,10 +130,18 @@ class HighCorrelationFilter(FeatureFilter):
             high_corr = np.where(np.any(correlation > self.th, axis=0))
 
             self.high_corr_cols = X.columns[high_corr[0]]
-            logger.info(
-                f"Number of columns dropped high correlation filter: {len(self.high_corr_cols)}"
-            )
-            logger.info(f"Number of columns left: {X.shape[1] - len(self.high_corr_cols)}")
+            
+            if len(self.high_corr_cols) == len(X.columns):
+                logger.warning(
+                    "All columns have high correlation, no columns will be dropped, "
+                    "this filter will be skipped."
+                )
+                self.high_corr_cols = None
+            else:
+                logger.info(
+                    f"Number of columns dropped high correlation filter: {len(self.high_corr_cols)}"
+                )
+                logger.info(f"Number of columns left: {X.shape[1] - len(self.high_corr_cols)}")
         
     def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Filter out high correlation features from a dataframe.
@@ -139,8 +157,11 @@ class HighCorrelationFilter(FeatureFilter):
         """
         assert hasattr(self, "high_corr_cols"), "Filter has not been fitted yet."
         if self.high_corr_cols is not None:
-            assert self.high_corr_cols.isin(X.columns).all(), "Columns do not match fitted columns."
-            X = X.drop(columns=self.high_corr_cols)
+            #assert self.high_corr_cols.isin(X.columns).all(), "Columns do not match fitted columns."
+            
+            columns_to_drop = self.high_corr_cols.intersection(X.columns)
+            
+            X = X.drop(columns=columns_to_drop)
 
         return X, y
 

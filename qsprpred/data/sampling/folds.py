@@ -5,6 +5,7 @@ from typing import Generator
 
 import pandas as pd
 from copy import deepcopy
+from ..pipelines.pipeline import Pipeline
 
 
 class FoldGenerator(ABC):
@@ -49,41 +50,39 @@ class FoldGenerator(ABC):
 
 class FoldsFromDataSplit(FoldGenerator):
     """This generator takes a scikit-learn or scikit-learn-like splitter
-    and creates folds from it. It is possible to pass a standardizer to
-    make sure features in the splits are properly standardized.
+    and creates folds from it. It is possible to pass a pipeline to
+    make sure features in the splits are properly pre-processed.
 
     Attributes:
         split (DataSplit):
             the splitter to use to create the folds (this can also just be
             a raw scikit-learn splitter)
-        featureStandardizer:
-            the standardizer to use to standardize the features (this can also
-            just be a raw scikit-learn standardizer)
+        pipeline (Pipeline):
+            the pipeline to use to pre-process the features, e.g. standardize them
     """
-    def _standardize_folds(self, folds):
-        """A generator that fits and applies feature standardizers to each fold
+    def _preprocess_folds(self, folds):
+        """A generator that fits and applies the pipeline to each fold
         returned. They are properly fitted on the training set and applied to the
         test set."""
         for X_train, X_test, y_train, y_test, train_index, test_index in folds:
-            standardizer_copy = deepcopy(self.featureStandardizer)
-            X_train, y_train = standardizer_copy.fitTransform(X_train, y_train)
-            X_test, y_test = standardizer_copy.transform(X_test, y_test)
+            pipeline_copy = deepcopy(self.pipeline)
+            X_train, y_train = pipeline_copy.fitTransform(X_train, y_train)
+            X_test, y_test = pipeline_copy.transform(X_test, y_test)
             
             yield X_train, X_test, y_train, y_test, train_index, test_index
 
-    def __init__(self, split: "DataSplit", feature_standardizer=None):  # noqa: F821
-        """Initialize the generator with a splitter and a standardizer.
+    def __init__(self, split: "DataSplit", pipeline: Pipeline = None):  # noqa: F821
+        """Initialize the generator with a splitter and a pipeline.
 
         Args:
             split (DataSplit):
                 the splitter to use to create the folds (this can also just be
                 a raw scikit-learn splitter)
-            feature_standardizer:
-                the standardizer to use to standardize the features (this can also
-                just be a raw scikit-learn standardizer)
+            pipeline:
+                the pipeline to use to pre-process the features
         """
         self.split = split
-        self.featureStandardizer = feature_standardizer
+        self.pipeline = pipeline
 
     def _make_folds(
         self, X: pd.DataFrame, y: pd.DataFrame | pd.Series
@@ -158,11 +157,11 @@ class FoldsFromDataSplit(FoldGenerator):
             if self.split.getSeed() is None:
                 self.split.setSeed(dataset.randomState)
         features = dataset.getFeatures(raw=True, concat=concat, ordered=True)
-        targets = dataset.getTargets(concat=concat, ordered=True)
-        if not concat:
-            features = features[0]
-            targets = targets[0]
-        if self.featureStandardizer:
-            return self._standardize_folds(self._make_folds(features, targets))
+        if concat:
+            X, y = features
         else:
-            return self._make_folds(features, targets)
+            X, X_ind, y, y_ind = features
+        if self.pipeline:
+            return self._preprocess_folds(self._make_folds(X, y))
+        else:
+            return self._make_folds(X, y)

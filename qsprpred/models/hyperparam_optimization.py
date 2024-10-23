@@ -95,7 +95,8 @@ class HyperparameterOptimization(ABC):
             model.save()
         if refit_optimal:
             model.setParams(self.bestParams)
-            model.fit(ds.getFeatures()[0], ds.getTargets()[0])
+            X, _, y, _ = ds.getFeatures()
+            model.fit(X, y)
             model.save()
 
 

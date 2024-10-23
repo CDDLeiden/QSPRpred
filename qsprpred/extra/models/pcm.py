@@ -96,7 +96,7 @@ class PCMModel(QSPRModel, ABC):
         # prepare dataset and return it
         dataset.prepareDataset(
             feature_calculators=self.featureCalculators,
-            feature_standardizer=self.featureStandardizer,
+            pipeline=self.pipeline,
             feature_fill_value=fill_value,
             shuffle=False,
         )

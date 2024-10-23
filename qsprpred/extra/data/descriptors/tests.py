@@ -8,6 +8,7 @@ from sklearn.preprocessing import StandardScaler
 
 from qsprpred import TargetProperty, TargetTasks
 from qsprpred.data import RandomSplit
+from qsprpred.data.pipelines.pipeline import QSPRPipeline
 from qsprpred.data.descriptors.fingerprints import MorganFP
 from qsprpred.data.descriptors.sets import DescriptorSet, DrugExPhyschem
 from qsprpred.data.processing.feature_filters import (
@@ -149,9 +150,11 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         dataset.prepareDataset(
             split=split,
             feature_calculators=[self.sampleDescSet],
-            feature_standardizer=StandardScaler(),
-            feature_filters=[LowVarianceFilter(0.05),
-                             HighCorrelationFilter(0.9)],
+            pipeline=QSPRPipeline({
+                "scaler": StandardScaler(),
+                "lowvar": LowVarianceFilter(0.05),
+                "highcorr": HighCorrelationFilter(0.9),
+            })
         )
         ndata = dataset.getDF().shape[0]
         self.validate_split(dataset)
@@ -165,7 +168,7 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         self.validate_split(dataset_new)
         self.assertEqual(dataset.X_ind.shape[0], round(ndata * 0.2))
         self.assertEqual(len(dataset_new.descriptorSets), len(dataset_new.descriptors))
-        self.assertTrue(dataset_new.featureStandardizer)
+        self.assertTrue(dataset_new.pipeline)
         self.assertTrue(len(dataset_new.featureNames) == len(self.sampleDescSet))
         self.assertTrue(all(mol_id in dataset_new.X_ind.index for mol_id in test_ids))
         self.assertTrue(all(mol_id in dataset_new.y_ind.index for mol_id in train_ids))
@@ -182,7 +185,11 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         dataset.prepareDataset(
             split=split,
             feature_calculators=[self.sampleDescSet],
-            feature_filters=[lv, hc],
+            pipeline=QSPRPipeline({
+                "scaler": StandardScaler(),
+                "lowvar": lv,
+                "highcorr": hc,
+            }),
             recalculate_features=True,
             feature_fill_value=np.nan,
         )
@@ -196,7 +203,11 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         dataset_next.prepareDataset(
             split=split,
             feature_calculators=[self.sampleDescSet],
-            feature_filters=[lv, hc],
+            pipeline=QSPRPipeline({
+                "scaler": StandardScaler(),
+                "lowvar": lv,
+                "highcorr": hc,
+            }),
             recalculate_features=True,
             feature_fill_value=np.nan,
         )
@@ -219,7 +230,7 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         ]
         self.dataset.prepareDataset(
             feature_calculators=calcs,
-            feature_standardizer=StandardScaler(),
+            pipeline=QSPRPipeline({"scaler": StandardScaler()}),
             split=RandomSplit(test_fraction=0.2),
         )
         # test if all descriptors are there
@@ -228,9 +239,14 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
             expected_length += len(calc)
         self.assertEqual(self.dataset.X.shape[1], expected_length)
         # filter features and test if they are there after saving and loading
-        self.dataset.filterFeatures(
-            [LowVarianceFilter(0.05),
-             HighCorrelationFilter(0.9)]
+        self.dataset.applyPipeline(
+            QSPRPipeline(
+                {
+                    "lowvar": LowVarianceFilter(0.05), 
+                    "highcorr": HighCorrelationFilter(0.9),
+                },
+            ),
+            inplace=True,
         )
         feats_left = self.dataset.X.shape[1]
         self.dataset.save()

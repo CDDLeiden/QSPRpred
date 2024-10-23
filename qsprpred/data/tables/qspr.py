@@ -24,6 +24,7 @@ from ..descriptors.sets import DescriptorSet
 from ..storage.interfaces.chem_store import ChemStore
 from .interfaces.molecule_data_set import MoleculeDataSet
 from .mol import MoleculeTable
+from ...data.pipelines.pipeline import Pipeline, Step
 
 
 class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
@@ -36,7 +37,7 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
     Attributes:
         targetProperties (str): property to be predicted with QSPRmodel
         featureNames (list of str): feature names
-        featureStandardizer (SKLearnStandardizer): feature standardizer
+        pipeline (Pipeline): data processing pipeline
         applicabilityDomain (ApplicabilityDomain): applicability domain
     """
 
@@ -93,7 +94,7 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             raise ValueError("Target properties must be specified for a new QSPRTable.")
         # load names of descriptors to use as training features
         self.featureNames = self.getFeatureNames()
-        self.featureStandardizer = None
+        self.pipeline = None
         self.applicabilityDomain = None
         # populate feature matrix and target properties
         self._X = None
@@ -437,7 +438,7 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
         ds = self.fromMolTable(
             mt, self.targetProperties, name=mt.name, path=path, **kwargs
         )
-        ds.featureStandardizer = self.featureStandardizer
+        ds.pipeline = self.pipeline
         ds.applicabilityDomain = self.applicabilityDomain
         ds.featureNames = self.featureNames
         ds.restoreTrainingData()
@@ -499,7 +500,7 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
         """
         for filter in table_filters:
             ret, _ = filter.transform(
-                self.getDescriptors(), self.getTargets(concat=True, ordered=True)
+                self.getDescriptors(), self.getFeatures(concat=True, ordered=True)[1]
             )
             ids = pd.Series(
                 self.getProperty(self.idProp), index=self.getProperty(self.idProp)
@@ -791,27 +792,20 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
         else:
             self.featurize()
 
-    def filterFeatures(self, feature_filters: list[Callable]):
-        """Filter features in the data set.
+    def updateFeatures(self):
+        """Remove features that are not present in the current feature matrix.
 
         Args:
-            feature_filters (list[Callable]):
-                list of feature filter functions that take X feature matrix and y
-                target vector as arguments
+            feature_names (list[str]): list of feature names to keep
         """
         if not self.hasFeatures:
             raise ValueError("No features to filter")
-        if self.X.shape[1] == 1:
-            logger.warning("Only one feature present. Skipping feature filtering.")
-            return
         else:
-            for featurefilter in feature_filters:
-                self._X, _ = featurefilter.fitTransform(self.X, self.y)
             # update features
             self.featureNames = self.X.columns.to_list()
+            logger.info(f"Selected features: {self.featureNames}")
             if self.X_ind is not None:
                 self._X_ind = self.X_ind[self.featureNames]
-            logger.info(f"Selected features: {self.featureNames}")
             # update descriptor calculator
             for ds in self.descriptors:
                 to_keep = [
@@ -819,19 +813,6 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
                     if x in self.featureNames
                 ]
                 ds.keepDescriptors(to_keep)
-
-    def setFeatureStandardizer(
-        self, feature_standardizer: SKLearnStandardizer | BaseEstimator
-    ):
-        """Set feature standardizer.
-
-        Args:
-            feature_standardizer (SKLearnStandardizer | BaseEstimator):
-                feature standardizer
-        """
-        if not hasattr(feature_standardizer, "toFile"):
-            feature_standardizer = SKLearnStandardizer(feature_standardizer)
-        self.featureStandardizer = feature_standardizer
 
     def reset(self):
         """Reset the data set.
@@ -845,45 +826,35 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             self._X_ind = None
             self._y = None
             self._y_ind = None
-            self.featureStandardizer = None
+            self.pipeline = None
             self.applicabilityDomain = None
             self.loadDescriptorsToSplits(shuffle=False)
 
     def prepareDataset(
         self,
-        data_filters: list | None = (RepeatsFilter(keep=True), ),
         split: DataSplit | None = None,
         feature_calculators: list["DescriptorSet"] | None = None,
-        feature_filters: list | None = None,
-        feature_standardizer: SKLearnStandardizer | None = None,
         feature_fill_value: float = np.nan,
+        pipeline: Pipeline | None = None,
         applicability_domain: (
             ApplicabilityDomain | MLChemADApplicabilityDomain | None
         ) = None,
-        drop_outliers: bool = False,
         recalculate_features: bool = False,
+        fit_pipeline: bool = True,
         shuffle: bool = True,
         random_state: int | None = None,
     ):
         """Prepare the dataset for use in QSPR model.
 
         Arguments:
-            smiles_standardizer (str | Callable): either `chembl`, `old`, or a
-                partial function that reads and standardizes smiles. If `None`, no
-                standardization will be performed. Defaults to `chembl`.
-            data_filters (list of datafilter obj): filters number of rows from dataset
             split (datasplitter obj): splits the dataset into train and test set
             feature_calculators (list[DescriptorSet]): descriptor sets to add to the data set
-            feature_filters (list of feature filter objs): filters features
-            feature_standardizer (SKLearnStandardizer or sklearn.base.BaseEstimator):
-                standardizes and/or scales features
             feature_fill_value (float): value to fill missing values with.
                 Defaults to `numpy.nan`
+            pipeline (Pipeline): pipeline to apply to the calculated features
             applicability_domain (applicabilityDomain obj): attaches an
                 applicability domain calculator to the dataset and fits it on
                 the training set
-            drop_outliers (bool): whether to drop samples that are outside the
-                applicability domain from the test set, if one is attached.
             recalculate_features (bool): recalculate features even if they are already
                 present in the file
             shuffle (bool): whether to shuffle the created training and test sets
@@ -894,9 +865,6 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
         # calculate features
         if feature_calculators is not None:
             self.addDescriptors(feature_calculators, recalculate=recalculate_features)
-        # apply data filters
-        if data_filters is not None:
-            self.filter(data_filters)
         # Replace any NaN values in featureNames by 0
         # FIXME: this is not very good, we should probably add option to do custom
         # data imputation here or drop rows with NaNs
@@ -908,20 +876,81 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
         # split dataset
         if split is not None:
             self.split(split)
-        # apply feature filters on training set
-        if feature_filters and self.hasDescriptors():
-            self.filterFeatures(feature_filters)
-        elif not self.hasDescriptors():
-            logger.warning("No descriptors present, feature filters will be skipped.")
-        # set feature standardizers
-        if feature_standardizer:
-            self.setFeatureStandardizer(feature_standardizer)
+        # set and fit pipeline
+        if pipeline is not None:
+            self.setPipeline(pipeline)
+            if fit_pipeline:
+                self.fitPipeline(pipeline)
         # set applicability domain and fit it on the training set
         if applicability_domain:
             self.setApplicabilityDomain(applicability_domain)
-        # drop outliers from test set based on applicability domain
-        if drop_outliers:
-            self.dropOutliers()
+            
+    def setPipeline(self, pipeline: Pipeline):
+        """Set a pipeline to apply to the data set.
+
+        Args:
+            pipeline (Pipeline): pipeline to apply
+        """
+        self.pipeline = pipeline
+            
+    def fitPipeline(self, pipeline: Pipeline | None = None):
+        """Fit a pipeline on the training set.
+
+        Args:
+            pipeline (Pipeline): pipeline to fit
+        """
+        pipeline = self.pipeline if pipeline is None else pipeline
+        pipeline.fitTransform(self.X)
+        return pipeline
+            
+    def applyPipeline(
+        self,
+        pipeline: Pipeline | Step | None = None,
+        fit: bool = True, 
+        inplace: bool = False,
+        X: pd.DataFrame | None = None,
+        X_ind: pd.DataFrame | None = None,
+        y: pd.DataFrame | None = None,
+        y_ind: pd.DataFrame | None = None
+    ):
+        """Apply a pipeline or step to the data set.
+
+        Args:
+            pipeline (Pipeline or Step, optional): pipeline to apply. 
+                Can also be a single step. if None, the dataset's pipeline will be used.
+                Defaults to None.
+            fit (bool): whether to fit the pipeline on the training set. 
+            inplace (bool): whether to apply the pipeline in place.
+            X (pd.DataFrame, optional): training feature matrix.
+                If None, the dataset's training feature matrix will be used.
+            X_ind (pd.DataFrame, optional): test feature matrix.
+                If None, the dataset's test feature matrix will be used.
+            y (pd.DataFrame, optional): training target values.
+                If None, the dataset's training target values will be used.
+            y_ind (pd.DataFrame, optional): test target values.
+                If None, the dataset's test target values will be used.
+        """
+        pipeline = self.pipeline if pipeline is None else pipeline
+        X = self.X if X is None else X
+        X_ind = self.X_ind if X_ind is None else X_ind
+        y = self.y if y is None else y
+        y_ind = self.y_ind if y_ind is None else y_ind
+        
+        if fit:
+            X, y = pipeline.fitTransform(X, y)
+        else:
+            X, y = pipeline.transform(X, y)
+        if X_ind is not None and X_ind.shape[0] > 0:
+            X_ind, y_ind = pipeline.transform(X_ind, y_ind)
+        
+        if inplace:
+            self._X = X
+            self._X_ind = X_ind
+            self._y = y
+            self._y_ind = y_ind
+            self.updateFeatures()
+            
+        return X, X_ind, y, y_ind
 
     def checkFeatures(self):
         """Check consistency of features and descriptors."""
@@ -939,13 +968,11 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
         concat: bool = False,
         raw: bool = False,
         ordered: bool = False,
-        refit_standardizer: bool = True,
-    ) -> pd.DataFrame | tuple[pd.DataFrame, pd.DataFrame]:
-        """Get the current feature sets (training and test) from the dataset.
+        refit_pipeline: bool = True,
+    ) -> tuple[pd.DataFrame, pd.DataFrame] | tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+        """Get the current feature sets and target values.
 
-        This method also applies any feature standardizers that have been set on the
-        dataset during preparation. Outliers are dropped from the test set if they are
-        present, unless `concat` is `True`.
+        This method also applies any pipeline set on the data set.
 
         Args:
             inplace (bool): If `True`, the created feature matrices will be saved to the
@@ -958,16 +985,22 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
                 that do not require separate training and test sets (i.e. the final
                 optimized models).
             raw (bool): If `True`, the raw feature matrices will be returned without
-                any standardization applied.
+                any pipeline transformations.
             ordered (bool):
                 If `True`, the returned feature matrices will be ordered
                 according to the original order of the data set. This is only relevant
                 if `concat` is `True`.
-            refit_standardizer (bool): If `True`, the feature standardizer will be
+            refit_pipeline (bool): If `True`, the pipeline will be
                 refit on the training set upon this call. If `False`, the previously
-                fitted standardizer will be used. Defaults to `True`. Use `False` if
-                this dataset is used for prediction only and the standardizer has
+                fitted pipeline will be used. Defaults to `True`. Use `False` if
+                this dataset is used for prediction only and the pipeline has
                 been initialized already.
+                
+        Returns:
+            X (pd.DataFrame): training feature matrix
+            X_ind (pd.DataFrame): test feature matrix, if not `concat`
+            y (pd.DataFrame): training target values
+            y_ind (pd.DataFrame): test target values, if not `concat`
         """
         df = self.getDF()
         self.checkFeatures()
@@ -981,65 +1014,35 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             else:
                 X = pd.concat([self.X, self.X_ind], axis=0)
                 X_ind = None
-        elif len(self.X.columns) != 0:
-            X = self.X[self.featureNames]
-            X_ind = self.X_ind[self.featureNames]
+            y = pd.concat([self.y, self.y_ind], axis=0)
+            y_ind = None
         else:
-            X = self.X
-            X_ind = self.X_ind
-        # standardize features
-        if not raw and self.featureStandardizer:
-            if refit_standardizer:
-                self.featureStandardizer.fit(X)
-            X, _ = self.featureStandardizer.transform(X)
-            if X_ind is not None and X_ind.shape[0] > 0:
-                X_ind, _ = self.featureStandardizer.transform(X_ind)
-        # drop outliers from test set
-        if "Split_IsOutlier" in df.columns and not concat:
-            if X_ind is not None:
-                X_ind = X_ind.loc[~X_ind.index.isin(df[df["Split_IsOutlier"]].index), :]
+            if len(self.X.columns) != 0:
+                X = self.X[self.featureNames]
+                X_ind = self.X_ind[self.featureNames]
+            else:
+                X = self.X
+                X_ind = self.X_ind
+            y = self.y
+            y_ind = self.y_ind
+        # apply pipeline if set
+        if not raw and self.pipeline:
+            X, X_ind, y, y_ind = self.applyPipeline(
+                self.pipeline, fit=refit_pipeline, inplace=False,
+                X=X, X_ind=X_ind, y=y, y_ind=y_ind
+            )
         # replace original feature matrices if inplace
         if inplace:
             self._X = X
             self._X_ind = X_ind
+            self._y = y
+            self._y_ind = y_ind
+            self.updateFeatures()
         # order if concatenating
         if ordered and concat:
             X = X.loc[df.index, :]
-        return (X, X_ind) if not concat else X
-
-    def getTargets(self, concat: bool = False, ordered: bool = False):
-        """Get the response values (training and test) for the set target property.
-
-        Args:
-            concat (bool):
-                if `True`, return concatenated training and validation set target
-                properties
-            ordered (bool):
-                if `True`, return the target properties in the original order of the
-                data set. This is only relevant if `concat` is `True`.
-        Returns:
-            (tuple[pd.DataFrame, pd.DataFrame] | pd.DataFrame):
-                `tuple` of (train_responses, test_responses) or `pandas.DataFrame` of
-                all target property values
-        """
-        if concat:
-            ret = pd.concat(
-                [self.y, self.y_ind] if self.y_ind is not None else [self.y]
-            )
-            return ret.loc[self.getProperty(self.idProp), :] if ordered else ret
-        else:
-            if self.y_ind is not None and "Split_IsOutlier" in self.getProperties():
-                y_ind = self.y_ind.loc[
-                    ~pd.Series(
-                        self.
-                        getProperty("Split_IsOutlier", ids=self.y_ind.index.values),
-                        index=self.y_ind.index,
-                    ),
-                    :,
-                ]
-            else:
-                y_ind = self.y_ind
-            return self.y, y_ind if y_ind is not None else self.y
+            y = y.loc[df.index, :]
+        return (X, X_ind, y, y_ind) if not concat else (X, y)
 
     def getTargetProperties(self, names: list) -> list[TargetProperty]:
         """Get the target properties with the given names.
@@ -1197,7 +1200,7 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
                 for each fold
         """
         self.checkFeatures()
-        folds = FoldsFromDataSplit(split, self.featureStandardizer)
+        folds = FoldsFromDataSplit(split, self.pipeline)
         return folds.iterFolds(self, concat=concat)
 
     def setApplicabilityDomain(
@@ -1240,38 +1243,3 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             return
         self.applicabilityDomain.fit(X)
         return self.applicabilityDomain.transform(X_ind)
-
-    def dropOutliers(self):
-        """Drop outliers from the test set based on the applicability domain."""
-        if self.applicabilityDomain is None:
-            raise ValueError(
-                "No applicability domain calculator attached to the data set."
-            )
-        X, X_ind = self.getFeatures()
-        if X_ind.shape[0] == 0:
-            logger.warning(
-                "No test samples available, skipping outlier removal from test set."
-            )
-            return
-        # check if X or X_ind contain any nan values
-        if X.isna().any().any() or X_ind.isna().any().any():
-            logger.warning(
-                "Feature matrix contains NaN values. "
-                "Please fill them before applying outlier removal."
-                "Outliers will not be dropped."
-            )
-            return
-        # fit applicability domain on the training set
-        self.applicabilityDomain.fit(X)
-        mask = self.applicabilityDomain.contains(X_ind)
-        if not mask.sum().any():
-            logger.warning(
-                "All samples in the test set are outside the applicability domain,"
-                "outliers will not be dropped."
-            )
-            return
-        self.addProperty("Split_IsOutlier", len(self) * [False])
-        self.addProperty("Split_IsOutlier", ~mask, mask.index.values)
-        logger.info(
-            f"Marked {(~mask).sum().sum()} samples from the test set as outlier."
-        )

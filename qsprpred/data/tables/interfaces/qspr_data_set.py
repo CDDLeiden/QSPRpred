@@ -141,42 +141,32 @@ class QSPRDataSet(MoleculeDataSet, ABC):
     @abstractmethod
     def prepareDataset(
         self,
-        split: Optional["DataSplit"] = None,  # noqa: F821
-        feature_calculators: list["DescriptorSet"] | None = None,  # noqa: F821
-        feature_filters: list | None = None,
-        feature_standardizer: SKLearnStandardizer | None = None,
+        split: type["DataSplit"] = None,
+        feature_calculators: list["DescriptorSet"] | None = None,
         feature_fill_value: float = np.nan,
+        pipeline: "Pipeline" = None,
         applicability_domain: (
             ApplicabilityDomain | MLChemADApplicabilityDomain | None
         ) = None,
-        drop_outliers: bool = False,
         recalculate_features: bool = False,
         shuffle: bool = True,
         random_state: int | None = None,
     ):
-        """Prepare the dataset for training.
+        """Prepare the dataset for use in QSPR model.
 
-        Args:
-            split (DataSplit):
-                split instance orchestrating the split
-            feature_calculators (list[DescriptorSet]):
-                list of feature calculators to use
-            feature_filters (list):
-                list of feature filters to use
-            feature_standardizer (SKLearnStandardizer):
-                feature standardizer to use
-            feature_fill_value (float):
-                fill value for missing features
-            applicability_domain (ApplicabilityDomain):
-                applicability domain to use
-            drop_outliers (bool):
-                whether to drop outliers
-            recalculate_features (bool):
-                whether to recalculate features
-            shuffle (bool):
-                whether to shuffle the dataset
-            random_state (int):
-                random state for shuffling
+        Arguments:
+            split (datasplitter obj): splits the dataset into train and test set
+            feature_calculators (list[DescriptorSet]): descriptor sets to add to the data set
+            feature_fill_value (float): value to fill missing values with.
+                Defaults to `numpy.nan`
+            pipeline (Pipeline): pipeline to apply to the calculated features
+            applicability_domain (applicabilityDomain obj): attaches an
+                applicability domain calculator to the dataset and fits it on
+                the training set
+            recalculate_features (bool): recalculate features even if they are already
+                present in the file
+            shuffle (bool): whether to shuffle the created training and test sets
+            random_state (int): random state for shuffling
         """
 
     @abstractmethod
@@ -186,11 +176,12 @@ class QSPRDataSet(MoleculeDataSet, ABC):
         concat: bool = False,
         raw: bool = False,
         ordered: bool = False,
-        refit_standardizer: bool = True,
-    ) -> pd.DataFrame | tuple[pd.DataFrame, pd.DataFrame]:
-        """Get the current feature sets (training and test) from the dataset.
+        refit_pipeline: bool = True,
+    ) -> tuple[pd.DataFrame, pd.DataFrame] | tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+        """Get the current feature and response values (training and test) from the 
+        dataset.
 
-        This method also applies any feature standardizers that have been set on the
+        This method also applies any pre-processing pipeline that have been set on the
         dataset during preparation. Outliers are dropped from the test set if they are
         present, unless `concat` is `True`.
 
@@ -210,33 +201,21 @@ class QSPRDataSet(MoleculeDataSet, ABC):
                 If `True`, the returned feature matrices will be ordered
                 according to the original order of the data set. This is only relevant
                 if `concat` is `True`.
-            refit_standardizer (bool): If `True`, the feature standardizer will be
+            refit_pipeline (bool): If `True`, the pipeline will be
                 refit on the training set upon this call. If `False`, the previously
-                fitted standardizer will be used. Defaults to `True`. Use `False` if
-                this dataset is used for prediction only and the standardizer has
+                fitted pipeline will be used. Defaults to `True`. Use `False` if
+                this dataset is used for prediction only and the pipeline has
                 been initialized already.
 
         Returns:
-            (pd.DataFrame) if `concat` is `True` or (tuple[pd.DataFrame, pd.DataFrame]):
-                feature matrices for training and test sets
-        """
-
-    @abstractmethod
-    def getTargets(
-        self,
-        concat: bool = False,
-        ordered: bool = False
-    ) -> pd.DataFrame | tuple[pd.DataFrame, pd.DataFrame]:
-        """Get the response values (training and test) for the set target property.
-
-        Args:
-            concat (bool): if `True`, return concatenated training and validation set
-                target properties
-            ordered (bool): if `True`, return the target properties in the original
-                order of the data set. This is only relevant if `concat` is `True`.
-        Returns:
-            (pd.DataFrame) if `concat` is `True` or (tuple[pd.DataFrame, pd.DataFrame):
-                target properties values for training and test sets
+            (tuple):
+                - (pd.DataFrame): training feature matrix
+                - (pd.DataFrame): test feature matrix
+                - (pd.DataFrame): training target vector/matrix
+                - (pd.DataFrame): test target vector/matrix
+            or if `concat` is `True`:
+                - (pd.DataFrame): feature matrix
+                - (pd.DataFrame): target vector/matrix
         """
 
     @abstractmethod

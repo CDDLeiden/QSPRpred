@@ -948,10 +948,10 @@ class TestAttachedApplicabilityDomain(ModelDataSetsPathMixIn, QSPRTestCase):
             dist="euclidean", alpha=0.9, scaling=None
         )
         features = dataset.getFeatures(
-            concat=True, ordered=True, refit_standardizer=False
+            concat=True, ordered=True, refit_pipeline=False
         )
-        comparison_ap.fit(features)
-        ap_pred = comparison_ap.contains(features)
+        comparison_ap.fit(features[0])
+        ap_pred = comparison_ap.contains(features[0])
 
         # check if the applicability domain predictions from the dataset are equal to the ones from the model
         _, ap_preds_model = model.predictMols(

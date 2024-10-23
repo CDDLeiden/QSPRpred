@@ -27,6 +27,7 @@ from ...data.descriptors.sets import (
     RDKitDescs,
     TanimotoDistances,
 )
+from ...data.pipelines.pipeline import QSPRPipeline
 from ...data.processing.data_filters import RepeatsFilter
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
 from ...data.processing.feature_standardizers import SKLearnStandardizer
@@ -79,12 +80,18 @@ class DataSetsPathMixIn(PathMixIn):
     @staticmethod
     def getDefaultPrep():
         """Return a dictionary with default preparation settings."""
+        #FIXME: standard scaler before filters gives error due to 
+        # "missing features seen at fit time"
         return {
             "feature_calculators": [MorganFP(radius=2, nBits=128)],
             "split": RandomSplit(test_fraction=0.2),
-            "feature_standardizer": StandardScaler(),
-            "feature_filters": [LowVarianceFilter(0.05),
-                                HighCorrelationFilter(0.8)],
+            "pipeline": QSPRPipeline(
+                {
+                    "feature_standardizer": StandardScaler(),
+                    "low_var_filter": LowVarianceFilter(0.05),
+                    "high_corr_filter": HighCorrelationFilter(0.8),
+                }
+            )
         }
 
     @classmethod

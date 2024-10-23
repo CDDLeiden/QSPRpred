@@ -12,9 +12,11 @@ from qsprpred.benchmarks import BenchmarkSettings, DataPrepSettings, BenchmarkRu
 from qsprpred.data import MoleculeTable, RandomSplit
 from qsprpred.data.descriptors.fingerprints import MorganFP
 from qsprpred.data.descriptors.sets import RDKitDescs
+from qsprpred.data.pipelines.pipeline import QSPRPipeline
 from qsprpred.data.processing.feature_filters import LowVarianceFilter
 from qsprpred.data.sources import DataSource
 from qsprpred.models import SklearnModel, TestSetAssessor, CrossValAssessor
+from qsprpred.utils.parallel import MultiprocessingJITGenerator
 
 BASE_DIR = "./data/"
 os.makedirs(BASE_DIR, exist_ok=True)
@@ -80,8 +82,10 @@ settings = BenchmarkSettings(
     prep_settings=[
         DataPrepSettings(
             split=RandomSplit(test_fraction=0.2),  # random split
-            feature_filters=[LowVarianceFilter(0.05)],
-            feature_standardizer=StandardScaler(),
+            pipeline=QSPRPipeline({
+                "filter": LowVarianceFilter(0.05),
+                "scaler": StandardScaler()
+            }),
         ),
     ],
     models=[
@@ -109,7 +113,11 @@ settings = BenchmarkSettings(
     ],
     optimizers=[],
 )
-runner = BenchmarkRunner(settings, data_dir=f"{BASE_DIR}/CLS")
+runner = BenchmarkRunner(
+    settings, 
+    data_dir=f"{BASE_DIR}/CLS", 
+    parallel_generator_cpu = MultiprocessingJITGenerator(1)
+)
 runner.run(raise_errors=True)
 
 # run regression
@@ -148,5 +156,9 @@ settings.models = [
         base_dir=f"{BASE_DIR}/models",
     ),
 ]
-runner = BenchmarkRunner(settings, data_dir=f"{BASE_DIR}/REG")
+runner = BenchmarkRunner(
+    settings, 
+    data_dir=f"{BASE_DIR}/REG", 
+    parallel_generator_cpu = MultiprocessingJITGenerator(5)
+)
 runner.run(raise_errors=True)

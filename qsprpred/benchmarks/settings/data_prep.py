@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
 from ...data.processing.data_filters import RepeatsFilter
-from ...data.processing.feature_standardizers import SKLearnStandardizer
 from ...data.sampling.splits import DataSplit
+from ...data.pipelines.pipeline import Pipeline
 
 
 @dataclass
@@ -11,11 +11,9 @@ class DataPrepSettings:
     passed to `QSPRDataSet.prepareDataset`.
 
     Attributes:
-        data_filters (list):
-            Data filters to use.
         split (DataSplit):
             Data split to use.
-        feature_filters (list):
+        pipeline (Pipeline):
             Feature filters to use.
         feature_standardizer (SKLearnStandardizer):
             Standardizer to use for features.
@@ -24,10 +22,7 @@ class DataPrepSettings:
         shuffle (bool):
             Whether to shuffle the data.
     """
-
-    data_filters: list | None = (RepeatsFilter(keep=True), )
     split: DataSplit = None
-    feature_filters: list = None
-    feature_standardizer: SKLearnStandardizer = None
+    pipeline: Pipeline = None
     feature_fill_value: float = 0.0
     shuffle: bool = True

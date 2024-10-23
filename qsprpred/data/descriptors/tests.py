@@ -5,6 +5,7 @@ from rdkit.Chem import Descriptors
 from ... import TargetTasks
 from ...data import RandomSplit
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
+from ...data.pipelines.pipeline import QSPRPipeline
 from ...models import SklearnModel
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import DescriptorInDataCheckMixIn
@@ -36,38 +37,38 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
         # test dropping of all sets
         dataset.addDescriptors(self.getDescList())
         full_len = sum(len(x) for x in dataset.descriptorSets)
-        self.assertTrue(dataset.getFeatures(concat=True).shape[1] == full_len)
+        self.assertTrue(dataset.getFeatures(concat=True)[0].shape[1] == full_len)
         dataset.dropDescriptorSets(dataset.descriptorSets)
-        self.assertEqual(dataset.getFeatures(concat=True).shape[1], 0)
+        self.assertEqual(dataset.getFeatures(concat=True)[0].shape[1], 0)
         dataset.dropDescriptorSets(dataset.descriptorSets, full_removal=True)
         self.assertEqual(len(dataset.descriptors), 0)
         dataset.addDescriptors(self.getDescList())
         dataset.dropDescriptorSets([str(x) for x in self.getDescList()])
-        self.assertEqual(dataset.getFeatures(concat=True).shape[1], 0)
+        self.assertEqual(dataset.getFeatures(concat=True)[0].shape[1], 0)
         dataset.dropDescriptorSets(
             [str(x) for x in self.getDescList()], full_removal=True
         )
         self.assertEqual(len(dataset.descriptors), 0)
         # test dropping of single set
         dataset.addDescriptors(self.getDescList())
-        self.assertTrue(dataset.getFeatures(concat=True).shape[1] == full_len)
+        self.assertTrue(dataset.getFeatures(concat=True)[0].shape[1] == full_len)
         dataset.dropDescriptorSets([dataset.descriptorSets[0]])
         self.assertEqual(
-            dataset.getFeatures(concat=True).shape[1], len(self.getDescList()[1])
+            dataset.getFeatures(concat=True)[0].shape[1], len(self.getDescList()[1])
         )
         dataset.dropDescriptorSets(dataset.descriptorSets, full_removal=True)
         dataset.addDescriptors(self.getDescList())
         dataset.dropDescriptorSets([str(dataset.descriptorSets[0])], full_removal=True)
         self.assertEqual(
-            dataset.getFeatures(concat=True).shape[1], len(self.getDescList()[1])
+            dataset.getFeatures(concat=True)[0].shape[1], len(self.getDescList()[1])
         )
         # test restoring of dropped sets
         dataset.addDescriptors(self.getDescList())
-        self.assertTrue(dataset.getFeatures(concat=True).shape[1] == full_len)
+        self.assertTrue(dataset.getFeatures(concat=True)[0].shape[1] == full_len)
         dataset.dropDescriptorSets(dataset.descriptorSets, full_removal=False)
-        self.assertEqual(dataset.getFeatures(concat=True).shape[1], 0)
+        self.assertEqual(dataset.getFeatures(concat=True)[0].shape[1], 0)
         dataset.restoreDescriptorSets(dataset.descriptorSets)
-        self.assertTrue(dataset.getFeatures(concat=True).shape[1] == full_len)
+        self.assertTrue(dataset.getFeatures(concat=True)[0].shape[1] == full_len)
 
     @parameterized.expand([(None, None), (1, None), (2, None), (4, 50)])
     def testSwitching(self, n_cpu, chunk_size):
@@ -80,12 +81,16 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
             DrugExPhyschem(),
         ]
         split = RandomSplit(test_fraction=0.1)
-        lv = LowVarianceFilter(0.05)
-        hc = HighCorrelationFilter(0.9)
+        pipeline = QSPRPipeline(
+            steps={
+                "low_var_filter": LowVarianceFilter(0.05),
+                "high_corr_filter": HighCorrelationFilter(0.9),
+            }
+        )
         dataset.prepareDataset(
             split=split,
             feature_calculators=feature_calculators,
-            feature_filters=[lv, hc],
+            pipeline=pipeline,
             recalculate_features=True,
             feature_fill_value=np.nan,
         )
@@ -94,7 +99,7 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
         dataset_next.prepareDataset(
             split=split,
             feature_calculators=feature_calculators,
-            feature_filters=[lv, hc],
+            pipeline=pipeline,
             recalculate_features=True,
             feature_fill_value=np.nan,
         )

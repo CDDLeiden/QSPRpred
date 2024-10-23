@@ -60,10 +60,7 @@ class DataSplit(DataSetDependent, ABC):
         """
 
     def splitDataset(self, dataset: QSPRDataSet):
-        return self.split(
-            dataset.getFeatures(concat=True),
-            dataset.getTargets(concat=True),
-        )
+        return self.split(dataset.getFeatures(concat=True))
 
 
 class RandomizedDataSplit(DataSplit, Randomized, ABC):

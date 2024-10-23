@@ -163,7 +163,7 @@ class QSPRModel(JSONSerializable, ABC):
         self.targetProperties = None
         self.nTargets = None
         self.featureCalculators = None
-        self.featureStandardizer = None
+        self.pipeline = None
         # initialize estimator
         self.earlyStopping = EarlyStopping() if self.supportsEarlyStopping else None
         if autoload and os.path.exists(self.metaFile):
@@ -226,7 +226,7 @@ class QSPRModel(JSONSerializable, ABC):
             self.targetProperties = data.targetProperties
             self.nTargets = len(self.targetProperties)
             self.featureCalculators = data.descriptorSets
-            self.featureStandardizer = data.featureStandardizer
+            self.pipeline = data.pipeline
             if self.randomState is None:
                 self.initRandomState(data.randomState)
             self.chemStandardizer = data.standardizer
@@ -234,7 +234,7 @@ class QSPRModel(JSONSerializable, ABC):
             self.targetProperties = None
             self.nTargets = None
             self.featureCalculators = None
-            self.featureStandardizer = None
+            self.pipeline = None
             self.chemStandardizer = None
 
     def initRandomState(self, random_state):
@@ -415,18 +415,21 @@ class QSPRModel(JSONSerializable, ABC):
 
         Args:
             X (pd.DataFrame, np.ndarray, QSPRDataSet): data matrix
-            y (pd.DataFrame, np.ndarray, QSPRDataSet): target matrix
+                if a `QSPRDataSet` instance is given, the features and targets are
+                extracted from the data set and returned
+            y (pd.DataFrame, np.ndarray): target matrix
 
         Returns:
                 data matrix and/or target matrix in np.ndarray format
         """
         if isinstance(X, QSPRDataSet):
-            X = X.getFeatures(concat=True, refit_standardizer=False)
+            if y is not None:
+                X, y = X.getFeatures(concat=True, ordered=True, refit_pipeline=False)
+            else:
+                X, _ = X.getFeatures(concat=True, ordered=True, refit_pipeline=False)
         if isinstance(X, pd.DataFrame):
             X = X.values
         if y is not None:
-            if isinstance(y, QSPRDataSet):
-                y = y.getTargets(concat=True)
             if isinstance(y, pd.DataFrame):
                 y = y.values
             return X, y
@@ -503,10 +506,10 @@ class QSPRModel(JSONSerializable, ABC):
         # prepare dataset and return it
         dataset.prepareDataset(
             feature_calculators=self.featureCalculators,
-            feature_standardizer=self.featureStandardizer,
+            pipeline=self.pipeline,
             feature_fill_value=fill_value,
             shuffle=False,
-            data_filters=None,
+            fit_pipeline=False,
         )
         return dataset, failed_mask
 
@@ -576,8 +579,8 @@ class QSPRModel(JSONSerializable, ABC):
         if hasattr(self, "applicabilityDomain") and use_applicability_domain:
             in_domain = self.applicabilityDomain.contains(
                 dataset.getFeatures(
-                    concat=True, ordered=True, refit_standardizer=False
-                )
+                    concat=True, ordered=True, refit_pipeline=False
+                )[0]
             ).values
             in_domain = self.handleInvalidsInPredictions(mols, in_domain, failed_mask)
 
@@ -628,8 +631,8 @@ class QSPRModel(JSONSerializable, ABC):
         # init properties from data
         self.initFromDataset(ds)
         # get data
-        X_all = ds.getFeatures(concat=True).values
-        y_all = ds.getTargets(concat=True).values
+        X_all, y_all = ds.getFeatures(concat=True)
+        X_all, y_all = self.convertToNumpy(X_all, y_all)
         # load estimator
         self.estimator = self.loadEstimator(self.parameters)
         # fit model

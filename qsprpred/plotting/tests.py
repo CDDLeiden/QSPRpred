@@ -164,7 +164,7 @@ class WilliamsPlotTest(PlottingTest):
         )
         # filter features to below the number of samples in the test set
         # to avoid error in WilliamsPlot
-        dataset.filterFeatures([LowVarianceFilter(0.23)])
+        dataset.applyPipeline(LowVarianceFilter(0.23), inplace=True)
         model = self.getModel(
             "test_williams_plot_single_model", alg=RandomForestRegressor
         )
