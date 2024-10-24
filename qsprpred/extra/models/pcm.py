@@ -99,6 +99,7 @@ class PCMModel(QSPRModel, ABC):
             pipeline=self.pipeline,
             feature_fill_value=fill_value,
             shuffle=False,
+            fit_pipeline=False,
         )
         return dataset, failed_mask
 
