@@ -73,7 +73,7 @@ python -m qsprpred.predict_CLI \
 -i ${TEST_DATA} \
 -o ${TEST_BASE}/qspr/predictions.tsv \
 -ncpu ${N_CPUS} \
--mp ${TEST_BASE}/qspr/models/RF_CL_fu_SINGLECLASS/meta.json \
+-mp ${TEST_BASE}/qspr/models/RF_CL_fu_SINGLECLASS/RF_CL_fu_SINGLECLASS_meta.json \
 -pr \
 -fv 0.0
 

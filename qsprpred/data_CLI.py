@@ -46,6 +46,7 @@ from qsprpred.data.sampling.splits import (
     ScaffoldSplit,
     TemporalSplit,
 )
+from qsprpred.data.pipelines.pipeline import QSPRPipeline
 from qsprpred.data.tables.qspr import QSPRTable
 from qsprpred.tasks import TargetTasks
 
@@ -470,11 +471,11 @@ def QSPR_dataprep(args):
                             PredictorDesc(SklearnModel.fromFile(predictor_path))
                         )
             # feature filters
-            featurefilters = []
+            steps = {}
             if args.low_variability:
-                featurefilters.append(LowVarianceFilter(th=args.low_variability))
+                steps["low_variability"] = LowVarianceFilter(th=args.low_variability)
             if args.high_correlation:
-                featurefilters.append(HighCorrelationFilter(th=args.high_correlation))
+                steps["high_correlation"] = HighCorrelationFilter(th=args.high_correlation)
             if args.boruta_filter:
                 # boruta filter can not be used for multi-task models
                 if len(props) > 1:
@@ -485,20 +486,17 @@ def QSPR_dataprep(args):
                     RandomForestRegressor(n_jobs=args.ncpu)
                     if args.regression else RandomForestClassifier(n_jobs=args.ncpu)
                 )
-                featurefilters.append(
-                    BorutaFilter(
-                        BorutaPy(estimator=boruta_estimator, perc=args.boruta_filter),
-                        args.random_state,
-                    )
+                steps["boruta"] = BorutaFilter(
+                    BorutaPy(estimator=boruta_estimator, perc=args.boruta_filter),
+                    args.random_state,
                 )
+            if "smiles" not in args.features:
+                steps["standardizer"] = StandardScaler()
             # prepare dataset for modelling
             mydataset.prepareDataset(
                 feature_calculators=descriptorsets,
                 split=split,
-                feature_filters=featurefilters,
-                feature_standardizer=(
-                    StandardScaler() if "Smiles" not in args.features else None
-                ),
+                pipeline=QSPRPipeline(steps),
                 feature_fill_value=args.fill_value,
             )
 
