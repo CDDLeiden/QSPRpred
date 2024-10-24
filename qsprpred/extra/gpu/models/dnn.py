@@ -151,7 +151,7 @@ class DNNModel(QSPRModelPyTorchGPU):
         elif data is not None:
             self.nClass = self.targetProperties[0].nClasses
         if data is not None:
-            self.nDim = data.getFeatures()[0].shape[1]
+            self.nDim = data.getFeatures(refit_pipeline=False)[0].shape[1]
 
     def loadEstimator(self, params: dict | None = None) -> object:
         """Load model from file or initialize new model.
@@ -263,6 +263,12 @@ class DNNModel(QSPRModelPyTorchGPU):
             n_splits=1, test_size=0.1, random_state=self.randomState
         )
         X, y = self.convertToNumpy(X, y)
+        
+        # Make sure the estimator has the correct dimensions
+        # FIXME: This is a hack to make sure the estimator has the correct dimensions
+        estimator.set_params(n_dim = X.shape[1])
+        self.nDim = X.shape[1]
+
         # fit with early stopping
         if self.earlyStopping:
             # split cross validation fold train set into train
