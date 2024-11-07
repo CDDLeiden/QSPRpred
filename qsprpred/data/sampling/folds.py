@@ -73,9 +73,9 @@ class FoldsFromDataSplit(FoldGenerator):
             if "filter"  in pipeline_copy.steps and "scaler" in pipeline_copy.steps and len(pipeline_copy.steps) == 2:
                 X_train_copy, y_train_copy = pipeline_copy.steps["filter"].transform(X_train, y_train)
                 pipeline_copy.steps["scaler"].fit(X_train_copy, y_train_copy)
+                X_train, y_train = pipeline_copy.transform(X_train, y_train)
             else:
                 X_train, y_train = pipeline_copy.fitTransform(X_train, y_train)
-            X_train, y_train = pipeline_copy.transform(X_train, y_train)
             X_test, y_test = pipeline_copy.transform(X_test, y_test)
 
             yield X_train, X_test, y_train, y_test, train_index, test_index
