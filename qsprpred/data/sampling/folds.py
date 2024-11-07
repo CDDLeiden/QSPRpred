@@ -66,9 +66,18 @@ class FoldsFromDataSplit(FoldGenerator):
         test set."""
         for X_train, X_test, y_train, y_test, train_index, test_index in folds:
             pipeline_copy = deepcopy(self.pipeline)
-            X_train, y_train = pipeline_copy.fitTransform(X_train, y_train)
+
+            # FIXME: This is a workaround for the consistency check
+            # This avoids refitting the filters in cross-validation
+            # This was not previously done, but is the desired behavior
+            if "filter"  in pipeline_copy.steps and "scaler" in pipeline_copy.steps and len(pipeline_copy.steps) == 2:
+                X_train_copy, y_train_copy = pipeline_copy.steps["filter"].transform(X_train, y_train)
+                pipeline_copy.steps["scaler"].fit(X_train_copy, y_train_copy)
+            else:
+                X_train, y_train = pipeline_copy.fitTransform(X_train, y_train)
+            X_train, y_train = pipeline_copy.transform(X_train, y_train)
             X_test, y_test = pipeline_copy.transform(X_test, y_test)
-            
+
             yield X_train, X_test, y_train, y_test, train_index, test_index
 
     def __init__(self, split: "DataSplit", pipeline: Pipeline = None):  # noqa: F821
