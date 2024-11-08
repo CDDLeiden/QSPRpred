@@ -1227,7 +1227,7 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             raise ValueError(
                 "No applicability domain calculator attached to the data set."
             )
-        X, X_ind = self.getFeatures()
+        X, X_ind, _, _ = self.getFeatures()
         if X_ind.shape[0] == 0:
             logger.warning(
                 "No test samples available, skipping applicability domain prediction."
