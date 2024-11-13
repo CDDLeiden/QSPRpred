@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Generator, Optional
+from typing import Callable, Generator
 
 import numpy as np
 import pandas as pd
@@ -9,7 +9,6 @@ from mlchemad.applicability_domains import (
 
 from qsprpred import TargetProperty
 from qsprpred.data.processing.applicability_domain import ApplicabilityDomain
-from qsprpred.data.processing.feature_standardizers import SKLearnStandardizer
 from qsprpred.data.tables.interfaces.molecule_data_set import MoleculeDataSet
 
 

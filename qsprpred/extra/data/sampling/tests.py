@@ -23,8 +23,14 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         self.dataset.addDescriptors([ProDec(["Zscale Hellberg"], self.msaProvider)])
         self.dataset.addDescriptors([RDKitDescs()])
 
-    @parameterized.expand([(RandomSplit(), ), (ScaffoldSplit(), ), (ClusterSplit(), )])
+    @parameterized.expand([(RandomSplit, ), (ScaffoldSplit, ), (ClusterSplit, )])
     def testPCMSplit(self, splitter):
+        if splitter in [ScaffoldSplit, ClusterSplit]:
+            splitter = splitter(
+                smiles_prop=self.dataset.getDF()[self.dataset.smilesProp]
+            )
+        else:
+            splitter = splitter()
         splitter = PCMSplit(splitter)
         self.dataset.split(splitter, featurize=True)
         train, test, _, _ = self.dataset.getFeatures()

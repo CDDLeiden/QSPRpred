@@ -160,11 +160,9 @@ class FoldsFromDataSplit(FoldGenerator):
                 (X_train, X_test, y_train, y_test, train_index, test_index)
 
         """
-        if hasattr(self.split, "setDataSet"):
-            self.split.setDataSet(dataset)
-        if hasattr(self.split, "setSeed") and hasattr(self.split, "getSeed"):
-            if self.split.getSeed() is None:
-                self.split.setSeed(dataset.randomState)
+        if hasattr(self.split, "randomState"):
+            if self.split.randomState is None:
+                self.split.randomState = dataset.randomState
         features = dataset.getFeatures(raw=True, concat=concat, ordered=True)
         if concat:
             X, y = features

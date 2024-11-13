@@ -75,7 +75,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
             dataset = self.createLargeTestDataSet()
         split = TemporalSplit(
             timesplit=self.splitYear,
-            timeprop="Year of first disclosure",
+            timeprop=dataset.getDF()["Year of first disclosure"],
         )
         # prepare and validate the split
         dataset.prepareDataset(split=split)
@@ -93,7 +93,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
             dataset = self.createLargeTestDataSet(name="TemporalSplit_bootstrap")
         split = TemporalSplit(
             timesplit=[self.splitYear - 1, self.splitYear, self.splitYear + 1],
-            timeprop="Year of first disclosure",
+            timeprop=dataset.getDF()["Year of first disclosure"],
         )
         bootstrap_split = BootstrapSplit(
             split=split,
@@ -126,6 +126,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
         else:
             dataset = self.createLargeTestDataSet(name="ScaffoldSplit")
         split = ScaffoldSplit(
+            smiles_prop = dataset.getDF()[dataset.smilesProp],
             scaffold=scaffold,
             custom_test_list=custom_test_list,
         )
@@ -143,6 +144,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
             dataset = self.createLargeTestDataSet(name="ScaffoldSplit_folding")
         n_folds = 5
         split = ScaffoldSplit(
+            smiles_prop = dataset.getDF()[dataset.smilesProp],
             scaffold=scaffold,
             custom_test_list=custom_test_list,
             n_folds=n_folds,
@@ -198,6 +200,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
         else:
             dataset = self.createLargeTestDataSet(name="ClusterSplit")
         split = ClusterSplit(
+            smiles_prop=dataset.getDF()[dataset.smilesProp],
             clustering=clustering_algorithm,
             custom_test_list=custom_test_list,
             time_limit_seconds=10,
@@ -213,7 +216,9 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
     def testSerialization(self):
         """Test the serialization of dataset with datasplit."""
         dataset = self.createLargeTestDataSet()
-        split = ScaffoldSplit()
+        split = ScaffoldSplit(
+            smiles_prop=dataset.getDF()[dataset.smilesProp],
+        )
         n_bits = 128
         pipeline = QSPRPipeline(
             steps={"standardizer": StandardScaler()}

@@ -384,6 +384,7 @@ def QSPR_dataprep(args):
             # data splitter
             if args.split == "scaffold":
                 split = ScaffoldSplit(
+                    smiles_prop=mydataset.getDF()[mydataset.smilesProp],
                     test_fraction=args.split_fraction,
                     scaffold=BemisMurckoRDKit(),
                     dataset=mydataset,
@@ -410,6 +411,7 @@ def QSPR_dataprep(args):
                 elif args.split_cluster_method == "LeaderPicker":
                     clustering = FPSimilarityLeaderPickerClusters()
                 split = ClusterSplit(
+                    smiles_prop=mydataset.getDF()[mydataset.smilesProp],
                     test_fraction=args.split_fraction,
                     clustering=clustering,
                     dataset=mydataset,
