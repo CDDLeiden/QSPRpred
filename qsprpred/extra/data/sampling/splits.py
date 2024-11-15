@@ -10,17 +10,20 @@ import numpy as np
 from sklearn.impute import SimpleImputer
 
 from qsprpred.data.sampling.splits import (
-    ClusterSplit,
     DataSplit,
-    RandomSplit,
+    ClusterSplit,
+    GBMTDataSplit,
+    GBMTRandomSplit,
     ScaffoldSplit,
 )
 from qsprpred.data.tables.qspr import QSPRTable
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.tasks import TargetProperty
+from qsprpred.utils.interfaces.randomized import Randomized
+import pandas as pd
 
 
-class PCMSplit(DataSplit):
+class PCMSplit(DataSplit, Randomized):
     """
     Splits a dataset into train and test set such that the subsets are balanced with
     respect to each of the protein targets.
@@ -30,21 +33,35 @@ class PCMSplit(DataSplit):
 
     Attributes:
         dataset (PCMDataSet): The dataset to split.
-        splitter (DataSplit): The splitter to use on the initial clusters.
+        splitter (GBMTDataSplit): The splitter to use on the initial clusters.
+        seed (int): The random seed to use for the splitter if it is a RandomSplit or
+            ClusterSplit (Can also be set on the splitter itself).
     """
-    def __init__(self, splitter: DataSplit, dataset: PCMDataSet | None = None) -> None:
-        super().__init__(dataset)
+    def __init__(self, splitter: GBMTDataSplit, proteins: pd.Series, seed = None) -> None:
+        super().__init__()
         self.splitter = splitter
+        self.proteins = proteins
 
         # Check that splitter is either RandomSplit, ScaffoldSplit or ClusterSplit
         assert isinstance(
-            self.splitter, (RandomSplit, ScaffoldSplit, ClusterSplit)
+            self.splitter, (GBMTRandomSplit, ScaffoldSplit, ClusterSplit)
         ), "Splitter must be either RandomSplit, ScaffoldSplit or ClusterSplit!"
 
-        if isinstance(self.splitter, (RandomSplit, ClusterSplit)):
-            self.splitter.randomState = (
-                dataset.randomState if dataset is not None else None
-            )
+        if isinstance(self.splitter, (GBMTRandomSplit, ClusterSplit)):
+            if seed is None:
+                self.randomState = self.splitter.randomState
+            else:
+                self.randomState = seed
+
+    @property
+    def randomState(self) -> int:
+        return self._seed
+
+    @randomState.setter
+    def randomState(self, seed: int | None):
+        self._seed = seed
+        if isinstance(self.splitter, (GBMTRandomSplit, ClusterSplit)):
+            self.splitter.randomState = seed
 
     def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
         """
@@ -65,56 +82,81 @@ class PCMSplit(DataSplit):
             input data matrix X (note that these are integer indices, rather than a
             pandas index!)
         """
-        ds = self.getDataSet()
-        df = ds.getDF()
-        indices = df.index.tolist()
-        proteins = df[ds.proteinIDProp].unique()
-        task = ds.targetProperties[0].task
-        th = ds.targetProperties[0].th if task.isClassification() else None
         assert (
-            len(ds.targetProperties) == 1
+            y.shape[1] == 1
         ), "PCMSplit only works for single-task datasets!"
         # TODO: Add support for multi-target (create a multi-task PCM dataset)
         # with all target-task combinations as different columns and split that
         # dataset with the given splitter
         # Pivot dataframe to get a matrix with protein targets as columns
-        df_mt = df.pivot(
-            index=ds.smilesProp,
-            columns=ds.proteinIDProp,
-            values=ds.targetProperties[0].name,
-        ).reset_index()
-        # Create target properties for multi-task dataset
-        mt_targetProperties = [
-            TargetProperty(
-                name=target, task=task, th=th, imputer=SimpleImputer(strategy="median")
-            ) for target in proteins
-        ]
-        # temporarily create multi-task dataset and split it with the given splitter
-        ds_mt = QSPRTable.fromDF(
-            name=f"PCM_{self.splitter.__class__.__name__}_{hash(self)}",
-            df=df_mt,
-            smiles_col=ds.smilesProp,
-            target_props=mt_targetProperties,
+        y_copy = y.copy()
+        y_copy["SMILES"] = self.splitter.smilesProp
+        y_copy["protein"] = self.proteins
+        y_copy.reset_index(drop=True, inplace=True)
+        # create dataframe with SMILES as index and protein targets as columns
+        # so each SMILES only appears once
+        df_mt = y_copy.pivot(
+            index="SMILES",
+            columns="protein",
+            values=y.columns[0],
         )
-        ds_mt.randomState = ds.randomState
-        ds_mt.split(self.splitter)
-        # Convert MT indices to indices of original PCM dataset
-        test_indices = []
-        for i in ds_mt.X_ind.index:
-            # Get SMILES and non-NaN targets for index i
-            smiles = df_mt.loc[i, ds_mt.smilesProp]
-            cols = df_mt.loc[i, :].dropna().index
-            targets = [col for col in cols if col in proteins]
-            for target in targets:
-                # Get index in the original PCM dataset the SMILES-target pair
-                a = df[ds.smilesProp] == smiles
-                b = df[ds.proteinIDProp] == target
-                if any(a & b):
-                    ds_idx = df[a & b].index.astype(str)[0]
-                    # Convert to numeric index
-                    test_indices.append(indices.index(ds_idx))
-        train_indices = [i for i in range(len(df)) if i not in test_indices]
-        return iter([(train_indices, test_indices)])
+        # Fill NaN values with median of the column
+        df_mt = df_mt.fillna(df_mt.median())
+        
+        # temporarily set the underlying splitter's smilesProp to the SMILES
+        # to align them with the multi-task dataset
+        self.splitter.smilesProp = pd.Series(df_mt.index, index=df_mt.index)
+        
+        
+        for train_mt_index, test_mt_index in self.splitter.split(X=df_mt, y=df_mt):
+            # Get the SMILES for the train and test set
+            train_smiles = df_mt.iloc[train_mt_index].index
+            test_smiles = df_mt.iloc[test_mt_index].index
+            # Get the numeric indices of the SMILES in the original dataset
+            train_indices = y_copy[y_copy["SMILES"].isin(train_smiles)].index.to_list()
+            test_indices = y_copy[y_copy["SMILES"].isin(test_smiles)].index.to_list()
+            yield train_indices, test_indices
+        self.splitter.smilesProp = y_copy["SMILES"]
+            
+            
+        
+        # df_mt = df.pivot(
+        #     index=ds.smilesProp,
+        #     columns=ds.proteinIDProp,
+        #     values=ds.targetProperties[0].name,
+        # ).reset_index()
+        # # Create target properties for multi-task dataset
+        # mt_targetProperties = [
+        #     TargetProperty(
+        #         name=target, task=task, th=th, imputer=SimpleImputer(strategy="median")
+        #     ) for target in proteins
+        # ]
+        # # temporarily create multi-task dataset and split it with the given splitter
+        # ds_mt = QSPRTable.fromDF(
+        #     name=f"PCM_{self.splitter.__class__.__name__}_{hash(self)}",
+        #     df=df_mt,
+        #     smiles_col=ds.smilesProp,
+        #     target_props=mt_targetProperties,
+        # )
+        # ds_mt.randomState = ds.randomState
+        # ds_mt.split(self.splitter)
+        # # Convert MT indices to indices of original PCM dataset
+        # test_indices = []
+        # for i in ds_mt.X_ind.index:
+        #     # Get SMILES and non-NaN targets for index i
+        #     smiles = df_mt.loc[i, ds_mt.smilesProp]
+        #     cols = df_mt.loc[i, :].dropna().index
+        #     targets = [col for col in cols if col in proteins]
+        #     for target in targets:
+        #         # Get index in the original PCM dataset the SMILES-target pair
+        #         a = df[ds.smilesProp] == smiles
+        #         b = df[ds.proteinIDProp] == target
+        #         if any(a & b):
+        #             ds_idx = df[a & b].index.astype(str)[0]
+        #             # Convert to numeric index
+        #             test_indices.append(indices.index(ds_idx))
+        # train_indices = [i for i in range(len(df)) if i not in test_indices]
+        # return iter([(train_indices, test_indices)])
 
 
 class LeaveTargetsOut(DataSplit):

@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from parameterized import parameterized
 
-from qsprpred.data import ClusterSplit, RandomSplit, ScaffoldSplit
+from qsprpred.data import ClusterSplit, RandomSplit, ScaffoldSplit, GBMTRandomSplit
 from qsprpred.data.descriptors.sets import RDKitDescs
 from qsprpred.extra.data.descriptors.sets import ProDec
 from qsprpred.extra.data.sampling.splits import (
@@ -23,15 +23,13 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         self.dataset.addDescriptors([ProDec(["Zscale Hellberg"], self.msaProvider)])
         self.dataset.addDescriptors([RDKitDescs()])
 
-    @parameterized.expand([(RandomSplit, ), (ScaffoldSplit, ), (ClusterSplit, )])
+    @parameterized.expand([(GBMTRandomSplit, ), (ScaffoldSplit, ), (ClusterSplit, )])
     def testPCMSplit(self, splitter):
-        if splitter in [ScaffoldSplit, ClusterSplit]:
-            splitter = splitter(
-                smiles_prop=self.dataset.getDF()[self.dataset.smilesProp]
-            )
-        else:
-            splitter = splitter()
-        splitter = PCMSplit(splitter)
+        splitter = splitter(
+            smiles_prop=self.dataset.getDF()[self.dataset.smilesProp]
+        )
+        splitter = PCMSplit(splitter, proteins=self.dataset.getDF()[self.dataset.proteinIDProp])
+
         self.dataset.split(splitter, featurize=True)
         train, test, _, _ = self.dataset.getFeatures()
         train, test = train.index, test.index

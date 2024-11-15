@@ -397,7 +397,7 @@ class GBMTDataSplit(DataSplit):
             yield train_indices, test_indices
 
 
-class GBMTRandomSplit(GBMTDataSplit):
+class GBMTRandomSplit(GBMTDataSplit, Randomized):
     """
     Splits dataset into balanced random train and test subsets.
 
@@ -421,7 +421,7 @@ class GBMTRandomSplit(GBMTDataSplit):
     ) -> None:
         if seed is None:
             logger.info("No random state supplied")
-
+            
         super().__init__(
             smiles_prop,
             RandomClusters(seed, n_initial_clusters),
@@ -429,6 +429,24 @@ class GBMTRandomSplit(GBMTDataSplit):
             n_folds,
             custom_test_list,
             **split_kwargs,
+        )
+        self.initialClusters = n_initial_clusters
+        self.randomState = seed
+    
+    @property
+    def randomState(self) -> int:
+        return self._seed
+
+    @randomState.setter
+    def randomState(self, seed: int | None):
+        self._seed = seed
+        super().__init__(
+            self.smilesProp,
+            RandomClusters(seed, self.initialClusters),
+            self.testFraction,
+            self.nFolds,
+            self.customTestList,
+            **self.splitKwargs,
         )
 
 
