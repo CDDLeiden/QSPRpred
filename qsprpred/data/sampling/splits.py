@@ -493,7 +493,7 @@ class ClusterSplit(GBMTDataSplit, Randomized):
                 "and could not find random state on the dataset."
                 "Random seed will be set randomly."
             )
-        clustering = (
+        self.clustering = (
             clustering
             if clustering is not None 
             else FPSimilarityMaxMinClusters(seed=seed)
