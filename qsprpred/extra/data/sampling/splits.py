@@ -7,7 +7,6 @@ To add a new data splitter:
 from typing import Iterable
 
 import numpy as np
-from sklearn.impute import SimpleImputer
 
 from qsprpred.data.sampling.splits import (
     DataSplit,
@@ -16,9 +15,6 @@ from qsprpred.data.sampling.splits import (
     GBMTRandomSplit,
     ScaffoldSplit,
 )
-from qsprpred.data.tables.qspr import QSPRTable
-from qsprpred.extra.data.tables.pcm import PCMDataSet
-from qsprpred.tasks import TargetProperty
 from qsprpred.utils.interfaces.randomized import Randomized
 import pandas as pd
 
@@ -34,13 +30,14 @@ class PCMSplit(DataSplit, Randomized):
     Attributes:
         dataset (PCMDataSet): The dataset to split.
         splitter (GBMTDataSplit): The splitter to use on the initial clusters.
+        targetProp (pd.Series): The protein targets to balance the split on.
         seed (int): The random seed to use for the splitter if it is a RandomSplit or
             ClusterSplit (Can also be set on the splitter itself).
     """
-    def __init__(self, splitter: GBMTDataSplit, proteins: pd.Series, seed = None) -> None:
+    def __init__(self, splitter: GBMTDataSplit, target_prop: pd.Series, seed = None) -> None:
         super().__init__()
         self.splitter = splitter
-        self.proteins = proteins
+        self.targetProp = target_prop
 
         # Check that splitter is either RandomSplit, ScaffoldSplit or ClusterSplit
         assert isinstance(
@@ -91,13 +88,13 @@ class PCMSplit(DataSplit, Randomized):
         # Pivot dataframe to get a matrix with protein targets as columns
         y_copy = y.copy()
         y_copy["SMILES"] = self.splitter.smilesProp
-        y_copy["protein"] = self.proteins
+        y_copy["target_prop"] = self.targetProp
         y_copy.reset_index(drop=True, inplace=True)
         # create dataframe with SMILES as index and protein targets as columns
         # so each SMILES only appears once
         df_mt = y_copy.pivot(
             index="SMILES",
-            columns="protein",
+            columns="target_prop",
             values=y.columns[0],
         )
         # Fill NaN values with median of the column
@@ -106,7 +103,6 @@ class PCMSplit(DataSplit, Randomized):
         # temporarily set the underlying splitter's smilesProp to the SMILES
         # to align them with the multi-task dataset
         self.splitter.smilesProp = pd.Series(df_mt.index, index=df_mt.index)
-        
         
         for train_mt_index, test_mt_index in self.splitter.split(X=df_mt, y=df_mt):
             # Get the SMILES for the train and test set
@@ -117,68 +113,24 @@ class PCMSplit(DataSplit, Randomized):
             test_indices = y_copy[y_copy["SMILES"].isin(test_smiles)].index.to_list()
             yield train_indices, test_indices
         self.splitter.smilesProp = y_copy["SMILES"]
-            
-            
-        
-        # df_mt = df.pivot(
-        #     index=ds.smilesProp,
-        #     columns=ds.proteinIDProp,
-        #     values=ds.targetProperties[0].name,
-        # ).reset_index()
-        # # Create target properties for multi-task dataset
-        # mt_targetProperties = [
-        #     TargetProperty(
-        #         name=target, task=task, th=th, imputer=SimpleImputer(strategy="median")
-        #     ) for target in proteins
-        # ]
-        # # temporarily create multi-task dataset and split it with the given splitter
-        # ds_mt = QSPRTable.fromDF(
-        #     name=f"PCM_{self.splitter.__class__.__name__}_{hash(self)}",
-        #     df=df_mt,
-        #     smiles_col=ds.smilesProp,
-        #     target_props=mt_targetProperties,
-        # )
-        # ds_mt.randomState = ds.randomState
-        # ds_mt.split(self.splitter)
-        # # Convert MT indices to indices of original PCM dataset
-        # test_indices = []
-        # for i in ds_mt.X_ind.index:
-        #     # Get SMILES and non-NaN targets for index i
-        #     smiles = df_mt.loc[i, ds_mt.smilesProp]
-        #     cols = df_mt.loc[i, :].dropna().index
-        #     targets = [col for col in cols if col in proteins]
-        #     for target in targets:
-        #         # Get index in the original PCM dataset the SMILES-target pair
-        #         a = df[ds.smilesProp] == smiles
-        #         b = df[ds.proteinIDProp] == target
-        #         if any(a & b):
-        #             ds_idx = df[a & b].index.astype(str)[0]
-        #             # Convert to numeric index
-        #             test_indices.append(indices.index(ds_idx))
-        # train_indices = [i for i in range(len(df)) if i not in test_indices]
-        # return iter([(train_indices, test_indices)])
 
 
 class LeaveTargetsOut(DataSplit):
-    def __init__(self, targets: list[str], dataset: PCMDataSet | None = None):
+    def __init__(self, targets: list[str], target_prop: pd.Series) -> None:
         """Creates a leave target out splitter.
 
         Args:
             targets (list): the identifiers of the targets to leave out as test set
-            dataset (PCMDataset): a `PCMDataset` instance to split
+            targetProp (pd.Series): the protein targets to balance the split on
         """
-
-        super().__init__(dataset)
         self.targets = list(set(targets))
+        self.targetProp = target_prop
 
     def split(self, X, y):
-        ds = self.getDataSet()
-        ds_targets = ds.getProteinKeys()
-        for target in self.targets:
-            assert target in ds_targets, f"Target key '{target}' not in dataset!"
-            ds_targets.remove(target)
-        mask = ds.getProperty(ds.proteinIDProp).isin(ds_targets).values
-        indices = np.array(list(range(len(ds))))
+        mask = self.targetProp.isin(self.targets)
+        mask = mask.loc[X.index].reset_index(drop=True)
+        
+        indices = np.array(list(range(len(X))))
         train = indices[mask]
         test = indices[~mask]
         return iter([(train, test)])
@@ -187,51 +139,56 @@ class LeaveTargetsOut(DataSplit):
 class TemporalPerTarget(DataSplit):
     def __init__(
         self,
-        year_col: str,
-        split_years: dict[str, int],
-        firts_year_per_compound: bool = True,
-        dataset: PCMDataSet | None = None,
+        smiles_prop: pd.Series,
+        target_prop: pd.Series,
+        time_prop: pd.Series,
+        split_time: dict[str, int],
+        first_time_per_compound: bool = True,
     ):
         """Creates a temporal split that is consistent across targets.
 
         Args:
-            year_col (str):
-                the name of the column in the dataframe that
-                contains the year information
-            split_years (dict[str,int]):
+            smiles_prop (pd.Series):
+                a series containing the smiles information
+            target_prop (pd.Series):
+                a series containing the target information
+            time_prop (pd.Series):
+                a series that contains the time information for the dataset (e.g. year)
+            split_time (dict[str,int]):
                 a dictionary with target keys as keys
-                and split years as values
-            firts_year_per_compound (bool):
-                if True, the first year a compound appears in the dataset is used
+                and split times as values
+            first_time_per_compound (bool):
+                if True, the first time a compound appears in the dataset is used
                 for all targets
-            dataset (PCMDataset):
-                a `PCMDataset` instance to split
         """
-        super().__init__(dataset)
-        self.splitYears = split_years
-        self.yearCol = year_col
-        self.firstYearPerCompound = firts_year_per_compound
+        self.smilesProp = smiles_prop
+        self.targetProp = target_prop
+        self.splitTime = split_time
+        self.timeProp = time_prop
+        self.firstTimePerCompound = first_time_per_compound
 
     def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
-        ds = self.getDataSet()
-        df = ds.getDF()
-        indices = df.index.tolist()
+        # Add the smiles,  target and time properties to target values
+        y_copy = y.copy()
+        y_copy["smiles"] = self.smilesProp
+        y_copy["target_prop"] = self.targetProp
+        y_copy["time_prop"] = self.timeProp
+        y_copy.reset_index(drop=True, inplace=True)
 
-        # Set the first year a compound appears in the dataset as the year
+        # Set the first time a compound appears in the dataset as the time
         # of the compound for all targets
-        if self.firstYearPerCompound:
-            first_years = df.groupby(ds.smilesProp)[self.yearCol].min()
-            df[self.yearCol + "_first"] = df[ds.smilesProp].map(first_years)
-            self.yearCol += "_first"
+        if self.firstTimePerCompound:
+            first_appearances = y_copy.groupby("smiles")["time_prop"].min()
+            y_copy["time_prop"] = y_copy["smiles"].map(first_appearances)
 
         train_indices = []
         test_indices = []
 
-        for target, split_year in self.splitYears.items():
-            df_target = df[df[ds.proteinIDProp] == target]
+        for target, split_year in self.splitTime.items():
+            y_target = y_copy[y_copy["target_prop"] == target]
             # Get indices of the train and test set
-            train = df_target[df_target[self.yearCol] <= split_year].index.tolist()
-            test = df_target[df_target[self.yearCol] > split_year].index.tolist()
+            train = y_target[y_target["time_prop"] <= split_year].index.tolist()
+            test = y_target[y_target["time_prop"] > split_year].index.tolist()
             # Check if there is data for the target before/after the split year
             if len(train) == 0:
                 raise ValueError(
@@ -242,11 +199,11 @@ class TemporalPerTarget(DataSplit):
                     f"No test data for target {target} after {split_year}!"
                 )
             # Convert to numeric indices
-            train_indices.extend([indices.index(i) for i in train])
-            test_indices.extend([indices.index(i) for i in test])
+            train_indices.extend(train)
+            test_indices.extend(test)
 
         assert len(set(train_indices)) + len(
             set(test_indices)
-        ) == len(ds), "Train and test set do not cover the whole dataset!"
+        ) == len(y_copy), "Train and test set do not cover the whole dataset!"
 
         return iter([(train_indices, test_indices)])

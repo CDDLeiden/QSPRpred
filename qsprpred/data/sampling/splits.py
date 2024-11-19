@@ -520,7 +520,7 @@ class ClusterSplit(GBMTDataSplit, Randomized):
 
         super().__init__(
             smiles_prop,
-            clustering,
+            self.clustering,
             test_fraction,
             n_folds,
             custom_test_list,
