@@ -311,7 +311,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         )
         dataset.prepareDataset(
             feature_calculators=[SmilesDesc()],
-            split=RandomSplit(test_fraction=0.1, dataset=dataset),
+            split=RandomSplit(test_fraction=0.1, seed=dataset.randomState),
         )
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
@@ -401,7 +401,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         )
         dataset.prepareDataset(
             feature_calculators=[SmilesDesc()],
-            split=RandomSplit(test_fraction=0.1, dataset=dataset),
+            split=RandomSplit(test_fraction=0.1, seed=dataset.randomState),
         )
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}"
