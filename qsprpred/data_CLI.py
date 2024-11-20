@@ -387,13 +387,11 @@ def QSPR_dataprep(args):
                     smiles_prop=mydataset.getDF()[mydataset.smilesProp],
                     test_fraction=args.split_fraction,
                     scaffold=BemisMurckoRDKit(),
-                    dataset=mydataset,
                 )
             elif args.split == "time":
                 split = TemporalSplit(
                     timesplit=args.split_time,
-                    timeprop=args.split_timecolumn,
-                    dataset=mydataset,
+                    timeprop=mydataset.getDF()[args.split_timecolumn],
                 )
             elif args.split == "manual":
                 if "datasplit" not in df.columns:
@@ -414,11 +412,11 @@ def QSPR_dataprep(args):
                     smiles_prop=mydataset.getDF()[mydataset.smilesProp],
                     test_fraction=args.split_fraction,
                     clustering=clustering,
-                    dataset=mydataset,
+                    seed=args.random_state,
                 )
             else:
                 split = RandomSplit(
-                    test_fraction=args.split_fraction, dataset=mydataset
+                    test_fraction=args.split_fraction, seed=args.random_state
                 )
             # feature calculator
             descriptorsets = []
