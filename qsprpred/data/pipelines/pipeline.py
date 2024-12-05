@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 import pandas as pd
 from ...utils.serialization import JSONSerializable
+# from ..descriptors.sets import DescriptorSet
+from qsprpred.data.sampling.splits import DataSplit
+from typing import Generator
 
 class Step(JSONSerializable):
     """A data preprocessing step that can be applied to a dataset"""
@@ -94,8 +97,13 @@ class QSPRPipeline(Pipeline):
     Args:
         steps (dict[str, Step]): Dictionary of named steps in the pipeline
     """
-    def __init__(self, steps: dict[str, Step]):
+    def __init__(
+        self,
+        # feature_calculators: list[DescriptorSet] | None = None,
+        steps: dict[str, Step] = {},
+    ):
         super().__init__(steps)
+        # self.feature_calculators = feature_calculators
         for name, step in steps.items():
             if not isinstance(step, Step):
                 if hasattr(step, 'fit_transform'):
@@ -103,14 +111,18 @@ class QSPRPipeline(Pipeline):
         self.originalfeatureNames = None
         self.featureNames = None
     
-    def fitTransform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def fitTransform(
+        self, X: pd.DataFrame, y: None | pd.DataFrame = None
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         self.originalfeatureNames = X.columns
         for step in self.steps.values():
             X, y = step.fitTransform(X, y)
         self.featureNames = X.columns
         return X, y
 
-    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def transform(
+        self, X: pd.DataFrame, y: None | pd.DataFrame = None
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         # add NaN values for missing features
         missing_features = list(set(self.originalfeatureNames) - set(X.columns))
         X = pd.concat(
@@ -120,3 +132,41 @@ class QSPRPipeline(Pipeline):
         for step in self.steps.values():
             X, y = step.transform(X, y)
         return X, y
+            
+    def apply(
+        self,
+        X_train: pd.DataFrame,
+        y_train: pd.DataFrame = None,
+        X_test: pd.DataFrame | None = None,
+        y_test: pd.DataFrame | None = None,
+        fit: bool = True,
+    ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame | None, pd.DataFrame | None
+    ]:
+        """Apply the pipeline to the data
+        
+        If fit is True, the pipeline is fitted to the training data and 
+        then applied to the train and test data. If fit is False, the pipeline is only
+        applied to the data.
+
+        Args:
+            X_train (pd.DataFrame): training data to apply the pipeline to
+            y_train (pd.DataFrame | None): training target data to apply the pipeline to
+            X_test (pd.DataFrame | None): test data to apply the pipeline to
+            y_test (pd.DataFrame | None): test target data to apply the pipeline to
+            refit (bool): whether to fit the pipeline
+        
+        Returns:
+            X_train (pd.DataFrame): transformed training data
+            y_train (pd.DataFrame | None): transformed training targets
+            X_test (pd.DataFrame | None): transformed test data
+            y_test (pd.DataFrame | None): transformed test targets
+        """
+        if fit:
+            X_train, y_train = self.fitTransform(X_train, y_train)
+        else:
+            X_train, y_train = self.transform(X_train, y_train)
+        if X_test is not None:
+            X_test, y_test = self.transform(X_test, y_test)
+        return X_train, X_test, y_train, y_test
+    
+    
