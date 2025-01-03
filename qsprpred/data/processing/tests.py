@@ -21,7 +21,7 @@ from ...data.processing.feature_filters import (
     LowVarianceFilter,
 )
 from ...data.processing.feature_standardizers import SKLearnStandardizer
-from ...data.pipelines.pipeline import QSPRPipeline
+from ...data.pipelines.pipeline import DatasetPipeline
 from ...data.tables.qspr import QSPRTable
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn, PathMixIn
@@ -113,7 +113,7 @@ class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
         remove_cation = CategoryFilter(prop=dataset.getDF()["moka_ionState7.4"], values=["cationic"])
         self.assertTrue((dataset.getDF()["moka_ionState7.4"] == "cationic").sum() > 0)
         dataset.filter([remove_cation])
-        self.assertEqual(len(dataset.getDF()), len(dataset.getFeatures(concat=True)[0]))
+        self.assertEqual(len(dataset.getDF()), len(dataset.getDescriptors()))
         self.assertTrue((dataset.getDF()["moka_ionState7.4"] == "cationic").sum() == 0)
 
 
@@ -129,6 +129,7 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         self.nCPU = 2  # just to test parallel processing
         self.chunkSize = 2
         self.setUpPaths()
+        # create example dataset
         self.df = pd.DataFrame(
             data=np.array([["C", 1], ["C", 2], ["C", 3], ["C", 4], ["C", 5], ["C", 6]]),
             columns=["SMILES", "y"],
@@ -142,14 +143,15 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
             df=self.df,
             path=self.generatedPath,
         )
-        descriptors = [
+        self.descriptor_names = [
             "Descriptor_F1",
             "Descriptor_F2",
             "Descriptor_F3",
             "Descriptor_F4",
             "Descriptor_F5",
         ]
-        self.df_descriptors = pd.DataFrame(
+        # create example descriptors and add them to the dataset
+        self.example_descriptors = pd.DataFrame(
             data=np.array(
                 [
                     [1, 4, 2, 6, 2],
@@ -160,30 +162,36 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
                     [1, 8, 4, 7, 12],
                 ]
             ),
-            columns=descriptors,
+            columns=[
+                "Descriptor_F1",
+                "Descriptor_F2",
+                "Descriptor_F3",
+                "Descriptor_F4",
+                "Descriptor_F5",
+            ],
         )
-        self.df_descriptors[self.dataset.idProp] = list(
+        self.example_descriptors[self.dataset.idProp] = list(
             self.dataset.getProperty(self.dataset.idProp)
         )
-        self.df_descriptors.set_index(self.dataset.idProp, inplace=True, drop=True)
-        self.dataset.addDescriptors([DataFrameDescriptorSet(self.df_descriptors)])
-        self.descriptors = self.dataset.featureNames
+        self.example_descriptors.set_index(self.dataset.idProp, inplace=True, drop=True)
+        self.dataset.addDescriptors([DataFrameDescriptorSet(self.example_descriptors)])
 
     def recalculateWithMultiIndex(self):
+        """Change the dataset to have a multi-index."""
         self.dataset.dropDescriptorSets(self.dataset.descriptorSets, full_removal=True)
-        self.df_descriptors["ID_COL1"] = (
+        self.example_descriptors["ID_COL1"] = (
             self.dataset.getProperty(self.dataset.idProp
                                     ).apply(lambda x: x.split("_")[0]).to_list()
         )
-        self.df_descriptors["ID_COL2"] = (
+        self.example_descriptors["ID_COL2"] = (
             self.dataset.getProperty(self.dataset.idProp
                                     ).apply(lambda x: x.split("_")[-1]).to_list()
         )
-        self.dataset.addProperty("ID_COL1", self.df_descriptors["ID_COL1"].values)
-        self.dataset.addProperty("ID_COL2", self.df_descriptors["ID_COL2"].values)
+        self.dataset.addProperty("ID_COL1", self.example_descriptors["ID_COL1"].values)
+        self.dataset.addProperty("ID_COL2", self.example_descriptors["ID_COL2"].values)
         self.dataset.addDescriptors(
             [DataFrameDescriptorSet(
-                self.df_descriptors,
+                self.example_descriptors,
                 ["ID_COL1", "ID_COL2"],
             )]
         )
@@ -191,7 +199,7 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
     def testDefaultDescriptorAdd(self):
         """Test adding without index columns."""
         self.dataset.nJobs = 1
-        df_new = self.dataset.getFeatures(concat=True)[0].copy()
+        df_new = self.dataset.getDescriptors().copy()
         calc = DataFrameDescriptorSet(df_new, suffix="new_df_desc")
         self.dataset.addDescriptors([calc])
 
@@ -201,13 +209,24 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
     ])
     def testLowVarianceFilter(self, use_index_cols):
         """Test the low variance filter, which drops features with a variance below
-        a threshold."""
+        a threshold.
+        
+        Args:
+            use_index_cols (bool): If True, a multi-index is used for the dataset.
+        """
         if use_index_cols:
             self.recalculateWithMultiIndex()
-        self.dataset.applyPipeline(LowVarianceFilter(0.01), inplace=True)
-        # check if correct columns selected and values still original
-        self.assertListEqual(list(self.dataset.featureNames), self.descriptors[1:])
-        self.assertListEqual(list(self.dataset.X.columns), self.descriptors[1:])
+
+        pipeline = DatasetPipeline(
+            steps={
+                "low_var_filter": LowVarianceFilter(0.01),
+            }
+        )
+        X, y = next(pipeline.apply(self.dataset))
+        # check if first column (no variance) is dropped
+        self.assertListEqual(X.columns.tolist(), self.dataset.getDescriptorNames()[1:])
+        # check y is still the same
+        self.assertListEqual(y.columns.tolist(), self.dataset.getTargets().columns.tolist())
 
     @parameterized.expand([
         (True, ),
@@ -218,11 +237,20 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         above a threshold."""
         if use_index_cols:
             self.recalculateWithMultiIndex()
-        self.dataset.applyPipeline(HighCorrelationFilter(0.8), inplace=True)
-        # check if correct columns selected and values still original
-        self.descriptors.pop(2)
-        self.assertListEqual(list(self.dataset.featureNames), self.descriptors)
-        self.assertListEqual(list(self.dataset.X.columns), self.descriptors)
+
+        pipeline = DatasetPipeline(
+            steps={
+                "high_corr_filter": HighCorrelationFilter(0.8),
+            }
+        )
+        X, y = next(pipeline.apply(self.dataset))
+        # check if "Descriptor_F3" (correlated to "Descriptor_F2") is dropped
+        desc_to_keep = self.dataset.getDescriptorNames()
+        desc_to_keep.remove("DataFrame_Descriptor_F3")
+        self.assertListEqual(X.columns.tolist(), desc_to_keep)
+        # check y is still the same
+        self.assertListEqual(y.columns.tolist(), self.dataset.getTargets().columns.tolist())
+
 
     @parameterized.expand(
         [
@@ -235,10 +263,16 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         relevant as random features."""
         if use_index_cols:
             self.recalculateWithMultiIndex()
-        self.dataset.applyPipeline(BorutaFilter(), inplace=True)
-        # check if correct columns selected and values still original
-        self.assertListEqual(list(self.dataset.featureNames), self.descriptors[-1:])
-        self.assertListEqual(list(self.dataset.X.columns), self.descriptors[-1:])
+        pipeline = DatasetPipeline(
+            steps={
+                "boruta_filter": BorutaFilter(),
+            }
+        )
+        X, y = next(pipeline.apply(self.dataset))
+        # check if only "Descriptor_F5" is kept (increases with target)
+        self.assertListEqual(X.columns.tolist(), self.dataset.getDescriptorNames()[-1:])
+        # check y is still the same
+        self.assertListEqual(y.columns.tolist(), self.dataset.getTargets().columns.tolist())
 
 
 class TestFeatureStandardizer(DataSetsPathMixIn, QSPRTestCase):
@@ -253,12 +287,12 @@ class TestFeatureStandardizer(DataSetsPathMixIn, QSPRTestCase):
     def testFeaturesStandardizer(self):
         """Test the feature standardizer fitting, transforming and serialization."""
         scaler = SKLearnStandardizer(StandardScaler())
-        scaled_features, _ = scaler.fitTransform(self.dataset.X)
+        scaled_features, _ = scaler.fitTransform(self.dataset.getDescriptors())
         scaler.toFile(f"{self.generatedPath}/test_scaler.json")
         scaler_fromfile = SKLearnStandardizer.fromFile(
             f"{self.generatedPath}/test_scaler.json"
         )
-        scaled_features_fromfile, _ = scaler_fromfile.transform(self.dataset.X)
+        scaled_features_fromfile, _ = scaler_fromfile.transform(self.dataset.getDescriptors())
         self.assertIsInstance(scaled_features, pd.DataFrame)
         self.assertEqual(scaled_features.shape, (len(self.dataset), 128))
         self.assertEqual(
@@ -355,26 +389,26 @@ class TestApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
     def testApplicabilityDomain(self):
         """Test the applicability domain fitting, transforming and serialization."""
         ad = MLChemADWrapper(KNNAD(dist="jaccard", scaling=None, alpha=0.95))
-        ad.fit(self.dataset.X)
-        self.assertIsInstance(ad.contains(self.dataset.X), pd.Series)
+        ad.fit(self.dataset.getDescriptors())
+        self.assertIsInstance(ad.contains(self.dataset.getDescriptors()), pd.Series)
 
         ad.toFile(f"{self.generatedPath}/test_ad.json")
         ad_fromfile = MLChemADWrapper.fromFile(f"{self.generatedPath}/test_ad.json")
-        self.assertIsInstance(ad_fromfile.contains(self.dataset.X), pd.Series)
+        self.assertIsInstance(ad_fromfile.contains(self.dataset.getDescriptors()), pd.Series)
 
     def testContinousAD(self):
         """Test the applicability domain for continuous data."""
         ad = KNNApplicabilityDomain(dist="euclidean", scaling="standard", alpha=0.95)
-        ad.fit(self.dataset.X)
+        ad.fit(self.dataset.getDescriptors())
 
         with self.assertRaises(ValueError):
-            ad.contains(ad.contains(self.dataset.X))
+            ad.contains(ad.contains(self.dataset.getDescriptors()))
 
-        self.assertIsInstance(ad.transform(self.dataset.X), pd.Series)
+        self.assertIsInstance(ad.transform(self.dataset.getDescriptors()), pd.Series)
 
         ad.threshold = 0.3
         ad.direction = "<"
-        self.assertIsInstance(ad.contains(self.dataset.X), pd.Series)
+        self.assertIsInstance(ad.contains(self.dataset.getDescriptors()), pd.Series)
 
         ad.toFile(f"{self.generatedPath}/test_ad.json")
         MLChemADWrapper.fromFile(f"{self.generatedPath}/test_ad.json")

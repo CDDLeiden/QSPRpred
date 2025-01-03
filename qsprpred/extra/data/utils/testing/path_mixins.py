@@ -37,7 +37,7 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
         self.dataPathPCM = f"{os.path.dirname(__file__)}/test_files/data"
 
     @classmethod
-    def getAllDescriptors(cls) -> list[DescriptorSet]:
+    def getAllDescriptorSets(cls) -> list[DescriptorSet]:
         """Return a list of all available molecule descriptor sets.
 
         Returns:

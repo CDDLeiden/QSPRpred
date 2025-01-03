@@ -1,7 +1,7 @@
-import numpy as np
 from parameterized import parameterized
 from sklearn.model_selection import KFold, StratifiedKFold
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import MinMaxScaler
+import numpy as np
 
 from ...data import (
     BootstrapSplit,
@@ -16,15 +16,15 @@ from ...data.chem.clustering import (
     FPSimilarityMaxMinClusters,
 )
 from ...data.chem.scaffolds import BemisMurcko, BemisMurckoRDKit
-from ...data.sampling.folds import FoldsFromDataSplit
 from ...data.sampling.splits import ManualSplit
-from ...data.pipelines.pipeline import QSPRPipeline
+from ...data.pipelines.pipeline import DatasetPipeline
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn
+from ...utils.testing.check_mixins import DataPrepCheckMixIn
 from ..descriptors.fingerprints import MorganFP
 
 
-class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
+class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase, DataPrepCheckMixIn):
     """Small tests to only check if the data splitters work on their own.
 
     The tests here should be used to check for all their specific parameters and edge
@@ -32,22 +32,30 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
     def setUp(self):
         super().setUp()
         self.setUpPaths()
-        self.splitYear = 2000
 
     def testManualSplit(self):
         """Test the manual split function, where the split is done manually."""
         dataset = self.createLargeTestDataSet()
         dataset.nJobs = self.nCPU
         dataset.chunkSize = self.chunkSize
+        
         # Add extra column to the data frame to use for splitting
         df = dataset.getDF()
-        test_ids = df.sample(frac=0.1).index.values
+        test_ids = df.sample(frac=0.1).index
         train_ids = df.index.difference(test_ids)
         dataset.addProperty("split", "test", ids=test_ids)
         dataset.addProperty("split", "train", ids=train_ids)
         split = ManualSplit(dataset.getDF()["split"], "train", "test")
-        dataset.prepareDataset(split=split)
-        self.validate_split(dataset)
+        dataset.addSplit(split, name="split")
+        
+        # check if the split is correctly stored
+        self.checkSplit(dataset, "split")
+        
+        # test if the split corresponds to the manually selected ids
+        train_ids_split, test_ids_split = dataset.getSplit("split", as_type="ids")[0]
+        self.assertTrue(all(train_ids.sort_values() == train_ids_split))
+        self.assertTrue(all(test_ids.sort_values() == test_ids_split))
+        
 
     @parameterized.expand([
         (False, ),
@@ -59,8 +67,9 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
             dataset = self.createLargeMultitaskDataSet()
         else:
             dataset = self.createLargeTestDataSet()
-        dataset.prepareDataset(split=RandomSplit(test_fraction=0.1))
-        self.validate_split(dataset)
+            
+        dataset.addSplit(RandomSplit(test_fraction=0.1), name="RandomSplit")
+        self.checkSplit(dataset, "RandomSplit")
 
     @parameterized.expand([
         (False, ),
@@ -73,17 +82,19 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
             dataset = self.createLargeMultitaskDataSet()
         else:
             dataset = self.createLargeTestDataSet()
+        split_year = 2000
         split = TemporalSplit(
-            timesplit=self.splitYear,
+            timesplit=split_year,
             timeprop=dataset.getDF()["Year of first disclosure"],
         )
-        # prepare and validate the split
-        dataset.prepareDataset(split=split)
-        self.validate_split(dataset)
+        dataset.addSplit(split, name="temp_split")
+        self.checkSplit(dataset, "temp_split")
+
         # test if dates higher than 2000 are in test set
-        test_set = dataset.getFeatures()[1]
-        years = dataset.getDF().loc[test_set.index, "Year of first disclosure"]
-        self.assertTrue(all(years > self.splitYear))
+        train_ids, test_ids = dataset.getSplit("temp_split", as_type="ids")[0]
+        years = dataset.getDF().loc[test_ids, "Year of first disclosure"]
+        self.assertTrue(all(years > split_year))
+
         # test bootstrapping
         if multitask:
             dataset = self.createLargeMultitaskDataSet(
@@ -92,7 +103,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
         else:
             dataset = self.createLargeTestDataSet(name="TemporalSplit_bootstrap")
         split = TemporalSplit(
-            timesplit=[self.splitYear - 1, self.splitYear, self.splitYear + 1],
+            timesplit=[split_year - 1, split_year, split_year + 1],
             timeprop=dataset.getDF()["Year of first disclosure"],
         )
         bootstrap_split = BootstrapSplit(
@@ -100,9 +111,9 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
             n_bootstraps=10,
         )
         for time, fold_info in zip(
-            split.timeSplit, list(dataset.iterFolds(bootstrap_split))
+            split.timeSplit, list(dataset.split(bootstrap_split))
         ):
-            years = dataset.getDF().loc[fold_info[1].index, "Year of first disclosure"]
+            years = dataset.getDF().loc[fold_info[1], "Year of first disclosure"]
             self.assertTrue(all(years > time))
 
     @parameterized.expand(
@@ -130,12 +141,13 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
             scaffold=scaffold,
             custom_test_list=custom_test_list,
         )
-        dataset.prepareDataset(split=split)
-        self.validate_split(dataset)
+        dataset.addSplit(split, name="scaffold_split")
+        self.checkSplit(dataset, "scaffold_split")
         # check that smiles in custom_test_list are in the test set
         if custom_test_list:
+            test_index = dataset.getSplit("scaffold_split", as_type="ids")[0][1]
             self.assertTrue(
-                all(mol_id in dataset.X_ind.index for mol_id in custom_test_list)
+                all(mol_id in test_index for mol_id in custom_test_list)
             )
         # check folding by scaffold
         if multitask:
@@ -150,14 +162,14 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
             n_folds=n_folds,
         )
         test_index_all = []
-        for k, (X_train, X_test, y_train, y_test, train_index, test_index) in enumerate(
-            dataset.iterFolds(split)
+        for k, (train_index, test_index) in enumerate(
+            dataset.split(split)
         ):
             self.assertTrue(all(x not in test_index_all for x in test_index))
-            self.assertTrue(len(X_train) > len(X_test))
-            test_index_all.extend(X_test.index.tolist())
+            self.assertTrue(len(train_index) > len(test_index))
+            test_index_all.extend(test_index.tolist())
         self.assertEqual(k, n_folds - 1)
-        self.assertEqual(len(test_index_all), len(dataset.getFeatures(concat=True)[0]))
+        self.assertEqual(len(test_index_all), len(dataset.getDescriptors()))
 
     @parameterized.expand(
         [
@@ -205,12 +217,13 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
             custom_test_list=custom_test_list,
             time_limit_seconds=10,
         )
-        dataset.prepareDataset(split=split)
-        self.validate_split(dataset)
+        dataset.addSplit(split, name="cluster_split")
+        self.checkSplit(dataset, "cluster_split")
         # check that smiles in custom_test_list are in the test set
         if custom_test_list:
+            test_index = dataset.getSplit("cluster_split", as_type="ids")[0][1]
             self.assertTrue(
-                all(mol_id in dataset.X_ind.index for mol_id in custom_test_list)
+                all(mol_id in test_index for mol_id in custom_test_list)
             )
 
     def testSerialization(self):
@@ -219,26 +232,15 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase):
         split = ScaffoldSplit(
             smiles_prop=dataset.getDF()[dataset.smilesProp],
         )
-        n_bits = 128
-        pipeline = QSPRPipeline(
-            steps={"standardizer": StandardScaler()}
-        )
-        dataset.prepareDataset(
-            split=split,
-            feature_calculators=[MorganFP(radius=3, nBits=n_bits)],
-            pipeline=pipeline,
-        )
-        self.validate_split(dataset)
-        test_ids = dataset.X_ind.index.values
-        train_ids = dataset.y_ind.index.values
+        dataset.addSplit(split, name="scaffold_split")
+        self.checkSplit(dataset, "scaffold_split")
+        train_ids, test_ids = dataset.getSplit("scaffold_split", as_type="ids")[0]
         dataset.save()
         dataset_new = QSPRTable.fromFile(dataset.metaFile)
-        self.validate_split(dataset_new)
-        self.assertTrue(dataset_new.descriptorSets)
-        self.assertTrue(dataset_new.pipeline)
-        self.assertTrue(len(dataset_new.featureNames) == n_bits)
-        self.assertTrue(all(mol_id in dataset_new.X_ind.index for mol_id in test_ids))
-        self.assertTrue(all(mol_id in dataset_new.y_ind.index for mol_id in train_ids))
+        self.checkSplit(dataset_new, "scaffold_split")
+        train_ids_new, test_ids_new = dataset_new.getSplit("scaffold_split", as_type="ids")[0]
+        self.assertTrue(all(mol_id in train_ids_new for mol_id in train_ids))
+        self.assertTrue(all(mol_id in test_ids_new for mol_id in test_ids))
         dataset_new.clear()
 
 
@@ -257,20 +259,16 @@ class TestFoldSplitters(DataSetsPathMixIn, QSPRTestCase):
         tested_indices = []
         for (
             X_train,
-            X_test,
             y_train,
+            X_test,
             y_test,
-            train_index,
-            test_index,
         ) in folds:
             k += 1
             self.assertEqual(len(X_train), len(y_train))
             self.assertEqual(len(X_test), len(y_test))
-            self.assertEqual(len(train_index), len(y_train))
-            self.assertEqual(len(test_index), len(y_test))
             tested_indices.extend(X_test.index.tolist())
             if more:
-                more(X_train, X_test, y_train, y_test, train_index, test_index)
+                more(X_train, X_test, y_train, y_test)
         return k, tested_indices
 
     def testStandardFolds(self):
@@ -278,30 +276,25 @@ class TestFoldSplitters(DataSetsPathMixIn, QSPRTestCase):
         # test default settings with regression
         dataset = self.createLargeTestDataSet()
         dataset.addDescriptors([MorganFP(radius=3, nBits=128)])
-        fold = KFold(5, shuffle=True, random_state=dataset.randomState)
-        generator = FoldsFromDataSplit(fold)
-        k, indices = self.validateFolds(generator.iterFolds(dataset))
+        fold_split = KFold(5, shuffle=True, random_state=dataset.randomState)
+        dataset.addSplit(fold_split, name="fold_split")
+        k, indices = self.validateFolds(dataset.iterSplit("fold_split", as_type="pandas"))
         self.assertEqual(k, 5)
         df = dataset.getDF()
         self.assertFalse(set(df.index) - set(indices))
-        # test directly on data set
-        k, indices = self.validateFolds(dataset.iterFolds(fold))
-        self.assertEqual(k, 5)
-        self.assertFalse(set(df.index) - set(indices))
         # test default settings with classification
         dataset.makeClassification("CL", th=[20])
-        fold = StratifiedKFold(5, shuffle=True, random_state=dataset.randomState)
-        k, indices = self.validateFolds(dataset.iterFolds(fold))
+        fold_split = StratifiedKFold(5, shuffle=True, random_state=dataset.randomState)
+        dataset.addSplit(fold_split, name="fold_split")
+        k, indices = self.validateFolds(dataset.iterSplit("fold_split", as_type="pandas"))
         self.assertEqual(k, 5)
         self.assertFalse(set(df.index) - set(indices))
-        # test with a standarizer
+        
+        # test in a pipeline (with a standarizer)
         MAX_VAL = 2
         MIN_VAL = 1
         scaler = MinMaxScaler(feature_range=(MIN_VAL, MAX_VAL))
-        dataset.prepareDataset(pipeline=QSPRPipeline(steps={"standardizer": scaler}))
-        k, indices = self.validateFolds(dataset.iterFolds(fold))
-        self.assertEqual(k, 5)
-        self.assertFalse(set(df.index) - set(indices))
+        pipeline=DatasetPipeline(steps={"standardizer": scaler})
 
         def check_min_max(X_train, X_test, *args, **kwargs):
             self.assertTrue(np.max(X_train.values) == MAX_VAL)
@@ -309,34 +302,39 @@ class TestFoldSplitters(DataSetsPathMixIn, QSPRTestCase):
             self.assertTrue(np.max(X_test.values) == MAX_VAL)
             self.assertTrue(np.min(X_test.values) == MIN_VAL)
 
-        self.validateFolds(dataset.iterFolds(fold), more=check_min_max)
-        k, indices = self.validateFolds(dataset.iterFolds(fold))
+        self.validateFolds(pipeline.apply(dataset, "fold_split"), check_min_max)
+        k, indices = self.validateFolds(dataset.iterSplit("fold_split", as_type="pandas"))
         self.assertEqual(k, 5)
         self.assertFalse(set(df.index) - set(indices))
 
         # try with a split data set
-        dataset.split(RandomSplit(test_fraction=0.1))
-        k, indices = self.validateFolds(dataset.iterFolds(fold))
+        train_ids, _ = next(dataset.split(RandomSplit(test_fraction=0.1)))
+        train_set = dataset[train_ids]
+        train_set.addSplit(fold_split, name="fold_split")
+        k, indices = self.validateFolds(train_set.iterSplit("fold_split", as_type="pandas"))
         self.assertEqual(k, 5)
-        self.assertFalse(set(dataset.X.index) - set(indices))
+        self.assertFalse(set(train_ids) - set(indices))
 
     def testBootstrappedFold(self):
-        dataset = self.createLargeTestDataSet(random_state=None)
+        dataset = self.createLargeTestDataSet(random_state=1)
         dataset.addDescriptors([MorganFP(radius=3, nBits=128)])
         split = RandomSplit(0.2)
         fold = BootstrapSplit(split, n_bootstraps=5)
-        k, indices = self.validateFolds(dataset.iterFolds(fold))
+        dataset.addSplit(fold, name="fold_split")
+        k, indices = self.validateFolds(dataset.iterSplit("fold_split", as_type="pandas"))
         self.assertEqual(k, 5)
         # check if the indices are the same if we do the same split again
         split = RandomSplit(0.2)
         fold = BootstrapSplit(split, n_bootstraps=5, seed=dataset.randomState)
-        k, indices_second = self.validateFolds(dataset.iterFolds(fold))
+        dataset.addSplit(fold, name="fold_split2")
+        k, indices_second = self.validateFolds(dataset.iterSplit("fold_split2", as_type="pandas"))
         self.assertEqual(k, 5)
         self.assertListEqual(indices, indices_second)
         # check if the indices are different if we do a different split
         split = RandomSplit(0.2)
         fold = BootstrapSplit(split, n_bootstraps=5, seed=42)
-        k, indices_third = self.validateFolds(dataset.iterFolds(fold))
+        dataset.addSplit(fold, name="fold_split3")
+        k, indices_third = self.validateFolds(dataset.iterSplit("fold_split3", as_type="pandas"))
         self.assertEqual(k, 5)
         self.assertEqual(split.randomState, None)
         self.assertNotEqual(indices, indices_third)

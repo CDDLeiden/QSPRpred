@@ -86,37 +86,6 @@ class QSPRDataSet(MoleculeDataSet, ABC):
                 `True`.
         """
 
-    @abstractmethod
-    def iterFolds(
-        self,
-        split: "DataSplit",  # noqa: F821
-        concat: bool = False,
-    ) -> Generator[
-        tuple[
-            pd.DataFrame,
-            pd.DataFrame,
-            pd.DataFrame | pd.Series,
-            pd.DataFrame | pd.Series,
-            list[int],
-            list[int],
-        ],
-        None,
-        None,
-    ]:
-        """Iterate over the folds of the dataset.
-
-        Args:
-            split (DataSplit):
-                split instance orchestrating the split
-            concat (bool):
-                whether to concatenate the training and test feature matrices
-
-        Yields:
-            (tuple):
-                training and test feature matrices and target vectors
-                for each fold
-        """
-
     @property
     @abstractmethod
     def X(self) -> pd.DataFrame:

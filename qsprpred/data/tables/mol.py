@@ -885,6 +885,23 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         self.storage.dropEntries(ids)
         for dset in self.descriptors:
             dset.dropEntries(ids)
+            
+    def dropEmptyEntries(self, names: list[str]):
+        """Drop rows with missing values in the properties.
+
+        Args:
+            names (list[str]): list property names
+        """
+        mask = pd.Series([False] * len(self), index=self.getProperty(self.idProp))
+        for prop in names:
+            prop = pd.Series(
+                self.getProperty(prop), index=self.getProperty(self.idProp)
+            )
+            mask = mask | prop.isna()
+        to_drop = pd.Series(
+            self.getProperty(self.idProp), index=self.getProperty(self.idProp)
+        )[mask]
+        self.dropEntries(to_drop)
 
     def addEntries(
         self, ids: list[str], props: dict[str, list], raise_on_existing: bool = True

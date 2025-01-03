@@ -1,33 +1,21 @@
 import json
 import os
 from copy import deepcopy
-from typing import Callable, ClassVar, Generator, Optional
+from typing import Callable, ClassVar, Generator
 
-import numpy as np
 import pandas as pd
-from mlchemad.applicability_domains import (
-    ApplicabilityDomain as MLChemADApplicabilityDomain,
-)
-from sklearn.base import BaseEstimator
 from sklearn.preprocessing import LabelEncoder
 
-from qsprpred.data.processing.data_filters import RepeatsFilter
-from qsprpred.data.sampling.splits import DataSplit
-from qsprpred.data.tables.interfaces.qspr_data_set import QSPRDataSet
-
-from ...data.processing.applicability_domain import ApplicabilityDomain, MLChemADWrapper
-from ...data.processing.feature_standardizers import SKLearnStandardizer
-from ...data.sampling.folds import FoldsFromDataSplit
 from ...logs import logger
 from ...tasks import TargetProperty, TargetTasks
-from ..descriptors.sets import DescriptorSet
 from ..storage.interfaces.chem_store import ChemStore
 from .interfaces.molecule_data_set import MoleculeDataSet
 from .mol import MoleculeTable
-from ...data.pipelines.pipeline import Pipeline, Step
+from qsprpred.data.sampling.splits import DataSplit
+import numpy as np
 
 
-class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
+class QSPRTable(MoleculeTable):
     """Implementation of `QSPRDataSet` using a collection of `PandasDataTable` objects.
 
     It splits the data in train and test set, as well as creating cross-validation
@@ -41,8 +29,7 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
         applicabilityDomain (ApplicabilityDomain): applicability domain
     """
 
-    # FIXME: these should be the hidden properties that are listed
-    _notJSON: ClassVar = [*MoleculeDataSet._notJSON, "X", "X_ind", "y", "y_ind"]
+    # _notJSON: ClassVar = [*MoleculeDataSet._notJSON]
 
     def __init__(
         self,
@@ -92,15 +79,7 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             ]
         elif target_props is None:
             raise ValueError("Target properties must be specified for a new QSPRTable.")
-        # load names of descriptors to use as training features
-        self.featureNames = self.getFeatureNames()
-        self.pipeline = None
-        self.applicabilityDomain = None
         # populate feature matrix and target properties
-        self._X = None
-        self._y = None
-        self._X_ind = None
-        self._y_ind = None
         self.targetProperties = []
         self.setTargetProperties(target_props, drop_empty_target_props)
         logger.info(
@@ -108,30 +87,7 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             f"target Properties: '{self.targetProperties}'. "
             f"Number of samples: {len(self.storage)}. "
         )
-
-    @property
-    def X(self) -> pd.DataFrame:
-        """Training feature matrix."""
-        return self._X
-
-    @property
-    def y(self) -> pd.Series | pd.DataFrame:
-        """Training label array."""
-        return self._y
-
-    @property
-    def X_ind(self) -> pd.DataFrame:
-        """Independent feature matrix."""
-        return self._X_ind
-
-    @property
-    def y_ind(self) -> pd.Series | pd.DataFrame:
-        """Independent label array."""
-        return self._y_ind
-
-    def __setstate__(self, state):
-        super().__setstate__(state)
-        self.restoreTrainingData()
+        self.splits = {}
 
     @classmethod
     def fromDF(
@@ -207,19 +163,95 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             "convert from 'MoleculeTable' with 'fromMolTable'."
         )
 
-    def restoreTargetProperty(self, prop: TargetProperty | str):
-        """Reset target property to its original value.
+    @classmethod
+    def fromMolTable(
+        cls,
+        mol_table: MoleculeTable,
+        target_props: list[TargetProperty | dict],
+        *args,
+        path: str = ".",
+        name: str | None = None,
+        **kwargs,
+    ) -> "QSPRTable":
+        """Create QSPRTable from a MoleculeTable.
 
         Args:
-            prop (TargetProperty | str): target property to reset
+            mol_table (MoleculeTable): `MoleculeTable` to use as the data source
+            target_props (list): list of target properties to use
+            *args:
+                additional positional arguments to pass to the constructor of
+                `QSPRTable`
+            path (str): path to the directory where the data set will be saved
+            name (str): name of the data set
+            **kwargs:
+                additional keyword arguments to pass to the constructor of `QSPRTable`
+
+        Returns:
+            QSPRTable: created data set
         """
-        if isinstance(prop, str):
-            prop = self.getTargetProperties([prop])[0]
-        if f"{prop.name}_original" in self.getProperties():
-            self.addProperty(prop.name, self.getProperty(f"{prop.name}_original"))
-        # save original values for next reset
-        self.addProperty(f"{prop.name}_original", self.getProperty(prop.name))
-        self.restoreTrainingData()
+        name = mol_table.name if name is None else name
+        kwargs["random_state"] = (
+            mol_table.randomState
+            if "random_state" not in kwargs else kwargs["random_state"]
+        )
+        kwargs["store_format"] = (
+            mol_table.storeFormat
+            if "store_format" not in kwargs else kwargs["store_format"]
+        )
+        ds = QSPRTable(
+            mol_table.storage,
+            name,
+            target_props,
+            path,
+            *args,
+            **kwargs,
+        )
+        ds.descriptors = mol_table.descriptors
+        return ds
+
+    def addTargetProperty(self, prop: TargetProperty | dict, drop_empty: bool = True):
+        """Add a target property to the dataset.
+
+        Args:
+            prop (TargetProperty | dict):
+                target property to add or dictionary to initialize a TargetProperty
+            drop_empty (bool):
+                whether to drop rows with empty target property values. Defaults to
+                `True`.
+        """
+        logger.debug(f"Adding target property '{prop}' to dataset.")
+        prop = deepcopy(prop)
+        if isinstance(prop, dict):
+            prop = TargetProperty.fromDict(prop)
+        if prop.name in self.targetPropertyNames:
+            logger.warning(
+                f"Property '{prop}' already exists in dataset. It will be reset."
+            )
+        assert (
+            prop.name in self.getProperties()
+        ), f"Property {prop} not found in data set."
+        self.targetProperties.append(prop)
+        self.restoreTargetProperty(prop)
+        # impute the property
+        if prop.imputer is not None:
+            self.imputeProperties([prop.name], prop.imputer)
+        if prop.transformer is not None:
+            self.transformProperties([prop.name], prop.transformer)
+        if drop_empty:
+            self.dropEmptyEntries([prop.name])
+        if prop.task.isClassification():
+            self.makeClassification(prop.name, prop.th)
+
+    def getTargetProperties(self, names: list) -> list[TargetProperty]:
+        """Get the target properties with the given names.
+
+        Args:
+            names (list[str]): name of the target properties
+
+        Returns:
+            (list[TargetProperty]): list of target properties
+        """
+        return [tp for tp in self.targetProperties if tp.name in names]
 
     def setTargetProperties(
         self,
@@ -254,57 +286,35 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
         for prop in target_props:
             self.addTargetProperty(prop, drop_empty)
 
-    @property
-    def hasFeatures(self):
-        """Check whether the currently selected set of features is not empty."""
-        return True if (self.featureNames and len(self.featureNames) > 0) else False
+    def unsetTargetProperty(self, name: str | TargetProperty):
+        """Unset the target property. It will not remove it from the data set, but
+        will make it unavailable for training.
 
-    def getFeatureNames(self) -> list[str]:
-        """Get current feature names for this data set.
-
-        Returns:
-            list[str]: list of feature names
+        Args:
+            name (str | TargetProperty):
+                name of the target property to drop or the property itself
         """
-        if not self.hasDescriptors():
-            return []
-        features = []
-        for ds in self.descriptors:
-            features.extend(ds.getDescriptorNames(active_only=True))
-        return features
+        name = name.name if isinstance(name, TargetProperty) else name
+        assert (
+            name in self.targetPropertyNames
+        ), f"Target property '{name}' not found in dataset."
+        assert (
+            len(self.targetProperties) > 1
+        ), "Cannot drop task from single-task dataset."
+        self.targetProperties = [tp for tp in self.targetProperties if tp.name != name]
 
-    def restoreTrainingData(self):
-        """Restore training data from the data frame.
+    def restoreTargetProperty(self, prop: TargetProperty | str):
+        """Reset target property to its original value.
 
-        If the data frame contains a column 'Split_IsTrain',
-        the data will be split into training and independent sets. Otherwise, the
-        independent set will be empty. If descriptors are available, the resulting
-        training matrices will be featurized.
+        Args:
+            prop (TargetProperty | str): target property to reset
         """
-        logger.debug("Restoring training data...")
-        # split data into training and independent sets if saved previously
-        df = self.getDF()
-        if "Split_IsTrain" in self.getProperties():
-            self._y = df.query("Split_IsTrain").sort_values("Split_Index")[
-                self.targetPropertyNames]
-            self._y_ind = df.loc[~df.index.isin(self.y.index), :].sort_values(
-                "Split_Index"
-            )[self.targetPropertyNames]
-        else:
-            self._y = df[self.targetPropertyNames]
-            self._y_ind = df.loc[~df.index.isin(self.y.index), self.targetPropertyNames]
-        self._X = self.y.drop(self.y.columns, axis=1)
-        self._X_ind = self.y_ind.drop(self.y_ind.columns, axis=1)
-
-        self.featurizeSplits(shuffle=False)
-        logger.debug("Training data restored.")
-        logger.debug(f"Training features shape: {self.X.shape}")
-        logger.debug(f"Test set features shape: {self.X_ind.shape}")
-        logger.debug(f"Training labels shape: {self.y.shape}")
-        logger.debug(f"Test set labels shape: {self.y_ind.shape}")
-        logger.debug(f"Training features indices: {self.X.index}")
-        logger.debug(f"Test set features indices: {self.X_ind.index}")
-        logger.debug(f"Training labels indices: {self.y.index}")
-        logger.debug(f"Test set labels indices: {self.y_ind.index}")
+        if isinstance(prop, str):
+            prop = self.getTargetProperties([prop])[0]
+        if f"{prop.name}_original" in self.getProperties():
+            self.addProperty(prop.name, self.getProperty(f"{prop.name}_original"))
+        # save original values for next reset
+        self.addProperty(f"{prop.name}_original", self.getProperty(prop.name))
 
     def makeRegression(self, target_property: str):
         """Switch to regression task using the given target property.
@@ -317,7 +327,6 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
         target_property.task = TargetTasks.REGRESSION
         if hasattr(target_property, "th"):
             del target_property.th
-        self.restoreTrainingData()
         logger.info("Target property converted to regression.")
 
     def makeClassification(
@@ -409,8 +418,34 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
                 TargetTasks.SINGLECLASS if len(th) == 1 else TargetTasks.MULTICLASS
             )
             target_property.th = th
-        self.restoreTrainingData()
         logger.info(f"Target property '{prop_name}' converted to classification.")
+
+    @property
+    def targetPropertyNames(self) -> list[str]:
+        """Get the names of the target properties."""
+        return TargetProperty.getNames(self.targetProperties)
+
+    @property
+    def isMultiTask(self) -> bool:
+        """Check if the dataset contains multiple target properties.
+
+        Returns:
+            (bool): `True` if the dataset contains multiple target properties
+        """
+        return len(self.targetProperties) > 1
+
+    @property
+    def nTargetProperties(self) -> int:
+        """Get the number of target properties in the dataset."""
+        return len(self.targetProperties)
+
+    def getTargets(self) -> pd.DataFrame:
+        """Get the target property values
+
+        Returns:
+            (pd.DataFrame): target property values
+        """
+        return self.getDF()[self.targetPropertyNames]
 
     def getSubset(
         self,
@@ -438,60 +473,165 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
         ds = self.fromMolTable(
             mt, self.targetProperties, name=mt.name, path=path, **kwargs
         )
-        ds.pipeline = self.pipeline
-        ds.applicabilityDomain = self.applicabilityDomain
-        ds.featureNames = self.featureNames
-        ds.restoreTrainingData()
         return ds
 
-    @classmethod
-    def fromMolTable(
-        cls,
-        mol_table: MoleculeTable,
-        target_props: list[TargetProperty | dict],
-        *args,
-        path: str = ".",
-        name: str | None = None,
-        **kwargs,
-    ) -> "QSPRTable":
-        """Create QSPRTable from a MoleculeTable.
+    def addSplit(self, split: DataSplit, name: str):
+        """Add a split to the dataset.
+        
+        Performs the split and stores the split object and the indices of the split.
+        If the split has a random state, it will be set to the random state of the
+        dataset if it is not set.
 
         Args:
-            mol_table (MoleculeTable): `MoleculeTable` to use as the data source
-            target_props (list): list of target properties to use
-            *args:
-                additional positional arguments to pass to the constructor of
-                `QSPRTable`
-            path (str): path to the directory where the data set will be saved
-            name (str): name of the data set
-            **kwargs:
-                additional keyword arguments to pass to the constructor of `QSPRTable`
+            split (DataSplit): split to add
+            name (str): name of the split
+        """
+        if hasattr(split, "randomState"):
+            if split.randomState is None:
+                split.randomState = self.randomState
+        self.splits[name] = {
+            "split": split,
+            "ids": [(train_idx, test_idx) for train_idx, test_idx in self.split(split)],
+        }
+        
+    def getSplit(self, name: str, as_type: str = "split"
+        ) -> (DataSplit |list[tuple[pd.Index, pd.Index]]):
+        """Get the split with the given name.
+
+        Args:
+            name (str): name of the split
+        as_type (str): Determines the type of output. Can be one of:
+            - "split": Returns a DataSplit object.
+            - "ids": Returns train and test indices.
 
         Returns:
-            QSPRTable: created data set
+            DataSplit: split if `as_type` is "split"
+            list[tuple[pd.Index, pd.Index]]: 
+                train and test indices if `as_type` is "ids"
         """
-        name = mol_table.name if name is None else name
-        kwargs["random_state"] = (
-            mol_table.randomState
-            if "random_state" not in kwargs else kwargs["random_state"]
-        )
-        kwargs["store_format"] = (
-            mol_table.storeFormat
-            if "store_format" not in kwargs else kwargs["store_format"]
-        )
-        ds = QSPRTable(
-            mol_table.storage,
-            name,
-            target_props,
-            path,
-            *args,
-            **kwargs,
-        )
-        ds.descriptors = mol_table.descriptors
-        ds.featureNames = mol_table.getDescriptorNames()
-        ds.loadDescriptorsToSplits(shuffle=False)
-        return ds
+        split = self.splits[name]
+        if as_type == "split":
+            return split["split"]
+        if as_type == "ids":
+            return split["ids"]
+        else:
+            raise ValueError(
+                f"Unknown as_type: {as_type}, "
+                "should be 'split' or 'ids'."
+            )
+        
+    def iterSplit(self, name: str, as_type: str = "ids"
+        ) -> (
+            Generator[tuple[pd.Index, pd.Index], None, None] |
+            Generator[tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray], None, None] |
+            Generator[tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame], None, None] |
+            Generator[tuple["QSPRTable", "QSPRTable"], None, None]
+        ):
+        """Get the split with the given name.
 
+        Args:
+            name (str): name of the split
+        as_type (str): Determines the type of output. Can be one of:
+            - "ids": yields train and test indices.
+            - "numpy": Yields train and test numpy arrays.
+            - "pandas": Yields train and test pandas DataFrames.
+            - "QSPRTable": Yields train and test QSPRTable objects.
+        
+        Yields:
+            tuple[pd.Index, pd.Index]: train and test indices if `as_type` is "ids"
+            tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+                train descriptors, train targets, test descriptors, test targets
+                `as_type` is "numpy"
+            tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+                train descriptors, train targets, test descriptors, test targets
+                `as_type` is "pandas"
+            tuple[QSPRTable, QSPRTable]: 
+                train and test QSPRTable objects if `as_type` is "QSPRTable"
+        """
+        split = self.splits[name]
+        if as_type == "ids":
+            for ids in split["ids"]:
+                yield ids
+        elif as_type == "numpy":
+            X = self.getDescriptors()
+            y = self.getTargets()
+            for ids in split["ids"]:
+                train_idx, test_idx = ids
+                yield (
+                    X.loc[train_idx].values,
+                    y.loc[train_idx].values,
+                    X.loc[test_idx].values,
+                    y.loc[test_idx].values
+                )
+        elif as_type == "pandas":
+            X = self.getDescriptors()
+            y = self.getTargets()
+            for ids in split["ids"]:
+                train_idx, test_idx = ids
+                yield (
+                    X.loc[train_idx],
+                    y.loc[train_idx],
+                    X.loc[test_idx],
+                    y.loc[test_idx]
+                )
+        elif as_type == "QSPRTable":
+            for ids in split["ids"]:
+                train = self.getSubset(self.getProperties(), ids[0])
+                test = self.getSubset(self.getProperties(), ids[1])
+                yield train, test
+        else:
+            raise ValueError(
+                f"Unknown as_type: {as_type}, "
+                "should be 'ids', 'numpy', 'pandas' or 'QSPRTable'."
+            )
+
+    def split(
+        self,
+        split: DataSplit,
+    ) -> Generator[
+        tuple[
+            pd.Index,
+            pd.Index
+        ],
+        None,
+        None,
+    ]:
+        """Create folds from X and y. Can be used either for cross-validation,
+        bootstrapping or train-test split.
+
+        Args:
+            split (DataSplit): Split to apply to the data
+            X (pd.DataFrame): data to apply the pipeline to
+            y (pd.DataFrame | None): target data to apply the pipeline to
+            fit_pipeline (bool): whether to fit the pipeline
+        
+        Yields:
+            tuple[pd.Index, pd.Index]: indices of the train and test set
+        """
+        X = self.getDescriptors()
+        y = self.getTargets()
+        folds = split.split(X, y)
+            
+        for train_idx, test_idx in folds:
+            # get QSPRTable indices from numerical index
+            train_idx = X.index[train_idx]
+            test_idx = X.index[test_idx]
+            yield train_idx, test_idx
+
+    def __getitem__(self, ids: list[str]) -> "QSPRTable":
+        """Get a subset of the data set.
+        
+        This method is used to get a subset of the data set by providing a list of IDs.
+        It is the same as calling `getSubset` method for all properties.
+
+        Args:
+            ids (list[str]): list of IDs to include in the subset
+
+        Returns:
+            QSPRTable: subset of the data set
+        """
+        return self.getSubset(self.getProperties(), ids)
+    
     def filter(self, table_filters: list[Callable]):
         """Filter the data set using the given filters.
 
@@ -499,747 +639,9 @@ class QSPRTable(MoleculeTable, QSPRDataSet):  # FIXME: needs to be renamed
             table_filters (list[Callable]): list of filters to apply
         """
         for filter in table_filters:
-            ret, _ = filter.transform(
-                self.getDescriptors(), self.getFeatures(concat=True, ordered=True)[1]
-            )
+            ret, _ = filter.transform(self.getDescriptors(), self.getTargets())
             ids = pd.Series(
                 self.getProperty(self.idProp), index=self.getProperty(self.idProp)
             )
             ids_to_drop = ids[~ids.isin(ret.index)].values
             self.dropEntries(ids_to_drop)
-        self.restoreTrainingData()
-        self.featurize()
-
-    def addDescriptors(
-        self,
-        descriptors: list[DescriptorSet],
-        recalculate: bool = False,
-        featurize: bool = True,
-        *args,
-        **kwargs,
-    ):
-        """Add descriptors to the data set.
-
-        If descriptors are already present, they will be recalculated if `recalculate`
-        is `True`. Featurization will be performed after adding descriptors if
-        `featurize` is `True`. Featurization converts current data matrices to pure
-        numeric matrices of selected descriptors (features).
-
-        Args:
-            descriptors (list[DescriptorSet]): list of descriptor sets to add
-            recalculate (bool, optional): whether to recalculate descriptors if they are
-                already present. Defaults to `False`.
-            featurize (bool, optional): whether to featurize the data set splits after
-                adding descriptors. Defaults to `True`.
-            *args: additional positional arguments to pass to each descriptor set
-            **kwargs: additional keyword arguments to pass to each descriptor set
-        """
-        super().addDescriptors(descriptors, recalculate, *args, **kwargs)
-        self.featurize(update_splits=featurize)
-
-    def dropDescriptors(self, descriptors: list[str]):
-        """Drop descriptors from the data set.
-
-        Args:
-            descriptors (list[str]): list of descriptors to drop
-        """
-        super().dropDescriptors(descriptors)
-        self.featurize(update_splits=True)
-
-    def restoreDescriptorSets(self, descriptors: list[DescriptorSet | str]):
-        """Restore descriptor sets to the data set.
-
-        Args:
-            descriptors (list[DescriptorSet | str]): list of descriptor sets to restore
-        """
-        super().restoreDescriptorSets(descriptors)
-        self.featurize(update_splits=True)
-
-    def featurize(self, update_splits: bool = True):
-        """Featurize the data set."""
-        self.featureNames = self.getFeatureNames()
-        if update_splits:
-            self.featurizeSplits(shuffle=False)
-
-    def saveSplit(self):
-        """Save split data to the managed data frame."""
-        if self.X is not None:
-            ids = pd.Series(
-                self.getProperty(self.idProp), index=self.getProperty(self.idProp)
-            )
-            self.addProperty("Split_IsTrain", ids.isin(self.X.index).values)
-            self.addProperty(
-                "Split_Index",
-                ids.apply(
-                    lambda x: (
-                        self.X.index.get_loc(x)
-                        if x in self.X.index else self.X_ind.index.get_loc(x)
-                    )
-                ),
-            )
-        else:
-            logger.debug("No split data available. Skipping split data save.")
-
-    def save(self, save_split: bool = True):
-        """Save the data set to file and serialize metadata.
-
-        Args:
-            save_split (bool): whether to save split data to the managed data frame.
-        """
-        if save_split:
-            self.saveSplit()
-        # elif "Split_IsTrain" in self.getProperties():
-        #     is_outlier = self.getProperty("Split_IsOutlier")
-        #     ids = pd.Series(
-        #         self.getProperty(self.idProp),
-        #         index=self.getProperty(self.idProp)
-        #     )
-        #     self.dropEntries(ids[is_outlier].values)
-        super().save()
-
-    def split(self, split: DataSplit, featurize: bool = False):
-        """Split dataset into train and test set.
-
-        You can either split tha data frame itself or you can set `featurize` to `True`
-        if you want to use feature matrices instead of the raw data frame.
-
-        Args:
-            split (DataSplit):
-                split instance orchestrating the split
-            featurize (bool):
-                whether to featurize the data set splits after splitting.
-                Defaults to `False`.
-        """
-        if (
-            hasattr(split, "hasDataSet") and hasattr(split, "setDataSet") and
-            not split.hasDataSet
-        ):
-            split.setDataSet(self)
-        if hasattr(split, "setSeed") and hasattr(split, "getSeed"):
-            if split.getSeed() is None:
-                split.setSeed(self.randomState)
-        # split the data into train and test
-        folds = FoldsFromDataSplit(split)
-        self._X, self._X_ind, self._y, self._y_ind, _, _ = next(
-            folds.iterFolds(self, concat=True)
-        )
-        # select target properties
-        logger.info("Total: train: %s test: %s" % (len(self.y), len(self.y_ind)))
-        logger.debug(f"First index train: {self.y.index[0]}")
-        logger.debug(f"First index test: {self.y_ind.index[0]}")
-        logger.debug(f"Last index train: {self.y.index[-1]}")
-        logger.debug(f"Last index test: {self.y_ind.index[-1]}")
-        for prop in self.targetProperties:
-            logger.info("Target property: %s" % prop.name)
-            if prop.task == TargetTasks.SINGLECLASS:
-                logger.info(
-                    "    In train: active: %s not active: %s" % (
-                        sum(self.y[prop.name]),
-                        len(self.y[prop.name]) - sum(self.y[prop.name]),
-                    )
-                )
-                logger.info(
-                    "    In test:  active: %s not active: %s\n" % (
-                        sum(self.y_ind[prop.name]),
-                        len(self.y_ind[prop.name]) - sum(self.y_ind[prop.name]),
-                    )
-                )
-            if prop.task == TargetTasks.MULTICLASS:
-                logger.info("train: %s" % self.y[prop.name].value_counts())
-                logger.info("test: %s\n" % self.y_ind[prop.name].value_counts())
-                try:
-                    assert np.all([x > 0 for x in self.y[prop.name].value_counts()])
-                    assert np.all([x > 0 for x in self.y_ind[prop.name].value_counts()])
-                except AssertionError as err:
-                    logger.exception(
-                        "All bins in multi-class classification "
-                        "should contain at least one sample"
-                    )
-                    raise err
-
-                if self.y[prop.name].dtype.name == "category":
-                    self.y[prop.name] = self.y[prop.name].cat.codes
-                    self.y_ind[prop.name] = self.y_ind[prop.name].cat.codes
-        # if "Split_IsOutlier" in self.getProperties():
-        #     ids = pd.Series(self.getProperty(self.idProp),
-        #                     index=self.getProperty(self.idProp))
-        #     is_outlier = self.getProperty("Split_IsOutlier")
-        #     self.dropEntries(ids[is_outlier].values)
-        # convert splits to features if required
-        if featurize:
-            self.featurizeSplits(shuffle=False)
-
-    def loadDescriptorsToSplits(
-        self, shuffle: bool = True, random_state: Optional[int] = None
-    ):
-        """Load all available descriptors into the train and test splits.
-
-        If no descriptors are available, an exception will be raised.
-
-        args:
-            shuffle (bool): whether to shuffle the training and test sets
-            random_state (int): random state for shuffling
-
-        Raises:
-            ValueError: if no descriptors are available
-        """
-        df = self.getDF()
-        descriptors = self.getDescriptors()
-        if self.X_ind is not None and self.y_ind is not None:
-            self._X = descriptors.loc[self.X.index, :]
-            self._y = df.loc[self.X.index, self.targetPropertyNames]
-            self._X_ind = descriptors.loc[self.X_ind.index, :]
-            self._y_ind = df.loc[self.y_ind.index, self.targetPropertyNames]
-        else:
-            self._X = descriptors
-            self.featureNames = self.getDescriptorNames()
-            self._y = df.loc[descriptors.index, self.targetPropertyNames]
-            self._X_ind = descriptors.loc[~self.X.index.isin(self.X.index), :]
-            self._y_ind = df.loc[self.X_ind.index, self.targetPropertyNames]
-        if shuffle:
-            self.shuffle(random_state)
-        # make sure no extra data is present in the splits
-        mask_train = self.X.index.isin(df.index)
-        mask_test = self.X_ind.index.isin(df.index)
-        if mask_train.sum() != len(self.X):
-            logger.warning(
-                "Some items will be removed from the training set because "
-                f"they no longer exist in the data set: {self.X.index[~mask_train]}"
-            )
-        if mask_test.sum() != len(self.X_ind):
-            logger.warning(
-                "Some items will be removed from the test set because "
-                f"they no longer exist in the data set: {self.X_ind.index[~mask_test]}"
-            )
-        self._X = self.X.loc[mask_train, :]
-        self._X_ind = self.X_ind.loc[mask_test, :]
-        self._y = self.y.loc[self.X.index, :]
-        self._y_ind = self.y_ind.loc[self.X_ind.index, :]
-
-    def shuffle(self, random_state: int | None = None):
-        """Shuffle the training and test sets.
-
-        Args:
-            random_state (int, optional): random state for shuffling. Defaults to `None`.
-        """
-        self._X = self.X.sample(frac=1, random_state=random_state or self.randomState)
-        self._X_ind = self.X_ind.sample(
-            frac=1, random_state=random_state or self.randomState
-        )
-        self._y = self.y.loc[self.X.index, :]
-        self._y_ind = self.y_ind.loc[self.X_ind.index, :]
-
-    def featurizeSplits(self, shuffle: bool = True, random_state: int | None = None):
-        """If the data set has descriptors, load them into the train and test splits.
-
-        If no descriptors are available, remove all features from
-        the splits. They will become zero length along the feature axis (columns), but
-        will retain their original length along the sample axis (rows). This is useful
-        for the case where the data set has no descriptors, but the user wants to retain
-        train and test splits.
-
-        shuffle (bool): whether to shuffle the training and test sets
-        random_state (int): random state for shuffling
-        """
-        df = self.getDF()
-        if self.hasDescriptors() and self.hasFeatures:
-            self.loadDescriptorsToSplits(
-                shuffle=shuffle, random_state=random_state or self.randomState
-            )
-            self._X = self.X.loc[:, self.featureNames]
-            self._X_ind = self.X_ind.loc[:, self.featureNames]
-        else:
-            if self.X is not None and self.X_ind is not None:
-                self._X = self.X.loc[self.X.index, :]
-                self._X_ind = self.X_ind.loc[self.X_ind.index, :]
-            else:
-                self._X = df.loc[df.index, :]
-                self._X_ind = df.loc[~df.index.isin(self.X.index), :]
-            self._X = self.X.drop(self.X.columns, axis=1)
-            self._X_ind = self.X_ind.drop(self.X_ind.columns, axis=1)
-            if shuffle:
-                self.shuffle(random_state or self.randomState)
-        # make sure no extra data is present in the splits
-        mask_train = self.X.index.isin(df.index)
-        mask_test = self.X_ind.index.isin(df.index)
-        if mask_train.sum() != len(self.X):
-            logger.warning(
-                "Some items will be removed from the training set because "
-                f"they no longer exist in the data set: {self.X.index[~mask_train]}"
-            )
-        if mask_test.sum() != len(self.X_ind):
-            logger.warning(
-                "Some items will be removed from the test set because "
-                f"they no longer exist in the data set: {self.X_ind.index[~mask_test]}"
-            )
-        self._X = self.X.loc[mask_train, :]
-        self._X_ind = self.X_ind.loc[mask_test, :]
-
-    def fillMissing(self, fill_value: float, columns: list[str] | None = None):
-        """Fill missing values in the data set with a given value.
-
-        Args:
-            fill_value (float): value to fill missing values with
-            columns (list[str], optional):
-                columns to fill missing values in. Defaults to None.
-        """
-        filled = False
-        for desc in self.descriptors:
-            desc.fillMissing(fill_value, columns)
-            filled = True
-        if not filled:
-            logger.warning("Missing values filled with %s" % fill_value)
-        else:
-            self.featurize()
-
-    def updateFeatures(self):
-        """Remove features that are not present in the current feature matrix.
-
-        Args:
-            feature_names (list[str]): list of feature names to keep
-        """
-        if not self.hasFeatures:
-            raise ValueError("No features to filter")
-        else:
-            # update features
-            self.featureNames = self.X.columns.to_list()
-            logger.info(f"Selected features: {self.featureNames}")
-            if self.X_ind is not None:
-                self._X_ind = self.X_ind[self.featureNames]
-            # update descriptor calculator
-            for ds in self.descriptors:
-                to_keep = [
-                    x for x in ds.getDescriptorNames(active_only=False)
-                    if x in self.featureNames
-                ]
-                ds.keepDescriptors(to_keep)
-
-    def reset(self):
-        """Reset the data set.
-
-        Splits will be removed and all descriptors will be moved to the training data.
-        Molecule standardization and molecule filtering are not affected.
-        """
-        if self.featureNames is not None:
-            self.featureNames = self.getDescriptorNames()
-            self._X = None
-            self._X_ind = None
-            self._y = None
-            self._y_ind = None
-            self.pipeline = None
-            self.applicabilityDomain = None
-            self.loadDescriptorsToSplits(shuffle=False)
-
-    def prepareDataset(
-        self,
-        split: DataSplit | None = None,
-        feature_calculators: list["DescriptorSet"] | None = None,
-        feature_fill_value: float = np.nan,
-        pipeline: Pipeline | None = None,
-        applicability_domain: (
-            ApplicabilityDomain | MLChemADApplicabilityDomain | None
-        ) = None,
-        recalculate_features: bool = False,
-        fit_pipeline: bool = True,
-        shuffle: bool = True,
-        random_state: int | None = None,
-    ):
-        """Prepare the dataset for use in QSPR model.
-
-        Arguments:
-            split (datasplitter obj): splits the dataset into train and test set
-            feature_calculators (list[DescriptorSet]): descriptor sets to add to the data set
-            feature_fill_value (float): value to fill missing values with.
-                Defaults to `numpy.nan`
-            pipeline (Pipeline): pipeline to apply to the calculated features
-            applicability_domain (applicabilityDomain obj): attaches an
-                applicability domain calculator to the dataset and fits it on
-                the training set
-            recalculate_features (bool): recalculate features even if they are already
-                present in the file
-            shuffle (bool): whether to shuffle the created training and test sets
-            random_state (int): random state for shuffling
-        """
-        # reset everything
-        self.reset()
-        # calculate features
-        if feature_calculators is not None:
-            self.addDescriptors(feature_calculators, recalculate=recalculate_features)
-        # Replace any NaN values in featureNames by 0
-        # FIXME: this is not very good, we should probably add option to do custom
-        # data imputation here or drop rows with NaNs
-        if feature_fill_value is not None:
-            self.fillMissing(feature_fill_value)
-        # shuffle the data
-        if shuffle:
-            self.shuffle(random_state or self.randomState)
-        # split dataset
-        if split is not None:
-            self.split(split)
-        # set and fit pipeline
-        if pipeline is not None:
-            self.setPipeline(pipeline)
-            if fit_pipeline:
-                self.fitPipeline(pipeline)
-        # set applicability domain and fit it on the training set
-        if applicability_domain:
-            self.setApplicabilityDomain(applicability_domain)
-            
-    def setPipeline(self, pipeline: Pipeline):
-        """Set a pipeline to apply to the data set.
-
-        Args:
-            pipeline (Pipeline): pipeline to apply
-        """
-        self.pipeline = pipeline
-            
-    def fitPipeline(self, pipeline: Pipeline | None = None):
-        """Fit a pipeline on the training set.
-
-        Args:
-            pipeline (Pipeline): pipeline to fit
-        """
-        pipeline = self.pipeline if pipeline is None else pipeline
-        pipeline.fitTransform(self.X)
-        return pipeline
-            
-    def applyPipeline(
-        self,
-        pipeline: Pipeline | Step | None = None,
-        fit: bool = True, 
-        inplace: bool = False,
-        X: pd.DataFrame | None = None,
-        X_ind: pd.DataFrame | None = None,
-        y: pd.DataFrame | None = None,
-        y_ind: pd.DataFrame | None = None
-    ):
-        """Apply a pipeline or step to the data set.
-
-        Args:
-            pipeline (Pipeline or Step, optional): pipeline to apply. 
-                Can also be a single step. if None, the dataset's pipeline will be used.
-                Defaults to None.
-            fit (bool): whether to fit the pipeline on the training set. 
-            inplace (bool): whether to apply the pipeline in place.
-            X (pd.DataFrame, optional): training feature matrix.
-                If None, the dataset's training feature matrix will be used.
-            X_ind (pd.DataFrame, optional): test feature matrix.
-                If None, the dataset's test feature matrix will be used.
-            y (pd.DataFrame, optional): training target values.
-                If None, the dataset's training target values will be used.
-            y_ind (pd.DataFrame, optional): test target values.
-                If None, the dataset's test target values will be used.
-        """
-        pipeline = self.pipeline if pipeline is None else pipeline
-        X = self.X if X is None else X
-        X_ind = self.X_ind if X_ind is None else X_ind
-        y = self.y if y is None else y
-        y_ind = self.y_ind if y_ind is None else y_ind
-        
-        if fit:
-            X, y = pipeline.fitTransform(X, y)
-        else:
-            X, y = pipeline.transform(X, y)
-        if X_ind is not None and X_ind.shape[0] > 0:
-            X_ind, y_ind = pipeline.transform(X_ind, y_ind)
-        
-        if inplace:
-            self._X = X
-            self._X_ind = X_ind
-            self._y = y
-            self._y_ind = y_ind
-            self.updateFeatures()
-            
-        return X, X_ind, y, y_ind
-
-    def checkFeatures(self):
-        """Check consistency of features and descriptors."""
-        if self.X.shape[0] != self.y.shape[0]:
-            raise ValueError(
-                "X and y have different number of rows: "
-                f"{self.X.shape[0]} != {self.y.shape[0]}"
-            )
-        elif self.X.shape[0] == 0:
-            raise ValueError("X has no rows.")
-
-    def getFeatures(
-        self,
-        inplace: bool = False,
-        concat: bool = False,
-        raw: bool = False,
-        ordered: bool = False,
-        refit_pipeline: bool = True,
-    ) -> tuple[pd.DataFrame, pd.DataFrame] | tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-        """Get the current feature sets and target values.
-
-        This method also applies any pipeline set on the data set.
-
-        Args:
-            inplace (bool): If `True`, the created feature matrices will be saved to the
-                dataset object itself as 'X' and 'X_ind' attributes. Note that this will
-                overwrite any existing feature matrices and if the data preparation
-                workflow changes, these are not kept up to date. Therefore, it is
-                recommended to generate new feature sets after any data set changes.
-            concat (bool): If `True`, the training and test feature matrices will be
-                concatenated into a single matrix. This is useful for training models
-                that do not require separate training and test sets (i.e. the final
-                optimized models).
-            raw (bool): If `True`, the raw feature matrices will be returned without
-                any pipeline transformations.
-            ordered (bool):
-                If `True`, the returned feature matrices will be ordered
-                according to the original order of the data set. This is only relevant
-                if `concat` is `True`.
-            refit_pipeline (bool): If `True`, the pipeline will be
-                refit on the training set upon this call. If `False`, the previously
-                fitted pipeline will be used. Defaults to `True`. Use `False` if
-                this dataset is used for prediction only and the pipeline has
-                been initialized already.
-                
-        Returns:
-            X (pd.DataFrame): training feature matrix
-            X_ind (pd.DataFrame): test feature matrix, if not `concat`
-            y (pd.DataFrame): training target values
-            y_ind (pd.DataFrame): test target values, if not `concat`
-        """
-        df = self.getDF()
-        self.checkFeatures()
-        # get feature matrices using feature names
-        if concat:
-            if len(self.X.columns) != 0:
-                X = pd.concat(
-                    [self.X[self.featureNames], self.X_ind[self.featureNames]], axis=0
-                )
-                X_ind = None
-            else:
-                X = pd.concat([self.X, self.X_ind], axis=0)
-                X_ind = None
-            y = pd.concat([self.y, self.y_ind], axis=0)
-            y_ind = None
-        else:
-            if len(self.X.columns) != 0:
-                X = self.X[self.featureNames]
-                X_ind = self.X_ind[self.featureNames]
-            else:
-                X = self.X
-                X_ind = self.X_ind
-            y = self.y
-            y_ind = self.y_ind
-        # apply pipeline if set
-        if not raw and self.pipeline:
-            X, X_ind, y, y_ind = self.applyPipeline(
-                self.pipeline, fit=refit_pipeline, inplace=False,
-                X=X, X_ind=X_ind, y=y, y_ind=y_ind
-            )
-        # replace original feature matrices if inplace
-        if inplace:
-            self._X = X
-            self._X_ind = X_ind
-            self._y = y
-            self._y_ind = y_ind
-            self.updateFeatures()
-        # order if concatenating
-        if ordered and concat:
-            X = X.loc[df.index, :]
-            y = y.loc[df.index, :]
-        return (X, X_ind, y, y_ind) if not concat else (X, y)
-
-    def getTargetProperties(self, names: list) -> list[TargetProperty]:
-        """Get the target properties with the given names.
-
-        Args:
-            names (list[str]): name of the target properties
-
-        Returns:
-            (list[TargetProperty]): list of target properties
-        """
-        return [tp for tp in self.targetProperties if tp.name in names]
-
-    @property
-    def targetPropertyNames(self) -> list[str]:
-        """Get the names of the target properties."""
-        return TargetProperty.getNames(self.targetProperties)
-
-    @property
-    def isMultiTask(self) -> bool:
-        """Check if the dataset contains multiple target properties.
-
-        Returns:
-            (bool): `True` if the dataset contains multiple target properties
-        """
-        return len(self.targetProperties) > 1
-
-    @property
-    def nTargetProperties(self) -> int:
-        """Get the number of target properties in the dataset."""
-        return len(self.targetProperties)
-
-    def unsetTargetProperty(self, name: str | TargetProperty):
-        """Unset the target property. It will not remove it from the data set, but
-        will make it unavailable for training.
-
-        Args:
-            name (str | TargetProperty):
-                name of the target property to drop or the property itself
-        """
-        name = name.name if isinstance(name, TargetProperty) else name
-        assert (
-            name in self.targetPropertyNames
-        ), f"Target property '{name}' not found in dataset."
-        assert (
-            len(self.targetProperties) > 1
-        ), "Cannot drop task from single-task dataset."
-        self.targetProperties = [tp for tp in self.targetProperties if tp.name != name]
-        self.restoreTrainingData()
-
-    def dropEmptyProperties(self, names: list[str]):
-        """Drop rows with missing values in the target properties.
-
-        Args:
-            names (list[str]): list of target property names
-        """
-        mask = pd.Series([False] * len(self), index=self.getProperty(self.idProp))
-        for prop in names:
-            prop = pd.Series(
-                self.getProperty(prop), index=self.getProperty(self.idProp)
-            )
-            mask = mask | prop.isna()
-        to_drop = pd.Series(
-            self.getProperty(self.idProp), index=self.getProperty(self.idProp)
-        )[mask]
-        self.dropEntries(to_drop)
-        self.restoreTrainingData()
-
-    def transformProperties(self, targets: list[str], transformer: Callable):
-        """Transform the target properties using the given transformer.
-
-        Args:
-            targets (list[str]): list of target properties names to transform
-            transformer (Callable): transformer function
-        """
-        super().transformProperties(targets, transformer)
-        self.restoreTrainingData()
-
-    def imputeProperties(self, names: list[str], imputer: Callable):
-        """Impute missing values in the target properties.
-
-        Args:
-            names (list[str]): list of target property names
-            imputer (Callable): imputer function
-        """
-        super().imputeProperties(names, imputer)
-        self.restoreTrainingData()
-
-    def addTargetProperty(self, prop: TargetProperty | dict, drop_empty: bool = True):
-        """Add a target property to the dataset.
-
-        Args:
-            prop (TargetProperty):
-                name of the target property to add
-            drop_empty (bool):
-                whether to drop rows with empty target property values. Defaults to
-                `True`.
-        """
-        logger.debug(f"Adding target property '{prop}' to dataset.")
-        # deep copy the property to avoid modifying the original
-        prop = deepcopy(prop)
-        if isinstance(prop, dict):
-            prop = TargetProperty.fromDict(prop)
-        if prop.name in self.targetPropertyNames:
-            logger.warning(
-                f"Property '{prop}' already exists in dataset. It will be reset."
-            )
-        assert (
-            prop.name in self.getProperties()
-        ), f"Property {prop} not found in data set."
-        # add the target property to the list
-        self.targetProperties.append(prop)
-        # restore original values if they were transformed
-        self.restoreTargetProperty(prop)
-        # impute the property
-        if prop.imputer is not None:
-            self.imputeProperties([prop.name], prop.imputer)
-        # transform the property
-        if prop.transformer is not None:
-            self.transformProperties([prop.name], prop.transformer)
-        # drop rows with missing smiles/no target property for any of
-        # the target properties
-        if drop_empty:
-            self.dropEmptyProperties([prop.name])
-        # convert classification targets to integers
-        if prop.task.isClassification():
-            self.makeClassification(prop.name, prop.th)
-
-    def iterFolds(
-        self,
-        split: DataSplit,
-        concat: bool = False,
-    ) -> Generator[
-        tuple[
-            pd.DataFrame,
-            pd.DataFrame,
-            pd.DataFrame | pd.Series,
-            pd.DataFrame | pd.Series,
-            list[int],
-            list[int],
-        ],
-        None,
-        None,
-    ]:
-        """Iterate over the folds of the dataset.
-
-        Args:
-            split (DataSplit):
-                split instance orchestrating the split
-            concat (bool):
-                whether to concatenate the training and test feature matrices
-
-        Yields:
-            (tuple):
-                training and test feature matrices and target vectors
-                for each fold
-        """
-        self.checkFeatures()
-        folds = FoldsFromDataSplit(split, self.pipeline)
-        return folds.iterFolds(self, concat=concat)
-
-    def setApplicabilityDomain(
-        self, applicability_domain: ApplicabilityDomain | MLChemADApplicabilityDomain
-    ):
-        """Set the applicability domain calculator.
-
-        Args:
-            applicability_domain (ApplicabilityDomain | MLChemADApplicabilityDomain):
-                applicability domain calculator instance
-        """
-        if isinstance(applicability_domain, MLChemADApplicabilityDomain):
-            self.applicabilityDomain = MLChemADWrapper(applicability_domain)
-        else:
-            self.applicabilityDomain = applicability_domain
-
-    def getApplicability(self) -> pd.DataFrame:
-        """Get applicability predictions for the test set.
-
-        Returns:
-            pd.DataFrame: applicability predictions
-        """
-        if self.applicabilityDomain is None:
-            raise ValueError(
-                "No applicability domain calculator attached to the data set."
-            )
-        X, X_ind, _, _ = self.getFeatures()
-        if X_ind.shape[0] == 0:
-            logger.warning(
-                "No test samples available, skipping applicability domain prediction."
-            )
-            return
-        # check if X or X_ind contain any nan values
-        if X.isna().any().any() or X_ind.isna().any().any():
-            logger.warning(
-                "Feature matrix contains NaN values. "
-                "Please fill them before applying applicability domain prediction."
-                "Applicability domain will not be calculated."
-            )
-            return
-        self.applicabilityDomain.fit(X)
-        return self.applicabilityDomain.transform(X_ind)

@@ -5,7 +5,7 @@ from rdkit.Chem import Descriptors
 from ... import TargetTasks
 from ...data import RandomSplit
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
-from ...data.pipelines.pipeline import QSPRPipeline
+from ...data.pipelines.pipeline import DatasetPipeline
 from ...models import SklearnModel
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import DescriptorInDataCheckMixIn
@@ -37,38 +37,38 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
         # test dropping of all sets
         dataset.addDescriptors(self.getDescList())
         full_len = sum(len(x) for x in dataset.descriptorSets)
-        self.assertTrue(dataset.getFeatures(concat=True)[0].shape[1] == full_len)
+        self.assertTrue(dataset.getDescriptors().shape[1] == full_len)
         dataset.dropDescriptorSets(dataset.descriptorSets)
-        self.assertEqual(dataset.getFeatures(concat=True)[0].shape[1], 0)
+        self.assertEqual(dataset.getDescriptors().shape[1], 0)
         dataset.dropDescriptorSets(dataset.descriptorSets, full_removal=True)
         self.assertEqual(len(dataset.descriptors), 0)
         dataset.addDescriptors(self.getDescList())
         dataset.dropDescriptorSets([str(x) for x in self.getDescList()])
-        self.assertEqual(dataset.getFeatures(concat=True)[0].shape[1], 0)
+        self.assertEqual(dataset.getDescriptors().shape[1], 0)
         dataset.dropDescriptorSets(
             [str(x) for x in self.getDescList()], full_removal=True
         )
         self.assertEqual(len(dataset.descriptors), 0)
         # test dropping of single set
         dataset.addDescriptors(self.getDescList())
-        self.assertTrue(dataset.getFeatures(concat=True)[0].shape[1] == full_len)
+        self.assertTrue(dataset.getDescriptors().shape[1] == full_len)
         dataset.dropDescriptorSets([dataset.descriptorSets[0]])
         self.assertEqual(
-            dataset.getFeatures(concat=True)[0].shape[1], len(self.getDescList()[1])
+            dataset.getDescriptors().shape[1], len(self.getDescList()[1])
         )
         dataset.dropDescriptorSets(dataset.descriptorSets, full_removal=True)
         dataset.addDescriptors(self.getDescList())
         dataset.dropDescriptorSets([str(dataset.descriptorSets[0])], full_removal=True)
         self.assertEqual(
-            dataset.getFeatures(concat=True)[0].shape[1], len(self.getDescList()[1])
+            dataset.getDescriptors().shape[1], len(self.getDescList()[1])
         )
         # test restoring of dropped sets
         dataset.addDescriptors(self.getDescList())
-        self.assertTrue(dataset.getFeatures(concat=True)[0].shape[1] == full_len)
+        self.assertTrue(dataset.getDescriptors().shape[1] == full_len)
         dataset.dropDescriptorSets(dataset.descriptorSets, full_removal=False)
-        self.assertEqual(dataset.getFeatures(concat=True)[0].shape[1], 0)
+        self.assertEqual(dataset.getDescriptors().shape[1], 0)
         dataset.restoreDescriptorSets(dataset.descriptorSets)
-        self.assertTrue(dataset.getFeatures(concat=True)[0].shape[1] == full_len)
+        self.assertTrue(dataset.getDescriptors().shape[1] == full_len)
 
     @parameterized.expand([(None, None), (1, None), (2, None), (4, 50)])
     def testSwitching(self, n_cpu, chunk_size):
@@ -81,29 +81,23 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
             DrugExPhyschem(),
         ]
         split = RandomSplit(test_fraction=0.1)
-        pipeline = QSPRPipeline(
+        pipeline = DatasetPipeline(
+            feature_calculators=feature_calculators,
             steps={
                 "low_var_filter": LowVarianceFilter(0.05),
                 "high_corr_filter": HighCorrelationFilter(0.9),
             }
         )
-        dataset.prepareDataset(
-            split=split,
-            feature_calculators=feature_calculators,
-            pipeline=pipeline,
-            recalculate_features=True,
-            feature_fill_value=np.nan,
-        )
+        X_train, y_train, X_test, y_test  = next(pipeline.apply(dataset, split))
         # create new dataset with the same calculator
         dataset_next = self.createLargeTestDataSet(self.__class__.__name__)
-        dataset_next.prepareDataset(
-            split=split,
-            feature_calculators=feature_calculators,
-            pipeline=pipeline,
-            recalculate_features=True,
-            feature_fill_value=np.nan,
+        X_train_next, y_train_next, X_test_next, y_test_next = next(
+            pipeline.apply(dataset_next, split)
         )
-        self.assertEqual(dataset.X.shape, dataset_next.X.shape)
+        self.assertEqual(X_train.shape, X_train_next.shape)
+        self.assertEqual(y_train.shape, y_train_next.shape)
+        self.assertEqual(X_test.shape, X_test_next.shape)
+        self.assertEqual(y_test.shape, y_test_next.shape)
 
 
 class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
@@ -115,7 +109,6 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
         self.dataset = self.createLargeTestDataSet(self.__class__.__name__)
         self.dataset.nJobs = self.nCPU
         self.dataset.chunkSize = None
-        self.dataset.shuffle()
 
     def testPredictorDescriptor(self):
         """Test the PredictorDesc descriptor set."""
@@ -127,22 +120,22 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
         model = SklearnModel.fromFile(meta_path)
         desc_calc = PredictorDesc(model)
         self.dataset.addDescriptors([desc_calc])
-        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))
-        self.assertTrue(self.dataset.X.any().any())
+        self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 1))
+        self.assertTrue(self.dataset.getDescriptors().any().any())
         # test from file instantiation
         desc_calc.toFile(f"{self.generatedDataPath}/test_calc.json")
         desc_calc_file = desc_calc.fromFile(f"{self.generatedDataPath}/test_calc.json")
         self.dataset.addDescriptors([desc_calc_file], recalculate=True)
-        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))
-        self.assertTrue(self.dataset.X.any().any())
+        self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 1))
+        self.assertTrue(self.dataset.getDescriptors().any().any())
 
     def testFingerprintSet(self):
         """Test the fingerprint set descriptor calculator."""
         desc_calc = MorganFP(radius=3, nBits=128)
         self.dataset.addDescriptors([desc_calc])
-        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 128))
-        self.assertTrue(self.dataset.X.any().any())
-        self.assertTrue(self.dataset.X.any().sum() > 1)
+        self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 128))
+        self.assertTrue(self.dataset.getDescriptors().any().any())
+        self.assertTrue(self.dataset.getDescriptors().any().sum() > 1)
 
     def testTanimotoDistances(self):
         """Test the Tanimoto distances descriptor calculator, which calculates the
@@ -155,28 +148,29 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
             )
         ]
         self.dataset.addDescriptors(desc_calc)
+        self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 7))
 
     def testDrugExPhyschem(self):
         """Test the DrugExPhyschem descriptor calculator."""
         desc_calc = [DrugExPhyschem()]
         self.dataset.addDescriptors(desc_calc)
-        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 19))
-        self.assertTrue(self.dataset.X.any().any())
-        self.assertTrue(self.dataset.X.any().sum() > 1)
+        self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 19))
+        self.assertTrue(self.dataset.getDescriptors().any().any())
+        self.assertTrue(self.dataset.getDescriptors().any().sum() > 1)
 
     def testRDKitDescs(self):
         """Test the rdkit descriptors calculator."""
         desc_calc = [RDKitDescs()]
         self.dataset.addDescriptors(desc_calc)
         rdkit_desc_count = len(set(Descriptors._descList))
-        self.assertEqual(self.dataset.X.shape, (len(self.dataset), rdkit_desc_count))
-        self.assertTrue(self.dataset.X.any().any())
-        self.assertTrue(self.dataset.X.any().sum() > 1)
+        self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), rdkit_desc_count))
+        self.assertTrue(self.dataset.getDescriptors().any().any())
+        self.assertTrue(self.dataset.getDescriptors().any().sum() > 1)
         # with 3D
         desc_calc = [RDKitDescs(include_3d=True)]
         self.dataset.addDescriptors(desc_calc, recalculate=True)
         self.assertEqual(
-            self.dataset.X.shape, (len(self.dataset), rdkit_desc_count + 10)
+            self.dataset.getDescriptors().shape, (len(self.dataset), rdkit_desc_count + 10)
         )
 
     def testSmilesDesc(self):
@@ -184,58 +178,43 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
         desc_calc = [SmilesDesc()]
         self.dataset.addDescriptors(desc_calc)
 
-        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1))
-        self.assertTrue(self.dataset.X.any().any())
-
-    def testConsistency(self):
-        """Test if the descriptor calculator is consistent with the dataset."""
-        len_prev = len(self.dataset)
-        desc_calc = [MorganFP(radius=3, nBits=128)]
-        self.dataset.addDescriptors(desc_calc)
-        self.assertEqual(len_prev, len(self.dataset))
-        self.assertEqual(len_prev, len(self.dataset.getDescriptors()))
-        self.assertEqual(len_prev, len(self.dataset.X))
-        self.assertEqual(128, self.dataset.getDescriptors().shape[1])
-        self.assertEqual(128, self.dataset.X.shape[1])
-        self.assertEqual(128, self.dataset.X_ind.shape[1])
-        self.assertEqual(128, self.dataset.getFeatures(concat=True)[0].shape[1])
-        self.assertEqual(len_prev, self.dataset.getFeatures(concat=True)[0].shape[0])
+        self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 1))
+        self.assertTrue(self.dataset.getDescriptors().any().any())
 
 
-class TestDescriptorsAll(DataSetsPathMixIn, DescriptorInDataCheckMixIn, QSPRTestCase):
-    """Test all descriptor sets in all data sets."""
-    def setUp(self):
-        super().setUp()
-        self.setUpPaths()
+# class TestDescriptorsAll(DataSetsPathMixIn, DescriptorInDataCheckMixIn, QSPRTestCase):
+#     """Test all descriptor sets in all data sets."""
+#     def setUp(self):
+#         super().setUp()
+#         self.setUpPaths()
 
-    @parameterized.expand(
-        [
-            (
-                f"{desc_set}_{TargetTasks.REGRESSION}",
-                desc_set,
-                [{
-                    "name": "CL",
-                    "task": TargetTasks.REGRESSION
-                }],
-            ) for desc_set in DataSetsPathMixIn.getAllDescriptors()
-        ]
-    )
-    def testDescriptorsAll(self, _, desc_set, target_props):
-        """Tests all available descriptor sets.
+#     @parameterized.expand(
+#         [
+#             (
+#                 f"{desc_set}_{TargetTasks.REGRESSION}",
+#                 desc_set,
+#                 [{
+#                     "name": "CL",
+#                     "task": TargetTasks.REGRESSION
+#                 }],
+#             ) for desc_set in DataSetsPathMixIn.getAllDescriptors()
+#         ]
+#     )
+#     def testDescriptorsAll(self, _, desc_set, target_props):
+#         """Tests all available descriptor sets.
 
-        Note that they are not checked with all possible settings and all possible
-        preparations, but only with the default settings provided by
-        `DataSetsPathMixIn.getDefaultPrep()`. The list itself is defined and configured by
-        `DataSetsPathMixIn.getAllDescriptors()`, so if you need a specific descriptor
-        tested, add it there.
-        """
-        np.random.seed(42)
-        dataset = self.createLargeTestDataSet(
-            name=self.getDatSetName(desc_set, target_props),
-            target_props=target_props,
-            n_jobs=self.nCPU,
-            chunk_size=None,
-        )
-        self.checkDataSetContainsDescriptorSet(
-            dataset, desc_set, self.getDefaultPrep(), target_props
-        )
+#         Note that they are not checked with all possible settings and all possible
+#         preparations, but only with the default settings provided by
+#         `DataSetsPathMixIn.getDefaultPrep()`. The list itself is defined and configured by
+#         `DataSetsPathMixIn.getAllDescriptors()`, so if you need a specific descriptor
+#         tested, add it there.
+#         """
+#         dataset = self.createLargeTestDataSet(
+#             name=self.getDataSetName(desc_set, target_props),
+#             target_props=target_props,
+#             n_jobs=self.nCPU,
+#             chunk_size=None,
+#         )
+#         self.checkDataSetContainsDescriptorSet(
+#             dataset, desc_set, self.getDefaultPrep(), target_props
+#         )

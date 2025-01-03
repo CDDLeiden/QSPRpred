@@ -46,7 +46,7 @@ from qsprpred.data.sampling.splits import (
     ScaffoldSplit,
     TemporalSplit,
 )
-from qsprpred.data.pipelines.pipeline import QSPRPipeline
+from qsprpred.data.pipelines.pipeline import DatasetPipeline
 from qsprpred.data.tables.qspr import QSPRTable
 from qsprpred.tasks import TargetTasks
 
@@ -496,7 +496,7 @@ def QSPR_dataprep(args):
             mydataset.prepareDataset(
                 feature_calculators=descriptorsets,
                 split=split,
-                pipeline=QSPRPipeline(steps),
+                pipeline=DatasetPipeline(steps),
                 feature_fill_value=args.fill_value,
             )
 

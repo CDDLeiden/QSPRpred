@@ -2,7 +2,7 @@ import logging
 import os
 from copy import deepcopy
 from os.path import exists
-from typing import Literal
+from typing import Literal, Tuple
 
 import numpy as np
 import pandas as pd
@@ -11,7 +11,7 @@ from sklearn.model_selection import KFold
 from ... import TargetTasks
 from ...data.descriptors.sets import DescriptorSet
 from ...data.processing.feature_filters import FeatureFilter
-from ...data.pipelines.pipeline import QSPRPipeline, DummyStep, SklearnStep
+from ...data.pipelines.pipeline import DatasetPipeline, DummyStep, SklearnStep
 from ...data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ...models import (
     AssessorMonitor,
@@ -31,58 +31,33 @@ from ...models import (
 from ...models.monitors import ListMonitor
 from ...tasks import TargetProperty
 from .path_mixins import ModelDataSetsPathMixIn
-
+from ...data.sampling.splits import DataSplit
 
 class DescriptorCheckMixIn:
     """Mixin class for common descriptor checks."""
-    def checkFeatures(self, ds: QSPRDataSet, expected_length: int):
-        """Check if the feature names and the feature matrix of a data set is consistent
-        with expected number of variables.
-
-        Args:
-            ds (QSPRDataSet): The data set to check.
-            expected_length (int): The expected number of features.
-
-        Raises:
-            AssertionError: If the feature names or the feature matrix is not consistent
+    def checkFeatures(self, X_train, y_train, X_test = None, y_test = None):
+        """Check if features matrices are the correct type and shape and if the indices
+        are consistent between features and targets. Also check if there is no overlap
+        between the train and test indices if both are provided.
         """
-        self.assertEqual(len(ds.featureNames), expected_length)
-        self.assertEqual(len(ds.getFeatureNames()), expected_length)
-        if expected_length > 0:
-            features, _ = ds.getFeatures(concat=True, refit_pipeline=False)
-        else:
-            self.assertRaises(ValueError, ds.getFeatures, concat=True, refit_pipeline=False)
-            features, _ = pd.concat([ds.X, ds.X_ind])
-        self.assertEqual(features.shape[0], len(ds))
-        self.assertEqual(features.shape[1], expected_length)
-        self.assertEqual(ds.X.shape[1], expected_length)
-        self.assertEqual(ds.X_ind.shape[1], expected_length)
-        # FIXME: find a way to test this with pipeline that can remove features
-        # if expected_length > 0:
-        #     for fold in ds.iterFolds(split=KFold(n_splits=5)):
-        #         self.assertIsInstance(fold, tuple)
-        #         self.assertEqual(fold[0].shape[1], expected_length)
-        #         self.assertEqual(fold[1].shape[1], expected_length)
-        # else:
-        #     self.assertRaises(
-        #         ValueError, lambda: list(ds.iterFolds(split=KFold(n_splits=5)))
-        #     )
-
-        # check if outliers are dropped
-        if "TestOutlier" in ds.getProperties():
-            # FIXME:  this does not seem to be called
-            num_dropped = ds.getDF().TestOutlier.sum()
-            # expected number of samples is the total number of samples minus the number
-            # of samples in the training set, minus the number of dropped
-            expected_num_samples = len(ds) - (len(ds.X)) - num_dropped
-            X, X_ind, _, _ = ds.getFeatures(concat=False)
-            self.assertEqual(X_ind.shape[0], expected_num_samples)
-
+        self.assertTrue(isinstance(X_train, pd.DataFrame))
+        self.assertTrue(isinstance(y_train, pd.DataFrame))
+        self.assertTrue(X_train.shape[0] == y_train.shape[0])
+        self.assertTrue(X_train.index.equals(y_train.index))
+        
+        if X_test is not None and y_test is not None:
+            self.assertTrue(isinstance(X_test, pd.DataFrame))
+            self.assertTrue(isinstance(y_test, pd.DataFrame))
+            self.assertTrue(X_test.shape[0] == y_test.shape[0])
+            self.assertTrue(X_test.index.equals(y_test.index))
+            self.assertTrue(X_train.shape[1] == X_test.shape[1])
+            self.assertTrue(y_train.shape[1] == y_test.shape[1])
+            self.assertTrue(X_train.index.intersection(X_test.index).empty)
+    
     def checkDescriptors(
         self, dataset: QSPRDataSet, target_props: list[dict | TargetProperty]
     ):
-        """
-        Check if information about descriptors is consistent in the data set. Checks
+        """Check if information about descriptors is consistent in the data set. Checks
         if calculators are consistent with the descriptors contained in the data set.
         This is tested also before and after serialization.
 
@@ -92,19 +67,17 @@ class DescriptorCheckMixIn:
 
         Raises:
             AssertionError: If the consistency check fails.
-
         """
-
-        # test some basic consistency rules on the resulting features
+        # check if the descriptors are consistent with getDescriptors method
         expected_length = 0
-        if dataset.pipeline is not None:
-            dataset.getFeatures(inplace=True)
         for calc in dataset.descriptorSets:
             expected_length += len(calc.descriptors)
-        self.checkFeatures(dataset, expected_length)
-        # save to file, check if it can be loaded, and if the features are consistent
+        self.assertEqual(len(dataset.getDescriptors()), expected_length)
+
         dataset.save()
         ds_loaded = dataset.__class__.fromFile(dataset.metaFile)
+        
+        # check randomState, targetProperties and descriptorSets are loaded correctly
         self.assertEqual(ds_loaded.randomState, dataset.randomState)
         for ds_loaded_prop, target_prop in zip(
             ds_loaded.targetProperties, target_props
@@ -116,90 +89,61 @@ class DescriptorCheckMixIn:
         for calc in ds_loaded.descriptors:
             calc = calc.calculator
             self.assertTrue(isinstance(calc, DescriptorSet))
-        self.checkFeatures(dataset, expected_length)
+        self.assertEqual(len(ds_loaded.getDescriptors()), expected_length)
 
 
 class DataPrepCheckMixIn(DescriptorCheckMixIn):
     """Mixin for testing data preparation."""
     def checkPrep(
         self,
-        dataset,
-        feature_calculators,
-        split,
-        feature_standardizer,
-        feature_filter,
-        data_filter,
-        applicability_domain,
-        expected_target_props,
+        dataset: QSPRDataSet,
+        pipeline: DatasetPipeline,
+        split: DataSplit | None = None,
     ):
-        """Check the consistency of the dataset after preparation."""
-        name = dataset.name
-        # if a split needs a dataset, give it one
-        if split and hasattr(split, "setDataSet"):
-            split.setDataSet(None)
-            self.assertRaises(ValueError, split.getDataSet)
-            split.setDataSet(dataset)
-            self.assertEqual(dataset, split.getDataSet())
-
-        # prepare the dataset and check consistency
-        pipeline = QSPRPipeline({
-            "data_filter": data_filter if data_filter else DummyStep(),
-            "feature_filter": feature_filter if feature_filter else DummyStep(),
-            "standardizer": feature_standardizer if feature_standardizer else DummyStep(),
-            # drop outliers
-        })
-        dataset.prepareDataset(
-            feature_calculators=feature_calculators,
-            split=split if split else None,
-            pipeline=pipeline,
-            applicability_domain=applicability_domain,
-        )
-        if dataset.pipeline is not None:
-            dataset.getFeatures(inplace=True)
-        expected_feature_count = len(dataset.featureNames)
-        original_features = dataset.featureNames
-        train, test, _, _ = dataset.getFeatures()
-        self.checkFeatures(dataset, expected_feature_count)
-        # save the dataset
+        """Check if the data preparation is consistent before and after reloading"""
+        def checkIdenticalFeatures(features1, features2):
+            """check that two sets of features and targets are identical
+            
+            Args:
+                features1 (tuple(pd.Dataframe)): (X_train, y_train, X_test, y_test)
+                features2 (tuple(pd.Dataframe)): (X_train, y_train, X_test, y_test)
+            """
+            for f1, f2 in zip(features1, features2):
+                if f1 is not None and f2 is not None:
+                    self.assertTrue(f1.index.equals(f2.index))
+                    self.assertTrue(f1.columns.equals(f2.columns))
+                    self.assertTrue(f1.equals(f2))
+        # check if the features are the correct type and shape
+        feature_list = []
+        for features in pipeline.apply(dataset, split):
+            self.checkFeatures(*features)
+            feature_list.append(features)
+        
+        # check if the features are the same after reloading the dataset
         dataset.save()
-        # reload the dataset and check consistency again
-        dataset = dataset.__class__.fromFile(dataset.metaFile)
-        train2, test2, _, _ = dataset.getFeatures()
-        self.assertTrue(train.index.equals(train2.index))
-        self.assertTrue(test.index.equals(test2.index))
-        self.assertEqual(dataset.name, name)
-        self.assertEqual(dataset.targetProperties[0].task, TargetTasks.REGRESSION)
-        for idx, prop in enumerate(expected_target_props):
-            self.assertEqual(dataset.targetProperties[idx].name, prop)
-        for calc in dataset.descriptors:
-            calc = calc.calculator
-            self.assertIsInstance(calc, DescriptorSet)
-        if feature_standardizer is not None:
-            self.assertIsInstance(dataset.pipeline.steps["standardizer"], SklearnStep)
-        else:
-            self.assertIsInstance(dataset.pipeline.steps["standardizer"], DummyStep)
-        self.checkFeatures(dataset, expected_feature_count)
-        pipeline = QSPRPipeline({
-            "data_filter": data_filter if data_filter else DummyStep(),
-            "feature_filter": feature_filter if feature_filter else DummyStep(),
-            "standardizer": feature_standardizer if feature_standardizer else DummyStep(),
-            # drop outliers
-        })
-        # verify prep results are the same after reloading
-        dataset.prepareDataset(
-            feature_calculators=feature_calculators,
-            split=split if split else None,
-            pipeline=pipeline,
-            applicability_domain=applicability_domain,
-        )
-        self.checkFeatures(dataset, expected_feature_count)
-        self.assertListEqual(sorted(dataset.featureNames), sorted(original_features))
+        dataset_reload = dataset.__class__.fromFile(dataset.metaFile)
+        for i, features in enumerate(pipeline.apply(dataset_reload, split, fit=False)):
+            self.checkFeatures(*features)
+            checkIdenticalFeatures(features, feature_list[i])
+            
+        # check if the features are the same after reloading the pipeline
+        pipeline.toFile(f"{dataset.path}_pipeline.json")
+        pipeline_reload = DatasetPipeline.fromFile(f"{dataset.path}_pipeline.json")
+        for i, features in enumerate(pipeline_reload.apply(dataset, split, fit=False)):
+            self.checkFeatures(*features)
+            checkIdenticalFeatures(features, feature_list[i])
 
+    def checkSplit(self, dataset: QSPRDataSet, name: str):
+        """Check if the split has the data it should have after splitting."""
+        self.assertTrue(isinstance(dataset.getSplit(name), DataSplit)) 
+        
+        for X_train, y_train, X_test, y_test in dataset.iterSplit(name, as_type="pandas"):
+            self.checkFeatures(X_train, y_train, X_test, y_test)
 
 class DescriptorInDataCheckMixIn(DescriptorCheckMixIn):
     """Mixin for testing descriptor sets in data sets."""
     @staticmethod
-    def getDatSetName(desc_set, target_props):
+    def getDataSetName(desc_set, target_props):
         """Get a unique name for a data set."""
         target_props_id = [
             f"{target_prop['name']}_{target_prop['task']}"
@@ -219,7 +163,6 @@ class DescriptorInDataCheckMixIn(DescriptorCheckMixIn):
         dataset.prepareDataset(**preparation)
         # test consistency
         self.checkDescriptors(dataset, target_props)
-
 
 class ModelCheckMixIn:
     """This class holds the tests for the QSPRmodel class."""
@@ -410,7 +353,6 @@ class ModelCheckMixIn:
                     predictions_proba, predictions_comparison_proba, expect_equal_result
                 )
 
-
 class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
     def trainModelWithMonitoring(
         self,
@@ -420,12 +362,12 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
         crossval_monitor: AssessorMonitor,
         test_monitor: AssessorMonitor,
         fit_monitor: FitMonitor,
-    ) -> (
+    ) -> Tuple[
         HyperparameterOptimizationMonitor,
         AssessorMonitor,
         AssessorMonitor,
         FitMonitor,
-    ):
+    ]:
         score_func = (
             "r2" if ds.targetProperties[0].task.isRegression() else "roc_auc_ovr"
         )

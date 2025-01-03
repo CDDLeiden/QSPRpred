@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 
 from qsprpred import TargetProperty, TargetTasks
 from qsprpred.data import RandomSplit
-from qsprpred.data.pipelines.pipeline import QSPRPipeline
+from qsprpred.data.pipelines.pipeline import DatasetPipeline
 from qsprpred.data.descriptors.fingerprints import MorganFP
 from qsprpred.data.descriptors.sets import DescriptorSet, DrugExPhyschem
 from qsprpred.data.processing.feature_filters import (
@@ -150,7 +150,7 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         dataset.prepareDataset(
             split=split,
             feature_calculators=[self.sampleDescSet],
-            pipeline=QSPRPipeline({
+            pipeline=DatasetPipeline({
                 "scaler": StandardScaler(),
                 "lowvar": LowVarianceFilter(0.05),
                 "highcorr": HighCorrelationFilter(0.9),
@@ -185,7 +185,7 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         dataset.prepareDataset(
             split=split,
             feature_calculators=[self.sampleDescSet],
-            pipeline=QSPRPipeline({
+            pipeline=DatasetPipeline({
                 "scaler": StandardScaler(),
                 "lowvar": lv,
                 "highcorr": hc,
@@ -203,7 +203,7 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         dataset_next.prepareDataset(
             split=split,
             feature_calculators=[self.sampleDescSet],
-            pipeline=QSPRPipeline({
+            pipeline=DatasetPipeline({
                 "scaler": StandardScaler(),
                 "lowvar": lv,
                 "highcorr": hc,
@@ -230,7 +230,7 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         ]
         self.dataset.prepareDataset(
             feature_calculators=calcs,
-            pipeline=QSPRPipeline({"scaler": StandardScaler()}),
+            pipeline=DatasetPipeline({"scaler": StandardScaler()}),
             split=RandomSplit(test_fraction=0.2),
         )
         # test if all descriptors are there
@@ -240,7 +240,7 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         self.assertEqual(self.dataset.X.shape[1], expected_length)
         # filter features and test if they are there after saving and loading
         self.dataset.applyPipeline(
-            QSPRPipeline(
+            DatasetPipeline(
                 {
                     "lowvar": LowVarianceFilter(0.05), 
                     "highcorr": HighCorrelationFilter(0.9),
@@ -282,7 +282,7 @@ class TestDescriptorsExtra(
                     "name": "CL",
                     "task": TargetTasks.REGRESSION
                 }],
-            ) for desc_set in DataSetsMixInExtras.getAllDescriptors()
+            ) for desc_set in DataSetsMixInExtras.getAllDescriptorSets()
         ]
     )
     def testDescriptorsExtraAll(
@@ -293,7 +293,7 @@ class TestDescriptorsExtra(
     ):
         """Test the calculation of extra descriptors with data preparation."""
         dataset = self.createLargeTestDataSet(
-            name=self.getDatSetName(desc_set, target_props),
+            name=self.getDataSetName(desc_set, target_props),
             target_props=target_props,
             n_jobs=2,
             chunk_size=self.chunkSize,
@@ -366,7 +366,7 @@ class TestDescriptorsPCM(DataSetsMixInExtras, DescriptorInDataCheckMixIn, TestCa
         so if you need a specific descriptor tested, add it there.
         """
         dataset = self.createPCMDataSet(
-            name=f"{self.getDatSetName(desc_set, target_props)}_pcm",
+            name=f"{self.getDataSetName(desc_set, target_props)}_pcm",
             target_props=target_props,
         )
         self.checkDataSetContainsDescriptorSet(

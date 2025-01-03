@@ -12,7 +12,7 @@ from qsprpred.benchmarks import BenchmarkSettings, DataPrepSettings, BenchmarkRu
 from qsprpred.data import MoleculeTable, RandomSplit
 from qsprpred.data.descriptors.fingerprints import MorganFP
 from qsprpred.data.descriptors.sets import RDKitDescs
-from qsprpred.data.pipelines.pipeline import QSPRPipeline
+from qsprpred.data.pipelines.pipeline import DatasetPipeline
 from qsprpred.data.processing.feature_filters import LowVarianceFilter
 from qsprpred.data.sources import DataSource
 from qsprpred.models import SklearnModel, TestSetAssessor, CrossValAssessor
@@ -82,7 +82,7 @@ settings = BenchmarkSettings(
     prep_settings=[
         DataPrepSettings(
             split=RandomSplit(test_fraction=0.2),  # random split
-            pipeline=QSPRPipeline({
+            pipeline=DatasetPipeline({
                 "filter": LowVarianceFilter(0.05),
                 "scaler": StandardScaler()
             }),
