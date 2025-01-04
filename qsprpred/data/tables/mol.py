@@ -512,16 +512,18 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         """Get the descriptor calculators for this table."""
         return [x.calculator for x in self.descriptors]
 
-    def generateDescriptorDataSetName(self, ds_set: str | DescriptorSet) -> str:
+    def generateDescriptorDataSetName(self, ds_set: str | DescriptorSet, name: str | None = None) -> str:
         """Generate a descriptor set name from a descriptor set.
 
         Args:
-            ds_set (str): Name of the descriptor set.
+            ds_set (str | DescriptorSet): Name of the descriptor set.
+            name (str): Name of the data set.
 
         Returns:
             (str): Name of the descriptor set.
         """
-        return f"Descriptors_{self.name}_{ds_set}"
+        name = name or self.name
+        return f"Descriptors_{name}_{ds_set}"
 
     def dropDescriptors(self, descriptors: list[str]):
         """Drop descriptors by name. Performs a simple feature selection by removing
@@ -826,7 +828,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
                 desc.getSubset(
                     self.getDescriptorNames(),
                     ids,
-                    name=name,
+                    name=self.generateDescriptorDataSetName(desc.calculator, name),
                     path=ret.descsPath,
                 )
             )
