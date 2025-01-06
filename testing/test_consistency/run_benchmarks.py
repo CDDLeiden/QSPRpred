@@ -15,7 +15,7 @@ from qsprpred.data.descriptors.sets import RDKitDescs
 from qsprpred.data.pipelines.pipeline import DatasetPipeline
 from qsprpred.data.processing.feature_filters import LowVarianceFilter
 from qsprpred.data.sources import DataSource
-from qsprpred.models import SklearnModel, TestSetAssessor, CrossValAssessor
+from qsprpred.models import SklearnModel, Assessor
 from qsprpred.utils.parallel import MultiprocessingJITGenerator
 
 BASE_DIR = "./data/"
@@ -106,10 +106,10 @@ settings = BenchmarkSettings(
         ),
     ],
     assessors=[
-        CrossValAssessor(scoring="roc_auc"),
-        CrossValAssessor(scoring="matthews_corrcoef", use_proba=False),
-        TestSetAssessor(scoring="roc_auc"),
-        TestSetAssessor(scoring="matthews_corrcoef", use_proba=False),
+        Assessor(scoring="roc_auc"),
+        Assessor(scoring="matthews_corrcoef", use_proba=False),
+        Assessor(scoring="roc_auc"),
+        Assessor(scoring="matthews_corrcoef", use_proba=False),
     ],
     optimizers=[],
 )
@@ -134,10 +134,10 @@ settings.target_props = [
     ],
 ]
 settings.assessors = [
-    CrossValAssessor(scoring="r2"),
-    CrossValAssessor(scoring="neg_root_mean_squared_error"),
-    TestSetAssessor(scoring="r2"),
-    TestSetAssessor(scoring="neg_root_mean_squared_error"),
+    Assessor(scoring="r2"),
+    Assessor(scoring="neg_root_mean_squared_error"),
+    Assessor(scoring="r2"),
+    Assessor(scoring="neg_root_mean_squared_error"),
 ]
 settings.models = [
     SklearnModel(

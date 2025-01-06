@@ -5,7 +5,7 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.neural_network import MLPClassifier
 
-from qsprpred.models.assessment.methods import CrossValAssessor, TestSetAssessor
+from qsprpred.models.assessment.methods import Assessor
 
 from .. import TargetProperty, TargetTasks
 from ..data import MoleculeTable, QSPRTable
@@ -106,21 +106,21 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
                 ),
             ],
             assessors=[
-                CrossValAssessor(
+                Assessor(
                     scoring="roc_auc",
                     split=KFold(
                         n_splits=self.nFolds, shuffle=True, random_state=self.seed
                     ),
                 ),
-                CrossValAssessor(
+                Assessor(
                     scoring="matthews_corrcoef",
                     split=KFold(
                         n_splits=self.nFolds, shuffle=True, random_state=self.seed
                     ),
                     use_proba=False,
                 ),
-                TestSetAssessor(scoring="roc_auc"),
-                TestSetAssessor(scoring="matthews_corrcoef", use_proba=False),
+                Assessor(scoring="roc_auc"),
+                Assessor(scoring="matthews_corrcoef", use_proba=False),
             ],
             optimizers=[],  # FIXME: needs to be tested
         )
@@ -188,16 +188,16 @@ class BenchmarkingTest(BenchMarkTestCase):
             ),
         ]
         self.settings.assessors = [
-            CrossValAssessor(
+            Assessor(
                 scoring="r2",
                 split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
             ),
-            CrossValAssessor(
+            Assessor(
                 scoring="neg_mean_squared_error",
                 split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
             ),
-            TestSetAssessor(scoring="r2"),
-            TestSetAssessor(scoring="neg_mean_squared_error"),
+            Assessor(scoring="r2"),
+            Assessor(scoring="neg_mean_squared_error"),
         ]
         self.checkSettings()
         results = self.benchmark.run(raise_errors=True)
@@ -239,19 +239,19 @@ class BenchmarkingTest(BenchMarkTestCase):
             ),
         ]
         self.settings.assessors = [
-            CrossValAssessor(
+            Assessor(
                 scoring="roc_auc",
                 split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
                 split_multitask_scores=True,
             ),
-            CrossValAssessor(
+            Assessor(
                 scoring="matthews_corrcoef",
                 split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
                 use_proba=False,
                 split_multitask_scores=True,
             ),
-            TestSetAssessor(scoring="roc_auc", split_multitask_scores=True),
-            TestSetAssessor(
+            Assessor(scoring="roc_auc", split_multitask_scores=True),
+            Assessor(
                 scoring="matthews_corrcoef",
                 use_proba=False,
                 split_multitask_scores=True,
@@ -294,18 +294,18 @@ class BenchmarkingTest(BenchMarkTestCase):
             ),
         ]
         self.settings.assessors = [
-            CrossValAssessor(
+            Assessor(
                 scoring="r2",
                 split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
                 split_multitask_scores=True,
             ),
-            CrossValAssessor(
+            Assessor(
                 scoring="neg_mean_squared_error",
                 split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
                 split_multitask_scores=True,
             ),
-            TestSetAssessor(scoring="r2", split_multitask_scores=True),
-            TestSetAssessor(
+            Assessor(scoring="r2", split_multitask_scores=True),
+            Assessor(
                 scoring="neg_mean_squared_error", split_multitask_scores=True
             ),
         ]

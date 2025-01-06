@@ -16,7 +16,7 @@ from ...data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ...models import (
     AssessorMonitor,
     BaseMonitor,
-    CrossValAssessor,
+    Assessor,
     EarlyStoppingMode,
     FileMonitor,
     FitMonitor,
@@ -26,12 +26,12 @@ from ...models import (
     OptunaOptimization,
     QSPRModel,
     SklearnMetrics,
-    TestSetAssessor,
+    Assessor,
 )
 from ...models.monitors import ListMonitor
 from ...tasks import TargetProperty
 from .path_mixins import ModelDataSetsPathMixIn
-from ...data.sampling.splits import DataSplit
+from ...data.sampling.splits import DataSplit, RandomSplit
 
 class DescriptorCheckMixIn:
     """Mixin class for common descriptor checks."""
@@ -186,17 +186,21 @@ class ModelCheckMixIn:
         return grid_params[grid_params[:, 0] == mname, 1][0]
 
     def checkOptimization(
-        self, model: QSPRModel, ds: QSPRDataSet, optimizer: HyperparameterOptimization
+        self,
+        model: QSPRModel,
+        ds: QSPRDataSet,
+        pipeline: DatasetPipeline,
+        optimizer: HyperparameterOptimization
     ):
         model_path, est_path = model.save(save_estimator=True)
         # get last modified time stamp of the model file
         model_last_modified = os.path.getmtime(est_path)
-        best_params = optimizer.optimize(model, ds)
+        best_params = optimizer.optimize(model, ds, pipeline)
         for param in best_params:
             self.assertEqual(best_params[param], model.parameters[param])
         new_time_modified = os.path.getmtime(est_path)
         self.assertTrue(model_last_modified < new_time_modified)
-        optimizer.optimize(model, ds, refit_optimal=True)
+        optimizer.optimize(model, ds, pipeline, refit_optimal=True)
         model_last_modified = new_time_modified
         new_time_modified = os.path.getmtime(est_path)
         self.assertTrue(model_last_modified < new_time_modified)
@@ -204,12 +208,13 @@ class ModelCheckMixIn:
         for param in model.parameters:
             self.assertEqual(model_new.parameters[param], model.parameters[param])
 
-    def fitTest(self, model: QSPRModel, ds: QSPRDataSet):
+    def fitTest(self, model: QSPRModel, ds: QSPRDataSet, pipeline: DatasetPipeline):
         """Test model fitting, optimization and evaluation.
 
         Args:
             model (QSPRModel): The model to test.
             ds (QSPRDataSet): The dataset to use for testing.
+            pipeline (DatasetPipeline): The pipeline to use for testing.
         """
         # perform bayes optimization
         model.initFromDataset(ds)
@@ -218,11 +223,14 @@ class ModelCheckMixIn:
         bayesoptimizer = OptunaOptimization(
             param_grid=search_space_bs,
             n_trials=1,
-            model_assessor=CrossValAssessor(
-                scoring=score_func, mode=EarlyStoppingMode.NOT_RECORDING
+            model_assessor=Assessor(
+                name="optuna_crossval",
+                split=KFold(n_splits=5, shuffle=True, random_state=model.randomState),
+                scoring=score_func,
+                mode=EarlyStoppingMode.NOT_RECORDING
             ),
         )
-        self.checkOptimization(model, ds, bayesoptimizer)
+        self.checkOptimization(model, ds, pipeline, bayesoptimizer)
         model.cleanFiles()
         # perform grid search
         search_space_gs = self.getParamGrid(model, "grid")
@@ -231,36 +239,43 @@ class ModelCheckMixIn:
         gridsearcher = GridSearchOptimization(
             param_grid=search_space_gs,
             score_aggregation=np.median,
-            model_assessor=TestSetAssessor(
+            model_assessor=Assessor(
+                name="grid_test",
+                split=RandomSplit(test_fraction=0.2),
                 scoring=score_func,
                 use_proba=False,
                 mode=EarlyStoppingMode.NOT_RECORDING,
             ),
         )
-        self.checkOptimization(model, ds, gridsearcher)
+        self.checkOptimization(model, ds, pipeline, gridsearcher)
         model.cleanFiles()
         # perform crossvalidation
         score_func = "r2" if model.task.isRegression() else "roc_auc_ovr"
         n_folds = 5
-        scores = CrossValAssessor(
-            mode=EarlyStoppingMode.RECORDING,
+        cross_val = Assessor(
+            name="crossval",
             scoring=score_func,
-            split_multitask_scores=model.isMultiTask,
             split=KFold(n_splits=n_folds, shuffle=True, random_state=model.randomState),
-        )(model, ds)
+            mode=EarlyStoppingMode.RECORDING,
+            split_multitask_scores=model.isMultiTask,
+        )
+        scores = cross_val(model, ds, pipeline)
         if model.isMultiTask:
             self.assertEqual(scores.shape, (n_folds, len(model.targetProperties)))
-        scores = TestSetAssessor(
-            mode=EarlyStoppingMode.NOT_RECORDING,
+        test_set = Assessor(
+            name="test",
             scoring=score_func,
+            split=RandomSplit(test_fraction=0.2),
+            mode=EarlyStoppingMode.NOT_RECORDING,
             split_multitask_scores=model.isMultiTask,
-        )(model, ds)
+        )
+        scores = test_set(model, ds, pipeline)
         if model.isMultiTask:
-            self.assertEqual(scores.shape, (len(model.targetProperties), ))
-        self.assertTrue(exists(f"{model.outDir}/{model.name}.ind.tsv"))
-        self.assertTrue(exists(f"{model.outDir}/{model.name}.cv.tsv"))
+            self.assertEqual(scores.shape, (1, len(model.targetProperties)))
+        self.assertTrue(exists(f"{model.outDir}/{model.name}_crossval.tsv"))
+        self.assertTrue(exists(f"{model.outDir}/{model.name}_test.tsv"))
         # train the model on all data
-        path = model.fitDataset(ds)
+        path = model.fitDataset(ds, pipeline)
         self.assertTrue(exists(path))
         self.assertTrue(exists(model.metaFile))
         self.assertEqual(path, model.metaFile)
@@ -320,10 +335,8 @@ class ModelCheckMixIn:
         # Check if the predictMols function gives the same result as the
         # predict/predictProba function
         # get the expected result from the basic predict function
-        features, _ = dataset.getFeatures(
-            concat=True, ordered=True, refit_pipeline=False
-        )
-        expected_result = model.predict(features)
+        X, _ = next(model.pipeline.apply(dataset, fit=False))
+        expected_result = model.predict(X)
         # make predictions with the predictMols function and check with previous result
         smiles = list(dataset.smiles)
         num_smiles = len(smiles)
@@ -333,7 +346,7 @@ class ModelCheckMixIn:
         # do the same for the predictProba function
         predictions_proba = None
         if model.task.isClassification():
-            expected_result_proba = model.predictProba(features)
+            expected_result_proba = model.predictProba(X)
             predictions_proba = model.predictMols(
                 smiles, use_probas=True, **pred_kwargs
             )
@@ -358,6 +371,7 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
         self,
         model: QSPRModel,
         ds: QSPRDataSet,
+        pipeline: DatasetPipeline,
         hyperparam_monitor: HyperparameterOptimizationMonitor,
         crossval_monitor: AssessorMonitor,
         test_monitor: AssessorMonitor,
@@ -374,28 +388,34 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
         search_space_gs = self.getParamGrid(model, "grid")
         gridsearcher = GridSearchOptimization(
             param_grid=search_space_gs,
-            model_assessor=CrossValAssessor(
+            model_assessor=Assessor(
+                name="grid_test",
+                split=RandomSplit(test_fraction=0.2),
                 scoring=score_func,
                 mode=EarlyStoppingMode.NOT_RECORDING,
             ),
             monitor=hyperparam_monitor,
         )
-        best_params = gridsearcher.optimize(model, ds)
+        best_params = gridsearcher.optimize(model, ds, pipeline)
         model.setParams(best_params)
         model.save()
         # perform crossvalidation
-        CrossValAssessor(
+        Assessor(
+            name="crossval",
+            split=KFold(n_splits=5, shuffle=True, random_state=model.randomState),
             mode=EarlyStoppingMode.RECORDING,
             scoring=score_func,
             monitor=crossval_monitor,
-        )(model, ds)
-        TestSetAssessor(
+        )(model, ds, pipeline)
+        Assessor(
+            name="test",
+            split=RandomSplit(test_fraction=0.2),
             mode=EarlyStoppingMode.NOT_RECORDING,
             scoring=score_func,
             monitor=test_monitor,
-        )(model, ds)
+        )(model, ds, pipeline)
         # train the model on all data
-        model.fitDataset(ds, monitor=fit_monitor)
+        model.fitDataset(ds, monitor=fit_monitor, pipeline=pipeline)
         return hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
 
     def baseMonitorTest(
@@ -441,7 +461,7 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
         def check_assessor_monitor(monitor, n_folds, len_y):
             self.assertEqual(
                 monitor.predictions.shape,
-                (len_y, 3 if n_folds > 1 else 2),  # labels + preds (+ fold)
+                (len_y, 4),  # labels + preds + fold + set
             )
             self.assertEqual(len(monitor.foldData), n_folds)
             self.assertEqual(len(monitor.fits), n_folds)
@@ -458,9 +478,11 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
         if monitor_type == "hyperparam":
             check_hyperparam_monitor(monitor)
         elif monitor_type == "crossval":
-            check_assessor_monitor(monitor, 5, len(monitor.assessmentDataset.y))
+            # length should be the number of folds times the total length of the dataset
+            # as both the training and test set are stored for each fold
+            check_assessor_monitor(monitor, 5, len(monitor.assessmentDataset.getTargets())*5)
         elif monitor_type == "test":
-            check_assessor_monitor(monitor, 1, len(monitor.assessmentDataset.y_ind))
+            check_assessor_monitor(monitor, 1, len(monitor.assessmentDataset.getTargets()))
         elif monitor_type == "fit":
             if neural_net:
                 check_fit_monitor(monitor)
@@ -522,7 +544,7 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
         self.fileMonitorTest(monitor.monitors[1], monitor_type, neural_net)
 
     def runMonitorTest(
-        self, model, data, monitor_type, test_method, nerual_net, *args, **kwargs
+        self, model, data, pipeline, monitor_type, test_method, nerual_net, *args, **kwargs
     ):
         hyperparam_monitor = monitor_type(*args, **kwargs)
         crossval_monitor = deepcopy(hyperparam_monitor)
@@ -534,7 +556,7 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
             test_monitor,
             fit_monitor,
         ) = self.trainModelWithMonitoring(
-            model, data, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+            model, data, pipeline, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
         )
         test_method(hyperparam_monitor, "hyperparam", nerual_net)
         test_method(crossval_monitor, "crossval", nerual_net)

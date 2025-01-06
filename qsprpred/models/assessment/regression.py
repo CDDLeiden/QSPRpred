@@ -1,27 +1,27 @@
 import pandas as pd
-from sklearn import metrics
+from sklearn.metrics import r2_score, root_mean_squared_error
 
 
-def create_correlation_summary(model):
-    cv_path = f"{model.outPrefix}.cv.tsv"
-    ind_path = f"{model.outPrefix}.ind.tsv"
+def create_correlation_summary(model, assessments):
+    assessment_paths = [f"{model.outPrefix}_{assessment}.tsv" for assessment in assessments]
 
-    cate = [cv_path, ind_path]
-    cate_names = ["cv", "ind"]
     property_name = model.targetProperties[0].name
-    summary = {"ModelName": [], "R2": [], "RMSE": [], "Set": []}
-    for j, _ in enumerate(["Cross Validation", "Independent Test"]):
-        df = pd.read_table(cate[j])
-        coef = metrics.r2_score(
-            df[f"{property_name}_Label"], df[f"{property_name}_Prediction"]
-        )
-        rmse = metrics.root_mean_squared_error(
-            df[f"{property_name}_Label"],
-            df[f"{property_name}_Prediction"],
-        )
-        summary["R2"].append(coef)
-        summary["RMSE"].append(rmse)
-        summary["Set"].append(cate_names[j])
-        summary["ModelName"].append(model.name)
+    summary = {"Model": [], "Metric": [], "Assessment": [], "Fold": [], "Set": [], "Value": []}
+    for assessment, assessment_path in zip(assessments, assessment_paths):
+        df = pd.read_table(assessment_path)
+        for metric in [r2_score, root_mean_squared_error]:
+            for fold in sorted(df.Fold.unique()):
+                df_fold = df[df.Fold == fold]
+                for set_name in ["Train", "Test"]:
+                    df_set = df_fold[df_fold.Set == set_name]
+                    y_true = df_set[f"{property_name}_Label"]
+                    y_pred = df_set[f"{property_name}_Prediction"]
+                    val = metric(y_true, y_pred)
+                    summary["Model"].append(model.name)
+                    summary["Metric"].append(metric.__name__)
+                    summary["Assessment"].append(assessment)
+                    summary["Fold"].append(fold)
+                    summary["Set"].append(set_name)
+                    summary["Value"].append(val)
 
     return summary

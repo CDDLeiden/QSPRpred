@@ -16,7 +16,7 @@ from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
 from qsprpred.data.tables.qspr import QSPRTable
-from qsprpred.models.assessment.methods import CrossValAssessor, TestSetAssessor
+from qsprpred.models.assessment.methods import Assessor
 from qsprpred.tasks import TargetTasks
 
 from .extra.gpu.models.dnn import DNNModel
@@ -312,7 +312,7 @@ def QSPR_modelling(args):
                 search_space_gs = grid_params[grid_params[:, 0] == model_type, 1][0]
                 log.info(search_space_gs)
                 gridsearcher = GridSearchOptimization(
-                    model_assessor=CrossValAssessor(scoring=score_func),
+                    model_assessor=Assessor(scoring=score_func),
                     param_grid=search_space_gs,
                 )
                 best_params = gridsearcher.optimize(qspr_model, dataset)
@@ -336,7 +336,7 @@ def QSPR_modelling(args):
                         {"criterion": ["categorical", ["gini", "entropy"]]}
                     )
                 bayesoptimizer = OptunaOptimization(
-                    model_assessor=CrossValAssessor(scoring=score_func),
+                    model_assessor=Assessor(scoring=score_func),
                     param_grid=search_space_bs,
                     n_trials=args.n_trials,
                     n_jobs=args.n_jobs,
@@ -346,11 +346,11 @@ def QSPR_modelling(args):
                 qspr_model.setParams(best_params)
 
             if args.model_evaluation:
-                CrossValAssessor(mode=EarlyStoppingMode.RECORDING, scoring=score_func)(
+                Assessor(mode=EarlyStoppingMode.RECORDING, scoring=score_func)(
                     qspr_model,
                     dataset,
                 )
-                TestSetAssessor(
+                Assessor(
                     mode=EarlyStoppingMode.NOT_RECORDING, scoring=score_func
                 )(qspr_model, dataset)
 

@@ -226,7 +226,8 @@ class DatasetPipeline(Pipeline):
         self,
         dataset: QSPRTable,
         split: DataSplit | None = None,
-        fit: bool = True
+        fit: bool = True,
+        order: pd.Index | None = None, # FIXME: added to reproduce original behavior
     ) -> Generator[
         tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame | None, pd.DataFrame | None],
         None,
@@ -256,6 +257,9 @@ class DatasetPipeline(Pipeline):
             dataset.addDescriptors(self.feature_calculators)
         X = dataset.getDescriptors()
         y = dataset.getTargets()
+        if order is not None:  # FIXME: added to reproduce original behavior
+            X = X.loc[order]  # FIXME: added to reproduce original behavior
+            y = y.loc[order]  # FIXME: added to reproduce original behavior
         if split is None:
             X, y, _, _ = super().apply(X, y, fit = fit)
             yield X, y
@@ -264,7 +268,7 @@ class DatasetPipeline(Pipeline):
                 split = dataset.getSplit(split)
             if hasattr(split, 'randomState'):
                 split.randomState = self.randomState
-            for train_index, test_index in dataset.split(split):
+            for train_index, test_index in dataset.split(split, X, y):  # FIXME: added to reproduce original behavior
                 X_train, y_train, X_test, y_test = (
                     X.loc[train_index], y.loc[train_index], X.loc[test_index], y.loc[test_index]
                 )

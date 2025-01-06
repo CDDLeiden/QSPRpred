@@ -21,7 +21,7 @@ from ....benchmarks.tests import BenchMarkTestCase
 from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
-from ....models import CrossValAssessor, SklearnMetrics, SklearnModel
+from ....models import Assessor, SklearnMetrics, SklearnModel
 from ....models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ....utils.parallel import ThreadsJITGenerator
 from ....utils.testing.check_mixins import ModelCheckMixIn, MonitorsCheckMixIn
@@ -455,7 +455,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         )
 
         # Run 1 fold of bootstrap cross validation (default cross validation in chemprop is bootstrap)
-        assessor = CrossValAssessor(
+        assessor = Assessor(
             scoring=SklearnMetrics(rmse),
             split=ShuffleSplit(
                 n_splits=1, test_size=0.1, random_state=dataset.randomState

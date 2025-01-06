@@ -588,6 +588,8 @@ class QSPRTable(MoleculeTable):
     def split(
         self,
         split: DataSplit,
+        X: pd.DataFrame | None = None,
+        y: pd.DataFrame | None = None,
     ) -> Generator[
         tuple[
             pd.Index,
@@ -601,15 +603,15 @@ class QSPRTable(MoleculeTable):
 
         Args:
             split (DataSplit): Split to apply to the data
-            X (pd.DataFrame): data to apply the pipeline to
-            y (pd.DataFrame | None): target data to apply the pipeline to
+            X (pd.DataFrame): data to apply the split to
+            y (pd.DataFrame | None): target data to apply the split to
             fit_pipeline (bool): whether to fit the pipeline
         
         Yields:
             tuple[pd.Index, pd.Index]: indices of the train and test set
         """
-        X = self.getDescriptors()
-        y = self.getTargets()
+        X = self.getDescriptors() if X is None else X
+        y = self.getTargets() if y is None else y
         folds = split.split(X, y)
             
         for train_idx, test_idx in folds:

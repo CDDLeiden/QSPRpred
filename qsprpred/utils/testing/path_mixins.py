@@ -31,7 +31,6 @@ from ...data.pipelines.pipeline import DatasetPipeline, Shuffle
 from ...data.processing.data_filters import RepeatsFilter
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
 from ...data.processing.feature_standardizers import SKLearnStandardizer
-from ...data.sampling.splits import RandomSplit
 from ...data.storage.tabular.basic_storage import PandasChemStore
 from ...data.tables.qspr import QSPRTable
 from ...models import SklearnModel
@@ -80,9 +79,7 @@ class DataSetsPathMixIn(PathMixIn):
     @staticmethod
     def getDefaultPrep():
         """Return a dictionary with default preparation settings."""
-        return {
-            "split": RandomSplit(test_fraction=0.2),
-            "pipeline": DatasetPipeline(
+        return DatasetPipeline(
                 feature_calculators=[MorganFP(radius=2, nBits=128)],
                 steps = {
                     "shuffle": Shuffle(),
@@ -91,7 +88,6 @@ class DataSetsPathMixIn(PathMixIn):
                     "high_corr_filter": HighCorrelationFilter(0.8),
                 }
             )
-        }
 
     @classmethod
     def getAllDescriptorSets(cls):

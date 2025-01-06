@@ -21,6 +21,8 @@ from qsprpred.data import QSPRTable
 from ..data.storage.tabular.basic_storage import PandasChemStore
 from ..data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ..data.tables.mol import MoleculeTable
+from ..data.pipelines.pipeline import DatasetPipeline
+from ..data.processing.applicability_domain import MLChemADWrapper, ApplicabilityDomain
 from ..logs import logger
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
 from ..tasks import ModelTasks
@@ -226,7 +228,7 @@ class QSPRModel(JSONSerializable, ABC):
             self.targetProperties = data.targetProperties
             self.nTargets = len(self.targetProperties)
             self.featureCalculators = data.descriptorSets
-            self.pipeline = data.pipeline
+            # self.pipeline = data.pipeline
             if self.randomState is None:
                 self.initRandomState(data.randomState)
             self.chemStandardizer = data.standardizer
@@ -458,15 +460,13 @@ class QSPRModel(JSONSerializable, ABC):
     def createPredictionDatasetFromMols(
         self,
         mols: list[str | Mol],
-        n_jobs: int = 1,
-        fill_value: float = np.nan,
+        n_jobs: int = 1
     ) -> tuple[QSPRDataSet, np.ndarray]:
         """Create a `QSPRDataSet` instance from a list of SMILES strings.
 
         Args:
             mols (list[str | Mol]): list of SMILES strings
             n_jobs (int): number of parallel jobs to use
-            fill_value (float): value to fill for missing features
 
         Returns:
             tuple:
@@ -503,14 +503,6 @@ class QSPRModel(JSONSerializable, ABC):
             self.targetProperties,
             drop_empty_target_props=False,
         )
-        # prepare dataset and return it
-        dataset.prepareDataset(
-            feature_calculators=self.featureCalculators,
-            pipeline=self.pipeline,
-            feature_fill_value=fill_value,
-            shuffle=False,
-            fit_pipeline=False,
-        )
         return dataset, failed_mask
 
     def predictDataset(self,
@@ -528,14 +520,18 @@ class QSPRModel(JSONSerializable, ABC):
                 an array of predictions or a list of arrays of predictions
                 (for classification models with use_probas=True)
         """
+        if self.pipeline is not None:
+            X, _ = next(self.pipeline.apply(dataset, fit=False))
+        else:
+            X = dataset.getDescriptors()
         if self.task.isRegression() or not use_probas:
-            predictions = self.predict(dataset)
+            predictions = self.predict(X)
             # always return 2D array
             if self.task.isClassification():
                 predictions = predictions.astype(int)
         else:
             # return a list of 2D arrays
-            predictions = self.predictProba(dataset)
+            predictions = self.predictProba(X)
         return predictions
 
     def predictMols(
@@ -564,11 +560,11 @@ class QSPRModel(JSONSerializable, ABC):
             np.ndarray[bool]: boolean mask indicating which molecules fall
                 within the applicability domain of the model
         """
-        if not self.featureCalculators:
+        if not self.featureCalculators and not self.pipeline.feature_calculators:
             raise ValueError("No feature calculator set on this instance.")
         # create data set from mols
         dataset, failed_mask = self.createPredictionDatasetFromMols(
-            mols, n_jobs, fill_value
+            mols, n_jobs
         )
         # make predictions for the dataset
         predictions = self.predictDataset(dataset, use_probas)
@@ -577,11 +573,11 @@ class QSPRModel(JSONSerializable, ABC):
 
         # return predictions and if mols are within applicability domain if requested
         if hasattr(self, "applicabilityDomain") and use_applicability_domain:
-            in_domain = self.applicabilityDomain.contains(
-                dataset.getFeatures(
-                    concat=True, ordered=True, refit_pipeline=False
-                )[0]
-            ).values
+            if self.pipeline is not None:
+                X, _ = next(self.pipeline.apply(dataset, fit=False))
+            else:
+                X = dataset.getDescriptors()
+            in_domain = self.applicabilityDomain.contains(X).values
             in_domain = self.handleInvalidsInPredictions(mols, in_domain, failed_mask)
 
             return predictions, in_domain
@@ -599,6 +595,7 @@ class QSPRModel(JSONSerializable, ABC):
     def fitDataset(
         self,
         ds: QSPRDataSet,
+        pipeline: DatasetPipeline | None = None,
         monitor=None,
         mode=EarlyStoppingMode.OPTIMAL,
         save_model=True,
@@ -607,12 +604,13 @@ class QSPRModel(JSONSerializable, ABC):
     ) -> str:
         """Train model on the whole attached data set.
 
-        ** IMPORTANT ** For models that supportEarlyStopping, `CrossValAssessor`
+        ** IMPORTANT ** For models that supportEarlyStopping, `Assessor`
         should be run first, so that the average number of epochs from the
         cross-validation with early stopping can be used for fitting the model.
 
         Args:
             ds (QSPRDataSet): data set to fit this model on
+            pipeline (DatasetPipeline): pipeline to use for fitting
             monitor (FitMonitor): monitor for the fitting process, if None, the base
                 monitor is used
             mode (EarlyStoppingMode): early stopping mode for models that support
@@ -631,7 +629,12 @@ class QSPRModel(JSONSerializable, ABC):
         # init properties from data
         self.initFromDataset(ds)
         # get data
-        X_all, y_all = ds.getFeatures(concat=True)
+        self.pipeline = pipeline
+        if self.pipeline is not None:
+            X_all, y_all = next(self.pipeline.apply(ds))
+        else:
+            X_all, y_all = ds.getDescriptors(), ds.getTargets()
+        
         X_all, y_all = self.convertToNumpy(X_all, y_all)
         # load estimator
         self.estimator = self.loadEstimator(self.parameters)
@@ -643,9 +646,8 @@ class QSPRModel(JSONSerializable, ABC):
         logger.info(
             "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
-        if hasattr(ds, "applicabilityDomain") and ds.applicabilityDomain is not None:
-            ds.applicabilityDomain.fit(X_all)
-            self.applicabilityDomain = ds.applicabilityDomain
+        if hasattr(self, "applicabilityDomain") and self.applicabilityDomain is not None:
+            self.applicabilityDomain.fit(X_all)
         if save_data:
             ds.save()
         # save model and return path
@@ -811,3 +813,25 @@ class QSPRModel(JSONSerializable, ABC):
         Returns:
             path (str): absolute path to the saved estimator
         """
+
+    @property
+    def applicabilityDomain(self) -> Any:
+        """Return the applicability domain of the model.
+
+        Returns:
+            Any: applicability domain of the model
+        """
+        return self._applicabilityDomain
+    
+    @applicabilityDomain.setter
+    def applicabilityDomain(self, apdomain: Any):
+        """Set the applicability domain of the model.
+
+        Args:
+            value (Any): applicability domain of the model
+        """
+        if not isinstance(apdomain, ApplicabilityDomain):
+            self._applicabilityDomain = MLChemADWrapper(apdomain)
+        else:
+            self._applicabilityDomain = apdomain
+            
