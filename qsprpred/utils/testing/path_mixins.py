@@ -27,7 +27,7 @@ from ...data.descriptors.sets import (
     RDKitDescs,
     TanimotoDistances,
 )
-from ...data.pipelines.pipeline import DatasetPipeline, Shuffle
+from ...data.pipelines.pipeline import DatasetPipeline, Shuffle, InvalidRemove
 from ...data.processing.data_filters import RepeatsFilter
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
 from ...data.processing.feature_standardizers import SKLearnStandardizer
@@ -83,6 +83,7 @@ class DataSetsPathMixIn(PathMixIn):
                 feature_calculators=[MorganFP(radius=2, nBits=128)],
                 steps = {
                     "shuffle": Shuffle(),
+                    "remove_nan": InvalidRemove(), 
                     "feature_standardizer": StandardScaler(),
                     "low_var_filter": LowVarianceFilter(0.05),
                     "high_corr_filter": HighCorrelationFilter(0.8),

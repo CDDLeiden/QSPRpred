@@ -116,7 +116,7 @@ class InvalidRemove(Step):
         if self.selected_features is None:
             self.selected_features = X.columns
         # print ids of removed rows
-        print(X[X.isnull().any(axis=1)].index)
+        # print(X[X.isnull().any(axis=1)].index)
         X = X.dropna(subset=self.selected_features)
         if y is not None:
             y = y.loc[X.index]

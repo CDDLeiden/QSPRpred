@@ -9,6 +9,7 @@ import pandas as pd
 from ..data.descriptors.sets import DescriptorSet
 from ..data.sources.data_source import DataSource
 from ..data.tables.qspr import QSPRTable
+from ..data.pipelines.pipeline import DatasetPipeline
 from ..logs import logger
 from ..models.assessment.methods import ModelAssessor
 from ..models.hyperparam_optimization import HyperparameterOptimization
@@ -16,7 +17,6 @@ from ..models.model import QSPRModel
 from ..models.monitors import NullMonitor
 from ..tasks import TargetProperty
 from ..utils.serialization import JSONSerializable
-from .settings.benchmark import DataPrepSettings
 
 
 class Replica(JSONSerializable):
@@ -34,8 +34,8 @@ class Replica(JSONSerializable):
             Descriptor sets to use.
         targetProps (list[TargetProperty]):
             Target properties to use.
-        prepSettings (DataPrepSettings):
-            Data preparation settings to use.
+        pipeline (DatasetPipeline):
+            Feature processing pipeline to use for the replica.
         model (QSPRModel):
             Current model. Use `initModel` to prepare it.
         optimizer (HyperparameterOptimization):
@@ -63,7 +63,7 @@ class Replica(JSONSerializable):
         data_source: DataSource,
         descriptors: list[DescriptorSet],
         target_props: list[TargetProperty],
-        prep_settings: DataPrepSettings,
+        pipeline: DatasetPipeline,
         model: QSPRModel,
         optimizer: HyperparameterOptimization,
         assessors: list[ModelAssessor],
@@ -83,8 +83,8 @@ class Replica(JSONSerializable):
                 Descriptor sets to use.
             target_props (list[TargetProperty]):
                 Target properties to use.
-            prep_settings (DataPrepSettings):
-                Data preparation settings to use.
+            pipeline (DatasetPipeline):
+                Feature processing pipeline to use for the replica.
             model (QSPRModel):
                 Model to use for the replica.
             optimizer (HyperparameterOptimization):
@@ -99,7 +99,7 @@ class Replica(JSONSerializable):
         self.dataSource = data_source
         self.descriptors = descriptors
         self.targetProps = target_props
-        self.prepSettings = prep_settings
+        self.pipeline = pipeline
         self.optimizer = optimizer
         self.assessors = assessors
         self.randomSeed = random_seed
@@ -214,17 +214,6 @@ class Replica(JSONSerializable):
             self.ds.randomState = self.randomSeed
             self.ds.save()
 
-    def prepData(self):
-        """Prepares the data set for this replica.
-
-        Raises:
-            ValueError:
-                If the data set has not been initialized.
-        """
-        if self.ds is None:
-            raise ValueError("Data set not initialized. Call initData first.")
-        self.ds.prepareDataset(**deepcopy(self.prepSettings.__dict__), )
-
     def initModel(self):
         """Initializes the model for this replica. This includes
         initializing the model from the data set and optimizing
@@ -261,7 +250,7 @@ class Replica(JSONSerializable):
             raise ValueError("Model not initialized. Call initModel first.")
         self.results = None
         for assessor in self.assessors:
-            scores = assessor(self.model, self.ds, save=True)
+            scores = assessor(self.model, self.ds, self.pipeline, save=True)
             if isinstance(scores, float):
                 scores = np.array([scores])
             scores_df = pd.DataFrame()

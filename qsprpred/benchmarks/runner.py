@@ -156,7 +156,7 @@ class BenchmarkRunner:
         ret = (
             benchmark_settings.n_replicas * len(benchmark_settings.data_sources) *
             len(benchmark_settings.descriptors) * len(benchmark_settings.target_props) *
-            len(benchmark_settings.prep_settings) * len(benchmark_settings.models)
+            len(benchmark_settings.pipelines) * len(benchmark_settings.models)
         )
         if len(benchmark_settings.optimizers) > 0:
             ret *= len(benchmark_settings.optimizers)
@@ -347,7 +347,7 @@ class BenchmarkRunner:
             benchmark_settings.data_sources,
             benchmark_settings.descriptors,
             benchmark_settings.target_props,
-            benchmark_settings.prep_settings,
+            benchmark_settings.pipelines,
             benchmark_settings.models,
             optimizers,
         )
@@ -500,8 +500,6 @@ class BenchmarkRunner:
                 logger.debug("Initializing data...")
                 cls.initData(replica)
                 logger.debug("Done.")
-            logger.debug("Preparing data set...")
-            replica.prepData()
             logger.debug("Done.")
             logger.debug("Initializing model...")
             replica.initModel()

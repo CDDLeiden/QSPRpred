@@ -5,11 +5,11 @@ from qsprpred.models.assessment.methods import ModelAssessor
 
 from ...data.descriptors.sets import DescriptorSet
 from ...data.sources.data_source import DataSource
+from ...data.pipelines.pipeline import DatasetPipeline
 from ...models.hyperparam_optimization import HyperparameterOptimization
 from ...models.model import QSPRModel
 from ...tasks import TargetProperty
 from ...utils.serialization import JSONSerializable
-from .data_prep import DataPrepSettings
 
 
 @dataclass
@@ -29,7 +29,7 @@ class BenchmarkSettings(JSONSerializable):
             Descriptor sets to use.
         target_props (list[list[TargetProperty]]):
             Target properties to use.
-        prep_settings (list[DataPrepSettings]):
+        prep_settings (list[DatasetPipeline]):
             Data preparation settings to use.
         models (list[QSPRModel]):
             Models to use.
@@ -47,7 +47,7 @@ class BenchmarkSettings(JSONSerializable):
     data_sources: list[DataSource]
     descriptors: list[list[DescriptorSet]]
     target_props: list[list[TargetProperty]]
-    prep_settings: list[DataPrepSettings]
+    pipelines: list[DatasetPipeline]
     models: list[QSPRModel]
     assessors: list[ModelAssessor]
     optimizers: list[HyperparameterOptimization] = ()
@@ -73,6 +73,6 @@ class BenchmarkSettings(JSONSerializable):
         assert len(self.data_sources) > 0, "No data sources defined."
         assert len(self.descriptors) > 0, "No descriptors defined."
         assert len(self.target_props) > 0, "No target properties defined."
-        assert len(self.prep_settings) > 0, "No data preparation settings defined."
+        assert len(self.pipelines) > 0, "No data preparation settings defined."
         assert len(self.models) > 0, "No models defined."
         assert len(self.assessors) > 0, "No model assessors defined."
