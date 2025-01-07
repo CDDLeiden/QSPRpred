@@ -22,7 +22,7 @@ class ModelPlot(ABC):
         indPaths (dict[QSPRModel, str]):
             dictionary of models mapped to their independent test set results paths
     """
-    def __init__(self, models: list[QSPRModel]):
+    def __init__(self, models: list[QSPRModel], assessments: list[str]):
         """Initialize the base class for all model plots.
 
         Args:
@@ -32,46 +32,40 @@ class ModelPlot(ABC):
         self.models = models
         self.modelOuts = {model: model.outPrefix for model in self.models}
         self.modelNames = {model: model.name for model in self.models}
-        self.cvPaths = {}
-        self.indPaths = {}
+        self.assesmentPaths = {}
         for model in self.models:
-            cv_path, ind_path = self.checkModel(model)
-            self.cvPaths[model] = cv_path
-            self.indPaths[model] = ind_path
+            assesment_paths = self.checkModel(model, assessments)
+            self.assesmentPaths[model] = assesment_paths
 
-    def checkModel(self, model: QSPRModel) -> tuple[str, str]:
+    def checkModel(self, model: QSPRModel, assessments: list[str]) -> tuple[str, str]:
         """Check if the model has been evaluated and saved. If not, raise an exception.
 
         Args:
             model (QSPRModel): model to check
-
+            assessments (list[str]): list of assessment names
         Returns:
-            cvPath (str): path to the cross-validation set results file
-            indPath (str): path to the independent test set results file
+            assesment_paths (dict[str, str]): 
+                dictionary of assessment names mapped to their paths
 
         Raises:
             ValueError: if the model type is not supported
         """
-        cv_path = f"{self.modelOuts[model]}.cv.tsv"
-        ind_path = f"{self.modelOuts[model]}.ind.tsv"
-        if model.task not in self.getSupportedTasks():
-            raise ValueError("Unsupported model type: %s" % model.task)
         if not os.path.exists(model.metaFile):
             raise ValueError(
                 "Model output file does not exist: %s. "
                 "Have you evaluated and saved the model, yet?" % model.metaFile
             )
-        if not os.path.exists(cv_path):
-            raise ValueError(
-                "Model output file does not exist: %s. "
-                "Have you evaluated and saved the model, yet?" % cv_path
-            )
-        if not os.path.exists(ind_path):
-            raise ValueError(
-                "Model output file does not exist: %s. "
-                "Have you evaluated and saved the model, yet?" % ind_path
-            )
-        return cv_path, ind_path
+        assesment_paths = {}
+        for assessment in assessments:
+            assesment_paths[assessment] = f"{self.modelOuts[model]}_{assessment}.tsv"
+            if not os.path.exists(assesment_paths[assessment]):
+                raise ValueError(
+                    "Model output file does not exist: %s. "
+                    "Have you evaluated the model, yet?" % assesment_paths[assessment]
+                )
+        if model.task not in self.getSupportedTasks():
+            raise ValueError("Unsupported model type: %s" % model.task)
+        return assesment_paths
 
     @abstractmethod
     def getSupportedTasks(self) -> list[str]:

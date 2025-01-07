@@ -98,6 +98,31 @@ class SklearnStep(Step):
     def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         return pd.DataFrame(self.transformer.transform(X), columns=X.columns, index=X.index), y
 
+class InvalidRemove(Step):
+    """Step that removes rows containing NaN values in a specified column"""
+    
+    def __init__(self, features: list[str] | None = None):
+        """Initialize the step with the columns to check for NaN values
+        
+        If no columns are specified, all columns are checked for NaN values.
+        
+        Args:
+            features (list[str] | None): columns to check for NaN values
+        """
+        self.selected_features = features
+    
+    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Remove rows containing NaN values in the specified columns"""
+        if self.selected_features is None:
+            self.selected_features = X.columns
+        # print ids of removed rows
+        print(X[X.isnull().any(axis=1)].index)
+        X = X.dropna(subset=self.selected_features)
+        if y is not None:
+            y = y.loc[X.index]
+        return X, y
+        
+
 class BasePipeline(ABC):
     """Pipeline class for data preprocessing steps
     
@@ -227,6 +252,7 @@ class DatasetPipeline(Pipeline):
         dataset: QSPRTable,
         split: DataSplit | None = None,
         fit: bool = True,
+        seed: int | None = None,
         order: pd.Index | None = None, # FIXME: added to reproduce original behavior
     ) -> Generator[
         tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame | None, pd.DataFrame | None],
@@ -240,6 +266,8 @@ class DatasetPipeline(Pipeline):
         Args:
             dataset (QSPRTable): dataset to apply the pipeline to
             split (DataSplit): split to apply to the dataset
+            seed (int | None): seed to randomize the pipeline,
+                if None, the random state of the dataset is used
             fit (bool): whether to fit the pipeline
         
         Yields:
@@ -248,7 +276,7 @@ class DatasetPipeline(Pipeline):
             X_test (pd.DataFrame | None): transformed test data if split is not None
             y_test (pd.DataFrame | None): transformed test targets if split is not None
         """
-        self.randomState = dataset.randomState
+        self.randomState = dataset.randomState if seed is None else seed
         
         if self.feature_calculators is not None:
             for feature_calculator in self.feature_calculators:

@@ -22,23 +22,25 @@ class RegressionPlot(ModelPlot, ABC):
         """Return a list of supported model tasks."""
         return [ModelTasks.REGRESSION, ModelTasks.MULTITASK_REGRESSION]
 
-    def prepareAssessment(self, assessment_df: pd.DataFrame) -> pd.DataFrame:
+    def prepareAssessment(self, name: str, assessment_df: pd.DataFrame) -> pd.DataFrame:
         """Prepare assessment dataframe for plotting
 
         Args:
+            name (str):
+                the name of the assessment
             assessment_df (pd.DataFrame):
                 the assessment dataframe containing the experimental and predicted
                 values for each property. The dataframe should have the following
                 columns:
-                QSPRID, Fold (opt.), <property_name>_<suffixes>_<Label/Prediction>
+                ID, Fold , <property_name>_<suffixes>_<Label/Prediction>
 
         Returns:
             pd.DataFrame:
                 The dataframe containing the assessment results,
-                columns: QSPRID, Fold, Property, Label, Prediction, Set
+                columns: ID, Fold, Set, Property, Label, Prediction, Set
         """
-        # change all property columns into one column
-        id_vars = ["ID", "Fold"] if "Fold" in assessment_df.columns else ["ID"]
+        # Melt all property columns into one column
+        id_vars = ["ID", "Fold", "Set"]
         df = assessment_df.melt(id_vars=id_vars)
         # split the variable (<property_name>_<suffixes>_<Label/Prediction>) column
         # into the property name and the type (Label or Prediction)
@@ -50,15 +52,10 @@ class RegressionPlot(ModelPlot, ABC):
         )
         df.reset_index(inplace=True)
         df.columns.name = None
-        # Add Fold column if it doesn't exist (for independent test set)
-        if "Fold" not in df.columns:
-            df["Fold"] = "Independent Test"
-            df["Set"] = "Independent Test"
-        else:
-            df["Set"] = "Cross Validation"
+        df["Assessment"] = name
         return df
 
-    def prepareRegressionResults(self, ) -> pd.DataFrame:
+    def prepareRegressionResults(self) -> pd.DataFrame:
         """Prepare regression results dataframe for plotting.
 
         Returns:
@@ -67,12 +64,13 @@ class RegressionPlot(ModelPlot, ABC):
                 columns: Model, QSPRID, Fold, Property, Label, Prediction, Set
         """
         model_results = {}
-        for m, model in enumerate(self.models):
-            # Read in and prepare the cross-validation and independent test set results
-            df_cv = self.prepareAssessment(pd.read_table(self.cvPaths[model]))
-            df_ind = self.prepareAssessment(pd.read_table(self.indPaths[model]))
-            # concatenate the cross-validation and independent test set results
-            df = pd.concat([df_cv, df_ind])
+        for model in self.models:
+            # Read in and prepare the assessment set results
+            results = []
+            for name, path in self.assesmentPaths[model].items():
+                df = self.prepareAssessment(name, pd.read_table(path))
+                results.append(df)
+            df = pd.concat(results)
             print(model.name)
             model_results[model.name] = df
         # concatenate the results from all models and add the model name as a column
@@ -91,7 +89,7 @@ class RegressionPlot(ModelPlot, ABC):
             self.prepareRegressionResults()
         df = deepcopy(self.results)
         df_summary = (
-            df.groupby(["Model", "Fold", "Property"]).apply(
+            df.groupby(["Model", "Assessment", "Fold", "Set", "Property"]).apply(
                 lambda x: pd.Series(
                     {
                         "R2":
@@ -103,12 +101,8 @@ class RegressionPlot(ModelPlot, ABC):
                 )
             ).reset_index()
         )
-        df_summary["Set"] = df_summary["Fold"].apply(
-            lambda x:
-            ("Independent Test" if x == "Independent Test" else "Cross Validation")
-        )
         self.summary = df_summary
-        return df_summary
+        return self.summary
 
 
 class CorrelationPlot(RegressionPlot):
@@ -141,13 +135,16 @@ class CorrelationPlot(RegressionPlot):
 
         if not hasattr(self, "summary"):
             self.getSummary()
+            
+        # Select only test set results
+        df = df[df["Set"] == "Test"]
 
         # plot the results
         g = sns.FacetGrid(
             df,
             col="Property",
             row="Model",
-            hue="Set",
+            hue="Assessment",
             margin_titles=True,
             height=4,
             sharex=False,
@@ -186,8 +183,8 @@ class CorrelationPlot(RegressionPlot):
 
 class WilliamsPlot(RegressionPlot):
     """Williams plot; plot of standardized residuals versus leverages"""
-    def __init__(self, models: list[QSPRModel], datasets: list[QSPRDataSet]):
-        super().__init__(models)
+    def __init__(self, models: list[QSPRModel], datasets: list[QSPRDataSet], assessments: list[str]):
+        super().__init__(models, assessments)
         self.datasets = datasets
 
     def make(
@@ -272,78 +269,87 @@ class WilliamsPlot(RegressionPlot):
         # prepare the dataframe for plotting
         df = self.prepareRegressionResults()
 
-        # calculate the leverages and h* for each model
+        # calculate the leverages and h* for each model, assessment and fold
         model_leverages = {}
         model_h_star = {}
         model_p = {}  # number of descriptors
         for model, dataset in zip(self.models, self.datasets):
-            model_name = model.name
-            if dataset.hasFeatures:
-                X, X_ind, _, _ = dataset.getFeatures(refit_pipeline=False)
-                leverages, h_star = calculateLeverages(X, X_ind)
-                model_leverages[model_name] = leverages
-                model_h_star[model_name] = h_star
-                model_p[model_name] = X.shape[1]
-            else:
-                raise ValueError(
-                    f"Dataset {dataset.name} does not have features, to"
-                    " calculate leverages, the dataset should have features."
-                )
+            for assessment in df["Assessment"].unique():
+                df_assessment = df[(df["Model"] == model.name) & (df["Assessment"] == assessment)]
+                for fold in df_assessment["Fold"].unique():
+                    df_ = df_assessment[(df_assessment["Fold"] == fold)]
+                    train_ind = df_[df_["Set"] == "Train"]["ID"]
+                    test_ind = df_[df_["Set"] == "Test"]["ID"]
+                    # FIXME: Pipeline is refit for each fold, this is not ideal
+                    # this information should be ideally be retrieved from the 
+                    # assessment, pipeline or similar
+                    pipeline = deepcopy(model.pipeline)
+                    X_train, _ = next(pipeline.apply(dataset[train_ind], seed=model.randomState))
+                    X_test, _ = next(pipeline.apply(dataset[test_ind], fit=False, seed=model.randomState))
+                    leverages, h_star = calculateLeverages(X_train, X_test)
+                    
+                    model_name = model.name
+                    model_leverages[f"{model_name}_{assessment}_{fold}"] = leverages	
+                    model_h_star[f"{model_name}_{assessment}_{fold}"] = h_star
+                    model_p[f"{model_name}_{assessment}_{fold}"] = X_train.shape[1]
 
-        # Add the levarages to the dataframe
+        # Add the leverages to the dataframe
         df["leverage"] = df.apply(
-            lambda x: model_leverages[x["Model"]][x["ID"]], axis=1
+            lambda x: model_leverages[f"{x['Model']}_{x['Assessment']}_{x['Fold']}"][x["ID"]],
+            axis=1,
         )
-        df["n_features"] = df["Model"].apply(lambda x: model_p[x])
+        df["n_features"] = df.apply(
+            lambda x: model_p[f"{x['Model']}_{x['Assessment']}_{x['Fold']}"], axis=1
+        )
 
         # calculate the residuals
         df["residual"] = df["Label"] - df["Prediction"]
 
         # calculate the residuals standard deviation
-        df["n_samples"] = df.groupby(["Model", "Set",
-                                      "Property"])["residual"].transform("count")
+        df["n_samples"] = df.groupby(
+            ["Model", "Assessment", "Property", "Fold", "Set"]
+        )["residual"].transform("count")
 
         # calculate degrees of freedom
         df["df"] = df["n_samples"] - df["n_features"] - 1
 
         RSE = {}
-        # check if the degrees of freedom is greater than 0 for each model, property, and set
-        for (model, set, property), df_ in df.groupby(["Model", "Set", "Property"]):
-            if set == "Cross Validation":
-                if df_["df"].iloc[0] <= 0:
-                    print(f"{model} {set} {property}")
-                    print(df_[["n_samples", "n_features"]].iloc[0])
-                    raise ValueError(
-                        "Degrees of freedom is less than or equal to 0 for some models, "
-                        "properties trainingset. Check the number of samples and features, the "
-                        "number of samples should be greater than the number of features."
-                    )
-                RSE[(model, property)] = np.sqrt(
-                    (1 / df_["df"].iloc[0]) * np.sum(df_["residual"]**2)
+        # check if the degrees of freedom is greater than 0 for each model, assessment, property, and set
+        for (model, property, assessment, fold, set), df_ in df.groupby(["Model", "Property", "Assessment", "Fold", "Set"]):
+            if df_["df"].iloc[0] <= 0:
+                raise ValueError(
+                    "Degrees of freedom is less than or equal to 0 for some models, "
+                    "properties trainingset. Check the number of samples and features, the "
+                    "number of samples should be greater than the number of features."
                 )
+            RSE[(model, property, assessment, fold, set)] = np.sqrt(
+                (1 / df_["df"].iloc[0]) * np.sum(df_["residual"]**2)
+            )
 
         # add the residual standard error to the df
-        df["RSE"] = df.apply(lambda x: RSE[(x["Model"], x["Property"])], axis=1)
+        df["RSE"] = df.apply(lambda x: RSE[(x["Model"], x["Property"], x["Assessment"], x["Fold"], x["Set"])], axis=1)
 
         # calculate the standardized residuals
         df["std_resid"] = df["residual"] / (df["RSE"] * np.sqrt(1 - df["leverage"]))
 
         # plot the results
         g = sns.FacetGrid(
-            df,
+            df[df["Set"] == "Test"],
             col="Property",
             row="Model",
             margin_titles=True,
             height=4,
             sharex=False,
             sharey=False,
-            hue="Set",
+            hue="Assessment",
         )
         g.map(sns.scatterplot, "leverage", "std_resid", s=7, edgecolor="none")
         # add the h* line to each plot based on the model's h*
         # and add hlines at +/- 3
         for k, ax in g.axes_dict.items():
-            ax.axvline(model_h_star[k[0]], c=".2", ls="--")
+            for assessment in df[df["Model"] == k[0]]["Assessment"].unique():
+                for fold in df[(df["Model"] == k[0]) & (df["Assessment"] == assessment)]["Fold"].unique():             
+                    ax.axvline(model_h_star[f"{k[0]}_{assessment}_{fold}"], c=".2", ls="--")
             ax.axhline(2, c=".2", ls="--")
             ax.axhline(-2, c=".2", ls="--")
 
@@ -364,6 +370,6 @@ class WilliamsPlot(RegressionPlot):
         plt.clf()
         return (
             g,
-            df[["Model", "Fold", "Property", "leverage", "std_resid", "ID"]],
+            df[["ID", "Model", "Property", "Assessment", "Fold", "Set", "leverage", "std_resid"]],
             model_h_star,
         )
