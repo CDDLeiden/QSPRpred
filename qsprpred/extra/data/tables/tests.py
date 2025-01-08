@@ -10,6 +10,7 @@ from qsprpred.data.sampling.splits import DataSplit
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.extra.data.utils.testing.path_mixins import DataSetsMixInExtras
 from qsprpred.utils.testing.check_mixins import DataPrepCheckMixIn
+from qsprpred.data.pipelines.pipeline import DatasetPipeline, Shuffle, DummyStep
 
 
 class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepCheckMixIn, TestCase):
@@ -57,13 +58,18 @@ class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepCheckMixIn, TestCas
             applicability_domain (Callable): Applicability domain.
         """
         dataset = self.createPCMDataSet(name=name)
+        pipeline = DatasetPipeline(
+            feature_calculators=feature_calculators,
+            steps={
+                "shuffle": Shuffle(),
+                "feature_standardizer": feature_standardizer if feature_standardizer else DummyStep(),
+                "feature_filter": feature_filter if feature_filter else DummyStep(),
+                "data_filter": data_filter if data_filter else DummyStep(),
+                # FIXME: applicability_domain is not yet implemented
+            }
+        )
         self.checkPrep(
             dataset,
-            feature_calculators,
+            pipeline,
             split,
-            feature_standardizer,
-            feature_filter,
-            data_filter,
-            applicability_domain,
-            ["pchembl_value_Median"],
         )

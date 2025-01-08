@@ -226,7 +226,7 @@ class Replica(JSONSerializable):
         if self.ds is None:
             raise ValueError("Data set not initialized. Call initData first.")
         self.model.name = f"{self.id}_{self.ds.name}"
-        self.model.initFromDataset(self.ds)
+        self.model.initFromData(self.ds, self.pipeline)
         self.model.initRandomState(self.randomSeed)
         if self.optimizer is not None:
             self.optimizer.optimize(self.model, self.ds)

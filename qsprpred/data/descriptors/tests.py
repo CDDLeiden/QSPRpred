@@ -1,14 +1,11 @@
-import numpy as np
 from parameterized import parameterized
 from rdkit.Chem import Descriptors
 
-from ... import TargetTasks
 from ...data import RandomSplit
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
 from ...data.pipelines.pipeline import DatasetPipeline
 from ...models import SklearnModel
 from ...utils.testing.base import QSPRTestCase
-from ...utils.testing.check_mixins import DescriptorInDataCheckMixIn
 from ...utils.testing.path_mixins import DataSetsPathMixIn
 from .fingerprints import MorganFP
 from .sets import (

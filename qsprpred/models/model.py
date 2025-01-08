@@ -223,12 +223,19 @@ class QSPRModel(JSONSerializable, ABC):
             self.alg = dynamic_import(self.alg)
         self.estimator = self.loadEstimator(self.parameters)
 
-    def initFromDataset(self, data: QSPRDataSet | None):
+    def initFromData(self, data: QSPRDataSet | None, pipeline: DatasetPipeline | None):
+        """Initialize the model from a data set and pipeline.
+        
+        Args:
+            data (QSPRDataSet):
+                data set to initialize the model with
+            pipeline (DatasetPipeline):
+                pipeline to use for feature calculation
+        """
         if data is not None:
             self.targetProperties = data.targetProperties
             self.nTargets = len(self.targetProperties)
             self.featureCalculators = data.descriptorSets
-            # self.pipeline = data.pipeline
             if self.randomState is None:
                 self.initRandomState(data.randomState)
             self.chemStandardizer = data.standardizer
@@ -236,8 +243,8 @@ class QSPRModel(JSONSerializable, ABC):
             self.targetProperties = None
             self.nTargets = None
             self.featureCalculators = None
-            self.pipeline = None
             self.chemStandardizer = None
+        self.pipeline = pipeline
 
     def initRandomState(self, random_state):
         """Set random state if applicable.
@@ -410,13 +417,13 @@ class QSPRModel(JSONSerializable, ABC):
 
     def convertToNumpy(
         self,
-        X: pd.DataFrame | np.ndarray | QSPRDataSet,
-        y: pd.DataFrame | np.ndarray | QSPRDataSet | None = None,
+        X: pd.DataFrame | np.ndarray,
+        y: pd.DataFrame | np.ndarray | None = None,
     ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
         """Convert the given data matrix and target matrix to np.ndarray format.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataSet): data matrix
+            X (pd.DataFrame, np.ndarray): data matrix
                 if a `QSPRDataSet` instance is given, the features and targets are
                 extracted from the data set and returned
             y (pd.DataFrame, np.ndarray): target matrix
@@ -424,11 +431,6 @@ class QSPRModel(JSONSerializable, ABC):
         Returns:
                 data matrix and/or target matrix in np.ndarray format
         """
-        if isinstance(X, QSPRDataSet):
-            if y is not None:
-                X, y = X.getFeatures(concat=True, ordered=True, refit_pipeline=False)
-            else:
-                X, _ = X.getFeatures(concat=True, ordered=True, refit_pipeline=False)
         if isinstance(X, pd.DataFrame):
             X = X.values
         if y is not None:
@@ -503,6 +505,7 @@ class QSPRModel(JSONSerializable, ABC):
             self.targetProperties,
             drop_empty_target_props=False,
         )
+        dataset.addDescriptors(self.featureCalculators)
         return dataset, failed_mask
 
     def predictDataset(self,
@@ -626,15 +629,15 @@ class QSPRModel(JSONSerializable, ABC):
         """
         # do some checks
         self.checkData(ds)
-        # init properties from data
-        self.initFromDataset(ds)
         # get data
         self.pipeline = pipeline
         if self.pipeline is not None:
             X_all, y_all = next(self.pipeline.apply(ds))
         else:
             X_all, y_all = ds.getDescriptors(), ds.getTargets()
-        
+        # init properties from data
+        self.initFromData(ds, pipeline)
+
         X_all, y_all = self.convertToNumpy(X_all, y_all)
         # load estimator
         self.estimator = self.loadEstimator(self.parameters)

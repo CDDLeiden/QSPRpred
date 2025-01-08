@@ -30,15 +30,13 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         )
         splitter = PCMSplit(splitter, target_prop=self.dataset.getDF()[self.dataset.proteinIDProp])
 
-        self.dataset.split(splitter, featurize=True)
-        train, test, _, _ = self.dataset.getFeatures()
-        train, test = train.index, test.index
-        test_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[test]
-        train_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[train]
-        test_smiles = self.dataset.getProperty(self.dataset.smilesProp).loc[test]
-        train_smiles = self.dataset.getProperty(self.dataset.smilesProp).loc[train]
-        self.assertEqual(len(test_targets), len(test))
-        self.assertEqual(len(train_targets), len(train))
+        train_index, test_index = next(self.dataset.split(splitter))
+        test_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[test_index]
+        train_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[train_index]
+        test_smiles = self.dataset.getProperty(self.dataset.smilesProp).loc[test_index]
+        train_smiles = self.dataset.getProperty(self.dataset.smilesProp).loc[train_index]
+        self.assertEqual(len(test_targets), len(test_index))
+        self.assertEqual(len(train_targets), len(train_index))
         self.assertTrue(
             set(test_smiles.unique()).isdisjoint(set(train_smiles.unique()))
         )
@@ -50,21 +48,21 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
             GBMTRandomSplit(smiles_prop=self.dataset.getDF()[self.dataset.smilesProp]),
             target_prop=self.dataset.getDF()[self.dataset.proteinIDProp]
         )
-        self.dataset.split(splitter, featurize=True)
-        train, test, _, _ = self.dataset.getFeatures()
-        train_order = train.index.tolist()
-        test_order = test.index.tolist()
+        train_index, test_index = next(self.dataset.split(splitter))
+        train_order = train_index.tolist()
+        test_order = test_index.tolist()
+        print(test_order)
         # reload and check if orders are the same if we redo the split
         dataset = PCMDataSet.fromFile(self.dataset.metaFile)
         splitter = PCMSplit(
             GBMTRandomSplit(smiles_prop=self.dataset.getDF()[self.dataset.smilesProp]),
             target_prop=self.dataset.getDF()[self.dataset.proteinIDProp]
         )
-        dataset.split(splitter, featurize=True)
-        train, test, _, _ = dataset.getFeatures()
+        train_index, test_index = next(self.dataset.split(splitter))
+        print(test_index.tolist())
         self.assertEqual(dataset.randomState, seed)
-        self.assertListEqual(train.index.tolist(), train_order)
-        self.assertListEqual(test.index.tolist(), test_order)
+        self.assertListEqual(train_index.tolist(), train_order)
+        self.assertListEqual(test_index.tolist(), test_order)
 
     def testLeaveTargetOut(self):
         target = self.dataset.getProteinKeys()[0:2]
@@ -72,13 +70,11 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
             targets=target,
             target_prop=self.dataset.getDF()[self.dataset.proteinIDProp]
         )
-        self.dataset.split(splitter, featurize=True)
-        train, test, _, _ = self.dataset.getFeatures()
-        train, test = train.index, test.index
-        test_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[test]
-        train_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[train]
-        self.assertEqual(len(test_targets), len(test))
-        self.assertEqual(len(train_targets), len(train))
+        train_index, test_index = next(self.dataset.split(splitter))
+        test_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[test_index]
+        train_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[train_index]
+        self.assertEqual(len(test_targets), len(test_index))
+        self.assertEqual(len(train_targets), len(train_index))
         self.assertTrue(
             set(test_targets.unique()).isdisjoint(set(train_targets.unique()))
         )
@@ -93,7 +89,6 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
             split_time={key: year
                          for key in self.dataset.getProteinKeys()},
         )
-        self.dataset.split(splitter, featurize=True)
-        train, test, _, _ = self.dataset.getFeatures()
-        self.assertTrue(self.dataset.getDF()[year_col].loc[train.index].max() <= year)
-        self.assertTrue(self.dataset.getDF()[year_col].loc[test.index].min() > year)
+        train_index, test_index = next(self.dataset.split(splitter))
+        self.assertTrue(self.dataset.getDF()[year_col].loc[train_index].max() <= year)
+        self.assertTrue(self.dataset.getDF()[year_col].loc[test_index].min() > year)

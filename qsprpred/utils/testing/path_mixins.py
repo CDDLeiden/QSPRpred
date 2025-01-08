@@ -29,6 +29,7 @@ from ...data.descriptors.sets import (
 )
 from ...data.pipelines.pipeline import DatasetPipeline, Shuffle, InvalidRemove
 from ...data.processing.data_filters import RepeatsFilter
+from ...data.sampling.splits import RandomSplit
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
 from ...data.processing.feature_standardizers import SKLearnStandardizer
 from ...data.storage.tabular.basic_storage import PandasChemStore

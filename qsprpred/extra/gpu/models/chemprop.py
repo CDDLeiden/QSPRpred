@@ -615,14 +615,14 @@ class ChempropModel(QSPRModelPyTorchGPU):
 
     def convertToMoleculeDataset(
         self,
-        X: pd.DataFrame | np.ndarray | QSPRTable,
-        y: pd.DataFrame | np.ndarray | QSPRTable | None = None,
+        X: pd.DataFrame | np.ndarray,
+        y: pd.DataFrame | np.ndarray | None = None,
     ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
         """Convert the given data matrix and target matrix to chemprop Molecule Dataset.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRTable): data matrix
-            y (pd.DataFrame, np.ndarray, QSPRTable): target matrix
+            X (pd.DataFrame, np.ndarray): data matrix
+            y (pd.DataFrame, np.ndarray): target matrix
 
         Returns:
                 data matrix and/or target matrix in np.ndarray format
@@ -638,20 +638,29 @@ class ChempropModel(QSPRModelPyTorchGPU):
             y = [None] * len(X)  # dummy targets
 
         # find which column contains the SMILES strings
-        prev_len = 0
-        for calc in self.featureCalculators:
-            names = calc.transformToFeatureNames()
-            if f"{calc}_SMILES" in names:
-                smiles_column = names.index(f"{calc}_SMILES") + prev_len
-                break
-            else:
-                prev_len += len(names)
+        if self.pipeline is not None and self.pipeline.featureNames is not None:
+            smiles_column = [i for i, name in enumerate(self.pipeline.featureNames) if "SMILES" in name]
+            if not smiles_column:
+                raise ValueError(
+                    "No SMILES column found in pipeline, Chemprop requires "
+                    "SMILES, make sure to add make sure to add SMILES calculator."
+                )
+            smiles_column = smiles_column[0]
         else:
-            raise ValueError(
-                "No SMILES column found in feature calculators, Chemprop "
-                "requires SMILES, make sure to add SMILES calculator to "
-                "the feature calculators."
-            )
+            prev_len = 0
+            for calc in self.featureCalculators:
+                names = calc.transformToFeatureNames()
+                if f"{calc}_SMILES" in names:
+                    smiles_column = names.index(f"{calc}_SMILES") + prev_len
+                    break
+                else:
+                    prev_len += len(names)
+            else:
+                raise ValueError(
+                    "No SMILES column found in feature calculators, Chemprop "
+                    "requires SMILES, make sure to add SMILES calculator to "
+                    "the feature calculators."
+                )
 
         # features data all but smiles column
         smiles = X[:, smiles_column]

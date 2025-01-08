@@ -610,6 +610,10 @@ class QSPRTable(MoleculeTable):
         Yields:
             tuple[pd.Index, pd.Index]: indices of the train and test set
         """
+        if hasattr(split, "randomState"):
+            if split.randomState is None:
+                split.randomState = self.randomState
+        
         X = self.getDescriptors() if X is None else X
         y = self.getTargets() if y is None else y
         folds = split.split(X, y)

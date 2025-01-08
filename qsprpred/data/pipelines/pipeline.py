@@ -284,6 +284,12 @@ class DatasetPipeline(Pipeline):
                     feature_calculator.randomState = self.randomState
             dataset.addDescriptors(self.feature_calculators)
         X = dataset.getDescriptors()
+        if self.originalfeatureNames is not None:
+            assert all(
+                feature in X.columns for feature in self.originalfeatureNames
+            ), "Some features are missing in the dataset, please check if any "
+            "descriptors that were added to the dataset directly "
+            "before fitting the pipeline are missing in the dataset."
         y = dataset.getTargets()
         if order is not None:  # FIXME: added to reproduce original behavior
             X = X.loc[order]  # FIXME: added to reproduce original behavior

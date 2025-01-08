@@ -144,14 +144,17 @@ class DNNModel(QSPRModelPyTorchGPU):
         """Whether the model supports early stopping or not."""
         return True
 
-    def initFromDataset(self, data: QSPRTable | None):
-        super().initFromDataset(data)
+    def initFromData(self, data: QSPRTable | None, pipeline: Any = None):
+        """Initialize the model from dataset and pipeline."""
+        super().initFromData(data, pipeline)
         if self.targetProperties[0].task.isRegression():
             self.nClass = 1
         elif data is not None:
             self.nClass = self.targetProperties[0].nClasses
-        if data is not None:
-            self.nDim = data.getFeatures(refit_pipeline=False)[0].shape[1]
+        if pipeline is not None and pipeline.featureNames is not None:
+            self.nDim = len(pipeline.featureNames)
+        else:
+            self.nDim = len(data.getDescriptorNames())
 
     def loadEstimator(self, params: dict | None = None) -> object:
         """Load model from file or initialize new model.

@@ -140,30 +140,6 @@ class DataPrepCheckMixIn(DescriptorCheckMixIn):
         for X_train, y_train, X_test, y_test in dataset.iterSplit(name, as_type="pandas"):
             self.checkFeatures(X_train, y_train, X_test, y_test)
 
-class DescriptorInDataCheckMixIn(DescriptorCheckMixIn):
-    """Mixin for testing descriptor sets in data sets."""
-    @staticmethod
-    def getDataSetName(desc_set, target_props):
-        """Get a unique name for a data set."""
-        target_props_id = [
-            f"{target_prop['name']}_{target_prop['task']}"
-            for target_prop in target_props
-        ]
-        return f"{desc_set}_{target_props_id}"
-
-    def checkDataSetContainsDescriptorSet(
-        self, dataset, desc_set, prep_combo, target_props
-    ):
-        """Check if a descriptor set is in a data set."""
-        # run the preparation
-        logging.debug(f"Testing descriptor set: {desc_set} in data set: {dataset.name}")
-        preparation = {}
-        preparation.update(prep_combo)
-        preparation["feature_calculators"] = [desc_set]
-        dataset.prepareDataset(**preparation)
-        # test consistency
-        self.checkDescriptors(dataset, target_props)
-
 class ModelCheckMixIn:
     """This class holds the tests for the QSPRmodel class."""
     @property
@@ -217,7 +193,7 @@ class ModelCheckMixIn:
             pipeline (DatasetPipeline): The pipeline to use for testing.
         """
         # perform bayes optimization
-        model.initFromDataset(ds)
+        model.initFromData(ds, pipeline)
         score_func = "r2" if model.task.isRegression() else "roc_auc_ovr"
         search_space_bs = self.getParamGrid(model, "bayes")
         bayesoptimizer = OptunaOptimization(
@@ -544,7 +520,7 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
         self.fileMonitorTest(monitor.monitors[1], monitor_type, neural_net)
 
     def runMonitorTest(
-        self, model, data, pipeline, monitor_type, test_method, nerual_net, *args, **kwargs
+        self, model, data, pipeline, monitor_type, test_method, neural_net, *args, **kwargs
     ):
         hyperparam_monitor = monitor_type(*args, **kwargs)
         crossval_monitor = deepcopy(hyperparam_monitor)
@@ -558,7 +534,7 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
         ) = self.trainModelWithMonitoring(
             model, data, pipeline, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
         )
-        test_method(hyperparam_monitor, "hyperparam", nerual_net)
-        test_method(crossval_monitor, "crossval", nerual_net)
-        test_method(test_monitor, "test", nerual_net)
-        test_method(fit_monitor, "fit", nerual_net)
+        test_method(hyperparam_monitor, "hyperparam", neural_net)
+        test_method(crossval_monitor, "crossval", neural_net)
+        test_method(test_monitor, "test", neural_net)
+        test_method(fit_monitor, "fit", neural_net)

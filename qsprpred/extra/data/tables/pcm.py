@@ -127,7 +127,6 @@ class PCMDataSet(QSPRTable):
         self,
         descriptors: list[DescriptorSet | ProteinDescriptorSet],
         recalculate: bool = False,
-        featurize: bool = True,
         *args,
         **kwargs,
     ):
@@ -141,7 +140,7 @@ class PCMDataSet(QSPRTable):
             kwargs[key] = info[key]
         # pass everything to the descriptor calculation
         return super().addDescriptors(
-            descriptors, recalculate, featurize, *args, **kwargs
+            descriptors, recalculate, *args, **kwargs
         )
 
     def getSubset(

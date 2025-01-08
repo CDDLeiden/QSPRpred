@@ -11,6 +11,7 @@ from rdkit.Chem import Mol
 
 from qsprpred.data import MoleculeTable
 from qsprpred.extra.data.tables.pcm import PCMDataSet
+from qsprpred.data.pipelines.pipeline import DatasetPipeline
 
 from ...data.storage.tabular.basic_storage import PandasChemStore
 from ...models.model import QSPRModel
@@ -29,8 +30,8 @@ class PCMModel(QSPRModel, ABC):
         if not hasattr(self, "proteins"):
             self.proteins = None
 
-    def initFromDataset(self, data: PCMDataSet | None):
-        super().initFromDataset(data)
+    def initFromData(self, data: PCMDataSet | None, pipeline: DatasetPipeline | None = None):
+        super().initFromData(data, pipeline)
         if data:
             self.proteins = data.proteins
 

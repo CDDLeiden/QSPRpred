@@ -208,7 +208,6 @@ class Assessor(ModelAssessor):
             each column represents a task and each row a fold. Otherwise, a 1D array is
             returned with the scores for each fold.
         """
-        model.initFromDataset(ds)
         monitor = monitor or self.monitor
         evalparams = model.parameters if parameters is None else parameters
         monitor.onAssessmentStart(model, ds, self.__class__.__name__)
@@ -226,6 +225,7 @@ class Assessor(ModelAssessor):
                 fold=i, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test
             )
             # fit model
+            model.initFromData(ds, pipeline)
             estimator = model.loadEstimator(evalparams)
             model_fit = model.fit(
                 X_train,

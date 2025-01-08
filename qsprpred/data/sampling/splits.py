@@ -52,7 +52,7 @@ class DataSplit(ABC):
         """
 
     def splitDataset(self, dataset: QSPRDataSet):
-        return self.split(dataset.getFeatures(concat=True))
+        return dataset.split(self)
 
 
 class RandomSplit(DataSplit, Randomized):
