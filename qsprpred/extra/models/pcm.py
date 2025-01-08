@@ -40,7 +40,6 @@ class PCMModel(QSPRModel, ABC):
         mols: list[str | Mol],
         protein_id: str,
         n_jobs: int = 1,
-        fill_value: float = np.nan,
     ) -> tuple[PCMDataSet, np.ndarray]:
         """
         Create a prediction data set of compounds using a PCM model
@@ -95,13 +94,7 @@ class PCMModel(QSPRModel, ABC):
             proteins=self.proteins,
         )
         # prepare dataset and return it
-        dataset.prepareDataset(
-            feature_calculators=self.featureCalculators,
-            pipeline=self.pipeline,
-            feature_fill_value=fill_value,
-            shuffle=False,
-            fit_pipeline=False,
-        )
+        dataset.addDescriptors(self.featureCalculators)
         return dataset, failed_mask
 
     def predictMols(
@@ -110,7 +103,6 @@ class PCMModel(QSPRModel, ABC):
         protein_id: str,
         use_probas: bool = False,
         n_jobs: int = 1,
-        fill_value: float = np.nan,
     ) -> np.ndarray:
         """
         Predict the target properties of a list of molecules using a PCM model.
@@ -126,8 +118,6 @@ class PCMModel(QSPRModel, ABC):
                 Whether to return class probabilities. Defaults to False.
             n_jobs (int, optional):
                 Number of parallel jobs. Defaults to 1.
-            fill_value (float, optional):
-                Value to fill missing features with. Defaults to np.nan.
 
         Returns:
             np.ndarray:
@@ -166,7 +156,7 @@ class PCMModel(QSPRModel, ABC):
             )
         # create data set from mols
         dataset, failed_mask = self.createPredictionDatasetFromMols(
-            mols, protein_id, n_jobs, fill_value
+            mols, protein_id, n_jobs
         )
         # make predictions for the dataset
         predictions = self.predictDataset(dataset, use_probas)
