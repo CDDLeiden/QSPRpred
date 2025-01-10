@@ -46,7 +46,7 @@ from qsprpred.data.sampling.splits import (
     ScaffoldSplit,
     TemporalSplit,
 )
-from qsprpred.data.pipelines.pipeline import DatasetPipeline
+from qsprpred.data.pipelines.pipeline import DatasetPipeline, InvalidRemove
 from qsprpred.data.tables.qspr import QSPRTable
 from qsprpred.tasks import TargetTasks
 
@@ -276,14 +276,6 @@ def QSPRArgParser(txt=None):
         "for percentile threshold for comparison between shadow and real features"
         "see https://github.com/scikit-learn-contrib/boruta_py for more info.",
     )
-    # other
-    parser.add_argument(
-        "-fv",
-        "--fill_value",
-        type=float,
-        default=np.nan,
-        help="Fill value for missing values in the calculated features",
-    )
     if txt:
         args = parser.parse_args(txt)
     else:
@@ -492,16 +484,17 @@ def QSPR_dataprep(args):
                 )
             if "smiles" not in args.features:
                 steps["standardizer"] = StandardScaler()
-            # prepare dataset for modelling
-            mydataset.prepareDataset(
+            steps["remove_nans"] = InvalidRemove()
+            # prepare dataset pipeline for modelling
+            pipeline = DatasetPipeline(
                 feature_calculators=descriptorsets,
-                split=split,
-                pipeline=DatasetPipeline(steps),
-                feature_fill_value=args.fill_value,
+                steps=steps
             )
+            mydataset.addSplit(split, "test_split")
 
-            # save dataset files and fingerprints
+            # save dataset files and pipeline
             mydataset.save()
+            pipeline.toFile(f"{mydataset.path}_pipeline.json")
 
 
 if __name__ == "__main__":

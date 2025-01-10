@@ -115,9 +115,11 @@ class InvalidRemove(Step):
         """Remove rows containing NaN values in the specified columns"""
         if self.selected_features is None:
             self.selected_features = X.columns
+        # only take selected features that are in the current data
+        selected_features = list(set(self.selected_features) & set(X.columns))
         # print ids of removed rows
         # print(X[X.isnull().any(axis=1)].index)
-        X = X.dropna(subset=self.selected_features)
+        X = X.dropna(subset=selected_features)
         if y is not None:
             y = y.loc[X.index]
         return X, y
@@ -147,13 +149,27 @@ class Pipeline(BasePipeline, Randomized, JSONSerializable):
     
     Args:
         steps (dict[str, Step]): Dictionary of named steps in the pipeline
+        fixed (list[str]): List of step names that should not be fitted, only transformed
+        fit_on (dict[str, str]): Settings for which data a step should be fitted on.
+            Either 'train', 'test' or 'both', if not specified the step is fitted on
+            the training data.
+        apply_to (dict[str, str]): Settings for which data a step should be applied to.
+            Either 'train', 'test' or 'both', if not specified the step is applied to 
+            both.
+        seed (int | None): Seed to randomize the pipeline
     """
     def __init__(
         self,
         steps: dict[str, Step] = {},
+        fixed: list[str] = [],
+        fit_on: dict[str, str] = {},
+        apply_to: dict[str, str] = {},
         seed: int | None = None,
     ):
         self.steps = steps
+        self.fixed = fixed
+        self.fitOn = fit_on
+        self.applyTo = apply_to
         for name, step in steps.items():
             if not isinstance(step, Step):
                 if hasattr(step, 'fit_transform'):
@@ -185,7 +201,10 @@ class Pipeline(BasePipeline, Randomized, JSONSerializable):
         for step in self.steps.values():
             if hasattr(step, 'randomState'):
                 step.randomState = self.randomState
-            X, y = step.fitTransform(X, y)
+            if step in self.fixed:
+                X, y = step.transform(X, y)
+            else:
+                X, y = step.fitTransform(X, y)
         self.featureNames = X.columns
         return X, y
 
@@ -243,8 +262,9 @@ class DatasetPipeline(Pipeline):
         self,
         feature_calculators: list[DescriptorSet] | None = None,
         steps: dict[str, Step] = {},
+        fixed: list[str] = [],
     ):
-        super().__init__(steps)
+        super().__init__(steps, fixed=fixed)
         self.feature_calculators = feature_calculators
         
     def apply(
@@ -262,6 +282,7 @@ class DatasetPipeline(Pipeline):
         """Apply the pipeline to the dataset
         
         Note. the random state of the dataset is used to randomize the pipeline
+            when the seed of feature calculators, splits or steps is not set.
         
         Args:
             dataset (QSPRTable): dataset to apply the pipeline to
@@ -280,7 +301,7 @@ class DatasetPipeline(Pipeline):
         
         if self.feature_calculators is not None:
             for feature_calculator in self.feature_calculators:
-                if hasattr(feature_calculator, 'randomState'):
+                if hasattr(feature_calculator, 'randomState') and feature_calculator.randomState is None:
                     feature_calculator.randomState = self.randomState
             dataset.addDescriptors(self.feature_calculators)
         X = dataset.getDescriptors()
@@ -300,8 +321,8 @@ class DatasetPipeline(Pipeline):
         else:
             if isinstance(split, str):
                 split = dataset.getSplit(split)
-            if hasattr(split, 'randomState'):
-                split.randomState = self.randomState
+            if hasattr(split, 'randomState') and split.randomState is None:
+                    split.randomState = self.randomState
             for train_index, test_index in dataset.split(split, X, y):  # FIXME: added to reproduce original behavior
                 X_train, y_train, X_test, y_test = (
                     X.loc[train_index], y.loc[train_index], X.loc[test_index], y.loc[test_index]

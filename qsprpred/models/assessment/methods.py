@@ -168,7 +168,7 @@ class Assessor(ModelAssessor):
         self,
         name: str,
         scoring: str | Callable[[Iterable, Iterable], float],
-        split: DataSplit = None,
+        split: DataSplit,
         monitor: AssessorMonitor | None = None,
         use_proba: bool = True,
         mode: EarlyStoppingMode | None = None,

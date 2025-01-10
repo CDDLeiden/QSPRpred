@@ -75,15 +75,6 @@ def QSPRArgParser(txt=None):
         help="Path to model meta file for each model to be used.",
     )
 
-    # other
-    parser.add_argument(
-        "-fv",
-        "--fill_value",
-        type=float,
-        default=np.nan,
-        help="Fill value for missing values in the calculated features",
-    )
-
     if txt:
         args = parser.parse_args(txt)
     else:
@@ -111,7 +102,7 @@ def QSPR_predict(args):
         predictor = QSPRModel.fromFile(model_path)
 
         predictions = predictor.predictMols(
-            smiles_list, use_probas=args.use_probas, fill_value=args.fill_value
+            smiles_list, use_probas=args.use_probas
         )
         # if predictions 2d array with more than 1 column, add as separate columns
         for idx, target in enumerate(predictor.targetProperties):

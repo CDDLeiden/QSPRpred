@@ -62,14 +62,14 @@ class QSPRModel(JSONSerializable, ABC):
 
     @staticmethod
     def handleInvalidsInPredictions(
-        mols: list[str],
+        num_mols: int,
         predictions: np.ndarray | list[np.ndarray],
         failed_mask: np.ndarray,
     ) -> np.ndarray:
         """Replace invalid predictions with None.
 
         Args:
-            mols (MoleculeTable): molecules for which the predictions were made
+            num_mols (int): molecules for which the predictions were made
             predictions (np.ndarray): predictions made by the model
             failed_mask (np.ndarray): boolean mask of failed predictions
 
@@ -79,13 +79,13 @@ class QSPRModel(JSONSerializable, ABC):
         if any(failed_mask):
             if isinstance(predictions, list):
                 predictions_with_invalids = [
-                    np.full((len(mols), pred.shape[1]), None) for pred in predictions
+                    np.full((num_mols, pred.shape[1]), None) for pred in predictions
                 ]
                 for i, pred in enumerate(predictions):
                     predictions_with_invalids[i][~failed_mask, :] = pred
             else:
                 predictions_with_invalids = np.full(
-                    (len(mols), predictions.shape[1]), None
+                    (num_mols, predictions.shape[1]), None
                 )
                 predictions_with_invalids[~failed_mask, :] = predictions
             predictions = predictions_with_invalids
@@ -527,6 +527,10 @@ class QSPRModel(JSONSerializable, ABC):
             X, _ = next(self.pipeline.apply(dataset, fit=False))
         else:
             X = dataset.getDescriptors()
+        failed_mask = np.full(len(dataset), False)
+        for i, idx in enumerate(dataset.getDF().index):
+            if idx not in X.index:
+                failed_mask[i] = True
         if self.task.isRegression() or not use_probas:
             predictions = self.predict(X)
             # always return 2D array
@@ -535,6 +539,7 @@ class QSPRModel(JSONSerializable, ABC):
         else:
             # return a list of 2D arrays
             predictions = self.predictProba(X)
+        predictions = self.handleInvalidsInPredictions(len(dataset), predictions, failed_mask)
         return predictions
 
     def predictMols(
@@ -542,7 +547,6 @@ class QSPRModel(JSONSerializable, ABC):
         mols: Iterable[str | Mol],
         use_probas: bool = False,
         n_jobs: int = 1,
-        fill_value: float = np.nan,
         use_applicability_domain: bool = False,
     ) -> np.ndarray | list[np.ndarray]:
         """
@@ -552,7 +556,6 @@ class QSPRModel(JSONSerializable, ABC):
             mols (List[str  | Mol]): list of SMILES strings
             use_probas (bool): use probabilities for classification models
             n_jobs: Number of jobs to use for parallel processing.
-            fill_value: Value to use for missing values in the feature matrix.
             use_applicability_domain: Use applicability domain to return if a
                 molecule is within the applicability domain of the model.
 
@@ -572,7 +575,7 @@ class QSPRModel(JSONSerializable, ABC):
         # make predictions for the dataset
         predictions = self.predictDataset(dataset, use_probas)
         # handle invalids
-        predictions = self.handleInvalidsInPredictions(mols, predictions, failed_mask)
+        predictions = self.handleInvalidsInPredictions(len(mols), predictions, failed_mask)
 
         # return predictions and if mols are within applicability domain if requested
         if hasattr(self, "applicabilityDomain") and use_applicability_domain:
@@ -581,10 +584,9 @@ class QSPRModel(JSONSerializable, ABC):
             else:
                 X = dataset.getDescriptors()
             in_domain = self.applicabilityDomain.contains(X).values
-            in_domain = self.handleInvalidsInPredictions(mols, in_domain, failed_mask)
+            in_domain = self.handleInvalidsInPredictions(len(mols), in_domain, failed_mask)
 
             return predictions, in_domain
-
         return predictions
 
     def cleanFiles(self):
