@@ -629,6 +629,7 @@ class QSPRTable(MoleculeTable):
         
         This method is used to get a subset of the data set by providing a list of IDs.
         It is the same as calling `getSubset` method for all properties.
+        It uses the same random state as the original data set.
 
         Args:
             ids (list[str]): list of IDs to include in the subset
@@ -636,7 +637,9 @@ class QSPRTable(MoleculeTable):
         Returns:
             QSPRTable: subset of the data set
         """
-        return self.getSubset(self.getProperties(), ids)
+        #FIXME: setting the random state here is not ideal, this should be done in the
+        # getSubset method
+        return self.getSubset(self.getProperties(), ids, random_state=self.randomState)
     
     def filter(self, table_filters: list[Callable]):
         """Filter the data set using the given filters.
