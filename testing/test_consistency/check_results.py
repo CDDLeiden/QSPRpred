@@ -19,12 +19,19 @@ failed_files = []
 for f in os.listdir("expected"):
     for type in ["ind", "cv"]:
         file_name = f"{f}.{type}.tsv"
+        # FIXME: Filenames changed in the new version
+        new_type = "crossval" if type == "cv" else "test"
+        if "CLS" in file_name:
+            new_file_name = f"{f}_{new_type}_matthews_corrcoef.tsv"
+        else:
+            new_file_name = f"{f}_{new_type}_neg_root_mean_squared_error.tsv"    
         try:
             print(f"Comparing file contents of {file_name}")
             relative_file_path = f"{f}/{file_name}"
+            new_relative_file_path = f"{f}/{new_file_name}"
 
             expected_file_path = f"expected/{relative_file_path}"
-            actual_file_path = f"{models_base}/{relative_file_path}"
+            actual_file_path = f"{models_base}/{new_relative_file_path}"
 
             expected_values = (
                 pd.read_csv(expected_file_path, sep="\t")
@@ -36,6 +43,15 @@ for f in os.listdir("expected"):
                 .set_index("ID", drop=True)
                 .sort_index()
             )
+            # FIXME: In the old version, only test values are saved and
+            # the "Fold" column is only present for cross validation
+            # also all Fold values used to be float64 but now they are int
+            if type == "ind":
+                actual_values = actual_values.drop(columns=["Fold"])
+            else:
+                actual_values["Fold"] = actual_values["Fold"].astype(np.float64)
+            actual_values = actual_values[actual_values["Set"] == "Test"]
+            actual_values = actual_values.drop(columns=["Set"])
             assert expected_values.columns.equals(
                 actual_values.columns
             ), f"Column names do not match for file {file_name}."
@@ -70,7 +86,7 @@ for f in os.listdir("expected"):
                 sys.stderr.write(json.dumps(overviews, indent=4))
                 raise e
         except AssertionError as e:
-            # print  stack trace
+            # print stack trace
             traceback.print_exc()
             success = False
             failed_files.append(file_name)

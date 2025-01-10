@@ -198,10 +198,10 @@ class Pipeline(BasePipeline, Randomized, JSONSerializable):
         self, X: pd.DataFrame, y: None | pd.DataFrame = None
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
         self.originalfeatureNames = X.columns
-        for step in self.steps.values():
+        for name, step in self.steps.items():
             if hasattr(step, 'randomState'):
                 step.randomState = self.randomState
-            if step in self.fixed:
+            if name in self.fixed:
                 X, y = step.transform(X, y)
             else:
                 X, y = step.fitTransform(X, y)

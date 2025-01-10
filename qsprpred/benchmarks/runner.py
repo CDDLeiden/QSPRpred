@@ -357,6 +357,7 @@ class BenchmarkRunner:
                 *settings,
                 random_seed=seeds[idx],
                 assessors=benchmark_settings.assessors,
+                subsets=benchmark_settings.subsets,
             )
 
     def makeReplica(self, *args, **kwargs) -> Replica:

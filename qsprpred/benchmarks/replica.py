@@ -8,6 +8,7 @@ import pandas as pd
 
 from ..data.descriptors.sets import DescriptorSet
 from ..data.sources.data_source import DataSource
+from ..data.sampling.splits import DataSplit
 from ..data.tables.qspr import QSPRTable
 from ..data.pipelines.pipeline import DatasetPipeline
 from ..logs import logger
@@ -67,6 +68,7 @@ class Replica(JSONSerializable):
         model: QSPRModel,
         optimizer: HyperparameterOptimization,
         assessors: list[ModelAssessor],
+        subsets: dict[str, tuple[DataSplit, str, int]],
         random_seed: int,
     ):
         """Initializes the replica.
@@ -91,6 +93,10 @@ class Replica(JSONSerializable):
                 Hyperparameter optimizer to use.
             assessors (list[ModelAssessor]):
                 Model assessors to use.
+            subsets (dict[str, tuple[DataSplit, str, int]]):
+                Dictionary mapping assessor names to tuples of data split, set 
+                (Train/Test), and fold index. Used to apply assessors to subsets of 
+                the data.
             random_seed (int):
                 Random seed to use for all random operations withing the replica.
         """
@@ -102,6 +108,7 @@ class Replica(JSONSerializable):
         self.pipeline = pipeline
         self.optimizer = optimizer
         self.assessors = assessors
+        self.subsets = subsets
         self.randomSeed = random_seed
         self.ds = None
         self.results = None
@@ -250,7 +257,27 @@ class Replica(JSONSerializable):
             raise ValueError("Model not initialized. Call initModel first.")
         self.results = None
         for assessor in self.assessors:
-            scores = assessor(self.model, self.ds, self.pipeline, save=True)
+            if assessor.name in self.subsets:
+                # FIXME: this is a temporary fix to pass consistency check
+                # previously the KFold split random state was not explicitly set but
+                # only initialized in assessor.__call__ method where the seed now has 
+                # the Replica seed instead of the original dataset seed
+                assessor.split.random_state = self.randomSeed #FIXME
+                    
+                # apply assessor to subset of data only if specified
+                subset = self.subsets[assessor.name]
+                fold = [fold for fold in self.ds.split(subset[0])][subset[2]]
+                indices = fold[0] if subset[1] == "Train" else fold[1]
+                # FIXME: this is a temporary fix to pass consistency check
+                # previously the filters were only fitted on the training set of 
+                # the initial train/test split set on the dataset.
+                # instead of each individual fold trainingset
+                if "benchmarkfilter" in self.pipeline.steps.keys(): # FIXME
+                    self.pipeline.steps["benchmarkfilter"].fit(self.ds[indices].getDescriptors()) # FIXME
+                    self.pipeline.fixed = ["benchmarkfilter"] # FIXME
+                scores = assessor(self.model, self.ds[indices], self.pipeline, save=True, order=indices)
+            else:
+                scores = assessor(self.model, self.ds, self.pipeline, save=True)
             if isinstance(scores, float):
                 scores = np.array([scores])
             scores_df = pd.DataFrame()

@@ -5,6 +5,7 @@ from qsprpred.models.assessment.methods import ModelAssessor
 
 from ...data.descriptors.sets import DescriptorSet
 from ...data.sources.data_source import DataSource
+from ...data.sampling.splits import DataSplit
 from ...data.pipelines.pipeline import DatasetPipeline
 from ...models.hyperparam_optimization import HyperparameterOptimization
 from ...models.model import QSPRModel
@@ -35,6 +36,9 @@ class BenchmarkSettings(JSONSerializable):
             Models to use.
         assessors (list[ModelAssessor]):
             Model assessors to use.
+        subsets (dict[str, tuple[DataSplit, str, int]]):
+            Dictionary mapping assessor names to tuples of data split, set (Train/Test),
+            and fold index. Used to apply assessors to subsets of the data.
         optimizers (list[HyperparameterOptimization]):
             Hyperparameter optimizers to use.
     """
@@ -50,6 +54,7 @@ class BenchmarkSettings(JSONSerializable):
     pipelines: list[DatasetPipeline]
     models: list[QSPRModel]
     assessors: list[ModelAssessor]
+    subsets: dict[str, tuple[DataSplit, str, int]] = ()
     optimizers: list[HyperparameterOptimization] = ()
 
     def __getstate__(self):
@@ -76,3 +81,12 @@ class BenchmarkSettings(JSONSerializable):
         assert len(self.pipelines) > 0, "No data preparation settings defined."
         assert len(self.models) > 0, "No models defined."
         assert len(self.assessors) > 0, "No model assessors defined."
+        assessor_names = [assessor.name for assessor in self.assessors]
+        if len(self.subsets) > 0:
+            for assessor in self.subsets.keys():
+                assert assessor in assessor_names, f"Assessor {assessor} in subsets not found in assessors."
+                assert len(self.subsets[assessor]) == 3, "Subsets must be a tuple of DataSplit, set (Train/Test), and fold index."
+                assert isinstance(self.subsets[assessor][0], DataSplit), "First element of subset must be a DataSplit."
+                assert self.subsets[assessor][1] in ["Train", "Test"], "Second element of subset must be 'Train' or 'Test'."
+                assert isinstance(self.subsets[assessor][2], int), "Third element of subset must be an integer, the fold index."
+            
