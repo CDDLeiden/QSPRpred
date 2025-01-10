@@ -254,9 +254,9 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
             (MoleculeTable): The created data set.
         """
         storage = PandasChemStore(
-            f"{name}_storage", path, df, smiles_col=smiles_col, **kwargs
+            f"{name}_storage", path, df, smiles_col=smiles_col
         )
-        return MoleculeTable(storage, name=name, path=path)
+        return MoleculeTable(storage, name=name, path=path, **kwargs)
 
     @classmethod
     def fromSMILES(cls, name: str, smiles: list, path: str, *args, **kwargs):

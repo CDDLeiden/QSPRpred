@@ -175,7 +175,7 @@ class QSPRModel(JSONSerializable, ABC):
             self.baseDir = os.path.abspath(base_dir.rstrip("/"))
             if parameters:
                 logger.warning(
-                    f"Explicitly specified parameters ({parameters})"
+                    f"Explicitly specified parameters ({parameters}) "
                     f"will override model settings read from file: {self.parameters}."
                     f"Estimator will be reloaded with the new parameters "
                     f"and will have to be re-fitted if fitted previously."
