@@ -10,7 +10,7 @@ from qsprpred.data.sampling.splits import DataSplit
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.extra.data.utils.testing.path_mixins import DataSetsMixInExtras
 from qsprpred.utils.testing.check_mixins import DataPrepCheckMixIn
-from qsprpred.data.pipelines.pipeline import DatasetPipeline, Shuffle, DummyStep
+from qsprpred.data.processing.pipeline import DatasetPipeline, Shuffle, DummyStep
 
 
 class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepCheckMixIn, TestCase):
@@ -65,7 +65,7 @@ class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepCheckMixIn, TestCas
                 "feature_standardizer": feature_standardizer if feature_standardizer else DummyStep(),
                 "feature_filter": feature_filter if feature_filter else DummyStep(),
                 "data_filter": data_filter if data_filter else DummyStep(),
-                # FIXME: applicability_domain is not yet implemented
+                "applicability_domain": applicability_domain if applicability_domain else DummyStep(),
             }
         )
         self.checkPrep(

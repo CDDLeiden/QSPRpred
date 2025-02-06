@@ -11,7 +11,7 @@ from rdkit.Chem import Mol
 
 from qsprpred.data import MoleculeTable
 from qsprpred.extra.data.tables.pcm import PCMDataSet
-from qsprpred.data.pipelines.pipeline import DatasetPipeline
+from qsprpred.data.processing.pipeline import DatasetPipeline
 
 from ...data.storage.tabular.basic_storage import PandasChemStore
 from ...models.model import QSPRModel

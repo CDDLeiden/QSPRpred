@@ -11,7 +11,7 @@ from sklearn.model_selection import ParameterGrid
 from qsprpred.models.assessment.methods import ModelAssessor
 
 from ..data.tables.interfaces.qspr_data_set import QSPRDataSet
-from ..data.pipelines.pipeline import DatasetPipeline
+from ..data.processing.pipeline import DatasetPipeline
 from ..logs import logger
 from ..models.model import QSPRModel
 from ..models.monitors import BaseMonitor, HyperparameterOptimizationMonitor

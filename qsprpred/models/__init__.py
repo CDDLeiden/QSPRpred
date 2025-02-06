@@ -1,8 +1,6 @@
 from qsprpred.models.assessment.methods import (
-    # Assessor,
     Assessor,
     ModelAssessor,
-    # Assessor,
 )
 from qsprpred.models.assessment.metrics.masked import MaskedMetric
 from qsprpred.models.assessment.metrics.scikit_learn import SklearnMetrics
@@ -29,8 +27,6 @@ __all__ = [
     "SklearnModel",
     "ModelAssessor",
     "Assessor",
-    # "Assessor",
-    # "Assessor",
     "MaskedMetric",
     "SklearnMetrics",
     "EarlyStoppingMode",

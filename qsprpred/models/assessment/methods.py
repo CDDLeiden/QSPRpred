@@ -15,7 +15,7 @@ from ...models.early_stopping import EarlyStoppingMode
 from ...models.model import QSPRModel
 from ...models.monitors import AssessorMonitor, BaseMonitor
 from .metrics.scikit_learn import SklearnMetrics
-from ...data.pipelines.pipeline import DatasetPipeline
+from ...data.processing.pipeline import DatasetPipeline
 
 
 class ModelAssessor(ABC):

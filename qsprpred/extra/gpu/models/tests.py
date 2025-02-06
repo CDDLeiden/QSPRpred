@@ -13,7 +13,7 @@ from sklearn.model_selection import ShuffleSplit
 
 from qsprpred.data.descriptors.sets import SmilesDesc
 from qsprpred.data.sampling.splits import RandomSplit
-from qsprpred.data.pipelines.pipeline import DummyStep, DatasetPipeline
+from qsprpred.data.processing.pipeline import DummyStep, DatasetPipeline
 from qsprpred.extra.gpu.utils.parallel import TorchJITGenerator
 from qsprpred.tasks import ModelTasks, TargetTasks
 

@@ -11,7 +11,7 @@ from sklearn.model_selection import KFold
 from ... import TargetTasks
 from ...data.descriptors.sets import DescriptorSet
 from ...data.processing.feature_filters import FeatureFilter
-from ...data.pipelines.pipeline import DatasetPipeline, DummyStep, SklearnStep
+from ...data.processing.pipeline import DatasetPipeline, DummyStep, SklearnStep
 from ...data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ...models import (
     AssessorMonitor,

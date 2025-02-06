@@ -10,7 +10,7 @@ from ..data.descriptors.sets import DescriptorSet
 from ..data.sources.data_source import DataSource
 from ..data.sampling.splits import DataSplit
 from ..data.tables.qspr import QSPRTable
-from ..data.pipelines.pipeline import DatasetPipeline
+from ..data.processing.pipeline import DatasetPipeline
 from ..logs import logger
 from ..models.assessment.methods import ModelAssessor
 from ..models.hyperparam_optimization import HyperparameterOptimization

@@ -96,53 +96,10 @@ class SklearnStep(Step):
         self.transformer.fit(X, y)
     
     def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
-        return pd.DataFrame(self.transformer.transform(X), columns=X.columns, index=X.index), y
+        return pd.DataFrame(self.transformer.transform(X), columns=X.columns, index=X.index), y        
 
-class InvalidRemove(Step):
-    """Step that removes rows containing NaN values in a specified column"""
-    
-    def __init__(self, features: list[str] | None = None):
-        """Initialize the step with the columns to check for NaN values
-        
-        If no columns are specified, all columns are checked for NaN values.
-        
-        Args:
-            features (list[str] | None): columns to check for NaN values
-        """
-        self.selected_features = features
-    
-    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
-        """Remove rows containing NaN values in the specified columns"""
-        if self.selected_features is None:
-            self.selected_features = X.columns
-        # only take selected features that are in the current data
-        selected_features = list(set(self.selected_features) & set(X.columns))
-        # print ids of removed rows
-        # print(X[X.isnull().any(axis=1)].index)
-        X = X.dropna(subset=selected_features)
-        if y is not None:
-            y = y.loc[X.index]
-        return X, y
-        
 
-class BasePipeline(ABC):
-    """Pipeline class for data preprocessing steps
-    
-    Pipeline is a sequence of data preprocessing steps that can be applied to a dataset.
-    
-    Args:
-        steps (dict[str, Step]): Dictionary of named steps in the pipeline
-    """
-    @abstractmethod
-    def fitTransform(self, X: pd.DataFrame, y: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-        pass
-    
-    @abstractmethod
-    def transform(self, X: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-        pass
-    
-
-class Pipeline(BasePipeline, Randomized, JSONSerializable):
+class Pipeline(Randomized, JSONSerializable):
     """Pipeline class for QSPR prediction
     
     A sequence of data preprocessing steps that can be applied to a dataset.
@@ -177,6 +134,8 @@ class Pipeline(BasePipeline, Randomized, JSONSerializable):
         self.originalfeatureNames = None
         self.featureNames = None
         self.randomState = seed
+        self._skip = []
+        self._fitted = False
 
     @property
     def randomState(self) -> int:
@@ -193,33 +152,6 @@ class Pipeline(BasePipeline, Randomized, JSONSerializable):
                 a random seed is used instead of a fixed one.
         """
         self.seed = seed
-    
-    def fitTransform(
-        self, X: pd.DataFrame, y: None | pd.DataFrame = None
-    ) -> tuple[pd.DataFrame, pd.DataFrame]:
-        self.originalfeatureNames = X.columns
-        for name, step in self.steps.items():
-            if hasattr(step, 'randomState'):
-                step.randomState = self.randomState
-            if name in self.fixed:
-                X, y = step.transform(X, y)
-            else:
-                X, y = step.fitTransform(X, y)
-        self.featureNames = X.columns
-        return X, y
-
-    def transform(
-        self, X: pd.DataFrame, y: None | pd.DataFrame = None
-    ) -> tuple[pd.DataFrame, pd.DataFrame]:
-        # add NaN values for missing features
-        missing_features = list(set(self.originalfeatureNames) - set(X.columns))
-        X = pd.concat(
-            [X, pd.DataFrame(0, index=X.index, columns=missing_features)], axis=1
-        )
-        X = X[self.originalfeatureNames]
-        for step in self.steps.values():
-            X, y = step.transform(X, y)
-        return X, y
             
     def apply(
         self,
@@ -240,7 +172,7 @@ class Pipeline(BasePipeline, Randomized, JSONSerializable):
             y_train (pd.DataFrame | None): training target data to apply the pipeline to
             X_test (pd.DataFrame | None): test data to apply the pipeline to
             y_test (pd.DataFrame | None): test target data to apply the pipeline to
-            refit (bool): whether to fit the pipeline
+            fit (bool): whether to fit the pipeline
         
         Returns:
             X_train (pd.DataFrame): transformed training data
@@ -248,23 +180,118 @@ class Pipeline(BasePipeline, Randomized, JSONSerializable):
             X_test (pd.DataFrame | None): transformed test data
             y_test (pd.DataFrame | None): transformed test targets
         """
-        if fit:
-            X_train, y_train = self.fitTransform(X_train, y_train)
-        else:
-            X_train, y_train = self.transform(X_train, y_train)
-        if X_test is not None:
-            X_test, y_test = self.transform(X_test, y_test)
+        for name, step in self.steps.items():
+            if name in self.skip:
+                continue
+            if fit:
+                if hasattr(step, 'randomState'):
+                    step.randomState = self.randomState if step.randomState is None else step.randomState
+                # Fit step on the specified data
+                if name not in self.fixed:
+                    if self.fitOn.get(name, 'train') == 'train':
+                        step.fit(X_train, y_train)
+                    elif self.fitOn.get(name, 'train') == 'both':
+                        X_all, y_all = pd.concat([X_train, X_test]), pd.concat([y_train, y_test])
+                        step.fit(X_all, y_all)
+                    elif self.fitOn.get(name, 'train') == 'test':
+                        step.fit(X_test, y_test)
+                    else:
+                        raise ValueError(f"Unknown value for {name} fit_on: {self.fitOn.get(name)}")
+                self._fitted = True
+            # Apply step on the specified data
+            if self.applyTo.get(name, 'both') in ['train', 'both']:
+                X_train, y_train = step.transform(X_train, y_train)
+            if self.applyTo.get(name, 'both') in ['test', 'both']:
+                if X_test is not None:
+                    X_test, y_test = step.transform(X_test, y_test)
+            if self.applyTo.get(name, 'both') not in ['train', 'test', 'both']:
+                raise ValueError(f"Unknown value for {name} apply_to: {self.applyTo.get(name)}")
+            # Check number of features is still consistent between training and test data
+            if X_test is not None:
+                assert X_train.shape[1] == X_test.shape[1], f"Number of features in training and test data is not consistent after step {name}"
+                assert all(X_train.columns == X_test.columns), f"Feature names in training and test data are not consistent after step {name}"
+            self.featureNames = X_train.columns
         
         return X_train, y_train, X_test, y_test
     
-class DatasetPipeline(Pipeline):
+    def removeStep(self, name: str):
+        """Remove a step from the pipeline"""
+        self.steps.pop(name)
+        
+    def addStep(self, name: str, step: Step, fit_on: str = 'train', apply_to: str = 'both', fixed: bool = False):
+        """Add a step to the pipeline
+            
+        Args:
+            name (str): name of the step
+            step (Step): step to add to the pipeline
+            fit_on (str): whether to fit the step on 'train', 'test' or 'both'
+            apply_to (str): whether to apply the step on 'train', 'test' or 'both'
+            fixed (bool): whether the step should be fixed and not fitted
+        """
+        self.steps[name] = step
+        self.fitOn[name] = fit_on
+        self.applyTo[name] = apply_to
+        if fixed:
+            self.fixed.append(name)
+            
+    def orderSteps(self, order: list[str]):
+        """Order the steps in the pipeline"""
+        assert set(order) == set(self.steps.keys()), "Order must contain all step names"
+        self.steps = {name: self.steps[name] for name in order}
+    
+    @property
+    def fitted(self) -> bool:
+        """Check if the pipeline is fitted"""
+        return self._fitted
+    
+    @property
+    def skip(self) -> list[str]:
+        """Get the steps to skip
+        
+        The steps to skip are not fitted or transformed, but
+        are still present in the pipeline.
+        
+        Returns:
+            list[str]: list of step names to skip
+        """
+        return self._skip
+    
+    def addSkip(self, name: str):
+        """Add a step to the skip list"""
+        self._skip.append(name)
+    
+    def removeSkip(self, name: str):
+        """Remove a step from the skip list"""
+        self._skip.remove(name)
+    
+    def __str__(self):
+        steps = []
+        for name, obj in self.steps.items():
+            step = f"{name} ({obj.__class__.__name__}): "
+            step += f"fit_on={self.fitOn.get(name, 'train')}, "
+            step += f"apply_to={self.applyTo.get(name, 'both')}, "
+            step += f"fixed={name in self.fixed}"
+            steps.append(step)
+        return (
+            f"{self.__class__.__name__}\n"
+            f"steps:\n  " + 
+            f"\n  ".join(steps) + 
+            f"\nseed: {self.seed}"
+            f"\nfitted: {self.fitted}"
+        )
+            
+    
+class DatasetPipeline(Pipeline): 
     def __init__(
         self,
         feature_calculators: list[DescriptorSet] | None = None,
         steps: dict[str, Step] = {},
         fixed: list[str] = [],
+        fit_on: dict[str, str] = {},
+        apply_to: dict[str, str] = {},
+        seed: int | None = None,
     ):
-        super().__init__(steps, fixed=fixed)
+        super().__init__(steps, fixed, fit_on, apply_to, seed)
         self.feature_calculators = feature_calculators
         
     def apply(
@@ -328,3 +355,9 @@ class DatasetPipeline(Pipeline):
                     X.loc[train_index], y.loc[train_index], X.loc[test_index], y.loc[test_index]
                 )
                 yield super().apply(X_train, y_train, X_test, y_test, fit)
+    
+    def __str__(self):
+        feature_calculators = ["None"] if self.feature_calculators is None else self.feature_calculators
+        return (
+            super().__str__() + 
+            f"\nfeature_calculators: {', '.join([str(fc) for fc in feature_calculators])}")

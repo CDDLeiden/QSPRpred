@@ -17,7 +17,7 @@ from ...data.chem.clustering import (
 )
 from ...data.chem.scaffolds import BemisMurcko, BemisMurckoRDKit
 from ...data.sampling.splits import ManualSplit
-from ...data.pipelines.pipeline import DatasetPipeline
+from ..processing.pipeline import DatasetPipeline
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn
 from ...utils.testing.check_mixins import DataPrepCheckMixIn

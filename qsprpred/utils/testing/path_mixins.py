@@ -27,7 +27,8 @@ from ...data.descriptors.sets import (
     RDKitDescs,
     TanimotoDistances,
 )
-from ...data.pipelines.pipeline import DatasetPipeline, Shuffle, InvalidRemove
+from ...data.processing.pipeline import DatasetPipeline, Shuffle
+from ...data.processing.data_filters import NaNFilter, OutlierFilter
 from ...data.processing.data_filters import RepeatsFilter
 from ...data.sampling.splits import RandomSplit
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
@@ -84,7 +85,7 @@ class DataSetsPathMixIn(PathMixIn):
                 feature_calculators=[MorganFP(radius=2, nBits=128)],
                 steps = {
                     "shuffle": Shuffle(),
-                    "remove_nan": InvalidRemove(), 
+                    "remove_nan": NaNFilter(), 
                     "feature_standardizer": StandardScaler(),
                     "low_var_filter": LowVarianceFilter(0.05),
                     "high_corr_filter": HighCorrelationFilter(0.8),
@@ -169,7 +170,7 @@ class DataSetsPathMixIn(PathMixIn):
         splits = [None, RandomSplit(test_fraction=0.1)]
         feature_standardizers = [None, StandardScaler()]
         feature_filters = [None, HighCorrelationFilter(0.9)]
-        applicability_domains = [None, TopKatApplicabilityDomain()]
+        applicability_domains = [None, OutlierFilter(TopKatApplicabilityDomain())]
         data_filters = [
             None,
             RepeatsFilter(),

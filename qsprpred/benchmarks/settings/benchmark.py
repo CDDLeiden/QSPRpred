@@ -6,7 +6,7 @@ from qsprpred.models.assessment.methods import ModelAssessor
 from ...data.descriptors.sets import DescriptorSet
 from ...data.sources.data_source import DataSource
 from ...data.sampling.splits import DataSplit
-from ...data.pipelines.pipeline import DatasetPipeline
+from ...data.processing.pipeline import DatasetPipeline
 from ...models.hyperparam_optimization import HyperparameterOptimization
 from ...models.model import QSPRModel
 from ...tasks import TargetProperty

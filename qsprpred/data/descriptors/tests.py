@@ -3,7 +3,7 @@ from rdkit.Chem import Descriptors
 
 from ...data import RandomSplit
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
-from ...data.pipelines.pipeline import DatasetPipeline
+from ..processing.pipeline import DatasetPipeline
 from ...models import SklearnModel
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn

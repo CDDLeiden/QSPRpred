@@ -46,7 +46,8 @@ from qsprpred.data.sampling.splits import (
     ScaffoldSplit,
     TemporalSplit,
 )
-from qsprpred.data.pipelines.pipeline import DatasetPipeline, InvalidRemove
+from qsprpred.data.processing.data_filters import NaNFilter
+from qsprpred.data.processing.pipeline import DatasetPipeline
 from qsprpred.data.tables.qspr import QSPRTable
 from qsprpred.tasks import TargetTasks
 
@@ -484,7 +485,7 @@ def QSPR_dataprep(args):
                 )
             if "smiles" not in args.features:
                 steps["standardizer"] = StandardScaler()
-            steps["remove_nans"] = InvalidRemove()
+            steps["remove_nans"] = NaNFilter()
             # prepare dataset pipeline for modelling
             pipeline = DatasetPipeline(
                 feature_calculators=descriptorsets,

@@ -17,7 +17,7 @@ from xgboost import XGBClassifier, XGBRegressor
 from sklearn.model_selection import KFold
 
 from qsprpred.data.tables.qspr import QSPRTable
-from qsprpred.data.pipelines.pipeline import DatasetPipeline
+from qsprpred.data.processing.pipeline import DatasetPipeline
 from qsprpred.models.assessment.methods import Assessor
 from qsprpred.tasks import TargetTasks
 

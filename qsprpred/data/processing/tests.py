@@ -12,7 +12,7 @@ from sklearn.preprocessing import StandardScaler
 from ... import TargetTasks
 from ...data.processing.applicability_domain import (
     KNNApplicabilityDomain,
-    MLChemADWrapper,
+    MLChemAD,
 )
 from ...data.processing.data_filters import CategoryFilter, RepeatsFilter
 from ...data.processing.feature_filters import (
@@ -21,7 +21,7 @@ from ...data.processing.feature_filters import (
     LowVarianceFilter,
 )
 from ...data.processing.feature_standardizers import SKLearnStandardizer
-from ...data.pipelines.pipeline import DatasetPipeline
+from .pipeline import DatasetPipeline
 from ...data.tables.qspr import QSPRTable
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn, PathMixIn
@@ -388,12 +388,12 @@ class TestApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
 
     def testApplicabilityDomain(self):
         """Test the applicability domain fitting, transforming and serialization."""
-        ad = MLChemADWrapper(KNNAD(dist="jaccard", scaling=None, alpha=0.95))
+        ad = MLChemAD(KNNAD(dist="jaccard", scaling=None, alpha=0.95))
         ad.fit(self.dataset.getDescriptors())
         self.assertIsInstance(ad.contains(self.dataset.getDescriptors()), pd.Series)
 
         ad.toFile(f"{self.generatedPath}/test_ad.json")
-        ad_fromfile = MLChemADWrapper.fromFile(f"{self.generatedPath}/test_ad.json")
+        ad_fromfile = MLChemAD.fromFile(f"{self.generatedPath}/test_ad.json")
         self.assertIsInstance(ad_fromfile.contains(self.dataset.getDescriptors()), pd.Series)
 
     def testContinousAD(self):
@@ -411,4 +411,4 @@ class TestApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
         self.assertIsInstance(ad.contains(self.dataset.getDescriptors()), pd.Series)
 
         ad.toFile(f"{self.generatedPath}/test_ad.json")
-        MLChemADWrapper.fromFile(f"{self.generatedPath}/test_ad.json")
+        MLChemAD.fromFile(f"{self.generatedPath}/test_ad.json")

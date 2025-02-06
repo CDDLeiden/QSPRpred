@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 
 from qsprpred import TargetProperty, TargetTasks
 from qsprpred.data import RandomSplit
-from qsprpred.data.pipelines.pipeline import DatasetPipeline
+from qsprpred.data.processing.pipeline import DatasetPipeline
 from qsprpred.data.descriptors.fingerprints import MorganFP
 from qsprpred.data.descriptors.sets import DescriptorSet, DrugExPhyschem
 from qsprpred.data.processing.feature_filters import (

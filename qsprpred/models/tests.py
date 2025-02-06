@@ -24,7 +24,7 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
-from ..data.processing.applicability_domain import MLChemADWrapper
+from ..data.processing.applicability_domain import MLChemAD
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stopping
 from ..models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ..models.scikit_learn import SklearnModel
@@ -936,13 +936,13 @@ class TestAttachedApplicabilityDomain(ModelDataSetsPathMixIn, QSPRTestCase):
 
         # check if the applicability domain is attached to the model
         self.assertTrue(hasattr(model, "applicabilityDomain"))
-        self.assertIsInstance(model.applicabilityDomain, MLChemADWrapper)
+        self.assertIsInstance(model.applicabilityDomain, MLChemAD)
 
         # check if the applicability domain is saved and loaded correctly
         model.save()
         model2 = SklearnModel.fromFile(model.metaFile)
         self.assertTrue(hasattr(model2, "applicabilityDomain"))
-        self.assertIsInstance(model2.applicabilityDomain, MLChemADWrapper)
+        self.assertIsInstance(model2.applicabilityDomain, MLChemAD)
 
         # make predictions with mlchemad ap on the dataset directly
         comparison_ap = KNNApplicabilityDomain(

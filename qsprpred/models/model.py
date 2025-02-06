@@ -21,8 +21,8 @@ from qsprpred.data import QSPRTable
 from ..data.storage.tabular.basic_storage import PandasChemStore
 from ..data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ..data.tables.mol import MoleculeTable
-from ..data.pipelines.pipeline import DatasetPipeline
-from ..data.processing.applicability_domain import MLChemADWrapper, ApplicabilityDomain
+from ..data.processing.pipeline import DatasetPipeline
+from ..data.processing.applicability_domain import MLChemAD, ApplicabilityDomain
 from ..logs import logger
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
 from ..tasks import ModelTasks
@@ -583,7 +583,7 @@ class QSPRModel(JSONSerializable, ABC):
                 X, _ = next(self.pipeline.apply(dataset, fit=False))
             else:
                 X = dataset.getDescriptors()
-            in_domain = self.applicabilityDomain.contains(X).values
+            in_domain = self.applicabilityDomain.transform(X).values
             in_domain = self.handleInvalidsInPredictions(len(mols), in_domain, failed_mask)
 
             return predictions, in_domain
@@ -652,7 +652,17 @@ class QSPRModel(JSONSerializable, ABC):
             "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
         if hasattr(self, "applicabilityDomain") and self.applicabilityDomain is not None:
+            logger.info(
+                "Applicability domain fit started: %s" % datetime.now().strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
+            )
             self.applicabilityDomain.fit(X_all)
+            logger.info(
+                "Applicability domain fit ended: %s" % datetime.now().strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
+            )
         if save_data:
             ds.save()
         # save model and return path
@@ -836,7 +846,7 @@ class QSPRModel(JSONSerializable, ABC):
             value (Any): applicability domain of the model
         """
         if not isinstance(apdomain, ApplicabilityDomain):
-            self._applicabilityDomain = MLChemADWrapper(apdomain)
+            self._applicabilityDomain = MLChemAD(apdomain)
         else:
             self._applicabilityDomain = apdomain
             

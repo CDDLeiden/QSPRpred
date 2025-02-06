@@ -13,7 +13,7 @@ from qsprpred.benchmarks import BenchmarkSettings, BenchmarkRunner
 from qsprpred.data import MoleculeTable, RandomSplit
 from qsprpred.data.descriptors.fingerprints import MorganFP
 from qsprpred.data.descriptors.sets import RDKitDescs
-from qsprpred.data.pipelines.pipeline import DatasetPipeline
+from qsprpred.data.processing.pipeline import DatasetPipeline
 from qsprpred.data.processing.feature_filters import LowVarianceFilter
 from qsprpred.data.sources import DataSource
 from qsprpred.models import SklearnModel, Assessor

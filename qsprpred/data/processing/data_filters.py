@@ -11,9 +11,10 @@ import numpy as np
 import pandas as pd
 
 from ...logs import logger
-from ..pipelines.pipeline import Step
+from .pipeline import Step
 from typing import Optional
-from .applicability_domain import ApplicabilityDomain
+from .applicability_domain import ApplicabilityDomain, MLChemAD
+from mlchemad.base import ApplicabilityDomain as MLChemADApplicabilityDomain
 
 
 class DataFilter(Step):
@@ -37,7 +38,6 @@ class DataFilter(Step):
             y (pd.DataFrame, optional): output dataframe if the standardization method
                 requires it
         """
-
 
 class CategoryFilter(Step):
     """To filter out values from column
@@ -218,4 +218,48 @@ class RepeatsFilter(DataFilter):
 
         return X, y
 
-# class outlier
+class NaNFilter(DataFilter):
+    """Step that removes rows containing NaN values in a specified column"""
+    
+    def __init__(self, features: list[str] | None = None):
+        """Initialize the step with the columns to check for NaN values
+        
+        If no columns are specified, all columns are checked for NaN values.
+        
+        Args:
+            features (list[str] | None): columns to check for NaN values
+        """
+        self.selected_features = features
+        
+    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
+        pass
+    
+    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Remove rows containing NaN values in the specified columns"""
+        if self.selected_features is None:
+            self.selected_features = X.columns
+        # only take selected features that are in the current data
+        selected_features = list(set(self.selected_features) & set(X.columns))
+        logger.info(f"Removing rows {X.index[X[selected_features].isnull().any(axis=1)].tolist()} with NaN values in features.")
+        X = X.dropna(subset=selected_features)
+        if y is not None:
+            y = y.loc[X.index]
+        return X, y
+
+class OutlierFilter(DataFilter):
+    def __init__(self, ad: ApplicabilityDomain):
+        if isinstance(ad, MLChemADApplicabilityDomain):
+            ad = MLChemAD(ad)
+        self.ad = ad
+        
+    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
+        self.ad.fit(X)
+        
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+        indomain = self.ad.contains(X)
+        logger.info(f"Removing {len(X) - indomain.sum()} samples outside the applicability domain.")
+        logger.debug(f"Removing samples {X.index[~indomain].tolist()} outside the applicability domain.")
+        X = X.loc[indomain]
+        if y is not None:
+            y = y.loc[indomain]
+        return X, y

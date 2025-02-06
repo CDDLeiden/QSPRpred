@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from ...logs import logger
-from ..pipelines.pipeline import Step
+from .pipeline import Step
 from abc import abstractmethod
 
 class Standardizer(Step):
