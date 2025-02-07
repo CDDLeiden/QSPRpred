@@ -56,6 +56,8 @@ class PCMDataSet(QSPRTable):
             drop_empty_target_props (bool, optional):
                 whether to ignore entries with empty target properties. Defaults to
                 `True`.
+            proteins (ProteinStorage, optional):
+                `ProteinStorage` instance containing the protein data.
 
         Raises:
             `ValueError`: Raised if threshold given with non-classification task.

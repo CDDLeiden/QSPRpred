@@ -1,13 +1,17 @@
+from qsprpred.utils.serialization import JSONSerializable
 from qsprpred.data.tables.interfaces.qspr_data_set import QSPRDataSet
+from typing import ClassVar
 
 
-class DataSetDependent:
+class DataSetDependent(JSONSerializable):
     """Classes that need an attached `QSPRDataSet` should inherit from this class,
     and it will be supplied to them via this API.
 
     Attributes:
         dataSet (QSPRDataSet): The data set attached to this object.
     """
+    _notJSON: ClassVar = ["dataSet"]
+    
     def __init__(self, dataset: QSPRDataSet | None = None):
         """Initialize the object with a data set.
 

@@ -41,11 +41,11 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase, DataPrepCheckMixIn):
         
         # Add extra column to the data frame to use for splitting
         df = dataset.getDF()
-        test_ids = df.sample(frac=0.1).index
+        test_ids = df.sample(frac=0.1, random_state=42).index
         train_ids = df.index.difference(test_ids)
         dataset.addProperty("split", "test", ids=test_ids)
         dataset.addProperty("split", "train", ids=train_ids)
-        split = ManualSplit(dataset.getDF()["split"], "train", "test")
+        split = ManualSplit("split", "train", "test")
         dataset.addSplit(split, name="split")
         
         # check if the split is correctly stored
@@ -85,7 +85,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase, DataPrepCheckMixIn):
         split_year = 2000
         split = TemporalSplit(
             timesplit=split_year,
-            timeprop=dataset.getDF()["Year of first disclosure"],
+            timeprop="Year of first disclosure",
         )
         dataset.addSplit(split, name="temp_split")
         self.checkSplit(dataset, "temp_split")
@@ -104,7 +104,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase, DataPrepCheckMixIn):
             dataset = self.createLargeTestDataSet(name="TemporalSplit_bootstrap")
         split = TemporalSplit(
             timesplit=[split_year - 1, split_year, split_year + 1],
-            timeprop=dataset.getDF()["Year of first disclosure"],
+            timeprop="Year of first disclosure",
         )
         bootstrap_split = BootstrapSplit(
             split=split,
@@ -137,7 +137,6 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase, DataPrepCheckMixIn):
         else:
             dataset = self.createLargeTestDataSet(name="ScaffoldSplit")
         split = ScaffoldSplit(
-            smiles_prop = dataset.getDF()[dataset.smilesProp],
             scaffold=scaffold,
             custom_test_list=custom_test_list,
         )
@@ -156,7 +155,6 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase, DataPrepCheckMixIn):
             dataset = self.createLargeTestDataSet(name="ScaffoldSplit_folding")
         n_folds = 5
         split = ScaffoldSplit(
-            smiles_prop = dataset.getDF()[dataset.smilesProp],
             scaffold=scaffold,
             custom_test_list=custom_test_list,
             n_folds=n_folds,
@@ -212,7 +210,6 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase, DataPrepCheckMixIn):
         else:
             dataset = self.createLargeTestDataSet(name="ClusterSplit")
         split = ClusterSplit(
-            smiles_prop=dataset.getDF()[dataset.smilesProp],
             clustering=clustering_algorithm,
             custom_test_list=custom_test_list,
             time_limit_seconds=10,
@@ -229,9 +226,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase, DataPrepCheckMixIn):
     def testSerialization(self):
         """Test the serialization of dataset with datasplit."""
         dataset = self.createLargeTestDataSet()
-        split = ScaffoldSplit(
-            smiles_prop=dataset.getDF()[dataset.smilesProp],
-        )
+        split = ScaffoldSplit()
         dataset.addSplit(split, name="scaffold_split")
         self.checkSplit(dataset, "scaffold_split")
         train_ids, test_ids = dataset.getSplit("scaffold_split", as_type="ids")[0]

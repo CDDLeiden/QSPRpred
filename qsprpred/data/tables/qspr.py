@@ -1,7 +1,7 @@
 import json
 import os
 from copy import deepcopy
-from typing import Callable, ClassVar, Generator
+from typing import Callable, Generator
 
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -9,7 +9,6 @@ from sklearn.preprocessing import LabelEncoder
 from ...logs import logger
 from ...tasks import TargetProperty, TargetTasks
 from ..storage.interfaces.chem_store import ChemStore
-from .interfaces.molecule_data_set import MoleculeDataSet
 from .mol import MoleculeTable
 from qsprpred.data.sampling.splits import DataSplit
 import numpy as np
@@ -486,9 +485,6 @@ class QSPRTable(MoleculeTable):
             split (DataSplit): split to add
             name (str): name of the split
         """
-        if hasattr(split, "randomState"):
-            if split.randomState is None:
-                split.randomState = self.randomState
         self.splits[name] = {
             "split": split,
             "ids": [(train_idx, test_idx) for train_idx, test_idx in self.split(split)],
@@ -610,6 +606,8 @@ class QSPRTable(MoleculeTable):
         Yields:
             tuple[pd.Index, pd.Index]: indices of the train and test set
         """
+        if hasattr(split, "dataSet"):
+            split.setDataSet(self)
         if hasattr(split, "randomState"):
             if split.randomState is None:
                 split.randomState = self.randomState
@@ -654,3 +652,8 @@ class QSPRTable(MoleculeTable):
             )
             ids_to_drop = ids[~ids.isin(ret.index)].values
             self.dropEntries(ids_to_drop)
+            
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        for name, split in self.splits.items():
+            split["split"].setDataSet(self)

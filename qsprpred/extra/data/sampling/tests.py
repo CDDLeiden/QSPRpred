@@ -25,10 +25,7 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
 
     @parameterized.expand([(GBMTRandomSplit, ), (ScaffoldSplit, ), (ClusterSplit, )])
     def testPCMSplit(self, splitter):
-        splitter = splitter(
-            smiles_prop=self.dataset.getDF()[self.dataset.smilesProp]
-        )
-        splitter = PCMSplit(splitter, target_prop=self.dataset.getDF()[self.dataset.proteinIDProp])
+        splitter = PCMSplit(splitter())
 
         train_index, test_index = next(self.dataset.split(splitter))
         test_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[test_index]
@@ -44,20 +41,14 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
     def testPCMSplitRandomShuffle(self):
         seed = self.dataset.randomState
         self.dataset.save()
-        splitter = PCMSplit(
-            GBMTRandomSplit(smiles_prop=self.dataset.getDF()[self.dataset.smilesProp]),
-            target_prop=self.dataset.getDF()[self.dataset.proteinIDProp]
-        )
+        splitter = PCMSplit(GBMTRandomSplit())
         train_index, test_index = next(self.dataset.split(splitter))
         train_order = train_index.tolist()
         test_order = test_index.tolist()
         print(test_order)
         # reload and check if orders are the same if we redo the split
         dataset = PCMDataSet.fromFile(self.dataset.metaFile)
-        splitter = PCMSplit(
-            GBMTRandomSplit(smiles_prop=self.dataset.getDF()[self.dataset.smilesProp]),
-            target_prop=self.dataset.getDF()[self.dataset.proteinIDProp]
-        )
+        splitter = PCMSplit(GBMTRandomSplit())
         train_index, test_index = next(self.dataset.split(splitter))
         print(test_index.tolist())
         self.assertEqual(dataset.randomState, seed)
@@ -66,10 +57,7 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
 
     def testLeaveTargetOut(self):
         target = self.dataset.getProteinKeys()[0:2]
-        splitter = LeaveTargetsOut(
-            targets=target,
-            target_prop=self.dataset.getDF()[self.dataset.proteinIDProp]
-        )
+        splitter = LeaveTargetsOut(targets=target)
         train_index, test_index = next(self.dataset.split(splitter))
         test_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[test_index]
         train_targets = self.dataset.getProperty(self.dataset.proteinIDProp).loc[train_index]
@@ -83,9 +71,7 @@ class TestPCMSplitters(DataSetsMixInExtras, TestCase):
         year_col = "Year"
         year = 2015
         splitter = TemporalPerTarget(
-            smiles_prop=self.dataset.getDF()[self.dataset.smilesProp],
-            target_prop=self.dataset.getDF()[self.dataset.proteinIDProp],
-            time_prop=self.dataset.getDF()[year_col],
+            time_prop=year_col,
             split_time={key: year
                          for key in self.dataset.getProteinKeys()},
         )

@@ -21,12 +21,14 @@ from ...data.chem.clustering import (
 )
 from ...data.chem.scaffolds import BemisMurckoRDKit, Scaffold
 from ...data.tables.interfaces.qspr_data_set import QSPRDataSet
+from ...data.tables.interfaces.data_set_dependent import DataSetDependent
 from ...logs import logger
 from ...utils.interfaces.randomized import Randomized
+from ...utils.serialization import JSONSerializable
 
 
-class DataSplit(ABC):
-    """Defines a function split a dataframe into train and test set."""
+class DataSplit(JSONSerializable):
+    """Defines a function to split a dataframe into train and test set."""
 
     @abstractmethod
     def split(
@@ -92,7 +94,7 @@ class RandomSplit(DataSplit, Randomized):
         ).split(X, y)
 
 
-class BootstrapSplit(DataSplit, Randomized):
+class BootstrapSplit(DataSplit, Randomized, DataSetDependent):
     """Splits dataset in random train and test subsets (bootstraps). Unlike
     cross-validation, bootstrapping allows for repeated samples in the test set.
 
@@ -102,14 +104,17 @@ class BootstrapSplit(DataSplit, Randomized):
         seed (int):
             Random state to use for shuffling and other random operations.
     """
-    def __init__(self, split: DataSplit, n_bootstraps=5, seed=None):
+    def __init__(self, split: DataSplit, n_bootstraps=5, seed=None, dataset=None):
         """Initialize a BootstrapSplit object.
 
         Args:
             split (DataSplit): the splitter to use for the bootstraps
             n_bootstraps (int): number of bootstraps to perform
             seed (int): random seed to use for random operations
+            dataset (QSPRDataSet): dataset for the underlying splitter if it is
+                `DataSetDependent`
         """
+        super().__init__(dataset)
         self._split = split
         self._original_split_seed = (
             split.randomState if hasattr(split, "randomState") else None
@@ -149,40 +154,48 @@ class BootstrapSplit(DataSplit, Randomized):
         if hasattr(self._split, "randomState"):
             self._split.randomState = self._original_split_seed
         self._current = 0
+        
+    def setDataSet(self, dataset):
+        """Set the dataset for the underlying splitter."""
+        super().setDataSet(dataset)
+        if hasattr(self._split, "setDataSet"):
+            self._split.setDataSet(dataset)
 
 
-class ManualSplit(DataSplit):
+class ManualSplit(DataSplit, DataSetDependent):
     """Splits dataset in train and test subsets based on a column in the dataframe.
 
-    Attributes:
-        splitCol (pd.Series): pandas series with split information
+    Attributes: 
+        splitProp (pd.Series): pandas series with split information
         trainVal (str): value in splitcol that will be used for training
         testVal (str): value in splitcol that will be used for testing
 
     Raises:
         ValueError: if there are more values in splitcol than trainval and testval
     """
-    def __init__(self, splitcol: pd.Series, trainval: str, testval: str) -> None:
+    def __init__(
+            self,
+            splitprop: str,
+            trainval: str,
+            testval: str,
+            data_set: QSPRDataSet | None = None
+        ) -> None:
         """Initialize the ManualSplit object with the splitcol, trainval and testval
         attributes.
 
         Args:
-            splitCol (pd.Series): pandas series with split information
+            splitProp (str): name of the column in the dataset that contains the split
             trainVal (str): value in splitcol that will be used for training
             testVal (str): value in splitcol that will be used for testing
+            dataset (QSPRDataSet): dataset that this splitter will be acting on
 
         Raises:
             ValueError: if there are more values in splitcol than trainval and testval
         """
-        super().__init__()
-        self.splitCol = splitcol.reset_index(drop=True)
+        super().__init__(data_set)
+        self.splitProp = splitprop
         self.trainVal = trainval
         self.testVal = testval
-        # check if only trainval and testval are present in splitcol
-        if not set(splitcol.unique()).issubset({trainval, testval}):
-            raise ValueError(
-                "There are more values in splitcol than trainval and testval"
-            )
 
     def split(self, X, y):
         """
@@ -198,12 +211,36 @@ class ManualSplit(DataSplit):
             (train_indices, test_indices) where the indices are the row indices of the
             input data matrix
         """
-        train = self.splitCol[self.splitCol == self.trainVal].index.values
-        test = self.splitCol[self.splitCol == self.testVal].index.values
+        assert self.hasDataSet, (
+            "No dataset attached to this splitter, set dataset with setDataSet()"
+        )
+    
+        df = self.dataSet.getDF()
+        assert self.splitProp in df.columns, f"Column {self.splitProp} not found in dataset"
+        
+        splitcol = df[self.splitProp]
+        
+        # check if only trainval and testval are present in splitcol
+        if not set(splitcol.unique()).issubset({self.trainVal, self.testVal}):
+            raise ValueError(
+                "There are more values in splitcol than trainval and testval"
+            )
+            
+        # Check if all samples are assigned to either train or test
+        assert all(
+            y.isin(splitcol.index)
+        ), "Not all samples are assigned to either train or test"
+        
+        # get indices of train and test samples
+        all_train = splitcol[splitcol == self.trainVal].index
+        train = np.where(y.index.isin(all_train))[0]
+        all_test = splitcol[splitcol == self.testVal].index
+        test = np.where(y.index.isin(all_test))[0]
+        
         return iter([(train, test)])
 
 
-class TemporalSplit(DataSplit):
+class TemporalSplit(DataSplit, DataSetDependent):
     """Splits dataset train and test subsets based on a threshold in time.
 
     Attributes:
@@ -213,22 +250,24 @@ class TemporalSplit(DataSplit):
     def __init__(
         self,
         timesplit: float | list[float],
-        timeprop: pd.Series,
+        timeprop: str,
+        data_set: QSPRDataSet | None = None,
     ):
         """Initialize a TemporalSplit object.
 
         Args:
-            dataset (QSPRDataSet):
-                dataset that this splitter will be acting on
             timesplit (float | list[float]):
                 time point after which sample is moved to test set. If a list is
                 provided, the splitter will split the dataset into multiple subsets
                 based on the timepoints in the list.
-            timeprop (pd.Series):
-                pandas series with timepoints for each sample
+            timeprop (str):
+                name of the column within the dataset with timepoints
+            dataset (QSPRDataSet):
+                dataset that this splitter will be acting on
         """
+        super().__init__(data_set)
         self.timeSplit = timesplit
-        self.timeCol = timeprop
+        self.timeProp = timeprop
 
     def split(self, X, y):
         """Split single-task dataset based on a time threshold.
@@ -242,11 +281,17 @@ class TemporalSplit(DataSplit):
             (train_indices, test_indices) where the indices are the row indices of the
             input data matrix
         """
+        assert self.hasDataSet, (
+            "No dataset attached to this splitter, set dataset with setDataSet()"
+        )
+        
         timesplits = (
             self.timeSplit if isinstance(self.timeSplit, list) else [
                 self.timeSplit,
             ]
         )
+        timeCol = self.dataSet.getDF()[self.timeProp]
+        timeCol = timeCol[y.index].copy().reset_index(drop=True)
         for timesplit in timesplits:
             # Get dataset, dataframe and tasks
             task_names = y.columns if isinstance(y, pd.DataFrame) else [y.name]
@@ -261,7 +306,6 @@ class TemporalSplit(DataSplit):
             # make indices numeric
             X_copy = X.copy().reset_index(drop=True)
             y_copy = y.copy().reset_index(drop=True)
-            timeCol = self.timeCol[y.index].copy().reset_index(drop=True)
 
             indices = X_copy.index.values
             mask = timeCol > timesplit
@@ -278,7 +322,7 @@ class TemporalSplit(DataSplit):
             yield train, test
 
 
-class GBMTDataSplit(DataSplit):
+class GBMTDataSplit(DataSplit, DataSetDependent):
     """Splits dataset into balanced train and test subsets
     based on an initial clustering algorithm. If `nFolds` is specified,
     the determined clusters will be split into `nFolds` groups of approximately
@@ -288,9 +332,6 @@ class GBMTDataSplit(DataSplit):
         https://github.com/CDDLeiden/gbmt-splits
 
     Attributes:
-        smilesProp (pd.Series):
-            Series with SMILES strings, used to get the clusters, index must match
-            the index of the input data matrix
         clustering (MoleculeClusters):
             clustering algorithm to use
         testFraction (float):
@@ -306,15 +347,15 @@ class GBMTDataSplit(DataSplit):
     """
     def __init__(
         self,
-        smiles_prop: pd.Series,
         clustering: MoleculeClusters = FPSimilarityMaxMinClusters(),
         test_fraction: float = 0.1,
         n_folds: int = 1,
         custom_test_list: list[str] | None = None,
+        data_set: QSPRDataSet | None = None,
         **split_kwargs,
     ):
         """Initialize a GBMTDataSplit object."""
-        self.smilesProp = smiles_prop
+        super().__init__(data_set)
         self.testFraction = test_fraction
         self.customTestList = custom_test_list
         self.clustering = clustering
@@ -339,6 +380,9 @@ class GBMTDataSplit(DataSplit):
             (train_indices, test_indices) where the indices are the row indices of the
             input data matrix
         """
+        assert self.hasDataSet, (
+            "No dataset attached to this splitter, set dataset with setDataSet()"
+        )
         # if we are on Windows, raise an error
         if platform.system() == "Windows":
             logger.warning(
@@ -347,7 +391,7 @@ class GBMTDataSplit(DataSplit):
             )
         # Get dataset, dataframe and tasks
         y_index = y.index.copy()
-        smiles = self.smilesProp[y_index].copy()
+        smiles = self.dataSet.getDF()[self.dataSet.smilesProp][y_index].copy()
         y.reset_index(drop=True, inplace=True) # need numeric index splits
         task_names = y.columns if isinstance(y, pd.DataFrame) else [y.name]
         assert len(task_names) > 0, "No target properties found."
@@ -356,7 +400,7 @@ class GBMTDataSplit(DataSplit):
         # Pre-assign smiles of custom_test_list to test set
         preassigned_smiles = (
             {
-                self.smilesProp[qspridx]: 1
+                smiles[qspridx]: 1
                 for qspridx in self.customTestList
             } if self.customTestList else None
         )
@@ -411,23 +455,23 @@ class GBMTRandomSplit(GBMTDataSplit, Randomized):
     """
     def __init__(
         self,
-        smiles_prop: pd.Series,
         test_fraction: float = 0.1,
         n_folds: int = 1,
         seed: int | None = None,
         n_initial_clusters: int | None = None,
         custom_test_list: list[str] | None = None,
+        data_set: QSPRDataSet | None = None,
         **split_kwargs,
     ) -> None:
         if seed is None:
             logger.info("No random state supplied")
             
         super().__init__(
-            smiles_prop,
             RandomClusters(seed, n_initial_clusters),
             test_fraction,
             n_folds,
             custom_test_list,
+            data_set,
             **split_kwargs,
         )
         self.initialClusters = n_initial_clusters
@@ -441,11 +485,11 @@ class GBMTRandomSplit(GBMTDataSplit, Randomized):
     def randomState(self, seed: int | None):
         self._seed = seed
         super().__init__(
-            self.smilesProp,
             RandomClusters(seed, self.initialClusters),
             self.testFraction,
             self.nFolds,
             self.customTestList,
+            self.dataSet,
             **self.splitKwargs,
         )
 
@@ -464,19 +508,19 @@ class ScaffoldSplit(GBMTDataSplit):
     """
     def __init__(
         self,
-        smiles_prop: pd.Series,
         scaffold: Scaffold = BemisMurckoRDKit(),
         test_fraction: float = 0.1,
         n_folds: int = 1,
         custom_test_list: list | None = None,
+        data_set: QSPRDataSet | None = None,
         **split_kwargs,
     ) -> None:
         super().__init__(
-            smiles_prop,
             ScaffoldClusters(scaffold),
             test_fraction,
             n_folds,
             custom_test_list,
+            data_set,
             **split_kwargs,
         )
 
@@ -497,12 +541,12 @@ class ClusterSplit(GBMTDataSplit, Randomized):
     """
     def __init__(
         self,
-        smiles_prop: pd.Series,
         test_fraction: float = 0.1,
         n_folds: int = 1,
         custom_test_list: list[str] | None = None,
         seed: int | None = None,
         clustering: MoleculeClusters | None = None,
+        data_set: QSPRDataSet | None = None,
         **split_kwargs,
     ) -> None:
         if seed is None:
@@ -519,11 +563,11 @@ class ClusterSplit(GBMTDataSplit, Randomized):
         self.randomState = seed
 
         super().__init__(
-            smiles_prop,
             self.clustering,
             test_fraction,
             n_folds,
             custom_test_list,
+            data_set,
             **split_kwargs,
         )
         

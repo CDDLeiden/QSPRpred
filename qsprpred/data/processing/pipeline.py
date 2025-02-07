@@ -330,6 +330,7 @@ class DatasetPipeline(Pipeline):
         """
         self.randomState = dataset.randomState if seed is None else seed
         
+        dataset.getDescriptors
         if self.feature_calculators is not None:
             for feature_calculator in self.feature_calculators:
                 if hasattr(feature_calculator, 'randomState') and feature_calculator.randomState is None:
@@ -354,6 +355,8 @@ class DatasetPipeline(Pipeline):
         else:
             if isinstance(split, str):
                 split = dataset.getSplit(split)
+            if hasattr(split, 'dataSet'):
+                split.setDataSet(dataset)
             if hasattr(split, 'randomState') and split.randomState is None:
                     split.randomState = self.randomState
             for train_index, test_index in dataset.split(split, X, y):  # FIXME: added to reproduce original behavior

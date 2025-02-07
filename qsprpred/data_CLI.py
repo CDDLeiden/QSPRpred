@@ -377,14 +377,13 @@ def QSPR_dataprep(args):
             # data splitter
             if args.split == "scaffold":
                 split = ScaffoldSplit(
-                    smiles_prop=mydataset.getDF()[mydataset.smilesProp],
                     test_fraction=args.split_fraction,
                     scaffold=BemisMurckoRDKit(),
                 )
             elif args.split == "time":
                 split = TemporalSplit(
                     timesplit=args.split_time,
-                    timeprop=mydataset.getDF()[args.split_timecolumn],
+                    timeprop=args.split_timecolumn,
                 )
             elif args.split == "manual":
                 if "datasplit" not in df.columns:
@@ -394,7 +393,7 @@ def QSPR_dataprep(args):
                         "split."
                     )
                 split = ManualSplit(
-                    splitcol=df["datasplit"], trainval="train", testval="test"
+                    splitprop="datasplit", trainval="train", testval="test"
                 )
             elif args.split == "cluster":
                 if args.split_cluster_method == "MaxMin":
@@ -402,7 +401,6 @@ def QSPR_dataprep(args):
                 elif args.split_cluster_method == "LeaderPicker":
                     clustering = FPSimilarityLeaderPickerClusters()
                 split = ClusterSplit(
-                    smiles_prop=mydataset.getDF()[mydataset.smilesProp],
                     test_fraction=args.split_fraction,
                     clustering=clustering,
                     seed=args.random_state,
