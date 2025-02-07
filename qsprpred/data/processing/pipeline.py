@@ -114,6 +114,10 @@ class Pipeline(Randomized, JSONSerializable):
             Either 'train', 'test' or 'both', if not specified the step is applied to 
             both.
         seed (int | None): Seed to randomize the pipeline
+        featureNames (list[str] | None): List of feature names in the dataset
+        randomState (int | None): Random state for the pipeline
+        skip (list[str]): List of step names to skip
+        fitted (bool): Whether the pipeline is fitted
     """
     def __init__(
         self,
@@ -131,7 +135,6 @@ class Pipeline(Randomized, JSONSerializable):
             if not isinstance(step, Step):
                 if hasattr(step, 'fit_transform'):
                     steps[name] = SklearnStep(step)
-        self.originalfeatureNames = None
         self.featureNames = None
         self.randomState = seed
         self._skip = []
@@ -292,6 +295,7 @@ class DatasetPipeline(Pipeline):
         seed: int | None = None,
     ):
         super().__init__(steps, fixed, fit_on, apply_to, seed)
+        self.originalfeatureNames = None
         self.feature_calculators = feature_calculators
         
     def apply(
@@ -332,12 +336,14 @@ class DatasetPipeline(Pipeline):
                     feature_calculator.randomState = self.randomState
             dataset.addDescriptors(self.feature_calculators)
         X = dataset.getDescriptors()
-        if self.originalfeatureNames is not None:
+        if self.fitted and not fit:
             assert all(
                 feature in X.columns for feature in self.originalfeatureNames
             ), "Some features are missing in the dataset, please check if any "
             "descriptors that were added to the dataset directly "
             "before fitting the pipeline are missing in the dataset."
+        else:
+            self.originalfeatureNames = X.columns
         y = dataset.getTargets()
         if order is not None:  # FIXME: added to reproduce original behavior
             X = X.loc[order]  # FIXME: added to reproduce original behavior
