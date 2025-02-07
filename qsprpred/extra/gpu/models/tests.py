@@ -428,6 +428,15 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
 
     def testConsistency(self):
         """Test if QSPRpred Chemprop and Chemprop models are consistent."""
+        
+        # Add safe globals to torch (v2.6.0) serialization to avoid errors when loading chemprop model
+        from argparse import Namespace
+        from numpy.core.multiarray import _reconstruct
+        from numpy import ndarray, dtype
+        from numpy.dtypes import Float64DType
+        
+        torch.serialization.add_safe_globals([Namespace, _reconstruct, ndarray, dtype, Float64DType])
+        
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name="consistency_data",
