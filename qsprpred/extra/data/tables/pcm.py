@@ -150,7 +150,7 @@ class PCMDataSet(QSPRTable):
         subset: list[str],
         ids: list[str] | None = None,
         name: str | None = None,
-        path: str | None = None,
+        path: str | None = ".",
         **kwargs,
     ) -> "QSPRTable":
         ds = super().getSubset(subset, ids, name, path, **kwargs)

@@ -185,7 +185,7 @@ class Assessor(ModelAssessor):
         self,
         model: QSPRModel,
         ds: QSPRDataSet,
-        pipeline: DatasetPipeline,
+        pipeline: DatasetPipeline | None = None,
         parameters: dict | None = None,
         monitor: AssessorMonitor | None = None,
         save: bool = True,
@@ -198,6 +198,7 @@ class Assessor(ModelAssessor):
             model (QSPRModel): model to assess
             ds (QSPRDataSet): dataset to assess on
             scoring (str | Callable): scoring function to use
+            pipeline (DatasetPipeline): optional pipeline to apply to the dataset
             parameters (dict): optional model parameters to use in assessment
             monitor (AssessorMonitor): optional, overrides monitor set in constructor
             order (pd.Index): optional, order of the indices in the dataset
@@ -210,6 +211,7 @@ class Assessor(ModelAssessor):
         """
         monitor = monitor or self.monitor
         evalparams = model.parameters if parameters is None else parameters
+        pipeline = pipeline if pipeline is not None else DatasetPipeline()
         monitor.onAssessmentStart(model, ds, self.__class__.__name__)
         # Assess model on each fold in the split
         self.scores = []

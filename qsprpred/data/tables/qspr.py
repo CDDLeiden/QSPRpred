@@ -468,6 +468,9 @@ class QSPRTable(MoleculeTable):
         Returns:
             QSPRTable: subset of the data set
         """
+        # add target properties if not already in the subset
+        # as the QSPRTable requires them
+        subset = list(set(subset + self.targetPropertyNames))
         mt = super().getSubset(subset, ids, name, path, **kwargs)
         ds = self.fromMolTable(
             mt, self.targetProperties, name=mt.name, path=path, **kwargs
