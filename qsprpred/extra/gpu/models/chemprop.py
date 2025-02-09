@@ -24,6 +24,14 @@ from ....models.model import QSPRModel
 from ....models.monitors import BaseMonitor, FitMonitor
 from .base_torch import DEFAULT_TORCH_GPUS, QSPRModelPyTorchGPU
 
+# Add safe globals to torch (v2.6.0) serialization to avoid errors when loading chemprop model
+from argparse import Namespace
+from numpy.core.multiarray import _reconstruct
+from numpy import ndarray, dtype
+from numpy.dtypes import Float64DType
+
+torch.serialization.add_safe_globals([Namespace, _reconstruct, ndarray, dtype, Float64DType])
+
 
 class ChempropMoleculeModel(chemprop.models.MoleculeModel):
     """Wrapper for chemprop.models.MoleculeModel.
@@ -168,7 +176,7 @@ class ChempropModel(QSPRModelPyTorchGPU):
         self.quietLogger = quiet_logger
         super().__init__(base_dir, alg, name, parameters, autoload, random_state)
         self.chempropLogger = chemprop.utils.create_logger(
-            name="chemprop_logger", save_dir=self.outDir, quiet=quiet_logger
+            name="chemprops_logger", save_dir=self.outDir, quiet=quiet_logger
         )
         self.gpus = None
         self.setGPUs(DEFAULT_TORCH_GPUS)
@@ -522,10 +530,6 @@ class ChempropModel(QSPRModelPyTorchGPU):
         Returns:
             object: initialized estimator instance
         """
-        if not hasattr(self, "chempropLogger"):
-            self.chempropLogger = chemprop.utils.create_logger(
-                name="chemprop_logger", save_dir=self.outDir, quiet=self.quietLogger
-            )
         if not self.targetProperties:
             return "Unititialized estimator, no target properties found yet."
         # set torch random seed if applicable
