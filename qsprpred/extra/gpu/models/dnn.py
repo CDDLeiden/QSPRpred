@@ -128,17 +128,6 @@ class DNNModel(QSPRModelPyTorchGPU):
         )
         self.setGPUs(gpus)
 
-    def initRandomState(self, random_state):
-        """Set random state if applicable.
-        Defaults to random state of dataset if no random state is provided by the constructor.
-
-        Args:
-            random_state (int): Random state to use for shuffling and other random operations.
-        """
-        super().initRandomState(random_state)
-        if random_state is not None:
-            torch.manual_seed(random_state)
-
     @property
     def supportsEarlyStopping(self) -> bool:
         """Whether the model supports early stopping or not."""
@@ -176,6 +165,7 @@ class DNNModel(QSPRModelPyTorchGPU):
             is_reg=self.task == ModelTasks.REGRESSION,
             patience=self.patience,
             tol=self.tol,
+            random_state=self.randomState,
         )
         # set parameters if available and return
         new_parameters = self.getParameters(params)

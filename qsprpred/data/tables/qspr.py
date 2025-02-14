@@ -251,6 +251,14 @@ class QSPRTable(MoleculeTable):
             (list[TargetProperty]): list of target properties
         """
         return [tp for tp in self.targetProperties if tp.name in names]
+    
+    def getTargetPropertiesNames(self) -> list[str]:
+        """Get the names of the target properties.
+
+        Returns:
+            (list[str]): list of target property names
+        """
+        return [tp.name for tp in self.targetProperties]
 
     def setTargetProperties(
         self,
