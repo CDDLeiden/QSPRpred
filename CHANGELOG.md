@@ -4,7 +4,11 @@ From v3.2.1 to v4.0.0
 
 ## Fixes
 
-- None.
+- The random state was not set correctly in the `DNNModel` class. `torch.manual_seed`
+  was only called when initializing the model, but not when calling `loadEstimator`.
+  This could lead to different results when running the same assessment multiple times 
+  in the same session. Thus, results generated with older versions were reproducible 
+  across sessions, but not within the same session.
 
 ## Changes
 
