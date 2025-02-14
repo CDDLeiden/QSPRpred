@@ -235,7 +235,7 @@ class OptunaOptimization(HyperparameterOptimization):
             dict: best parameters found during optimization
         """
         import optuna
-
+        pipeline = pipeline if pipeline is not None else DatasetPipeline()
         self.monitor.onOptimizationStart(
             model, ds, self.config, self.__class__.__name__
         )
@@ -381,6 +381,7 @@ class GridSearchOptimization(HyperparameterOptimization):
         Returns:
             dict: best parameters found during optimization
         """
+        pipeline = pipeline if pipeline is not None else DatasetPipeline()
         self.monitor.onOptimizationStart(
             model, ds, self.config, self.__class__.__name__
         )

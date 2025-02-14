@@ -212,7 +212,9 @@ class Assessor(ModelAssessor):
         monitor = monitor or self.monitor
         evalparams = model.parameters if parameters is None else parameters
         pipeline = pipeline if pipeline is not None else DatasetPipeline()
-        monitor.onAssessmentStart(model, ds, self.__class__.__name__)
+        monitor.onAssessmentStart(
+            model, ds, pipeline, self.name, evalparams, self.split, 
+        )
         # Assess model on each fold in the split
         self.scores = []
         self.predictions = []
@@ -271,7 +273,7 @@ class Assessor(ModelAssessor):
             preds_df = self.predictionsToDataFrame(
                 model, y_train, y_test, train_preds, test_preds, fold=i
             )
-            monitor.onFoldEnd(model_fit, preds_df)
+            monitor.onFoldEnd(model_fit, preds_df, self.scores[i])
             self.predictions.append(preds_df)
         monitor.onAssessmentEnd(pd.concat(self.predictions))
         if save:

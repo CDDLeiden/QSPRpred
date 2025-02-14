@@ -479,11 +479,11 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
             self.assertTrue(os.path.exists(f"{path}/batch_log.tsv"))
 
         def check_assessment_files(path, monitor):
-            output_path = f"{path}/{monitor.assessmentType}"
+            output_path = f"{path}/{monitor.assessmentName}"
             self.assertTrue(os.path.exists(output_path))
             self.assertTrue(
                 os.path.
-                exists(f"{output_path}/{monitor.assessmentType}_predictions.tsv")
+                exists(f"{output_path}/{monitor.assessmentName}_predictions.tsv")
             )
 
             if monitor.saveFits and neural_net:

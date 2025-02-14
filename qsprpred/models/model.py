@@ -440,7 +440,7 @@ class QSPRModel(JSONSerializable, ABC):
         else:
             return X
 
-    def getParameters(self, new_parameters) -> dict | None:
+    def getParameters(self, new_parameters: dict | None = None) -> dict | None:
         """Get the model parameters combined with the given parameters.
 
         If both the model and the given parameters contain the same key,
@@ -453,7 +453,7 @@ class QSPRModel(JSONSerializable, ABC):
             dict: dictionary of model parameters
         """
         parameters_out = copy.deepcopy(self.parameters)
-        if parameters_out is not None:
+        if parameters_out is not None and new_parameters is not None:
             parameters_out.update(new_parameters)
         else:
             parameters_out = new_parameters
