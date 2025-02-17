@@ -204,7 +204,7 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         )
         self.fitTest(model, dataset, self.getDefaultPrep())
         predictor = DNNModel(
-            name=alg_name, base_dir=model.baseDir, random_state=random_state[0]
+            name=alg_name, base_dir=model.baseDir
         )
 
         # test if the results are (not) equal if the random state is the (not) same
