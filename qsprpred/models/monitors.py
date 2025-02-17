@@ -299,7 +299,6 @@ class NullMonitor(HyperparameterOptimizationMonitor):
             y_test (np.ndarray): test targets of the current fold
         """
 
-    @abstractmethod
     def onFoldEnd(
         self,
         model_fit: Any | tuple[Any, int],
