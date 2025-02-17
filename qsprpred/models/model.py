@@ -176,7 +176,7 @@ class QSPRModel(JSONSerializable, ABC):
             if parameters:
                 logger.warning(
                     f"Explicitly specified parameters ({parameters}) "
-                    f"will override model settings read from file: {self.parameters}."
+                    f"will override model settings read from file: {self.parameters}. "
                     f"Estimator will be reloaded with the new parameters "
                     f"and will have to be re-fitted if fitted previously."
                 )
@@ -184,8 +184,10 @@ class QSPRModel(JSONSerializable, ABC):
                 self.estimator = self.loadEstimator(self.parameters)
             if random_state:
                 logger.warning(
-                    f"Explicitly specified random state ({random_state})"
+                    f"Explicitly specified random state ({random_state}) "
                     f"will override model settings read from file: {self.randomState}."
+                    f"Estimator will be reloaded with the new parameters "
+                    f"and will have to be re-fitted if fitted previously."
                 )
                 self.initRandomState(random_state)
         else:
