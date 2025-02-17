@@ -479,15 +479,22 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
             self.assertTrue(os.path.exists(f"{path}/batch_log.tsv"))
 
         def check_assessment_files(path, monitor):
-            output_path = f"{path}/{monitor.assessmentName}"
+            assessment_name = monitor.assessmentName if hasattr(monitor, "assessmentName") else monitor["assessmentName"]
+            output_path = f"{path}/{assessment_name}"
             self.assertTrue(os.path.exists(output_path))
             self.assertTrue(
                 os.path.
-                exists(f"{output_path}/{monitor.assessmentName}_predictions.tsv")
+                exists(f"{output_path}/{assessment_name}_settings.json")
+            )
+            self.assertTrue(
+                os.path.
+                exists(f"{output_path}/{assessment_name}_predictions.tsv")
             )
 
-            if monitor.saveFits and neural_net:
-                for fold in monitor.foldData:
+            save_fits = monitor.saveFits if hasattr(monitor, "saveFits") else monitor["saveFits"]
+            if save_fits and neural_net:
+                fold_data = monitor.foldData if hasattr(monitor, "foldData") else monitor["foldData"]
+                for fold in fold_data:
                     check_fit_files(f"{output_path}/fold_{fold}")
 
         def check_hyperparam_files(path, monitor):
@@ -498,9 +505,10 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
             )
 
             if monitor.saveAssessments:
-                for assessment in monitor.assessments:
+                for idx, assessment in monitor.assessments.items():
+                    assessment["saveFits"] = monitor.saveFits
                     check_assessment_files(
-                        f"{output_path}/iteration_{assessment}", monitor
+                        f"{output_path}/iteration_{idx}", assessment
                     )
 
         if monitor_type == "hyperparam":
