@@ -673,10 +673,11 @@ class MetricsPlot(ClassifierPlot):
             if metric not in self.summary.columns:
                 print(f"Metric {metric} not in summary dataframe, skipping")
                 continue
+            summary = self.summary[self.summary["Set"] == "Test"]
 
             # plot the results
             g = sns.catplot(
-                self.summary,
+                summary,
                 x="Class",
                 y=metric,
                 hue="Assessment",
