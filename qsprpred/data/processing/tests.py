@@ -51,15 +51,18 @@ class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
         
         # Test with keep=False
         remove_cation = CategoryFilter(
-            prop=self.dataset.getDF()["moka_ionState7.4"], values=["cationic"]
+            prop="moka_ionState7.4",
+            values=["cationic"],
+            data_set=self.dataset,
         )
         filtered_df, _ = remove_cation.transform(self.dataset.getDF())
         self.assertTrue((filtered_df["moka_ionState7.4"] == "cationic").sum() == 0)
 
         # Test with keep=True
         only_cation = CategoryFilter(
-            prop=self.dataset.getDF()["moka_ionState7.4"],
+            prop="moka_ionState7.4",
             values=["cationic"],
+            data_set=self.dataset,
             keep=True
         )
         filtered_df, _ = only_cation.transform(self.dataset.getDF())
