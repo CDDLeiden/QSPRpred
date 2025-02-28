@@ -728,11 +728,15 @@ class ConfusionMatrixPlot(ClassifierPlot):
             for property in df.Property.unique():
                 for assessment in df.Assessment.unique():
                     for fold in df.Fold.unique():
-                        df_subset = df[(df.Model == model) & (df.Property == property) &
-                                    (df.Fold == fold) & (df.Set == "Test")]
-                        conf_dict[(model, property, assessment, fold)] = confusion_matrix(
-                            df_subset.Label, df_subset.Prediction
-                        )
+                        df_subset = df[
+                            (df.Model == model) & (df.Property == property) & 
+                            (df.Assessment == assessment) & (df.Fold == fold) &
+                            (df.Set == "Test")
+                        ]
+                        if not df_subset.empty:
+                            conf_dict[(model, property, assessment, fold)] = confusion_matrix(
+                                df_subset.Label, df_subset.Prediction
+                            )
         return conf_dict
 
     def make(
@@ -770,6 +774,8 @@ class ConfusionMatrixPlot(ClassifierPlot):
             for property in df.Property.unique():
                 for assessment in df.Assessment.unique():
                     for fold in df.Fold.unique():
+                        if (model, property, assessment, fold) not in conf_dict:
+                            continue
                         fig, ax = plt.subplots()
                         sns.heatmap(
                             conf_dict[(model, property, assessment, fold)],
