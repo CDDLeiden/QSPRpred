@@ -608,7 +608,6 @@ class QSPRTable(MoleculeTable):
             split (DataSplit): Split to apply to the data
             X (pd.DataFrame): data to apply the split to
             y (pd.DataFrame | None): target data to apply the split to
-            fit_pipeline (bool): whether to fit the pipeline
         
         Yields:
             tuple[pd.Index, pd.Index]: indices of the train and test set
@@ -663,4 +662,5 @@ class QSPRTable(MoleculeTable):
     def __setstate__(self, state):
         super().__setstate__(state)
         for name, split in self.splits.items():
-            split["split"].setDataSet(self)
+            if hasattr(split["split"], "setdataSet"):
+                split["split"].setDataSet(self)
