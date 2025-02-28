@@ -183,6 +183,9 @@ class Pipeline(Randomized, JSONSerializable):
             X_test (pd.DataFrame | None): transformed test data
             y_test (pd.DataFrame | None): transformed test targets
         """
+        if not self.fitted and not fit:
+            raise ValueError("Pipeline must be fitted before transforming data")
+        
         for name, step in self.steps.items():
             if name in self.skip:
                 continue
@@ -330,6 +333,7 @@ class DatasetPipeline(Pipeline):
         """
         self.randomState = dataset.randomState if seed is None else seed
         
+        # prepare X and y from the dataset
         dataset.getDescriptors
         if self.feature_calculators is not None:
             for feature_calculator in self.feature_calculators:
@@ -349,6 +353,13 @@ class DatasetPipeline(Pipeline):
         if order is not None:  # FIXME: added to reproduce original behavior
             X = X.loc[order]  # FIXME: added to reproduce original behavior
             y = y.loc[order]  # FIXME: added to reproduce original behavior
+            
+        # set the dataset for each step
+        for step in self.steps.values():
+            if hasattr(step, 'setDataSet'):
+                step.setDataSet(dataset)
+        
+        # split the dataset and apply the pipeline
         if split is None:
             X, y, _, _ = super().apply(X, y, fit = fit)
             yield X, y
