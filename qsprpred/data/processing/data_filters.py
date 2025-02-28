@@ -15,6 +15,8 @@ from .pipeline import Step
 from typing import Optional
 from .applicability_domain import ApplicabilityDomain, MLChemAD
 from mlchemad.base import ApplicabilityDomain as MLChemADApplicabilityDomain
+from ..tables.interfaces.data_set_dependent import DataSetDependent
+from ..tables.interfaces.qspr_data_set import QSPRDataSet
 
 
 class DataFilter(Step):
@@ -39,26 +41,35 @@ class DataFilter(Step):
                 requires it
         """
 
-class CategoryFilter(Step):
+class CategoryFilter(Step, DataSetDependent):
     """To filter out values from column
 
     Attributes:
-        prop (pd.Series): column based on which to filter.
+        prop (str): column based on which to filter.
         values (list[str]): filter values.
         keep (bool): whether to keep or discard values.
     """
-    def __init__(self, prop: pd.Series, values: list[str], keep: bool = False) -> None:
+    def __init__(
+        self,
+        prop: str,
+        values: list[str],
+        data_set: QSPRDataSet | None = None,
+        keep: bool = False
+    ) -> None:
         """Initialize the CategoryFilter with the name, values and keep attributes.
 
         Args:
-            prop (pd.Series): column based on which to filter.
+            prop (str): column based on which to filter.
             values (list): list of values to filter from props.
+            data_set (QSPRDataSet): dataset to filter.
             keep (bool, optional): whether to keep or discard the values. Defaults to
                 False.
         """
+        super().__init__(data_set)
         self.prop = prop
         self.values = values
         self.keep = keep
+        
 
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
         """Fit the filter to the data.
@@ -79,11 +90,15 @@ class CategoryFilter(Step):
         Returns:
             pd.DataFrame: filtered dataframe.
         """
+        assert self.hasDataSet, (
+            "No dataset attached to this filter, set dataset with setDataSet()"
+        )
+        prop_col = self.dataSet.getDF()[self.prop].copy()
         old_len = X.shape[0]
         if self.keep:
-            idx_to_keep = self.prop.isin(self.values)
+            idx_to_keep = prop_col.isin(self.values)
         else:
-            idx_to_keep = ~self.prop.isin(self.values)
+            idx_to_keep = ~prop_col.isin(self.values)
         X = X.loc[idx_to_keep]
         if y is not None:
             y = y.loc[idx_to_keep]
@@ -221,14 +236,17 @@ class RepeatsFilter(DataFilter):
 class NaNFilter(DataFilter):
     """Step that removes rows containing NaN values in a specified column"""
     
-    def __init__(self, features: list[str] | None = None):
+    def __init__(self, features: list[str] | None = None, keep: bool = False):
         """Initialize the step with the columns to check for NaN values
         
         If no columns are specified, all columns are checked for NaN values.
         
         Args:
             features (list[str] | None): columns to check for NaN values
+            keep (bool): whether to keep or discard rows with NaN values,
+                if True only warn about NaN values, if False remove rows with NaN values
         """
+        self.keep = keep
         self.selected_features = features
         
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
@@ -240,10 +258,22 @@ class NaNFilter(DataFilter):
             self.selected_features = X.columns
         # only take selected features that are in the current data
         selected_features = list(set(self.selected_features) & set(X.columns))
-        logger.info(f"Removing rows {X.index[X[selected_features].isnull().any(axis=1)].tolist()} with NaN values in features.")
-        X = X.dropna(subset=selected_features)
-        if y is not None:
-            y = y.loc[X.index]
+        
+        if self.keep:
+            nan_mask = X[selected_features].isnull()
+            nan_rows, nan_features = nan_mask.index[nan_mask.any(axis=1)], nan_mask.columns
+            nan_features_per_row = nan_mask.loc[nan_rows].apply(lambda row: nan_features[row].tolist(), axis=1)
+            for row, features in zip(nan_rows, nan_features_per_row):
+                logger.warning(f"Entry {row} contains NaN values in features {features}.")
+        else:
+            logger.info(
+                f"Removing rows "
+                f"{X.index[X[selected_features].isnull().any(axis=1)].tolist()} with "
+                f"NaN values in features."
+            )
+            X = X.dropna(subset=selected_features)
+            if y is not None:
+                y = y.loc[X.index]
         return X, y
 
 class OutlierFilter(DataFilter):
