@@ -18,14 +18,10 @@ class QSPRTable(MoleculeTable):
     """Implementation of `QSPRDataSet` using a collection of `PandasDataTable` objects.
 
     It splits the data in train and test set, as well as creating cross-validation
-    folds. Optionally low quality data is filtered out. For classification the dataset
-    samples are labelled as active/inactive.
+    folds. For classification the dataset samples are labelled as active/inactive.
 
     Attributes:
         targetProperties (str): property to be predicted with QSPRmodel
-        featureNames (list of str): feature names
-        pipeline (Pipeline): data processing pipeline
-        applicabilityDomain (ApplicabilityDomain): applicability domain
     """
 
     # _notJSON: ClassVar = [*MoleculeDataSet._notJSON]
