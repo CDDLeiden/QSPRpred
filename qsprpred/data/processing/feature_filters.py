@@ -47,7 +47,8 @@ class FeatureFilter(Step):
 
 
 class LowVarianceFilter(FeatureFilter):
-    """Remove features with variance lower than a given threshold after MinMax scaling.
+    """Remove features with variance equal to or lower than a given threshold after 
+    MinMax scaling.
 
     Attributes:
         th (float): threshold for removing features
@@ -57,7 +58,8 @@ class LowVarianceFilter(FeatureFilter):
         self.th = th
         
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
-        """Find features with variance lower than a given threshold after MinMax scaling.
+        """Find features with variance equal to or lower than a given threshold after 
+        MinMax scaling.
         
         Args:
             X (pd.DataFrame): training data
@@ -126,6 +128,15 @@ class HighCorrelationFilter(FeatureFilter):
             logger.info("Only one column in the dataframe. No correlation check.")
             self.high_corr_cols = None
         else:
+            zero_variance_cols = X.columns[X.var() == 0]
+            if len(zero_variance_cols) > 0:
+                logger.warning(
+                    f"The following features have zero variance: "
+                    f"{zero_variance_cols.tolist()}. These features will not be dropped"
+                    f"by the high correlation filter. Consider using the low variance "
+                    f"filter first."
+                )
+            
             correlation = np.triu(np.abs(np.corrcoef(X.values.astype(float).T)), k=1)
             high_corr = np.where(np.any(correlation > self.th, axis=0))
 
