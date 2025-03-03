@@ -289,7 +289,7 @@ class Replica(JSONSerializable):
                         tp = self.targetProps[0]
                     score_df = pd.DataFrame(
                         {
-                            "Assessor": [assessor.__class__.__name__],
+                            "Assessor": [assessor.name],
                             "ScoreFunc":
                                 [
                                     (
@@ -308,7 +308,7 @@ class Replica(JSONSerializable):
                     for tp_score, tp in zip(fold_score, self.targetProps):
                         score_df = pd.DataFrame(
                             {
-                                "Assessor": [assessor.__class__.__name__],
+                                "Assessor": [assessor.name],
                                 "ScoreFunc":
                                     [
                                         (

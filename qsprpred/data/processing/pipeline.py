@@ -366,7 +366,7 @@ class DatasetPipeline(Pipeline):
         else:
             if isinstance(split, str):
                 split = dataset.getSplit(split)
-            if hasattr(split, 'dataSet'):
+            if hasattr(split, 'setDataSet'):
                 split.setDataSet(dataset)
             if hasattr(split, 'randomState') and split.randomState is None:
                     split.randomState = self.randomState
