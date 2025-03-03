@@ -183,7 +183,7 @@ class Pipeline(Randomized, JSONSerializable):
             X_test (pd.DataFrame | None): transformed test data
             y_test (pd.DataFrame | None): transformed test targets
         """
-        if not self.fitted and not fit:
+        if not self.fitted and not fit and len(self.steps) > 0:
             raise ValueError("Pipeline must be fitted before transforming data")
         
         for name, step in self.steps.items():
