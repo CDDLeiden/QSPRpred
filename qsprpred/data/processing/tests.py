@@ -113,7 +113,11 @@ class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
 
     def testConsistency(self):
         dataset = self.createLargeTestDataSet()
-        remove_cation = CategoryFilter(prop=dataset.getDF()["moka_ionState7.4"], values=["cationic"])
+        remove_cation = CategoryFilter(
+            prop="moka_ionState7.4",
+            values=["cationic"],
+            data_set=dataset
+        )
         self.assertTrue((dataset.getDF()["moka_ionState7.4"] == "cationic").sum() > 0)
         dataset.filter([remove_cation])
         self.assertEqual(len(dataset.getDF()), len(dataset.getDescriptors()))
