@@ -146,7 +146,7 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
                 score = assessor.scoreFunc.name
                 score_results = results[
                     (results["ScoreFunc"] == score) &
-                    (results["Assessor"] == assessor.__class__.__name__) &
+                    (results["Assessor"] == assessor.name) &
                     (results["TargetProperty"].isin([tp.name for tp in tps]))]
                 self.assertTrue(len(score_results) > 0)
 
