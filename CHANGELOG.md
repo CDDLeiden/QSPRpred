@@ -9,6 +9,10 @@ From v3.2.1 to v4.0.0
   This could lead to different results when running the same assessment multiple times 
   in the same session. Thus, results generated with older versions were reproducible 
   across sessions, but not within the same session.
+- Fix conversion of continous target properties to classification targets in the `QSPRTable`
+  class when missing values are present. The conversion was not done correctly, where
+  NaN values were converted to a class label, which is not desired. Now, NaN values are
+  ignored during conversion.
 
 ## Changes
 

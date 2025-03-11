@@ -92,6 +92,7 @@ class QSPRTable(MoleculeTable):
         target_props: list[TargetProperty | dict],
         path: str = ".",
         smiles_col: str = "SMILES",
+        drop_empty_target_props: bool = True,
         **kwargs,
     ) -> "QSPRTable":
         """Create `QSPRTable` from a pandas DataFrame.
@@ -108,7 +109,7 @@ class QSPRTable(MoleculeTable):
             QSPRTable: created data set
         """
         mt = super().fromDF(name, df, path, smiles_col, **kwargs)
-        return QSPRTable.fromMolTable(mt, target_props, name=name, path=path)
+        return QSPRTable.fromMolTable(mt, target_props, name=name, path=path, drop_empty_target_props=drop_empty_target_props)
 
     @classmethod
     def fromTableFile(
@@ -365,9 +366,9 @@ class QSPRTable(MoleculeTable):
         # check if the column only has nan values
         df = self.getDF()
         if df[target_property.name].isna().all():
-            logger.debug(
+            logger.warning(
                 f"Target property {target_property.name}"
-                " is all nan, assuming predictor."
+                " is all nan, cannot convert to classification."
             )
             return target_property
         # if no threshold values provided, use the ones specified in the TargetProperty
@@ -397,11 +398,12 @@ class QSPRTable(MoleculeTable):
                     "For multi-class classification, "
                     "set more than 3 values as threshold."
                 )
-                assert max(df[prop_name]) <= max(th), (
+                # get max value, ignore nan
+                assert max(df[prop_name].dropna()) <= max(th), (
                     "Make sure final threshold value is not smaller "
                     "than largest value of property"
                 )
-                assert min(df[prop_name]) >= min(th), (
+                assert min(df[prop_name].dropna()) >= min(th), (
                     "Make sure first threshold value is not larger "
                     "than smallest value of property"
                 )
@@ -409,14 +411,16 @@ class QSPRTable(MoleculeTable):
                     f"{prop_name}_intervals",
                     pd.cut(df[prop_name], bins=th, include_lowest=True).astype(str),
                 )
+                encoded_intervals = LabelEncoder().fit_transform(
+                    self.getProperty(f"{prop_name}_intervals")
+                )
                 self.addProperty(
                     prop_name,
-                    LabelEncoder().fit_transform(
-                        self.getProperty(f"{prop_name}_intervals")
-                    ),
+                    np.where(df[prop_name].notna(), encoded_intervals, np.nan).astype(float),
                 )
             else:
-                self.addProperty(prop_name, df[prop_name] > th[0])
+                binary_target = df[prop_name] > th[0]
+                self.addProperty(prop_name, binary_target.where(df[prop_name].notna(), np.nan).astype(float))
             target_property.task = (
                 TargetTasks.SINGLECLASS if len(th) == 1 else TargetTasks.MULTICLASS
             )
@@ -477,7 +481,7 @@ class QSPRTable(MoleculeTable):
         subset = list(set(subset + self.targetPropertyNames))
         mt = super().getSubset(subset, ids, name, path, **kwargs)
         ds = self.fromMolTable(
-            mt, self.targetProperties, name=mt.name, path=path, **kwargs
+            mt, self.targetProperties, name=mt.name, path=path, drop_empty_target_props=False, **kwargs
         )
         return ds
 
