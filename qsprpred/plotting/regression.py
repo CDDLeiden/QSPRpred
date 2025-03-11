@@ -22,7 +22,7 @@ class RegressionPlot(ModelPlot, ABC):
         """Return a list of supported model tasks."""
         return [ModelTasks.REGRESSION, ModelTasks.MULTITASK_REGRESSION]
 
-    def prepareAssessment(self, name: str, assessment_df: pd.DataFrame) -> pd.DataFrame:
+    def prepareAssessment(self, name: str, assessment_df: pd.DataFrame, use_dataset_labels: bool = False) -> pd.DataFrame:
         """Prepare assessment dataframe for plotting
 
         Args:
@@ -33,12 +33,22 @@ class RegressionPlot(ModelPlot, ABC):
                 values for each property. The dataframe should have the following
                 columns:
                 ID, Fold , <property_name>_<suffixes>_<Label/Prediction>
+            use_dataset_labels (bool):
+                whether to use the original dataset labels instead of the
+                assessment labels (i.e. with pipeline applied)
 
         Returns:
             pd.DataFrame:
                 The dataframe containing the assessment results,
                 columns: ID, Fold, Set, Property, Label, Prediction, Set
         """
+        # Replace the assessment labels with the dataset labels
+        if use_dataset_labels:
+            assessment_df = assessment_df.drop(columns=[col for col in assessment_df.columns if col.endswith("Label")])
+            assessment_df.rename(columns={col: col.replace("Label_Dataset", "Label") for col in assessment_df.columns}, inplace=True)
+        else:
+            assessment_df = assessment_df.drop(columns=[col for col in assessment_df.columns if col.endswith("Label_Dataset")])
+        
         # Melt all property columns into one column
         id_vars = ["ID", "Fold", "Set"]
         df = assessment_df.melt(id_vars=id_vars)
@@ -50,25 +60,30 @@ class RegressionPlot(ModelPlot, ABC):
         df = df.pivot_table(
             index=[*id_vars, "Property"], columns="type", values="value"
         )
+        df.dropna(subset=["Label"], inplace=True) # Remove rows with missing values in the label column
         df.reset_index(inplace=True)
         df.columns.name = None
         df["Assessment"] = name
+        
         return df
 
-    def prepareRegressionResults(self) -> pd.DataFrame:
+    def prepareRegressionResults(self, use_dataset_labels: bool = False) -> pd.DataFrame:
         """Prepare regression results dataframe for plotting.
 
         Returns:
             pd.DataFrame:
                 the dataframe containing the regression results,
                 columns: Model, QSPRID, Fold, Property, Label, Prediction, Set
+            use_dataset_labels (bool):
+                whether to use the original dataset labels instead of the
+                assessment labels (i.e. with pipeline applied)
         """
         model_results = {}
         for model in self.models:
             # Read in and prepare the assessment set results
             results = []
             for name, path in self.assesmentPaths[model].items():
-                df = self.prepareAssessment(name, pd.read_table(path))
+                df = self.prepareAssessment(name, pd.read_table(path), use_dataset_labels)
                 results.append(df)
             df = pd.concat(results)
             print(model.name)
@@ -83,10 +98,10 @@ class RegressionPlot(ModelPlot, ABC):
         self.results = df
         return df
 
-    def getSummary(self):
+    def getSummary(self, use_dataset_labels: bool = False) -> pd.DataFrame:
         """calculate the R2 and RMSE for each model per set (cross-validation or independent test)"""
         if not hasattr(self, "results"):
-            self.prepareRegressionResults()
+            self.prepareRegressionResults(use_dataset_labels)
         df = deepcopy(self.results)
         df_summary = (
             df.groupby(["Model", "Assessment", "Fold", "Set", "Property"]).apply(
@@ -112,6 +127,7 @@ class CorrelationPlot(RegressionPlot):
         save: bool = True,
         show: bool = False,
         out_path: str | None = None,
+        use_dataset_labels: bool = False,
     ) -> tuple[sns.FacetGrid, pd.DataFrame]:
         """Plot the results of regression models. Plot predicted pX_train vs real pX_train.
 
@@ -123,6 +139,9 @@ class CorrelationPlot(RegressionPlot):
             out_path (str | None):
                 path to save the plot to, e.g. "results/plot.png", if `None`, the plot
                 will be saved to each model's output directory.
+            use_dataset_labels (bool):
+                whether to use the original dataset labels instead of the
+                assessment labels (i.e. with pipeline applied)
 
         Returns:
             g (sns.FacetGrid):
@@ -131,10 +150,10 @@ class CorrelationPlot(RegressionPlot):
                 the summary data used to make the plot
         """
         # prepare the dataframe for plotting
-        df = self.prepareRegressionResults()
+        df = self.prepareRegressionResults(use_dataset_labels)
 
         if not hasattr(self, "summary"):
-            self.getSummary()
+            self.getSummary(use_dataset_labels)
             
         # Select only test set results
         df = df[df["Set"] == "Test"]
@@ -192,6 +211,7 @@ class WilliamsPlot(RegressionPlot):
         save: bool = True,
         show: bool = False,
         out_path: str | None = None,
+        use_dataset_labels: bool = False,
     ) -> tuple[sns.FacetGrid, pd.DataFrame, List[float]]:
         """make Williams plot
 
@@ -203,6 +223,9 @@ class WilliamsPlot(RegressionPlot):
             out_path (str | None):
                 path to save the plot to, e.g. "results/plot.png", if `None`, the plot
                 will be saved to each model's output directory.
+            use_dataset_labels (bool):
+                whether to use the original dataset labels instead of the
+                assessment labels (i.e. with pipeline applied)
 
         Returns:
             g (sns.FacetGrid):
@@ -267,7 +290,7 @@ class WilliamsPlot(RegressionPlot):
             return leverages, h_star
 
         # prepare the dataframe for plotting
-        df = self.prepareRegressionResults()
+        df = self.prepareRegressionResults(use_dataset_labels)
 
         # calculate the leverages and h* for each model, assessment and fold
         model_leverages = {}

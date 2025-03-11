@@ -41,7 +41,7 @@ class ClassifierPlot(ModelPlot, ABC):
             ModelTasks.MULTITASK_MULTICLASS,
         ]
 
-    def prepareAssessment(self, name: str, assessment_df: pd.DataFrame) -> pd.DataFrame:
+    def prepareAssessment(self, name: str, assessment_df: pd.DataFrame, use_dataset_labels: bool = False) -> pd.DataFrame:
         """Prepare assessment dataframe for plotting
 
         Args:
@@ -52,12 +52,21 @@ class ClassifierPlot(ModelPlot, ABC):
                 values for each property. The dataframe should have the following
                 columns:
                 QSPRID, Fold (opt.), <property_name>_<suffixes>_<Label/Prediction/ProbabilityClass_X>
+            use_dataset_labels (bool):
+                whether to use the original dataset labels instead of the
+                assessment labels (i.e. with pipeline applied))
 
         Returns:
             pd.DataFrame:
                 The dataframe containing the assessment results,
                 columns: QSPRID, Fold, Property, Label, Prediction, Class, Set
         """
+        # Replace the assessment labels with the dataset labels
+        if use_dataset_labels:
+            assessment_df = assessment_df.drop(columns=[col for col in assessment_df.columns if col.endswith("Label")])
+            assessment_df.rename(columns={col: col.replace("Label_Dataset", "Label") for col in assessment_df.columns}, inplace=True)
+        else:
+            assessment_df = assessment_df.drop(columns=[col for col in assessment_df.columns if col.endswith("Label_Dataset")])
         # Melt all property columns into one column
         id_vars = ["ID", "Fold", "Set"]
         df = assessment_df.melt(id_vars=id_vars)
@@ -73,6 +82,7 @@ class ClassifierPlot(ModelPlot, ABC):
         df = df.pivot_table(
             index=[*id_vars, "Property"], columns="type", values="value"
         )
+        df.dropna(subset=["Label"], inplace=True) # Remove rows with missing values in the label column
         df.reset_index(inplace=True)
         df.columns.name = None
         df["Label"] = df["Label"].astype(int)
@@ -80,13 +90,16 @@ class ClassifierPlot(ModelPlot, ABC):
         df["Assessment"] = name
         return df
 
-    def prepareClassificationResults(self) -> pd.DataFrame:
+    def prepareClassificationResults(self, use_dataset_labels: bool = False) -> pd.DataFrame:
         """Prepare classification results dataframe for plotting.
 
         Returns:
             pd.DataFrame:
                 the dataframe containing the classficiation results,
                 columns: Model, QSPRID, Fold, Property, Label, Prediction, Set
+        use_dataset_labels (bool):
+                whether to use the original dataset labels instead of the
+                assessment labels (i.e. with pipeline applied))
         """
         model_results = {}
         for m, model in enumerate(self.models):
@@ -188,10 +201,10 @@ class ClassifierPlot(ModelPlot, ABC):
 
         return pd.Series(metrics)
 
-    def getSummary(self):
+    def getSummary(self, use_dataset_labels: bool = False):
         """Get summary statistics for classification results."""
         if not hasattr(self, "results"):
-            self.prepareClassificationResults()
+            self.prepareClassificationResults(use_dataset_labels)
 
         df = deepcopy(self.results)
 
@@ -245,7 +258,7 @@ class ROCPlot(ClassifierPlot):
         """Return a list of tasks supported by this plotter."""
         return [ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS]
 
-    def makeROC(self, model: QSPRModel, property_name: str) -> Tuple[str, plt.Axes]:
+    def makeROC(self, model: QSPRModel, property_name: str, use_dataset_labels: bool = False) -> Tuple[str, plt.Axes]:
         """Make the plot for a given model using cross-validation data.
 
         Many thanks to the scikit-learn documentation since the code below
@@ -259,6 +272,9 @@ class ROCPlot(ClassifierPlot):
             property_name (str):
                 name of the property to plot (should correspond to the prefix
                 of the column names in the data files).
+            use_dataset_labels (bool):
+                whether to use the original dataset labels instead of the
+                assessment labels (i.e. with pipeline applied)
 
         Returns:
            ax (matplotlib.axes.Axes): the axes object containing the plot.
@@ -274,7 +290,14 @@ class ROCPlot(ClassifierPlot):
         for fold in df.Fold.unique():
             # get labels
             y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
-            y_true = df[f"{property_name}_Label"][df.Fold == fold]
+            if use_dataset_labels:
+                y_true = df[f"{property_name}_Label_Dataset"][df.Fold == fold]
+            else:
+                y_true = df[f"{property_name}_Label"][df.Fold == fold]
+            # drop rows with missing values
+            missing = y_true.isnull()
+            y_pred = y_pred[~missing]
+            y_true = y_true[~missing]
             # do plotting
             viz = RocCurveDisplay.from_predictions(
                 y_true,
@@ -333,6 +356,7 @@ class ROCPlot(ClassifierPlot):
         show: bool = False,
         property_name: str | None = None,
         fig_size: tuple = (6, 6),
+        use_dataset_labels: bool = False,
     ) -> list[plt.Axes]:
         """Make the ROC plot for a given model assessment.
         
@@ -350,6 +374,9 @@ class ROCPlot(ClassifierPlot):
                 Whether to save the plot to a file.
             show (bool):
                 Whether to display the plot.
+            use_dataset_labels (bool):
+                whether to use the original dataset labels instead of the
+                assessment labels (i.e. with pipeline applied)
 
         Returns:
             axes (list[plt.Axes]):
@@ -362,7 +389,7 @@ class ROCPlot(ClassifierPlot):
         axes = []
         for model in self.models:
             fig, ax = plt.subplots(figsize=fig_size)
-            assessment_name, _ = self.makeROC(model, property_name)
+            assessment_name, _ = self.makeROC(model, property_name, use_dataset_labels)
             axes.append(fig)
             if save:
                 fig.savefig(f"{self.modelOuts[model]}_{assessment_name}_ROC.png")
@@ -378,7 +405,7 @@ class PRCPlot(ClassifierPlot):
         """Return a list of tasks supported by this plotter."""
         return [ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS]
 
-    def makePRC(self, model: QSPRModel, property_name: str) -> Tuple[str, plt.Axes]:
+    def makePRC(self, model: QSPRModel, property_name: str, use_dataset_labels: bool = False) -> Tuple[str, plt.Axes]:
         """Make the plot for a given model using cross-validation data.
 
         Args:
@@ -387,6 +414,9 @@ class PRCPlot(ClassifierPlot):
             property_name (str):
                 name of the property to plot
                 (should correspond to the prefix of the column names in the data files).
+            use_dataset_labels (bool):
+                whether to use the original dataset labels instead of the
+                assessment labels (i.e. with pipeline applied)
 
         Returns:
                 ax (matplotlib.axes.Axes):
@@ -402,7 +432,14 @@ class PRCPlot(ClassifierPlot):
         for fold in df.Fold.unique():
             # get labels
             y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
-            y_true = df[f"{property_name}_Label"][df.Fold == fold]
+            if use_dataset_labels:
+                y_true = df[f"{property_name}_Label_Dataset"][df.Fold == fold]
+            else:
+                y_true = df[f"{property_name}_Label"][df.Fold == fold]
+            # drop rows with missing values
+            missing = y_true.isnull()
+            y_pred = y_pred[~missing]
+            y_true = y_true[~missing]
             y_predproba.append(y_pred)
             y_real.append(y_true)
             # do plotting
@@ -443,6 +480,7 @@ class PRCPlot(ClassifierPlot):
         show: bool = False,
         property_name: str | None = None,
         fig_size: tuple = (6, 6),
+        use_dataset_labels: bool = False
     ):
         """Make the plot for a given validation type.
 
@@ -457,6 +495,9 @@ class PRCPlot(ClassifierPlot):
                 Whether to save the plot to a file.
             show (bool):
                 Whether to display the plot.
+            use_dataset_labels (bool):
+                whether to use the original dataset labels instead of the
+                assessment labels (i.e. with pipeline applied)
 
         Returns:
             axes (list): A list of matplotlib axes objects containing the plots.
@@ -466,7 +507,7 @@ class PRCPlot(ClassifierPlot):
         axes = []
         for model in self.models:
             fig, ax = plt.subplots(figsize=fig_size)
-            assessment_name, ax = self.makePRC(model, property_name)
+            assessment_name, ax = self.makePRC(model, property_name, use_dataset_labels)
             axes.append(ax)
             if save:
                 fig.savefig(f"{self.modelOuts[model]}_{assessment_name}_PRC.png")
@@ -483,7 +524,7 @@ class CalibrationPlot(ClassifierPlot):
         return [ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS]
 
     def makeCalibrationPlot(
-        self, model: QSPRModel, property_name: str, n_bins: int = 10
+        self, model: QSPRModel, property_name: str, n_bins: int = 10, use_dataset_labels: bool = False
     ) -> Tuple[str, plt.Axes]:
         """Make the plot for a given model assessment
 
@@ -495,6 +536,9 @@ class CalibrationPlot(ClassifierPlot):
                 prefix of the column names in the data files).
             n_bins (int):
                 The number of bins to use for the calibration curve.
+            use_dataset_labels (bool):
+                whether to use the original dataset labels instead of the
+                assessment labels (i.e. with pipeline applied)
 
         Returns:
             assessment_name (str):
@@ -511,7 +555,14 @@ class CalibrationPlot(ClassifierPlot):
         for fold in df.Fold.unique():
             # get labels
             y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
-            y_true = df[f"{property_name}_Label"][df.Fold == fold]
+            if use_dataset_labels:
+                y_true = df[f"{property_name}_Label_Dataset"][df.Fold == fold]
+            else:
+                y_true = df[f"{property_name}_Label"][df.Fold == fold]
+            # drop rows with missing values
+            missing = y_true.isnull()
+            y_pred = y_pred[~missing]
+            y_true = y_true[~missing]
             y_pred_proba.append(y_pred)
             y_real.append(y_true)
             # do plotting
@@ -551,8 +602,9 @@ class CalibrationPlot(ClassifierPlot):
         save: bool = True,
         show: bool = False,
         property_name: str | None = None,
-        validation: str = "cv",
         fig_size: tuple = (6, 6),
+        n_bins: int = 10,
+        use_dataset_labels: bool = False
     ) -> list[plt.Axes]:
         """Make the plot for a given validation type.
 
@@ -561,15 +613,22 @@ class CalibrationPlot(ClassifierPlot):
                 name of the property to plot (should correspond to the prefix
                 of the column names in the data files). If `None`, the first
                 property in the model's `targetProperties` list will be used.
-            validation (str):
-                The type of validation data to use. Can be either 'cv'
-                for cross-validation or 'ind' for independent test set.
             fig_size (tuple):
                 The size of the figure to create.
             save (bool):
                 Whether to save the plot to a file.
             show (bool):
                 Whether to display the plot.
+            property_name (str):
+                name of the property to plot (should correspond to the prefix of
+                the column names in the data files).
+            fig_size (tuple):
+                The size of the figure to create.
+            n_bins (int):
+                The number of bins to use for the calibration curve.
+            use_dataset_labels (bool):
+                whether to use the original dataset labels instead of the
+                assessment labels (i.e. with pipeline applied)                
 
         Returns:
             axes (list[plt.Axes]):
@@ -580,7 +639,7 @@ class CalibrationPlot(ClassifierPlot):
         axes = []
         for model in self.models:
             fig, ax = plt.subplots(figsize=fig_size)
-            assessment_name, ax = self.makeCalibrationPlot(model, property_name)
+            assessment_name, ax = self.makeCalibrationPlot(model, property_name, n_bins, use_dataset_labels)
             axes.append(ax)
             if save:
                 fig.savefig(f"{self.modelOuts[model]}_{assessment_name}_Calibration.png")
@@ -640,6 +699,7 @@ class MetricsPlot(ClassifierPlot):
         save: bool = True,
         show: bool = False,
         out_path: str | None = None,
+        use_dataset_labels: bool = False
     ) -> tuple[List[sns.FacetGrid], pd.DataFrame]:
         """Make the plot for a given validation type.
 
@@ -656,6 +716,9 @@ class MetricsPlot(ClassifierPlot):
                 saved to this path with the metric name appended before the extension,
                 e.g. "results/plot_roc_auc.png". If `None`, the plots will be saved to
                 each model's output directory.
+            use_dataset_labels (bool):
+                whether to use the original dataset labels instead of the
+                assessment labels (i.e. with pipeline applied).
 
         Returns:
             figures (list[sns.FacetGrid]):
@@ -665,7 +728,7 @@ class MetricsPlot(ClassifierPlot):
         """
         # Get summary with calculated metrics
         if not hasattr(self, "summary"):
-            self.getSummary()
+            self.getSummary(use_dataset_labels)
 
         figures = []
         for metric in self.metrics:
@@ -744,6 +807,7 @@ class ConfusionMatrixPlot(ClassifierPlot):
         save: bool = True,
         show: bool = False,
         out_path: str | None = None,
+        use_dataset_labels: bool = False
     ) -> tuple[dict, plt.Axes]:
         """Make confusion matrix heatmap for each model, property and fold
 
@@ -756,6 +820,9 @@ class ConfusionMatrixPlot(ClassifierPlot):
                 path to save the plot to, e.g. "results/plot.png", the plots will be
                 saved to this path with the plot identifier appended before the extension,
                 If `None`, the plots will be saved to each model's output directory.
+            use_dataset_labels (bool):
+                whether to use the original dataset labels instead of the
+                assessment labels (i.e. with pipeline applied)
 
         Returns:
             dict:
@@ -763,7 +830,7 @@ class ConfusionMatrixPlot(ClassifierPlot):
             list[plt.axes.Axes]:
                 a list of matplotlib axes objects containing the plots.
         """
-        df = self.prepareClassificationResults()
+        df = self.prepareClassificationResults(use_dataset_labels)
 
         # Get dictionary of confusion matrices
         conf_dict = self.getConfusionMatrixDict(df)
