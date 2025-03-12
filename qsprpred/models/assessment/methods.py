@@ -132,7 +132,7 @@ class ModelAssessor(ABC):
         # add original target values (no pipeline applied)
         y_original = dataset.getTargets()
         y_original = y_original.add_suffix("_Label_Dataset")
-        df_out = pd.concat([df_out, y_original], axis=1)
+        df_out = pd.concat([df_out, y_original.loc[y.index]], axis=1)
 
         # Add predictions to dataframe
         for idx, prop in enumerate(model.targetProperties):

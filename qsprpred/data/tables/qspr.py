@@ -231,12 +231,12 @@ class QSPRTable(MoleculeTable):
         # impute the property
         if prop.imputer is not None:
             self.imputeProperties([prop.name], prop.imputer)
+        if prop.task.isClassification():
+            self.makeClassification(prop.name, prop.th)
         if prop.transformer is not None:
             self.transformProperties([prop.name], prop.transformer)
         if drop_empty:
             self.dropEmptyEntries([prop.name])
-        if prop.task.isClassification():
-            self.makeClassification(prop.name, prop.th)
 
     def getTargetProperties(self, names: list) -> list[TargetProperty]:
         """Get the target properties with the given names.

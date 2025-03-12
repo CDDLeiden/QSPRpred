@@ -232,7 +232,7 @@ class BenchmarkingTest(BenchMarkTestCase):
                         "name": "CL",
                         "task": TargetTasks.SINGLECLASS,
                         "th": [10],
-                        "imputer": SimpleImputer(strategy="mean"),
+                        "imputer": SimpleImputer(strategy="most_frequent"),
                     }
                 ),
                 TargetProperty.fromDict(
@@ -240,7 +240,7 @@ class BenchmarkingTest(BenchMarkTestCase):
                         "name": "fu",
                         "task": TargetTasks.SINGLECLASS,
                         "th": [0.3],
-                        "imputer": SimpleImputer(strategy="mean"),
+                        "imputer": SimpleImputer(strategy="most_frequent"),
                     }
                 ),
             ]
