@@ -266,11 +266,11 @@ class NaNFilter(DataFilter):
             for row, features in zip(nan_rows, nan_features_per_row):
                 logger.warning(f"Entry {row} contains NaN values in features {features}.")
         else:
-            logger.info(
-                f"Removing rows "
-                f"{X.index[X[selected_features].isnull().any(axis=1)].tolist()} with "
-                f"NaN values in features."
-            )
+            drop_rows = X.index[X[selected_features].isnull().any(axis=1)]
+            if len(drop_rows) > 0:
+                logger.info(
+                    f"Removing rows {drop_rows} with NaN values in features."
+                )
             X = X.dropna(subset=selected_features)
             if y is not None:
                 y = y.loc[X.index]

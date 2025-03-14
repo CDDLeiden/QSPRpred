@@ -334,7 +334,7 @@ class DatasetPipeline(Pipeline):
         self.randomState = dataset.randomState if seed is None else seed
         
         # prepare X and y from the dataset
-        dataset.getDescriptors
+        
         if self.feature_calculators is not None:
             for feature_calculator in self.feature_calculators:
                 if hasattr(feature_calculator, 'randomState') and feature_calculator.randomState is None:

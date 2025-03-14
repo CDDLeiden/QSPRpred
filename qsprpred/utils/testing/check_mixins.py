@@ -279,6 +279,14 @@ class ModelCheckMixIn:
             **pred_kwargs:
                 Extra keyword arguments to pass to the predictor's `predictMols` method.
         """
+        def reorder_predictions(predictions: np.ndarray, order: pd.Index, dataset: QSPRDataSet):
+            """Reorder the predictions according to the order of the dataset."""
+            if isinstance(predictions, list):
+                return [
+                    pd.DataFrame(pred, index=order).loc[dataset.getDF().index].values
+                    for pred in predictions
+                ]
+            return pd.DataFrame(predictions, index=order).loc[dataset.getDF().index].values
 
         # define checks of the shape of the predictions
         def check_shape(predictions, model, num_smiles, use_probas):
@@ -312,6 +320,7 @@ class ModelCheckMixIn:
         # get the expected result from the basic predict function
         X, _ = next(model.pipeline.apply(dataset, fit=False))
         expected_result = model.predict(X)
+        expected_result = reorder_predictions(expected_result, X.index, dataset)
         # make predictions with the predictMols function and check with previous result
         smiles = list(dataset.smiles)
         num_smiles = len(smiles)
@@ -322,6 +331,9 @@ class ModelCheckMixIn:
         predictions_proba = None
         if model.task.isClassification():
             expected_result_proba = model.predictProba(X)
+            expected_result_proba = reorder_predictions(
+                expected_result_proba, X.index, dataset
+            )
             predictions_proba = model.predictMols(
                 smiles, use_probas=True, **pred_kwargs
             )

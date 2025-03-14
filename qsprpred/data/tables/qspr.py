@@ -17,9 +17,6 @@ import numpy as np
 class QSPRTable(MoleculeTable):
     """Implementation of `QSPRDataSet` using a collection of `PandasDataTable` objects.
 
-    It splits the data in train and test set, as well as creating cross-validation
-    folds. For classification the dataset samples are labelled as active/inactive.
-
     Attributes:
         targetProperties (str): property to be predicted with QSPRmodel
     """
@@ -48,6 +45,8 @@ class QSPRTable(MoleculeTable):
                 target properties, names should correspond with target columnname in df.
                 If `None`, target properties will be inferred if this data set has been
                 saved previously. Defaults to `None`.
+            path (str, optional): path to the directory where the data set will be saved.
+                Defaults to ".".
             random_state (int, optional): random state for splitting the data.
             store_format (str, optional):
                 format to use for storing the data ('pkl' or 'csv').
@@ -103,7 +102,9 @@ class QSPRTable(MoleculeTable):
             target_props (list[TargetProperty | dict]): target properties to use
             path (str): path to the directory where the data set will be saved
             smiles_col (str): name of the column containing SMILES
-            **kwargs: additional keyword arguments for `QSPRTable` constructor
+            drop_empty_target_props (bool, optional): whether to drop rows with empty
+                target property values. Defaults to `True`.
+            **kwargs: additional keyword arguments for `MoleculeTable` constructor
 
         Returns:
             QSPRTable: created data set
@@ -128,11 +129,11 @@ class QSPRTable(MoleculeTable):
             name (str): name of the data set
             filename (str): path to the table file
             path (str): path to the directory where the data set will be saved
-            *args: additional arguments for `QSPRTable` constructor
+            *args: additional arguments for `MolTable` constructor
             sep (str, optional): separator in the table file. Defaults to "\t".
             target_props (list[TargetProperty | dict], optional): target properties to
                 use. Defaults to `None`.
-            **kwargs: additional keyword arguments for `QSPRTable` constructor
+            **kwargs: additional keyword arguments for `MolTable` constructor
 
         Returns:
             QSPRTable: `QSPRTable` object
@@ -228,11 +229,10 @@ class QSPRTable(MoleculeTable):
         ), f"Property {prop} not found in data set."
         self.targetProperties.append(prop)
         self.restoreTargetProperty(prop)
-        # impute the property
-        if prop.imputer is not None:
-            self.imputeProperties([prop.name], prop.imputer)
         if prop.task.isClassification():
             self.makeClassification(prop.name, prop.th)
+        if prop.imputer is not None:
+            self.imputeProperties([prop.name], prop.imputer)
         if prop.transformer is not None:
             self.transformProperties([prop.name], prop.transformer)
         if drop_empty:
