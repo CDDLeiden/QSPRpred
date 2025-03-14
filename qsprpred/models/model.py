@@ -256,6 +256,12 @@ class QSPRModel(JSONSerializable, ABC):
             random_state (int):
                 Random state to use for shuffling and other random operations.
         """
+        # FIXME: random state is not set to random int if not provided
+        # It will be set to None if not provided after the logging message
+        # that it is set to a random int.
+        # However, perhaps it is better to set it to None if not provided
+        # As the initfromdata method will set it to the random state of the data
+        # if there is no random state provided.
         if random_state is None:
             self.randomState = int(np.random.randint(0, 2**31 - 1, dtype=np.int64))
             logger.info(
@@ -510,9 +516,9 @@ class QSPRModel(JSONSerializable, ABC):
         dataset.addDescriptors(self.featureCalculators)
         return dataset, failed_mask
 
-    def predictDataset(self,
-                       dataset: QSPRDataSet,
-                       use_probas: bool = False) -> np.ndarray | list[np.ndarray]:
+    def predictDataset(
+        self, dataset: QSPRDataSet, use_probas: bool = False
+    ) -> np.ndarray | list[np.ndarray]:
         """
         Make predictions for the given dataset.
 
@@ -541,6 +547,20 @@ class QSPRModel(JSONSerializable, ABC):
         else:
             # return a list of 2D arrays
             predictions = self.predictProba(X)
+        # order the predictions according to the original order of the molecules
+        # in case the pipeline has shuffled the data
+        if isinstance(predictions, list):
+            predictions = [
+                pd.DataFrame(pred, index=X.index)
+                .loc[dataset.getDF().index.intersection(X.index)]
+                .values for pred in predictions
+            ]
+        else:
+            predictions = (
+                pd.DataFrame(predictions, index=X.index)
+                .loc[dataset.getDF().index.intersection(X.index)]
+                .values
+            )
         predictions = self.handleInvalidsInPredictions(len(dataset), predictions, failed_mask)
         return predictions
 

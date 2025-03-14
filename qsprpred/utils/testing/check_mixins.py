@@ -33,6 +33,16 @@ from ...tasks import TargetProperty
 from .path_mixins import ModelDataSetsPathMixIn
 from ...data.sampling.splits import DataSplit, RandomSplit
 
+class PipelineStepCheckMixIn:
+    """Mixin class for common pipeline step checks."""
+    def checkStep(self, step, dataset):
+        """Check if the step is a valid pipeline step."""
+        pass
+
+    def checkStepInPipeline(self, step, dataset):
+        """Check if the step is in the pipeline."""
+        pass
+
 class DescriptorCheckMixIn:
     """Mixin class for common descriptor checks."""
     def checkFeatures(self, X_train, y_train, X_test = None, y_test = None):
@@ -282,11 +292,18 @@ class ModelCheckMixIn:
         def reorder_predictions(predictions: np.ndarray, order: pd.Index, dataset: QSPRDataSet):
             """Reorder the predictions according to the order of the dataset."""
             if isinstance(predictions, list):
-                return [
-                    pd.DataFrame(pred, index=order).loc[dataset.getDF().index].values
-                    for pred in predictions
+                predictions = [
+                    pd.DataFrame(pred, index=order)
+                    .loc[dataset.getDF().index.intersection(order)]
+                    .values for pred in predictions
                 ]
-            return pd.DataFrame(predictions, index=order).loc[dataset.getDF().index].values
+            else:
+                predictions = (
+                    pd.DataFrame(predictions, index=order)
+                    .loc[dataset.getDF().index.intersection(order)]
+                    .values
+                )
+            return predictions
 
         # define checks of the shape of the predictions
         def check_shape(predictions, model, num_smiles, use_probas):
