@@ -443,13 +443,13 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
                     "name": "fu",
                     "task": TargetTasks.SINGLECLASS,
                     "th": [0.3],
-                    "imputer": SimpleImputer(strategy="mean"),
+                    "imputer": SimpleImputer(strategy="most_frequent"),
                 },
                 {
                     "name": "CL",
                     "task": TargetTasks.SINGLECLASS,
                     "th": [6.5],
-                    "imputer": SimpleImputer(strategy="mean"),
+                    "imputer": SimpleImputer(strategy="most_frequent"),
                 },
             ],
         )
