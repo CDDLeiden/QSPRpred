@@ -350,7 +350,8 @@ def QSPR_dataprep(args):
                         "transformer":
                             (
                                 transform_dict[args.transform_data[prop]]
-                                if prop in args.transform_data else None
+                                if (prop in args.transform_data) & (task == TargetTasks.REGRESSION)
+                                else None
                             ),
                         "imputer":
                             (

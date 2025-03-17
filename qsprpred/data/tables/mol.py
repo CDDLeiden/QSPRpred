@@ -845,7 +845,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
             transformer (Callable): Function to use for transformation.
         """
         subset = self.getDF()[names]
-        ret = subset.apply(transformer, axis=1)
+        ret = subset.apply(lambda row: row.map(lambda x: transformer(x) if not pd.isna(x) else np.nan), axis=1)
         for col in ret.columns:
             self.addProperty(f"{col}_before_transform", subset[col])
             self.addProperty(col, ret[col])
