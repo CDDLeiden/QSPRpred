@@ -465,7 +465,7 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
         def check_assessor_monitor(monitor, n_folds, len_y):
             self.assertEqual(
                 monitor.predictions.shape,
-                (len_y, 5),  # labels + dataset labels + preds + fold + set
+                (len_y, 4),  # labels + preds + fold + set
             )
             self.assertEqual(len(monitor.foldData), n_folds)
             self.assertEqual(len(monitor.fits), n_folds)

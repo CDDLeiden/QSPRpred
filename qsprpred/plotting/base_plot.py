@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from ..models.model import QSPRModel
+from ..data.tables.qspr import QSPRTable
 
 
 class ModelPlot(ABC):
@@ -17,17 +18,26 @@ class ModelPlot(ABC):
             dictionary of model output paths
         modelNames (dict[QSPRModel, str]):
             dictionary of model names
-        cvPaths (dict[QSPRModel, str]):
-            dictionary of models mapped to their cross-validation set results paths
-        indPaths (dict[QSPRModel, str]):
-            dictionary of models mapped to their independent test set results paths
+        assesmentPaths (dict[QSPRModel, dict[str, str]):
+            dictionary of assessment names mapped to their
+            paths for each model
+        datasets (dict[str, QSPRTable]):
+            dictionary of model names mapped to their datasets used for training,
+            if datasets are provided, the plotter will use the dataset labels instead
+            of the assessment labels
     """
-    def __init__(self, models: list[QSPRModel], assessments: list[str]):
+    def __init__(self, models: list[QSPRModel], assessments: list[str], datasets: list[QSPRTable] = None):
         """Initialize the base class for all model plots.
 
         Args:
             models (list[QSPRModel]):
                 list of models to plot
+            assessments (list[str]):
+                list of assessment names
+            datasets (list[QSPRTable], optional):
+                list of datasets used for training the models, if provided,
+                the plotter will use the dataset labels instead of the assessment labels.
+                Must be the same length as `models`, use None to skip a model.
         """
         self.models = models
         self.modelOuts = {model: model.outPrefix for model in self.models}
@@ -36,6 +46,14 @@ class ModelPlot(ABC):
         for model in self.models:
             assesment_paths = self.checkModel(model, assessments)
             self.assesmentPaths[model] = assesment_paths
+        if datasets is not None:
+            if len(datasets) != len(models):
+                raise ValueError(
+                    "Length of datasets must be the same as the length of models."
+                )
+            self.datasets = {model.name: dataset for model, dataset in zip(models, datasets)}
+        else:
+            self.datasets = None
 
     def checkModel(self, model: QSPRModel, assessments: list[str]) -> tuple[str, str]:
         """Check if the model has been evaluated and saved. If not, raise an exception.

@@ -95,7 +95,6 @@ class ModelAssessor(ABC):
     def predictionsToDataFrame(
         self,
         model: QSPRModel,
-        dataset: QSPRDataSet,
         y_train: np.ndarray,
         y_test: np.ndarray,
         train_preds: np.ndarray | list[np.ndarray],
@@ -128,11 +127,6 @@ class ModelAssessor(ABC):
         # Combine target values into dataframe
         y = pd.concat([y_train, y_test])
         df_out = y.add_suffix("_Label")
-        
-        # add original target values (no pipeline applied)
-        y_original = dataset.getTargets()
-        y_original = y_original.add_suffix("_Label_Dataset")
-        df_out = pd.concat([df_out, y_original.loc[y.index]], axis=1)
 
         # Add predictions to dataframe
         for idx, prop in enumerate(model.targetProperties):
@@ -278,7 +272,7 @@ class Assessor(ModelAssessor):
                 (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             )
             preds_df = self.predictionsToDataFrame(
-                model, ds, y_train, y_test, train_preds, test_preds, fold=i
+                model, y_train, y_test, train_preds, test_preds, fold=i
             )
             monitor.onFoldEnd(model_fit, preds_df, self.scores[i])
             self.predictions.append(preds_df)

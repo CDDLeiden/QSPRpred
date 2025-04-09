@@ -203,8 +203,8 @@ class WilliamsPlotTest(PlottingTest):
         model.fitDataset(dataset, pipeline)
         model.save()
         # generate metrics plot and associated files
-        plt = WilliamsPlot([model], [dataset], ["crossval", "test"])
-        g, leverages, hstar = plt.make()
+        plt = WilliamsPlot([model], ["crossval", "test"], [dataset])
+        g, leverages, hstar = plt.make(dataset.getTargetPropertiesNames()[0])
         self.assertIsInstance(leverages, pd.DataFrame)
         self.assertIsInstance(hstar, dict)
         # assert g is sns.FacetGrid

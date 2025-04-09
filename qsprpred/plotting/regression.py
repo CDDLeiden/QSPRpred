@@ -22,7 +22,7 @@ class RegressionPlot(ModelPlot, ABC):
         """Return a list of supported model tasks."""
         return [ModelTasks.REGRESSION, ModelTasks.MULTITASK_REGRESSION]
 
-    def prepareAssessment(self, name: str, assessment_df: pd.DataFrame, use_dataset_labels: bool = False) -> pd.DataFrame:
+    def prepareAssessment(self, name: str, assessment_df: pd.DataFrame) -> pd.DataFrame:
         """Prepare assessment dataframe for plotting
 
         Args:
@@ -33,22 +33,12 @@ class RegressionPlot(ModelPlot, ABC):
                 values for each property. The dataframe should have the following
                 columns:
                 ID, Fold , <property_name>_<suffixes>_<Label/Prediction>
-            use_dataset_labels (bool):
-                whether to use the original dataset labels instead of the
-                assessment labels (i.e. with pipeline applied)
 
         Returns:
             pd.DataFrame:
                 The dataframe containing the assessment results,
                 columns: ID, Fold, Set, Property, Label, Prediction, Set
         """
-        # Replace the assessment labels with the dataset labels
-        if use_dataset_labels:
-            assessment_df = assessment_df.drop(columns=[col for col in assessment_df.columns if col.endswith("Label")])
-            assessment_df.rename(columns={col: col.replace("Label_Dataset", "Label") for col in assessment_df.columns}, inplace=True)
-        else:
-            assessment_df = assessment_df.drop(columns=[col for col in assessment_df.columns if col.endswith("Label_Dataset")])
-        
         # Melt all property columns into one column
         id_vars = ["ID", "Fold", "Set"]
         df = assessment_df.melt(id_vars=id_vars)
@@ -67,23 +57,28 @@ class RegressionPlot(ModelPlot, ABC):
         
         return df
 
-    def prepareRegressionResults(self, use_dataset_labels: bool = False) -> pd.DataFrame:
+    def prepareRegressionResults(self) -> pd.DataFrame:
         """Prepare regression results dataframe for plotting.
 
         Returns:
             pd.DataFrame:
                 the dataframe containing the regression results,
                 columns: Model, QSPRID, Fold, Property, Label, Prediction, Set
-            use_dataset_labels (bool):
-                whether to use the original dataset labels instead of the
-                assessment labels (i.e. with pipeline applied)
         """
         model_results = {}
         for model in self.models:
             # Read in and prepare the assessment set results
             results = []
             for name, path in self.assesmentPaths[model].items():
-                df = self.prepareAssessment(name, pd.read_table(path), use_dataset_labels)
+                assessment = pd.read_table(path)
+                # Replace the assessment labels with the dataset labels
+                if self.datasets is not None and model.name in self.datasets:
+                    targets = self.datasets[model.name].getTargets()
+                    assessment = assessment.drop(columns=[col for col in assessment.columns if col.endswith("Label")])
+                    # add suffix Label to the target columns
+                    targets.columns = [f"{col}_Label" for col in targets.columns]
+                    assessment = pd.merge(assessment, targets, on="ID")
+                df = self.prepareAssessment(name, assessment)
                 results.append(df)
             df = pd.concat(results)
             print(model.name)
@@ -98,10 +93,10 @@ class RegressionPlot(ModelPlot, ABC):
         self.results = df
         return df
 
-    def getSummary(self, use_dataset_labels: bool = False) -> pd.DataFrame:
+    def getSummary(self) -> pd.DataFrame:
         """calculate the R2 and RMSE for each model per set (cross-validation or independent test)"""
         if not hasattr(self, "results"):
-            self.prepareRegressionResults(use_dataset_labels)
+            self.prepareRegressionResults()
         df = deepcopy(self.results)
         df_summary = (
             df.groupby(["Model", "Assessment", "Fold", "Set", "Property"]).apply(
@@ -126,8 +121,7 @@ class CorrelationPlot(RegressionPlot):
         self,
         save: bool = True,
         show: bool = False,
-        out_path: str | None = None,
-        use_dataset_labels: bool = False,
+        out_path: str | None = None
     ) -> tuple[sns.FacetGrid, pd.DataFrame]:
         """Plot the results of regression models. Plot predicted pX_train vs real pX_train.
 
@@ -139,9 +133,6 @@ class CorrelationPlot(RegressionPlot):
             out_path (str | None):
                 path to save the plot to, e.g. "results/plot.png", if `None`, the plot
                 will be saved to each model's output directory.
-            use_dataset_labels (bool):
-                whether to use the original dataset labels instead of the
-                assessment labels (i.e. with pipeline applied)
 
         Returns:
             g (sns.FacetGrid):
@@ -150,10 +141,10 @@ class CorrelationPlot(RegressionPlot):
                 the summary data used to make the plot
         """
         # prepare the dataframe for plotting
-        df = self.prepareRegressionResults(use_dataset_labels)
+        df = self.prepareRegressionResults()
 
         if not hasattr(self, "summary"):
-            self.getSummary(use_dataset_labels)
+            self.getSummary()
             
         # Select only test set results
         df = df[df["Set"] == "Test"]
@@ -202,20 +193,30 @@ class CorrelationPlot(RegressionPlot):
 
 class WilliamsPlot(RegressionPlot):
     """Williams plot; plot of standardized residuals versus leverages"""
-    def __init__(self, models: list[QSPRModel], datasets: list[QSPRDataSet], assessments: list[str]):
-        super().__init__(models, assessments)
-        self.datasets = datasets
+    def __init__(self, models: list[QSPRModel], assessments: list[str], datasets: list[QSPRDataSet]):
+        """Initialize the Williams plot.
+        Args:
+            models (list[QSPRModel]):
+                the models to plot
+            assessments (list[str]):
+                the assessments to plot
+            datasets (list[QSPRDataSet]):
+                the datasets to plot
+        """
+        super().__init__(models, assessments, datasets)
 
     def make(
         self,
+        property_name: str,
         save: bool = True,
         show: bool = False,
-        out_path: str | None = None,
-        use_dataset_labels: bool = False,
+        out_path: str | None = None
     ) -> tuple[sns.FacetGrid, pd.DataFrame, List[float]]:
         """make Williams plot
 
         Args:
+            property_name (str):
+                the name of the property to plot
             save (bool):
                 whether to save the plot
             show (bool):
@@ -223,9 +224,6 @@ class WilliamsPlot(RegressionPlot):
             out_path (str | None):
                 path to save the plot to, e.g. "results/plot.png", if `None`, the plot
                 will be saved to each model's output directory.
-            use_dataset_labels (bool):
-                whether to use the original dataset labels instead of the
-                assessment labels (i.e. with pipeline applied)
 
         Returns:
             g (sns.FacetGrid):
@@ -252,8 +250,8 @@ class WilliamsPlot(RegressionPlot):
                 float:
                     the h* value for the dataset
             """
-            X_train = features_train.values
-            X_test = features_test.values
+            X_train = features_train.values.astype(float)
+            X_test = features_test.values.astype(float)
 
             # assert the number of samples is greater than the number of features
             assert X_train.shape[0] > X_train.shape[1], (
@@ -264,10 +262,10 @@ class WilliamsPlot(RegressionPlot):
             # get the diagonal elements of the hat matrix
             # these are the leverages
             pinv_XTX = np.linalg.pinv(X_train.T @ X_train)
-            leverages_train = np.diag(X_train @ pinv_XTX @ X_train.T)
+            leverages_train = np.sum(X_train @ pinv_XTX * X_train, axis=1)
             leverages_train = pd.Series(leverages_train, index=features_train.index)
 
-            leverages_test = np.diag(X_test @ pinv_XTX @ X_test.T)
+            leverages_test = np.sum(X_test @ pinv_XTX * X_test, axis=1)
             leverages_test = pd.Series(leverages_test, index=features_test.index)
 
             leverages = pd.concat([leverages_train, leverages_test])
@@ -279,7 +277,6 @@ class WilliamsPlot(RegressionPlot):
             N = X_train.shape[0]
             h_star = (3 * (p + 1)) / N
 
-            # print waring if h* > 1
             if h_star > 1:
                 print(
                     f"Warning: h* = {h_star} is greater than 1, this may indicate that the "
@@ -290,19 +287,23 @@ class WilliamsPlot(RegressionPlot):
             return leverages, h_star
 
         # prepare the dataframe for plotting
-        df = self.prepareRegressionResults(use_dataset_labels)
+        df = self.prepareRegressionResults()
+        
+        # Select property to plot
+        df = df[df["Property"] == property_name].copy()
 
         # calculate the leverages and h* for each model, assessment and fold
         model_leverages = {}
         model_h_star = {}
         model_p = {}  # number of descriptors
-        for model, dataset in zip(self.models, self.datasets):
+        for model in self.models:
+            dataset = self.datasets[model.name]
             for assessment in df["Assessment"].unique():
                 df_assessment = df[(df["Model"] == model.name) & (df["Assessment"] == assessment)]
                 for fold in df_assessment["Fold"].unique():
                     df_ = df_assessment[(df_assessment["Fold"] == fold)]
-                    train_ind = df_[df_["Set"] == "Train"]["ID"]
-                    test_ind = df_[df_["Set"] == "Test"]["ID"]
+                    train_ind = df_[df_["Set"] == "Train"]["ID"].to_list()
+                    test_ind = df_[df_["Set"] == "Test"]["ID"].to_list()
                     # FIXME: Pipeline is refit for each fold, this is not ideal
                     # this information should be ideally be retrieved from the 
                     # assessment, pipeline or similar
