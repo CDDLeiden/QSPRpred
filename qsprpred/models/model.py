@@ -855,7 +855,7 @@ class QSPRModel(JSONSerializable, ABC):
             Any: applicability domain of the model
         """
         return self._applicabilityDomain
-    
+
     @applicabilityDomain.setter
     def applicabilityDomain(self, apdomain: Any):
         """Set the applicability domain of the model.
@@ -867,4 +867,3 @@ class QSPRModel(JSONSerializable, ABC):
             self._applicabilityDomain = MLChemAD(apdomain)
         else:
             self._applicabilityDomain = apdomain
-            

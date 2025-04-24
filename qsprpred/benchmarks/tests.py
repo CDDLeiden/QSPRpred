@@ -219,7 +219,7 @@ class BenchmarkingTest(BenchMarkTestCase):
                 split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
             ),
             Assessor(
-                name="test_r2", 
+                name="test_r2",
                 scoring="r2",
                 split=RandomSplit(test_fraction=0.2),
             ),

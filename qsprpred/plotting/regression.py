@@ -55,7 +55,7 @@ class RegressionPlot(ModelPlot, ABC):
         df.reset_index(inplace=True)
         df.columns.name = None
         df["Assessment"] = name
-        
+
         return df
 
     def prepareRegressionResults(self) -> pd.DataFrame:
@@ -143,7 +143,7 @@ class CorrelationPlot(RegressionPlot):
 
         if not hasattr(self, "summary"):
             self.getSummary()
-            
+
         # Select only test set results
         df = df[df["Set"] == "Test"]
 
@@ -287,7 +287,7 @@ class WilliamsPlot(RegressionPlot):
 
         # prepare the dataframe for plotting
         df = self.prepareRegressionResults()
-        
+
         # Select property to plot
         df = df[df["Property"] == property_name].copy()
 
@@ -304,15 +304,15 @@ class WilliamsPlot(RegressionPlot):
                     train_ind = df_[df_["Set"] == "Train"]["ID"].to_list()
                     test_ind = df_[df_["Set"] == "Test"]["ID"].to_list()
                     # FIXME: Pipeline is refit for each fold, this is not ideal
-                    # this information should be ideally be retrieved from the 
+                    # this information should be ideally be retrieved from the
                     # assessment, pipeline or similar
                     pipeline = deepcopy(model.pipeline)
                     X_train, _ = next(pipeline.apply(dataset[train_ind], seed=model.randomState))
                     X_test, _ = next(pipeline.apply(dataset[test_ind], fit=False, seed=model.randomState))
                     leverages, h_star = calculateLeverages(X_train, X_test)
-                    
+
                     model_name = model.name
-                    model_leverages[f"{model_name}_{assessment}_{fold}"] = leverages	
+                    model_leverages[f"{model_name}_{assessment}_{fold}"] = leverages
                     model_h_star[f"{model_name}_{assessment}_{fold}"] = h_star
                     model_p[f"{model_name}_{assessment}_{fold}"] = X_train.shape[1]
 
@@ -371,7 +371,7 @@ class WilliamsPlot(RegressionPlot):
         # and add hlines at +/- 3
         for k, ax in g.axes_dict.items():
             for assessment in df[df["Model"] == k[0]]["Assessment"].unique():
-                for fold in df[(df["Model"] == k[0]) & (df["Assessment"] == assessment)]["Fold"].unique():             
+                for fold in df[(df["Model"] == k[0]) & (df["Assessment"] == assessment)]["Fold"].unique():
                     ax.axvline(model_h_star[f"{k[0]}_{assessment}_{fold}"], c=".2", ls="--")
             ax.axhline(2, c=".2", ls="--")
             ax.axhline(-2, c=".2", ls="--")
