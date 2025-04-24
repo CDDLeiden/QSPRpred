@@ -13,6 +13,7 @@ from sklearn.model_selection import ShuffleSplit
 
 from qsprpred.data.descriptors.sets import SmilesDesc
 from qsprpred.data.sampling.splits import RandomSplit
+from qsprpred.data.processing.pipeline import DummyStep, DatasetPipeline
 from qsprpred.extra.gpu.utils.parallel import TorchJITGenerator
 from qsprpred.tasks import ModelTasks, TargetTasks
 
@@ -21,7 +22,7 @@ from ....benchmarks.tests import BenchMarkTestCase
 from ....extra.gpu.models.chemprop import ChempropModel
 from ....extra.gpu.models.dnn import DNNModel
 from ....extra.gpu.models.neural_network import STFullyConnected
-from ....models import CrossValAssessor, SklearnMetrics, SklearnModel
+from ....models import Assessor, SklearnMetrics, SklearnModel
 from ....models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ....utils.parallel import ThreadsJITGenerator
 from ....utils.testing.check_mixins import ModelCheckMixIn, MonitorsCheckMixIn
@@ -81,7 +82,9 @@ class BenchMarkTest(BenchMarkTestCase):
             )
         ]
         self.settings.descriptors = [[SmilesDesc()]]
-        self.settings.prep_settings[0].feature_standardizer = None
+        self.settings.pipelines[0].steps["feature_standardizer"] = DummyStep()
+        self.settings.pipelines[0].steps["low_var_filter"] = DummyStep()
+        self.settings.pipelines[0].steps["high_corr_filter"] = DummyStep()
         self.checkSettings()
         self.benchmark = BenchmarkRunner(
             self.settings,
@@ -190,7 +193,6 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                 "task": task,
                 "th": th
             }],
-            preparation_settings=self.getDefaultPrep(),
         )
 
         # initialize model for training from class
@@ -200,9 +202,9 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             alg=alg,
             random_state=random_state[0],
         )
-        self.fitTest(model, dataset)
+        self.fitTest(model, dataset, self.getDefaultPrep())
         predictor = DNNModel(
-            name=alg_name, base_dir=model.baseDir, random_state=random_state[0]
+            name=alg_name, base_dir=model.baseDir
         )
 
         # test if the results are (not) equal if the random state is the (not) same
@@ -214,7 +216,7 @@ class NeuralNet(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                 alg=alg,
                 random_state=random_state[1],
             )
-            self.fitTest(comparison_model, dataset)
+            self.fitTest(comparison_model, dataset, self.getDefaultPrep())
             self.predictorTest(
                 predictor,  # model loaded from file
                 dataset=dataset,
@@ -307,19 +309,16 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                 "task": task,
                 "th": th
             }],
-            preparation_settings=None,
         )
-        dataset.prepareDataset(
-            feature_calculators=[SmilesDesc()],
-            split=RandomSplit(test_fraction=0.1, dataset=dataset),
-        )
+        dataset.addDescriptors([SmilesDesc()])
+        pipeline = DatasetPipeline()
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}_th={th}"
         model = self.getModel(
             name=f"{alg_name}",
             random_state=random_state[0],
         )
-        self.fitTest(model, dataset)
+        self.fitTest(model, dataset, pipeline)
         predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
         self.predictorTest(predictor, dataset=dataset)
 
@@ -331,7 +330,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                 name=alg_name,
                 random_state=random_state[1],
             )
-            self.fitTest(comparison_model, dataset)
+            self.fitTest(comparison_model, dataset, pipeline)
             self.predictorTest(
                 predictor,  # model loaded from file
                 dataset=dataset,
@@ -384,32 +383,28 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                     "name": "fu",
                     "task": TargetTasks.SINGLECLASS,
                     "th": [0.3],
-                    "imputer": SimpleImputer(strategy="mean"),
+                    "imputer": SimpleImputer(strategy="most_frequent"),
                 },
                 {
                     "name": "CL",
                     "task": TargetTasks.SINGLECLASS,
                     "th": [6.5],
-                    "imputer": SimpleImputer(strategy="mean"),
+                    "imputer": SimpleImputer(strategy="most_frequent"),
                 },
             ]
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name=f"{alg_name}_{task}",
             target_props=target_props,
-            preparation_settings=None,
         )
-        dataset.prepareDataset(
-            feature_calculators=[SmilesDesc()],
-            split=RandomSplit(test_fraction=0.1, dataset=dataset),
-        )
+        pipeline = DatasetPipeline(feature_calculators=[SmilesDesc()])
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}"
         model = self.getModel(
             name=alg_name,
             random_state=random_state[0],
         )
-        self.fitTest(model, dataset)
+        self.fitTest(model, dataset, pipeline)
         predictor = ChempropModel(name=alg_name, base_dir=model.baseDir)
         self.predictorTest(predictor, dataset=dataset)
 
@@ -421,7 +416,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                 name=alg_name,
                 random_state=random_state[1],
             )
-            self.fitTest(comparison_model, dataset)
+            self.fitTest(comparison_model, dataset, pipeline)
             self.predictorTest(
                 predictor,  # model loaded from file
                 dataset=dataset,
@@ -433,19 +428,24 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
 
     def testConsistency(self):
         """Test if QSPRpred Chemprop and Chemprop models are consistent."""
+        
+        # Add safe globals to torch (v2.6.0) serialization to avoid errors when loading chemprop model
+        from argparse import Namespace
+        from numpy.core.multiarray import _reconstruct
+        from numpy import ndarray, dtype
+        from numpy.dtypes import Float64DType
+        
+        torch.serialization.add_safe_globals([Namespace, _reconstruct, ndarray, dtype, Float64DType])
+        
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name="consistency_data",
             target_props=[{
                 "name": "CL",
                 "task": TargetTasks.REGRESSION
-            }],
-            preparation_settings=None,
+            }]
         )
-        dataset.prepareDataset(
-            feature_calculators=[SmilesDesc()],
-            split=RandomSplit(test_fraction=0.1, seed=dataset.randomState),
-        )
+        pipeline = DatasetPipeline([SmilesDesc()])
         # initialize model for training from class
         model = self.getModel(name="consistency_data")
 
@@ -454,18 +454,14 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             metrics.root_mean_squared_error, greater_is_better=False
         )
 
+        train_indices, _ = next(dataset.split(RandomSplit(test_fraction=0.1, seed=dataset.randomState)))
         # Run 1 fold of bootstrap cross validation (default cross validation in chemprop is bootstrap)
-        assessor = CrossValAssessor(
+        assessor = Assessor(
+            name="single_fold_bootstrap",
             scoring=SklearnMetrics(rmse),
-            split=ShuffleSplit(
-                n_splits=1, test_size=0.1, random_state=dataset.randomState
-            ),
-        )
-        qsprpred_score = assessor(
-            model,
-            dataset,
             split=RandomSplit(test_fraction=0.1, seed=dataset.randomState),
         )
+        qsprpred_score = assessor(model, dataset[train_indices], pipeline, order=train_indices)
         qsprpred_score = -qsprpred_score[0]  # qsprpred_score is negative rmse
 
         # save the cross-validation train, test and validation split to
@@ -551,7 +547,8 @@ class TestNNMonitoring(MonitorsCheckMixIn, TestCase):
         )
         self.runMonitorTest(
             model,
-            self.createLargeTestDataSet(preparation_settings=self.getDefaultPrep()),
+            self.createLargeTestDataSet(),
+            self.getDefaultPrep(),
             BaseMonitor,
             self.baseMonitorTest,
             True,
@@ -568,7 +565,8 @@ class TestNNMonitoring(MonitorsCheckMixIn, TestCase):
         )
         self.runMonitorTest(
             model,
-            self.createLargeTestDataSet(preparation_settings=self.getDefaultPrep()),
+            self.createLargeTestDataSet(),
+            self.getDefaultPrep(),
             BaseMonitor,
             self.baseMonitorTest,
             True,
@@ -586,7 +584,8 @@ class TestNNMonitoring(MonitorsCheckMixIn, TestCase):
         )
         self.runMonitorTest(
             model,
-            self.createLargeTestDataSet(preparation_settings=self.getDefaultPrep()),
+            self.createLargeTestDataSet(),
+            self.getDefaultPrep(),
             ListMonitor,
             self.listMonitorTest,
             True,

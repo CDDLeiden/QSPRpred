@@ -56,6 +56,8 @@ class PCMDataSet(QSPRTable):
             drop_empty_target_props (bool, optional):
                 whether to ignore entries with empty target properties. Defaults to
                 `True`.
+            proteins (ProteinStorage, optional):
+                `ProteinStorage` instance containing the protein data.
 
         Raises:
             `ValueError`: Raised if threshold given with non-classification task.
@@ -127,7 +129,6 @@ class PCMDataSet(QSPRTable):
         self,
         descriptors: list[DescriptorSet | ProteinDescriptorSet],
         recalculate: bool = False,
-        featurize: bool = True,
         *args,
         **kwargs,
     ):
@@ -141,7 +142,7 @@ class PCMDataSet(QSPRTable):
             kwargs[key] = info[key]
         # pass everything to the descriptor calculation
         return super().addDescriptors(
-            descriptors, recalculate, featurize, *args, **kwargs
+            descriptors, recalculate, *args, **kwargs
         )
 
     def getSubset(
@@ -149,7 +150,7 @@ class PCMDataSet(QSPRTable):
         subset: list[str],
         ids: list[str] | None = None,
         name: str | None = None,
-        path: str | None = None,
+        path: str | None = ".",
         **kwargs,
     ) -> "QSPRTable":
         ds = super().getSubset(subset, ids, name, path, **kwargs)

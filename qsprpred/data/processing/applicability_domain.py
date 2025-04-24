@@ -34,7 +34,7 @@ class ApplicabilityDomain(JSONSerializable, ABC):
         Args:
             threshold (float | None): threshold value
             direction (str | None): direction of the threshold, should be set if
-                threshold is set
+                threshold is set (">", "<", ">=", "<=")
         """
         self.threshold = threshold
         self._direction = direction
@@ -52,8 +52,7 @@ class ApplicabilityDomain(JSONSerializable, ABC):
         """Transform the features to a score for the applicability domain.
 
         The result could be a boolean array indicating if the features are in the
-        applicability domain or a score indicating how much the features are in the
-        applicability domain
+        applicability domain or a continous score indicating a measure of applicability
         (e.g., a probability or a distance).
 
         Args:
@@ -129,7 +128,7 @@ class ApplicabilityDomain(JSONSerializable, ABC):
             raise ValueError("Direction must be set to apply threshold")
 
 
-class MLChemADWrapper(ApplicabilityDomain):
+class MLChemAD(ApplicabilityDomain):
     """Define the applicability domain for a dataset using the MLChemAD package.
 
     This class uses the MLChemAD package to filter out molecules that are not in the

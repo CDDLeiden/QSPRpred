@@ -8,7 +8,9 @@ import pandas as pd
 
 from ..data.descriptors.sets import DescriptorSet
 from ..data.sources.data_source import DataSource
+from ..data.sampling.splits import DataSplit
 from ..data.tables.qspr import QSPRTable
+from ..data.processing.pipeline import DatasetPipeline
 from ..logs import logger
 from ..models.assessment.methods import ModelAssessor
 from ..models.hyperparam_optimization import HyperparameterOptimization
@@ -16,7 +18,6 @@ from ..models.model import QSPRModel
 from ..models.monitors import NullMonitor
 from ..tasks import TargetProperty
 from ..utils.serialization import JSONSerializable
-from .settings.benchmark import DataPrepSettings
 
 
 class Replica(JSONSerializable):
@@ -34,8 +35,8 @@ class Replica(JSONSerializable):
             Descriptor sets to use.
         targetProps (list[TargetProperty]):
             Target properties to use.
-        prepSettings (DataPrepSettings):
-            Data preparation settings to use.
+        pipeline (DatasetPipeline):
+            Feature processing pipeline to use for the replica.
         model (QSPRModel):
             Current model. Use `initModel` to prepare it.
         optimizer (HyperparameterOptimization):
@@ -63,10 +64,11 @@ class Replica(JSONSerializable):
         data_source: DataSource,
         descriptors: list[DescriptorSet],
         target_props: list[TargetProperty],
-        prep_settings: DataPrepSettings,
+        pipeline: DatasetPipeline,
         model: QSPRModel,
         optimizer: HyperparameterOptimization,
         assessors: list[ModelAssessor],
+        subsets: dict[str, tuple[DataSplit, str, int]],
         random_seed: int,
     ):
         """Initializes the replica.
@@ -83,14 +85,18 @@ class Replica(JSONSerializable):
                 Descriptor sets to use.
             target_props (list[TargetProperty]):
                 Target properties to use.
-            prep_settings (DataPrepSettings):
-                Data preparation settings to use.
+            pipeline (DatasetPipeline):
+                Feature processing pipeline to use for the replica.
             model (QSPRModel):
                 Model to use for the replica.
             optimizer (HyperparameterOptimization):
                 Hyperparameter optimizer to use.
             assessors (list[ModelAssessor]):
                 Model assessors to use.
+            subsets (dict[str, tuple[DataSplit, str, int]]):
+                Dictionary mapping assessor names to tuples of data split, set 
+                (Train/Test), and fold index. Used to apply assessors to subsets of 
+                the data.
             random_seed (int):
                 Random seed to use for all random operations withing the replica.
         """
@@ -99,9 +105,10 @@ class Replica(JSONSerializable):
         self.dataSource = data_source
         self.descriptors = descriptors
         self.targetProps = target_props
-        self.prepSettings = prep_settings
+        self.pipeline = pipeline
         self.optimizer = optimizer
         self.assessors = assessors
+        self.subsets = subsets
         self.randomSeed = random_seed
         self.ds = None
         self.results = None
@@ -214,17 +221,6 @@ class Replica(JSONSerializable):
             self.ds.randomState = self.randomSeed
             self.ds.save()
 
-    def prepData(self):
-        """Prepares the data set for this replica.
-
-        Raises:
-            ValueError:
-                If the data set has not been initialized.
-        """
-        if self.ds is None:
-            raise ValueError("Data set not initialized. Call initData first.")
-        self.ds.prepareDataset(**deepcopy(self.prepSettings.__dict__), )
-
     def initModel(self):
         """Initializes the model for this replica. This includes
         initializing the model from the data set and optimizing
@@ -237,7 +233,7 @@ class Replica(JSONSerializable):
         if self.ds is None:
             raise ValueError("Data set not initialized. Call initData first.")
         self.model.name = f"{self.id}_{self.ds.name}"
-        self.model.initFromDataset(self.ds)
+        self.model.initFromData(self.ds, self.pipeline)
         self.model.initRandomState(self.randomSeed)
         if self.optimizer is not None:
             self.optimizer.optimize(self.model, self.ds)
@@ -261,7 +257,27 @@ class Replica(JSONSerializable):
             raise ValueError("Model not initialized. Call initModel first.")
         self.results = None
         for assessor in self.assessors:
-            scores = assessor(self.model, self.ds, save=True)
+            if assessor.name in self.subsets:
+                # FIXME: this is a temporary fix to pass consistency check
+                # previously the KFold split random state was not explicitly set but
+                # only initialized in assessor.__call__ method where the seed now has 
+                # the Replica seed instead of the original dataset seed
+                assessor.split.random_state = self.randomSeed #FIXME
+                    
+                # apply assessor to subset of data only if specified
+                subset = self.subsets[assessor.name]
+                fold = [fold for fold in self.ds.split(subset[0])][subset[2]]
+                indices = fold[0] if subset[1] == "Train" else fold[1]
+                # FIXME: this is a temporary fix to pass consistency check
+                # previously the filters were only fitted on the training set of 
+                # the initial train/test split set on the dataset.
+                # instead of each individual fold trainingset
+                if "benchmarkfilter" in self.pipeline.steps.keys(): # FIXME
+                    self.pipeline.steps["benchmarkfilter"].fit(self.ds[indices].getDescriptors()) # FIXME
+                    self.pipeline.fixed = ["benchmarkfilter"] # FIXME
+                scores = assessor(self.model, self.ds[indices], self.pipeline, save=True, order=indices)
+            else:
+                scores = assessor(self.model, self.ds, self.pipeline, save=True)
             if isinstance(scores, float):
                 scores = np.array([scores])
             scores_df = pd.DataFrame()
@@ -273,7 +289,7 @@ class Replica(JSONSerializable):
                         tp = self.targetProps[0]
                     score_df = pd.DataFrame(
                         {
-                            "Assessor": [assessor.__class__.__name__],
+                            "Assessor": [assessor.name],
                             "ScoreFunc":
                                 [
                                     (
@@ -292,7 +308,7 @@ class Replica(JSONSerializable):
                     for tp_score, tp in zip(fold_score, self.targetProps):
                         score_df = pd.DataFrame(
                             {
-                                "Assessor": [assessor.__class__.__name__],
+                                "Assessor": [assessor.name],
                                 "ScoreFunc":
                                     [
                                         (

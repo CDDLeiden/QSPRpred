@@ -7,20 +7,25 @@ To add a new data splitter:
 from typing import Iterable
 
 import numpy as np
-from sklearn.impute import SimpleImputer
 
 from qsprpred.data.sampling.splits import (
-    ClusterSplit,
     DataSplit,
-    RandomSplit,
+    ClusterSplit,
+    GBMTDataSplit,
+    GBMTRandomSplit,
     ScaffoldSplit,
 )
-from qsprpred.data.tables.qspr import QSPRTable
+from qsprpred.utils.interfaces.randomized import Randomized
+from qsprpred.data.tables.interfaces.data_set_dependent import DataSetDependent
+import pandas as pd
 from qsprpred.extra.data.tables.pcm import PCMDataSet
+
+from qsprpred.data.tables.qspr import QSPRTable
 from qsprpred.tasks import TargetProperty
+from sklearn.impute import SimpleImputer
 
 
-class PCMSplit(DataSplit):
+class PCMSplit(DataSplit, Randomized, DataSetDependent):
     """
     Splits a dataset into train and test set such that the subsets are balanced with
     respect to each of the protein targets.
@@ -30,21 +35,41 @@ class PCMSplit(DataSplit):
 
     Attributes:
         dataset (PCMDataSet): The dataset to split.
-        splitter (DataSplit): The splitter to use on the initial clusters.
+        splitter (GBMTDataSplit): The splitter to use on the initial clusters.
+        seed (int): The random seed to use for the splitter if it is a RandomSplit or
+            ClusterSplit (Can also be set on the splitter itself).
+        data_set (PCMDataSet): The data set attached to this object.
     """
-    def __init__(self, splitter: DataSplit, dataset: PCMDataSet | None = None) -> None:
-        super().__init__(dataset)
+    def __init__(
+        self,
+        splitter: GBMTDataSplit,
+        seed = None,
+        data_set: PCMDataSet | None = None
+    ) -> None:
+        super().__init__(data_set)
         self.splitter = splitter
 
-        # Check that splitter is either RandomSplit, ScaffoldSplit or ClusterSplit
+        # Check that splitter is either GBMTRandomSplit, ScaffoldSplit or ClusterSplit
         assert isinstance(
-            self.splitter, (RandomSplit, ScaffoldSplit, ClusterSplit)
-        ), "Splitter must be either RandomSplit, ScaffoldSplit or ClusterSplit!"
+            self.splitter, (GBMTRandomSplit, ScaffoldSplit, ClusterSplit)
+        ), "Splitter must be either GBMTRandomSplit, ScaffoldSplit or ClusterSplit!"
 
-        if isinstance(self.splitter, (RandomSplit, ClusterSplit)):
-            self.splitter.randomState = (
-                dataset.randomState if dataset is not None else None
-            )
+        if hasattr(self.splitter, "randomState"):
+            if seed is None:
+                self.randomState = self.splitter.randomState
+            else:
+                self.randomState = seed
+        
+
+    @property
+    def randomState(self) -> int:
+        return self._seed
+
+    @randomState.setter
+    def randomState(self, seed: int | None):
+        self._seed = seed
+        if hasattr(self.splitter, "randomState"):
+            self.splitter.randomState = seed
 
     def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
         """
@@ -65,19 +90,26 @@ class PCMSplit(DataSplit):
             input data matrix X (note that these are integer indices, rather than a
             pandas index!)
         """
+        assert self.hasDataSet, (
+            "No dataset attached to this splitter, set dataset with setDataSet()"
+        )
+        assert isinstance(self.getDataSet(), PCMDataSet), (
+            "PCMSplit only works for PCM datasets, set a PCMDataSet with setDataSet()"
+        )
+        
         ds = self.getDataSet()
         df = ds.getDF()
         indices = df.index.tolist()
         proteins = df[ds.proteinIDProp].unique()
         task = ds.targetProperties[0].task
         th = ds.targetProperties[0].th if task.isClassification() else None
-        assert (
-            len(ds.targetProperties) == 1
-        ), "PCMSplit only works for single-task datasets!"
         # TODO: Add support for multi-target (create a multi-task PCM dataset)
         # with all target-task combinations as different columns and split that
         # dataset with the given splitter
-        # Pivot dataframe to get a matrix with protein targets as columns
+        assert (
+            len(ds.targetProperties) == 1
+        ), "PCMSplit only works for single-task datasets!"
+        
         df_mt = df.pivot(
             index=ds.smilesProp,
             columns=ds.proteinIDProp,
@@ -95,12 +127,13 @@ class PCMSplit(DataSplit):
             df=df_mt,
             smiles_col=ds.smilesProp,
             target_props=mt_targetProperties,
+            random_state=ds.randomState,
         )
-        ds_mt.randomState = ds.randomState
-        ds_mt.split(self.splitter)
+        _, mt_test_indices = next(ds_mt.split(self.splitter))
+
         # Convert MT indices to indices of original PCM dataset
         test_indices = []
-        for i in ds_mt.X_ind.index:
+        for i in mt_test_indices:
             # Get SMILES and non-NaN targets for index i
             smiles = df_mt.loc[i, ds_mt.smilesProp]
             cols = df_mt.loc[i, :].dropna().index
@@ -117,79 +150,88 @@ class PCMSplit(DataSplit):
         return iter([(train_indices, test_indices)])
 
 
-class LeaveTargetsOut(DataSplit):
-    def __init__(self, targets: list[str], dataset: PCMDataSet | None = None):
+class LeaveTargetsOut(DataSplit, DataSetDependent):
+    def __init__(self, targets: list[str], data_set: PCMDataSet | None = None):
         """Creates a leave target out splitter.
 
         Args:
             targets (list): the identifiers of the targets to leave out as test set
-            dataset (PCMDataset): a `PCMDataset` instance to split
+            data_set (PCMDataset): the dataset to split
         """
-
-        super().__init__(dataset)
+        super().__init__(data_set)
         self.targets = list(set(targets))
 
     def split(self, X, y):
-        ds = self.getDataSet()
-        ds_targets = ds.getProteinKeys()
-        for target in self.targets:
-            assert target in ds_targets, f"Target key '{target}' not in dataset!"
-            ds_targets.remove(target)
-        mask = ds.getProperty(ds.proteinIDProp).isin(ds_targets).values
-        indices = np.array(list(range(len(ds))))
+        assert self.hasDataSet, (
+            "No dataset attached to this splitter, set dataset with setDataSet()"
+        )
+        assert isinstance(self.getDataSet(), PCMDataSet), (
+            "LeaveTargetsOut only works for PCM datasets, set a PCMDataSet with setDataSet()"
+        )
+        
+        protein_prop = self.getDataSet().getDF()[self.getDataSet().proteinIDProp]
+        mask = protein_prop.isin(self.targets)
+        mask = mask.loc[X.index].reset_index(drop=True)
+        
+        indices = np.array(list(range(len(X))))
         train = indices[mask]
         test = indices[~mask]
         return iter([(train, test)])
 
 
-class TemporalPerTarget(DataSplit):
+class TemporalPerTarget(DataSplit, DataSetDependent):
     def __init__(
         self,
-        year_col: str,
-        split_years: dict[str, int],
-        firts_year_per_compound: bool = True,
-        dataset: PCMDataSet | None = None,
+        time_prop: str,
+        split_time: dict[str, int],
+        first_time_per_compound: bool = True,
+        data_set: PCMDataSet | None = None,
     ):
         """Creates a temporal split that is consistent across targets.
 
         Args:
-            year_col (str):
-                the name of the column in the dataframe that
-                contains the year information
-            split_years (dict[str,int]):
+            time_prop (str):
+                the name of the property in the dataset that contains the time information
+            split_time (dict[str,int]):
                 a dictionary with target keys as keys
-                and split years as values
-            firts_year_per_compound (bool):
-                if True, the first year a compound appears in the dataset is used
+                and split times as values
+            first_time_per_compound (bool):
+                if True, the first time a compound appears in the dataset is used
                 for all targets
-            dataset (PCMDataset):
-                a `PCMDataset` instance to split
+            data_set (PCMDataset):
+                the dataset to split containing the time information
         """
-        super().__init__(dataset)
-        self.splitYears = split_years
-        self.yearCol = year_col
-        self.firstYearPerCompound = firts_year_per_compound
+        super().__init__(data_set)
+        self.timeProp = time_prop
+        self.splitTime = split_time
+        self.firstTimePerCompound = first_time_per_compound
 
     def split(self, X, y) -> Iterable[tuple[list[int], list[int]]]:
+        assert self.hasDataSet, (
+            "No dataset attached to this splitter, set dataset with setDataSet()"
+        )
+        assert isinstance(self.getDataSet(), PCMDataSet), (
+            "TemporalPerTarget only works for PCM datasets, set a PCMDataSet with setDataSet()"
+        )
+        # Add the smiles, target and time properties to target values
         ds = self.getDataSet()
-        df = ds.getDF()
+        df = ds.getDF().copy()
         indices = df.index.tolist()
 
-        # Set the first year a compound appears in the dataset as the year
+        # Set the first time a compound appears in the dataset as the time
         # of the compound for all targets
-        if self.firstYearPerCompound:
-            first_years = df.groupby(ds.smilesProp)[self.yearCol].min()
-            df[self.yearCol + "_first"] = df[ds.smilesProp].map(first_years)
-            self.yearCol += "_first"
+        if self.firstTimePerCompound:
+            first_appearances = df.groupby(ds.smilesProp)[self.timeProp].min()
+            df["time_prop"] = df[ds.smilesProp].map(first_appearances)
 
         train_indices = []
         test_indices = []
 
-        for target, split_year in self.splitYears.items():
+        for target, split_year in self.splitTime.items():
             df_target = df[df[ds.proteinIDProp] == target]
             # Get indices of the train and test set
-            train = df_target[df_target[self.yearCol] <= split_year].index.tolist()
-            test = df_target[df_target[self.yearCol] > split_year].index.tolist()
+            train = df_target[df_target["time_prop"] <= split_year].index.tolist()
+            test = df_target[df_target["time_prop"] > split_year].index.tolist()
             # Check if there is data for the target before/after the split year
             if len(train) == 0:
                 raise ValueError(

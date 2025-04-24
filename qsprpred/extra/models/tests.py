@@ -127,14 +127,13 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
             parameters = None
 
         # initialize dataset
-        prep = self.getDefaultPrep()
-        prep["feature_calculators"] = prep["feature_calculators"] + [
+        pipeline = self.getDefaultPrep()
+        pipeline.feature_calculators = pipeline.feature_calculators + [
             ProDec(["Sneath"], self.getMSAProvider(self.generatedDataPath))
         ]
         dataset = self.createPCMDataSet(
             name=f"{model_name}_{props[0]['task']}_pcm",
             target_props=props,
-            preparation_settings=prep,
             random_state=random_state[0],
         )
         # initialize model for training from class
@@ -144,7 +143,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
             parameters=parameters,
             random_state=random_state[0],
         )
-        self.fitTest(model, dataset)
+        self.fitTest(model, dataset, pipeline)
         predictor = SklearnPCMModel(
             name=f"{model_name}_{props[0]['task']}", base_dir=model.baseDir
         )
@@ -166,7 +165,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
                     parameters=parameters,
                     random_state=random_state[1],
                 )
-                self.fitTest(comparison_model, dataset)
+                self.fitTest(comparison_model, dataset, pipeline)
                 self.predictorTest(
                     predictor,  # model loaded from file
                     subset,
@@ -230,14 +229,13 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
                 "name": "CL",
                 "task": task
             }],
-            preparation_settings=self.getDefaultPrep(),
         )
         # initialize model for training from class
         model = self.getModel(
             name=f"{model_name}_{task}",
             random_state=random_state[0],
         )
-        self.fitTest(model, dataset)
+        self.fitTest(model, dataset, self.getDefaultPrep())
         # load model from file
         predictor = RandomModel(
             name=f"{model_name}_{task}",
@@ -253,7 +251,7 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
                 name=f"{model_name}_{task}",
                 random_state=random_state[1],
             )
-            self.fitTest(comparison_model, dataset)
+            self.fitTest(comparison_model, dataset, self.getDefaultPrep())
             self.predictorTest(
                 predictor,  # model loaded from file
                 dataset,
@@ -279,8 +277,7 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
                     "task": TargetTasks.REGRESSION,
                     "imputer": SimpleImputer(strategy="mean"),
                 },
-            ],
-            preparation_settings=self.getDefaultPrep(),
+            ]
         )
         # test classifier
         # initialize model for training from class
@@ -288,7 +285,7 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
             name=f"{model_name}_multitask_regression",
             random_state=random_state[0],
         )
-        self.fitTest(model, dataset)
+        self.fitTest(model, dataset, self.getDefaultPrep())
         predictor = RandomModel(
             name=f"{model_name}_multitask_regression",
             base_dir=model.baseDir,
@@ -303,7 +300,7 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
                 name=f"{model_name}_multitask_regression",
                 random_state=random_state[1],
             )
-            self.fitTest(comparison_model, dataset)
+            self.fitTest(comparison_model, dataset, self.getDefaultPrep())
             self.predictorTest(
                 predictor,
                 dataset,
@@ -337,7 +334,6 @@ class TestRandomModelClassification(RandomBaseModelTestCase):
                 "task": task,
                 "th": th
             }],
-            preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
         # initialize model for training from class
@@ -347,7 +343,7 @@ class TestRandomModelClassification(RandomBaseModelTestCase):
             parameters=parameters,
             random_state=random_state[0],
         )
-        self.fitTest(model, dataset)
+        self.fitTest(model, dataset, self.getDefaultPrep())
         predictor = RandomModel(
             name=f"{model_name}_{task}",
             base_dir=model.baseDir,
@@ -365,7 +361,7 @@ class TestRandomModelClassification(RandomBaseModelTestCase):
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(comparison_model, dataset)
+            self.fitTest(comparison_model, dataset, self.getDefaultPrep())
             self.predictorTest(
                 predictor,  # model loaded from file
                 dataset,
@@ -394,16 +390,15 @@ class TestRandomModelClassificationMultiTask(RandomBaseModelTestCase):
                     "name": "fu",
                     "task": TargetTasks.SINGLECLASS,
                     "th": [0.3],
-                    "imputer": SimpleImputer(strategy="mean"),
+                    "imputer": SimpleImputer(strategy="most_frequent"),
                 },
                 {
                     "name": "CL",
                     "task": TargetTasks.SINGLECLASS,
                     "th": [6.5],
-                    "imputer": SimpleImputer(strategy="mean"),
+                    "imputer": SimpleImputer(strategy="most_frequent"),
                 },
             ],
-            preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
         # initialize model for training from class
@@ -413,7 +408,7 @@ class TestRandomModelClassificationMultiTask(RandomBaseModelTestCase):
             parameters=parameters,
             random_state=random_state[0],
         )
-        self.fitTest(model, dataset)
+        self.fitTest(model, dataset, self.getDefaultPrep())
         predictor = RandomModel(
             name=f"{model_name}_multitask_classification",
             base_dir=model.baseDir,
@@ -431,7 +426,7 @@ class TestRandomModelClassificationMultiTask(RandomBaseModelTestCase):
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(comparison_model, dataset)
+            self.fitTest(comparison_model, dataset, self.getDefaultPrep())
             self.predictorTest(
                 predictor,  # model loaded from file
                 dataset,

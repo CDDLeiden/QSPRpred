@@ -12,6 +12,8 @@ from rdkit.Chem import Draw
 from ..data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ..utils.serialization import JSONSerializable
 from .model import QSPRModel
+from ..data.processing.pipeline import DatasetPipeline
+from ..data.sampling.splits import DataSplit
 
 
 class FitMonitor(JSONSerializable, ABC):
@@ -84,14 +86,24 @@ class AssessorMonitor(FitMonitor):
     """Base class for monitoring the assessment of a model."""
     @abstractmethod
     def onAssessmentStart(
-        self, model: QSPRModel, data: QSPRDataSet, assesment_type: str
+        self,
+        model: QSPRModel,
+        data: QSPRDataSet,
+        pipeline: DatasetPipeline,
+        assessment_name: str,
+        parameters: dict,
+        split: DataSplit,
+        
     ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
             data (QSPRDataSet): data set used in assessment
-            assesment_type (str): type of assessment
+            pipeline (DatasetPipeline): pipeline used in assessment
+            assessment_name (str): type of assessment
+            parameters (dict): parameters used in the assessment
+            split (DataSplit): split used in the assessment
         """
 
     @abstractmethod
@@ -123,7 +135,10 @@ class AssessorMonitor(FitMonitor):
 
     @abstractmethod
     def onFoldEnd(
-        self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
+        self,
+        model_fit: Any | tuple[Any, int],
+        fold_predictions: pd.DataFrame,
+        scores: list[float] | float,
     ):
         """Called after each fold of the assessment.
 
@@ -131,6 +146,8 @@ class AssessorMonitor(FitMonitor):
             model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or
                                              tuple containing the fitted estimator and
                                              the number of epochs it was trained for
+            fold_predictions (pd.DataFrame): predictions of the current fold
+            scores (list[float] | float): scores of the current fold
         """
 
 
@@ -237,14 +254,24 @@ class NullMonitor(HyperparameterOptimizationMonitor):
         """
 
     def onAssessmentStart(
-        self, model: QSPRModel, data: QSPRDataSet, assesment_type: str
+        self,
+        model: QSPRModel,
+        data: QSPRDataSet,
+        pipeline: DatasetPipeline,
+        assessment_name: str,
+        parameters: dict,
+        split: DataSplit,
+        
     ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
             data (QSPRDataSet): data set used in assessment
-            assesment_type (str): type of assessment
+            pipeline (DatasetPipeline): pipeline used in assessment
+            assessment_name (str): type of assessment
+            parameters (dict): parameters used in the assessment
+            split (DataSplit): split used in the assessment
         """
 
     def onAssessmentEnd(self, predictions: pd.DataFrame):
@@ -273,7 +300,10 @@ class NullMonitor(HyperparameterOptimizationMonitor):
         """
 
     def onFoldEnd(
-        self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
+        self,
+        model_fit: Any | tuple[Any, int],
+        fold_predictions: pd.DataFrame,
+        scores: list[float] | float,
     ):
         """Called after each fold of the assessment.
 
@@ -281,6 +311,8 @@ class NullMonitor(HyperparameterOptimizationMonitor):
             model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or
                                              tuple containing the fitted estimator and
                                              the number of epochs it was trained for
+            fold_predictions (pd.DataFrame): predictions of the current fold
+            scores (list[float] | float): scores of the current fold
         """
 
     def onOptimizationStart(
@@ -404,17 +436,28 @@ class ListMonitor(HyperparameterOptimizationMonitor):
             monitor.onBatchEnd(batch, loss)
 
     def onAssessmentStart(
-        self, model: QSPRModel, data: QSPRDataSet, assesment_type: str
+        self,
+        model: QSPRModel,
+        data: QSPRDataSet,
+        pipeline: DatasetPipeline,
+        assessment_name: str,
+        parameters: dict,
+        split: DataSplit
     ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
             data (QSPRDataSet): data set used in assessment
-            assesment_type (str): type of assessment
+            pipeline (DatasetPipeline): pipeline used in assessment
+            assessment_name (str): type of assessment
+            parameters (dict): parameters used in the assessment
+            split (DataSplit): split used in the assessment
         """
         for monitor in self.monitors:
-            monitor.onAssessmentStart(model, data, assesment_type)
+            monitor.onAssessmentStart(
+                model, data, pipeline, assessment_name, parameters, split
+            )
 
     def onAssessmentEnd(self, predictions: pd.DataFrame):
         """Called after the assessment has finished.
@@ -446,7 +489,10 @@ class ListMonitor(HyperparameterOptimizationMonitor):
             monitor.onFoldStart(fold, X_train, y_train, X_test, y_test)
 
     def onFoldEnd(
-        self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
+        self,
+        model_fit: Any | tuple[Any, int],
+        fold_predictions: pd.DataFrame,
+        scores: list[float] | float,
     ):
         """Called after each fold of the assessment.
 
@@ -454,9 +500,11 @@ class ListMonitor(HyperparameterOptimizationMonitor):
             model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or
                                              tuple containing the fitted estimator and
                                              the number of epochs it was trained for
+            fold_predictions (pd.DataFrame): predictions of the current fold
+            scores (list[float] | float): scores of the current fold
         """
         for monitor in self.monitors:
-            monitor.onFoldEnd(model_fit, fold_predictions)
+            monitor.onFoldEnd(model_fit, fold_predictions, scores)
 
     def onOptimizationStart(
         self, model: QSPRModel, data: QSPRDataSet, config: dict, optimization_type: str
@@ -526,9 +574,12 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         model (QSPRModel): model to optimize
         data (QSPRDataSet): dataset used in optimization
 
-        assessmentType (str): type of current assessment
+        assessmentName (str): type of current assessment
         assessmentModel (QSPRModel): model to assess in current assessment
         assessmentDataset (QSPRDataSet): data set used in current assessment
+        assessmentPipeline (DatasetPipeline): pipeline used in current assessment
+        assessmentParameters (dict): parameters used in current assessment
+        assessmentSplit (DataSplit): split used in current assessment
         foldData (dict): dictionary of input data, keyed by the fold index, of the
             current assessment
         predictions (pd.DataFrame): predictions for the dataset of the current assessment
@@ -573,7 +624,12 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         # assessment data
         self.assessmentModel = None
         self.assessmentDataset = None
+        self.assessmentPipeline = None
+        self.assessmentName = None
+        self.assessmentParameters = None
+        self.assessmentSplit = None
         self.foldData = {}
+        self.foldScores = {}
         self.predictions = None
         self.estimators = {}
         self.currentFold = None
@@ -653,18 +709,30 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         self.iteration += 1
 
     def onAssessmentStart(
-        self, model: QSPRModel, data: QSPRDataSet, assesment_type: str
+        self,
+        model: QSPRModel,
+        data: QSPRDataSet,
+        pipeline: DatasetPipeline,
+        assessment_name: str,
+        parameters: dict,
+        split: DataSplit,
     ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
             data (QSPRDataSet): data set used in assessment
-            assesment_type (str): type of assessment
+            pipeline (DatasetPipeline): pipeline used in assessment
+            assessment_name (str): type of assessment
+            parameters (dict): parameters used in the assessment
+            split (DataSplit): split used in the assessment
         """
         self.assessmentModel = model
         self.assessmentDataset = data
-        self.assessmentType = assesment_type
+        self.assessmentPipeline = pipeline
+        self.assessmentName = assessment_name
+        self.assessmentParameters = parameters
+        self.assessmentSplit = split
 
     def onAssessmentEnd(self, predictions: pd.DataFrame):
         """Called after the assessment has finished.
@@ -700,7 +768,10 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         }
 
     def onFoldEnd(
-        self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
+        self,
+        model_fit: Any | tuple[Any, int],
+        fold_predictions: pd.DataFrame,
+        scores: list[float] | float,
     ):
         """Called after each fold of the assessment.
 
@@ -709,8 +780,12 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
                                              tuple containing the fitted estimator and
                                              the number of epochs it was trained for
             fold_predictions (pd.DataFrame): predictions of the current fold
+            scores (list[float] | float): scores of the current fold
         """
+        # not saving fold_predictions, as they are already stored in self.predictions
+        # after the last fold
         self.estimators[self.currentFold] = model_fit
+        self.foldScores[self.currentFold] = scores
         self.fits[self.currentFold] = self._getFit()
         self._clearFit()
 
@@ -718,16 +793,37 @@ class BaseMonitor(HyperparameterOptimizationMonitor):
         """Clear the assessment data."""
         self.assessmentModel = None
         self.asssessmentDataset = None
+        self.assessmentPipeline = None
+        self.assessmentName = None
+        self.assessmentParameters = None
+        self.assessmentSplit = None
         self.foldData = {}
         self.predictions = None
         self.estimators = {}
+        self.foldScores = {}
+        self.currentFold = None
         self.fits = {}
 
-    def _get_assessment(self) -> tuple[QSPRModel, QSPRDataSet, pd.DataFrame, dict]:
+    def _get_assessment(self) -> tuple[
+        QSPRModel,
+        QSPRDataSet,
+        DatasetPipeline,
+        str,
+        dict,
+        DataSplit,
+        pd.DataFrame,
+        dict,
+        dict,
+        dict
+        ]:
         """Return the assessment data."""
         return {
             "assessmentModel": self.assessmentModel,
             "assessmentDataset": self.assessmentDataset,
+            "assessmentPipeline": self.assessmentPipeline,
+            "assessmentName": self.assessmentName,
+            "assessmentParameters": self.assessmentParameters,
+            "assessmentSplit": self.assessmentSplit,
             "foldData": self.foldData,
             "predictions": self.predictions,
             "estimators": self.estimators,
@@ -896,22 +992,33 @@ class FileMonitor(BaseMonitor):
             )
 
     def onAssessmentStart(
-        self, model: QSPRModel, data: QSPRDataSet, assesment_type: str
+        self,
+        model: QSPRModel,
+        data: QSPRDataSet,
+        pipeline: DatasetPipeline,
+        assessment_name: str,
+        parameters: dict,
+        split: DataSplit,
     ):
         """Called before the assessment has started.
 
         Args:
             model (QSPRModel): model to assess
             data (QSPRDataSet): data set used in assessment
-            assesment_type (str): type of assessment
+            pipeline (DatasetPipeline): pipeline used in assessment
+            assessment_name (str): type of assessment
+            parameters (dict): parameters used in the assessment
+            split (DataSplit): split used in the assessment
         """
-        super().onAssessmentStart(model, data, assesment_type)
+        super().onAssessmentStart(
+            model, data, pipeline, assessment_name, parameters, split
+        )
         self.outDir = self.outDir or model.outDir
         if self.saveAssessments:
             if self.iteration is not None:
-                self.assessmentPath = f"{self.optimizationItPath}/{self.assessmentType}"
+                self.assessmentPath = f"{self.optimizationItPath}/{self.assessmentName}"
             else:
-                self.assessmentPath = f"{self.outDir}/{self.assessmentType}"
+                self.assessmentPath = f"{self.outDir}/{self.assessmentName}"
             os.makedirs(self.assessmentPath, exist_ok=True)
 
     def onAssessmentEnd(self, predictions: pd.DataFrame):
@@ -922,8 +1029,26 @@ class FileMonitor(BaseMonitor):
         """
         super().onAssessmentEnd(predictions)
         if self.saveAssessments:
+            # save metadata to json
+            metadata = {
+                "assessmentModel": self.assessmentModel.name,
+                "assessmentDataset": self.assessmentDataset.name,
+                "assessmentPipeline": self.assessmentPipeline.__str__(),
+                "assessmentParameters": self.assessmentParameters,
+                "assessmentSplit": self.assessmentSplit.__class__.__name__,
+                "targetProperties": self.assessmentDataset.getTargetPropertiesNames(),
+                "foldScores": self.foldScores,
+            }
+            if self.optimizationType is not None:
+                metadata["optimizationType"] = self.optimizationType
+                metadata["hyperParamOpt_iteration"] = self.iteration
+
+            # save metadata to json
+            with open(f"{self.assessmentPath}/{self.assessmentName}_settings.json", "w") as f:
+                json.dump(metadata, f, indent=4)
+            
             predictions.to_csv(
-                f"{self.assessmentPath}/{self.assessmentType}_predictions.tsv",
+                f"{self.assessmentPath}/{self.assessmentName}_predictions.tsv",
                 sep="\t"
             )
 
@@ -952,7 +1077,7 @@ class FileMonitor(BaseMonitor):
                 self.fitPath = f"{self.optimizationItPath}"
             if self.currentFold is not None:
                 self.fitPath = (
-                    f"{self.fitPath}/{self.assessmentType}/fold_{self.currentFold}"
+                    f"{self.fitPath}/{self.assessmentName}/fold_{self.currentFold}"
                 )
             os.makedirs(self.fitPath, exist_ok=True)
 
@@ -987,6 +1112,7 @@ class WandBMonitor(BaseMonitor):
 
         wandb.login()
 
+        self.run = None
         self.projectName = project_name
         self.kwargs = kwargs
 
@@ -1011,10 +1137,15 @@ class WandBMonitor(BaseMonitor):
         config = {
             "fold": fold,
             "model": self.assessmentModel.name,
-            "assessmentType": self.assessmentType,
+            "assessmentName": self.assessmentName,
+            "assessmentDataset": self.assessmentDataset.name,
+            "assessmentPipeline": self.assessmentPipeline.__str__(),
+            "assessmentParameters": self.assessmentParameters,
+            "assessmentSplit": self.assessmentSplit.__class__.__name__,
+            "targetProperties": self.assessmentDataset.getTargetPropertiesNames(),
         }
         # add hyperparameter optimization parameters if available
-        if hasattr(self, "optimizationType"):
+        if self.optimizationType is not None:
             config["optimizationType"] = self.optimizationType
             config.update(self.parameters[self.iteration])
             config["hyperParamOpt_iteration"] = self.iteration
@@ -1023,29 +1154,37 @@ class WandBMonitor(BaseMonitor):
 
         group = (
             f"{self.model.name}_{self.optimizationType}_{self.iteration}"
-            if hasattr(self, "optimizationType") else f"{self.assessmentModel.name}"
+            if self.optimizationType is not None
+            else f"{self.assessmentModel.name}"
         )
-        name = f"{group}_{self.assessmentType}_{fold}"
+        name = f"{group}_{self.assessmentName}_{fold}"
 
-        self.wandb.init(
+        print("Initializing wandb run for fold:", self.assessmentModel.outDir)
+        self.run = self.wandb.init(
             project=self.projectName,
             config=config,
             name=name,
             group=group,
-            dir=f"{self.assessmentModel.outDir}",
+            dir=self.assessmentModel.outDir,
             **self.kwargs,
         )
 
     def onFoldEnd(
-        self, model_fit: Any | tuple[Any, int], fold_predictions: pd.DataFrame
+        self,
+        model_fit: Any | tuple[Any, int],
+        fold_predictions: pd.DataFrame,
+        scores: list[float] | float,
     ):
         """Called after each fold of the assessment.
 
         Args:
-            model_fit (Any |tuple[Any, int]):
-                fitted estimator of the current fold
+            model_fit (Any|tuple[Any, int]): fitted estimator of the current fold, or
+                                             tuple containing the fitted estimator and
+                                             the number of epochs it was trained for
+            fold_predictions (pd.DataFrame): predictions of the current fold
+            scores (list[float] | float): scores of the current fold
         """
-        super().onFoldEnd(model_fit, fold_predictions)
+        super().onFoldEnd(model_fit, fold_predictions, scores)
 
         fold_predictions_copy = deepcopy(fold_predictions)
 
@@ -1066,8 +1205,16 @@ class WandBMonitor(BaseMonitor):
 
         wandbTable = self.wandb.Table(data=fold_predictions_copy)
 
-        self.wandb.log({"Test Results": wandbTable})
-        self.wandb.finish()
+        self.run.log({"Fold predictions": wandbTable})
+        if isinstance(scores, list):
+            tasks = self.assessmentDataset.getTargetPropertiesNames()
+            scores = {tasks[i]: scores[i] for i in range(len(tasks))}
+        else:
+            scores = {"fold score": scores}
+        self.run.log(scores)
+        
+        self.run.finish()
+        self.run = None
 
     def onFitStart(
         self,
@@ -1084,13 +1231,14 @@ class WandBMonitor(BaseMonitor):
         """
         super().onFitStart(model, X_train, y_train, X_val, y_val)
         # initialize wandb run if not already initialized
-        if not self.wandb.run:
-            self.wandb.init(
+        if not self.run:
+            print("Initializing wandb run for fit:", self.fitModel.outDir)
+            self.run = self.wandb.init(
                 project=self.projectName,
                 config={"model": self.fitModel.name},
                 name=f"{self.fitModel.name}_fit",
                 group=self.fitModel.name,
-                dir=f"{self.fitModel.outDir}",
+                dir=self.fitModel.outDir,
                 **self.kwargs,
             )
 
@@ -1102,10 +1250,11 @@ class WandBMonitor(BaseMonitor):
             best_epoch (int | None): index of the best epoch
         """
         super().onFitEnd(estimator, best_epoch)
-        self.wandb.log({"best_epoch": best_epoch})
-        # finish wandb run if not already finished
-        if not hasattr(self, "assessmentType"):
-            self.wandb.finish()
+        self.run.log({"best_epoch": best_epoch})
+        # finish wandb run here if not fit from Assessor
+        if not hasattr(self, "assessmentName"):
+            self.run.finish()
+            self.run = None
 
     def onEpochEnd(self, epoch: int, train_loss: float, val_loss: float | None = None):
         """Called after each epoch of the training.
@@ -1116,7 +1265,7 @@ class WandBMonitor(BaseMonitor):
             val_loss (float | None): validation loss of the current epoch
         """
         super().onEpochEnd(epoch, train_loss, val_loss)
-        self.wandb.log({"epoch": epoch, "train_loss": train_loss, "val_loss": val_loss})
+        self.run.log({"epoch": epoch, "train_loss": train_loss, "val_loss": val_loss})
 
     def onBatchEnd(self, batch: int, loss: float):
         """Called after each batch of the training.
@@ -1126,4 +1275,4 @@ class WandBMonitor(BaseMonitor):
             loss (float): loss of the current batch
         """
         super().onBatchEnd(batch, loss)
-        self.wandb.log({"batch": batch, "loss": loss})
+        self.run.log({"batch": batch, "loss": loss})

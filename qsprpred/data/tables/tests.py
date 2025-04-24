@@ -8,18 +8,20 @@ from parameterized import parameterized
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import KFold, ShuffleSplit
 
-from qsprpred.data.descriptors.sets import DrugExPhyschem
-from qsprpred.data.storage.tabular.simple import PandasChemStore
-from .interfaces.qspr_data_set import QSPRDataSet
-from .mol import MoleculeTable
-from ..chem.standardizers.papyrus import PapyrusStandardizer
-from ..descriptors.fingerprints import MorganFP
+from ...data.descriptors.sets import DrugExPhyschem
+from ...data.storage.tabular.simple import PandasChemStore
 from ... import TargetProperty, TargetTasks
 from ...data.tables.qspr import QSPRTable
 from ...utils.stopwatch import StopWatch
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import DataPrepCheckMixIn
 from ...utils.testing.path_mixins import DataSetsPathMixIn, PathMixIn
+
+from ..chem.standardizers.papyrus import PapyrusStandardizer
+from ..descriptors.fingerprints import MorganFP
+from .interfaces.qspr_data_set import QSPRDataSet
+from .mol import MoleculeTable
+from ..processing.pipeline import DatasetPipeline, Shuffle, DummyStep
 
 
 class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
@@ -209,11 +211,9 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(ds.targetProperties[0].task, TargetTasks.REGRESSION)
         self.assertTrue(ds.hasProperty("CL"))
         self.assertEqual(ds.targetProperties[0].name, "CL")
-        self.assertEqual(len(ds.X), len(ds))
-        self.assertEqual(len(ds.X_ind), 0)
-        self.assertEqual(len(ds.y), len(ds))
-        self.assertEqual(len(ds.y_ind), 0)
-        self.assertEqual(ds.X.shape[1], 128)
+        self.assertEqual(len(ds.getDescriptors()), len(ds))
+        self.assertEqual(len(ds.getTargets()), len(ds))
+        self.assertEqual(ds.getDescriptors().shape[1], 128)
 
     def checkConsistencyMulticlass(self, ds):
         self.assertTrue(ds.isMultiTask)
@@ -223,11 +223,11 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(ds.targetProperties[1].name, "fu")
         self.assertEqual(ds.targetProperties[0].task, TargetTasks.REGRESSION)
         self.assertEqual(ds.targetProperties[1].task, TargetTasks.REGRESSION)
-        self.assertEqual(len(ds.X), len(ds))
-        self.assertEqual(len(ds.y), len(ds))
-        self.assertEqual(len(ds.y.columns), 2)
-        self.assertEqual(ds.y.columns[0], "CL")
-        self.assertEqual(ds.y.columns[1], "fu")
+        self.assertEqual(len(ds.getDescriptors()), len(ds))
+        self.assertEqual(len(ds.getTargets()), len(ds))
+        self.assertEqual(len(ds.getTargets().columns), 2)
+        self.assertEqual(ds.getTargets().columns[0], "CL")
+        self.assertEqual(ds.getTargets().columns[1], "fu")
 
     def checkConsistencySingleclass(self, ds):
         self.assertFalse(ds.isMultiTask)
@@ -235,10 +235,10 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(len(ds.targetProperties), 1)
         self.assertEqual(ds.targetProperties[0].name, "CL")
         self.assertEqual(ds.targetProperties[0].task, TargetTasks.REGRESSION)
-        self.assertEqual(len(ds.X), len(ds))
-        self.assertEqual(len(ds.y), len(ds))
-        self.assertEqual(len(ds.y.columns), 1)
-        self.assertEqual(ds.y.columns[0], "CL")
+        self.assertEqual(len(ds.getDescriptors()), len(ds))
+        self.assertEqual(len(ds.getTargets()), len(ds))
+        self.assertEqual(len(ds.getTargets().columns), 1)
+        self.assertEqual(ds.getTargets().columns[0], "CL")
 
     def checkBadInit(self, ds):
         with self.assertRaises(AssertionError):
@@ -259,7 +259,7 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             else:
                 self.assertEqual(target_prop.task, TargetTasks.MULTICLASS)
             self.assertEqual(target_prop.name, target_names[idx])
-            y = ds.getTargets(concat=True)
+            y = ds.getTargets()
             self.assertTrue(y.columns[idx] == target_prop.name)
             if target_prop.task == TargetTasks.SINGLECLASS:
                 self.assertEqual(y[target_prop.name].unique().shape[0], 2)
@@ -275,7 +275,6 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             self.assertEqual(target_prop.task, TargetTasks.REGRESSION)
             self.assertTrue(ds.hasProperty(target_names[idx]))
             self.assertEqual(target_prop.name, target_names[idx])
-            ds.getTargets(concat=True)
 
     def testDefaults(self):
         """Test basic dataset creation and serialization with mostly default options."""
@@ -341,45 +340,46 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         self.assertTrue(isinstance(dataset_new, QSPRTable))
         self.assertIn("HBD", dataset_new.getProperties())
         dataset_new.removeProperty("HBD")
-        self.assertEqual(dataset_new.X.shape[1], 0)
+        self.assertEqual(dataset_new.getDescriptors().shape[1], 0)
         dataset_new.addDescriptors([MorganFP(radius=2, nBits=128)])
         self.checkConsistency(dataset_new)
         # test subset creation
-        features = dataset_new.getFeatures(concat=True, refit_standardizer=False)
-        targets = dataset_new.getTargets(concat=True)
+        descriptors = dataset_new.getDescriptors()
+        targets = dataset_new.getTargets()
         subset = dataset_new.getSubset(["CL"], path=self.generatedDataPath)
         props = subset.getProperties()
         self.assertIn("CL", props)
         self.assertNotIn("HBD", props)
         self.assertNotIn("Notes", props)
         self.assertEqual(len(subset), len(dataset_new))
-        features_new = subset.getFeatures(concat=True, refit_standardizer=False)
-        self.assertTrue(np.allclose(features_new, features))
-        targets_new = subset.getTargets(concat=True)
+        descriptors_new, targets_new = subset.getDescriptors(), subset.getTargets()
+        self.assertTrue(np.allclose(descriptors_new, descriptors))
         self.assertTrue(np.allclose(targets_new, targets))
         # subset only first two ids
         subset = dataset_new.getSubset(
             ["CL"], ids=list(dataset_new.getProperty(dataset_new.idProp)[0:2])
         )
         self.assertEqual(len(subset), 2)
-        self.assertEqual(subset.getFeatures(concat=True).shape[0], 2)
-        self.assertEqual(subset.getTargets(concat=True).shape[0], 2)
+        descriptors_subset = subset.getDescriptors()
+        targets_subset = subset.getTargets()
+        self.assertEqual(descriptors_subset.shape[0], 2)
+        self.assertEqual(targets_subset.shape[0], 2)
         self.assertListEqual(
-            list(subset.getFeatures(concat=True).index),
-            list(features.iloc[0:2, :].index),
+            list(descriptors_subset.index),
+            list(descriptors.iloc[0:2, :].index),
         )
         self.assertListEqual(
-            list(subset.getTargets(concat=True).index),
+            list(targets_subset.index),
             list(targets.iloc[0:2, :].index)
         )
         self.assertTrue(
             np.allclose(
-                subset.getFeatures(concat=True, refit_standardizer=False),
-                features.iloc[0:2, :],
+                descriptors_subset,
+                descriptors.iloc[0:2, :],
             )
         )
         self.assertTrue(
-            np.allclose(subset.getTargets(concat=True), targets.iloc[0:2, :])
+            np.allclose(targets_subset, targets.iloc[0:2, :])
         )
 
     def testMultitask(self):
@@ -488,32 +488,33 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         dataset_new = QSPRTable.fromFile(dataset.metaFile)
         self.checkRegression(dataset_new, ["CL"])
 
-    def testRandomStateShuffle(self):
-        dataset = self.createLargeTestDataSet()
-        # initial order
-        order = dataset.X.index.tolist()
-        seed = dataset.randomState
-        dataset.shuffle()
-        # shuffled order
-        order_next = dataset.X.index.tolist()
-        # initial and shuffled order should be different
-        self.assertNotEqual(order, order_next)
-        # save current order
-        order = order_next
-        # save data set with shuffled order
-        dataset.save()
-        # shuffle again
-        dataset.shuffle()
-        order_next = dataset.X.index.tolist()
-        # reload and check if seed and order are the same
-        dataset = QSPRTable.fromFile(dataset.metaFile)
-        self.assertEqual(dataset.randomState, seed)
-        self.assertListEqual(dataset.X.index.tolist(), order)
-        # shuffle the reloaded set and check if we got the same order as before
-        dataset.shuffle()
-        self.assertListEqual(dataset.X.index.tolist(), order_next)
+    # FIXME: make this a test for the shuffle step
+    # def testRandomStateShuffle(self):
+    #     dataset = self.createLargeTestDataSet()
+    #     # initial order
+    #     order = dataset.getDF().index.tolist()
+    #     seed = dataset.randomState
+    #     dataset.shuffle()
+    #     # shuffled order
+    #     order_next = dataset.getDF().index.tolist()
+    #     # initial and shuffled order should be different
+    #     self.assertNotEqual(order, order_next)
+    #     # save current order
+    #     order = order_next
+    #     # save data set with shuffled order
+    #     dataset.save()
+    #     # shuffle again
+    #     dataset.shuffle()
+    #     order_next = dataset.getDF().index.tolist()
+    #     # reload and check if seed and order are the same
+    #     dataset = QSPRTable.fromFile(dataset.metaFile)
+    #     self.assertEqual(dataset.randomState, seed)
+    #     self.assertListEqual(dataset.getDF().index.tolist(), order)
+    #     # shuffle the reloaded set and check if we got the same order as before
+    #     dataset.shuffle()
+    #     self.assertListEqual(dataset.getDF().index.tolist(), order_next)
 
-    def testRandomStateFeaturization(self):
+    def testRandomStateSplit(self):
         # create and save the data set
         dataset = self.createLargeTestDataSet()
         dataset.addDescriptors(
@@ -521,45 +522,42 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             featurize=False,
         )
         dataset.save()
-        # split and featurize with shuffling
+        # shuffle and split
         split = ShuffleSplit(1, test_size=0.5, random_state=dataset.randomState)
-        dataset.split(split, featurize=False)
-        dataset.featurizeSplits(shuffle=True)
-        train, test = dataset.getFeatures()
-        train_order = train.index.tolist()
-        test_order = test.index.tolist()
+        dataset.addSplit(split, "shufflesplit")
+        train, test = next(dataset.iterSplit("shufflesplit", as_type="ids"))
         # reload and check if orders are the same if we redo the split
-        # and featurization with the same random state
+        # with the same random state
         dataset = QSPRTable.fromFile(dataset.metaFile)
         split = ShuffleSplit(1, test_size=0.5, random_state=dataset.randomState)
-        dataset.split(split, featurize=False)
-        dataset.featurizeSplits(shuffle=True)
-        train, test = dataset.getFeatures()
-        self.assertListEqual(train.index.tolist(), train_order)
-        self.assertListEqual(test.index.tolist(), test_order)
+        dataset.addSplit(split, "shufflesplit2")
+        train2, test2 = next(dataset.iterSplit("shufflesplit2", as_type="ids"))
+        self.assertListEqual(train.tolist(), train2.tolist())
+        self.assertListEqual(test.tolist(), test2.tolist())
 
     def testRandomStateFolds(self):
         # create and save the data set (fixes the seed)
         dataset = self.createLargeTestDataSet()
+        dataset.addDescriptors(
+            [MorganFP(radius=2, nBits=128)],
+            featurize=False,
+        )
         dataset.save()
         # calculate descriptors and iterate over folds
-        dataset.prepareDataset(feature_calculators=[MorganFP(radius=2, nBits=128)])
-        train, _ = dataset.getFeatures()
-        order_train = train.index.tolist()
+        order_train = dataset.getDescriptors().index.tolist()
         order_folds = []
         split = KFold(5, shuffle=True, random_state=dataset.randomState)
-        for _, _, _, _, train_index, test_index in dataset.iterFolds(split):
-            order_folds.append(train.iloc[train_index].index.tolist())
+        dataset.addSplit(split, "kfold")
+        for ids in dataset.getSplit("kfold", as_type="ids"):
+            order_folds.append(ids)
         # reload and check if orders are the same if we redo the folds from saved data
         dataset = QSPRTable.fromFile(dataset.metaFile)
-        dataset.prepareDataset(feature_calculators=[MorganFP(radius=2, nBits=128)])
-        train, _ = dataset.getFeatures()
-        self.assertListEqual(train.index.tolist(), order_train)
+        self.assertListEqual(dataset.getDescriptors().index.tolist(), order_train)
         split = KFold(5, shuffle=True, random_state=dataset.randomState)
-        for i, (_, _, _, _, train_index, test_index) in enumerate(
-                dataset.iterFolds(split)
-        ):
-            self.assertListEqual(train.iloc[train_index].index.tolist(), order_folds[i])
+        dataset.addSplit(split, "kfold2")
+        for i, (train_index, test_index) in enumerate(dataset.getSplit("kfold2", as_type="ids")):
+            self.assertListEqual(train_index.tolist(), order_folds[i][0].tolist())
+            self.assertListEqual(test_index.tolist(), order_folds[i][1].tolist())
 
 
 class TestSearchFeatures(DataSetsPathMixIn, QSPRTestCase):
@@ -573,7 +571,7 @@ class TestSearchFeatures(DataSetsPathMixIn, QSPRTestCase):
         self.assertTrue(isinstance(result, type(dataset)))
         self.assertEqual(result.name, name)
         self.assertListEqual(dataset.getProperties(), result.getProperties())
-        self.assertListEqual(dataset.getFeatureNames(), result.getFeatureNames())
+        self.assertListEqual(dataset.getDescriptorNames(), result.getDescriptorNames())
         self.assertListEqual(dataset.targetPropertyNames, result.targetPropertyNames)
         self.assertEqual(len(dataset.descriptors), len(result.descriptors))
         self.assertEqual(len(dataset.descriptorSets), len(result.descriptorSets))
@@ -581,9 +579,7 @@ class TestSearchFeatures(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(dataset.nTargetProperties, result.nTargetProperties)
 
     def testSMARTS(self):
-        dataset = self.createLargeTestDataSet(
-            preparation_settings=self.getDefaultPrep()
-        )
+        dataset = self.createLargeTestDataSet()
         search_name = "search_name"
         results_and = dataset.searchWithSMARTS(
             ["c1ccccc1", "S(=O)(=O)"],
@@ -603,9 +599,7 @@ class TestSearchFeatures(DataSetsPathMixIn, QSPRTestCase):
         self.assertTrue(len(results_and) < len(results_or))
 
     def testPropSearch(self):
-        dataset = self.createLargeTestDataSet(
-            preparation_settings=self.getDefaultPrep()
-        )
+        dataset = self.createLargeTestDataSet()
         search_name = "search_name"
         results = dataset.searchOnProperty(
             "moka_ionState7.4",
@@ -754,17 +748,21 @@ class TestDataSetPreparation(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCase
         This generates a large number of parameterized tests. Use the ``skip`` decorator
         if you want to skip all these tests. Note that the combinations are not
         exhaustive, but defined by `DataSetsPathMixIn.getPrepCombos()`."""
-        np.random.seed(42)
         dataset = self.createLargeTestDataSet(name=name)
+        pipeline = DatasetPipeline(
+            feature_calculators=feature_calculators,
+            steps={
+                "shuffle": Shuffle(),
+                "feature_standardizer": feature_standardizer if feature_standardizer else DummyStep(),
+                "feature_filter": feature_filter if feature_filter else DummyStep(),
+                "data_filter": data_filter if data_filter else DummyStep(),
+                # FIXME: applicability_domain is not yet implemented
+            }
+        )
         self.checkPrep(
             dataset,
-            feature_calculators,
+            pipeline,
             split,
-            feature_standardizer,
-            feature_filter,
-            data_filter,
-            applicability_domain,
-            ["CL"],
         )
 
 
@@ -797,6 +795,7 @@ class TestTargetImputation(PathMixIn, QSPRTestCase):
         )
 
     def testImputation(self):
+        # FIXME: imputations should be done in the pipeline
         """Test the imputation of missing values in the target properties."""
         self.dataset = QSPRTable.fromDF(
             "TestImputation",

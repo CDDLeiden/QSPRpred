@@ -16,7 +16,7 @@ class MaskedMetric(Metric):
     def __call__(
         self, y_true: np.ndarray, y_pred: np.ndarray | list[np.ndarray]
     ) -> float:
-        """Calculate the score.
+        """Calculate the score for all predictions where the target is not missing.
 
         Args:
             y_true (np.ndarray): True values. Must be of shape (n_samples, n_targets)

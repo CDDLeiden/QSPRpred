@@ -24,6 +24,14 @@ from ....models.model import QSPRModel
 from ....models.monitors import BaseMonitor, FitMonitor
 from .base_torch import DEFAULT_TORCH_GPUS, QSPRModelPyTorchGPU
 
+# Add safe globals to torch (v2.6.0) serialization to avoid errors when loading chemprop model
+from argparse import Namespace
+from numpy.core.multiarray import _reconstruct
+from numpy import ndarray, dtype
+from numpy.dtypes import Float64DType
+
+torch.serialization.add_safe_globals([Namespace, _reconstruct, ndarray, dtype, Float64DType])
+
 
 class ChempropMoleculeModel(chemprop.models.MoleculeModel):
     """Wrapper for chemprop.models.MoleculeModel.
@@ -168,7 +176,7 @@ class ChempropModel(QSPRModelPyTorchGPU):
         self.quietLogger = quiet_logger
         super().__init__(base_dir, alg, name, parameters, autoload, random_state)
         self.chempropLogger = chemprop.utils.create_logger(
-            name="chemprop_logger", save_dir=self.outDir, quiet=quiet_logger
+            name="chemprops_logger", save_dir=self.outDir, quiet=quiet_logger
         )
         self.gpus = None
         self.setGPUs(DEFAULT_TORCH_GPUS)
@@ -522,10 +530,6 @@ class ChempropModel(QSPRModelPyTorchGPU):
         Returns:
             object: initialized estimator instance
         """
-        if not hasattr(self, "chempropLogger"):
-            self.chempropLogger = chemprop.utils.create_logger(
-                name="chemprop_logger", save_dir=self.outDir, quiet=self.quietLogger
-            )
         if not self.targetProperties:
             return "Unititialized estimator, no target properties found yet."
         # set torch random seed if applicable
@@ -615,14 +619,14 @@ class ChempropModel(QSPRModelPyTorchGPU):
 
     def convertToMoleculeDataset(
         self,
-        X: pd.DataFrame | np.ndarray | QSPRTable,
-        y: pd.DataFrame | np.ndarray | QSPRTable | None = None,
+        X: pd.DataFrame | np.ndarray,
+        y: pd.DataFrame | np.ndarray | None = None,
     ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
         """Convert the given data matrix and target matrix to chemprop Molecule Dataset.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRTable): data matrix
-            y (pd.DataFrame, np.ndarray, QSPRTable): target matrix
+            X (pd.DataFrame, np.ndarray): data matrix
+            y (pd.DataFrame, np.ndarray): target matrix
 
         Returns:
                 data matrix and/or target matrix in np.ndarray format
@@ -638,20 +642,29 @@ class ChempropModel(QSPRModelPyTorchGPU):
             y = [None] * len(X)  # dummy targets
 
         # find which column contains the SMILES strings
-        prev_len = 0
-        for calc in self.featureCalculators:
-            names = calc.transformToFeatureNames()
-            if f"{calc}_SMILES" in names:
-                smiles_column = names.index(f"{calc}_SMILES") + prev_len
-                break
-            else:
-                prev_len += len(names)
+        if self.pipeline is not None and self.pipeline.featureNames is not None:
+            smiles_column = [i for i, name in enumerate(self.pipeline.featureNames) if "SMILES" in name]
+            if not smiles_column:
+                raise ValueError(
+                    "No SMILES column found in pipeline, Chemprop requires "
+                    "SMILES, make sure to add make sure to add SMILES calculator."
+                )
+            smiles_column = smiles_column[0]
         else:
-            raise ValueError(
-                "No SMILES column found in feature calculators, Chemprop "
-                "requires SMILES, make sure to add SMILES calculator to "
-                "the feature calculators."
-            )
+            prev_len = 0
+            for calc in self.featureCalculators:
+                names = calc.transformToFeatureNames()
+                if f"{calc}_SMILES" in names:
+                    smiles_column = names.index(f"{calc}_SMILES") + prev_len
+                    break
+                else:
+                    prev_len += len(names)
+            else:
+                raise ValueError(
+                    "No SMILES column found in feature calculators, Chemprop "
+                    "requires SMILES, make sure to add SMILES calculator to "
+                    "the feature calculators."
+                )
 
         # features data all but smiles column
         smiles = X[:, smiles_column]

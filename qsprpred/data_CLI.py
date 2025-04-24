@@ -34,7 +34,6 @@ from qsprpred.data.descriptors.sets import (
     RDKitDescs,
     SmilesDesc,
 )
-from qsprpred.data.processing.data_filters import papyrusLowQualityFilter
 from qsprpred.data.processing.feature_filters import (
     BorutaFilter,
     HighCorrelationFilter,
@@ -47,6 +46,8 @@ from qsprpred.data.sampling.splits import (
     ScaffoldSplit,
     TemporalSplit,
 )
+from qsprpred.data.processing.data_filters import NaNFilter
+from qsprpred.data.processing.pipeline import DatasetPipeline
 from qsprpred.data.tables.qspr import QSPRTable
 from qsprpred.tasks import TargetTasks
 
@@ -149,14 +150,6 @@ def QSPRArgParser(txt=None):
             "\"{'CL':[6.5],'fu':[0,1,2,3,4]}\". Note: no spaces and surround "
             "by single quotes"
         ),
-    )
-    # Data pre-processing arguments
-    parser.add_argument(
-        "-lq",
-        "--low_quality",
-        action="store_true",
-        help="If lq, than low quality data will be should be a column 'Quality' where "
-        "all 'Low' will be removed",
     )
     parser.add_argument(
         "-tr",
@@ -284,14 +277,6 @@ def QSPRArgParser(txt=None):
         "for percentile threshold for comparison between shadow and real features"
         "see https://github.com/scikit-learn-contrib/boruta_py for more info.",
     )
-    # other
-    parser.add_argument(
-        "-fv",
-        "--fill_value",
-        type=float,
-        default=np.nan,
-        help="Fill value for missing values in the calculated features",
-    )
     if txt:
         args = parser.parse_args(txt)
     else:
@@ -365,7 +350,8 @@ def QSPR_dataprep(args):
                         "transformer":
                             (
                                 transform_dict[args.transform_data[prop]]
-                                if prop in args.transform_data else None
+                                if (prop in args.transform_data) & (task == TargetTasks.REGRESSION)
+                                else None
                             ),
                         "imputer":
                             (
@@ -389,22 +375,16 @@ def QSPR_dataprep(args):
                 args.random_state if args.random_state is not None else None
             )
             mydataset.storage.nJobs = args.ncpu
-            # data filters
-            data_filters = []
-            if args.low_quality:
-                data_filters.append(papyrusLowQualityFilter())
             # data splitter
             if args.split == "scaffold":
                 split = ScaffoldSplit(
                     test_fraction=args.split_fraction,
                     scaffold=BemisMurckoRDKit(),
-                    dataset=mydataset,
                 )
             elif args.split == "time":
                 split = TemporalSplit(
                     timesplit=args.split_time,
                     timeprop=args.split_timecolumn,
-                    dataset=mydataset,
                 )
             elif args.split == "manual":
                 if "datasplit" not in df.columns:
@@ -414,7 +394,7 @@ def QSPR_dataprep(args):
                         "split."
                     )
                 split = ManualSplit(
-                    splitcol=df["datasplit"], trainval="train", testval="test"
+                    splitprop="datasplit", trainval="train", testval="test"
                 )
             elif args.split == "cluster":
                 if args.split_cluster_method == "MaxMin":
@@ -424,11 +404,11 @@ def QSPR_dataprep(args):
                 split = ClusterSplit(
                     test_fraction=args.split_fraction,
                     clustering=clustering,
-                    dataset=mydataset,
+                    seed=args.random_state,
                 )
             else:
                 split = RandomSplit(
-                    test_fraction=args.split_fraction, dataset=mydataset
+                    test_fraction=args.split_fraction, seed=args.random_state
                 )
             # feature calculator
             descriptorsets = []
@@ -483,11 +463,11 @@ def QSPR_dataprep(args):
                             PredictorDesc(SklearnModel.fromFile(predictor_path))
                         )
             # feature filters
-            featurefilters = []
+            steps = {}
             if args.low_variability:
-                featurefilters.append(LowVarianceFilter(th=args.low_variability))
+                steps["low_variability"] = LowVarianceFilter(th=args.low_variability)
             if args.high_correlation:
-                featurefilters.append(HighCorrelationFilter(th=args.high_correlation))
+                steps["high_correlation"] = HighCorrelationFilter(th=args.high_correlation)
             if args.boruta_filter:
                 # boruta filter can not be used for multi-task models
                 if len(props) > 1:
@@ -498,26 +478,23 @@ def QSPR_dataprep(args):
                     RandomForestRegressor(n_jobs=args.ncpu)
                     if args.regression else RandomForestClassifier(n_jobs=args.ncpu)
                 )
-                featurefilters.append(
-                    BorutaFilter(
-                        BorutaPy(estimator=boruta_estimator, perc=args.boruta_filter),
-                        args.random_state,
-                    )
+                steps["boruta"] = BorutaFilter(
+                    BorutaPy(estimator=boruta_estimator, perc=args.boruta_filter),
+                    args.random_state,
                 )
-            # prepare dataset for modelling
-            mydataset.prepareDataset(
+            if "smiles" not in args.features:
+                steps["standardizer"] = StandardScaler()
+            steps["remove_nans"] = NaNFilter()
+            # prepare dataset pipeline for modelling
+            pipeline = DatasetPipeline(
                 feature_calculators=descriptorsets,
-                data_filters=data_filters,
-                split=split,
-                feature_filters=featurefilters,
-                feature_standardizer=(
-                    StandardScaler() if "Smiles" not in args.features else None
-                ),
-                feature_fill_value=args.fill_value,
+                steps=steps
             )
+            mydataset.addSplit(split, "test_split")
 
-            # save dataset files and fingerprints
+            # save dataset files and pipeline
             mydataset.save()
+            pipeline.toFile(f"{mydataset.path}_pipeline.json")
 
 
 if __name__ == "__main__":

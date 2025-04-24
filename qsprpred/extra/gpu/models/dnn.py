@@ -128,30 +128,22 @@ class DNNModel(QSPRModelPyTorchGPU):
         )
         self.setGPUs(gpus)
 
-    def initRandomState(self, random_state):
-        """Set random state if applicable.
-        Defaults to random state of dataset if no random state is provided by the constructor.
-
-        Args:
-            random_state (int): Random state to use for shuffling and other random operations.
-        """
-        super().initRandomState(random_state)
-        if random_state is not None:
-            torch.manual_seed(random_state)
-
     @property
     def supportsEarlyStopping(self) -> bool:
         """Whether the model supports early stopping or not."""
         return True
 
-    def initFromDataset(self, data: QSPRTable | None):
-        super().initFromDataset(data)
+    def initFromData(self, data: QSPRTable | None, pipeline: Any = None):
+        """Initialize the model from dataset and pipeline."""
+        super().initFromData(data, pipeline)
         if self.targetProperties[0].task.isRegression():
             self.nClass = 1
         elif data is not None:
             self.nClass = self.targetProperties[0].nClasses
-        if data is not None:
-            self.nDim = data.getFeatures()[0].shape[1]
+        if pipeline is not None and pipeline.featureNames is not None:
+            self.nDim = len(pipeline.featureNames)
+        else:
+            self.nDim = len(data.getDescriptorNames())
 
     def loadEstimator(self, params: dict | None = None) -> object:
         """Load model from file or initialize new model.
@@ -173,6 +165,7 @@ class DNNModel(QSPRModelPyTorchGPU):
             is_reg=self.task == ModelTasks.REGRESSION,
             patience=self.patience,
             tol=self.tol,
+            random_state=self.randomState,
         )
         # set parameters if available and return
         new_parameters = self.getParameters(params)
@@ -263,6 +256,12 @@ class DNNModel(QSPRModelPyTorchGPU):
             n_splits=1, test_size=0.1, random_state=self.randomState
         )
         X, y = self.convertToNumpy(X, y)
+        
+        # Make sure the estimator has the correct dimensions
+        # FIXME: This is a hack to make sure the estimator has the correct dimensions
+        estimator.set_params(n_dim = X.shape[1])
+        self.nDim = X.shape[1]
+
         # fit with early stopping
         if self.earlyStopping:
             # split cross validation fold train set into train
