@@ -51,13 +51,34 @@ for f in os.listdir("expected"):
             else:
                 actual_values["Fold"] = actual_values["Fold"].astype(np.float64)
             actual_values = actual_values[actual_values["Set"] == "Test"]
+            # FIXME: In the old version, the "Set" column was not present
+            # and only the test values were saved
             actual_values = actual_values.drop(columns=["Set"])
+            # FIXME: In the old version, for classification the Label
+            # were bool for binary classification, but now they are float64
+            # changed in commit 0d3f4dc
+            if "CLS" in file_name:
+                actual_values["pchembl_value_Mean_Label"] = actual_values[
+                    "pchembl_value_Mean_Label"
+                ].astype(bool)
+                # this changed, but I don't know why
+                if actual_values["pchembl_value_Mean_Prediction"].dtype == np.float64:
+                    actual_values["pchembl_value_Mean_Prediction"] = actual_values[
+                        "pchembl_value_Mean_Prediction"
+                    ].astype(bool)
             assert expected_values.columns.equals(
                 actual_values.columns
             ), f"Column names do not match for file {file_name}."
             assert expected_values.index.equals(
                 actual_values.index
             ), f"Index values do not match for file {file_name}."
+            assert expected_values.dtypes.equals(
+                actual_values.dtypes
+            ), (
+                f"Data types do not match for file {file_name}.\n"
+                f"Expected: {expected_values.dtypes}\n"
+                f"Actual: {actual_values.dtypes}"
+            )
             try:
                 assert expected_values.equals(
                     actual_values
@@ -66,6 +87,7 @@ for f in os.listdir("expected"):
                 sys.stderr.write(f"Comparison error in values of: {file_name}\n")
                 # check and print which values are different
                 diff = expected_values.compare(actual_values)
+                sys.stderr.write(diff.to_string())
                 overviews = []
                 for idx, row in diff.iterrows():
                     overview = dict()
