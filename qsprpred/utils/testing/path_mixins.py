@@ -85,7 +85,7 @@ class DataSetsPathMixIn(PathMixIn):
                 feature_calculators=[MorganFP(radius=2, nBits=128)],
                 steps = {
                     "shuffle": Shuffle(),
-                    "remove_nan": NaNFilter(), 
+                    "remove_nan": NaNFilter(),
                     "feature_standardizer": StandardScaler(),
                     "low_var_filter": LowVarianceFilter(0.05),
                     "high_corr_filter": HighCorrelationFilter(0.8),
