@@ -68,7 +68,7 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         # load target properties if not specified and file exists
         if target_props is None and os.path.exists(self.metaFile):
             meta = json.load(open(self.metaFile, "r"))
-            target_props = meta["py/state"]["targetProperties"]
+            target_props = meta["py/state"]["_targetProperties"]
             target_props = [
                 TargetProperty.fromJSON(json.dumps(x)) for x in target_props
             ]
