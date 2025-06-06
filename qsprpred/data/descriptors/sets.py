@@ -20,6 +20,7 @@ from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 
 from ...logs import logger
 from ...utils.serialization import JSONSerializable
+from ...utils.interfaces.randomized import Randomized
 from ..processing.mol_processor import MolProcessorWithID
 
 
@@ -813,3 +814,77 @@ class SmilesDesc(DescriptorSet):
 
     def __str__(self):
         return "SmilesDesc"
+
+class RandomDescs(DescriptorSet, Randomized):
+    """Descriptorset of a set of random numbers as descriptors.
+
+    Attributes:
+        n (int): number of random descriptors to generate
+        randomState (int | None):
+            random state to use for the random number generator,
+    """
+    def __init__(self, n: int = 10, seed: int | None = None):
+        """Initialize the descriptorset with a number of random descriptors.
+
+        Args:
+            n (int): number of random descriptors to generate
+        """
+        super().__init__()
+        self.n = n
+        self.randomState = seed
+    
+    def getDescriptors(
+        self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
+        """Calculate the descriptor for a list of molecules.
+
+        Args:
+            mols (list): list of smiles or rdkit molecules
+            props (dict): dictionary of properties for the passed molecules
+            args: positional arguments
+            kwargs: keyword arguments
+
+        Returns:
+            np.ndarray: array of descriptor values of shape (n_mols, n)
+        """
+        rng = np.random.default_rng(self.seed)
+        return rng.random((len(mols), self.n))
+    
+    @property
+    def randomState(self) -> int | None:
+        """Get the random state for the object."""
+        return self.seed
+
+    @randomState.setter
+    def randomState(self, seed: int | None):
+        """Set the random state for the object.
+
+        Args:
+            seed (int | None):
+                The seed to use to randomize the action. If `None`,
+                a random seed is used instead of a fixed one.
+        """
+        self.seed = seed
+        
+    @property
+    def dtype(self):
+        """Return the data type of the descriptor values."""
+        return np.float64
+        
+    @property
+    def descriptors(self) -> list[str]:
+        """Return the descriptor names."""
+        return ["RandomDesc_" + str(i) for i in range(self.n)]
+
+    @descriptors.setter
+    def descriptors(self, descriptors: list[str]):
+        """Set the descriptor names.
+
+        Ignore the input since the names are generated automatically.
+
+        Args:
+            (list[str]): list of descriptor names to set
+        """
+        
+    def __str__(self):
+        return f"RandomDesc({self.n})"

@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import pandas as pd
 from ...utils.serialization import JSONSerializable
 from ..descriptors.sets import DescriptorSet
@@ -6,6 +6,7 @@ from qsprpred.data.sampling.splits import DataSplit
 from typing import Generator
 from qsprpred.data.tables.qspr import QSPRTable
 from ...utils.interfaces.randomized import Randomized
+from sklearn.base import BaseEstimator
 
 class Step(JSONSerializable):
     """A data preprocessing step that can be applied to a dataset"""
@@ -22,7 +23,7 @@ class Step(JSONSerializable):
         pass
     
     @abstractmethod
-    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame | None]:
         """Apply the step to the dataset
         
         Note. the step should not modify the original data
@@ -37,7 +38,7 @@ class Step(JSONSerializable):
         """
         pass
     
-    def fitTransform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def fitTransform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame | None]:
         """Fit the step to the dataset and apply it
         
         Args:
@@ -54,18 +55,35 @@ class Step(JSONSerializable):
 class DummyStep(Step):
     """Dummy step that does nothing"""
     
-    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
-        """Just return the input data"""
+    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame | None]:
+        """Just return the input data
+        
+        Args:
+            X (pd.DataFrame): data to be transformed
+            y (pd.DataFrame | None): target data to be transformed
+        Returns:
+            pd.DataFrame: unchanged data
+            pd.DataFrame | None: unchanged target data
+        """
         return X, y
     
 class Shuffle(Step, Randomized):
-    """Step that shuffles the data"""
+    """Step that shuffles the data
+    
+    Attributes:
+        randomState (int | None): Seed to randomize the action. If `None`, a random seed is used.
+    """
     
     def __init__(self, seed: int | None = None):
+        """Initialize the shuffle step
+        
+        Args:
+            seed (int | None): Seed to randomize the action. If `None`, a random seed is used.
+        """
         self.seed = seed
     
     @property
-    def randomState(self) -> int:
+    def randomState(self) -> int | None:
         """Get the random state for the object."""
         return self.seed
     
@@ -80,22 +98,49 @@ class Shuffle(Step, Randomized):
         """
         self.seed = seed
     
-    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame | None]:
         """Shuffle the data"""
         X_shuffled = X.sample(frac=1, random_state=self.randomState)
         y_shuffled = y.loc[X_shuffled.index] if y is not None else None
         return X_shuffled, y_shuffled
 
 class SklearnStep(Step):
-    """Step that wraps a scikit-learn transformer"""
+    """Step that wraps a scikit-learn transformer
     
-    def __init__(self, transformer):
+    Attributes:
+        transformer (BaseEstimator): scikit-learn transformer to wrap, should
+            have implementations of the `fit` and `transform` methods.
+    """
+    
+    def __init__(self, transformer: BaseEstimator):
+        """Initialize the SklearnStep
+        
+        Args:
+            transformer (BaseEstimator): scikit-learn transformer to wrap, should 
+                have implementations of the `fit` and `transform` methods.
+        """
         self.transformer = transformer
     
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
+        """Fit the transformer to the data
+        
+        Args:
+            X (pd.DataFrame): training data
+            y (pd.DataFrame | None): training targets
+        """
         self.transformer.fit(X, y)
     
-    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame | None]:
+        """Transform the data using the transformer
+        
+        Args:
+            X (pd.DataFrame): data to be transformed
+            y (pd.DataFrame | None): target data to be transformed
+
+        Returns:
+            pd.DataFrame: transformed data
+            pd.DataFrame | None: (transformed) target data
+        """
         return pd.DataFrame(self.transformer.transform(X), columns=X.columns, index=X.index), y        
 
 
@@ -125,6 +170,7 @@ class Pipeline(Randomized, JSONSerializable):
         fixed: list[str] = [],
         fit_on: dict[str, str] = {},
         apply_to: dict[str, str] = {},
+        skip: list[str] = [],
         seed: int | None = None,
     ):
         self.steps = steps
@@ -137,11 +183,11 @@ class Pipeline(Randomized, JSONSerializable):
                     steps[name] = SklearnStep(step)
         self.featureNames = None
         self.randomState = seed
-        self._skip = []
+        self._skip = skip
         self._fitted = False
 
     @property
-    def randomState(self) -> int:
+    def randomState(self) -> int | None:
         """Get the random state for the object."""
         return self.seed
 
@@ -159,11 +205,11 @@ class Pipeline(Randomized, JSONSerializable):
     def apply(
         self,
         X_train: pd.DataFrame,
-        y_train: pd.DataFrame = None,
+        y_train: pd.DataFrame | None = None,
         X_test: pd.DataFrame | None = None,
         y_test: pd.DataFrame | None = None,
         fit: bool = True,
-    ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame | None, pd.DataFrame | None]:
+    ) -> tuple[pd.DataFrame, pd.DataFrame | None, pd.DataFrame | None, pd.DataFrame | None]:
         """Apply the pipeline to the data
         
         If fit is True, the pipeline is fitted to the training data and 

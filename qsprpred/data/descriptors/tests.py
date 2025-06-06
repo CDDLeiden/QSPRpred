@@ -14,6 +14,7 @@ from .sets import (
     RDKitDescs,
     SmilesDesc,
     TanimotoDistances,
+    RandomDescs,
 )
 
 

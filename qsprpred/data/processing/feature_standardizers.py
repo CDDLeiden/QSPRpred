@@ -1,12 +1,12 @@
 """This module is used for standardizing feature sets."""
 
 import ml2json
-import numpy as np
 import pandas as pd
 
 from ...logs import logger
 from .pipeline import Step
 from abc import abstractmethod
+from sklearn.base import BaseEstimator
 
 class Standardizer(Step):
     """Standardizer for molecular features."""
@@ -21,7 +21,7 @@ class Standardizer(Step):
         """
     
     @abstractmethod
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> pd.DataFrame:
         """Standardize features.	
         
         Args:
@@ -37,14 +37,14 @@ class Standardizer(Step):
 
 class SKLearnStandardizer(Standardizer):
     """Standardizer for molecular features."""
-    def __init__(self, scaler):
+    def __init__(self, scaler: BaseEstimator):
         """
         Initialize the standardizer.
 
         Args:
-            scaler: sklearn object
+            scaler: any sklearn scaler object that is supported by
+                `ml2json`, see https://github.com/OlivierBeq/ml2json
         """
-
         self.scaler = scaler
         self._fitted = False
 
@@ -68,11 +68,11 @@ class SKLearnStandardizer(Standardizer):
             X (pd.DataFrame): training data
             y (pd.DataFrame, optional): training targets
         """
-        self.scaler.fit(X)
+        self.scaler.fit(X, y)
         logger.debug("Standardizer fitted")
         self._fitted = True
         
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> pd.DataFrame:
         """Standardize features.	
         
         Args:

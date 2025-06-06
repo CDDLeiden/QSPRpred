@@ -628,7 +628,7 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
             y (pd.DataFrame | None): target data to apply the split to
 
         Yields:
-            tuple[pd.Index, pd.Index]: indices of the train and test set
+            pd.Index, pd.Index: indices of the train and test set
         """
         if hasattr(split, "dataSet"):
             split.setDataSet(self)

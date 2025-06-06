@@ -57,6 +57,17 @@ class QSPRDataSet(MoleculeDataSet, ABC):
                 `True`.
         """
 
+    @abstractmethod
+    def getTargetProperties(self, names: list) -> list[TargetProperty]:
+        """Get the target properties with the given names.
+
+        Args:
+            names (list): list of target property names
+
+        Returns:
+            (list): list of target properties
+        """
+
     @property
     @abstractmethod
     def isMultiTask(self) -> bool:
