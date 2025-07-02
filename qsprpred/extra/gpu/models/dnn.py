@@ -37,9 +37,6 @@ class DNNModel(QSPRModelPyTorchGPU):
         featureCalculators (MoleculeDescriptorsCalculator):
             feature calculator instance taken from the data set
             or deserialized from file if the model is loaded without data
-        featureStandardizer (SKLearnStandardizer):
-            feature standardizer instance taken from the data set
-            or deserialized from file if the model is loaded without data
         baseDir (str):
             base directory of the model, the model files
             are stored in a subdirectory `{baseDir}/{outDir}/`

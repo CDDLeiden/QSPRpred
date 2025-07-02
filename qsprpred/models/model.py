@@ -45,9 +45,8 @@ class QSPRModel(JSONSerializable, ABC):
         featureCalculators (MoleculeDescriptorsCalculator):
             feature calculator instance taken from the data set or
             deserialized from file if the model is loaded without data
-        featureStandardizer (SKLearnStandardizer):
-            feature standardizer instance taken from the data set
-            or deserialized from file if the model is loaded without data
+        pipeline (DatasetPipeline):
+            pipeline to use for feature calculation and other data processing
         baseDir (str):
             base directory of the model,
             the model files are stored in a subdirectory `{baseDir}/{outDir}/`

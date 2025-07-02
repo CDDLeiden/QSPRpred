@@ -31,8 +31,7 @@ class Imputer(Step):
 
 class TargetImputer(Imputer):
     def __init__(self, imputer: _BaseImputer, target_properties: list[str] | None = None):
-        """
-        Initialize the target imputer.
+        """Initialize the target imputer.
         
         Args:
             imputer (callable): imputer function, e.g. from sklearn.impute, should
@@ -74,8 +73,7 @@ class TargetImputer(Imputer):
     
 class FeatureImputer(Imputer):
     def __init__(self, imputer: _BaseImputer, feature_properties: list[str] | None = None):
-        """
-        Initialize the feature imputer.
+        """Initialize the feature imputer.
         
         Args:
             imputer (callable): imputer function, e.g. from sklearn.impute, should
