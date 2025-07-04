@@ -18,11 +18,11 @@ from ...data.processing.feature_filters import (
     HighCorrelationFilter,
     LowVarianceFilter,
 )
-from ...data.processing.feature_standardizers import SKLearnStandardizer
-from .pipeline import DatasetPipeline, Pipeline, DummyStep, SklearnStep, Shuffle
+from .feature_transformers import SklearnStep
+from .pipeline import DatasetPipeline, Pipeline, DummyStep, Shuffle
 from ...data.tables.qspr import QSPRTable
 from ...utils.testing.base import QSPRTestCase
-from ...utils.testing.path_mixins import DataSetsPathMixIn, PathMixIn
+from ...utils.testing.path_mixins import DataSetsPathMixIn
 from ...utils.testing.check_mixins import StepCheckMixIn
 from ..descriptors.fingerprints import MorganFP
 from ..descriptors.sets import DataFrameDescriptorSet, RandomDescs
@@ -204,7 +204,7 @@ class TestPipeline(DataSetsPathMixIn, QSPRTestCase):
         checkOutput((self.X_train, self.y_train, self.X_test, self.y_test), pipeline)
         
         # test setting fit argument and fitted state
-        pipeline = Pipeline(steps={"scaler": SKLearnStandardizer(Binarizer())})
+        pipeline = Pipeline(steps={"scaler": SklearnStep(Binarizer())})
         self.assertFalse(pipeline.steps["scaler"].fitted)
         self.assertFalse(pipeline.fitted)
         with self.assertRaises(ValueError):
@@ -216,7 +216,7 @@ class TestPipeline(DataSetsPathMixIn, QSPRTestCase):
         self.assertTrue(pipeline.fitted)
         
         # test if the input data is not modified
-        pipeline = Pipeline(steps={"scaler": SKLearnStandardizer(StandardScaler())})
+        pipeline = Pipeline(steps={"scaler": SklearnStep(StandardScaler())})
         X_train_copy = self.X_train.copy()
         X_test_copy = self.X_test.copy()
         y_train_copy = self.y_train.copy()
@@ -229,7 +229,7 @@ class TestPipeline(DataSetsPathMixIn, QSPRTestCase):
         
     def testApplyWithFixedSteps(self):
         """Test the pipeline apply method with fixed steps."""
-        pipeline = Pipeline(steps={"scaler": SKLearnStandardizer(Binarizer())}, fixed=["scaler"])
+        pipeline = Pipeline(steps={"scaler": SklearnStep(Binarizer())}, fixed=["scaler"])
         self.assertEqual(pipeline.fixed, ["scaler"])
         
         pipeline.apply(self.X_train, self.y_train, self.X_test, self.y_test)
@@ -241,7 +241,7 @@ class TestPipeline(DataSetsPathMixIn, QSPRTestCase):
         # test with fit_on="test"
         test_means = self.X_test.mean().to_list()
         pipeline = Pipeline(
-            steps={"scaler": SKLearnStandardizer(StandardScaler())},
+            steps={"scaler": SklearnStep(StandardScaler())},
             fit_on={"scaler": "test"}
         )
         self.assertEqual(pipeline.fitOn, {"scaler": "test"})
@@ -253,7 +253,7 @@ class TestPipeline(DataSetsPathMixIn, QSPRTestCase):
         # test with fit_on="both"
         all_means = pd.concat([self.X_train, self.X_test]).mean().to_list()
         pipeline = Pipeline(
-            steps={"scaler": SKLearnStandardizer(StandardScaler())},
+            steps={"scaler": SklearnStep(StandardScaler())},
             fit_on={"scaler": "both"}
         )
         self.assertEqual(pipeline.fitOn, {"scaler": "both"})
@@ -266,7 +266,7 @@ class TestPipeline(DataSetsPathMixIn, QSPRTestCase):
         """Test the pipeline apply method with apply_to argument."""
         # test with apply_to="train"
         pipeline = Pipeline(
-            steps={"scaler": SKLearnStandardizer(StandardScaler())},
+            steps={"scaler": SklearnStep(StandardScaler())},
             apply_to={"scaler": "train"}
         )
         self.assertEqual(pipeline.applyTo, {"scaler": "train"})
@@ -278,7 +278,7 @@ class TestPipeline(DataSetsPathMixIn, QSPRTestCase):
         
         # test with apply_to="test"
         pipeline = Pipeline(
-            steps={"scaler": SKLearnStandardizer(StandardScaler())},
+            steps={"scaler": SklearnStep(StandardScaler())},
             apply_to={"scaler": "test"}
         )
         self.assertEqual(pipeline.applyTo, {"scaler": "test"})
@@ -334,7 +334,7 @@ class TestPipeline(DataSetsPathMixIn, QSPRTestCase):
         """Test the pipeline skipping steps."""
         pipeline = Pipeline(steps={
             "dummy_step_1": DummyStep(),
-            "scaler": SKLearnStandardizer(StandardScaler()),
+            "scaler": SklearnStep(StandardScaler()),
             "dummy_step_2": DummyStep(),
         }, skip=["scaler"])
         self.assertEqual(len(pipeline.steps), 3)
@@ -484,26 +484,6 @@ class TestDummyStep(QSPRTestCase, StepCheckMixIn):
         """Test the dummy step."""
         X_out, y_out = self.checkStep(DummyStep(), self.dataset)
         self.assertTrue(X_out.equals(self.dataset.getDescriptors()))
-        self.assertTrue(y_out.equals(self.dataset.getTargets()))
-
-class TestSklearnStep(QSPRTestCase, StepCheckMixIn):
-    """Test the sklearn step which wraps a sklearn transformer."""
-    def setUp(self):
-        """Create a small test dataset with random descriptors."""
-        super().setUp()
-        self.setUpPaths()
-        self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
-        self.dataset.addDescriptors([RandomDescs(n=10, seed=42)])
-
-    def testSklearnStep(self):
-        """Test the sklearn step."""
-        X_out, y_out = self.checkStep(SklearnStep(StandardScaler()), self.dataset)
-        
-        # check if the output of the step is equal to directly applying a sklearn scaler
-        X = self.dataset.getDescriptors()
-        scaler = StandardScaler()
-        X_transformed = scaler.fit_transform(X)
-        self.assertTrue(np.allclose(X_out.values, X_transformed))
         self.assertTrue(y_out.equals(self.dataset.getTargets()))
 
 class TestShuffle(QSPRTestCase, StepCheckMixIn):
@@ -772,28 +752,23 @@ class TestFeatureFilters(QSPRTestCase, StepCheckMixIn):
         self.assertListEqual(X.columns.tolist(), self.dataset.getDescriptorNames()[-1:])
         # check y is still the same
         self.assertListEqual(y.columns.tolist(), self.dataset.getTargets().columns.tolist())
-
-
-class TestFeatureStandardizer(DataSetsPathMixIn, QSPRTestCase):
-    """Test the feature standardizer."""
+        
+class TestFeatureTransformers(QSPRTestCase, StepCheckMixIn):
+    """Test the sklearn step which wraps a sklearn transformer."""
     def setUp(self):
-        """Create a small test dataset with MorganFP descriptors."""
+        """Create a small test dataset with random descriptors."""
         super().setUp()
         self.setUpPaths()
         self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
-        self.dataset.addDescriptors([MorganFP(radius=3, nBits=128)])
+        self.dataset.addDescriptors([RandomDescs(n=10, seed=42)])
 
-    def testFeaturesStandardizer(self):
-        """Test the feature standardizer fitting, transforming and serialization."""
-        scaler = SKLearnStandardizer(StandardScaler())
-        scaled_features, _ = scaler.fitTransform(self.dataset.getDescriptors())
-        scaler.toFile(f"{self.generatedPath}/test_scaler.json")
-        scaler_fromfile = SKLearnStandardizer.fromFile(
-            f"{self.generatedPath}/test_scaler.json"
-        )
-        scaled_features_fromfile, _ = scaler_fromfile.transform(self.dataset.getDescriptors())
-        self.assertIsInstance(scaled_features, pd.DataFrame)
-        self.assertEqual(scaled_features.shape, (len(self.dataset), 128))
-        self.assertEqual(
-            np.array_equal(scaled_features, scaled_features_fromfile), True
-        )
+    def testSklearnStep(self):
+        """Test the sklearn step."""
+        X_out, y_out = self.checkStep(SklearnStep(StandardScaler()), self.dataset)
+        
+        # check if the output of the step is equal to directly applying a sklearn scaler
+        X = self.dataset.getDescriptors()
+        scaler = StandardScaler()
+        X_transformed = scaler.fit_transform(X)
+        self.assertTrue(np.allclose(X_out.values, X_transformed))
+        self.assertTrue(y_out.equals(self.dataset.getTargets()))

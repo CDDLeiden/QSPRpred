@@ -32,7 +32,6 @@ from ...data.processing.data_filters import NaNFilter, OutlierFilter
 from ...data.processing.data_filters import RepeatsFilter
 from ...data.sampling.splits import RandomSplit
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
-from ...data.processing.feature_standardizers import SKLearnStandardizer
 from ...data.storage.tabular.basic_storage import PandasChemStore
 from ...data.tables.qspr import QSPRTable
 from ...models import SklearnModel
@@ -208,10 +207,7 @@ class DataSetsPathMixIn(PathMixIn):
                 str: the generated name of the object
             """
             return (
-                str(None) if obj is None else (
-                    obj.__class__.__name__ if
-                    (not isinstance(obj, SKLearnStandardizer)) else str(obj)
-                )
+                str(None) if obj is None else obj.__class__.__name__
             )
 
         def get_name_list(obj: Iterable | object):

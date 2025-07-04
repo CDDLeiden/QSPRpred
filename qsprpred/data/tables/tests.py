@@ -642,9 +642,7 @@ class TestTargetProperty(QSPRTestCase):
             self.assertEqual(target_prop.th, th)
 
     def testInit(self):
-        """Check the TargetProperty class on target
-        property creation.
-        """
+        """Check the TargetProperty class on target property creation."""
         # Check the different task types
         targetprop = TargetProperty("CL", TargetTasks.REGRESSION)
         self.checkTargetProperty(targetprop, "CL", TargetTasks.REGRESSION, None)
@@ -720,7 +718,7 @@ class TestTargetProperty(QSPRTestCase):
         )
 
 
-class TestDataSetPreparation(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCase):
+class TestDataSetPreProcessing(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCase):
     """Test as many possible combinations of data sets and their preparation
     settings. These can run potentially for a long time so use the ``skip`` decorator
     if you want to skip all these tests to speed things up during development."""
