@@ -832,6 +832,7 @@ class RandomDescs(DescriptorSet, Randomized):
         super().__init__()
         self.n = n
         self.randomState = seed
+        self._descriptors = [f"RandomDesc_{i}" for i in range(n)]
     
     def getDescriptors(
         self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
@@ -874,7 +875,7 @@ class RandomDescs(DescriptorSet, Randomized):
     @property
     def descriptors(self) -> list[str]:
         """Return the descriptor names."""
-        return ["RandomDesc_" + str(i) for i in range(self.n)]
+        return self._descriptors
 
     @descriptors.setter
     def descriptors(self, descriptors: list[str]):
@@ -885,6 +886,7 @@ class RandomDescs(DescriptorSet, Randomized):
         Args:
             (list[str]): list of descriptor names to set
         """
+        self._descriptors = descriptors
         
     def __str__(self):
         return f"RandomDesc({self.n})"

@@ -2,15 +2,13 @@ import platform
 from typing import Type
 from unittest import TestCase, skipIf
 
-import numpy as np
 from parameterized import parameterized
 from sklearn.preprocessing import StandardScaler
 
-from qsprpred import TargetProperty, TargetTasks
 from qsprpred.data import RandomSplit
 from qsprpred.data.processing.pipeline import DatasetPipeline
 from qsprpred.data.descriptors.fingerprints import MorganFP
-from qsprpred.data.descriptors.sets import DescriptorSet, DrugExPhyschem
+from qsprpred.data.descriptors.sets import DrugExPhyschem
 from qsprpred.data.processing.feature_filters import (
     HighCorrelationFilter,
     LowVarianceFilter,
@@ -145,7 +143,7 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase, DescriptorCheckMixIn):
         self.sampleDescSet.msaProvider = provider
         dataset = self.createPCMDataSet(self.__class__.__name__)
         split = RandomSplit(test_fraction=0.2)
-        pipeline=DatasetPipeline(
+        pipeline=DatasetPipeline( 
             feature_calculators=[self.sampleDescSet],
             steps = {
                 "scaler": StandardScaler(),

@@ -1,4 +1,3 @@
-import logging
 import os
 from copy import deepcopy
 from os.path import exists
@@ -8,11 +7,10 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold
 
-from ... import TargetTasks
 from ...data.descriptors.sets import DescriptorSet
-from ...data.processing.feature_filters import FeatureFilter
-from ...data.processing.pipeline import DatasetPipeline, DummyStep, SklearnStep
+from ...data.processing.pipeline import DatasetPipeline, Step
 from ...data.tables.interfaces.qspr_data_set import QSPRDataSet
+from ...data.tables.qspr import QSPRTable
 from ...models import (
     AssessorMonitor,
     BaseMonitor,
@@ -30,18 +28,48 @@ from ...models import (
 )
 from ...models.monitors import ListMonitor
 from ...tasks import TargetProperty
-from .path_mixins import ModelDataSetsPathMixIn
+from .path_mixins import ModelDataSetsPathMixIn, DataSetsPathMixIn
 from ...data.sampling.splits import DataSplit, RandomSplit
 
-class PipelineStepCheckMixIn:
+class StepCheckMixIn(DataSetsPathMixIn):
     """Mixin class for common pipeline step checks."""
-    def checkStep(self, step, dataset):
-        """Check if the step is a valid pipeline step."""
-        pass
+    def checkFitTransform(self, step: Step, dataset: QSPRTable) -> Tuple[pd.DataFrame, pd.DataFrame | None]:
+        """Check basic step fit and transform functionality."""
+        X = dataset.getDescriptors()
+        y = dataset.getTargets()
+        
+        step.fit(X, y)
+        X_out, y_out = step.transform(X, y)
+        self.assertTrue(isinstance(X_out, pd.DataFrame))
+        self.assertTrue(isinstance(y_out, pd.DataFrame))
+        self.assertTrue(X_out.index.equals(y_out.index))
+        
+        return X_out, y_out
 
-    def checkStepInPipeline(self, step, dataset):
-        """Check if the step is in the pipeline."""
-        pass
+    def checkStep(self, step: Step, dataset: QSPRTable) -> Tuple[pd.DataFrame, pd.DataFrame | None]:
+        """Check basic step functionality and serialization."""
+        # check if the step can be fitted and transformed
+        X_out, y_out = self.checkFitTransform(step, dataset)
+        
+        # check if the step can be serialized and deserialized
+        step.toFile(f"{self.generatedPath}/test_step.json")
+        self.assertTrue(exists(f"{self.generatedPath}/test_step.json"))
+        step_loaded = step.__class__.fromFile(f"{self.generatedPath}/test_step.json")
+        self.assertTrue(isinstance(step_loaded, step.__class__))
+        
+        # restore the dataset to the step if it has a dataSet attribute as this is not 
+        # saved in the JSON file. If using a step in a DatasetPipeline, it will be 
+        # restored automatically in the pipeline's apply method.
+        if hasattr(step_loaded, "dataSet"):
+            step_loaded.dataSet = dataset
+
+        # check if the deserialized step gives the same output
+        X_out_loaded, y_out_loaded = self.checkFitTransform(step_loaded, dataset)
+        self.assertTrue(X_out.equals(X_out_loaded))
+        self.assertTrue(y_out.equals(y_out_loaded))
+        
+        return X_out, y_out
+        
 
 class DescriptorCheckMixIn:
     """Mixin class for common descriptor checks."""

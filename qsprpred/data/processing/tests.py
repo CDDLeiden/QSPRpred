@@ -1,6 +1,4 @@
-import copy
 import itertools
-from unittest import skipIf
 
 import numpy as np
 import pandas as pd
@@ -21,10 +19,11 @@ from ...data.processing.feature_filters import (
     LowVarianceFilter,
 )
 from ...data.processing.feature_standardizers import SKLearnStandardizer
-from .pipeline import DatasetPipeline, Pipeline, DummyStep
+from .pipeline import DatasetPipeline, Pipeline, DummyStep, SklearnStep, Shuffle
 from ...data.tables.qspr import QSPRTable
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn, PathMixIn
+from ...utils.testing.check_mixins import StepCheckMixIn
 from ..descriptors.fingerprints import MorganFP
 from ..descriptors.sets import DataFrameDescriptorSet, RandomDescs
 from ..storage.interfaces.stored_mol import StoredMol
@@ -116,7 +115,7 @@ class TestApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
         super().setUp()
         self.setUpPaths()
         self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
-        self.dataset.addDescriptors([MorganFP(radius=3, nBits=1000)])
+        self.dataset.addDescriptors([MorganFP(radius=3, nBits=100)])
 
     def testApplicabilityDomain(self):
         """Test the applicability domain fitting, transforming and serialization."""
@@ -149,7 +148,7 @@ class TestApplicabilityDomain(DataSetsPathMixIn, QSPRTestCase):
 class TestPipeline(DataSetsPathMixIn, QSPRTestCase):
     """Test the dataset pipeline."""
     def setUp(self):
-        """Create a small test dataset with MorganFP descriptors."""
+        """Create a small test dataset with random descriptors."""
         super().setUp()
         self.setUpPaths()
         dataset = self.createSmallTestDataSet(self.__class__.__name__)
@@ -361,28 +360,185 @@ class TestPipeline(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(len(pipeline_fromfile.steps), len(pipeline.steps))
         self.assertIn("dummy_step", pipeline_fromfile.steps)
         self.assertIsInstance(pipeline_fromfile.steps["dummy_step"], DummyStep)
+        
+        # test if apply works after serialization
+        X_train, y_train, X_test, y_test = pipeline.apply(
+            self.X_train, self.y_train, self.X_test, self.y_test
+        )
+        X_train_fromfile, y_train_fromfile, X_test_fromfile, y_test_fromfile = pipeline_fromfile.apply(
+            self.X_train, self.y_train, self.X_test, self.y_test
+        )
+        self.assertIsInstance(X_train_fromfile, pd.DataFrame)
+        self.assertIsInstance(y_train_fromfile, pd.DataFrame)
+        self.assertIsInstance(X_test_fromfile, pd.DataFrame)
+        self.assertIsInstance(y_test_fromfile, pd.DataFrame)
+        self.assertTrue(X_train.equals(X_train_fromfile))
+        self.assertTrue(y_train.equals(y_train_fromfile))
+        self.assertTrue(X_test.equals(X_test_fromfile))
+        self.assertTrue(y_test.equals(y_test_fromfile))
     
 class TestDatasetPipeline(DataSetsPathMixIn, QSPRTestCase):
     """Test the dataset pipeline."""
 
     def setUp(self):
-        """Create a small test dataset with MorganFP descriptors."""
+        """Create a small test dataset for the dataset pipeline."""
         super().setUp()
         self.setUpPaths()
         self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
-        self.dataset.addDescriptors([MorganFP(radius=2, nBits=20)])
+        self.dataset.addDescriptors([RandomDescs(n=10, seed=42)])
 
     def testApply(self):
         """Test the dataset pipeline apply method."""
-        # TODO
-        pass
+        pipeline = DatasetPipeline(steps={"dummy_step": DummyStep()})
+        self.assertIsInstance(pipeline, DatasetPipeline)
+        self.assertEqual(len(pipeline.steps), 1)
+        self.assertIn("dummy_step", pipeline.steps)
+
+        # Test apply with a dummy step
+        X, y = next(pipeline.apply(self.dataset))
+        self.assertIsInstance(X, pd.DataFrame)
+        self.assertIsInstance(y, pd.DataFrame)
+        self.assertEqual(X.shape[0], len(self.dataset))
+        self.assertEqual(y.shape[0], len(self.dataset))
+
+        # test apply with a data split
+        X_train, y_train, X_test, y_test = next(
+            pipeline.apply(self.dataset, split=RandomSplit(seed=42))
+        )
+        self.assertIsInstance(X_train, pd.DataFrame)
+        self.assertIsInstance(y_train, pd.DataFrame)
+        self.assertIsInstance(X_test, pd.DataFrame)
+        self.assertIsInstance(y_test, pd.DataFrame)
+        self.assertEqual(X_train.shape[0] + X_test.shape[0], len(self.dataset))
+        self.assertEqual(y_train.shape[0] + y_test.shape[0], len(self.dataset))
+        self.assertEqual(X_train.shape[1], self.dataset.getDescriptors().shape[1])
+        self.assertEqual(y_train.shape[1], self.dataset.getTargets().shape[1])
+        
+        # Test apply with no steps
+        pipeline = DatasetPipeline(steps={})
+        self.assertEqual(len(pipeline.steps), 0)
+        X, y = next(pipeline.apply(self.dataset))
+        self.assertTrue(X.equals(self.dataset.getDescriptors()))
+        self.assertTrue(y.equals(self.dataset.getTargets()))
+        
+        # test pipeline with feature calculators
+        pipeline = DatasetPipeline(
+            feature_calculators=[MorganFP(radius=2, nBits=20)],
+            steps={"dummy_step": DummyStep()}
+        )
+        X, y = next(pipeline.apply(self.dataset))
+        self.assertIsInstance(X, pd.DataFrame)
+        self.assertIsInstance(y, pd.DataFrame)
+        self.assertEqual(X.shape[0], len(self.dataset))
+        self.assertEqual(y.shape[0], len(self.dataset))
+        self.assertEqual(X.shape[1], 10 + 20)  # 10 random descriptors + 20 MorganFP bits
+        self.assertEqual(y.shape[1], self.dataset.getTargets().shape[1])
+        
+        # test if an error is raised if the dataset misses expected descriptors
+        self.dataset.dropDescriptorSets(["RandomDesc(10)"])
+        self.assertEqual(len(pipeline.originalfeatureNames), 10 + 20)
+        with self.assertRaises(AssertionError):
+            print(self.dataset.getDescriptors().columns.tolist())
+            _ = next(pipeline.apply(self.dataset, fit=False))
+        
+        
+    def testSerialization(self):
+        """Test the dataset pipeline serialization."""
+        pipeline = DatasetPipeline(
+            feature_calculators=[MorganFP(radius=2, nBits=20)],
+            steps={
+                "dummy_step": DummyStep(),
+            }
+        )
+        pipeline.toFile(f"{self.generatedPath}/test_dataset_pipeline.json")
+        pipeline_fromfile = DatasetPipeline.fromFile(
+            f"{self.generatedPath}/test_dataset_pipeline.json"
+        )
+        self.assertIsInstance(pipeline_fromfile, DatasetPipeline)
+        self.assertEqual(len(pipeline_fromfile.steps), len(pipeline.steps))
+        self.assertIn("dummy_step", pipeline_fromfile.steps)
+        self.assertIsInstance(pipeline_fromfile.steps["dummy_step"], DummyStep)
+        self.assertEqual(
+            len(pipeline_fromfile.feature_calculators),
+            len(pipeline.feature_calculators)
+        )
+        
+        X, y = next(pipeline.apply(self.dataset))
+        X_fromfile, y_fromfile = next(pipeline_fromfile.apply(self.dataset))
+        self.assertIsInstance(X_fromfile, pd.DataFrame)
+        self.assertIsInstance(y_fromfile, pd.DataFrame)
+        self.assertTrue(X.equals(X_fromfile))
+        self.assertTrue(y.equals(y_fromfile))
 
 #####-----------------Test Pipeline Steps-----------------#####
-class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
-    """Small tests to only check if the data filters work on their own.
+class TestDummyStep(QSPRTestCase, StepCheckMixIn):
+    """Test the dummy step"""
+    def setUp(self):
+        """Create a small test dataset with random descriptors."""
+        super().setUp()
+        self.setUpPaths()
+        self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
+        self.dataset.addDescriptors([RandomDescs(n=10, seed=42)])
 
-    The tests here should be used to check for all their specific parameters and
-    edge cases."""
+    def testDummyStep(self):
+        """Test the dummy step."""
+        X_out, y_out = self.checkStep(DummyStep(), self.dataset)
+        self.assertTrue(X_out.equals(self.dataset.getDescriptors()))
+        self.assertTrue(y_out.equals(self.dataset.getTargets()))
+
+class TestSklearnStep(QSPRTestCase, StepCheckMixIn):
+    """Test the sklearn step which wraps a sklearn transformer."""
+    def setUp(self):
+        """Create a small test dataset with random descriptors."""
+        super().setUp()
+        self.setUpPaths()
+        self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
+        self.dataset.addDescriptors([RandomDescs(n=10, seed=42)])
+
+    def testSklearnStep(self):
+        """Test the sklearn step."""
+        X_out, y_out = self.checkStep(SklearnStep(StandardScaler()), self.dataset)
+        
+        # check if the output of the step is equal to directly applying a sklearn scaler
+        X = self.dataset.getDescriptors()
+        scaler = StandardScaler()
+        X_transformed = scaler.fit_transform(X)
+        self.assertTrue(np.allclose(X_out.values, X_transformed))
+        self.assertTrue(y_out.equals(self.dataset.getTargets()))
+
+class TestShuffle(QSPRTestCase, StepCheckMixIn):
+    """Test the shuffle step in the pipeline."""
+    def setUp(self):
+        """Create a small test dataset with random descriptors."""
+        super().setUp()
+        self.setUpPaths()
+        self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
+        self.dataset.addDescriptors([RandomDescs(n=10, seed=42)])
+
+    def testShuffle(self):
+        """Test the shuffle step."""
+        X_out, y_out = self.checkStep(Shuffle(42), self.dataset)
+        
+        # check if the output of the step is a shuffled version of the input
+        self.assertEqual(X_out.shape, self.dataset.getDescriptors().shape)
+        self.assertEqual(y_out.shape, self.dataset.getTargets().shape)
+        self.assertFalse(X_out.equals(self.dataset.getDescriptors()))
+        self.assertTrue(
+            X_out.sort_values(by=self.dataset.idProp).equals(
+                self.dataset.getDescriptors().sort_values(by=self.dataset.idProp)
+            )
+        )
+        
+        # check if the random state is set correctly
+        X_out_same, y_out_same = self.checkStep(Shuffle(42), self.dataset)
+        self.assertTrue(X_out.equals(X_out_same))
+        self.assertTrue(y_out.equals(y_out_same))
+        X_out_diff, y_out_diff = self.checkStep(Shuffle(43), self.dataset)
+        self.assertFalse(X_out.equals(X_out_diff))
+        self.assertFalse(y_out.equals(y_out_diff))
+
+class TestDataFilters(QSPRTestCase, StepCheckMixIn):
+    """Test the data filters, which filter the dataset based on properties."""
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -390,8 +546,7 @@ class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
         self.dataset.addDescriptors([MorganFP(radius=2, nBits=20)])
 
     def testCategoryFilter(self):
-        """Test the category filter, which drops specific values from dataset
-        properties."""
+        """Test the category filter that drops values from a dataset property."""
         self.assertTrue(
             (self.dataset.getDF()["moka_ionState7.4"] == "cationic").sum() > 0
         )
@@ -402,7 +557,8 @@ class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
             values=["cationic"],
             data_set=self.dataset,
         )
-        filtered_df, _ = remove_cation.transform(self.dataset.getDF())
+        X_filtered, _ = self.checkStep(remove_cation, self.dataset)
+        filtered_df = self.dataset.getDF().loc[X_filtered.index]
         self.assertTrue((filtered_df["moka_ionState7.4"] == "cationic").sum() == 0)
 
         # Test with keep=True
@@ -412,7 +568,8 @@ class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
             data_set=self.dataset,
             keep=True
         )
-        filtered_df, _ = only_cation.transform(self.dataset.getDF())
+        X_filtered, _ = self.checkStep(only_cation, self.dataset)
+        filtered_df = self.dataset.getDF().loc[X_filtered.index]
         self.assertTrue((filtered_df["moka_ionState7.4"] != "cationic").sum() == 0)
 
     def testRepeatsFilter(self):
@@ -423,42 +580,44 @@ class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
         descriptors = self.dataset.getDescriptors()
         self.assertTrue(np.array_equal(descriptors.iloc[0], descriptors.iloc[3]))
         self.assertTrue(np.array_equal(descriptors.iloc[0], descriptors.iloc[5]))
-        
-        # check all other rows are unique
         self.assertEqual(
             len(descriptors.drop_duplicates(keep=False)), len(descriptors)-3
         )
 
         ## test the filter
         # only warnings
-        warn_reps = RepeatsFilter(keep=True)
-        filtered_df, _ = warn_reps.transform(descriptors)
-        self.assertEqual(len(filtered_df), len(descriptors))
-        self.assertTrue(filtered_df.equals(descriptors))
-        
+        warn_reps = RepeatsFilter(keep=True, data_set=self.dataset)
+        X_filtered, _ = self.checkStep(warn_reps, self.dataset)
+        self.assertEqual(len(X_filtered), len(descriptors))
+        self.assertTrue(X_filtered.equals(descriptors))
+
         # drop duplicates
-        drop_reps = RepeatsFilter(keep=False)
-        filtered_df, _ = drop_reps.transform(descriptors)
-        self.assertEqual(len(filtered_df), len(descriptors)-3)
+        drop_reps = RepeatsFilter(keep=False, data_set=self.dataset)
+        X_filtered, _ = self.checkStep(drop_reps, self.dataset)
+        self.assertEqual(len(X_filtered), len(descriptors)-3)
         
         # keep first, by year
         keep_first = RepeatsFilter(
-            keep="first", timecol=self.dataset.getDF()["Year of first disclosure"]
+            keep="first", timecol="Year of first disclosure", data_set=self.dataset
         )
-        filtered_df, _ = keep_first.transform(descriptors)
-        self.assertEqual(len(filtered_df), len(descriptors)-2)
-        self.assertIn(descriptors.iloc[0].name, filtered_df.index)
+        X_filtered, _ = self.checkStep(keep_first, self.dataset)
+        self.assertEqual(len(X_filtered), len(descriptors)-2)
+        self.assertIn(descriptors.iloc[0].name, X_filtered.index)
 
         # check with additional columns 
         proteinid = ["A", "B", "B", "A", "B", "B", "B", "B", "B"]
+        self.dataset.addProperty("proteinid", pd.Series(proteinid, index=descriptors.index))
         drop_reps_protein = RepeatsFilter(
             keep=False,
-            additional_cols={"proteinid": pd.Series(proteinid, index=descriptors.index)}
+            additional_cols=["proteinid"],
+            data_set=self.dataset
         )
-        filtered_df, _ = drop_reps_protein.transform(descriptors)
-        self.assertEqual(len(filtered_df), len(descriptors)-2)
+        X_filtered, _ = self.checkStep(drop_reps_protein, self.dataset)
+        self.assertEqual(len(X_filtered), len(descriptors)-2)
 
-    def testConsistency(self):
+    def testFilterMethodOfDataset(self):
+        # TODO: Either this functionality should be removed or the test should be moved
+        # to the dataset tests, as it is not a step in the pipeline.
         dataset = self.createLargeTestDataSet()
         remove_cation = CategoryFilter(
             prop="moka_ionState7.4",
@@ -470,8 +629,7 @@ class TestDataFilters(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(len(dataset.getDF()), len(dataset.getDescriptors()))
         self.assertTrue((dataset.getDF()["moka_ionState7.4"] == "cationic").sum() == 0)
 
-
-class TestFeatureFilters(PathMixIn, QSPRTestCase):
+class TestFeatureFilters(QSPRTestCase, StepCheckMixIn):
     """Tests to check if the feature filters work on their own.
 
     Note: This also tests the `DataframeDescriptorSet`,
@@ -483,7 +641,6 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         self.nCPU = 2  # just to test parallel processing
         self.chunkSize = 2
         self.setUpPaths()
-        # create example dataset
         self.df = pd.DataFrame(
             data=np.array([["C", 1], ["C", 2], ["C", 3], ["C", 4], ["C", 5], ["C", 6]]),
             columns=["SMILES", "y"],
@@ -571,12 +728,8 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         if use_index_cols:
             self.recalculateWithMultiIndex()
 
-        pipeline = DatasetPipeline(
-            steps={
-                "low_var_filter": LowVarianceFilter(0.01),
-            }
-        )
-        X, y = next(pipeline.apply(self.dataset))
+        low_var_filter = LowVarianceFilter(0.01)
+        X, y = self.checkStep(low_var_filter, self.dataset)
         # check if first column (no variance) is dropped
         self.assertListEqual(X.columns.tolist(), self.dataset.getDescriptorNames()[1:])
         # check y is still the same
@@ -592,12 +745,8 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         if use_index_cols:
             self.recalculateWithMultiIndex()
 
-        pipeline = DatasetPipeline(
-            steps={
-                "high_corr_filter": HighCorrelationFilter(0.8),
-            }
-        )
-        X, y = next(pipeline.apply(self.dataset))
+        high_corr_filter = HighCorrelationFilter(0.8)
+        X, y = self.checkStep(high_corr_filter, self.dataset)
         # check if "Descriptor_F3" (correlated to "Descriptor_F2") is dropped
         desc_to_keep = self.dataset.getDescriptorNames()
         desc_to_keep.remove("DataFrame_Descriptor_F3")
@@ -617,12 +766,8 @@ class TestFeatureFilters(PathMixIn, QSPRTestCase):
         relevant as random features."""
         if use_index_cols:
             self.recalculateWithMultiIndex()
-        pipeline = DatasetPipeline(
-            steps={
-                "boruta_filter": BorutaFilter(),
-            }
-        )
-        X, y = next(pipeline.apply(self.dataset))
+        boruta_filter = BorutaFilter()
+        X, y = self.checkStep(boruta_filter, self.dataset)
         # check if only "Descriptor_F5" is kept (increases with target)
         self.assertListEqual(X.columns.tolist(), self.dataset.getDescriptorNames()[-1:])
         # check y is still the same

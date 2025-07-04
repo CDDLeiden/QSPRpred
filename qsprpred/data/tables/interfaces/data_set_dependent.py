@@ -43,3 +43,7 @@ class DataSetDependent(JSONSerializable):
             return self.dataSet
         else:
             raise ValueError("Data set not set.")
+        
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.dataSet = None
