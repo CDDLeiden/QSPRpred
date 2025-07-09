@@ -33,6 +33,7 @@ class SklearnStep(FeatureTransformer):
             transformer (BaseEstimator): scikit-learn transformer to wrap, should 
                 have implementations of the `fit` and `transform` methods.
         """
+        self._fitted = False
         self.transformer = transformer
     
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
@@ -43,6 +44,7 @@ class SklearnStep(FeatureTransformer):
             y (pd.DataFrame | None): training targets
         """
         self.transformer.fit(X, y)
+        self._fitted = True
     
     def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame | None]:
         """Transform the data using the transformer

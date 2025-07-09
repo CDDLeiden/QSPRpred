@@ -11,6 +11,10 @@ from sklearn.base import BaseEstimator
 class Step(JSONSerializable):
     """A data preprocessing step that can be applied to a dataset"""
     
+    def __init__(self):
+        """Initialize the step"""
+        self._fitted = False
+    
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
         """Fit the step to the dataset
         
@@ -20,7 +24,7 @@ class Step(JSONSerializable):
             X (pd.DataFrame): training data
             y (pd.DataFrame): training targets
         """
-        pass
+        self._fitted = True
     
     @abstractmethod
     def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame | None]:
@@ -52,6 +56,16 @@ class Step(JSONSerializable):
         self.fit(X, y)
         return self.transform(X, y)
     
+    @property
+    def fitted(self) -> bool:
+        """Check if the step is fitted
+        
+        Returns:
+            bool: True if the step is fitted, False otherwise
+        """
+        return self._fitted
+        
+    
 class DummyStep(Step):
     """Dummy step that does nothing"""
     
@@ -81,6 +95,7 @@ class Shuffle(Step, Randomized):
         Args:
             seed (int | None): Seed to randomize the shuffle.
         """
+        self._fitted = False
         self.seed = seed
     
     @property

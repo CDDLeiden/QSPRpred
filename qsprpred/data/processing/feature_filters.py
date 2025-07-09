@@ -23,17 +23,9 @@ import json
 
 class FeatureFilter(Step):
     """Filter out uninformative featureNames from a dataframe."""
-    @abstractmethod
-    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
-        """Fit the filter to the data.
-        
-        Args:
-            X (pd.DataFrame): training data
-            y (pd.DataFrame, optional): training targets
-        """
 
     @abstractmethod
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> pd.DataFrame:
         """Filter out uninformative features from a dataframe.
 
         Args:
@@ -55,6 +47,7 @@ class LowVarianceFilter(FeatureFilter):
         low_var_cols (pd.Index): columns with low variance (if fitted)
     """
     def __init__(self, th: float) -> None:
+        self._fitted = False
         self.th = th
         
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
@@ -83,8 +76,9 @@ class LowVarianceFilter(FeatureFilter):
                 f"Number of columns dropped low variance filter: {len(self.low_var_cols)}"
             )
             logger.info(f"Number of columns left: {X.shape[1] - len(self.low_var_cols)}")
+        self._fitted = True
         
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Filter out low variance features from a dataframe.
 
         Args:
@@ -114,6 +108,7 @@ class HighCorrelationFilter(FeatureFilter):
         high_corr_cols (pd.Index): columns with high correlation (if fitted)
     """
     def __init__(self, th: float) -> None:
+        self._fitted = False
         self.th = th
         
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
@@ -153,8 +148,9 @@ class HighCorrelationFilter(FeatureFilter):
                     f"Number of columns dropped high correlation filter: {len(self.high_corr_cols)}"
                 )
                 logger.info(f"Number of columns left: {X.shape[1] - len(self.high_corr_cols)}")
+        self._fitted = True
         
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Filter out high correlation features from a dataframe.
 
         Args:
@@ -242,6 +238,7 @@ class BorutaFilter(FeatureFilter, Randomized):
                 random operations. If None, the random state set in the BorutaPy
                 instance is used. Defaults to None.
         """
+        self._fitted = False
         self.seed = seed
         self.featSelector = boruta_feat_selector
         if self.featSelector is None:
@@ -269,8 +266,9 @@ class BorutaFilter(FeatureFilter, Randomized):
             f"{len(self.droppedFeatures)}"
         )
         logger.info(f"Number of columns left: {X.shape[1] - len(self.droppedFeatures)}")
+        self._fitted = True
         
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Filter out uninformative features from a dataframe using BorutaPy.
 
         Args:

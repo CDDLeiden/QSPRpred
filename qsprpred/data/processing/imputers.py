@@ -5,15 +5,7 @@ from sklearn.impute._base import _BaseImputer
 from qsprpred.logs import logger
 
 class Imputer(Step):
-    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
-        """Fit the imputer to the dataset
-        
-        Args:
-            X (pd.DataFrame): training data features
-            y (pd.DataFrame): training targets
-        """
-        pass
-    
+
     @abstractmethod
     def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Impute values in the dataset.

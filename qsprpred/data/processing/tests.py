@@ -247,7 +247,7 @@ class TestPipeline(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(pipeline.fitOn, {"scaler": "test"})
         pipeline.apply(self.X_train, self.y_train, self.X_test, self.y_test)
         self.assertListEqual(
-            pipeline.steps["scaler"].scaler.mean_.tolist(), test_means
+            pipeline.steps["scaler"].transformer.mean_.tolist(), test_means
         )
         
         # test with fit_on="both"
@@ -259,7 +259,7 @@ class TestPipeline(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(pipeline.fitOn, {"scaler": "both"})
         pipeline.apply(self.X_train, self.y_train, self.X_test, self.y_test)
         self.assertListEqual(
-            pipeline.steps["scaler"].scaler.mean_.tolist(), all_means
+            pipeline.steps["scaler"].transformer.mean_.tolist(), all_means
         )
         
     def testApplyWithApplyTo(self):

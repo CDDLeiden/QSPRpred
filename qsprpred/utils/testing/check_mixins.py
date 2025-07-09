@@ -38,7 +38,9 @@ class StepCheckMixIn(DataSetsPathMixIn):
         X = dataset.getDescriptors()
         y = dataset.getTargets()
         
+        self.assertFalse(step.fitted)
         step.fit(X, y)
+        self.assertTrue(step.fitted)
         X_out, y_out = step.transform(X, y)
         self.assertTrue(isinstance(X_out, pd.DataFrame))
         self.assertTrue(isinstance(y_out, pd.DataFrame))

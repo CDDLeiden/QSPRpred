@@ -22,16 +22,7 @@ class DataFilter(Step, DataSetDependent):
     """Filter out some rows from a dataframe."""
 
     @abstractmethod
-    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
-        """Fit the filter to the data.
-
-        Args:
-            X (pd.DataFrame): training data
-            y (pd.DataFrame, optional): training targets
-        """
-
-    @abstractmethod
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> pd.DataFrame:
         """Remove rows from a dataframe.
 
         Args:
@@ -68,17 +59,9 @@ class CategoryFilter(DataFilter):
         self.prop = prop
         self.values = values
         self.keep = keep
-        
+        self._fitted = False
 
-    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
-        """Fit the filter to the data.
-
-        Args:
-            X (pd.DataFrame): training data
-            y (pd.DataFrame, optional): training targets
-        """
-
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> pd.DataFrame:
         """Filter rows from dataframe.
 
         Args:
@@ -149,14 +132,6 @@ class RepeatsFilter(DataFilter):
         self.keep = keep
         self.timeCol = timecol
         self.additionalCols = additional_cols
-
-    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
-        """Fit the filter to the data.
-
-        Args:
-            X (pd.DataFrame): training data
-            y (pd.DataFrame, optional): training targets
-        """
 
     def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> pd.DataFrame:
         """Filter rows from dataframe.
@@ -267,11 +242,9 @@ class NaNFilter(DataFilter):
             keep (bool): whether to keep or discard rows with NaN values,
                 if True only warn about NaN values, if False remove rows with NaN values
         """
+        self._fitted = False
         self.keep = keep
         self.selected_features = features
-        
-    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
-        pass
     
     def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Remove rows containing NaN values in the specified columns"""
@@ -299,14 +272,31 @@ class NaNFilter(DataFilter):
 
 class OutlierFilter(DataFilter):
     def __init__(self, ad: ApplicabilityDomain):
+        self._fitted = False
         if isinstance(ad, MLChemADApplicabilityDomain):
             ad = MLChemAD(ad)
         self.ad = ad
         
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
-        self.ad.fit(X)
+        """Fit the applicability domain to the data.
         
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+        Args:
+            X (pd.DataFrame): training data
+            y (pd.DataFrame, optional): training targets
+        """
+        self.ad.fit(X)
+        self._fitted = True
+        
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Remove samples outside the applicability domain.
+        
+        Args:
+            X (pd.DataFrame): training data
+            y (pd.DataFrame, optional): training targets
+
+        Returns:
+            tuple[pd.DataFrame, pd.DataFrame]: filtered training data and targets
+        """
         indomain = self.ad.contains(X)
         logger.info(f"Removing {len(X) - indomain.sum()} samples outside the applicability domain.")
         logger.debug(f"Removing samples {X.index[~indomain].tolist()} outside the applicability domain.")
