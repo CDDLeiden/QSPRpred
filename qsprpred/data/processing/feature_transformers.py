@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from .pipeline import Step
+from .step import Step
 from sklearn.base import BaseEstimator
 
 class FeatureTransformer(Step):

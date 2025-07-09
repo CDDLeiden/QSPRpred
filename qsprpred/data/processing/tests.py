@@ -19,7 +19,8 @@ from ...data.processing.feature_filters import (
     LowVarianceFilter,
 )
 from .feature_transformers import SklearnStep
-from .pipeline import DatasetPipeline, Pipeline, DummyStep, Shuffle
+from .pipeline import DatasetPipeline, Pipeline
+from .step import DummyStep, Shuffle
 from ...data.tables.qspr import QSPRTable
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn

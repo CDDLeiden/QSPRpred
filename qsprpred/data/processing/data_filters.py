@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 from ...logs import logger
-from .pipeline import Step
+from .step import Step
 from .applicability_domain import ApplicabilityDomain, MLChemAD
 from mlchemad.base import ApplicabilityDomain as MLChemADApplicabilityDomain
 from ..tables.interfaces.data_set_dependent import DataSetDependent

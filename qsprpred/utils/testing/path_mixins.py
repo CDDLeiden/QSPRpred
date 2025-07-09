@@ -27,9 +27,9 @@ from ...data.descriptors.sets import (
     RDKitDescs,
     TanimotoDistances,
 )
-from ...data.processing.pipeline import DatasetPipeline, Shuffle
-from ...data.processing.data_filters import NaNFilter, OutlierFilter
-from ...data.processing.data_filters import RepeatsFilter
+from ...data.processing.pipeline import DatasetPipeline
+from ...data.processing.step import Shuffle
+from ...data.processing.data_filters import NaNFilter, OutlierFilter, RepeatsFilter
 from ...data.sampling.splits import RandomSplit
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
 from ...data.storage.tabular.basic_storage import PandasChemStore

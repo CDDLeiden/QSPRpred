@@ -1,5 +1,5 @@
 import pandas as pd
-from .pipeline import Step
+from .step import Step
 from abc import abstractmethod
 from sklearn.impute._base import _BaseImputer
 from qsprpred.logs import logger

@@ -15,7 +15,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 from ...logs import logger
 from ...utils.interfaces.randomized import Randomized
-from .pipeline import Step
+from .step import Step
 import os
 from pickle import dump, load
 import json
