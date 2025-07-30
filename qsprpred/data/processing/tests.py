@@ -12,13 +12,10 @@ from ...data.processing.applicability_domain import (
     KNNApplicabilityDomain,
     MLChemAD,
 )
-from ...data.processing.data_filters import CategoryFilter, RepeatsFilter
-from ...data.processing.feature_filters import (
-    BorutaFilter,
-    HighCorrelationFilter,
-    LowVarianceFilter,
-)
+from .data_filters import CategoryFilter, RepeatsFilter
+from .feature_filters import BorutaFilter, HighCorrelationFilter, LowVarianceFilter
 from .feature_transformers import SklearnStep
+from .target_transformers import Discretizer, SimpleTargetTransformer, TargetTransformer
 from .pipeline import DatasetPipeline, Pipeline
 from .step import DummyStep, Shuffle
 from ...data.tables.qspr import QSPRTable
@@ -773,3 +770,57 @@ class TestFeatureTransformers(QSPRTestCase, StepCheckMixIn):
         X_transformed = scaler.fit_transform(X)
         self.assertTrue(np.allclose(X_out.values, X_transformed))
         self.assertTrue(y_out.equals(self.dataset.getTargets()))
+        
+class TestTargetTransformers(QSPRTestCase, StepCheckMixIn):
+    """Test the sklearn step which wraps a sklearn transformer for targets."""
+    def setUp(self):
+        """Create a small test dataset with random descriptors."""
+        super().setUp()
+        self.setUpPaths()
+        self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
+        self.dataset.addDescriptors([RandomDescs(n=10, seed=42)])
+
+    def testDiscretizer(self):
+        """Test the discretizer step."""
+        x_out, y_out = self.checkStep(Discretizer(target = "CL", th=2), self.dataset)
+        self.assertTrue(y_out["CL"].nunique() == 2)
+        
+        x_out, y_out = self.checkStep(
+            Discretizer(target = "CL", th=[0, 2, 10, 100]), self.dataset
+        )
+        self.assertTrue(y_out["CL"].nunique() == 3)
+        
+        # smallest threshold must be larger than smallest value in target
+        with self.assertRaises(AssertionError):
+            _ = self.checkStep(Discretizer(target = "CL", th=[1, 2, 10, 100]), self.dataset)
+
+        # largest threshold must be larger than largest value in target
+        with self.assertRaises(AssertionError):
+            _ = self.checkStep(Discretizer(target = "CL", th=[0, 2, 9, 10]), self.dataset)
+            
+        # Setting too few multi-class classification thresholds
+        with self.assertRaises(AssertionError):
+            _ = self.checkStep(Discretizer(target = "CL", th=[1, 2, 3]), self.dataset)
+        
+        # setting no thresholds for binary classification
+        with self.assertRaises(AssertionError):
+            _ = self.checkStep(Discretizer(target = "CL", th=[]), self.dataset)
+            
+        # missing target
+        with self.assertRaises(ValueError):
+            _ = self.checkStep(Discretizer(target = "missing_target", th=3), self.dataset)
+
+    def testSimpleTargetTransformer(self):
+        """Test the simple target transformer."""
+        for transform in ["log10", "log2", "log", "sqrt", "cbrt", "exp", "square", "cube", "reciprocal"]:
+            transformer = SimpleTargetTransformer("CL", transform)
+            x_out, y_out = self.checkStep(transformer, self.dataset)
+
+            y_in = self.dataset.getTargets()
+            # check if the output has been transformed
+            with self.assertRaises(AssertionError):
+                pd.testing.assert_series_equal(y_in["CL"], y_out["CL"])
+            # check if the inverse transform works
+            _, y_out_inverse = transformer.inverseTransform(x_out, y_out)
+            pd.testing.assert_series_equal(y_in["CL"], y_out_inverse["CL"])
+
