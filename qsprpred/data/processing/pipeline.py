@@ -1,6 +1,6 @@
 import pandas as pd
 from .step import Step
-from feature_transformers import SklearnStep
+from .feature_transformers import SklearnStep
 from ...utils.serialization import JSONSerializable
 from ..descriptors.sets import DescriptorSet
 from qsprpred.data.sampling.splits import DataSplit
