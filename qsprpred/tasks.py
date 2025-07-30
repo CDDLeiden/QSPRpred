@@ -1,11 +1,7 @@
 from enum import Enum
-from typing import Callable, ClassVar, Literal, Optional
+from typing import ClassVar, Literal, Optional
 
-from qsprpred.utils.serialization import (
-    JSONSerializable,
-    function_as_string,
-    function_from_string,
-)
+from qsprpred.utils.serialization import JSONSerializable
 
 
 class TargetTasks(Enum):
@@ -98,105 +94,54 @@ class ModelTasks(Enum):
 
 
 class TargetProperty(JSONSerializable):
-    """Target property for QSPRmodelling class.
+    """Target property for a QSPR model.
 
     Attributes:
         name (str): name of the target property
-        task (Literal[TargetTasks.REGRESSION,
-              TargetTasks.SINGLECLASS,
-              TargetTasks.MULTICLASS]): task type for the target property
-        th (int): threshold for the target property, only used for classification tasks
-        nClasses (int): number of classes for the target property, only used for
+        task (Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS,
+            TargetTasks.MULTICLASS]): task type for the target property
+        th (list[float] | None): threshold for the target property, only used for 
             classification tasks
-        transformer (Callable): function to transform the target property
-        imputer (Callable): function to impute the target property
+        nClasses (int): number of classes for the target property, only used for
+            classification tasks.
     """
-
-    _notJSON: ClassVar = ["transformer", *JSONSerializable._notJSON]
 
     def __init__(
         self,
         name: str,
         task: Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS,
                       TargetTasks.MULTICLASS],
-        th: Optional[list[float] | str] = None,
-        n_classes: Optional[int] = None,
-        transformer: Optional[Callable] = None,
-        imputer: Optional[Callable] = None,
+        th: list[float] | None = None,
+        n_classes: int | None = None,
     ):
         """Initialize a TargetProperty object.
 
         Args:
             name (str): name of the target property
-            task (Literal[TargetTasks.REGRESSION,
-              TargetTasks.SINGLECLASS,
+            task (Literal[TargetTasks.REGRESSION, TargetTasks.SINGLECLASS,
               TargetTasks.MULTICLASS]): task type for the target property
             th (list[float] | str): threshold for the target property, only used
-                for classification tasks. If th is precomputed, set it to "precomputed".
-                If th is precomputed, n_classes must be specified.
+                for classification tasks. If target property is already discrete,
+                n_classes must be specified, otherwise it is inferred from th.
             n_classes (int): number of classes for the target property. Must be
-                specified if th is precomputed, otherwise it is inferred from th.
-            transformer (Callable): function to transform the target property
-            imputer (Callable): function to impute the target property
+                specified if th is None and the target property is already discrete.
+                If th is provided, n_classes is inferred from it.
         """
         self.name = name
         self.task = task
         if task.isClassification():
-            assert th is not None, (
-                f"Threshold not specified for classification task `{name}`. "
-                "If the task is already precomputed, set `th` to `precomputed`, and "
-                "define the correct number of classes with `n_classes."
-            )
-            self.th = th
-            if isinstance(th, str) and th == "precomputed":
-                self.nClasses = n_classes
-        self.transformer = transformer
-        self.imputer = imputer
-
-    def __getstate__(self):
-        o_dict = super().__getstate__()
-        o_dict["transformer"] = (
-            function_as_string(self.transformer) if self.transformer else None
-        )
-        return o_dict
-
-    def __setstate__(self, state):
-        super().__setstate__(state)
-        if state["transformer"] is not None:
-            self.transformer = function_from_string(self.transformer)
+            self.setTh(th, n_classes)
 
     @property
     def th(self):
         """Set the threshold for the target property.
 
         Returns:
-            th ([list[int] | str]): threshold for the target property
+            th ([list[float] | None): threshold for the target property
         """
+        assert self.task.isClassification(), "Threshold is only available for classification tasks"
         return self._th
-
-    @th.setter
-    def th(self, th: list[float] | str):
-        """Set the threshold for the target property and the number of classes if th is
-        not precomputed.
-
-        Args:
-            th (list[float] | str): threshold for the target property
-        """
-        assert (
-            self.task.isClassification()
-        ), "Threshold can only be set for classification tasks"
-        self._th = th
-        if isinstance(th, str):
-            assert th == "precomputed", f"Invalid threshold {th}"
-        else:
-            self._nClasses = len(self.th) - 1 if len(self.th) > 1 else 2
-
-    @th.deleter
-    def th(self):
-        """Delete the threshold for the target property and the number of classes."""
-        del self._th
-        del self._nClasses
-
+    
     @property
     def nClasses(self):
         """Get the number of classes for the target property.
@@ -204,19 +149,60 @@ class TargetProperty(JSONSerializable):
         Returns:
             nClasses (int): number of classes
         """
+        assert self.task.isClassification(), "Number of classes is only available for classification tasks"
         return self._nClasses
 
-    @nClasses.setter
-    def nClasses(self, nClasses: int):
-        """Set the number of classes for the target property if th is precomputed.
+    def setTh(self, th: list[float] | None, n_classes: int | None = None):
+        """Set the threshold for the target property and the number of classes if th is
+        precomputed.
 
         Args:
-            nClasses (int): number of classes
+            th (list[float] | None): threshold for the target property
+            n_classes (int | None): number of classes for the target property
         """
         assert (
-            self.th == "precomputed"
-        ), "Number of classes can only be set if threshold is precomputed"
-        self._nClasses = nClasses
+            self.task.isClassification()
+        ), "Threshold can only be set for classification tasks"
+        self._th = th
+        if self.th is None:
+            assert n_classes is not None, (
+                "If target property is a classification task, "
+                "either a threshold or the number of classes must be specified."
+                "Make sure to set nClasses first if setting th to None."
+            )
+            self._nClasses = n_classes
+        else:
+            assert isinstance(self.th, list), "Threshold must be a list of floats."
+            assert len(self.th) > 0, "Threshold list must contain at least one value."
+            assert n_classes is None, (
+                "If th is provided, n_classes must be None. "
+                "Number of classes is inferred from the threshold."
+            )
+            if len(self.th) > 1:
+                assert self.task == TargetTasks.MULTICLASS, (
+                    f"If multiple thresholds are provided, "
+                    f"task must be {TargetTasks.MULTICLASS}, "
+                    f"but got {self.task}."
+                )
+                assert len(self.th) > 3, (
+                    "For multi-class classification, set at least 4 thresholds. "
+                    "These define the lower and upper bounds of the bins, e.g. "
+                    "[1, 2, 3, 4] will create bins (1,2], (2,3], (3,4]. "
+                    "For binary classification, set a single threshold."
+                )
+            else:
+                assert self.task == TargetTasks.SINGLECLASS, (
+                    f"If a single threshold is provided, "
+                    f"task must be {TargetTasks.SINGLECLASS}, "
+                    f"but got {self.task}."
+                )
+            self._nClasses = len(self.th) - 1 if len(self.th) > 1 else 2
+
+    @th.deleter
+    def th(self):
+        """Delete the threshold for the target property and the number of classes."""
+        del self._th
+        del self._nClasses
 
     def __repr__(self):
         """Representation of the TargetProperty object."""
@@ -230,7 +216,7 @@ class TargetProperty(JSONSerializable):
         return self.name
 
     @classmethod
-    def fromDict(cls, d: dict):
+    def fromDict(cls, d: dict[str, str | list[float] | int]):
         """Create a TargetProperty object from a dictionary.
 
         task can be specified as a string or as a TargetTasks object.
@@ -246,14 +232,8 @@ class TargetProperty(JSONSerializable):
             TargetProperty: TargetProperty object
         """
         if isinstance(d["task"], str):
-            return TargetProperty(
-                **{
-                    k: TargetTasks[v.upper()] if k == "task" else v
-                    for k, v in d.items()
-                }
-            )
-        else:
-            return TargetProperty(**d)
+            d["task"] = TargetTasks[d["task"].upper()]
+        return TargetProperty(**d)
 
     @classmethod
     def fromList(cls, _list: list[dict]):
@@ -269,7 +249,7 @@ class TargetProperty(JSONSerializable):
         return [cls.fromDict(d) for d in _list]
 
     @staticmethod
-    def toList(_list: list, task_as_str: bool = False, drop_transformer: bool = True):
+    def toList(_list: list, task_as_str: bool = False):
         """Convert a list of TargetProperty objects to a list of dictionaries.
 
         Args:
@@ -294,8 +274,6 @@ class TargetProperty(JSONSerializable):
                         "n_classes": target_prop.nClasses
                     }
                 )
-            if not drop_transformer:
-                target_props[-1].update({"transformer": target_prop.transformer})
         return target_props
 
     @staticmethod

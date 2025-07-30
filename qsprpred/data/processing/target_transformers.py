@@ -23,6 +23,11 @@ class TargetTransformer(Step):
     
 class Discretizer(TargetTransformer):
     """Discretizes the target data into bins.
+    
+    Note. using this step in a pipeline may break the subsequent model training
+    as the discretizer does not update the `targetProperties` of the dataset.
+    It is recommended to use the `makeClassification` method of the dataset instead,
+    see the documentation of the `QSPRDataSet` class.
 
     Attributes:
         target (str): name of the target property to be discretized

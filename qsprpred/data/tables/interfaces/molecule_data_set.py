@@ -36,18 +36,3 @@ class MoleculeDataSet(
         Returns:
             Generator[str, None, None]: Generator of SMILES strings.
         """
-
-    @abstractmethod
-    def imputeProperties(self, names: list[str], imputer: Callable):
-        """Impute missing values in the given properties using the given imputer.
-
-        Args:
-            names (list[str]): list of target properties names to impute
-            imputer (Callable): imputer function
-        """
-
-    @abstractmethod
-    def transformProperties(
-        self, names: list[str], transformer: Callable[[Iterable[Any]], Iterable[Any]]
-    ):
-        """Transform the target properties using the given transformer function."""

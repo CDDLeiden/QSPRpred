@@ -634,13 +634,14 @@ def prop_transform(x):
 
 class TestTargetProperty(QSPRTestCase):
     """Test the TargetProperty class."""
-    def checkTargetProperty(self, target_prop, name, task, th):
+    def checkTargetProperty(self, target_prop, name, task, th, n_classes=None):
         # Check the target property creation consistency
         self.assertEqual(target_prop.name, name)
         self.assertEqual(target_prop.task, task)
         if task.isClassification():
             self.assertTrue(target_prop.task.isClassification())
             self.assertEqual(target_prop.th, th)
+            self.assertEqual(target_prop.nClasses, n_classes)
 
     def testInit(self):
         """Check the TargetProperty class on target property creation."""
@@ -649,17 +650,26 @@ class TestTargetProperty(QSPRTestCase):
         self.checkTargetProperty(targetprop, "CL", TargetTasks.REGRESSION, None)
         targetprop = TargetProperty("CL", TargetTasks.MULTICLASS, th=[0, 1, 10, 1200])
         self.checkTargetProperty(
-            targetprop, "CL", TargetTasks.MULTICLASS, [0, 1, 10, 1200]
+            targetprop, "CL", TargetTasks.MULTICLASS, [0, 1, 10, 1200], 3
         )
         targetprop = TargetProperty("CL", TargetTasks.SINGLECLASS, th=[5])
-        self.checkTargetProperty(targetprop, "CL", TargetTasks.SINGLECLASS, [5])
-        # check with precomputed values
-        targetprop = TargetProperty(
-            "CL", TargetTasks.SINGLECLASS, th="precomputed", n_classes=2
-        )
-        self.checkTargetProperty(
-            targetprop, "CL", TargetTasks.SINGLECLASS, "precomputed"
-        )
+        self.checkTargetProperty(targetprop, "CL", TargetTasks.SINGLECLASS, [5], 2)
+        targetprop = TargetProperty("CL", TargetTasks.SINGLECLASS, n_classes=2)
+        self.checkTargetProperty(targetprop, "CL", TargetTasks.SINGLECLASS, None, 2)
+        # check if incorrect task raises an error
+        with self.assertRaises(AssertionError):
+            TargetProperty("CL", TargetTasks.SINGLECLASS, th=[5], n_classes=2)
+        with self.assertRaises(AssertionError):
+            TargetProperty("CL", TargetTasks.SINGLECLASS, th=5)
+        with self.assertRaises(AssertionError):
+            TargetProperty("CL", TargetTasks.SINGLECLASS, th=[])
+        with self.assertRaises(AssertionError):
+            TargetProperty("CL", TargetTasks.SINGLECLASS, th=[5, 6])
+        with self.assertRaises(AssertionError):
+            TargetProperty("CL", TargetTasks.MULTICLASS, th=[5, 6])
+        with self.assertRaises(AssertionError):
+            TargetProperty("CL", TargetTasks.SINGLECLASS, th=[0, 1, 10, 1200])
+
         # Check from dictionary creation
         targetprop = TargetProperty.fromDict(
             {
@@ -676,7 +686,7 @@ class TestTargetProperty(QSPRTestCase):
             }
         )
         self.checkTargetProperty(
-            targetprop, "CL", TargetTasks.MULTICLASS, [0, 1, 10, 1200]
+            targetprop, "CL", TargetTasks.MULTICLASS, [0, 1, 10, 1200], 3
         )
         # Check from list creation, selection and serialization support functions
         targetprops = TargetProperty.fromList(
@@ -702,21 +712,19 @@ class TestTargetProperty(QSPRTestCase):
 
     @parameterized.expand(
         [
-            (TargetTasks.REGRESSION, "CL", None, prop_transform),
-            (TargetTasks.MULTICLASS, "CL", [0, 1, 10, 1200], lambda x: x + 1),
-            # (TargetTasks.SINGLECLASS, "CL", [5], np.log), FIXME: np.log does not save
+            (TargetTasks.REGRESSION, "CL", None),
+            (TargetTasks.MULTICLASS, "CL", [0, 1, 10, 1200]),
         ]
     )
-    def testSerialization(self, task, name, th, transformer):
-        prop = TargetProperty(name, task, transformer=transformer, th=th)
+    def testSerialization(self, task, name, th):
+        prop = TargetProperty(name, task, th=th)
         json_form = prop.toJSON()
         prop2 = TargetProperty.fromJSON(json_form)
         self.assertEqual(prop2.name, prop.name)
         self.assertEqual(prop2.task, prop.task)
-        rnd_number = np.random.rand(10)
-        self.assertTrue(
-            all(prop2.transformer(rnd_number) == prop.transformer(rnd_number))
-        )
+        if task.isClassification():
+            self.assertEqual(prop2.th, prop.th)
+            self.assertEqual(prop2.nClasses, prop.nClasses)
 
 
 class TestDataSetPreProcessing(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCase):
@@ -759,88 +767,6 @@ class TestDataSetPreProcessing(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCa
             dataset,
             pipeline,
             split,
-        )
-
-
-class TestTargetImputation(PathMixIn, QSPRTestCase):
-    """Small tests to only check if the target imputation works on its own."""
-    def setUp(self):
-        """Set up the test Dataframe."""
-        super().setUp()
-        self.setUpPaths()
-        self.descriptors = [
-            "Descriptor_F1",
-            "Descriptor_F2",
-            "Descriptor_F3",
-            "Descriptor_F4",
-            "Descriptor_F5",
-        ]
-        self.df = pd.DataFrame(
-            data=np.array(
-                [
-                    ["C", 1, 4, 2, 6, 2, 1, 2],
-                    ["C", 1, 8, 4, 2, 4, 1, 2],
-                    ["C", 1, 4, 3, 2, 5, 1, np.NaN],
-                    ["C", 1, 8, 4, 9, 8, 2, 2],
-                    ["C", 1, 4, 2, 3, 9, 2, 2],
-                    ["C", 1, 8, 4, 7, 12, 2, 2],
-                ]
-            ),
-            columns=["SMILES", *self.descriptors, "y", "z"],
-        )
-
-    def testImputation(self):
-        # FIXME: imputations should be done in the pipeline
-        """Test the imputation of missing values in the target properties."""
-        self.dataset = QSPRTable.fromDF(
-            "TestImputation",
-            self.df,
-            target_props=[
-                {
-                    "name": "y",
-                    "task": TargetTasks.REGRESSION,
-                    "imputer": SimpleImputer(strategy="mean"),
-                },
-                {
-                    "name": "z",
-                    "task": TargetTasks.REGRESSION,
-                    "imputer": SimpleImputer(strategy="mean"),
-                },
-            ],
-            path=self.generatedPath,
-        )
-        self.assertEqual(self.dataset.targetProperties[0].name, "y")
-        self.assertEqual(self.dataset.targetProperties[1].name, "z")
-        self.assertTrue("y_before_impute" in self.dataset.getDF().columns)
-        self.assertTrue("z_before_impute" in self.dataset.getDF().columns)
-        self.assertEqual(self.dataset.getDF()["y"].isna().sum(), 0)
-        self.assertEqual(self.dataset.getDF()["z"].isna().sum(), 0)
-
-
-class TestTargetTransformation(DataSetsPathMixIn, QSPRTestCase):
-    """Tests the transformation of target properties."""
-    def setUp(self):
-        super().setUp()
-        self.setUpPaths()
-
-    def prop_transform(self, x):
-        return np.log10(x)
-
-    def testTransformation(self):
-        dataset = self.createLargeTestDataSet(
-            target_props=[
-                {
-                    "name": "CL",
-                    "task": TargetTasks.REGRESSION,
-                    "transformer": prop_transform,
-                },
-            ]
-        )
-        self.assertTrue(
-            all(
-                dataset.getDF()["CL"] ==
-                np.log10(dataset.getDF()["CL_before_transform"])
-            )
         )
 
 
