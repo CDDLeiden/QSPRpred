@@ -10,7 +10,8 @@ from qsprpred.data.sampling.splits import DataSplit
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.extra.data.utils.testing.path_mixins import DataSetsMixInExtras
 from qsprpred.utils.testing.check_mixins import DataPrepCheckMixIn
-from qsprpred.data.processing.pipeline import DatasetPipeline, Shuffle, DummyStep
+from qsprpred.data.processing.pipeline import DatasetPipeline
+from qsprpred.data.processing.step import Shuffle, DummyStep
 
 
 class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepCheckMixIn, TestCase):

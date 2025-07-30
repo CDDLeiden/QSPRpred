@@ -6,9 +6,10 @@ from ...utils.interfaces.randomized import Randomized
 class Step(JSONSerializable):
     """A data preprocessing step that can be applied to a dataset"""
     
-    def __init__(self):
+    def __init__(self, **kwargs):
         """Initialize the step"""
         self._fitted = False
+        super().__init__(**kwargs)
     
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
         """Fit the step to the dataset

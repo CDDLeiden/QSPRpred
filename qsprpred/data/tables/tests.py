@@ -21,7 +21,8 @@ from ..chem.standardizers.papyrus import PapyrusStandardizer
 from ..descriptors.fingerprints import MorganFP
 from .interfaces.qspr_data_set import QSPRDataSet
 from .mol import MoleculeTable
-from ..processing.pipeline import DatasetPipeline, Shuffle, DummyStep
+from ..processing.pipeline import DatasetPipeline
+from ..processing.step import Shuffle, DummyStep
 
 
 class TestMolTable(DataSetsPathMixIn, QSPRTestCase):

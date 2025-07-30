@@ -55,13 +55,13 @@ class CategoryFilter(DataFilter):
             keep (bool, optional): whether to keep or discard the values. Defaults to
                 False.
         """
-        super().__init__(data_set)
+        super().__init__(dataset = data_set)
         self.prop = prop
         self.values = values
         self.keep = keep
         self._fitted = False
 
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame | None]:
         """Filter rows from dataframe.
 
         Args:
@@ -71,6 +71,7 @@ class CategoryFilter(DataFilter):
 
         Returns:
             pd.DataFrame: filtered dataframe.
+            pd.DataFrame: target dataframe.
         """
         assert self.hasDataSet, (
             "No dataset attached to this filter, set dataset with setDataSet()"
@@ -128,18 +129,22 @@ class RepeatsFilter(DataFilter):
                 are not removed. Defaults to None.
             data_set (QSPRDataSet, optional): dataset to filter. Defaults to None.
         """
-        super().__init__(data_set)
+        super().__init__(dataset = data_set)
         self.keep = keep
         self.timeCol = timecol
         self.additionalCols = additional_cols
 
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame | None]:
         """Filter rows from dataframe.
 
         Arguments:
             X (pandas dataframe): dataframe to filter
             y (pandas dataframe, optional): output dataframe if the filtering method
                 requires it
+                
+        Returns:
+            tuple[pd.DataFrame, pd.DataFrame | None]: filtered dataframe and target
+            dataframe if provided.
         """
         def group_duplicate_index(df) -> list[list[int]]:
             """Group indices of duplicate rows
@@ -286,8 +291,8 @@ class OutlierFilter(DataFilter):
         """
         self.ad.fit(X)
         self._fitted = True
-        
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame | None]:
         """Remove samples outside the applicability domain.
         
         Args:

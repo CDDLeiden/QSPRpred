@@ -1,7 +1,4 @@
-"""
-Test module for testing extra models.
-
-"""
+"""Test module for testing extra models."""
 
 from typing import Type
 

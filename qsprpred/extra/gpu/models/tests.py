@@ -9,11 +9,11 @@ from parameterized import parameterized
 from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
-from sklearn.model_selection import ShuffleSplit
 
 from qsprpred.data.descriptors.sets import SmilesDesc
 from qsprpred.data.sampling.splits import RandomSplit
-from qsprpred.data.processing.pipeline import DummyStep, DatasetPipeline
+from qsprpred.data.processing.pipeline import DatasetPipeline
+from qsprpred.data.processing.step import DummyStep
 from qsprpred.extra.gpu.utils.parallel import TorchJITGenerator
 from qsprpred.tasks import ModelTasks, TargetTasks
 

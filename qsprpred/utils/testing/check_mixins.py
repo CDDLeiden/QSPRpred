@@ -33,12 +33,15 @@ from ...data.sampling.splits import DataSplit, RandomSplit
 
 class StepCheckMixIn(DataSetsPathMixIn):
     """Mixin class for common pipeline step checks."""
-    def checkFitTransform(self, step: Step, dataset: QSPRTable) -> Tuple[pd.DataFrame, pd.DataFrame | None]:
+    def checkFitTransform(self, step: Step, dataset: QSPRTable, fromfile=False) -> Tuple[pd.DataFrame, pd.DataFrame | None]:
         """Check basic step fit and transform functionality."""
         X = dataset.getDescriptors()
         y = dataset.getTargets()
         
-        self.assertFalse(step.fitted)
+        if fromfile:
+            self.assertTrue(step.fitted)
+        else:
+            self.assertFalse(step.fitted)
         step.fit(X, y)
         self.assertTrue(step.fitted)
         X_out, y_out = step.transform(X, y)
@@ -66,7 +69,7 @@ class StepCheckMixIn(DataSetsPathMixIn):
             step_loaded.dataSet = dataset
 
         # check if the deserialized step gives the same output
-        X_out_loaded, y_out_loaded = self.checkFitTransform(step_loaded, dataset)
+        X_out_loaded, y_out_loaded = self.checkFitTransform(step_loaded, dataset, fromfile=True)
         self.assertTrue(X_out.equals(X_out_loaded))
         self.assertTrue(y_out.equals(y_out_loaded))
         
