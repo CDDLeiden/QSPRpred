@@ -66,6 +66,13 @@ class Pipeline(Randomized, JSONSerializable):
         self.randomState = seed
         self._skip = skip
         self._fitted = False
+        # FIXME: featureNames is only set in the apply method, as only after applying
+        # the pipeline we know which features are present in the data (i.e. filters
+        # may remove some features). Some models like Neural Net model, require the
+        # number of features on initialization. However, if removing, adding or changing
+        # steps, the feature names may change, so this is not a reliable way to get
+        # the feature names. This should be fixed in the future.
+        self.featureNames = None
 
     @property
     def randomState(self) -> int | None:
@@ -143,6 +150,7 @@ class Pipeline(Randomized, JSONSerializable):
             if X_test is not None:
                 assert X_train.shape[1] == X_test.shape[1], f"Number of features in training and test data is not consistent after step {name}"
                 assert all(X_train.columns == X_test.columns), f"Feature names in training and test data are not consistent after step {name}"
+        self.featureNames = X_train.columns.tolist()
         
         return X_train, y_train, X_test, y_test
     
