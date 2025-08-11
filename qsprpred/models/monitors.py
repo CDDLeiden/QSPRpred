@@ -1142,7 +1142,7 @@ class WandBMonitor(BaseMonitor):
             "assessmentPipeline": self.assessmentPipeline.__str__(),
             "assessmentParameters": self.assessmentParameters,
             "assessmentSplit": self.assessmentSplit.__class__.__name__,
-            "targetProperties": self.assessmentDataset.targetPropertiesNames(),
+            "targetProperties": self.assessmentDataset.targetPropertiesNames,
         }
         # add hyperparameter optimization parameters if available
         if self.optimizationType is not None:
@@ -1159,7 +1159,6 @@ class WandBMonitor(BaseMonitor):
         )
         name = f"{group}_{self.assessmentName}_{fold}"
 
-        print("Initializing wandb run for fold:", self.assessmentModel.outDir)
         self.run = self.wandb.init(
             project=self.projectName,
             config=config,
@@ -1207,7 +1206,7 @@ class WandBMonitor(BaseMonitor):
 
         self.run.log({"Fold predictions": wandbTable})
         if isinstance(scores, list):
-            tasks = self.assessmentDataset.targetPropertiesNames()
+            tasks = self.assessmentDataset.targetPropertiesNames
             scores = {tasks[i]: scores[i] for i in range(len(tasks))}
         else:
             scores = {"fold score": scores}
