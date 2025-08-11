@@ -458,10 +458,10 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         target_spec = self.getTargetSpec(target_property)
 
         if not all(
-            value is None or (type(value) in (int, bool)) or
+            value is None or np.isnan(value) or (type(value) in (int, bool)) or
             (isinstance(value, float) and value.is_integer())
             for value in target_values
-        ):
+        ):  
             logger.warning(
                 f"Classification target property '{target_property}' "
                 "should only contain integers or booleans. "

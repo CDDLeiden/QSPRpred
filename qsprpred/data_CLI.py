@@ -39,6 +39,8 @@ from qsprpred.data.processing.feature_filters import (
     HighCorrelationFilter,
     LowVarianceFilter,
 )
+from qsprpred.data.processing.imputers import TargetImputer
+from qsprpred.data.processing.target_transformers import SimpleTargetTransformer
 from qsprpred.data.sampling.splits import (
     ClusterSplit,
     ManualSplit,
@@ -310,13 +312,13 @@ def QSPR_dataprep(args):
                 th = args.threshold[prop] if args.threshold else None
                 if reg:
                     task = TargetTasks.REGRESSION
+                    th = None
                 elif th is None:
                     task = (
                         TargetTasks.MULTICLASS
                         if len(df[prop].dropna().unique()) > 2  # noqa: PLR2004
                         else TargetTasks.SINGLECLASS
                     )
-                    th = "precomputed"
                 else:
                     task = (
                         TargetTasks.SINGLECLASS
@@ -328,16 +330,7 @@ def QSPR_dataprep(args):
                         "Threshold will be ignored."
                     )
                     th = None
-                target_props.append(
-                    {
-                        "name":
-                            prop,
-                        "task":
-                            task,
-                        "th":
-                            th
-                    }
-                )
+                target_props.append({"name": prop, "task": task, "th": th})
             dataset_name = (
                 f"{props_name}_{task}_{args.data_suffix}"
                 if args.data_suffix else f"{props_name}_{task}"
@@ -440,8 +433,29 @@ def QSPR_dataprep(args):
                         descriptorsets.append(
                             PredictorDesc(SklearnModel.fromFile(predictor_path))
                         )
-            # feature filters
             steps = {}
+            # Target imputers and transformations
+            for prop in props:
+                if prop in args.imputation:
+                    steps[f"imputer_{prop}"] = (
+                        TargetImputer(
+                            SimpleImputer(strategy=args.imputation[prop]),
+                            target_properties=[prop]
+                        )
+                    )
+            # transformation of target properties
+            # FIXME: assuming no transformation for classification tasks
+            # maybe this should be allowed?
+            if reg:
+                for prop in props:
+                    if prop in args.transform_data:
+                        steps[f"transform_{prop}"] = (
+                            SimpleTargetTransformer(
+                                target=prop,
+                                transformation=args.transform_data[prop],
+                            )
+                        )
+            # feature filters
             if args.low_variability:
                 steps["low_variability"] = LowVarianceFilter(th=args.low_variability)
             if args.high_correlation:
