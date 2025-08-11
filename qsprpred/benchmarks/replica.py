@@ -16,7 +16,7 @@ from ..models.assessment.methods import ModelAssessor
 from ..models.hyperparam_optimization import HyperparameterOptimization
 from ..models.model import QSPRModel
 from ..models.monitors import NullMonitor
-from ..tasks import TargetProperty
+from ..tasks import TargetSpec
 from ..utils.serialization import JSONSerializable
 
 
@@ -63,7 +63,7 @@ class Replica(JSONSerializable):
         name: str,
         data_source: DataSource,
         descriptors: list[DescriptorSet],
-        target_props: list[TargetProperty],
+        target_props: list[TargetSpec],
         pipeline: DatasetPipeline,
         model: QSPRModel,
         optimizer: HyperparameterOptimization,

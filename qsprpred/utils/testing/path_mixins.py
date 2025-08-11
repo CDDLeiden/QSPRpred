@@ -28,7 +28,7 @@ from ...data.descriptors.sets import (
     TanimotoDistances,
 )
 from ...data.processing.pipeline import DatasetPipeline
-from ...data.processing.step import Shuffle
+from ...data.processing.step import Shuffle, DummyStep
 from ...data.processing.data_filters import NaNFilter, OutlierFilter, RepeatsFilter
 from ...data.sampling.splits import RandomSplit
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
@@ -78,11 +78,12 @@ class DataSetsPathMixIn(PathMixIn):
             os.makedirs(self.generatedDataPath)
 
     @staticmethod
-    def getDefaultPrep():
+    def getDefaultPrep(add_imputer=None):
         """Return a dictionary with default preparation settings."""
         return DatasetPipeline(
                 feature_calculators=[MorganFP(radius=2, nBits=128)],
                 steps = {
+                    "imputer": add_imputer if add_imputer else DummyStep(),
                     "shuffle": Shuffle(),
                     "remove_nan": NaNFilter(),
                     "feature_standardizer": StandardScaler(),
@@ -256,6 +257,7 @@ class DataSetsPathMixIn(PathMixIn):
         random_state=42,
         n_jobs=1,
         chunk_size=None,
+        drop_empty_target_props=True
     ):
         """Create a large dataset for testing purposes.
 
@@ -274,6 +276,7 @@ class DataSetsPathMixIn(PathMixIn):
             random_state=random_state,
             n_jobs=n_jobs,
             chunk_size=chunk_size,
+            drop_empty_target_props=drop_empty_target_props
         )
         return dataset
 
@@ -324,6 +327,7 @@ class DataSetsPathMixIn(PathMixIn):
         random_state=None,
         n_jobs=1,
         chunk_size=None,
+        drop_empty_target_props=True
     ):
         """Create a dataset for testing purposes from the given data frame.
 
@@ -346,6 +350,7 @@ class DataSetsPathMixIn(PathMixIn):
             target_props=target_props,
             path=self.generatedDataPath,
             random_state=random_state,
+            drop_empty_target_props=drop_empty_target_props
         )
         return dataset
 

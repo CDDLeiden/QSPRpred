@@ -502,9 +502,9 @@ class QSPRModel(JSONSerializable, ABC):
             storage,
             f"{self.__class__.__name__}_{hash(self)}",
             path=self.baseDir,
+            random_state=self.randomState,
         )
         for target_property in self.targetProperties:
-            target_property.imputer = None
             dataset.addProperty(target_property.name, np.nan)
         # create the dataset and get failed molecules
         dataset = QSPRTable.fromMolTable(

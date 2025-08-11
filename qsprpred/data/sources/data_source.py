@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from qsprpred import TargetProperty
+from qsprpred import TargetSpec
 from qsprpred.data import MoleculeTable, QSPRTable
 
 
@@ -22,7 +22,7 @@ class DataSource(ABC):
 
     def getDataSet(
         self,
-        target_props: list[TargetProperty | dict],
+        target_props: list[TargetSpec | dict],
         name: str | None = None,
         **kwargs
     ) -> QSPRTable:

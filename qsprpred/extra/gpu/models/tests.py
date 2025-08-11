@@ -14,6 +14,7 @@ from qsprpred.data.descriptors.sets import SmilesDesc
 from qsprpred.data.sampling.splits import RandomSplit
 from qsprpred.data.processing.pipeline import DatasetPipeline
 from qsprpred.data.processing.step import DummyStep
+from qsprpred.data.processing.imputers import TargetImputer
 from qsprpred.extra.gpu.utils.parallel import TorchJITGenerator
 from qsprpred.tasks import ModelTasks, TargetTasks
 
@@ -382,22 +383,26 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                 {
                     "name": "fu",
                     "task": TargetTasks.SINGLECLASS,
-                    "th": [0.3],
-                    "imputer": SimpleImputer(strategy="most_frequent"),
+                    "th": [0.3]
                 },
                 {
                     "name": "CL",
                     "task": TargetTasks.SINGLECLASS,
-                    "th": [6.5],
-                    "imputer": SimpleImputer(strategy="most_frequent"),
+                    "th": [6.5]
                 },
             ]
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name=f"{alg_name}_{task}",
             target_props=target_props,
+            drop_empty_target_props=False,
         )
         pipeline = DatasetPipeline(feature_calculators=[SmilesDesc()])
+        if task == ModelTasks.MULTITASK_SINGLECLASS:
+            pipeline.addStep(
+                name="imputer", 
+                step=TargetImputer(SimpleImputer(strategy="most_frequent"))
+            )
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}"
         model = self.getModel(

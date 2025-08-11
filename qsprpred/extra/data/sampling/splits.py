@@ -21,8 +21,9 @@ import pandas as pd
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 
 from qsprpred.data.tables.qspr import QSPRTable
-from qsprpred.tasks import TargetProperty
+from qsprpred.tasks import TargetSpec
 from sklearn.impute import SimpleImputer
+from qsprpred.data.processing.pipeline import DatasetPipeline
 
 
 class PCMSplit(DataSplit, Randomized, DataSetDependent):
@@ -117,8 +118,8 @@ class PCMSplit(DataSplit, Randomized, DataSetDependent):
         ).reset_index()
         # Create target properties for multi-task dataset
         mt_targetProperties = [
-            TargetProperty(
-                name=target, task=task, th=th, imputer=SimpleImputer(strategy="median")
+            TargetSpec(
+                name=target, task=task, th=th
             ) for target in proteins
         ]
         # temporarily create multi-task dataset and split it with the given splitter
@@ -128,7 +129,20 @@ class PCMSplit(DataSplit, Randomized, DataSetDependent):
             smiles_col=ds.smilesProp,
             target_props=mt_targetProperties,
             random_state=ds.randomState,
+            drop_empty_target_props=False,
         )
+        # impute missing values in the multi-task dataset
+        # FIXME: this is not very intuitive, applying a transformation or step
+        # directly on the dataset values should be simplified
+        values = pd.DataFrame(
+            SimpleImputer(strategy="median").fit_transform(ds_mt.getTargets()),
+            columns=ds_mt.targetPropertiesNames
+        )
+        for target_prop in ds_mt.targetProperties:
+            ds_mt.addProperty(
+                target_prop.name,
+                values[target_prop.name]
+            )
         _, mt_test_indices = next(ds_mt.split(self.splitter))
 
         # Convert MT indices to indices of original PCM dataset

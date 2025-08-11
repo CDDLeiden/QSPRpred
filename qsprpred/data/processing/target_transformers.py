@@ -72,8 +72,12 @@ class Discretizer(TargetTransformer):
         """
         if y is None:
             return X, y
+        if isinstance(y, pd.Series):
+            y = pd.DataFrame(y)
         if self.target not in y.columns:
             raise ValueError(f"Target {self.target} not found in target data.")
+        if y[self.target].isna().all():
+            return X, y
         if len(self.th) > 1:
             assert max(y[self.target].dropna()) <= max(self.th), (
                 "Make sure final threshold value is not smaller "

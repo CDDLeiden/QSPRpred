@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
 from xgboost import XGBClassifier, XGBRegressor
 
-from qsprpred import TargetProperty, TargetTasks
+from qsprpred import TargetSpec, TargetTasks
 from qsprpred.benchmarks import BenchmarkSettings, BenchmarkRunner
 from qsprpred.data import MoleculeTable, RandomSplit
 from qsprpred.data.descriptors.fingerprints import MorganFP
@@ -71,7 +71,7 @@ settings = BenchmarkSettings(
     target_props=[
         # one or more properties to model
         [
-            TargetProperty.fromDict(
+            TargetSpec.fromDict(
                 {
                     "name": "pchembl_value_Mean",
                     "task": TargetTasks.SINGLECLASS,
@@ -148,7 +148,7 @@ settings.name = "ConsistencyChecksREG"
 settings.target_props = [
     # one or more properties to model
     [
-        TargetProperty.fromDict(
+        TargetSpec.fromDict(
             {
                 "name": "pchembl_value_Mean",
                 "task": TargetTasks.REGRESSION,

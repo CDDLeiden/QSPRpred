@@ -1,6 +1,5 @@
 from enum import Enum
-from typing import ClassVar, Literal, Optional
-
+from typing import Literal
 from qsprpred.utils.serialization import JSONSerializable
 
 
@@ -24,6 +23,26 @@ class TargetTasks(Enum):
     def __str__(self):
         """Return the name of the task."""
         return self.name
+
+    @classmethod
+    def getTaskFromTh(cls, th: list[float]) -> "TargetTasks":
+        """Get the task type from the threshold.
+
+        Args:
+            th (list[float]): threshold for a target task
+
+        Returns:
+            TargetTasks: task type for the target property
+        """
+        if len(th) == 1:
+            return TargetTasks.SINGLECLASS
+        elif len(th) > 3:
+            return TargetTasks.MULTICLASS
+        else:
+            raise ValueError(
+                "Threshold list must contain at least 4 values for multi-class classification."
+                "Or only a single value for binary classification to infer the task type."
+            )
 
 
 class ModelTasks(Enum):
@@ -93,8 +112,8 @@ class ModelTasks(Enum):
             return ModelTasks.MULTITASK_MIXED
 
 
-class TargetProperty(JSONSerializable):
-    """Target property for a QSPR model.
+class TargetSpec(JSONSerializable):
+    """Target specifications for a single target property.
 
     Attributes:
         name (str): name of the target property
@@ -114,7 +133,7 @@ class TargetProperty(JSONSerializable):
         th: list[float] | None = None,
         n_classes: int | None = None,
     ):
-        """Initialize a TargetProperty object.
+        """Initialize a TargetSpec object.
 
         Args:
             name (str): name of the target property
@@ -139,7 +158,8 @@ class TargetProperty(JSONSerializable):
         Returns:
             th ([list[float] | None): threshold for the target property
         """
-        assert self.task.isClassification(), "Threshold is only available for classification tasks"
+        if not self.task.isClassification():
+            raise AttributeError("Threshold is only available for classification tasks")
         return self._th
     
     @property
@@ -205,19 +225,19 @@ class TargetProperty(JSONSerializable):
         del self._nClasses
 
     def __repr__(self):
-        """Representation of the TargetProperty object."""
-        if self.task.isClassification() and self.th is not None:
-            return f"TargetProperty(name={self.name}, task={self.task}, th={self.th})"
+        """Representation of the TargetSpec object."""
+        if self.task.isClassification():
+            return f"TargetSpec(name={self.name}, task={self.task}, th={self.th}, n_classes={self.nClasses})"
         else:
-            return f"TargetProperty(name={self.name}, task={self.task})"
+            return f"TargetSpec(name={self.name}, task={self.task})"
 
     def __str__(self):
-        """Return string identifier of the TargetProperty object."""
+        """Return string identifier of the TargetSpec object."""
         return self.name
 
     @classmethod
     def fromDict(cls, d: dict[str, str | list[float] | int]):
-        """Create a TargetProperty object from a dictionary.
+        """Create a TargetSpec object from a dictionary.
 
         task can be specified as a string or as a TargetTasks object.
 
@@ -225,35 +245,35 @@ class TargetProperty(JSONSerializable):
             d (dict): dictionary containing the target property information
 
         Example:
-            >>> TargetProperty.fromDict({"name": "property_name", "task": "regression"})
-            TargetProperty(name=property_name, task=REGRESSION)
+            >>> TargetSpec.fromDict({"name": "property_name", "task": "regression"})
+            TargetSpec(name=property_name, task=REGRESSION)
 
         Returns:
-            TargetProperty: TargetProperty object
+            TargetSpec: TargetSpec object
         """
         if isinstance(d["task"], str):
             d["task"] = TargetTasks[d["task"].upper()]
-        return TargetProperty(**d)
+        return TargetSpec(**d)
 
     @classmethod
     def fromList(cls, _list: list[dict]):
-        """Create a list of TargetProperty objects from a list of dictionaries.
+        """Create a list of TargetSpec objects from a list of dictionaries.
 
         Args:
             _list (list): list of dictionaries containing the target property
                 information
 
         Returns:
-            list[TargetProperty]: list of TargetProperty objects
+            list[TargetSpec]: list of TargetSpec objects
         """
         return [cls.fromDict(d) for d in _list]
 
     @staticmethod
     def toList(_list: list, task_as_str: bool = False):
-        """Convert a list of TargetProperty objects to a list of dictionaries.
+        """Convert a list of TargetSpec objects to a list of dictionaries.
 
         Args:
-            _list (list): list of TargetProperty objects
+            _list (list): list of TargetSpec objects
             task_as_str (bool): whether to convert the task to a string
 
         Returns:
@@ -278,26 +298,26 @@ class TargetProperty(JSONSerializable):
 
     @staticmethod
     def selectFromList(_list: list, names: list):
-        """Select a subset of TargetProperty objects from a list of TargetProperty
+        """Select a subset of TargetSpec objects from a list of TargetSpec
         objects.
 
         Args:
-            _list (list): list of TargetProperty objects
+            _list (list): list of TargetSpec objects
             names (list): list of names of the target properties to be selected
             original_names (bool): whether to use the original names of the target
                 properties
 
         Returns:
-            list[TargetProperty]: list of TargetProperty objects
+            list[TargetSpec]: list of TargetSpec objects
         """
         return [t for t in _list if t.name in names]
 
     @staticmethod
     def getNames(_list: list):
-        """Get the names of the target properties from a list of TargetProperty objects.
+        """Get the names of the target properties from a list of TargetSpec objects.
 
         Args:
-            _list (list): list of TargetProperty objects
+            _list (list): list of TargetSpec objects
 
         Returns:
             list[str]: list of names of the target properties

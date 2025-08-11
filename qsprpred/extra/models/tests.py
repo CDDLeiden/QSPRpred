@@ -8,7 +8,8 @@ from sklearn.impute import SimpleImputer
 from xgboost import XGBClassifier, XGBRegressor
 
 from qsprpred.extra.data.descriptors.sets import ProDec
-from qsprpred.tasks import TargetProperty, TargetTasks
+from qsprpred.tasks import TargetSpec, TargetTasks
+from qsprpred.data.processing.imputers import TargetImputer
 
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import ModelCheckMixIn
@@ -104,7 +105,7 @@ class TestPCM(ModelDataSetsMixInExtras, ModelCheckMixIn, QSPRTestCase):
     def testFittingPCM(
         self,
         _,
-        props: list[TargetProperty | dict],
+        props: list[TargetSpec | dict],
         model_name: str,
         model_class: Type,
         random_state: list[int | None],
@@ -267,12 +268,10 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
                 {
                     "name": "fu",
                     "task": TargetTasks.REGRESSION,
-                    "imputer": SimpleImputer(strategy="mean"),
                 },
                 {
                     "name": "CL",
                     "task": TargetTasks.REGRESSION,
-                    "imputer": SimpleImputer(strategy="mean"),
                 },
             ]
         )
@@ -282,7 +281,8 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
             name=f"{model_name}_multitask_regression",
             random_state=random_state[0],
         )
-        self.fitTest(model, dataset, self.getDefaultPrep())
+        pipeline = self.getDefaultPrep(TargetImputer(SimpleImputer(strategy="mean")))
+        self.fitTest(model, dataset, pipeline)
         predictor = RandomModel(
             name=f"{model_name}_multitask_regression",
             base_dir=model.baseDir,
@@ -297,7 +297,7 @@ class TestRandomModelRegression(RandomBaseModelTestCase):
                 name=f"{model_name}_multitask_regression",
                 random_state=random_state[1],
             )
-            self.fitTest(comparison_model, dataset, self.getDefaultPrep())
+            self.fitTest(comparison_model, dataset, pipeline)
             self.predictorTest(
                 predictor,
                 dataset,
@@ -387,13 +387,11 @@ class TestRandomModelClassificationMultiTask(RandomBaseModelTestCase):
                     "name": "fu",
                     "task": TargetTasks.SINGLECLASS,
                     "th": [0.3],
-                    "imputer": SimpleImputer(strategy="most_frequent"),
                 },
                 {
                     "name": "CL",
                     "task": TargetTasks.SINGLECLASS,
                     "th": [6.5],
-                    "imputer": SimpleImputer(strategy="most_frequent"),
                 },
             ],
         )
@@ -405,7 +403,8 @@ class TestRandomModelClassificationMultiTask(RandomBaseModelTestCase):
             parameters=parameters,
             random_state=random_state[0],
         )
-        self.fitTest(model, dataset, self.getDefaultPrep())
+        pipeline = self.getDefaultPrep(TargetImputer(SimpleImputer(strategy="mean")))
+        self.fitTest(model, dataset, pipeline)
         predictor = RandomModel(
             name=f"{model_name}_multitask_classification",
             base_dir=model.baseDir,
@@ -423,7 +422,7 @@ class TestRandomModelClassificationMultiTask(RandomBaseModelTestCase):
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(comparison_model, dataset, self.getDefaultPrep())
+            self.fitTest(comparison_model, dataset, pipeline)
             self.predictorTest(
                 predictor,  # model loaded from file
                 dataset,

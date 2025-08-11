@@ -172,6 +172,9 @@ class Pipeline(Randomized, JSONSerializable):
             apply_to (str): whether to apply the step on 'train', 'test' or 'both'
             fixed (bool): whether the step should be fixed and not fitted
         """
+        if not isinstance(step, Step):
+            if hasattr(step, 'fit_transform'):
+                step = SklearnStep(step)
         self.steps[name] = step
         self.fitOn[name] = fit_on
         self.applyTo[name] = apply_to
@@ -227,6 +230,11 @@ class Pipeline(Randomized, JSONSerializable):
             step += f"fit_on={self.fitOn.get(name, 'train')}, "
             step += f"apply_to={self.applyTo.get(name, 'both')}, "
             step += f"fixed={name in self.fixed}"
+            step += f", skip={name in self.skip}"
+            if hasattr(obj, 'fitted'):
+                step += f", fitted={obj.fitted}"
+            if hasattr(obj, 'randomState'):
+                step += f", randomState={obj.randomState}"
             steps.append(step)
         return (
             f"{self.__class__.__name__}\n"
@@ -309,7 +317,8 @@ class DatasetPipeline(Pipeline):
             X_test (pd.DataFrame | None): transformed test data if split is not None
             y_test (pd.DataFrame | None): transformed test targets if split is not None
         """
-        self.randomState = dataset.randomState if seed is None else seed
+        if fit:
+            self.randomState = dataset.randomState if seed is None else seed
         
         # prepare X and y from the dataset
         if self.feature_calculators is not None:

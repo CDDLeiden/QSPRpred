@@ -328,17 +328,6 @@ def QSPR_dataprep(args):
                         "Threshold will be ignored."
                     )
                     th = None
-                transform_dict = {
-                    "log10": lambda x: (__import__("numpy").log10(x)),
-                    "log2": lambda x: (__import__("numpy").log2(x)),
-                    "log": lambda x: (__import__("numpy").log(x)),
-                    "sqrt": lambda x: (__import__("numpy").sqrt(x)),
-                    "cbrt": lambda x: (__import__("numpy").cbrt(x)),
-                    "exp": lambda x: (__import__("numpy").exp(x)),
-                    "square": lambda x: __import__("numpy").power(x, 2),
-                    "cube": lambda x: __import__("numpy").power(x, 3),
-                    "reciprocal": lambda x: __import__("numpy").reciprocal(x),
-                }
                 target_props.append(
                     {
                         "name":
@@ -346,18 +335,7 @@ def QSPR_dataprep(args):
                         "task":
                             task,
                         "th":
-                            th,
-                        "transformer":
-                            (
-                                transform_dict[args.transform_data[prop]]
-                                if (prop in args.transform_data) & (task == TargetTasks.REGRESSION)
-                                else None
-                            ),
-                        "imputer":
-                            (
-                                SimpleImputer(strategy=args.imputation[prop])
-                                if prop in args.imputation else None
-                            ),
+                            th
                     }
                 )
             dataset_name = (

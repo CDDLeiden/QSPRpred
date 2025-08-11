@@ -2,7 +2,6 @@ import pandas as pd
 from .step import Step
 from abc import abstractmethod
 from sklearn.impute._base import _BaseImputer
-from qsprpred.logs import logger
 
 class Imputer(Step):
 
@@ -28,7 +27,8 @@ class TargetImputer(Imputer):
         Args:
             imputer (callable): imputer function, e.g. from sklearn.impute, should
                 have fit and transform methods
-            target_properties (list[str], optional): target properties to impute
+            target_properties (list[str], optional): target properties to impute,
+            if None, all targets will be imputed.
         """
         self.imputer = imputer
         self.target_properties = target_properties

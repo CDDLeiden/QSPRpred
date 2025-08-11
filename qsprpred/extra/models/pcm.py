@@ -80,7 +80,6 @@ class PCMModel(QSPRModel, ABC):
         )
         dataset.addProperty(self.proteins.idProp, protein_id)
         for target_property in self.targetProperties:
-            target_property.imputer = None
             dataset.addProperty(target_property.name, np.nan)
         # create the dataset and get failed molecules
         dataset = PCMDataSet.fromMolTable(
