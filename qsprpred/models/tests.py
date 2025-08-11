@@ -593,7 +593,11 @@ class TestMetrics(TestCase):
         ## multi-class with threshold
         y_true, y_pred = self.sample_data(ModelTasks.MULTICLASS, use_proba=True)
         qsprpred_scorer = SklearnMetrics(
-            make_scorer(top_k_accuracy_score, needs_threshold=True, k=2)
+            make_scorer(
+                top_k_accuracy_score,
+                response_method=("predict_proba", "decision_function"),
+                k=2
+            )
         )
         self.assertEqual(
             qsprpred_scorer(y_true, y_pred),
