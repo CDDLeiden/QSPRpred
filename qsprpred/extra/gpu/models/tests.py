@@ -367,16 +367,8 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         """
         if task == ModelTasks.MULTITASK_REGRESSION:
             target_props = [
-                {
-                    "name": "fu",
-                    "task": TargetTasks.SINGLECLASS,
-                    "th": [0.3]
-                },
-                {
-                    "name": "CL",
-                    "task": TargetTasks.SINGLECLASS,
-                    "th": [6.5]
-                },
+                {"name": "fu", "task": TargetTasks.REGRESSION},
+                {"name": "CL", "task": TargetTasks.REGRESSION},
             ]
         else:
             target_props = [
@@ -402,6 +394,11 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             pipeline.addStep(
                 name="imputer", 
                 step=TargetImputer(SimpleImputer(strategy="most_frequent"))
+            )
+        elif task == ModelTasks.MULTITASK_REGRESSION:
+            pipeline.addStep(
+                name="imputer", 
+                step=TargetImputer(SimpleImputer(strategy="mean"))
             )
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}"
