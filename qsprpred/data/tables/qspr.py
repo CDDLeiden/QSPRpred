@@ -231,17 +231,17 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         logger.debug(f"Adding target property '{target_spec}' to dataset.")
         if isinstance(target_spec, dict):
             target_spec = TargetSpec.fromDict(target_spec)
-        if target_spec.name in self.targetPropertiesNames:
-            logger.warning(
-                f"Target property '{target_spec}' already exists in dataset. It will be reset."
-            )
-            self.restoreTargetProperty(target_spec)
-            self._targetProperties = [
-                tp for tp in self.targetProperties if tp.name != target_spec.name
-            ]
         assert (
             target_spec.name in self.getProperties()
         ), f"Property {target_spec.name} not found in data set."
+        self.restoreTargetProperty(target_spec)
+        if target_spec.name in self.targetPropertiesNames:
+            logger.warning(
+                f"Target property '{target_spec}' already exists in dataset. It will be overwritten."
+            )
+            self._targetProperties = [
+                tp for tp in self.targetProperties if tp.name != target_spec.name
+            ]
         self._targetProperties.append(target_spec)
         if target_spec.task.isClassification():
             self.makeClassification(target_spec.name, target_spec.th)
