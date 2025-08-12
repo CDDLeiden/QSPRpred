@@ -31,11 +31,11 @@ class Pipeline(Randomized, JSONSerializable):
     """
     def __init__(
         self,
-        steps: dict[str, Step | BaseEstimator] = {},
-        fixed: list[str] = [],
-        fit_on: dict[str, str] = {},
-        apply_to: dict[str, str] = {},
-        skip: list[str] = [],
+        steps: dict[str, Step | BaseEstimator] | None = None,
+        fixed: list[str] | None = None,
+        fit_on: dict[str, str] | None = None,
+        apply_to: dict[str, str] | None = None,
+        skip: list[str] | None = None,
         seed: int | None = None,
     ):
         """Initialize the Pipeline
@@ -55,16 +55,16 @@ class Pipeline(Randomized, JSONSerializable):
             skip (list[str]): List of step names to skip
             seed (int | None): Random state for the pipeline
         """
-        self.steps = steps
-        self.fixed = fixed
-        self.fitOn = fit_on
-        self.applyTo = apply_to
-        for name, step in steps.items():
+        self.steps = steps if steps is not None else {}
+        self.fixed = fixed if fixed is not None else []
+        self.fitOn = fit_on if fit_on is not None else {}
+        self.applyTo = apply_to if apply_to is not None else {}
+        for name, step in self.steps.items():
             if not isinstance(step, Step):
                 if hasattr(step, 'fit_transform'):
-                    steps[name] = SklearnStep(step)
+                    self.steps[name] = SklearnStep(step)
         self.randomState = seed
-        self._skip = skip
+        self._skip = skip if skip is not None else []
         self._fitted = False
         # FIXME: featureNames is only set in the apply method, as only after applying
         # the pipeline we know which features are present in the data (i.e. filters
@@ -257,15 +257,15 @@ class DatasetPipeline(Pipeline):
     def __init__(
         self,
         feature_calculators: list[DescriptorSet] | None = None,
-        steps: dict[str, Step | BaseEstimator] = {},
-        fixed: list[str] = [],
-        fit_on: dict[str, str] = {},
-        apply_to: dict[str, str] = {},
-        skip: list[str] = [],
+        steps: dict[str, Step | BaseEstimator] | None = None,
+        fixed: list[str] | None = None,
+        fit_on: dict[str, str] | None = None,
+        apply_to: dict[str, str] | None = None,
+        skip: list[str] | None = None,
         seed: int | None = None,
     ):
         """Initialize the DatasetPipeline
-        
+
         Args:
             feature_calculators (list[DescriptorSet] | None): List of feature 
                 calculators to apply to the dataset.
