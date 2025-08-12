@@ -501,32 +501,6 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
         dataset_new = QSPRTable.fromFile(dataset.metaFile)
         self.checkRegression(dataset_new, ["CL"])
 
-    # FIXME: make this a test for the shuffle step
-    # def testRandomStateShuffle(self):
-    #     dataset = self.createLargeTestDataSet()
-    #     # initial order
-    #     order = dataset.getDF().index.tolist()
-    #     seed = dataset.randomState
-    #     dataset.shuffle()
-    #     # shuffled order
-    #     order_next = dataset.getDF().index.tolist()
-    #     # initial and shuffled order should be different
-    #     self.assertNotEqual(order, order_next)
-    #     # save current order
-    #     order = order_next
-    #     # save data set with shuffled order
-    #     dataset.save()
-    #     # shuffle again
-    #     dataset.shuffle()
-    #     order_next = dataset.getDF().index.tolist()
-    #     # reload and check if seed and order are the same
-    #     dataset = QSPRTable.fromFile(dataset.metaFile)
-    #     self.assertEqual(dataset.randomState, seed)
-    #     self.assertListEqual(dataset.getDF().index.tolist(), order)
-    #     # shuffle the reloaded set and check if we got the same order as before
-    #     dataset.shuffle()
-    #     self.assertListEqual(dataset.getDF().index.tolist(), order_next)
-
     def testRandomStateSplit(self):
         # create and save the data set
         dataset = self.createLargeTestDataSet()
