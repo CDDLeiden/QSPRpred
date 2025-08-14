@@ -823,14 +823,16 @@ class RandomDescs(DescriptorSet, Randomized):
         randomState (int | None):
             random state to use for the random number generator,
     """
-    def __init__(self, n: int = 10, seed: int | None = None):
+    def __init__(self, n: int = 10, missing: float | int | None = None, seed: int | None = None):
         """Initialize the descriptorset with a number of random descriptors.
 
         Args:
             n (int): number of random descriptors to generate
+            missing (float | None): fraction of missing values (randomly chosen)
         """
         super().__init__()
         self.n = n
+        self.missing = missing
         self.randomState = seed
         self._descriptors = [f"RandomDesc_{i}" for i in range(n)]
     
@@ -849,8 +851,16 @@ class RandomDescs(DescriptorSet, Randomized):
             np.ndarray: array of descriptor values of shape (n_mols, n)
         """
         rng = np.random.default_rng(self.seed)
-        return rng.random((len(mols), self.n))
-    
+        descriptors = rng.random((len(mols), self.n))
+        if self.missing is not None:
+            if isinstance(self.missing, float):
+                n_values = int(np.round(self.missing * descriptors.size))
+            elif isinstance(self.missing, int):
+                n_values = self.missing
+            indices = rng.choice(descriptors.size, size=n_values, replace=False)
+            descriptors[np.unravel_index(indices, descriptors.shape)] = np.nan
+        return descriptors
+
     @property
     def randomState(self) -> int | None:
         """Get the random state for the object."""

@@ -186,7 +186,7 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
         self.dataset.addDescriptors(desc_calc)
         self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 10))
         self.assertTrue(self.dataset.getDescriptors().any().any())
-        descriptors_no_randomseed = self.dataset.getDescriptors()
+        self.assertFalse(self.dataset.getDescriptors().isna().any().any())
         self.dataset.dropDescriptorSets(desc_calc, full_removal=True)
         
         # test setting n
@@ -199,17 +199,33 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
         # test setting randomseed
         desc_calc = [RandomDescs(n=10, seed=42)]
         self.dataset.addDescriptors(desc_calc)
-        self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 10))
-        self.assertTrue(self.dataset.getDescriptors().any().any())
         descriptors_42 = self.dataset.getDescriptors()
-        self.assertFalse(np.array_equal(descriptors_42, descriptors_no_randomseed))
         self.dataset.dropDescriptorSets(desc_calc, full_removal=True)
         
         desc_calc = [RandomDescs(n=10, seed=42)]
         self.dataset.addDescriptors(desc_calc)
         self.assertTrue(np.array_equal(self.dataset.getDescriptors(), descriptors_42))
-
-
+        self.dataset.dropDescriptorSets(desc_calc, full_removal=True)
+        
+        desc_calc = [RandomDescs(n=10, seed=1)]
+        self.dataset.addDescriptors(desc_calc)
+        self.assertFalse(np.array_equal(self.dataset.getDescriptors(), descriptors_42))
+        self.dataset.dropDescriptorSets(desc_calc, full_removal=True)
+        
+        # test add missing values
+        desc_calc = [RandomDescs(n=10, missing=0.1)]
+        self.dataset.addDescriptors(desc_calc)
+        self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 10))
+        self.assertTrue(self.dataset.getDescriptors().any().any())
+        n_missing = 10 * len(self.dataset) * 0.1
+        self.assertEqual(self.dataset.getDescriptors().isna().sum().sum(), n_missing)
+        self.dataset.dropDescriptorSets(desc_calc, full_removal=True)
+        
+        desc_calc = [RandomDescs(n=10, missing=4)]
+        self.dataset.addDescriptors(desc_calc)
+        self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 10))
+        self.assertTrue(self.dataset.getDescriptors().any().any())
+        self.assertEqual(self.dataset.getDescriptors().isna().sum().sum(), 4)
 
 
 # class TestDescriptorsAll(DataSetsPathMixIn, DescriptorInDataCheckMixIn, QSPRTestCase):
