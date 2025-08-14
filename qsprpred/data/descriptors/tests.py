@@ -1,5 +1,6 @@
 from parameterized import parameterized
 from rdkit.Chem import Descriptors
+import numpy as np
 
 from ...data import RandomSplit
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
@@ -178,6 +179,37 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
 
         self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 1))
         self.assertTrue(self.dataset.getDescriptors().any().any())
+
+    def testRandomDescs(self):
+        """Test the random descriptors calculator."""
+        desc_calc = [RandomDescs(n=10)]
+        self.dataset.addDescriptors(desc_calc)
+        self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 10))
+        self.assertTrue(self.dataset.getDescriptors().any().any())
+        descriptors_no_randomseed = self.dataset.getDescriptors()
+        self.dataset.dropDescriptorSets(desc_calc, full_removal=True)
+        
+        # test setting n
+        desc_calc = [RandomDescs(n=100)]
+        self.dataset.addDescriptors(desc_calc)
+        self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 100))
+        self.assertTrue(self.dataset.getDescriptors().any().any())
+        self.dataset.dropDescriptorSets(desc_calc, full_removal=True)
+        
+        # test setting randomseed
+        desc_calc = [RandomDescs(n=10, seed=42)]
+        self.dataset.addDescriptors(desc_calc)
+        self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 10))
+        self.assertTrue(self.dataset.getDescriptors().any().any())
+        descriptors_42 = self.dataset.getDescriptors()
+        self.assertFalse(np.array_equal(descriptors_42, descriptors_no_randomseed))
+        self.dataset.dropDescriptorSets(desc_calc, full_removal=True)
+        
+        desc_calc = [RandomDescs(n=10, seed=42)]
+        self.dataset.addDescriptors(desc_calc)
+        self.assertTrue(np.array_equal(self.dataset.getDescriptors(), descriptors_42))
+
+
 
 
 # class TestDescriptorsAll(DataSetsPathMixIn, DescriptorInDataCheckMixIn, QSPRTestCase):
