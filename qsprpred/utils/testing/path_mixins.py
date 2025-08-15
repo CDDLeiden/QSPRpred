@@ -288,6 +288,7 @@ class DataSetsPathMixIn(PathMixIn):
             "task": TargetTasks.REGRESSION
         }],
         random_state=42,
+        drop_empty_target_props=True
     ):
         """Create a small dataset for testing purposes.
 
@@ -303,7 +304,8 @@ class DataSetsPathMixIn(PathMixIn):
             self.getSmallDF(),
             name=name,
             target_props=target_props,
-            random_state=random_state
+            random_state=random_state,
+            drop_empty_target_props=drop_empty_target_props
         )
 
     def getStorage(self, df, name, n_jobs=1, chunk_size=None):
