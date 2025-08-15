@@ -6,6 +6,7 @@ from mlchemad.applicability_domains import KNNApplicabilityDomain as KNNAD
 from parameterized import parameterized
 from rdkit import Chem
 from sklearn.preprocessing import StandardScaler, Binarizer
+from sklearn.impute import SimpleImputer
 
 from ... import TargetTasks
 from ...data.processing.applicability_domain import (
@@ -15,7 +16,8 @@ from ...data.processing.applicability_domain import (
 from .data_filters import CategoryFilter, RepeatsFilter
 from .feature_filters import BorutaFilter, HighCorrelationFilter, LowVarianceFilter
 from .feature_transformers import SklearnStep
-from .target_transformers import Discretizer, SimpleTargetTransformer, TargetTransformer
+from .target_transformers import Discretizer, SimpleTargetTransformer
+from .imputers import FeatureImputer, TargetImputer
 from .pipeline import DatasetPipeline, Pipeline
 from .step import DummyStep, Shuffle
 from ...data.tables.qspr import QSPRTable
@@ -770,15 +772,98 @@ class TestFeatureTransformers(QSPRTestCase, StepCheckMixIn):
         X_transformed = scaler.fit_transform(X)
         self.assertTrue(np.allclose(X_out.values, X_transformed))
         self.assertTrue(y_out.equals(self.dataset.getTargets()))
-        
-class TestTargetTransformers(QSPRTestCase, StepCheckMixIn):
-    """Test the sklearn step which wraps a sklearn transformer for targets."""
+
+class TestImputers(QSPRTestCase, StepCheckMixIn):
+    """Test the sklearn step which wraps a sklearn imputer."""
     def setUp(self):
         """Create a small test dataset with random descriptors."""
         super().setUp()
         self.setUpPaths()
         self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
         self.dataset.addDescriptors([RandomDescs(n=10, seed=42)])
+
+class TestTargetTransformers(QSPRTestCase, StepCheckMixIn):
+    """Test the sklearn step which wraps a sklearn transformer for targets."""
+    def setUp(self):
+        """Create a small test dataset with random descriptors."""
+        super().setUp()
+        self.setUpPaths()
+        self.dataset = self.createSmallTestDataSet(
+            self.__class__.__name__,
+            target_props=[
+                {"name": "CL", "task": "REGRESSION"},
+                {"name": "fu", "task": "REGRESSION"}
+            ],
+            drop_empty_target_props=False
+        )
+        self.dataset.addDescriptors([RandomDescs(n=10, seed=42, missing=10)])
+
+    def testTargetImputer(self):
+        """Test the target imputer step."""
+        targets = self.dataset.getTargets()
+        self.assertTrue(targets["CL"].isna().sum() > 0)
+        self.assertTrue(targets["fu"].isna().sum() > 0)
+        
+        # check impute all targets
+        x_out, y_out = self.checkStep(TargetImputer(
+            imputer=SimpleImputer(strategy="mean")
+        ), self.dataset)
+        self.assertTrue(y_out.isna().sum().sum() == 0)
+        
+        # check impute specific target
+        x_out, y_out = self.checkStep(TargetImputer(
+            imputer=SimpleImputer(strategy="mean"),
+            target_properties=["CL"]
+        ), self.dataset)
+        self.assertTrue(y_out["CL"].isna().sum() == 0)
+        self.assertTrue(y_out["fu"].isna().sum() > 0)
+
+    def testFeatureImputer(self):
+        """Test the feature imputer step."""
+        X = self.dataset.getDescriptors()
+        self.assertTrue(X.isna().sum().sum() > 0)
+
+        # Test fill all descriptors
+        x_out, y_out = self.checkStep(FeatureImputer(
+            imputer=SimpleImputer(strategy="mean")
+        ), self.dataset)
+        self.assertTrue(x_out.isna().sum().sum() == 0)
+        
+        # Test fill specific descriptor
+        self.assertTrue(X["RandomDesc(10)_RandomDesc_3"].isna().sum() > 0)
+        self.assertTrue(
+            X.loc[:, ~X.columns.isin(["RandomDesc(10)_RandomDesc_3"])].isna().sum().sum() > 0
+        )
+        x_out, y_out = self.checkStep(FeatureImputer(
+            imputer=SimpleImputer(strategy="mean"),
+            feature_properties=["RandomDesc(10)_RandomDesc_3"]
+        ), self.dataset)
+        self.assertTrue(x_out["RandomDesc(10)_RandomDesc_3"].isna().sum() == 0)
+        
+        # Test fill specific descriptor set
+        self.dataset.addDescriptors([RandomDescs(n=20, seed=42, missing=10)])
+        X = self.dataset.getDescriptors()
+        self.assertTrue(X.isna().sum().sum() > 0)
+        self.assertTrue(
+            X.loc[:, X.columns.str.startswith("RandomDesc(10)")].isna().sum().sum() > 0
+        )
+        self.assertTrue(
+            X.loc[:, X.columns.str.startswith("RandomDesc(20)")].isna().sum().sum() > 0
+        )
+        x_out, y_out = self.checkStep(FeatureImputer(
+            imputer=SimpleImputer(strategy="mean"),
+        ), self.dataset)
+        self.assertTrue(x_out.isna().sum().sum() == 0)
+        x_out, y_out = self.checkStep(FeatureImputer(
+            imputer=SimpleImputer(strategy="mean"),
+            feature_properties=["RandomDesc(20)"]
+        ), self.dataset)
+        self.assertTrue(
+            x_out.loc[:, x_out.columns.str.startswith("RandomDesc(20)")].isna().sum().sum() == 0
+        )
+        self.assertTrue(
+            x_out.loc[:, x_out.columns.str.startswith("RandomDesc(10)")].isna().sum().sum() > 0
+        )
 
     def testDiscretizer(self):
         """Test the discretizer step."""
