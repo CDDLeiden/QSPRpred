@@ -817,9 +817,16 @@ class SmilesDesc(DescriptorSet):
 
 class RandomDescs(DescriptorSet, Randomized):
     """Descriptorset of a set of random numbers as descriptors.
+    
+    Note. that when setting the randomState the seed of random number generator is
+    based on the idProp of the dataset. Therefore, if the id of the molecules
+    changes the results will be different, however if the order of the molecules
+    is shuffled the descriptors per molecule will remain the same.
 
     Attributes:
         n (int): number of random descriptors to generate
+        missing (float | int | None): fraction of missing values or number of
+            missing values per descriptor
         randomState (int | None):
             random state to use for the random number generator,
     """
@@ -828,11 +835,17 @@ class RandomDescs(DescriptorSet, Randomized):
 
         Args:
             n (int): number of random descriptors to generate
-            missing (float | None): fraction of missing values (randomly chosen)
+            missing (float | int| None): fraction of missing values or number of 
+                missing values per descriptor
         """
         super().__init__()
         self.n = n
         self.missing = missing
+        if self.missing is not None:
+            if isinstance(self.missing, float):
+                self._n_missing = int(np.round(self.missing * self.n))
+            elif isinstance(self.missing, int):
+                self._n_missing = self.missing
         self.randomState = seed
         self._descriptors = [f"RandomDesc_{i}" for i in range(n)]
     
@@ -850,15 +863,17 @@ class RandomDescs(DescriptorSet, Randomized):
         Returns:
             np.ndarray: array of descriptor values of shape (n_mols, n)
         """
-        rng = np.random.default_rng(self.seed)
-        descriptors = rng.random((len(mols), self.n))
-        if self.missing is not None:
-            if isinstance(self.missing, float):
-                n_values = int(np.round(self.missing * descriptors.size))
-            elif isinstance(self.missing, int):
-                n_values = self.missing
-            indices = rng.choice(descriptors.size, size=n_values, replace=False)
-            descriptors[np.unravel_index(indices, descriptors.shape)] = np.nan
+        descriptors = np.zeros((len(props[self.idProp]), self.n), dtype=self.dtype)
+        for i, id in enumerate(props[self.idProp]):
+            # set a seed based on the idProp to ensure reproducibility
+            # independent of chunk size
+            seed = abs(self.randomState + hash(id)) if self.randomState is not None else None
+            rng = np.random.default_rng(seed)
+            mol_descriptors = rng.random((1, self.n))
+            if self.missing is not None:
+                indices = rng.choice(mol_descriptors.size, size=self._n_missing, replace=False)
+                mol_descriptors[0, indices] = np.nan
+            descriptors[i, :] = mol_descriptors
         return descriptors
 
     @property
@@ -897,6 +912,6 @@ class RandomDescs(DescriptorSet, Randomized):
             (list[str]): list of descriptor names to set
         """
         self._descriptors = descriptors
-        
+
     def __str__(self):
         return f"RandomDesc({self.n})"

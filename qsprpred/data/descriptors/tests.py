@@ -225,7 +225,7 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
         self.dataset.addDescriptors(desc_calc)
         self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 10))
         self.assertTrue(self.dataset.getDescriptors().any().any())
-        self.assertEqual(self.dataset.getDescriptors().isna().sum().sum(), 4)
+        self.assertEqual(self.dataset.getDescriptors().isna().sum().sum(), (len(self.dataset) * 4))
 
 
 # class TestDescriptorsAll(DataSetsPathMixIn, DescriptorInDataCheckMixIn, QSPRTestCase):

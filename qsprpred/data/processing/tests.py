@@ -796,7 +796,7 @@ class TestTargetTransformers(QSPRTestCase, StepCheckMixIn):
             ],
             drop_empty_target_props=False
         )
-        self.dataset.addDescriptors([RandomDescs(n=10, seed=42, missing=10)])
+        self.dataset.addDescriptors([RandomDescs(n=10, seed=42, missing=2)])
 
     def testTargetImputer(self):
         """Test the target imputer step."""
@@ -830,18 +830,18 @@ class TestTargetTransformers(QSPRTestCase, StepCheckMixIn):
         self.assertTrue(x_out.isna().sum().sum() == 0)
         
         # Test fill specific descriptor
-        self.assertTrue(X["RandomDesc(10)_RandomDesc_3"].isna().sum() > 0)
+        self.assertTrue(X["RandomDesc(10)_RandomDesc_0"].isna().sum() > 0)
         self.assertTrue(
-            X.loc[:, ~X.columns.isin(["RandomDesc(10)_RandomDesc_3"])].isna().sum().sum() > 0
+            X.loc[:, ~X.columns.isin(["RandomDesc(10)_RandomDesc_0"])].isna().sum().sum() > 0
         )
         x_out, y_out = self.checkStep(FeatureImputer(
             imputer=SimpleImputer(strategy="mean"),
-            feature_properties=["RandomDesc(10)_RandomDesc_3"]
+            feature_properties=["RandomDesc(10)_RandomDesc_0"]
         ), self.dataset)
-        self.assertTrue(x_out["RandomDesc(10)_RandomDesc_3"].isna().sum() == 0)
+        self.assertTrue(x_out["RandomDesc(10)_RandomDesc_0"].isna().sum() == 0)
         
         # Test fill specific descriptor set
-        self.dataset.addDescriptors([RandomDescs(n=20, seed=42, missing=10)])
+        self.dataset.addDescriptors([RandomDescs(n=20, seed=42, missing=2)])
         X = self.dataset.getDescriptors()
         self.assertTrue(X.isna().sum().sum() > 0)
         self.assertTrue(
