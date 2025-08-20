@@ -13,6 +13,9 @@ From v3.2.1 to v4.0.0
   class when missing values are present. The conversion was not done correctly, where
   NaN values were converted to a class label, which is not desired. Now, NaN values are
   ignored during conversion.
+- When initializing a `QSPRModel` without setting `random_state` a message would be
+  displayed that the random state was set to a random integer. However, the random
+  state would not actually be set. This message is now removed.
 
 ## Changes
 

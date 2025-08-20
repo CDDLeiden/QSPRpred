@@ -255,18 +255,6 @@ class QSPRModel(JSONSerializable, ABC):
             random_state (int):
                 Random state to use for shuffling and other random operations.
         """
-        # FIXME: random state is not set to random int if not provided
-        # It will be set to None if not provided after the logging message
-        # that it is set to a random int.
-        # However, perhaps it is better to set it to None if not provided
-        # As the initfromdata method will set it to the random state of the data
-        # if there is no random state provided.
-        if random_state is None:
-            self.randomState = int(np.random.randint(0, 2**31 - 1, dtype=np.int64))
-            logger.info(
-                "No random state supplied."
-                f"Setting random state to: {self.randomState}."
-            )
         self.randomState = random_state
         constructor_params = [
             name for name, _ in inspect.signature(self.alg.__init__).parameters.items()
