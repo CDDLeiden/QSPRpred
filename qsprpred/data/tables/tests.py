@@ -24,6 +24,7 @@ from .interfaces.qspr_data_set import QSPRDataSet
 from .mol import MoleculeTable
 from ..processing.pipeline import DatasetPipeline
 from ..processing.step import Shuffle, DummyStep
+from ..processing.data_filters import NaNFilter
 
 
 class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
@@ -615,9 +616,6 @@ class TestSearchFeatures(DataSetsPathMixIn, QSPRTestCase):
         self.assertTrue(len(results) == 0)
 
 
-def prop_transform(x):
-    return np.log10(x)
-
 
 class TestTargetProperty(QSPRTestCase):
     """Test the TargetProperty class."""
@@ -747,7 +745,10 @@ class TestDataSetPreProcessing(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCa
                 "feature_standardizer": feature_standardizer if feature_standardizer else DummyStep(),
                 "feature_filter": feature_filter if feature_filter else DummyStep(),
                 "data_filter": data_filter if data_filter else DummyStep(),
-                # FIXME: applicability_domain is not yet implemented
+                # The outlierfilter cannot handle NaN values, so a NaN filter has to be added
+                # as the RDKit descriptors sometimes have NaN values
+                "NaNFilter": NaNFilter() if applicability_domain else DummyStep(),
+                "outlier_filter": applicability_domain if applicability_domain else DummyStep(),
             }
         )
         self.checkPrep(
