@@ -13,7 +13,7 @@ from ...data.processing.applicability_domain import (
     KNNApplicabilityDomain,
     MLChemAD,
 )
-from .data_filters import CategoryFilter, RepeatsFilter
+from .data_filters import CategoryFilter, NaNFilter, RepeatsFilter, OutlierFilter
 from .feature_filters import BorutaFilter, HighCorrelationFilter, LowVarianceFilter
 from .feature_transformers import SklearnStep
 from .target_transformers import Discretizer, SimpleTargetTransformer
@@ -25,7 +25,7 @@ from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn
 from ...utils.testing.check_mixins import StepCheckMixIn
 from ..descriptors.fingerprints import MorganFP
-from ..descriptors.sets import DataFrameDescriptorSet, RandomDescs
+from ..descriptors.sets import DataFrameDescriptorSet, RDKitDescs, RandomDescs
 from ..storage.interfaces.stored_mol import StoredMol
 from .mol_processor import MolProcessor
 from ...data.sampling.splits import RandomSplit
@@ -522,7 +522,7 @@ class TestDataFilters(QSPRTestCase, StepCheckMixIn):
     def setUp(self):
         super().setUp()
         self.setUpPaths()
-        self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
+        self.dataset = self.createLargeTestDataSet(self.__class__.__name__)
         self.dataset.addDescriptors([MorganFP(radius=2, nBits=20)])
 
     def testCategoryFilter(self):
@@ -594,6 +594,39 @@ class TestDataFilters(QSPRTestCase, StepCheckMixIn):
         )
         X_filtered, _ = self.checkStep(drop_reps_protein, self.dataset)
         self.assertEqual(len(X_filtered), len(descriptors)-2)
+        
+    def testNaNFilter(self):
+        """Test the NaN filter, which drops rows with NaN values from dataset."""
+        # check assumptions about the test data
+        self.dataset.addDescriptors([RDKitDescs()])
+        self.assertTrue(self.dataset.getDescriptors().isna().any().any())
+
+        # test the filter
+        # only warnings
+        warn_nans = NaNFilter(keep=True)
+        X_filtered, _ = self.checkStep(warn_nans, self.dataset)
+        self.assertEqual(len(X_filtered), len(self.dataset.getDescriptors()))
+        self.assertTrue(X_filtered.equals(self.dataset.getDescriptors()))
+
+        # drop NaNs
+        drop_nans = NaNFilter(keep=False)
+        descriptors = self.dataset.getDescriptors()
+        nan_rows = descriptors.isna().any(axis=1).sum()
+        X_filtered, _ = self.checkStep(drop_nans, self.dataset)
+        self.assertEqual(len(X_filtered), len(descriptors) - nan_rows)
+        
+        # drop NaNs for specific features
+        # this should remove all nan rows because there is only one molecule
+        # with missing values ('TestDataFilters_storage_library_044')
+        drop_nans_specific = NaNFilter(keep=False, features=["RDkit_BCUT2D_CHGLO"])
+        X_filtered, _ = self.checkStep(drop_nans_specific, self.dataset)
+        self.assertEqual(len(X_filtered), len(descriptors) - nan_rows)
+        
+        # This should not drop the nan row, because there is no missing value in 
+        # this feature
+        drop_nans_specific = NaNFilter(keep=False, features=["MorganFP_MorganFP_0"])
+        X_filtered, _ = self.checkStep(drop_nans_specific, self.dataset)
+        self.assertEqual(len(X_filtered), len(descriptors))
 
     def testFilterMethodOfDataset(self):
         # TODO: Either this functionality should be removed or the test should be moved
