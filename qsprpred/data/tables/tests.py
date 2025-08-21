@@ -628,30 +628,30 @@ class TestSearchFeatures(DataSetsPathMixIn, QSPRTestCase):
 
 
 
-class TestTargetProperty(QSPRTestCase):
-    """Test the TargetProperty class."""
-    def checkTargetProperty(self, target_prop, name, task, th, n_classes=None):
-        # Check the target property creation consistency
-        self.assertEqual(target_prop.name, name)
-        self.assertEqual(target_prop.task, task)
+class TestTargetSpec(QSPRTestCase):
+    """Test the TargetSpec class."""
+    def checkTargetSpec(self, target_spec, name, task, th, n_classes=None):
+        # Check the target spec creation consistency
+        self.assertEqual(target_spec.name, name)
+        self.assertEqual(target_spec.task, task)
         if task.isClassification():
-            self.assertTrue(target_prop.task.isClassification())
-            self.assertEqual(target_prop.th, th)
-            self.assertEqual(target_prop.nClasses, n_classes)
+            self.assertTrue(target_spec.task.isClassification())
+            self.assertEqual(target_spec.th, th)
+            self.assertEqual(target_spec.nClasses, n_classes)
 
     def testInit(self):
-        """Check the TargetProperty class on target property creation."""
+        """Check the TargetSpec class on target spec creation."""
         # Check the different task types
-        targetprop = TargetSpec("CL", TargetTasks.REGRESSION)
-        self.checkTargetProperty(targetprop, "CL", TargetTasks.REGRESSION, None)
-        targetprop = TargetSpec("CL", TargetTasks.MULTICLASS, th=[0, 1, 10, 1200])
-        self.checkTargetProperty(
-            targetprop, "CL", TargetTasks.MULTICLASS, [0, 1, 10, 1200], 3
+        target_spec = TargetSpec("CL", TargetTasks.REGRESSION)
+        self.checkTargetSpec(target_spec, "CL", TargetTasks.REGRESSION, None)
+        target_spec = TargetSpec("CL", TargetTasks.MULTICLASS, th=[0, 1, 10, 1200])
+        self.checkTargetSpec(
+            target_spec, "CL", TargetTasks.MULTICLASS, [0, 1, 10, 1200], 3
         )
-        targetprop = TargetSpec("CL", TargetTasks.SINGLECLASS, th=[5])
-        self.checkTargetProperty(targetprop, "CL", TargetTasks.SINGLECLASS, [5], 2)
-        targetprop = TargetSpec("CL", TargetTasks.SINGLECLASS, n_classes=2)
-        self.checkTargetProperty(targetprop, "CL", TargetTasks.SINGLECLASS, None, 2)
+        target_spec = TargetSpec("CL", TargetTasks.SINGLECLASS, th=[5])
+        self.checkTargetSpec(target_spec, "CL", TargetTasks.SINGLECLASS, [5], 2)
+        target_spec = TargetSpec("CL", TargetTasks.SINGLECLASS, n_classes=2)
+        self.checkTargetSpec(target_spec, "CL", TargetTasks.SINGLECLASS, None, 2)
         # check if incorrect task raises an error
         with self.assertRaises(AssertionError):
             TargetSpec("CL", TargetTasks.SINGLECLASS, th=[5], n_classes=2)
@@ -673,7 +673,7 @@ class TestTargetProperty(QSPRTestCase):
                 "task": TargetTasks.REGRESSION
             }
         )
-        self.checkTargetProperty(targetprop, "CL", TargetTasks.REGRESSION, None)
+        self.checkTargetSpec(targetprop, "CL", TargetTasks.REGRESSION, None)
         targetprop = TargetSpec.fromDict(
             {
                 "name": "CL",
@@ -681,7 +681,7 @@ class TestTargetProperty(QSPRTestCase):
                 "th": [0, 1, 10, 1200]
             }
         )
-        self.checkTargetProperty(
+        self.checkTargetSpec(
             targetprop, "CL", TargetTasks.MULTICLASS, [0, 1, 10, 1200], 3
         )
         # Check from list creation, selection and serialization support functions
@@ -697,8 +697,8 @@ class TestTargetProperty(QSPRTestCase):
                 },
             ]
         )
-        self.checkTargetProperty(targetprops[0], "CL", TargetTasks.REGRESSION, None)
-        self.checkTargetProperty(targetprops[1], "fu", TargetTasks.REGRESSION, None)
+        self.checkTargetSpec(targetprops[0], "CL", TargetTasks.REGRESSION, None)
+        self.checkTargetSpec(targetprops[1], "fu", TargetTasks.REGRESSION, None)
         self.assertListEqual(TargetSpec.getNames(targetprops), ["CL", "fu"])
         targetprops = TargetSpec.toList(targetprops)
         self.assertIsInstance(targetprops, list)
@@ -713,14 +713,14 @@ class TestTargetProperty(QSPRTestCase):
         ]
     )
     def testSerialization(self, task, name, th):
-        prop = TargetSpec(name, task, th=th)
-        json_form = prop.toJSON()
-        prop2 = TargetSpec.fromJSON(json_form)
-        self.assertEqual(prop2.name, prop.name)
-        self.assertEqual(prop2.task, prop.task)
+        spec = TargetSpec(name, task, th=th)
+        json_form = spec.toJSON()
+        spec_from_json = TargetSpec.fromJSON(json_form)
+        self.assertEqual(spec_from_json.name, spec.name)
+        self.assertEqual(spec_from_json.task, spec.task)
         if task.isClassification():
-            self.assertEqual(prop2.th, prop.th)
-            self.assertEqual(prop2.nClasses, prop.nClasses)
+            self.assertEqual(spec_from_json.th, spec.th)
+            self.assertEqual(spec_from_json.nClasses, spec.nClasses)
 
 
 class TestDataSetPreProcessing(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCase):
