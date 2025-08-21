@@ -6,7 +6,6 @@ import tempfile
 import numpy as np
 import pandas as pd
 from parameterized import parameterized
-from sklearn.impute import SimpleImputer
 from sklearn.model_selection import KFold, ShuffleSplit
 
 from qsprpred.data.descriptors.sets import DrugExPhyschem
@@ -17,14 +16,14 @@ from ...data.tables.qspr import QSPRTable
 from ...utils.stopwatch import StopWatch
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import DataPrepCheckMixIn
-from ...utils.testing.path_mixins import DataSetsPathMixIn, PathMixIn
+from ...utils.testing.path_mixins import DataSetsPathMixIn
 from ..chem.standardizers.papyrus import PapyrusStandardizer
 from ..descriptors.fingerprints import MorganFP
 from .interfaces.qspr_data_set import QSPRDataSet
 from .mol import MoleculeTable
 from ..processing.pipeline import DatasetPipeline
 from ..processing.step import Shuffle, DummyStep
-from ..processing.data_filters import NaNFilter
+from ..processing.data_filters import CategoryFilter, NaNFilter
 
 
 class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
@@ -199,7 +198,7 @@ class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
         )
 
 
-class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
+class TestQSPRTable(DataSetsPathMixIn, QSPRTestCase):
     """Simple tests for dataset creation and serialization under different conditions
     and error states."""
     def setUp(self):
@@ -547,6 +546,18 @@ class TestDataSetCreationAndSerialization(DataSetsPathMixIn, QSPRTestCase):
             self.assertListEqual(train_index.tolist(), order_folds[i][0].tolist())
             self.assertListEqual(test_index.tolist(), order_folds[i][1].tolist())
 
+    def testFilter(self):
+        """Test removing entries from the dataset using a DataFilter."""
+        dataset = self.createLargeTestDataSet()
+        remove_cation = CategoryFilter(
+            prop="moka_ionState7.4",
+            values=["cationic"],
+            data_set=dataset
+        )
+        self.assertTrue((dataset.getDF()["moka_ionState7.4"] == "cationic").sum() > 0)
+        dataset.filter([remove_cation])
+        self.assertEqual(len(dataset.getDF()), len(dataset.getDescriptors()))
+        self.assertTrue((dataset.getDF()["moka_ionState7.4"] == "cationic").sum() == 0)
 
 class TestSearchFeatures(DataSetsPathMixIn, QSPRTestCase):
     def setUp(self):

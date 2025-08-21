@@ -644,20 +644,6 @@ class TestDataFilters(QSPRTestCase, StepCheckMixIn):
         self.assertEqual(len(X_filtered.columns), len(self.dataset.getDescriptors().columns))
         self.assertTrue(X_filtered.equals(self.dataset.getDescriptors().loc[transformed]))
 
-    def testFilterMethodOfDataset(self):
-        # TODO: Either this functionality should be removed or the test should be moved
-        # to the dataset tests, as it is not a step in the pipeline.
-        dataset = self.createLargeTestDataSet()
-        remove_cation = CategoryFilter(
-            prop="moka_ionState7.4",
-            values=["cationic"],
-            data_set=dataset
-        )
-        self.assertTrue((dataset.getDF()["moka_ionState7.4"] == "cationic").sum() > 0)
-        dataset.filter([remove_cation])
-        self.assertEqual(len(dataset.getDF()), len(dataset.getDescriptors()))
-        self.assertTrue((dataset.getDF()["moka_ionState7.4"] == "cationic").sum() == 0)
-
 class TestFeatureFilters(QSPRTestCase, StepCheckMixIn):
     """Tests to check if the feature filters work on their own.
 

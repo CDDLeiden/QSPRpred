@@ -4,12 +4,14 @@ from typing import Callable, Generator
 
 import pandas as pd
 
+
 from .interfaces.qspr_data_set import QSPRDataSet
 from ...logs import logger
 from ...tasks import TargetSpec, TargetTasks
 from ..storage.interfaces.chem_store import ChemStore
 from .mol import MoleculeTable
 from qsprpred.data.sampling.splits import DataSplit
+from qsprpred.data.processing.data_filters import DataFilter
 from qsprpred.data.processing.target_transformers import Discretizer
 import numpy as np
 
@@ -735,11 +737,11 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         # getSubset method
         return self.getSubset(self.getProperties(), ids, random_state=self.randomState)
 
-    def filter(self, table_filters: list[Callable]):
+    def filter(self, table_filters: list[DataFilter]):
         """Filter the data set using the given filters.
 
         Args:
-            table_filters (list[Callable]): list of filters to apply
+            table_filters (list[DataFilter]): list of filters to apply
         """
         for filter in table_filters:
             ret, _ = filter.transform(self.getDescriptors(), self.getTargets())
