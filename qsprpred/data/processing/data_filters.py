@@ -276,7 +276,14 @@ class NaNFilter(DataFilter):
         return X, y
 
 class OutlierFilter(DataFilter):
+    """Remove outliers based on an applicability domain"""
+    
     def __init__(self, ad: ApplicabilityDomain):
+        """Initialize the OutlierFilter with an applicability domain from MLChemAD.
+
+        Args:
+            ad (MLChemAD | MLChemADApplicabilityDomain): The applicability domain to use.
+        """
         self._fitted = False
         if isinstance(ad, MLChemADApplicabilityDomain):
             ad = MLChemAD(ad)

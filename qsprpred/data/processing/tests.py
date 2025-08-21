@@ -25,7 +25,7 @@ from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn
 from ...utils.testing.check_mixins import StepCheckMixIn
 from ..descriptors.fingerprints import MorganFP
-from ..descriptors.sets import DataFrameDescriptorSet, RDKitDescs, RandomDescs
+from ..descriptors.sets import DataFrameDescriptorSet, RandomDescs
 from ..storage.interfaces.stored_mol import StoredMol
 from .mol_processor import MolProcessor
 from ...data.sampling.splits import RandomSplit
@@ -627,6 +627,22 @@ class TestDataFilters(QSPRTestCase, StepCheckMixIn):
         drop_nans_specific = NaNFilter(keep=False, features=["MorganFP_MorganFP_0"])
         X_filtered, _ = self.checkStep(drop_nans_specific, self.dataset)
         self.assertEqual(len(X_filtered), len(descriptors))
+        
+    def testOutlierFilter(self):
+        """Test the outlier filter, which removes outliers from the dataset."""
+        # check assumptions about the test data
+        ad = MLChemAD(KNNAD(dist="jaccard", scaling=None, alpha=0.5))
+        ad.fit(self.dataset.getDescriptors())
+        transformed = ad.transform(self.dataset.getDescriptors())
+        self.assertTrue(transformed.sum() > 0)
+        self.assertTrue(transformed.sum() < len(self.dataset))
+        n_outliers = len(self.dataset) - transformed.sum()
+
+        # check if the outliers are removed
+        X_filtered, _ = self.checkStep(OutlierFilter(ad), dataset=self.dataset)
+        self.assertEqual(len(X_filtered), len(self.dataset) - n_outliers)
+        self.assertEqual(len(X_filtered.columns), len(self.dataset.getDescriptors().columns))
+        self.assertTrue(X_filtered.equals(self.dataset.getDescriptors().loc[transformed]))
 
     def testFilterMethodOfDataset(self):
         # TODO: Either this functionality should be removed or the test should be moved
