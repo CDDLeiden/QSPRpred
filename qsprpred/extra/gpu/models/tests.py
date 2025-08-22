@@ -13,7 +13,7 @@ from sklearn.impute import SimpleImputer
 from qsprpred.data.descriptors.sets import SmilesDesc
 from qsprpred.data.sampling.splits import RandomSplit
 from qsprpred.data.processing.pipeline import DatasetPipeline
-from qsprpred.data.processing.step import DummyStep
+from qsprpred.data.processing.step import DummyStep, Shuffle
 from qsprpred.data.processing.imputers import TargetImputer
 from qsprpred.extra.gpu.utils.parallel import TorchJITGenerator
 from qsprpred.tasks import ModelTasks, TargetTasks
@@ -447,7 +447,12 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                 "task": TargetTasks.REGRESSION
             }]
         )
-        pipeline = DatasetPipeline([SmilesDesc()])
+        pipeline = DatasetPipeline(
+            [SmilesDesc()],
+            steps={
+                "shuffle": Shuffle(seed=dataset.randomState),
+            }
+        )
         # initialize model for training from class
         model = self.getModel(name="consistency_data")
 
@@ -463,7 +468,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             scoring=SklearnMetrics(rmse),
             split=RandomSplit(test_fraction=0.1, seed=dataset.randomState),
         )
-        qsprpred_score = assessor(model, dataset[train_indices], pipeline, order=train_indices)
+        qsprpred_score = assessor(model, dataset[train_indices], pipeline)
         qsprpred_score = -qsprpred_score[0]  # qsprpred_score is negative rmse
 
         # save the cross-validation train, test and validation split to
