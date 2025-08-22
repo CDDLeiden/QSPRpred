@@ -683,8 +683,6 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
     def split(
         self,
         split: DataSplit,
-        X: pd.DataFrame | None = None,
-        y: pd.DataFrame | None = None,
     ) -> Generator[
         tuple[
             pd.Index,
@@ -693,13 +691,11 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         None,
         None,
     ]:
-        """Create folds from X and y. Can be used either for cross-validation,
-        bootstrapping or train-test split.
+        """Create folds from Descriptors and Targets. Can be used either for 
+        cross-validation, bootstrapping or train-test split.
 
         Args:
             split (DataSplit): Split to apply to the data
-            X (pd.DataFrame): data to apply the split to
-            y (pd.DataFrame | None): target data to apply the split to
 
         Yields:
             pd.Index, pd.Index: indices of the train and test set
@@ -710,8 +706,8 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
             if split.randomState is None:
                 split.randomState = self.randomState
 
-        X = self.getDescriptors() if X is None else X
-        y = self.getTargets() if y is None else y
+        X = self.getDescriptors()
+        y = self.getTargets()
         folds = split.split(X, y)
 
         for train_idx, test_idx in folds:

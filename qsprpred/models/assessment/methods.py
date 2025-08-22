@@ -190,7 +190,6 @@ class Assessor(ModelAssessor):
         parameters: dict | None = None,
         monitor: AssessorMonitor | None = None,
         save: bool = True,
-        order: pd.Index | None = None, # FIXME: added to reproduce original behavior
         **kwargs,
     ) -> np.ndarray:
         """Perform cross validation on the model with the given parameters.
@@ -220,7 +219,7 @@ class Assessor(ModelAssessor):
         self.scores = []
         self.predictions = []
         for i, (X_train, y_train, X_test, y_test) in enumerate(
-            pipeline.apply(ds, self.split, order=order) # FIXME: added to reproduce original behavior
+            pipeline.apply(ds, self.split)
         ):
             logger.debug(
                 "Model Assessment fold %s started: %s" %

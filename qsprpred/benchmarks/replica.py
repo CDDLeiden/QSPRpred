@@ -275,7 +275,7 @@ class Replica(JSONSerializable):
                 if "benchmarkfilter" in self.pipeline.steps.keys(): # FIXME
                     self.pipeline.steps["benchmarkfilter"].fit(self.ds[indices].getDescriptors()) # FIXME
                     self.pipeline.fixed = ["benchmarkfilter"] # FIXME
-                scores = assessor(self.model, self.ds[indices], self.pipeline, save=True, order=indices)
+                scores = assessor(self.model, self.ds[indices], self.pipeline, save=True)
             else:
                 scores = assessor(self.model, self.ds, self.pipeline, save=True)
             if isinstance(scores, float):

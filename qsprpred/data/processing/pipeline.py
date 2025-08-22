@@ -293,7 +293,6 @@ class DatasetPipeline(Pipeline):
         split: DataSplit | None = None,
         fit: bool = True,
         seed: int | None = None,
-        order: pd.Index | None = None, # FIXME: added to reproduce original behavior
     ) -> Generator[
         tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame] | tuple[pd.DataFrame, pd.DataFrame],
         None,
@@ -336,9 +335,6 @@ class DatasetPipeline(Pipeline):
         else:
             self.originalfeatureNames = X.columns
         y = dataset.getTargets()
-        if order is not None:  # FIXME: added to reproduce original behavior
-            X = X.loc[order]  # FIXME: added to reproduce original behavior
-            y = y.loc[order]  # FIXME: added to reproduce original behavior
             
         # set the dataset for each step
         for step in self.steps.values():
@@ -356,7 +352,7 @@ class DatasetPipeline(Pipeline):
                 split.setDataSet(dataset)
             if hasattr(split, 'randomState') and split.randomState is None:
                     split.randomState = self.randomState
-            for train_index, test_index in dataset.split(split, X, y):  # FIXME: added to reproduce original behavior
+            for train_index, test_index in dataset.split(split):
                 X_train, y_train, X_test, y_test = (
                     X.loc[train_index], y.loc[train_index], X.loc[test_index], y.loc[test_index]
                 )
