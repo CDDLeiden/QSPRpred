@@ -17,21 +17,17 @@ models_base = "./data/models"
 success = True
 failed_files = []
 for f in os.listdir("expected"):
-    for type in ["ind", "cv"]:
-        file_name = f"{f}.{type}.tsv"
-        # FIXME: Filenames changed in the new version
-        new_type = "crossval" if type == "cv" else "test"
-        if "CLS" in file_name:
-            new_file_name = f"{f}_{new_type}_matthews_corrcoef.tsv"
+    for type in ["test", "crossval"]:
+        if "CLS" in f:
+            file_name = f"{f}_{type}_matthews_corrcoef.tsv"
         else:
-            new_file_name = f"{f}_{new_type}_neg_root_mean_squared_error.tsv"    
+            file_name = f"{f}_{type}_neg_root_mean_squared_error.tsv"    
         try:
             print(f"Comparing file contents of {file_name}")
             relative_file_path = f"{f}/{file_name}"
-            new_relative_file_path = f"{f}/{new_file_name}"
 
             expected_file_path = f"expected/{relative_file_path}"
-            actual_file_path = f"{models_base}/{new_relative_file_path}"
+            actual_file_path = f"{models_base}/{relative_file_path}"
 
             expected_values = (
                 pd.read_csv(expected_file_path, sep="\t")
@@ -43,29 +39,6 @@ for f in os.listdir("expected"):
                 .set_index("ID", drop=True)
                 .sort_index()
             )
-            # FIXME: In the old version, only test values are saved and
-            # the "Fold" column is only present for cross validation
-            # also all Fold values used to be float64 but now they are int
-            if type == "ind":
-                actual_values = actual_values.drop(columns=["Fold"])
-            else:
-                actual_values["Fold"] = actual_values["Fold"].astype(np.float64)
-            actual_values = actual_values[actual_values["Set"] == "Test"]
-            # FIXME: In the old version, the "Set" column was not present
-            # and only the test values were saved
-            actual_values = actual_values.drop(columns=["Set"])
-            # FIXME: In the old version, for classification the Label
-            # were bool for binary classification, but now they are float64
-            # changed in commit 0d3f4dc
-            if "CLS" in file_name:
-                actual_values["pchembl_value_Mean_Label"] = actual_values[
-                    "pchembl_value_Mean_Label"
-                ].astype(bool)
-                # this changed, but I don't know why
-                if actual_values["pchembl_value_Mean_Prediction"].dtype == np.float64:
-                    actual_values["pchembl_value_Mean_Prediction"] = actual_values[
-                        "pchembl_value_Mean_Prediction"
-                    ].astype(bool)
             assert expected_values.columns.equals(
                 actual_values.columns
             ), f"Column names do not match for file {file_name}."
