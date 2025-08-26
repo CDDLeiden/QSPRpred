@@ -60,7 +60,6 @@ for f in os.listdir("expected"):
                 sys.stderr.write(f"Comparison error in values of: {file_name}\n")
                 # check and print which values are different
                 diff = expected_values.compare(actual_values)
-                sys.stderr.write(diff.to_string())
                 overviews = []
                 for idx, row in diff.iterrows():
                     overview = {}
@@ -75,7 +74,7 @@ for f in os.listdir("expected"):
                     overview = {
                         k: v
                         for k, v in overview.items()
-                        if not (np.isnan(v["true"]) and np.isnan(v["expected"]))
+                        if not (pd.isna(v["true"]) and pd.isna(v["expected"]))
                     }
                     overviews.append(overview)
                 sys.stderr.write(json.dumps(overviews, indent=4))
