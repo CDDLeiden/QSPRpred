@@ -58,7 +58,7 @@ if __name__ == "__main__":
     # run classification
     source = DataSourceTesting("ConsistencyChecks", f"{BASE_DIR}/data")
     settings = BenchmarkSettings(
-        name="ConsistencyChecksCLS",
+        name="CLStest",
         n_replicas=1,
         random_seed=SEED,
         data_sources=[source],
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     runner.run(raise_errors=True)
 
     # run regression
-    settings.name = "ConsistencyChecksREG"
+    settings.name = "REGtest"
     settings.target_props = [
         # one or more properties to model
         [

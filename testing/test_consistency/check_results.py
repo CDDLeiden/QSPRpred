@@ -21,7 +21,7 @@ for f in os.listdir("expected"):
         if "CLS" in f:
             file_name = f"{f}_{type}_matthews_corrcoef.tsv"
         else:
-            file_name = f"{f}_{type}_neg_root_mean_squared_error.tsv"    
+            file_name = f"{f}_{type}_neg_root_mean_squared_error.tsv"
         try:
             print(f"Comparing file contents of {file_name}")
             relative_file_path = f"{f}/{file_name}"
@@ -63,7 +63,7 @@ for f in os.listdir("expected"):
                 sys.stderr.write(diff.to_string())
                 overviews = []
                 for idx, row in diff.iterrows():
-                    overview = dict()
+                    overview = {}
                     for col in diff.columns:
                         name = col[0]
                         if name not in overview:
@@ -80,7 +80,7 @@ for f in os.listdir("expected"):
                     overviews.append(overview)
                 sys.stderr.write(json.dumps(overviews, indent=4))
                 raise e
-        except AssertionError as e:
+        except AssertionError:
             # print stack trace
             traceback.print_exc()
             success = False
