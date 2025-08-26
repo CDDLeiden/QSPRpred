@@ -352,6 +352,10 @@ class DatasetPipeline(Pipeline):
                 split.setDataSet(dataset)
             if hasattr(split, 'randomState') and split.randomState is None:
                     split.randomState = self.randomState
+            if hasattr(split, 'random_state') and split.random_state is None:
+                # FIXME: this is to set the random state for scikit-learn splits,
+                # but it may give unexpected results in other contexts
+                split.random_state = self.randomState
             for train_index, test_index in dataset.split(split):
                 X_train, y_train, X_test, y_test = (
                     X.loc[train_index], y.loc[train_index], X.loc[test_index], y.loc[test_index]
