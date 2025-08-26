@@ -54,155 +54,155 @@ class DataSourceTesting(DataSource):
         mt.storeFormat = "csv"
         return mt
 
-
-# run classification
-source = DataSourceTesting("ConsistencyChecks", f"{BASE_DIR}/data")
-settings = BenchmarkSettings(
-    name="ConsistencyChecksCLS",
-    n_replicas=1,
-    random_seed=SEED,
-    data_sources=[source],
-    descriptors=[
-        [
-            MorganFP(radius=2, nBits=256),
-            RDKitDescs(),
+if __name__ == "__main__":
+    # run classification
+    source = DataSourceTesting("ConsistencyChecks", f"{BASE_DIR}/data")
+    settings = BenchmarkSettings(
+        name="ConsistencyChecksCLS",
+        n_replicas=1,
+        random_seed=SEED,
+        data_sources=[source],
+        descriptors=[
+            [
+                MorganFP(radius=2, nBits=256),
+                RDKitDescs(),
+            ],
         ],
-    ],
-    target_props=[
+        target_props=[
+            # one or more properties to model
+            [
+                TargetSpec.fromDict(
+                    {
+                        "name": "pchembl_value_Mean",
+                        "task": TargetTasks.SINGLECLASS,
+                        "th": [6.5],
+                    }
+                )
+            ],
+        ],
+        pipelines = [
+            DatasetPipeline(
+                steps = {
+                    "benchmarkfilter": LowVarianceFilter(0.05),
+                    "scaler": StandardScaler()
+                }
+            )
+        ],
+        models=[
+            SklearnModel(
+                name="ExtraTreesClassifier",
+                alg=ExtraTreesClassifier,
+                base_dir=f"{BASE_DIR}/models",
+            ),
+            SklearnModel(
+                name="XGBClassifier",
+                alg=XGBClassifier,
+                base_dir=f"{BASE_DIR}/models",
+            ),
+            SklearnModel(
+                name="GaussianNB",
+                alg=GaussianNB,
+                base_dir=f"{BASE_DIR}/models",
+            ),
+        ],
+        assessors=[
+            Assessor(
+                name="crossval_roc_auc",
+                scoring="roc_auc",
+                split=KFold(n_splits=5, shuffle=True),
+            ),
+            Assessor(
+                name="crossval_matthews_corrcoef",
+                scoring="matthews_corrcoef",
+                split=KFold(n_splits=5, shuffle=True),
+                use_proba=False
+            ),
+            Assessor(
+                name="test_roc_auc",
+                scoring="roc_auc",
+                split=RandomSplit(test_fraction=0.2),
+            ),
+            Assessor(
+                name="test_matthews_corrcoef",
+                scoring="matthews_corrcoef",
+                split=RandomSplit(test_fraction=0.2),
+                use_proba=False
+            ),
+        ],
+        subsets={
+            # apply cross-validation only to the training set
+            "crossval_roc_auc": (RandomSplit(test_fraction=0.2), "Train", 0),
+            "crossval_matthews_corrcoef": (RandomSplit(test_fraction=0.2), "Train", 0),
+        },
+        optimizers=[],
+    )
+    runner = BenchmarkRunner(
+        settings,
+        data_dir=f"{BASE_DIR}/CLS",
+        parallel_generator_cpu = MultiprocessingJITGenerator(1)
+    )
+    runner.run(raise_errors=True)
+
+    # run regression
+    settings.name = "ConsistencyChecksREG"
+    settings.target_props = [
         # one or more properties to model
         [
             TargetSpec.fromDict(
                 {
                     "name": "pchembl_value_Mean",
-                    "task": TargetTasks.SINGLECLASS,
-                    "th": [6.5],
+                    "task": TargetTasks.REGRESSION,
                 }
             )
         ],
-    ],
-    pipelines = [
-        DatasetPipeline(
-            steps = {
-                "benchmarkfilter": LowVarianceFilter(0.05),
-                "scaler": StandardScaler()
-            }
-        )
-    ],
-    models=[
-        SklearnModel(
-            name="ExtraTreesClassifier",
-            alg=ExtraTreesClassifier,
-            base_dir=f"{BASE_DIR}/models",
-        ),
-        SklearnModel(
-            name="XGBClassifier",
-            alg=XGBClassifier,
-            base_dir=f"{BASE_DIR}/models",
-        ),
-        SklearnModel(
-            name="GaussianNB",
-            alg=GaussianNB,
-            base_dir=f"{BASE_DIR}/models",
-        ),
-    ],
-    assessors=[
+    ]
+    settings.assessors = [
         Assessor(
-            name="crossval_roc_auc",
-            scoring="roc_auc",
+            name="crossval_r2",
+            scoring="r2",
             split=KFold(n_splits=5, shuffle=True),
         ),
         Assessor(
-            name="crossval_matthews_corrcoef",
-            scoring="matthews_corrcoef",
+            name="crossval_neg_root_mean_squared_error",
+            scoring="neg_root_mean_squared_error",
             split=KFold(n_splits=5, shuffle=True),
-            use_proba=False
         ),
         Assessor(
-            name="test_roc_auc",
-            scoring="roc_auc",
+            name="test_r2",
+            scoring="r2",
             split=RandomSplit(test_fraction=0.2),
         ),
         Assessor(
-            name="test_matthews_corrcoef",
-            scoring="matthews_corrcoef",
+            name="test_neg_root_mean_squared_error",
+            scoring="neg_root_mean_squared_error",
             split=RandomSplit(test_fraction=0.2),
-            use_proba=False
         ),
-    ],
-    subsets={
+    ]
+    settings.subsets = {
         # apply cross-validation only to the training set
-        "crossval_roc_auc": (RandomSplit(test_fraction=0.2), "Train", 0),
-        "crossval_matthews_corrcoef": (RandomSplit(test_fraction=0.2), "Train", 0),
-    },
-    optimizers=[],
-)
-runner = BenchmarkRunner(
-    settings, 
-    data_dir=f"{BASE_DIR}/CLS", 
-    parallel_generator_cpu = MultiprocessingJITGenerator(1)
-)
-runner.run(raise_errors=True)
-
-# run regression
-settings.name = "ConsistencyChecksREG"
-settings.target_props = [
-    # one or more properties to model
-    [
-        TargetSpec.fromDict(
-            {
-                "name": "pchembl_value_Mean",
-                "task": TargetTasks.REGRESSION,
-            }
-        )
-    ],
-]
-settings.assessors = [
-    Assessor(
-        name="crossval_r2",
-        scoring="r2",
-        split=KFold(n_splits=5, shuffle=True),
-    ),
-    Assessor(
-        name="crossval_neg_root_mean_squared_error",
-        scoring="neg_root_mean_squared_error",
-        split=KFold(n_splits=5, shuffle=True),
-    ),
-    Assessor(
-        name="test_r2",
-        scoring="r2",
-        split=RandomSplit(test_fraction=0.2),
-    ),
-    Assessor(
-        name="test_neg_root_mean_squared_error",
-        scoring="neg_root_mean_squared_error",
-        split=RandomSplit(test_fraction=0.2),
-    ),
-]
-settings.subsets = {
-    # apply cross-validation only to the training set
-    "crossval_r2": (RandomSplit(test_fraction=0.2), "Train", 0),
-    "crossval_neg_root_mean_squared_error": (RandomSplit(test_fraction=0.2), "Train", 0)
-}
-settings.models = [
-    SklearnModel(
-        name="ExtraTreesRegressor",
-        alg=ExtraTreesRegressor,
-        base_dir=f"{BASE_DIR}/models",
-    ),
-    SklearnModel(
-        name="XGBRegressor",
-        alg=XGBRegressor,
-        base_dir=f"{BASE_DIR}/models",
-    ),
-    SklearnModel(
-        name="PLSRegression",
-        alg=PLSRegression,
-        base_dir=f"{BASE_DIR}/models",
-    ),
-]
-runner = BenchmarkRunner(
-    settings, 
-    data_dir=f"{BASE_DIR}/REG", 
-    parallel_generator_cpu = MultiprocessingJITGenerator(5)
-)
-runner.run(raise_errors=True)
+        "crossval_r2": (RandomSplit(test_fraction=0.2), "Train", 0),
+        "crossval_neg_root_mean_squared_error": (RandomSplit(test_fraction=0.2), "Train", 0)
+    }
+    settings.models = [
+        SklearnModel(
+            name="ExtraTreesRegressor",
+            alg=ExtraTreesRegressor,
+            base_dir=f"{BASE_DIR}/models",
+        ),
+        SklearnModel(
+            name="XGBRegressor",
+            alg=XGBRegressor,
+            base_dir=f"{BASE_DIR}/models",
+        ),
+        SklearnModel(
+            name="PLSRegression",
+            alg=PLSRegression,
+            base_dir=f"{BASE_DIR}/models",
+        ),
+    ]
+    runner = BenchmarkRunner(
+        settings,
+        data_dir=f"{BASE_DIR}/REG",
+        parallel_generator_cpu = MultiprocessingJITGenerator(5)
+    )
+    runner.run(raise_errors=True)
