@@ -235,11 +235,12 @@ class ClassifierPlot(ModelPlot, ABC):
                 n_classes = df_subset["Label"].nunique()
 
                 # calculate metrics for binary and multi-class properties
+                extra_kwargs = {"include_groups": False} if pd.__version__ >= "2.2.0" else {}
                 if n_classes == 2:
                     summary_list[f"{model_name}_{property_name}_Binary"] = (
                         df_subset.groupby(
                             ["Model", "Assessment", "Fold", "Set", "Property"]
-                        ).apply(lambda x: self.calculateSingleClassMetrics(x))
+                        ).apply(lambda x: self.calculateSingleClassMetrics(x), **extra_kwargs)
                     ).reset_index()
                     summary_list[f"{model_name}_{property_name}_Binary"]["Class"
                                                                         ] = "Binary"
@@ -254,7 +255,7 @@ class ClassifierPlot(ModelPlot, ABC):
                         summary_list[f"{model_name}_{property_name}_{class_type}"] = (
                             df_subset.groupby(["Model", "Assessment", "Fold", "Set", "Property"]).apply(
                                 lambda x: self.
-                                calculateMultiClassMetrics(x, class_type, n_classes)
+                                calculateMultiClassMetrics(x, class_type, n_classes), **extra_kwargs
                             )
                         ).reset_index()
                         summary_list[f"{model_name}_{property_name}_{class_type}"][
