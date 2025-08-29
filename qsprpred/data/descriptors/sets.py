@@ -6,6 +6,7 @@ To add a new descriptor or fingerprint calculator:
 
 from abc import ABC, abstractmethod
 from typing import Any, ClassVar, Generator, Type
+import hashlib
 
 import numpy as np
 import pandas as pd
@@ -867,7 +868,8 @@ class RandomDescs(DescriptorSet, Randomized):
         for i, id in enumerate(props[self.idProp]):
             # set a seed based on the idProp to ensure reproducibility
             # independent of chunk size
-            seed = abs(self.randomState + hash(id)) if self.randomState is not None else None
+            id_hash = int(hashlib.sha256(id.encode()).hexdigest(), 16) % (10**8)
+            seed = self.randomState + id_hash if self.randomState is not None else None
             rng = np.random.default_rng(seed)
             mol_descriptors = rng.random((1, self.n))
             if self.missing is not None:

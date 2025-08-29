@@ -814,15 +814,6 @@ class TestImputers(QSPRTestCase, StepCheckMixIn):
         """Create a small test dataset with random descriptors."""
         super().setUp()
         self.setUpPaths()
-        self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
-        self.dataset.addDescriptors([RandomDescs(n=10, seed=42)])
-
-class TestTargetTransformers(QSPRTestCase, StepCheckMixIn):
-    """Test the sklearn step which wraps a sklearn transformer for targets."""
-    def setUp(self):
-        """Create a small test dataset with random descriptors."""
-        super().setUp()
-        self.setUpPaths()
         self.dataset = self.createSmallTestDataSet(
             self.__class__.__name__,
             target_props=[
@@ -832,7 +823,7 @@ class TestTargetTransformers(QSPRTestCase, StepCheckMixIn):
             drop_empty_target_props=False
         )
         self.dataset.addDescriptors([RandomDescs(n=10, seed=42, missing=2)])
-
+        
     def testTargetImputer(self):
         """Test the target imputer step."""
         targets = self.dataset.getTargets()
@@ -865,15 +856,15 @@ class TestTargetTransformers(QSPRTestCase, StepCheckMixIn):
         self.assertTrue(x_out.isna().sum().sum() == 0)
         
         # Test fill specific descriptor
-        self.assertTrue(X["RandomDesc(10)_RandomDesc_0"].isna().sum() > 0)
+        self.assertTrue(X["RandomDesc(10)_RandomDesc_1"].isna().sum() > 0)
         self.assertTrue(
-            X.loc[:, ~X.columns.isin(["RandomDesc(10)_RandomDesc_0"])].isna().sum().sum() > 0
+            X.loc[:, ~X.columns.isin(["RandomDesc(10)_RandomDesc_1"])].isna().sum().sum() > 0
         )
         x_out, y_out = self.checkStep(FeatureImputer(
             imputer=SimpleImputer(strategy="mean"),
-            feature_properties=["RandomDesc(10)_RandomDesc_0"]
+            feature_properties=["RandomDesc(10)_RandomDesc_1"]
         ), self.dataset)
-        self.assertTrue(x_out["RandomDesc(10)_RandomDesc_0"].isna().sum() == 0)
+        self.assertTrue(x_out["RandomDesc(10)_RandomDesc_1"].isna().sum() == 0)
         
         # Test fill specific descriptor set
         self.dataset.addDescriptors([RandomDescs(n=20, seed=42, missing=2)])
@@ -899,6 +890,22 @@ class TestTargetTransformers(QSPRTestCase, StepCheckMixIn):
         self.assertTrue(
             x_out.loc[:, x_out.columns.str.startswith("RandomDesc(10)")].isna().sum().sum() > 0
         )
+
+class TestTargetTransformers(QSPRTestCase, StepCheckMixIn):
+    """Test the sklearn step which wraps a sklearn transformer for targets."""
+    def setUp(self):
+        """Create a small test dataset with random descriptors."""
+        super().setUp()
+        self.setUpPaths()
+        self.dataset = self.createSmallTestDataSet(
+            self.__class__.__name__,
+            target_props=[
+                {"name": "CL", "task": "REGRESSION"},
+                {"name": "fu", "task": "REGRESSION"}
+            ],
+            drop_empty_target_props=False
+        )
+        self.dataset.addDescriptors([RandomDescs(n=10, seed=42, missing=2)])
 
     def testDiscretizer(self):
         """Test the discretizer step."""
