@@ -38,6 +38,8 @@ class Base(nn.Module):
             device to run the model on
         gpus (list):
             list of gpus to run the model on
+        random_state (int):
+            random seed
     """
     def __init__(
         self,
@@ -48,6 +50,7 @@ class Base(nn.Module):
         batch_size: int = 256,
         patience: int = 50,
         tol: float = 0,
+        random_state: int | None = None,
     ):
         """Initialize the DNN model.
 
@@ -68,6 +71,8 @@ class Base(nn.Module):
             tol (float):
                 minimum absolute improvement of loss necessary to count as progress
                 on best validation score
+            random_state (int, optional):
+                random seed
         """
         super().__init__()
         self.n_epochs = n_epochs
@@ -82,6 +87,9 @@ class Base(nn.Module):
                 f"At the moment multiple gpus is not possible: "
                 f"running DNN on gpu: {gpus[0]}."
             )
+        self.random_state = random_state
+        if random_state is not None:
+            torch.manual_seed(random_state)
 
     def fit(
         self,
@@ -372,6 +380,7 @@ class STFullyConnected(Base):
         neurons_hx=128,
         extra_layer=False,
         dropout_frac=0.25,
+        random_state=None,
     ):
         """Initialize the STFullyConnected model.
 
@@ -406,6 +415,8 @@ class STFullyConnected(Base):
                 add third hidden layer
             dropout_frac (float):
                 dropout fraction
+            random_state (int, optional):
+                random seed
         """
         if not lr:
             lr = 1e-4 if is_reg else 1e-5
@@ -417,6 +428,7 @@ class STFullyConnected(Base):
             batch_size=batch_size,
             patience=patience,
             tol=tol,
+            random_state=random_state,
         )
         self.n_dim = n_dim
         self.is_reg = is_reg

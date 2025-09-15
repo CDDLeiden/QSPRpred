@@ -24,7 +24,8 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
-from ..data.processing.applicability_domain import MLChemADWrapper
+from ..data.processing.applicability_domain import MLChemAD
+from ..data.processing.imputers import TargetImputer
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stopping
 from ..models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ..models.scikit_learn import SklearnModel
@@ -132,8 +133,8 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
                 "name": "CL",
                 "task": task
             }],
-            preparation_settings=self.getDefaultPrep(),
         )
+        pipeline = self.getDefaultPrep()
         # initialize model for training from class
         model = self.getModel(
             name=f"{model_name}_{task}",
@@ -141,7 +142,7 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
             parameters=parameters,
             random_state=random_state[0],
         )
-        self.fitTest(model, dataset)
+        self.fitTest(model, dataset, pipeline)
 
         # load in model from file
         predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
@@ -156,15 +157,15 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(comparison_model, dataset)
+            self.fitTest(comparison_model, dataset, pipeline)
             self.predictorTest(
                 predictor,  # model loaded from file
-                dataset=dataset,
+                dataset,
                 comparison_model=comparison_model,  # comparison model not saved/loaded
                 expect_equal_result=random_state[0] == random_state[1],
             )
         else:
-            self.predictorTest(predictor, dataset=dataset)
+            self.predictorTest(predictor, dataset)
 
     def testPLSRegressionSummaryWithSeed(self):
         """Test model training for regression models."""
@@ -176,16 +177,16 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
             target_props=[{
                 "name": "CL",
                 "task": task
-            }],
-            preparation_settings=self.getDefaultPrep(),
+            }]
         )
+        pipeline = self.getDefaultPrep()
         model = self.getModel(
             name=f"{model_name}_{task}",
             alg=model_class,
             parameters=parameters,
         )
-        self.fitTest(model, dataset)
-        expected_summary = create_correlation_summary(model)
+        self.fitTest(model, dataset, pipeline)
+        expected_summary = create_correlation_summary(model, ["crossval", "test"])
 
         # Generate summary again, check that the result is identical
         model = self.getModel(
@@ -193,13 +194,15 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
             alg=model_class,
             parameters=parameters,
         )
-        self.fitTest(model, dataset)
-        summary = create_correlation_summary(model)
+        self.fitTest(model, dataset, pipeline)
+        summary = create_correlation_summary(model, ["crossval", "test"])
 
-        self.assertListEqual(summary["ModelName"], expected_summary["ModelName"])
-        self.assertListEqual(summary["R2"], expected_summary["R2"])
-        self.assertListEqual(summary["RMSE"], expected_summary["RMSE"])
+        self.assertListEqual(summary["Model"], expected_summary["Model"])
+        self.assertListEqual(summary["Metric"], expected_summary["Metric"])
+        self.assertListEqual(summary["Assessment"], expected_summary["Assessment"])
+        self.assertListEqual(summary["Fold"], expected_summary["Fold"])
         self.assertListEqual(summary["Set"], expected_summary["Set"])
+        self.assertListEqual(summary["Value"], expected_summary["Value"])
 
 
 class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
@@ -222,15 +225,12 @@ class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
                 {
                     "name": "fu",
                     "task": TargetTasks.REGRESSION,
-                    "imputer": SimpleImputer(strategy="mean"),
                 },
                 {
                     "name": "CL",
                     "task": TargetTasks.REGRESSION,
-                    "imputer": SimpleImputer(strategy="mean"),
                 },
             ],
-            preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
         # initialize model for training from class
@@ -239,7 +239,8 @@ class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
             alg=model_class,
             random_state=random_state[0],
         )
-        self.fitTest(model, dataset)
+        pipeline = self.getDefaultPrep(TargetImputer(SimpleImputer(strategy="mean")))
+        self.fitTest(model, dataset, pipeline=pipeline)
 
         # load in model from file
         predictor = SklearnModel(
@@ -255,7 +256,7 @@ class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
                 alg=model_class,
                 random_state=random_state[1],
             )
-            self.fitTest(comparison_model, dataset)
+            self.fitTest(comparison_model, dataset, pipeline=pipeline)
             self.predictorTest(
                 predictor,  # model loaded from file
                 dataset=dataset,
@@ -339,7 +340,6 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
                 "task": task,
                 "th": th
             }],
-            preparation_settings=self.getDefaultPrep(),
         )
         # test classifier
         # initialize model for training from class
@@ -349,7 +349,7 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
             parameters=parameters,
             random_state=random_state[0],
         )
-        self.fitTest(model, dataset)
+        self.fitTest(model, dataset, pipeline=self.getDefaultPrep())
 
         # load in model from file
         predictor = SklearnModel(name=f"{model_name}_{task}", base_dir=model.baseDir)
@@ -364,7 +364,7 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(comparison_model, dataset)
+            self.fitTest(comparison_model, dataset, pipeline=self.getDefaultPrep())
             self.predictorTest(
                 predictor,  # model loaded from file
                 dataset=dataset,
@@ -385,7 +385,6 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
                 "task": TargetTasks.SINGLECLASS,
                 "th": [6.5]
             }],
-            preparation_settings=self.getDefaultPrep(),
             random_state=42,
         )
         # test classifier
@@ -395,8 +394,8 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
             alg=RandomForestClassifier,
             parameters=parameters,
         )
-        self.fitTest(model, dataset)
-        expected_summary = create_metrics_summary(model)
+        self.fitTest(model, dataset, pipeline=self.getDefaultPrep())
+        expected_summary = create_metrics_summary(model, assessments=["crossval", "test"])
 
         # Generate summary again, check that the result is identical
         model = self.getModel(
@@ -405,12 +404,14 @@ class TestSklearnClassification(SklearnBaseModelTestCase):
             parameters=parameters,
             random_state=42,
         )
-        self.fitTest(model, dataset)
-        summary = create_metrics_summary(model)
+        self.fitTest(model, dataset, pipeline=self.getDefaultPrep())
+        summary = create_metrics_summary(model, assessments=["crossval", "test"])
 
         self.assertListEqual(summary["Metric"], expected_summary["Metric"])
         self.assertListEqual(summary["Model"], expected_summary["Model"])
-        self.assertListEqual(summary["TestSet"], expected_summary["TestSet"])
+        self.assertListEqual(summary["Assessment"], expected_summary["Assessment"])
+        self.assertListEqual(summary["Fold"], expected_summary["Fold"])
+        self.assertListEqual(summary["Set"], expected_summary["Set"])
         self.assertListEqual(summary["Value"], expected_summary["Value"])
 
 
@@ -442,16 +443,14 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
                     "name": "fu",
                     "task": TargetTasks.SINGLECLASS,
                     "th": [0.3],
-                    "imputer": SimpleImputer(strategy="mean"),
                 },
                 {
                     "name": "CL",
                     "task": TargetTasks.SINGLECLASS,
                     "th": [6.5],
-                    "imputer": SimpleImputer(strategy="mean"),
                 },
             ],
-            preparation_settings=self.getDefaultPrep(),
+            drop_empty_target_props=False
         )
         # test classifier
         # initialize model for training from class
@@ -461,7 +460,10 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
             parameters=parameters,
             random_state=random_state[0],
         )
-        self.fitTest(model, dataset)
+        pipeline = self.getDefaultPrep(
+            TargetImputer(SimpleImputer(strategy="most_frequent"))
+        )
+        self.fitTest(model, dataset, pipeline=pipeline)
 
         # load in model from file
         predictor = SklearnModel(
@@ -478,7 +480,7 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(comparison_model, dataset)
+            self.fitTest(comparison_model, dataset, pipeline=pipeline)
             self.predictorTest(
                 predictor,  # model loaded from file
                 dataset=dataset,
@@ -593,7 +595,11 @@ class TestMetrics(TestCase):
         ## multi-class with threshold
         y_true, y_pred = self.sample_data(ModelTasks.MULTICLASS, use_proba=True)
         qsprpred_scorer = SklearnMetrics(
-            make_scorer(top_k_accuracy_score, needs_threshold=True, k=2)
+            make_scorer(
+                top_k_accuracy_score,
+                response_method=("predict_proba", "decision_function"),
+                k=2
+            )
         )
         self.assertEqual(
             qsprpred_scorer(y_true, y_pred),
@@ -862,7 +868,8 @@ class TestMonitors(MonitorsCheckMixIn, TestCase):
         )
         self.runMonitorTest(
             model,
-            self.createLargeTestDataSet(preparation_settings=self.getDefaultPrep()),
+            self.createLargeTestDataSet(),
+            self.getDefaultPrep(),
             BaseMonitor,
             self.baseMonitorTest,
             False,
@@ -878,7 +885,8 @@ class TestMonitors(MonitorsCheckMixIn, TestCase):
         )
         self.runMonitorTest(
             model,
-            self.createLargeTestDataSet(preparation_settings=self.getDefaultPrep()),
+            self.createLargeTestDataSet(),
+            self.getDefaultPrep(),
             FileMonitor,
             self.fileMonitorTest,
             False,
@@ -894,7 +902,8 @@ class TestMonitors(MonitorsCheckMixIn, TestCase):
         )
         self.runMonitorTest(
             model,
-            self.createLargeTestDataSet(preparation_settings=self.getDefaultPrep()),
+            self.createLargeTestDataSet(),
+            self.getDefaultPrep(),
             ListMonitor,
             self.listMonitorTest,
             False,
@@ -916,11 +925,6 @@ class TestAttachedApplicabilityDomain(ModelDataSetsPathMixIn, QSPRTestCase):
                 "name": "CL",
                 "task": "REGRESSION"
             }],
-            preparation_settings={
-                **self.getDefaultPrep(),
-                "applicability_domain":
-                    KNNApplicabilityDomain(dist="euclidean", alpha=0.9, scaling=None),
-            },
         )
         # initialize model for training
         model = SklearnModel(
@@ -930,28 +934,29 @@ class TestAttachedApplicabilityDomain(ModelDataSetsPathMixIn, QSPRTestCase):
             parameters={"n_jobs": self.nCPU},
             random_state=42,
         )
+        model.applicabilityDomain = KNNApplicabilityDomain(
+            dist="euclidean", alpha=0.9, scaling=None
+        )
 
-        model.fitDataset(dataset)
+        model.fitDataset(dataset, pipeline=self.getDefaultPrep())
 
         # check if the applicability domain is attached to the model
         self.assertTrue(hasattr(model, "applicabilityDomain"))
-        self.assertIsInstance(model.applicabilityDomain, MLChemADWrapper)
+        self.assertIsInstance(model.applicabilityDomain, MLChemAD)
 
         # check if the applicability domain is saved and loaded correctly
         model.save()
         model2 = SklearnModel.fromFile(model.metaFile)
         self.assertTrue(hasattr(model2, "applicabilityDomain"))
-        self.assertIsInstance(model2.applicabilityDomain, MLChemADWrapper)
+        self.assertIsInstance(model2.applicabilityDomain, MLChemAD)
 
         # make predictions with mlchemad ap on the dataset directly
         comparison_ap = KNNApplicabilityDomain(
             dist="euclidean", alpha=0.9, scaling=None
         )
-        features = dataset.getFeatures(
-            concat=True, ordered=True, refit_standardizer=False
-        )
-        comparison_ap.fit(features)
-        ap_pred = comparison_ap.contains(features)
+        X, _ = next(model.pipeline.apply(dataset, fit=False))
+        comparison_ap.fit(X)
+        ap_pred = comparison_ap.contains(X)
 
         # check if the applicability domain predictions from the dataset are equal to the ones from the model
         _, ap_preds_model = model.predictMols(

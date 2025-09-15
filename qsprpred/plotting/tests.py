@@ -9,7 +9,7 @@ from matplotlib.figure import Figure
 from parameterized import parameterized
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 
-from qsprpred.models.assessment.methods import CrossValAssessor, TestSetAssessor
+from qsprpred.models.assessment.methods import Assessor
 
 from ..data.processing.feature_filters import LowVarianceFilter
 from ..models.scikit_learn import SklearnModel
@@ -18,6 +18,8 @@ from ..plotting.regression import CorrelationPlot, WilliamsPlot
 from ..tasks import TargetTasks
 from ..utils.testing.base import QSPRTestCase
 from ..utils.testing.path_mixins import ModelDataSetsPathMixIn
+from sklearn.model_selection import KFold
+from ..data.sampling.splits import RandomSplit
 
 
 class PlottingTest(ModelDataSetsPathMixIn, QSPRTestCase):
@@ -61,23 +63,30 @@ class ROCPlotTest(PlottingTest):
                 "task": TargetTasks.SINGLECLASS,
                 "th": [6.5]
             }],
-            preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel("test_roc_plot_single_model")
         score_func = "roc_auc_ovr"
-        CrossValAssessor(scoring=score_func)(model, dataset)
-        TestSetAssessor(scoring=score_func)(model, dataset)
+        Assessor(
+            "crossval",
+            split = KFold(n_splits=5, shuffle=True, random_state=model.randomState),
+            scoring = score_func
+        )(model, dataset, pipeline=self.getDefaultPrep())
+        Assessor(
+            "test",
+            split=RandomSplit(test_fraction=0.2),
+            scoring=score_func)(model, dataset, pipeline=self.getDefaultPrep())
         model.save()
         # make plots
-        plt = ROCPlot([model])
+        plt = ROCPlot([model], ["crossval"])
         # cross validation plot
-        ax = plt.make(validation="cv")[0]
+        ax = plt.make()[0]
         self.assertIsInstance(ax, Figure)
-        self.assertTrue(os.path.exists(f"{model.outPrefix}.cv.png"))
+        self.assertTrue(os.path.exists(f"{model.outPrefix}_crossval_ROC.png"))
         # independent test set plot
-        ax = plt.make(validation="ind")[0]
+        plt = ROCPlot([model], ["test"])
+        ax = plt.make()[0]
         self.assertIsInstance(ax, Figure)
-        self.assertTrue(os.path.exists(f"{model.outPrefix}.ind.png"))
+        self.assertTrue(os.path.exists(f"{model.outPrefix}_test_ROC.png"))
 
 
 class MetricsPlotTest(PlottingTest):
@@ -109,15 +118,21 @@ class MetricsPlotTest(PlottingTest):
                     "th": th,
                 }
             ],
-            preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(f"test_metrics_plot_single_{task}_model")
         score_func = "roc_auc_ovr"
-        CrossValAssessor(scoring=score_func)(model, dataset)
-        TestSetAssessor(scoring=score_func)(model, dataset)
+        Assessor(
+            "crossval",
+            split = KFold(n_splits=5, shuffle=True, random_state=model.randomState),
+            scoring = score_func
+        )(model, dataset, pipeline=self.getDefaultPrep())
+        Assessor(
+            "test",
+            split=RandomSplit(test_fraction=0.2),
+            scoring=score_func)(model, dataset, pipeline=self.getDefaultPrep())
         model.save()
         # generate metrics plot and associated files
-        plt = MetricsPlot([model])
+        plt = MetricsPlot([model], ["crossval", "test"])
         figures, summary = plt.make()
         for g in figures:
             self.assertIsInstance(g, sns.FacetGrid)
@@ -134,15 +149,22 @@ class CorrPlotTest(PlottingTest):
     def testPlotSingle(self):
         """Test plotting correlation for single task."""
         dataset = self.createLargeTestDataSet(
-            "test_corr_plot_single_data", preparation_settings=self.getDefaultPrep()
+            "test_corr_plot_single_data"
         )
         model = self.getModel("test_corr_plot_single_model", alg=RandomForestRegressor)
         score_func = "r2"
-        CrossValAssessor(scoring=score_func)(model, dataset)
-        TestSetAssessor(scoring=score_func)(model, dataset)
+        Assessor(
+            "crossval",
+            split = KFold(n_splits=5, shuffle=True, random_state=model.randomState),
+            scoring = score_func
+        )(model, dataset, pipeline=self.getDefaultPrep())
+        Assessor(
+            "test",
+            split=RandomSplit(test_fraction=0.2),
+            scoring=score_func)(model, dataset, pipeline=self.getDefaultPrep())
         model.save()
         # generate metrics plot and associated files
-        plt = CorrelationPlot([model])
+        plt = CorrelationPlot([model], ["crossval", "test"])
         g, summary = plt.make("CL")
         self.assertIsInstance(summary, pd.DataFrame)
         # assert g is sns.FacetGrid
@@ -160,21 +182,29 @@ class WilliamsPlotTest(PlottingTest):
         """Test plotting Williams plot for single task."""
         dataset = self.createLargeTestDataSet(
             "test_williams_plot_single_data",
-            preparation_settings=self.getDefaultPrep()
         )
+        pipeline = self.getDefaultPrep()
+        pipeline.steps.update({"low_variance_filter": LowVarianceFilter(0.23)})
         # filter features to below the number of samples in the test set
         # to avoid error in WilliamsPlot
-        dataset.filterFeatures([LowVarianceFilter(0.23)])
         model = self.getModel(
             "test_williams_plot_single_model", alg=RandomForestRegressor
         )
         score_func = "r2"
-        CrossValAssessor(scoring=score_func)(model, dataset)
-        TestSetAssessor(scoring=score_func)(model, dataset)
+        Assessor(
+            "crossval",
+            split = KFold(n_splits=5, shuffle=True, random_state=model.randomState),
+            scoring = score_func
+        )(model, dataset, pipeline=self.getDefaultPrep())
+        Assessor(
+            "test",
+            split=RandomSplit(test_fraction=0.2),
+            scoring=score_func)(model, dataset, pipeline=self.getDefaultPrep())
+        model.fitDataset(dataset, pipeline)
         model.save()
         # generate metrics plot and associated files
-        plt = WilliamsPlot([model], [dataset])
-        g, leverages, hstar = plt.make()
+        plt = WilliamsPlot([model], ["crossval", "test"], [dataset])
+        g, leverages, hstar = plt.make(dataset.targetPropertiesNames[0])
         self.assertIsInstance(leverages, pd.DataFrame)
         self.assertIsInstance(hstar, dict)
         # assert g is sns.FacetGrid
@@ -211,36 +241,47 @@ class ConfusionMatrixPlotTest(PlottingTest):
                     "th": th,
                 }
             ],
-            preparation_settings=self.getDefaultPrep(),
         )
         model = self.getModel(f"test_cm_plot_single_{task}_model")
         score_func = "roc_auc_ovr"
-        CrossValAssessor(scoring=score_func)(model, dataset)
-        TestSetAssessor(scoring=score_func)(model, dataset)
+        Assessor(
+            "crossval",
+            split = KFold(n_splits=5, shuffle=True, random_state=model.randomState),
+            scoring = score_func
+        )(model, dataset, pipeline=self.getDefaultPrep())
+        Assessor(
+            "test",
+            split=RandomSplit(test_fraction=0.2),
+            scoring=score_func)(model, dataset, pipeline=self.getDefaultPrep())
         model.save()
         # make plots
-        plt = ConfusionMatrixPlot([model])
+        plt = ConfusionMatrixPlot([model], ["crossval"])
         axes, cm_dict = plt.make()
         # assert all figures are sns.FacetGrid
         for ax in axes:
             self.assertIsInstance(ax, Figure)
         self.assertIsInstance(cm_dict, dict)
         self.assertTrue(
-            os.path.exists(f"{model.outPrefix}_CL_0.0_confusion_matrix.png")
+            os.path.exists(f"{model.outPrefix}_CL_crossval_0_confusion_matrix.png")
         )
         self.assertTrue(
-            os.path.exists(f"{model.outPrefix}_CL_1.0_confusion_matrix.png")
+            os.path.exists(f"{model.outPrefix}_CL_crossval_1_confusion_matrix.png")
         )
         self.assertTrue(
-            os.path.exists(f"{model.outPrefix}_CL_2.0_confusion_matrix.png")
+            os.path.exists(f"{model.outPrefix}_CL_crossval_2_confusion_matrix.png")
         )
         self.assertTrue(
-            os.path.exists(f"{model.outPrefix}_CL_3.0_confusion_matrix.png")
+            os.path.exists(f"{model.outPrefix}_CL_crossval_3_confusion_matrix.png")
         )
         self.assertTrue(
-            os.path.exists(f"{model.outPrefix}_CL_4.0_confusion_matrix.png")
+            os.path.exists(f"{model.outPrefix}_CL_crossval_4_confusion_matrix.png")
         )
+        plt = ConfusionMatrixPlot([model], ["test"])
+        axes, cm_dict = plt.make()
+        for ax in axes:
+            self.assertIsInstance(ax, Figure)
+        self.assertIsInstance(cm_dict, dict)
         self.assertTrue(
             os.path.
-            exists(f"{model.outPrefix}_CL_Independent Test_confusion_matrix.png")
+            exists(f"{model.outPrefix}_CL_test_0_confusion_matrix.png")
         )

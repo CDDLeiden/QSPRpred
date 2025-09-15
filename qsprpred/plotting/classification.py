@@ -4,7 +4,7 @@ import os.path
 import re
 from abc import ABC
 from copy import deepcopy
-from typing import List, Literal
+from typing import List, Literal, Tuple
 
 import numpy as np
 import pandas as pd
@@ -26,6 +26,7 @@ from sklearn.metrics import (
 
 from ..models.assessment.metrics.classification import CalibrationError
 from ..models.model import QSPRModel
+from ..data.tables.qspr import QSPRTable
 from ..plotting.base_plot import ModelPlot
 from ..tasks import ModelTasks
 
@@ -41,10 +42,12 @@ class ClassifierPlot(ModelPlot, ABC):
             ModelTasks.MULTITASK_MULTICLASS,
         ]
 
-    def prepareAssessment(self, assessment_df: pd.DataFrame) -> pd.DataFrame:
+    def prepareAssessment(self, name: str, assessment_df: pd.DataFrame) -> pd.DataFrame:
         """Prepare assessment dataframe for plotting
 
         Args:
+            name (str):
+                the name of assessment to prepare
             assessment_df (pd.DataFrame):
                 the assessment dataframe containing the experimental and predicted
                 values for each property. The dataframe should have the following
@@ -56,31 +59,24 @@ class ClassifierPlot(ModelPlot, ABC):
                 The dataframe containing the assessment results,
                 columns: QSPRID, Fold, Property, Label, Prediction, Class, Set
         """
-        # change all property columns into one column
-        id_vars = ["ID", "Fold"] if "Fold" in assessment_df.columns else ["ID"]
+        # Melt all property columns into one column
+        id_vars = ["ID", "Fold", "Set"]
         df = assessment_df.melt(id_vars=id_vars)
         # split the variable (<property_name>_<suffixes>_<Label/Prediction/ProbabilityClass_X>) column
         # into the property name and the type (Label or Prediction or ProbabilityClass_X)
-        pattern = re.compile(
-            r"^(?P<Property>.*?)_(?P<type>Label|Prediction|ProbabilityClass_\d+)$"
-        )
-        df[["Property", "type"]
-          ] = df["variable"].apply(lambda x: pd.Series(pattern.match(x).groupdict()))
+        pattern = r"^(?P<Property>.*?)_(?P<type>Label|Prediction|ProbabilityClass_\d+)$"
+        df[["Property", "type"]] = df["variable"].str.extract(pattern)
         df.drop("variable", axis=1, inplace=True)
         # pivot the dataframe so that Label and Prediction are separate columns
         df = df.pivot_table(
             index=[*id_vars, "Property"], columns="type", values="value"
         )
+        df.dropna(subset=["Label"], inplace=True) # Remove rows with missing values in the label column
         df.reset_index(inplace=True)
         df.columns.name = None
         df["Label"] = df["Label"].astype(int)
         df["Prediction"] = df["Prediction"].astype(int)
-        # Add Fold column if it doesn't exist (for independent test set)
-        if "Fold" not in df.columns:
-            df["Fold"] = "Independent Test"
-            df["Set"] = "Independent Test"
-        else:
-            df["Set"] = "Cross Validation"
+        df["Assessment"] = name
         return df
 
     def prepareClassificationResults(self) -> pd.DataFrame:
@@ -92,13 +88,22 @@ class ClassifierPlot(ModelPlot, ABC):
                 columns: Model, QSPRID, Fold, Property, Label, Prediction, Set
         """
         model_results = {}
-        for m, model in enumerate(self.models):
-            # Read in and prepare the cross-validation and independent test set results
-            df_cv = self.prepareAssessment(pd.read_table(self.cvPaths[model]))
-            df_ind = self.prepareAssessment(pd.read_table(self.indPaths[model]))
+        for model in self.models:
+            # Read in and prepare the assessment set results
+            results = []
+            for name, path in self.assesmentPaths[model].items():
+                assessment = pd.read_table(path)
+                # Replace the assessment labels with the dataset labels
+                if self.datasets is not None and model.name in self.datasets:
+                    targets = self.datasets[model.name].getTargets()
+                    assessment = assessment.drop(columns=[col for col in assessment.columns if col.endswith("Label")])
+                    # add suffix Label to the target columns
+                    targets.columns = [f"{col}_Label" for col in targets.columns]
+                    assessment = pd.merge(assessment, targets, on="ID")
+                df = self.prepareAssessment(name, assessment)
+                results.append(df)
             # concatenate the cross-validation and independent test set results
-            df = pd.concat([df_cv, df_ind])
-            print(model.name)
+            df = pd.concat(results)
             model_results[model.name] = df
         # concatenate the results from all models and add the model name as a column
         df = (
@@ -114,6 +119,14 @@ class ClassifierPlot(ModelPlot, ABC):
         """Calculate metrics for a given dataframe."""
         # check if ProbabilityClass_X columns exist
         proba = all(f"ProbabilityClass_{i}" in df.columns for i in range(n_classes))
+        # check if there are no NaN values in the ProbabilityClass_X columns
+        if proba:
+            if df[[f"ProbabilityClass_{i}" for i in range(n_classes)]].isnull().any().any():
+                print(
+                    "NaN values found in ProbabilityClass columns, not calculating "
+                    "metrics that depend on them."
+                )
+                proba = False
 
         if average_type == "All":
             metrics = {
@@ -128,6 +141,9 @@ class ClassifierPlot(ModelPlot, ABC):
                 metrics["calibration_error"] = CalibrationError()(
                     df.Label.values, y_pred
                 )
+            else:
+                metrics["calibration_error"] = np.nan
+                metrics["roc_auc"] = np.nan
             return pd.Series(metrics)
 
         # check if average type is int (i.e. class number, so we can calculate metrics for a single class)
@@ -170,6 +186,14 @@ class ClassifierPlot(ModelPlot, ABC):
 
         # check if ProbabilityClass_1 column exists
         proba = "ProbabilityClass_1" in df.columns
+        if proba:
+            if df["ProbabilityClass_1"].isnull().any():
+                print(
+                    "NaN values found in ProbabilityClass_1 column, not calculating "
+                    "metrics that depend on them."
+                )
+                proba = False
+            
 
         metrics = {
             "accuracy": accuracy_score(df.Label, df.Prediction),
@@ -186,8 +210,11 @@ class ClassifierPlot(ModelPlot, ABC):
             ]
             metrics["calibration_error"] = CalibrationError()(df.Label.values, y_pred)
             metrics["roc_auc"] = roc_auc_score(df.Label, df.ProbabilityClass_1)
+        else:
+            metrics["calibration_error"] = np.nan
+            metrics["roc_auc"] = np.nan
 
-        return pd.Series(metrics)
+        return pd.Series(metrics, name="metrics")
 
     def getSummary(self):
         """Get summary statistics for classification results."""
@@ -208,11 +235,12 @@ class ClassifierPlot(ModelPlot, ABC):
                 n_classes = df_subset["Label"].nunique()
 
                 # calculate metrics for binary and multi-class properties
+                extra_kwargs = {"include_groups": False} if pd.__version__ >= "2.2.0" else {}
                 if n_classes == 2:
                     summary_list[f"{model_name}_{property_name}_Binary"] = (
                         df_subset.groupby(
-                            ["Model", "Fold", "Property"]
-                        ).apply(lambda x: self.calculateSingleClassMetrics(x))
+                            ["Model", "Assessment", "Fold", "Set", "Property"]
+                        ).apply(lambda x: self.calculateSingleClassMetrics(x), **extra_kwargs)
                     ).reset_index()
                     summary_list[f"{model_name}_{property_name}_Binary"]["Class"
                                                                         ] = "Binary"
@@ -225,20 +253,15 @@ class ClassifierPlot(ModelPlot, ABC):
 
                     for class_type in class_list:
                         summary_list[f"{model_name}_{property_name}_{class_type}"] = (
-                            df_subset.groupby(["Model", "Fold", "Property"]).apply(
+                            df_subset.groupby(["Model", "Assessment", "Fold", "Set", "Property"]).apply(
                                 lambda x: self.
-                                calculateMultiClassMetrics(x, class_type, n_classes)
+                                calculateMultiClassMetrics(x, class_type, n_classes), **extra_kwargs
                             )
                         ).reset_index()
                         summary_list[f"{model_name}_{property_name}_{class_type}"][
                             "Class"] = class_type
 
         df_summary = pd.concat(summary_list.values(), ignore_index=True)
-
-        df_summary["Set"] = df_summary["Fold"].apply(
-            lambda x:
-            ("Independent Test" if x == "Independent Test" else "Cross Validation")
-        )
         self.summary = df_summary
         return df_summary
 
@@ -251,7 +274,7 @@ class ROCPlot(ClassifierPlot):
         """Return a list of tasks supported by this plotter."""
         return [ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS]
 
-    def makeCV(self, model: QSPRModel, property_name: str) -> plt.Axes:
+    def makeROC(self, model: QSPRModel, property_name: str) -> Tuple[str, plt.Axes]:
         """Make the plot for a given model using cross-validation data.
 
         Many thanks to the scikit-learn documentation since the code below
@@ -269,16 +292,27 @@ class ROCPlot(ClassifierPlot):
         Returns:
            ax (matplotlib.axes.Axes): the axes object containing the plot.
         """
-        df = pd.read_table(self.cvPaths[model])
+        assessment_name = list(self.assesmentPaths[model].keys())[0]
+        df = pd.read_table(self.assesmentPaths[model][assessment_name])
+        df = df[df["Set"] == "Test"]
         # get true positive rate and false positive rate for each fold
         tprs = []
         aucs = []
         mean_fpr = np.linspace(0, 1, 100)
         ax = plt.gca()
+        df = df.set_index("ID")
         for fold in df.Fold.unique():
             # get labels
             y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
-            y_true = df[f"{property_name}_Label"][df.Fold == fold]
+            if self.datasets is not None and model.name in self.datasets:
+                y_true = self.datasets[model.name].getTargets()[property_name]
+                y_true = y_true.loc[y_true.index.intersection(y_pred.index)]
+            else:
+                y_true = df[f"{property_name}_Label"][df.Fold == fold]
+            # drop rows with missing values
+            missing = y_true.isnull()
+            y_pred = y_pred[~missing]
+            y_true = y_true[~missing]
             # do plotting
             viz = RocCurveDisplay.from_predictions(
                 y_true,
@@ -325,53 +359,22 @@ class ROCPlot(ClassifierPlot):
         ax.set(
             xlim=[-0.05, 1.05],
             ylim=[-0.05, 1.05],
-            title=f"Receiver Operating Characteristic ({self.modelNames[model]})",
+            title=f"Receiver Operating Characteristic Curve \n"
+                  f" ({self.modelNames[model]} {assessment_name})",
         )
         ax.legend(loc="lower right")
-        return ax
-
-    def makeInd(self, model: QSPRModel, property_name: str) -> plt.Axes:
-        """Make the ROC plot for a given model using independent test data.
-
-        Args:
-            model (QSPRModel):
-                the model to plot the data from.
-            property_name (str):
-                name of the property to plot
-                (should correspond to the prefix of the column names in the data files).
-
-        Returns:
-              ax (matplotlib.axes.Axes): the axes object containing the plot.
-        """
-        df = pd.read_table(self.indPaths[model])
-        y_pred = df[f"{property_name}_ProbabilityClass_1"]
-        y_true = df[f"{property_name}_Label"]
-
-        ax = plt.gca()
-        RocCurveDisplay.from_predictions(
-            y_true,
-            y_pred,
-            name="ROC",
-            ax=ax,
-        )
-        ax.plot([0, 1], [0, 1], linestyle="--", lw=2, color="r", label="Chance")
-        ax.set(
-            xlim=[-0.05, 1.05],
-            ylim=[-0.05, 1.05],
-            title=f"Receiver Operating Characteristic ({self.modelNames[model]})",
-        )
-        ax.legend(loc="lower right")
-        return ax
+        return assessment_name, ax
 
     def make(
         self,
         save: bool = True,
         show: bool = False,
         property_name: str | None = None,
-        validation: str = "cv",
         fig_size: tuple = (6, 6),
     ) -> list[plt.Axes]:
-        """Make the ROC plot for given validation sets.
+        """Make the ROC plot for a given model assessment.
+        
+        If multiple assessments are available, the first one will be used.
 
         Args:
             property_name (str):
@@ -379,9 +382,6 @@ class ROCPlot(ClassifierPlot):
                 prefix of the column names in `cvPaths` or `indPaths` files).
                 If `None`, the first property in the model's `targetProperties` list
                 will be used.
-            validation (str):
-                The type of validation set to read data for. Can be either 'cv'
-                for cross-validation or 'ind' for independent test set.
             fig_size (tuple):
                 The size of the figure to create.
             save (bool):
@@ -397,14 +397,13 @@ class ROCPlot(ClassifierPlot):
             property_name = self.models[0].targetProperties[0].name
         # fetch the correct plotting function based on validation set type
         # and make the plot for each model
-        choices = {"cv": self.makeCV, "ind": self.makeInd}
         axes = []
         for model in self.models:
             fig, ax = plt.subplots(figsize=fig_size)
-            choices[validation](model, property_name)
+            assessment_name, _ = self.makeROC(model, property_name)
             axes.append(fig)
             if save:
-                fig.savefig(f"{self.modelOuts[model]}.{validation}.png")
+                fig.savefig(f"{self.modelOuts[model]}_{assessment_name}_ROC.png")
             if show:
                 plt.show()
                 plt.clf()
@@ -417,7 +416,7 @@ class PRCPlot(ClassifierPlot):
         """Return a list of tasks supported by this plotter."""
         return [ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS]
 
-    def makeCV(self, model: QSPRModel, property_name: str) -> plt.Axes:
+    def makePRC(self, model: QSPRModel, property_name: str) -> Tuple[str, plt.Axes]:
         """Make the plot for a given model using cross-validation data.
 
         Args:
@@ -432,14 +431,25 @@ class PRCPlot(ClassifierPlot):
                     the axes object containing the plot.
         """
         # read data from file for each fold
-        df = pd.read_table(self.cvPaths[model])
+        assessment_name = list(self.assesmentPaths[model].keys())[0]
+        df = pd.read_table(self.assesmentPaths[model][assessment_name])
+        df = df[df["Set"] == "Test"]
         y_real = []
         y_predproba = []
         ax = plt.gca()
+        df = df.set_index("ID")
         for fold in df.Fold.unique():
             # get labels
             y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
-            y_true = df[f"{property_name}_Label"][df.Fold == fold]
+            if self.datasets is not None and model.name in self.datasets:
+                y_true = self.datasets[model.name].getTargets()[property_name]
+                y_true = y_true.loc[y_true.index.intersection(y_pred.index)]
+            else:
+                y_true = df[f"{property_name}_Label"][df.Fold == fold]
+            # drop rows with missing values
+            missing = y_true.isnull()
+            y_pred = y_pred[~missing]
+            y_true = y_true[~missing]
             y_predproba.append(y_pred)
             y_real.append(y_true)
             # do plotting
@@ -468,51 +478,17 @@ class PRCPlot(ClassifierPlot):
         ax.set(
             xlim=[-0.05, 1.05],
             ylim=[-0.05, 1.05],
-            title=f"Precision-Recall Curve ({self.modelNames[model]})",
+            title=f"Precision-Recall Curve \n"
+                  f" ({self.modelNames[model]} {assessment_name})",
         )
         ax.legend(loc="best")
-        return ax
-
-    def makeInd(self, model: QSPRModel, property_name: str) -> plt.Axes:
-        """Make the plot for a given model using independent test data.
-
-        Args:
-            model (QSPRModel):
-                the model to plot the data from.
-            property_name (str):
-                name of the property to plot (should correspond to the prefix
-                of the column names in the data files).
-
-        Returns:
-              ax (matplotlib.axes.Axes):
-                the axes object containing the plot.
-        """
-        # read data from file
-        df = pd.read_table(self.indPaths[model])
-        y_pred = df[f"{property_name}_ProbabilityClass_1"]
-        y_true = df[f"{property_name}_Label"]
-        # do plotting
-        ax = plt.gca()
-        PrecisionRecallDisplay.from_predictions(
-            y_true,
-            y_pred,
-            name="PRC",
-            ax=ax,
-        )
-        ax.set(
-            xlim=[-0.05, 1.05],
-            ylim=[-0.05, 1.05],
-            title=f"Receiver Operating Characteristic ({self.modelNames[model]})",
-        )
-        ax.legend(loc="best")
-        return ax
+        return assessment_name, ax
 
     def make(
         self,
         save: bool = True,
         show: bool = False,
         property_name: str | None = None,
-        validation: str = "cv",
         fig_size: tuple = (6, 6),
     ):
         """Make the plot for a given validation type.
@@ -522,10 +498,6 @@ class PRCPlot(ClassifierPlot):
                 name of the property to plot (should correspond to the prefix
                 of the column names in the data files). If `None`, the first
                 property in the model's `targetProperties` list will be used.
-            validation (str):
-                The type of validation data to use.
-                Can be either 'cv' for cross-validation or 'ind'
-                for independent test set.
             fig_size (tuple):
                 The size of the figure to create.
             save (bool):
@@ -538,14 +510,13 @@ class PRCPlot(ClassifierPlot):
         """
         if property_name is None:
             property_name = self.models[0].targetProperties[0].name
-        choices = {"cv": self.makeCV, "ind": self.makeInd}
         axes = []
         for model in self.models:
             fig, ax = plt.subplots(figsize=fig_size)
-            ax = choices[validation](model, property_name)
+            assessment_name, ax = self.makePRC(model, property_name)
             axes.append(ax)
             if save:
-                fig.savefig(f"{self.modelOuts[model]}.{validation}.png")
+                fig.savefig(f"{self.modelOuts[model]}_{assessment_name}_PRC.png")
             if show:
                 plt.show()
                 plt.clf()
@@ -558,10 +529,10 @@ class CalibrationPlot(ClassifierPlot):
         """Return a list of tasks supported by this plotter."""
         return [ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS]
 
-    def makeCV(
+    def makeCalibrationPlot(
         self, model: QSPRModel, property_name: str, n_bins: int = 10
-    ) -> plt.Axes:
-        """Make the plot for a given model using cross-validation data.
+    ) -> Tuple[str, plt.Axes]:
+        """Make the plot for a given model assessment
 
         Args:
             model (QSPRModel):
@@ -573,17 +544,30 @@ class CalibrationPlot(ClassifierPlot):
                 The number of bins to use for the calibration curve.
 
         Returns:
+            assessment_name (str):
+                the name of the assessment used to make the plot.
             ax (matplotlib.axes.Axes): the axes object containing the plot.
         """
         # read data from file for each fold and plot
-        df = pd.read_table(self.cvPaths[model])
+        assessment_name = list(self.assesmentPaths[model].keys())[0]
+        df = pd.read_table(self.assesmentPaths[model][assessment_name])
+        df = df[df["Set"] == "Test"]
         y_real = []
         y_pred_proba = []
         ax = plt.gca()
+        df = df.set_index("ID")
         for fold in df.Fold.unique():
             # get labels
             y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
-            y_true = df[f"{property_name}_Label"][df.Fold == fold]
+            if self.datasets is not None and model.name in self.datasets:
+                y_true = self.datasets[model.name].getTargets()[property_name]
+                y_true = y_true.loc[y_true.index.intersection(y_pred.index)]
+            else:
+                y_true = df[f"{property_name}_Label"][df.Fold == fold]
+            # drop rows with missing values
+            missing = y_true.isnull()
+            y_pred = y_pred[~missing]
+            y_true = y_true[~missing]
             y_pred_proba.append(y_pred)
             y_real.append(y_true)
             # do plotting
@@ -612,55 +596,19 @@ class CalibrationPlot(ClassifierPlot):
         ax.set(
             xlim=[-0.05, 1.05],
             ylim=[-0.05, 1.05],
-            title=f"Calibration Curve ({self.modelNames[model]})",
+            title=f"Calibration Curve \n"
+                  f" ({self.modelNames[model]} {assessment_name})",
         )
         ax.legend(loc="best")
-        return ax
-
-    def makeInd(
-        self, model: QSPRModel, property_name: str, n_bins: int = 10
-    ) -> plt.Axes:
-        """Make the plot for a given model using independent test data.
-
-        Args:
-            model (QSPRModel):
-                the model to plot the data from.
-            property_name (str):
-                name of the property to plot (should correspond to the prefix
-                of the column names in the data files).
-            n_bins (int):
-                The number of bins to use for the calibration curve.
-
-        Returns:
-            ax (matplotlib.axes.Axes):
-                the axes object containing the plot.
-        """
-        df = pd.read_table(self.indPaths[model])
-        y_pred = df[f"{property_name}_ProbabilityClass_1"]
-        y_true = df[f"{property_name}_Label"]
-        ax = plt.gca()
-        CalibrationDisplay.from_predictions(
-            y_true,
-            y_pred,
-            n_bins=n_bins,
-            name="Calibration",
-            ax=ax,
-        )
-        ax.set(
-            xlim=[-0.05, 1.05],
-            ylim=[-0.05, 1.05],
-            title=f"Calibration Curve ({self.modelNames[model]})",
-        )
-        ax.legend(loc="best")
-        return ax
+        return assessment_name, ax
 
     def make(
         self,
         save: bool = True,
         show: bool = False,
         property_name: str | None = None,
-        validation: str = "cv",
         fig_size: tuple = (6, 6),
+        n_bins: int = 10
     ) -> list[plt.Axes]:
         """Make the plot for a given validation type.
 
@@ -669,15 +617,19 @@ class CalibrationPlot(ClassifierPlot):
                 name of the property to plot (should correspond to the prefix
                 of the column names in the data files). If `None`, the first
                 property in the model's `targetProperties` list will be used.
-            validation (str):
-                The type of validation data to use. Can be either 'cv'
-                for cross-validation or 'ind' for independent test set.
             fig_size (tuple):
                 The size of the figure to create.
             save (bool):
                 Whether to save the plot to a file.
             show (bool):
                 Whether to display the plot.
+            property_name (str):
+                name of the property to plot (should correspond to the prefix of
+                the column names in the data files).
+            fig_size (tuple):
+                The size of the figure to create.
+            n_bins (int):
+                The number of bins to use for the calibration curve.       
 
         Returns:
             axes (list[plt.Axes]):
@@ -685,14 +637,13 @@ class CalibrationPlot(ClassifierPlot):
         """
         if property_name is None:
             property_name = self.models[0].targetProperties[0].name
-        choices = {"cv": self.makeCV, "ind": self.makeInd}
         axes = []
         for model in self.models:
             fig, ax = plt.subplots(figsize=fig_size)
-            ax = choices[validation](model, property_name, fig_size)
+            assessment_name, ax = self.makeCalibrationPlot(model, property_name, n_bins)
             axes.append(ax)
             if save:
-                fig.savefig(f"{self.modelOuts[model]}.{validation}.png")
+                fig.savefig(f"{self.modelOuts[model]}_{assessment_name}_Calibration.png")
             if show:
                 plt.show()
                 plt.clf()
@@ -711,6 +662,8 @@ class MetricsPlot(ClassifierPlot):
     def __init__(
         self,
         models: List[QSPRModel],
+        assessments: List[str],
+        datasets: List[QSPRTable] = None,
         metrics: List[Literal[
             "f1",
             "matthews_corrcoef",
@@ -737,9 +690,13 @@ class MetricsPlot(ClassifierPlot):
 
         Args:
             models (list): A list of QSPRModel objects to plot the data from.
+            assessments (list): A list of assessment names to plot the data from.
+            datasets (list): A list of QSPRTable objects containing the datasets used
+                for training the models. If provided, the plotter will use the dataset
+                labels instead of the assessment labels.
             metrics (list): A list of metrics to plot.
         """
-        super().__init__(models)
+        super().__init__(models, assessments, datasets)
         self.metrics = metrics
 
     def make(
@@ -751,9 +708,6 @@ class MetricsPlot(ClassifierPlot):
         """Make the plot for a given validation type.
 
         Args:
-            property_name (str):
-                name of the property to plot (should correspond to the prefix of
-                the column names in the data files).
             save (bool):
                 Whether to save the plot to a file.
             show (bool):
@@ -762,7 +716,7 @@ class MetricsPlot(ClassifierPlot):
                 Path to save the plots to, e.g. "results/plot.png", the plot will be
                 saved to this path with the metric name appended before the extension,
                 e.g. "results/plot_roc_auc.png". If `None`, the plots will be saved to
-                each model's output directory.
+                each model's output directory
 
         Returns:
             figures (list[sns.FacetGrid]):
@@ -780,13 +734,14 @@ class MetricsPlot(ClassifierPlot):
             if metric not in self.summary.columns:
                 print(f"Metric {metric} not in summary dataframe, skipping")
                 continue
+            summary = self.summary[self.summary["Set"] == "Test"]
 
             # plot the results
             g = sns.catplot(
-                self.summary,
+                summary,
                 x="Class",
                 y=metric,
-                hue="Set",
+                hue="Assessment",
                 col="Property",
                 row="Model",
                 kind="bar",
@@ -794,7 +749,8 @@ class MetricsPlot(ClassifierPlot):
                 sharex=False,
                 sharey=False,
             )
-            # set y range max to 1 for each plot, but don't set min to 0 as some metrics can be negative
+            # set y range max to 1 for each plot, but don't set min to 0 as some metrics
+            # can be negative
             for ax in g.axes_dict.values():
                 y_min, y_max = ax.get_ylim()
                 ax.set_ylim(y_min, 1)
@@ -831,19 +787,24 @@ class ConfusionMatrixPlot(ClassifierPlot):
         conf_dict = {}
         for model in df.Model.unique():
             for property in df.Property.unique():
-                for fold in df.Fold.unique():
-                    df_subset = df[(df.Model == model) & (df.Property == property) &
-                                   (df.Fold == fold)]
-                    conf_dict[(model, property, fold)] = confusion_matrix(
-                        df_subset.Label, df_subset.Prediction
-                    )
+                for assessment in df.Assessment.unique():
+                    for fold in df.Fold.unique():
+                        df_subset = df[
+                            (df.Model == model) & (df.Property == property) & 
+                            (df.Assessment == assessment) & (df.Fold == fold) &
+                            (df.Set == "Test")
+                        ]
+                        if not df_subset.empty:
+                            conf_dict[(model, property, assessment, fold)] = confusion_matrix(
+                                df_subset.Label, df_subset.Prediction
+                            )
         return conf_dict
 
     def make(
         self,
         save: bool = True,
         show: bool = False,
-        out_path: str | None = None,
+        out_path: str | None = None
     ) -> tuple[dict, plt.Axes]:
         """Make confusion matrix heatmap for each model, property and fold
 
@@ -872,35 +833,40 @@ class ConfusionMatrixPlot(ClassifierPlot):
         axes = []
         for model in df.Model.unique():
             for property in df.Property.unique():
-                for fold in df.Fold.unique():
-                    fig, ax = plt.subplots()
-                    sns.heatmap(
-                        conf_dict[(model, property, fold)],
-                        annot=True,
-                        fmt="g",
-                        cmap="Blues",
-                    )
-                    ax.set_title(f"Confusion Matrix ({model}_{property}_fold_{fold})")
-                    ax.set_xlabel("Predicted label")
-                    ax.set_ylabel("True label")
-                    axes.append(fig)
-                    if save:
-                        if out_path is not None:
-                            # add identifier to out_path before the extension
-                            plt.savefig(
-                                os.path.splitext(out_path)[0] +
-                                f"_{model}_{property}_{fold}_confusion_matrix.png",
-                                dpi=300,
-                            )
-                        else:
-                            # reverse self.modelNames dictionary to get model out
-                            modelNames = {v: k for k, v in self.modelNames.items()}
-                            plt.savefig(
-                                f"{self.modelOuts[modelNames[model]]}_{property}_{fold}_confusion_matrix.png",
-                                dpi=300,
-                            )
-                    if show:
-                        plt.show()
-                        plt.clf()
-                    plt.close()
+                for assessment in df.Assessment.unique():
+                    for fold in df.Fold.unique():
+                        if (model, property, assessment, fold) not in conf_dict:
+                            continue
+                        fig, ax = plt.subplots()
+                        sns.heatmap(
+                            conf_dict[(model, property, assessment, fold)],
+                            annot=True,
+                            fmt="g",
+                            cmap="Blues",
+                        )
+                        ax.set_title(
+                            f"Confusion Matrix \n"
+                            f"({model} {property} {assessment} fold {fold})")
+                        ax.set_xlabel("Predicted label")
+                        ax.set_ylabel("True label")
+                        axes.append(fig)
+                        if save:
+                            if out_path is not None:
+                                # add identifier to out_path before the extension
+                                plt.savefig(
+                                    os.path.splitext(out_path)[0] +
+                                    f"_{model}_{property}_{assessment}_{fold}_confusion_matrix.png",
+                                    dpi=300,
+                                )
+                            else:
+                                # reverse self.modelNames dictionary to get model out
+                                modelNames = {v: k for k, v in self.modelNames.items()}
+                                plt.savefig(
+                                    f"{self.modelOuts[modelNames[model]]}_{property}_{assessment}_{fold}_confusion_matrix.png",
+                                    dpi=300,
+                                )
+                        if show:
+                            plt.show()
+                            plt.clf()
+                        plt.close()
         return axes, conf_dict

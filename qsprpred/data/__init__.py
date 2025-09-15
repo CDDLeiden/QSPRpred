@@ -8,6 +8,7 @@ from .sampling.splits import (
 )
 from .tables.mol import MoleculeTable
 from .tables.qspr import QSPRTable
+from .processing.pipeline import DatasetPipeline
 
 __all__ = [
     "BootstrapSplit",
@@ -18,4 +19,5 @@ __all__ = [
     "TemporalSplit",
     "MoleculeTable",
     "QSPRTable",
+    "DatasetPipeline",
 ]

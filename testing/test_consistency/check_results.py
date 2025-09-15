@@ -17,8 +17,11 @@ models_base = "./data/models"
 success = True
 failed_files = []
 for f in os.listdir("expected"):
-    for type in ["ind", "cv"]:
-        file_name = f"{f}.{type}.tsv"
+    for type in ["test", "crossval"]:
+        if "CLS" in f:
+            file_name = f"{f}_{type}_matthews_corrcoef.tsv"
+        else:
+            file_name = f"{f}_{type}_neg_root_mean_squared_error.tsv"
         try:
             print(f"Comparing file contents of {file_name}")
             relative_file_path = f"{f}/{file_name}"
@@ -42,6 +45,13 @@ for f in os.listdir("expected"):
             assert expected_values.index.equals(
                 actual_values.index
             ), f"Index values do not match for file {file_name}."
+            assert expected_values.dtypes.equals(
+                actual_values.dtypes
+            ), (
+                f"Data types do not match for file {file_name}.\n"
+                f"Expected: {expected_values.dtypes}\n"
+                f"Actual: {actual_values.dtypes}"
+            )
             try:
                 assert expected_values.equals(
                     actual_values
@@ -52,7 +62,7 @@ for f in os.listdir("expected"):
                 diff = expected_values.compare(actual_values)
                 overviews = []
                 for idx, row in diff.iterrows():
-                    overview = dict()
+                    overview = {}
                     for col in diff.columns:
                         name = col[0]
                         if name not in overview:
@@ -64,13 +74,13 @@ for f in os.listdir("expected"):
                     overview = {
                         k: v
                         for k, v in overview.items()
-                        if not (np.isnan(v["true"]) and np.isnan(v["expected"]))
+                        if not (pd.isna(v["true"]) and pd.isna(v["expected"]))
                     }
                     overviews.append(overview)
                 sys.stderr.write(json.dumps(overviews, indent=4))
                 raise e
-        except AssertionError as e:
-            # print  stack trace
+        except AssertionError:
+            # print stack trace
             traceback.print_exc()
             success = False
             failed_files.append(file_name)

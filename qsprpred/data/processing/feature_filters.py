@@ -4,8 +4,9 @@ To add a new feature filters:
 * Add a FeatureFilter subclass for your new filter
 """
 
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
+from typing import ClassVar
 import numpy as np
 import pandas as pd
 from boruta import BorutaPy
@@ -14,17 +15,22 @@ from sklearn.preprocessing import MinMaxScaler
 
 from ...logs import logger
 from ...utils.interfaces.randomized import Randomized
+from .step import Step
+import os
+from pickle import dump, load
+import json
 
 
-class FeatureFilter(ABC):
+class FeatureFilter(Step):
     """Filter out uninformative featureNames from a dataframe."""
+
     @abstractmethod
-    def __call__(self, df: pd.DataFrame, y_col: pd.DataFrame = None):
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> pd.DataFrame:
         """Filter out uninformative features from a dataframe.
 
         Args:
-            df (pd.DataFrame): dataframe to be filtered
-            y_col (pd.DataFrame, optional): output dataframe if the filtering method
+            X (pd.DataFrame): dataframe to be filtered
+            y (pd.DataFrame, optional): output dataframe if the filtering method
                 requires it
 
         Returns:
@@ -33,30 +39,65 @@ class FeatureFilter(ABC):
 
 
 class LowVarianceFilter(FeatureFilter):
-    """Remove features with variance lower than a given threshold after MinMax scaling.
+    """Remove features with variance equal to or lower than a given threshold after 
+    MinMax scaling.
 
     Attributes:
         th (float): threshold for removing features
+        low_var_cols (pd.Index): columns with low variance (if fitted)
     """
     def __init__(self, th: float) -> None:
+        self._fitted = False
         self.th = th
-
-    def __call__(self, df: pd.DataFrame, y_col: pd.DataFrame = None) -> pd.DataFrame:
-        # scale values between 0 and 1
-        colnames = df.columns
-        data_scaled = MinMaxScaler().fit_transform(X=df.values)
+        
+    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
+        """Find features with variance equal to or lower than a given threshold after 
+        MinMax scaling.
+        
+        Args:
+            X (pd.DataFrame): training data
+            y (pd.DataFrame, optional): training targets
+        """
+        colnames = X.columns
+        data_scaled = MinMaxScaler().fit_transform(X=X.values)
         variance = data_scaled.var(axis=0, ddof=1)
+        
+        low_var_cols_idx = np.where(variance <= self.th)[0]
+        self.low_var_cols = colnames[low_var_cols_idx]
+        
+        if len(self.low_var_cols) == len(colnames):
+            logger.warning(
+                "All columns have low variance, no columns will be dropped, this filter"
+                " will be skipped."
+            )
+            self.low_var_cols = None
+        else:
+            logger.info(
+                f"Number of columns dropped low variance filter: {len(self.low_var_cols)}"
+            )
+            logger.info(f"Number of columns left: {X.shape[1] - len(self.low_var_cols)}")
+        self._fitted = True
+        
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Filter out low variance features from a dataframe.
 
-        low_var_cols = np.where(variance <= self.th)[0]
+        Args:
+            X (pd.DataFrame): dataframe to be filtered
+            y (pd.DataFrame, optional): output dataframe if the filtering method
+                requires it
 
-        # drop from both the minmax scaled descriptors df and the original dataframe
-        df = df.drop(list(colnames[low_var_cols]), axis=1)
-        logger.info(
-            f"number of columns dropped low variance filter: {len(low_var_cols)}"
-        )
-        logger.info(f"number of columns left: {df.shape[1]}")
+        Returns:
+            pd.DataFrame: The filtered dataframe
+            pd.DataFrame: The target dataframe
+        """
+        assert hasattr(self, "low_var_cols"), "Filter has not been fitted yet."
+        # assert self.low_var_cols.isin(X.columns).all(), "Columns do not match fitted columns."
+        if self.low_var_cols is not None:
+            columns_to_drop = self.low_var_cols.intersection(X.columns)
+            
+            X = X.drop(columns=columns_to_drop)
 
-        return df
+        return X, y
 
 
 class HighCorrelationFilter(FeatureFilter):
@@ -64,38 +105,85 @@ class HighCorrelationFilter(FeatureFilter):
 
     Attributes:
         th (float): threshold for correlation
+        high_corr_cols (pd.Index): columns with high correlation (if fitted)
     """
     def __init__(self, th: float) -> None:
+        self._fitted = False
         self.th = th
+        
+    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
+        """Find features with correlation higher than a given threshold.
+        
+        Args:
+            X (pd.DataFrame): training data
+            y (pd.DataFrame, optional): training targets
+        """
+        # stop if only 1 column
+        if X.shape[1] == 1:
+            logger.info("Only one column in the dataframe. No correlation check.")
+            self.high_corr_cols = None
+        else:
+            zero_variance_cols = X.columns[X.var() == 0]
+            if len(zero_variance_cols) > 0:
+                logger.warning(
+                    f"The following features have zero variance: "
+                    f"{zero_variance_cols.tolist()}. These features will not be dropped"
+                    f"by the high correlation filter. Consider using the low variance "
+                    f"filter first."
+                )
+            
+            correlation = np.triu(np.abs(np.corrcoef(X.values.astype(float).T)), k=1)
+            high_corr = np.where(np.any(correlation > self.th, axis=0))
 
-    def __call__(self, df: pd.DataFrame, y_col: pd.DataFrame = None) -> pd.DataFrame:
-        if df.shape[1] == 1:
-            return df
-        # make absolute, because we also want to filter out large negative correlation
-        correlation = np.triu(np.abs(np.corrcoef(df.values.astype(float).T)), k=1)
-        high_corr = np.where(np.any(correlation > self.th, axis=0))
+            self.high_corr_cols = X.columns[high_corr[0]]
+            
+            if len(self.high_corr_cols) == len(X.columns):
+                logger.warning(
+                    "All columns have high correlation, no columns will be dropped, "
+                    "this filter will be skipped."
+                )
+                self.high_corr_cols = None
+            else:
+                logger.info(
+                    f"Number of columns dropped high correlation filter: {len(self.high_corr_cols)}"
+                )
+                logger.info(f"Number of columns left: {X.shape[1] - len(self.high_corr_cols)}")
+        self._fitted = True
+        
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Filter out high correlation features from a dataframe.
 
-        logger.info(
-            f"number of columns dropped high correlation filter: {len(high_corr[0])}"
-        )
-        df = df.drop(df.columns[high_corr[0]], axis=1)
-        logger.info(f"number of columns left: {df.shape[1]}")
+        Args:
+            X (pd.DataFrame): dataframe to be filtered
+            y (pd.DataFrame, optional): output dataframe if the filtering method
+                requires it
 
-        return df
+        Returns:
+            pd.DataFrame: The filtered dataframe
+            pd.DataFrame: The target dataframe
+        """
+        assert hasattr(self, "high_corr_cols"), "Filter has not been fitted yet."
+        if self.high_corr_cols is not None:
+            #assert self.high_corr_cols.isin(X.columns).all(), "Columns do not match fitted columns."
+            
+            columns_to_drop = self.high_corr_cols.intersection(X.columns)
+            
+            X = X.drop(columns=columns_to_drop)
+
+        return X, y
 
 
 class BorutaFilter(FeatureFilter, Randomized):
     """Boruta filter from BorutaPy: Boruta all-relevant feature selection.
 
-    Uses BorutaPy implementation from https://github.com/scikit-learn-contrib/boruta_py.
-    Note that the `boruta` package is not compatible with numpy 1.24.0 and above.
-    Therefore, make sure to downgrade numpy to 1.23.0 or older before using this filter.
-
     Attributes:
         featSelector (BorutaPy): BorutaPy feature selector
+        droppedFeatures (pd.Index): columns dropped by Boruta filter
         seed (int):
             Random state to use for shuffling and other random operations.
     """
+    _notJSON: ClassVar = ["featSelector"]
+    
     @property
     def randomState(self) -> int:
         """Get the random state for the object."""
@@ -111,6 +199,34 @@ class BorutaFilter(FeatureFilter, Randomized):
                 a random seed is used instead of a fixed one.
         """
         self.seed = seed
+    
+    def toFile(self, filename: str) -> str:
+        """Serialize object to a JSON file. This JSON file should
+        contain all  data necessary to reconstruct the object.
+
+        Args:
+            filename (str): filename to save object to
+
+        Returns:
+            filename (str): absolute path to the saved JSON file of the object
+        """
+        with open(f"{filename.removesuffix('.json')}_featSelector.pkl", "wb") as f:
+            dump(self.featSelector, f)
+            
+        o_dict = json.loads(self.toJSON())
+        o_dict["py/state"]["featSelector"] = os.path.basename(
+            f"{filename.removesuffix('.json')}_featSelector.pkl"
+        )
+        with open(filename, "w") as fh:
+            json.dump(o_dict, fh, indent=4)
+        return os.path.abspath(filename)
+    
+    @classmethod
+    def fromFile(cls, filename: str) -> "BorutaFilter":
+        ret = super().fromFile(filename)
+        with open(f"{filename.removesuffix('.json')}_featSelector.pkl", "rb") as f:
+            ret.featSelector = load(f)
+        return ret
 
     def __init__(self, boruta_feat_selector: BorutaPy = None, seed: int | None = None):
         """Initialize the BorutaFilter class.
@@ -122,6 +238,7 @@ class BorutaFilter(FeatureFilter, Randomized):
                 random operations. If None, the random state set in the BorutaPy
                 instance is used. Defaults to None.
         """
+        self._fitted = False
         self.seed = seed
         self.featSelector = boruta_feat_selector
         if self.featSelector is None:
@@ -131,30 +248,41 @@ class BorutaFilter(FeatureFilter, Randomized):
 
         # set seed from BorutaPy instance to class attribute
         self.randomState = self.featSelector.random_state
+        
+    def fit(self, X: pd.DataFrame, y: pd.DataFrame):
+        """Fit the Boruta filter to the data.
 
-    def __call__(
-        self, features: pd.DataFrame, y_col: pd.DataFrame = None
-    ) -> pd.DataFrame:
+        Args:
+            X (pd.DataFrame): training data
+            y (pd.DataFrame): training targets
+        """
+        assert y.shape[1] == 1, "Boruta filter only works with one target column."
+        
+        self.featSelector.fit(X.values, y.values.ravel())
+        self.droppedFeatures = X.columns[~self.featSelector.support_]
+
+        logger.info(
+            "Number of columns dropped Boruta filter: "
+            f"{len(self.droppedFeatures)}"
+        )
+        logger.info(f"Number of columns left: {X.shape[1] - len(self.droppedFeatures)}")
+        self._fitted = True
+        
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Filter out uninformative features from a dataframe using BorutaPy.
 
         Args:
-            features (pd.DataFrame): dataframe to be filtered
-            y_col (pd.DataFrame): target column(s)
+            X (pd.DataFrame): dataframe to be filtered
+            y (pd.DataFrame, optional): output dataframe if the filtering method
+                requires it
 
         Returns:
-            pd.DataFrame: filtered dataframe
+            pd.DataFrame: The filtered dataframe
+            pd.DataFrame: The target dataframe
         """
-        if y_col.shape[1] > 1:
-            raise NotImplementedError(
-                "Boruta filter only works with one target column."
-            )
-        self.featSelector.fit(features.values, y_col.values.ravel())
+        assert hasattr(self, "droppedFeatures"), "Filter has not been fitted yet."
+        assert self.droppedFeatures.isin(X.columns).all(), "Columns do not match fitted columns."
+        
+        X = X.drop(columns=self.droppedFeatures)
 
-        selected_features = features.loc[:, self.featSelector.support_]
-        logger.info(
-            "Number of columns dropped Boruta filter: "
-            f"{features.shape[1] - selected_features.shape[1]}"
-        )
-        logger.info(f"Number of columns left: {selected_features.shape[1]}")
-
-        return selected_features
+        return X, y

@@ -6,6 +6,7 @@ To add a new descriptor or fingerprint calculator:
 
 from abc import ABC, abstractmethod
 from typing import Any, ClassVar, Generator, Type
+import hashlib
 
 import numpy as np
 import pandas as pd
@@ -20,6 +21,7 @@ from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 
 from ...logs import logger
 from ...utils.serialization import JSONSerializable
+from ...utils.interfaces.randomized import Randomized
 from ..processing.mol_processor import MolProcessorWithID
 
 
@@ -813,3 +815,105 @@ class SmilesDesc(DescriptorSet):
 
     def __str__(self):
         return "SmilesDesc"
+
+class RandomDescs(DescriptorSet, Randomized):
+    """Descriptorset of a set of random numbers as descriptors.
+    
+    Note. that when setting the randomState the seed of random number generator is
+    based on the idProp of the dataset. Therefore, if the id of the molecules
+    changes the results will be different, however if the order of the molecules
+    is shuffled the descriptors per molecule will remain the same.
+
+    Attributes:
+        n (int): number of random descriptors to generate
+        missing (float | int | None): fraction of missing values or number of
+            missing values per descriptor
+        randomState (int | None):
+            random state to use for the random number generator,
+    """
+    def __init__(self, n: int = 10, missing: float | int | None = None, seed: int | None = None):
+        """Initialize the descriptorset with a number of random descriptors.
+
+        Args:
+            n (int): number of random descriptors to generate
+            missing (float | int| None): fraction of missing values or number of 
+                missing values per descriptor
+        """
+        super().__init__()
+        self.n = n
+        self.missing = missing
+        if self.missing is not None:
+            if isinstance(self.missing, float):
+                self._n_missing = int(np.round(self.missing * self.n))
+            elif isinstance(self.missing, int):
+                self._n_missing = self.missing
+        self.randomState = seed
+        self._descriptors = [f"RandomDesc_{i}" for i in range(n)]
+    
+    def getDescriptors(
+        self, mols: list[str | Mol], props: dict[str, list[Any]], *args, **kwargs
+    ) -> np.ndarray:
+        """Calculate the descriptor for a list of molecules.
+
+        Args:
+            mols (list): list of smiles or rdkit molecules
+            props (dict): dictionary of properties for the passed molecules
+            args: positional arguments
+            kwargs: keyword arguments
+
+        Returns:
+            np.ndarray: array of descriptor values of shape (n_mols, n)
+        """
+        descriptors = np.zeros((len(props[self.idProp]), self.n), dtype=self.dtype)
+        for i, id in enumerate(props[self.idProp]):
+            # set a seed based on the idProp to ensure reproducibility
+            # independent of chunk size
+            id_hash = int(hashlib.sha256(id.encode()).hexdigest(), 16) % (10**8)
+            seed = self.randomState + id_hash if self.randomState is not None else None
+            rng = np.random.default_rng(seed)
+            mol_descriptors = rng.random((1, self.n))
+            if self.missing is not None:
+                indices = rng.choice(mol_descriptors.size, size=self._n_missing, replace=False)
+                mol_descriptors[0, indices] = np.nan
+            descriptors[i, :] = mol_descriptors
+        return descriptors
+
+    @property
+    def randomState(self) -> int | None:
+        """Get the random state for the object."""
+        return self.seed
+
+    @randomState.setter
+    def randomState(self, seed: int | None):
+        """Set the random state for the object.
+
+        Args:
+            seed (int | None):
+                The seed to use to randomize the action. If `None`,
+                a random seed is used instead of a fixed one.
+        """
+        self.seed = seed
+        
+    @property
+    def dtype(self):
+        """Return the data type of the descriptor values."""
+        return np.float64
+        
+    @property
+    def descriptors(self) -> list[str]:
+        """Return the descriptor names."""
+        return self._descriptors
+
+    @descriptors.setter
+    def descriptors(self, descriptors: list[str]):
+        """Set the descriptor names.
+
+        Ignore the input since the names are generated automatically.
+
+        Args:
+            (list[str]): list of descriptor names to set
+        """
+        self._descriptors = descriptors
+
+    def __str__(self):
+        return f"RandomDesc({self.n})"

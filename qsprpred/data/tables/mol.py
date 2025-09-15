@@ -100,7 +100,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
     @randomState.setter
     def randomState(self, seed: int | None):
         """Set the random state to use for shuffling and other random ops."""
-        self._randomState = seed or np.random.randint(0, 2**32 - 1)
+        self._randomState = seed or int(np.random.randint(0, 2**31 - 1, dtype=np.int64))
 
     @property
     def name(self) -> str:
@@ -254,9 +254,9 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
             (MoleculeTable): The created data set.
         """
         storage = PandasChemStore(
-            f"{name}_storage", path, df, smiles_col=smiles_col, **kwargs
+            f"{name}_storage", path, df, smiles_col=smiles_col
         )
-        return MoleculeTable(storage, name=name, path=path)
+        return MoleculeTable(storage, name=name, path=path, **kwargs)
 
     @classmethod
     def fromSMILES(cls, name: str, smiles: list, path: str, *args, **kwargs):
@@ -512,16 +512,18 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         """Get the descriptor calculators for this table."""
         return [x.calculator for x in self.descriptors]
 
-    def generateDescriptorDataSetName(self, ds_set: str | DescriptorSet) -> str:
+    def generateDescriptorDataSetName(self, ds_set: str | DescriptorSet, name: str | None = None) -> str:
         """Generate a descriptor set name from a descriptor set.
 
         Args:
-            ds_set (str): Name of the descriptor set.
+            ds_set (str | DescriptorSet): Name of the descriptor set.
+            name (str): Name of the data set.
 
         Returns:
             (str): Name of the descriptor set.
         """
-        return f"Descriptors_{self.name}_{ds_set}"
+        name = name or self.name
+        return f"Descriptors_{name}_{ds_set}"
 
     def dropDescriptors(self, descriptors: list[str]):
         """Drop descriptors by name. Performs a simple feature selection by removing
@@ -826,7 +828,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
                 desc.getSubset(
                     self.getDescriptorNames(),
                     ids,
-                    name=name,
+                    name=self.generateDescriptorDataSetName(desc.calculator, name),
                     path=ret.descsPath,
                 )
             )
@@ -843,7 +845,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
             transformer (Callable): Function to use for transformation.
         """
         subset = self.getDF()[names]
-        ret = subset.apply(transformer, axis=1)
+        ret = subset.apply(lambda row: row.map(lambda x: transformer(x) if not pd.isna(x) else np.nan), axis=1)
         for col in ret.columns:
             self.addProperty(f"{col}_before_transform", subset[col])
             self.addProperty(col, ret[col])
@@ -885,6 +887,23 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         self.storage.dropEntries(ids)
         for dset in self.descriptors:
             dset.dropEntries(ids)
+            
+    def dropEmptyEntries(self, names: list[str]):
+        """Drop rows with missing values in the properties.
+
+        Args:
+            names (list[str]): list property names
+        """
+        mask = pd.Series([False] * len(self), index=self.getProperty(self.idProp))
+        for prop in names:
+            prop = pd.Series(
+                self.getProperty(prop), index=self.getProperty(self.idProp)
+            )
+            mask = mask | prop.isna()
+        to_drop = pd.Series(
+            self.getProperty(self.idProp), index=self.getProperty(self.idProp)
+        )[mask]
+        self.dropEntries(to_drop)
 
     def addEntries(
         self, ids: list[str], props: dict[str, list], raise_on_existing: bool = True
@@ -1089,32 +1108,6 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
             bool: Whether the data frame contains clusters.
         """
         return len(self.getClusterNames()) > 0
-
-    def imputeProperties(self, names: list[str], imputer: Callable):
-        """Impute missing property values.
-
-        Args:
-            names (list):
-                List of property names to impute.
-            imputer (Callable):
-                imputer object implementing the `fit_transform`
-                 method from scikit-learn API.
-        """
-        df_subset = self.getDF()[names].copy()
-        assert hasattr(imputer, "fit_transform"), (
-            "Imputer object must implement the `fit_transform` "
-            "method from scikit-learn API."
-        )
-        assert all(
-            name in df_subset.columns for name in names
-        ), "Not all properties in dataframe columns for imputation."
-        names_old = [f"{name}_before_impute" for name in names]
-        df_subset[names_old] = df_subset[names]
-        df_subset[names] = imputer.fit_transform(df_subset[names])
-        for name in df_subset.columns:
-            self.addProperty(name, df_subset[name])
-        logger.debug(f"Imputed missing values for properties: {names}")
-        logger.debug(f"Old values saved in: {names_old}")
 
     def processMols(
         self,

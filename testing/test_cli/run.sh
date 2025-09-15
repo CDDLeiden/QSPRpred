@@ -39,6 +39,7 @@ python -m qsprpred.data_CLI \
 -sm  ${SMILES} \
 -pr  CL fu \
 -th '{"CL":[6.5],"fu":[0.3]}' \
+-im '{"CL":"most_frequent","fu":"most_frequent"}' \
 -tr '{"CL":"log"}' \
 -sp 'time' \
 -stc 'Year of first disclosure' \
@@ -47,8 +48,7 @@ python -m qsprpred.data_CLI \
 -fe RDkit \
 -pd ../../qsprpred/utils/testing/test_files/test_predictor/RFC_SINGLECLASS/RFC_SINGLECLASS_meta.json \
 -lv 0.01 \
--hc 0.9 \
--fv 0.0
+-hc 0.9
 
 ###############
 # MODELLING #
@@ -73,9 +73,8 @@ python -m qsprpred.predict_CLI \
 -i ${TEST_DATA} \
 -o ${TEST_BASE}/qspr/predictions.tsv \
 -ncpu ${N_CPUS} \
--mp ${TEST_BASE}/qspr/models/RF_CL_fu_SINGLECLASS/meta.json \
--pr \
--fv 0.0
+-mp ${TEST_BASE}/qspr/models/RF_CL_fu_SINGLECLASS/RF_CL_fu_SINGLECLASS_meta.json \
+-pr
 
 echo "All tests finished without errors."
 

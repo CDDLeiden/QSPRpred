@@ -5,17 +5,20 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.neural_network import MLPClassifier
 
-from qsprpred.models.assessment.methods import CrossValAssessor, TestSetAssessor
+from qsprpred.models.assessment.methods import Assessor
 
-from .. import TargetProperty, TargetTasks
+from .. import TargetSpec, TargetTasks
 from ..data import MoleculeTable, QSPRTable
+from ..data.processing.imputers import TargetImputer
+from ..data.descriptors.fingerprints import MorganFP
 from ..data.descriptors.sets import RDKitDescs
 from ..data.sources.data_source import DataSource
+from ..data.sampling.splits import RandomSplit
 from ..models.scikit_learn import SklearnModel
 from ..utils.stringops import get_random_string
 from ..utils.testing.base import QSPRTestCase
 from ..utils.testing.path_mixins import DataSetsPathMixIn
-from . import BenchmarkRunner, BenchmarkSettings, DataPrepSettings
+from . import BenchmarkRunner, BenchmarkSettings
 
 
 class DataSourceTesting(DataSetsPathMixIn, DataSource):
@@ -33,7 +36,7 @@ class DataSourceTesting(DataSetsPathMixIn, DataSource):
 
     def getDataSet(
         self,
-        target_props: list[TargetProperty | dict],
+        target_props: list[TargetSpec | dict],
         name: str | None = None,
         **kwargs,
     ) -> QSPRTable:
@@ -53,12 +56,10 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
     def setUp(self):
         super().setUp()
         self.setUpPaths()
-        prep = self.getDefaultPrep()
-        descriptors = prep["feature_calculators"]
-        del prep["feature_calculators"]
-        descriptors.append(RDKitDescs())
         self.seed = 42
         self.nFolds = 3
+        pipeline = self.getDefaultPrep()
+        
         self.settings = BenchmarkSettings(
             name=get_random_string(prefix=self.__class__.__name__ + "_"),
             n_replicas=2,
@@ -68,13 +69,13 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
                 DataSourceTesting("TestData_2"),
             ],
             descriptors=[
-                descriptors,
-                [descriptors[0]],
-                [descriptors[1]],
+                [MorganFP(radius=2, nBits=128), RDKitDescs()],
+                [MorganFP(radius=2, nBits=128)],
+                [RDKitDescs()],
             ],
             target_props=[
                 [
-                    TargetProperty.fromDict(
+                    TargetSpec.fromDict(
                         {
                             "name": "CL",
                             "task": TargetTasks.SINGLECLASS,
@@ -83,7 +84,7 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
                     )
                 ],
                 [
-                    TargetProperty.fromDict(
+                    TargetSpec.fromDict(
                         {
                             "name": "fu",
                             "task": TargetTasks.SINGLECLASS,
@@ -92,7 +93,7 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
                     )
                 ],
             ],
-            prep_settings=[DataPrepSettings(**prep)],
+            pipelines=[pipeline],
             models=[
                 SklearnModel(
                     name="GaussianNB",
@@ -106,21 +107,32 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
                 ),
             ],
             assessors=[
-                CrossValAssessor(
+                Assessor(
+                    name="crossval_roc_auc",
                     scoring="roc_auc",
                     split=KFold(
                         n_splits=self.nFolds, shuffle=True, random_state=self.seed
                     ),
                 ),
-                CrossValAssessor(
+                Assessor(
+                    name="crossval_matthews_corrcoef",
                     scoring="matthews_corrcoef",
                     split=KFold(
                         n_splits=self.nFolds, shuffle=True, random_state=self.seed
                     ),
                     use_proba=False,
                 ),
-                TestSetAssessor(scoring="roc_auc"),
-                TestSetAssessor(scoring="matthews_corrcoef", use_proba=False),
+                Assessor(
+                    name="test_roc_auc",
+                    scoring="roc_auc",
+                    split=RandomSplit(test_fraction=0.2)
+                ),
+                Assessor(
+                    name="test_matthews_corrcoef",
+                    scoring="matthews_corrcoef",
+                    use_proba=False,
+                    split=RandomSplit(test_fraction=0.2)
+                )
             ],
             optimizers=[],  # FIXME: needs to be tested
         )
@@ -137,7 +149,7 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
                 score = assessor.scoreFunc.name
                 score_results = results[
                     (results["ScoreFunc"] == score) &
-                    (results["Assessor"] == assessor.__class__.__name__) &
+                    (results["Assessor"] == assessor.name) &
                     (results["TargetProperty"].isin([tp.name for tp in tps]))]
                 self.assertTrue(len(score_results) > 0)
 
@@ -145,7 +157,7 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
         self.assertTrue(len(self.settings.data_sources) > 0)
         self.assertTrue(len(self.settings.descriptors) > 0)
         self.assertTrue(len(self.settings.target_props) > 0)
-        self.assertTrue(len(self.settings.prep_settings) > 0)
+        self.assertTrue(len(self.settings.pipelines) > 0)
         self.assertTrue(len(self.settings.models) > 0)
         self.assertTrue(len(self.settings.assessors) > 0)
         self.settings.toFile(f"{self.generatedPath}/benchmarks/settings.json")
@@ -155,7 +167,7 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(len(self.settings.data_sources), len(settings.data_sources))
         self.assertEqual(len(self.settings.descriptors), len(settings.descriptors))
         self.assertEqual(len(self.settings.target_props), len(settings.target_props))
-        self.assertEqual(len(self.settings.prep_settings), len(settings.prep_settings))
+        self.assertEqual(len(self.settings.pipelines), len(settings.pipelines))
         self.assertEqual(len(self.settings.models), len(settings.models))
         self.assertEqual(len(self.settings.assessors), len(settings.assessors))
 
@@ -170,7 +182,7 @@ class BenchmarkingTest(BenchMarkTestCase):
 
     def testSingleTaskREG(self):
         self.settings.target_props = [
-            [TargetProperty.fromDict({
+            [TargetSpec.fromDict({
                 "name": "CL",
                 "task": TargetTasks.REGRESSION,
             })]
@@ -188,16 +200,26 @@ class BenchmarkingTest(BenchMarkTestCase):
             ),
         ]
         self.settings.assessors = [
-            CrossValAssessor(
+            Assessor(
+                name="crossval_r2",
                 scoring="r2",
                 split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
             ),
-            CrossValAssessor(
+            Assessor(
+                name="crossval_neg_mean_squared_error",
                 scoring="neg_mean_squared_error",
                 split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
             ),
-            TestSetAssessor(scoring="r2"),
-            TestSetAssessor(scoring="neg_mean_squared_error"),
+            Assessor(
+                name="test_r2",
+                scoring="r2",
+                split=RandomSplit(test_fraction=0.2),
+            ),
+            Assessor(
+                name="test_neg_mean_squared_error",
+                scoring="neg_mean_squared_error",
+                split=RandomSplit(test_fraction=0.2),
+            ),
         ]
         self.checkSettings()
         results = self.benchmark.run(raise_errors=True)
@@ -208,20 +230,18 @@ class BenchmarkingTest(BenchMarkTestCase):
         """Run the test benchmark."""
         self.settings.target_props = [
             [
-                TargetProperty.fromDict(
+                TargetSpec.fromDict(
                     {
                         "name": "CL",
                         "task": TargetTasks.SINGLECLASS,
                         "th": [10],
-                        "imputer": SimpleImputer(strategy="mean"),
                     }
                 ),
-                TargetProperty.fromDict(
+                TargetSpec.fromDict(
                     {
                         "name": "fu",
                         "task": TargetTasks.SINGLECLASS,
                         "th": [0.3],
-                        "imputer": SimpleImputer(strategy="mean"),
                     }
                 ),
             ]
@@ -238,21 +258,33 @@ class BenchmarkingTest(BenchMarkTestCase):
                 base_dir=f"{self.generatedPath}/models",
             ),
         ]
+        self.settings.pipelines = [
+            self.getDefaultPrep(TargetImputer(SimpleImputer(strategy="most_frequent"))),
+        ]
         self.settings.assessors = [
-            CrossValAssessor(
+            Assessor(
+                name="crossval_roc_auc",
                 scoring="roc_auc",
                 split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
                 split_multitask_scores=True,
             ),
-            CrossValAssessor(
+            Assessor(
+                name="crossval_matthews_corrcoef",
                 scoring="matthews_corrcoef",
                 split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
                 use_proba=False,
                 split_multitask_scores=True,
             ),
-            TestSetAssessor(scoring="roc_auc", split_multitask_scores=True),
-            TestSetAssessor(
+            Assessor(
+                name="test_roc_auc",
+                scoring="roc_auc",
+                split=RandomSplit(test_fraction=0.2),
+                split_multitask_scores=True
+            ),
+            Assessor(
+                name="test_matthews_corrcoef",
                 scoring="matthews_corrcoef",
+                split=RandomSplit(test_fraction=0.2),
                 use_proba=False,
                 split_multitask_scores=True,
             ),
@@ -265,18 +297,16 @@ class BenchmarkingTest(BenchMarkTestCase):
     def testMultiTaskREG(self):
         self.settings.target_props = [
             [
-                TargetProperty.fromDict(
+                TargetSpec.fromDict(
                     {
                         "name": "CL",
                         "task": TargetTasks.REGRESSION,
-                        "imputer": SimpleImputer(strategy="mean"),
                     }
                 ),
-                TargetProperty.fromDict(
+                TargetSpec.fromDict(
                     {
                         "name": "fu",
                         "task": TargetTasks.REGRESSION,
-                        "imputer": SimpleImputer(strategy="mean"),
                     }
                 ),
             ]
@@ -293,20 +323,33 @@ class BenchmarkingTest(BenchMarkTestCase):
                 base_dir=f"{self.generatedPath}/models",
             ),
         ]
+        self.settings.pipelines = [
+            self.getDefaultPrep(TargetImputer(SimpleImputer(strategy="mean"))),
+        ]
         self.settings.assessors = [
-            CrossValAssessor(
+            Assessor(
+                name="crossval_r2",
                 scoring="r2",
                 split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
                 split_multitask_scores=True,
             ),
-            CrossValAssessor(
+            Assessor(
+                name="crossval_neg_mean_squared_error",
                 scoring="neg_mean_squared_error",
                 split=KFold(n_splits=self.nFolds, shuffle=True, random_state=self.seed),
                 split_multitask_scores=True,
             ),
-            TestSetAssessor(scoring="r2", split_multitask_scores=True),
-            TestSetAssessor(
-                scoring="neg_mean_squared_error", split_multitask_scores=True
+            Assessor(
+                name="test_r2",
+                scoring="r2",
+                split=RandomSplit(test_fraction=0.2),
+                split_multitask_scores=True
+            ),
+            Assessor(
+                name="test_neg_mean_squared_error",
+                scoring="neg_mean_squared_error",
+                split=RandomSplit(test_fraction=0.2),
+                split_multitask_scores=True
             ),
         ]
         self.checkSettings()
