@@ -5,12 +5,13 @@ from parameterized import parameterized
 
 from qsprpred.data.descriptors.sets import DescriptorSet
 from qsprpred.data.processing.applicability_domain import ApplicabilityDomain
-from qsprpred.data.processing.feature_standardizers import SKLearnStandardizer
+from qsprpred.data.processing.feature_transformers import SklearnStep
 from qsprpred.data.sampling.splits import DataSplit
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.extra.data.utils.testing.path_mixins import DataSetsMixInExtras
 from qsprpred.utils.testing.check_mixins import DataPrepCheckMixIn
-from qsprpred.data.processing.pipeline import DatasetPipeline, Shuffle, DummyStep
+from qsprpred.data.processing.pipeline import DatasetPipeline
+from qsprpred.data.processing.step import Shuffle, DummyStep
 
 
 class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepCheckMixIn, TestCase):
@@ -37,7 +38,7 @@ class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepCheckMixIn, TestCas
         name: str,
         feature_calculators: list[DescriptorSet],
         split: DataSplit,
-        feature_standardizer: SKLearnStandardizer,
+        feature_standardizer: SklearnStep,
         feature_filter: Callable,
         data_filter: Callable,
         applicability_domain: ApplicabilityDomain,
@@ -52,7 +53,7 @@ class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepCheckMixIn, TestCas
             feature_calculators (list[DescriptorsCalculator]):
                 List of feature calculators.
             split (DataSplit): Splitting strategy.
-            feature_standardizer (SKLearnStandardizer): Feature standardizer.
+            feature_standardizer (SklearnStep): Feature standardizer.
             feature_filter (Callable): Feature filter.
             data_filter (Callable): Data filter.
             applicability_domain (Callable): Applicability domain.

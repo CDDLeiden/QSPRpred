@@ -121,9 +121,6 @@ class ChempropModel(QSPRModelPyTorchGPU):
         featureCalculators (MoleculeDescriptorsCalculator):
             feature calculator instance taken from the data set or
             deserialized from file if the model is loaded without data
-        featureStandardizer (SKLearnStandardizer):
-            feature standardizer instance taken from the data set
-            or deserialized from file if the model is loaded without data
         baseDir (str):
             base directory of the model,
             the model files are stored in a subdirectory `{baseDir}/{outDir}/`
@@ -853,3 +850,25 @@ class ChempropModel(QSPRModelPyTorchGPU):
             name="chemprop_logger", save_dir=ret.outDir, quiet=ret.quietLogger
         )
         return ret
+    
+    
+    def __deepcopy__(self, memo):
+        """Create a deep copy of the ChempropModel instance.
+
+        Args:
+            memo (dict): memo dictionary to keep track of already copied objects
+
+        Returns:
+            ChempropModel: a deep copy of the ChempropModel instance
+        """
+        cls = self.__class__
+        new_model = cls.__new__(cls)
+        memo[id(self)] = new_model 
+
+        for k, v in self.__dict__.items():
+            if k == 'chempropLogger':
+                setattr(new_model, k, self.chempropLogger)
+            else:
+                setattr(new_model, k, deepcopy(v, memo))
+
+        return new_model

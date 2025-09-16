@@ -77,6 +77,7 @@ Overview of available features
                 * :class:`~qsprpred.data.descriptors.sets.SmilesDescs`: SmilesDescs
                 * :class:`~qsprpred.data.descriptors.sets.TanimotoDistances`: TanimotoDistances
                 * :class:`~qsprpred.data.descriptors.sets.DataFrameDescriptorSet`: DataFrameDescriptorSet
+                * :class:`~qsprpred.data.descriptors.sets.RandomDescs`: RandomDescs
                 * :class:`~qsprpred.data.descriptors.fingerprints.Fingerprint`: Fingerprint
                     * :class:`~qsprpred.data.descriptors.fingerprints.AtomPairFP`: AtomPairFP
                     * :class:`~qsprpred.data.descriptors.fingerprints.AvalonFP`: AvalonFP
@@ -107,6 +108,7 @@ Overview of available features
                     * :class:`~qsprpred.extra.data.descriptors.fingerprints.CDKPubchemFP`: CDKPubchemFP
                     * :class:`~qsprpred.extra.data.descriptors.fingerprints.CDKSubstructureFP`: CDKSubstructureFP
 
+
     .. dropdown:: Data Splitters
 
         :class:`~qsprpred.data.sampling.splits.DataSplit`: Base class for data splitters.
@@ -133,6 +135,21 @@ Overview of available features
                 * :class:`~qsprpred.extra.data.sampling.splits.PCMSplit`: PCMSplit
                     * :class:`~qsprpred.extra.data.sampling.splits.TemporalPerTarget`: TemporalPerTarget
 
+    .. dropdown:: Data Filters
+
+        :class:`~qsprpred.data.processing.data_filters.DataFilter`: Base class for Data Filters.
+
+        Data filters are used to filter rows from a dataframe.
+        Examples can be found in the `data preparation tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/data/data_preparation.ipynb>`_.
+
+        .. tab-set::
+
+            .. tab-item:: Core
+
+                * :class:`~qsprpred.data.processing.data_filters.CategoryFilter`: CategoryFilter
+                * :class:`~qsprpred.data.processing.data_filters.RepeatsFilter`: RepeatsFilter
+                * :class:`~qsprpred.data.processing.data_filters.NaNFilter`: NaNFilter
+                * :class:`~qsprpred.data.processing.data_filters.OutlierFilter`: OutlierFilter
 
     .. dropdown:: Feature Filters
 
@@ -148,6 +165,47 @@ Overview of available features
                 * :class:`~qsprpred.data.processing.feature_filters.HighCorrelationFilter`: HighCorrelationFilter
                 * :class:`~qsprpred.data.processing.feature_filters.LowVarianceFilter`: LowVarianceFilter
                 * :class:`~qsprpred.data.processing.feature_filters.BorutaFilter`: BorutaFilter
+
+    .. dropdown:: Feature Transformers
+
+        :class:`~qsprpred.data.processing.feature_transformers.FeatureTransformer`: Base class for feature transformers.
+
+        Feature transformers are used for feature standardization and transformation
+        Examples can be found in the `data preparation tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/data/data_preparation.ipynb>`_.
+
+        .. tab-set::
+
+            .. tab-item:: Core
+
+                * :class:`~qsprpred.data.processing.feature_transformers.SklearnStep`: SklearnStep
+
+    .. dropdown:: Target Transformers
+
+        :class:`~qsprpred.data.processing.target_transformers.TargetTransformer`: Base class for target transformers.
+
+        Target transformers are used for target discretization and transformation.
+
+        .. tab-set::
+
+            .. tab-item:: Core
+
+                * :class:`~qsprpred.data.processing.target_transformers.Discretizer`: Discretizer
+                * :class:`~qsprpred.data.processing.target_transformers.SimpleTargetTransformer`: SimpleTargetTransformer
+
+    .. dropdown:: Imputers
+
+        :class:`~qsprpred.data.processing.imputers.Imputer`: Base class for imputers.
+
+        Imputers are used for filling missing values in the descriptor or target values.
+        Examples can be found in the `data preparation tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/data/data_preparation.ipynb>`_
+        and the `multi task modelling tutorial <https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/advanced/modelling/multi_task_modelling.ipynb>`_.
+
+        .. tab-set::
+
+            .. tab-item:: Core
+
+                * :class:`~qsprpred.data.processing.imputers.TargetImputer`: TargetImputer
+                * :class:`~qsprpred.data.processing.imputers.FeatureImputer`: FeatureImputer
 
     .. dropdown:: Models
 
@@ -225,8 +283,7 @@ Overview of available features
 
             .. tab-item:: Core
 
-                * :class:`~qsprpred.models.assessment.methods.CrossValAssessor`: CrossValAssessor
-                * :class:`~qsprpred.models.assessment.methods.TestSetAssessor`: TestSetAssessor
+                * :class:`~qsprpred.models.assessment.methods.Assessor`: Assessor
 
     .. dropdown:: Hyperparameter Optimizers
 

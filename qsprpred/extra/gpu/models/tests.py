@@ -9,11 +9,12 @@ from parameterized import parameterized
 from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
-from sklearn.model_selection import ShuffleSplit
 
 from qsprpred.data.descriptors.sets import SmilesDesc
 from qsprpred.data.sampling.splits import RandomSplit
-from qsprpred.data.processing.pipeline import DummyStep, DatasetPipeline
+from qsprpred.data.processing.pipeline import DatasetPipeline
+from qsprpred.data.processing.step import DummyStep, Shuffle
+from qsprpred.data.processing.imputers import TargetImputer
 from qsprpred.extra.gpu.utils.parallel import TorchJITGenerator
 from qsprpred.tasks import ModelTasks, TargetTasks
 
@@ -366,6 +367,11 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
         """
         if task == ModelTasks.MULTITASK_REGRESSION:
             target_props = [
+                {"name": "fu", "task": TargetTasks.REGRESSION},
+                {"name": "CL", "task": TargetTasks.REGRESSION},
+            ]
+        else:
+            target_props = [
                 {
                     "name": "fu",
                     "task": TargetTasks.SINGLECLASS,
@@ -377,27 +383,23 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                     "th": [6.5]
                 },
             ]
-        else:
-            target_props = [
-                {
-                    "name": "fu",
-                    "task": TargetTasks.SINGLECLASS,
-                    "th": [0.3],
-                    "imputer": SimpleImputer(strategy="most_frequent"),
-                },
-                {
-                    "name": "CL",
-                    "task": TargetTasks.SINGLECLASS,
-                    "th": [6.5],
-                    "imputer": SimpleImputer(strategy="most_frequent"),
-                },
-            ]
         # initialize dataset
         dataset = self.createLargeTestDataSet(
             name=f"{alg_name}_{task}",
             target_props=target_props,
+            drop_empty_target_props=False,
         )
         pipeline = DatasetPipeline(feature_calculators=[SmilesDesc()])
+        if task == ModelTasks.MULTITASK_SINGLECLASS:
+            pipeline.addStep(
+                name="imputer", 
+                step=TargetImputer(SimpleImputer(strategy="most_frequent"))
+            )
+        elif task == ModelTasks.MULTITASK_REGRESSION:
+            pipeline.addStep(
+                name="imputer", 
+                step=TargetImputer(SimpleImputer(strategy="mean"))
+            )
         # initialize model for training from class
         alg_name = f"{alg_name}_{task}"
         model = self.getModel(
@@ -445,7 +447,12 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
                 "task": TargetTasks.REGRESSION
             }]
         )
-        pipeline = DatasetPipeline([SmilesDesc()])
+        pipeline = DatasetPipeline(
+            [SmilesDesc()],
+            steps={
+                "shuffle": Shuffle(seed=dataset.randomState),
+            }
+        )
         # initialize model for training from class
         model = self.getModel(name="consistency_data")
 
@@ -461,7 +468,7 @@ class ChemPropTest(ModelDataSetsPathMixIn, ModelCheckMixIn, TestCase):
             scoring=SklearnMetrics(rmse),
             split=RandomSplit(test_fraction=0.1, seed=dataset.randomState),
         )
-        qsprpred_score = assessor(model, dataset[train_indices], pipeline, order=train_indices)
+        qsprpred_score = assessor(model, dataset[train_indices], pipeline)
         qsprpred_score = -qsprpred_score[0]  # qsprpred_score is negative rmse
 
         # save the cross-validation train, test and validation split to

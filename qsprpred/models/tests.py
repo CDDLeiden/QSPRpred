@@ -25,6 +25,7 @@ from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
 
 from ..data.processing.applicability_domain import MLChemAD
+from ..data.processing.imputers import TargetImputer
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode, early_stopping
 from ..models.monitors import BaseMonitor, FileMonitor, ListMonitor
 from ..models.scikit_learn import SklearnModel
@@ -224,12 +225,10 @@ class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
                 {
                     "name": "fu",
                     "task": TargetTasks.REGRESSION,
-                    "imputer": SimpleImputer(strategy="mean"),
                 },
                 {
                     "name": "CL",
                     "task": TargetTasks.REGRESSION,
-                    "imputer": SimpleImputer(strategy="mean"),
                 },
             ],
         )
@@ -240,7 +239,8 @@ class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
             alg=model_class,
             random_state=random_state[0],
         )
-        self.fitTest(model, dataset, pipeline=self.getDefaultPrep())
+        pipeline = self.getDefaultPrep(TargetImputer(SimpleImputer(strategy="mean")))
+        self.fitTest(model, dataset, pipeline=pipeline)
 
         # load in model from file
         predictor = SklearnModel(
@@ -256,7 +256,7 @@ class TestSklearnRegressionMultiTask(SklearnBaseModelTestCase):
                 alg=model_class,
                 random_state=random_state[1],
             )
-            self.fitTest(comparison_model, dataset, pipeline=self.getDefaultPrep())
+            self.fitTest(comparison_model, dataset, pipeline=pipeline)
             self.predictorTest(
                 predictor,  # model loaded from file
                 dataset=dataset,
@@ -443,15 +443,14 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
                     "name": "fu",
                     "task": TargetTasks.SINGLECLASS,
                     "th": [0.3],
-                    "imputer": SimpleImputer(strategy="most_frequent"),
                 },
                 {
                     "name": "CL",
                     "task": TargetTasks.SINGLECLASS,
                     "th": [6.5],
-                    "imputer": SimpleImputer(strategy="most_frequent"),
                 },
             ],
+            drop_empty_target_props=False
         )
         # test classifier
         # initialize model for training from class
@@ -461,7 +460,10 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
             parameters=parameters,
             random_state=random_state[0],
         )
-        self.fitTest(model, dataset, pipeline=self.getDefaultPrep())
+        pipeline = self.getDefaultPrep(
+            TargetImputer(SimpleImputer(strategy="most_frequent"))
+        )
+        self.fitTest(model, dataset, pipeline=pipeline)
 
         # load in model from file
         predictor = SklearnModel(
@@ -478,7 +480,7 @@ class TestSklearnClassificationMultiTask(SklearnBaseModelTestCase):
                 parameters=parameters,
                 random_state=random_state[1],
             )
-            self.fitTest(comparison_model, dataset, pipeline=self.getDefaultPrep())
+            self.fitTest(comparison_model, dataset, pipeline=pipeline)
             self.predictorTest(
                 predictor,  # model loaded from file
                 dataset=dataset,
@@ -593,7 +595,11 @@ class TestMetrics(TestCase):
         ## multi-class with threshold
         y_true, y_pred = self.sample_data(ModelTasks.MULTICLASS, use_proba=True)
         qsprpred_scorer = SklearnMetrics(
-            make_scorer(top_k_accuracy_score, needs_threshold=True, k=2)
+            make_scorer(
+                top_k_accuracy_score,
+                response_method=("predict_proba", "decision_function"),
+                k=2
+            )
         )
         self.assertEqual(
             qsprpred_scorer(y_true, y_pred),

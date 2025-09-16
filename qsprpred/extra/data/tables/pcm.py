@@ -9,7 +9,7 @@ from qsprpred.extra.data.storage.protein.interfaces.protein_storage import (
     ProteinStorage,
 )
 from qsprpred.logs import logger
-from qsprpred.tasks import TargetProperty
+from qsprpred.tasks import TargetSpec
 
 
 class PCMDataSet(QSPRTable):
@@ -31,7 +31,7 @@ class PCMDataSet(QSPRTable):
         self,
         storage: ChemStore | None = None,
         name: str | None = None,
-        target_props: list[TargetProperty | dict] | None = None,
+        target_props: list[TargetSpec | dict] | None = None,
         path: str = ".",
         random_state: int | None = None,
         store_format: str = "pkl",
@@ -162,7 +162,7 @@ class PCMDataSet(QSPRTable):
     def fromMolTable(
         cls,
         mol_table: MoleculeTable,
-        target_props: list[TargetProperty | dict],
+        target_props: list[TargetSpec | dict],
         *args,
         proteins: ProteinStorage | None = None,
         name: str | None = None,

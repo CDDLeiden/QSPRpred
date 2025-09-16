@@ -6,9 +6,11 @@ from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVR
 
-from ..models.assessment.methods import Assessor
-from .. import TargetProperty, TargetTasks
+from qsprpred.models.assessment.methods import Assessor
+
+from .. import TargetSpec, TargetTasks
 from ..data import MoleculeTable, QSPRTable
+from ..data.processing.imputers import TargetImputer
 from ..data.descriptors.fingerprints import MorganFP
 from ..data.descriptors.sets import RDKitDescs
 from ..data.sources.data_source import DataSource
@@ -35,10 +37,10 @@ class DataSourceTesting(DataSetsPathMixIn, DataSource):
         return self.createLargeTestDataSet(name)
 
     def getDataSet(
-            self,
-            target_props: list[TargetProperty | dict],
-            name: str | None = None,
-            **kwargs,
+        self,
+        target_props: list[TargetSpec | dict],
+        name: str | None = None,
+        **kwargs,
     ) -> QSPRTable:
         name = name or self.name
         return self.createLargeTestDataSet(name, target_props=target_props)
@@ -59,6 +61,8 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
         self.setUpPaths()
         self.seed = 42
         self.nFolds = 3
+        pipeline = self.getDefaultPrep()
+
         self.settings = BenchmarkSettings(
             name=get_random_string(prefix=self.__class__.__name__ + "_"),
             n_replicas=2,
@@ -74,7 +78,7 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
             ],
             target_props=[
                 [
-                    TargetProperty.fromDict(
+                    TargetSpec.fromDict(
                         {
                             "name": "CL",
                             "task": TargetTasks.SINGLECLASS,
@@ -83,7 +87,7 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
                     )
                 ],
                 [
-                    TargetProperty.fromDict(
+                    TargetSpec.fromDict(
                         {
                             "name": "fu",
                             "task": TargetTasks.SINGLECLASS,
@@ -92,7 +96,7 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
                     )
                 ],
             ],
-            pipelines=[self.getDefaultPrep()],
+            pipelines=[pipeline],
             models=[
                 SklearnModel(
                     name="GaussianNB",
@@ -182,7 +186,7 @@ class BenchmarkingTest(BenchMarkTestCase):
 
     def testSingleTaskREG(self):
         self.settings.target_props = [
-            [TargetProperty.fromDict({
+            [TargetSpec.fromDict({
                 "name": "CL",
                 "task": TargetTasks.REGRESSION,
             })]
@@ -238,20 +242,18 @@ class BenchmarkingTest(BenchMarkTestCase):
         """Run the test benchmark."""
         self.settings.target_props = [
             [
-                TargetProperty.fromDict(
+                TargetSpec.fromDict(
                     {
                         "name": "CL",
                         "task": TargetTasks.SINGLECLASS,
                         "th": [10],
-                        "imputer": SimpleImputer(strategy="most_frequent"),
                     }
                 ),
-                TargetProperty.fromDict(
+                TargetSpec.fromDict(
                     {
                         "name": "fu",
                         "task": TargetTasks.SINGLECLASS,
                         "th": [0.3],
-                        "imputer": SimpleImputer(strategy="most_frequent"),
                     }
                 ),
             ]
@@ -269,6 +271,9 @@ class BenchmarkingTest(BenchMarkTestCase):
                 base_dir=f"{self.generatedPath}/models",
                 parameters={"n_jobs": 1},
             ),
+        ]
+        self.settings.pipelines = [
+            self.getDefaultPrep(TargetImputer(SimpleImputer(strategy="most_frequent"))),
         ]
         self.settings.assessors = [
             Assessor(
@@ -306,18 +311,16 @@ class BenchmarkingTest(BenchMarkTestCase):
     def testMultiTaskREG(self):
         self.settings.target_props = [
             [
-                TargetProperty.fromDict(
+                TargetSpec.fromDict(
                     {
                         "name": "CL",
                         "task": TargetTasks.REGRESSION,
-                        "imputer": SimpleImputer(strategy="mean"),
                     }
                 ),
-                TargetProperty.fromDict(
+                TargetSpec.fromDict(
                     {
                         "name": "fu",
                         "task": TargetTasks.REGRESSION,
-                        "imputer": SimpleImputer(strategy="mean"),
                     }
                 ),
             ]
@@ -335,6 +338,9 @@ class BenchmarkingTest(BenchMarkTestCase):
                 base_dir=f"{self.generatedPath}/models",
                 parameters={"n_jobs": 1},
             ),
+        ]
+        self.settings.pipelines = [
+            self.getDefaultPrep(TargetImputer(SimpleImputer(strategy="mean"))),
         ]
         self.settings.assessors = [
             Assessor(

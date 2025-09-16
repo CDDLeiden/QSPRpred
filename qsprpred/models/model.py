@@ -44,6 +44,8 @@ class QSPRModel(JSONSerializable, ABC):
         featureCalculators (MoleculeDescriptorsCalculator):
             feature calculator instance taken from the data set or
             deserialized from file if the model is loaded without data
+        pipeline (DatasetPipeline):
+            pipeline to use for feature calculation and other data processing
         baseDir (str):
             base directory of the model,
             the model files are stored in a subdirectory `{baseDir}/{outDir}/`
@@ -499,9 +501,9 @@ class QSPRModel(JSONSerializable, ABC):
             storage,
             f"{self.__class__.__name__}_{hash(self)}",
             path=self.baseDir,
+            random_state=self.randomState,
         )
         for target_property in self.targetProperties:
-            target_property.imputer = None
             dataset.addProperty(target_property.name, np.nan)
         # create the dataset and get failed molecules
         dataset = QSPRTable.fromMolTable(

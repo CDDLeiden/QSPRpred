@@ -1,19 +1,10 @@
 import pandas as pd
-from .pipeline import Step
+from .step import Step
 from abc import abstractmethod
 from sklearn.impute._base import _BaseImputer
-from qsprpred.logs import logger
 
 class Imputer(Step):
-    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
-        """Fit the imputer to the dataset
-        
-        Args:
-            X (pd.DataFrame): training data features
-            y (pd.DataFrame): training targets
-        """
-        pass
-    
+
     @abstractmethod
     def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Impute values in the dataset.
@@ -31,13 +22,13 @@ class Imputer(Step):
 
 class TargetImputer(Imputer):
     def __init__(self, imputer: _BaseImputer, target_properties: list[str] | None = None):
-        """
-        Initialize the target imputer.
+        """Initialize the target imputer.
         
         Args:
             imputer (callable): imputer function, e.g. from sklearn.impute, should
                 have fit and transform methods
-            target_properties (list[str], optional): target properties to impute
+            target_properties (list[str], optional): target properties to impute,
+            if None, all targets will be imputed.
         """
         self.imputer = imputer
         self.target_properties = target_properties
@@ -74,8 +65,7 @@ class TargetImputer(Imputer):
     
 class FeatureImputer(Imputer):
     def __init__(self, imputer: _BaseImputer, feature_properties: list[str] | None = None):
-        """
-        Initialize the feature imputer.
+        """Initialize the feature imputer.
         
         Args:
             imputer (callable): imputer function, e.g. from sklearn.impute, should

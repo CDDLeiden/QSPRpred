@@ -5,7 +5,7 @@
         "baseDir": ".",
         "targetProperties": [
             {
-                "py/object": "qsprpred.tasks.TargetProperty",
+                "py/object": "qsprpred.tasks.TargetSpec",
                 "py/state": {
                     "name": "CL",
                     "task": {
@@ -23,9 +23,7 @@
                     "_th": [
                         6.5
                     ],
-                    "_nClasses": 2,
-                    "imputer": null,
-                    "transformer": null
+                    "_nClasses": 2
                 }
             }
         ],

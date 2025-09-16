@@ -39,6 +39,7 @@ python -m qsprpred.data_CLI \
 -sm  ${SMILES} \
 -pr  CL fu \
 -th '{"CL":[6.5],"fu":[0.3]}' \
+-im '{"CL":"most_frequent","fu":"most_frequent"}' \
 -tr '{"CL":"log"}' \
 -sp 'time' \
 -stc 'Year of first disclosure' \

@@ -51,12 +51,8 @@ class PCMModel(QSPRModel, ABC):
                 List of SMILES strings.
             protein_id (str):
                 Protein identifier.
-            smiles_standardizer (str | Callable, optional):
-                Smiles standardizer. Defaults to "chembl".
             n_jobs (int, optional):
                 Number of parallel jobs. Defaults to 1.
-            fill_value (float, optional):
-                Value to fill missing features with. Defaults to np.nan.
         Returns:
             PCMDataSet:
                 Dataset with the features calculated for the molecules.
@@ -84,7 +80,6 @@ class PCMModel(QSPRModel, ABC):
         )
         dataset.addProperty(self.proteins.idProp, protein_id)
         for target_property in self.targetProperties:
-            target_property.imputer = None
             dataset.addProperty(target_property.name, np.nan)
         # create the dataset and get failed molecules
         dataset = PCMDataSet.fromMolTable(

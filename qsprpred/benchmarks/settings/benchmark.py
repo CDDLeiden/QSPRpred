@@ -9,7 +9,7 @@ from ...data.sampling.splits import DataSplit
 from ...data.processing.pipeline import DatasetPipeline
 from ...models.hyperparam_optimization import HyperparameterOptimization
 from ...models.model import QSPRModel
-from ...tasks import TargetProperty
+from ...tasks import TargetSpec
 from ...utils.serialization import JSONSerializable
 
 
@@ -50,7 +50,7 @@ class BenchmarkSettings(JSONSerializable):
     random_seed: int
     data_sources: list[DataSource]
     descriptors: list[list[DescriptorSet]]
-    target_props: list[list[TargetProperty]]
+    target_props: list[list[TargetSpec]]
     pipelines: list[DatasetPipeline]
     models: list[QSPRModel]
     assessors: list[ModelAssessor]

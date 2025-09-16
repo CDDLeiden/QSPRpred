@@ -1,17 +1,16 @@
 import json
 import os
-from copy import deepcopy
 from typing import Callable, Generator
 
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
 
 from .interfaces.qspr_data_set import QSPRDataSet
 from ...logs import logger
-from ...tasks import TargetProperty, TargetTasks
+from ...tasks import TargetSpec, TargetTasks
 from ..storage.interfaces.chem_store import ChemStore
 from .mol import MoleculeTable
 from qsprpred.data.sampling.splits import DataSplit
+from qsprpred.data.processing.target_transformers import Discretizer
 import numpy as np
 
 
@@ -22,13 +21,11 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         targetProperties (str): property to be predicted with QSPRmodel
     """
 
-    # _notJSON: ClassVar = [*MoleculeDataSet._notJSON]
-
     def __init__(
         self,
         storage: ChemStore | None = None,
         name: str | None = None,
-        target_props: list[TargetProperty | dict] | None = None,
+        target_props: list[TargetSpec | dict] | None = None,
         path: str = ".",
         random_state: int | None = None,
         store_format: str = "pkl",
@@ -42,12 +39,12 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
                 storage object to use for saving the data. Defaults to `None`.
             name (str):
                 data name, used in saving the data
-            target_props (list[TargetProperty | dict] | None):
-                target properties, names should correspond with target columnname in df.
-                If `None`, target properties will be inferred if this data set has been
-                saved previously. Defaults to `None`.
-            path (str, optional): path to the directory where the data set will be saved.
-                Defaults to ".".
+            target_props (list[TargetSpec | dict] | None):
+                target properties, names should correspond with target column names
+                in df. If `None`, target specifications will be inferred if this data 
+                set has been saved previously. Defaults to `None`.
+            path (str, optional): 
+                path to the directory where the data set will be saved. Defaults to ".".
             random_state (int, optional): random state for splitting the data.
             store_format (str, optional):
                 format to use for storing the data ('pkl' or 'csv').
@@ -65,32 +62,32 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
             random_state=random_state,
             store_format=store_format,
         )
-        # load target properties if not specified and file exists
+        # load target specifications if not specified and file exists
         if target_props is None and os.path.exists(self.metaFile):
             meta = json.load(open(self.metaFile, "r"))
-            target_props = meta["py/state"]["targetProperties"]
+            target_props = meta["py/state"]["_targetProperties"]
             target_props = [
-                TargetProperty.fromJSON(json.dumps(x)) for x in target_props
+                TargetSpec.fromJSON(json.dumps(x)) for x in target_props
             ]
         elif target_props is None:
-            raise ValueError("Target properties must be specified for a new QSPRTable.")
-        # populate feature matrix and target properties
+            raise ValueError("Target specifications must be specified for a new QSPRTable.")
+        # populate feature matrix and target specifications
         self._targetProperties = []
         self.setTargetProperties(target_props, drop_empty_target_props)
         logger.info(
             f"Dataset '{self.name}' created for "
-            f"target Properties: '{self.targetProperties}'. "
+            f"Targets: '{self.targetProperties}'. "
             f"Number of samples: {len(self.storage)}. "
         )
         self.splits = {}
 
     @property
-    def targetProperties(self) -> list[TargetProperty]:
-        """Get the target properties of the dataset."""
+    def targetProperties(self) -> list[TargetSpec]:
+        """Returns the specifications of target properties of the dataset."""
         return self._targetProperties
 
     @targetProperties.setter
-    def targetProperties(self, target_properties: list[TargetProperty]):
+    def targetProperties(self, target_properties: list[TargetSpec]):
         """Set the target properties of the dataset."""
         raise NotImplementedError(
             "targetProperties is a read-only property. Use `setTargetProperties` to set "
@@ -102,7 +99,7 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         cls,
         name: str,
         df: pd.DataFrame,
-        target_props: list[TargetProperty | dict],
+        target_props: list[TargetSpec | dict],
         path: str = ".",
         smiles_col: str = "SMILES",
         drop_empty_target_props: bool = True,
@@ -134,7 +131,7 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         path: str,
         *args,
         sep: str = "\t",
-        target_props: list[TargetProperty | dict] | None = None,
+        target_props: list[TargetSpec | dict] | None = None,
         **kwargs,
     ):
         r"""Create `QSPRTable` from table file (i.e. CSV or TSV).
@@ -178,7 +175,7 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
     def fromMolTable(
         cls,
         mol_table: MoleculeTable,
-        target_props: list[TargetProperty | dict],
+        target_props: list[TargetSpec | dict],
         *args,
         path: str = ".",
         name: str | None = None,
@@ -220,132 +217,138 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         ds.descriptors = mol_table.descriptors
         return ds
 
-    def addTargetProperty(self, prop: TargetProperty | dict, drop_empty: bool = True):
+    def addTargetProperty(self, target_spec: TargetSpec | dict, drop_empty: bool = True):
         """Add a target property to the dataset.
 
         Args:
-            prop (TargetProperty | dict):
-                target property to add or dictionary to initialize a TargetProperty
+            target_spec (TargetSpec | dict):
+                target property specification to add or dictionary to initialize a
+                TargetSpec
             drop_empty (bool):
                 whether to drop rows with empty target property values. Defaults to
                 `True`.
         """
-        logger.debug(f"Adding target property '{prop}' to dataset.")
-        prop = deepcopy(prop)
-        if isinstance(prop, dict):
-            prop = TargetProperty.fromDict(prop)
-        if prop.name in self.targetPropertyNames:
-            logger.warning(
-                f"Property '{prop}' already exists in dataset. It will be reset."
-            )
+        logger.debug(f"Adding target property '{target_spec}' to dataset.")
+        if isinstance(target_spec, dict):
+            target_spec = TargetSpec.fromDict(target_spec)
         assert (
-            prop.name in self.getProperties()
-        ), f"Property {prop} not found in data set."
-        self._targetProperties.append(prop)
-        self.restoreTargetProperty(prop)
-        if prop.task.isClassification():
-            self.makeClassification(prop.name, prop.th)
-        if prop.imputer is not None:
-            self.imputeProperties([prop.name], prop.imputer)
-        if prop.transformer is not None:
-            self.transformProperties([prop.name], prop.transformer)
+            target_spec.name in self.getProperties()
+        ), f"Property {target_spec.name} not found in data set."
+        self.restoreTargetProperty(target_spec)
+        if target_spec.name in self.getTargetPropertiesNames():
+            logger.warning(
+                f"Target property '{target_spec}' already exists in dataset. It will be overwritten."
+            )
+            self._targetProperties = [
+                tp for tp in self.targetProperties if tp.name != target_spec.name
+            ]
+        self._targetProperties.append(target_spec)
+        if target_spec.task.isClassification():
+            self.makeClassification(target_spec.name, target_spec.th)
+            self.checkClassification(target_spec.name)
         if drop_empty:
-            self.dropEmptyEntries([prop.name])
+            self.dropEmptyEntries([target_spec.name])
 
-    def getTargetProperties(self, names: list) -> list[TargetProperty]:
-        """Get the target properties with the given names.
+    def getTargetSpecs(self, names: list | None) -> list[TargetSpec]:
+        """Get the target specifications with the given names.
 
         Args:
             names (list[str]): name of the target properties
 
         Returns:
-            (list[TargetProperty]): list of target properties
+            (list[TargetSpec]): list of target specifications
         """
+        if names is None:
+            return self.targetProperties
+        if not all(name in self.getTargetPropertiesNames() for name in names):
+            logger.warning(
+                f"Some target properties {names} not found in dataset. "
+                f"Available target properties: {self.getTargetPropertiesNames()}"
+            )
         return [tp for tp in self.targetProperties if tp.name in names]
 
-    def getTargetPropertiesNames(self) -> list[str]:
-        """Get the names of the target properties.
+    def getTargetSpec(self, name: str) -> TargetSpec:
+        """Get the target specification of a single target property by its name.
+
+        Args:
+            name (str): name of the target property
 
         Returns:
-            (list[str]): list of target property names
+            TargetSpec: target specification with the given name
+
+        Raises:
+            ValueError: if the target property with the given name is not found
         """
-        return [tp.name for tp in self.targetProperties]
+        for tp in self.targetProperties:
+            if tp.name == name:
+                return tp
+        raise ValueError(f"Target property '{name}' not found in dataset.")
 
     def setTargetProperties(
         self,
-        target_props: list[TargetProperty | dict],
+        target_props: list[TargetSpec | dict],
         drop_empty: bool = True,
     ):
-        """Set list of target properties and apply transformations if specified.
+        """Set list of target properties for the dataset.
 
         Args:
-            target_props (list[TargetProperty]):
-                list of target properties
+            target_props (list[TargetSpec | dict]):
+                list of target properties specifications or dictionaries to initialize
+                the TargetSpec objects from.
             drop_empty (bool, optional):
                 whether to drop rows with empty target property values. Defaults to
                 `True`.
         """
         assert isinstance(target_props, list), (
-            "target_props should be a list of TargetProperty objects or dictionaries "
-            "initialize TargetProperties from. Not a %s." % type(target_props)
+            "target_props should be a list of TargetSpec objects or dictionaries to "
+            "initialize TargetSpec objects from. Not a %s." % type(target_props)
         )
         if isinstance(target_props[0], dict):
             assert all(isinstance(d, dict) for d in target_props), (
-                "target_props should be a list of TargetProperty objects or "
-                "dictionaries to initialize TargetProperties from, not a mix."
+                "target_props should be a list of TargetSpec objects or "
+                "dictionaries to initialize TargetSpec objects from, not a mix."
             )
-            target_props = TargetProperty.fromList(target_props)
+            target_props = TargetSpec.fromList(target_props)
         else:
-            assert all(isinstance(d, TargetProperty) for d in target_props), (
-                "target_props should be a list of TargetProperty objects or "
-                "dictionaries to initialize TargetProperties from, not a mix."
+            assert all(isinstance(d, TargetSpec) for d in target_props), (
+                "target_props should be a list of TargetSpec objects or "
+                "dictionaries to initialize TargetSpec objects from, not a mix."
             )
         self._targetProperties = []
         for prop in target_props:
             self.addTargetProperty(prop, drop_empty)
 
-    def unsetTargetProperty(self, name: str | TargetProperty):
-        """Unset the target property. It will not remove it from the data set, but
+    def unsetTargetProperty(self, name: str | TargetSpec):
+        """Unset a target property. It will not remove it from the data set, but
         will make it unavailable for training.
 
         Args:
-            name (str | TargetProperty):
-                name of the target property to drop or the property itself
+            name (str | TargetSpec):
+                name or specification of the target property to drop
         """
-        name = name.name if isinstance(name, TargetProperty) else name
+        name = name.name if isinstance(name, TargetSpec) else name
         assert (
-            name in self.targetPropertyNames
+            name in self.getTargetPropertiesNames()
         ), f"Target property '{name}' not found in dataset."
         assert (
             len(self.targetProperties) > 1
         ), "Cannot drop task from single-task dataset."
         self._targetProperties = [tp for tp in self.targetProperties if tp.name != name]
 
-    def restoreTargetProperty(self, prop: TargetProperty | str):
+    def restoreTargetProperty(self, prop: TargetSpec | str):
         """Reset target property to its original value.
 
         Args:
             prop (TargetProperty | str): target property to reset
         """
         if isinstance(prop, str):
-            prop = self.getTargetProperties([prop])[0]
+            prop = self.getTargetSpec(prop)
         if f"{prop.name}_original" in self.getProperties():
+            # restore original values
             self.addProperty(prop.name, self.getProperty(f"{prop.name}_original"))
-        # save original values for next reset
-        self.addProperty(f"{prop.name}_original", self.getProperty(prop.name))
-
-    def makeRegression(self, target_property: str):
-        """Switch to regression task using the given target property.
-
-        Args:
-            target_property (str): name of the target property to use for regression
-        """
-        target_property = self.getTargetProperties([target_property])[0]
-        self.restoreTargetProperty(target_property)
-        target_property.task = TargetTasks.REGRESSION
-        if hasattr(target_property, "th"):
-            del target_property.th
-        logger.info("Target property converted to regression.")
+        else:
+            # save original values for next reset
+            self.addProperty(f"{prop.name}_original", self.getProperty(prop.name))
 
     def makeClassification(
         self,
@@ -356,95 +359,145 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
 
         Args:
             target_property (str):
-                Target property to use for classification
-                or name of the target property.
+                Name of target property to use for classification
             th (list[float], optional):
-                list of threshold values. If not provided, the
-                values will be inferred from th specified in TargetProperty.
-                Defaults to None.
+                list of threshold values. If not provided, it is assumed that
+                the target property is already discretized and can be used for
+                classification.
         """
-        prop_name = target_property
-        target_property = self.getTargetProperties([target_property])[0]
+        assert isinstance(th, (list, type(None))), (
+            "Thresholds must be a list of floats or None. "
+            f"Got {type(th)} instead."
+        )
+        if isinstance(th, list):
+            assert len(th) > 0, (
+                "Thresholds must be a non-empty list of floats. "
+            )
+            assert len(th) == 1 or len(th) > 3, (
+                "Thresholds must be a single float for binary classification or "
+                "a list of at least 3 floats for multi-class classification."
+            )
+
+        assert target_property in self.getTargetPropertiesNames(), (
+            f"Target property '{target_property}' not found in dataset. "
+            f"Available target properties: {self.getTargetPropertiesNames()} "
+            f"To convert a regression task to classification, first add the "
+            f"property as a target property with the "
+            f"`addTargetProperty` method."
+        )
         self.restoreTargetProperty(target_property)
-        # perform some checks
-        if th is not None:
-            assert (
-                isinstance(th, list) or th == "precomputed"
-            ), "Threshold values should be provided as a list of floats."
-            if isinstance(th, list):
-                assert (
-                    len(th) > 0
-                ), "Threshold values should be provided as a list of floats."
-        if isinstance(target_property, str):
-            target_property = self.getTargetProperties([target_property])[0]
-        # check if the column only has nan values
-        df = self.getDF()
-        if df[target_property.name].isna().all():
-            logger.warning(
-                f"Target property {target_property.name}"
-                " is all nan, cannot convert to classification."
+        target_values = self.getTarget(target_property).copy()
+        target_spec = self.getTargetSpec(target_property)
+        if target_values.isna().all():
+            logger.debug(
+                f"Target property '{target_property}' has all NaNs. This happens "
+                "on the initialization of a PredictionDataSet, but should not happen "
+                "otherwise."
             )
-            return target_property
-        # if no threshold values provided, use the ones specified in the TargetProperty
-        if th is None:
-            assert hasattr(target_property, "th"), (
-                "Target property does not have a threshold attribute and "
-                "no threshold specified in function args."
+            assert target_spec.task.isClassification(), (
+                f"Target property '{target_property}' is not a classification task. "
+                " and it has no values."
             )
-            th = target_property.th
-        if th == "precomputed":
-            assert all(
-                value is None or (type(value) in (int, bool)) or
-                (isinstance(value, float) and value.is_integer())
-                for value in df[prop_name]
-            ), "Precomputed classification target must be integers or booleans."
-            n_classes = len(df[prop_name].dropna().unique())
-            target_property.task = (
-                TargetTasks.MULTICLASS if n_classes > 2  # noqa: PLR2004
-                else TargetTasks.SINGLECLASS
-            )
-            target_property.th = th
-            target_property.nClasses = n_classes
         else:
-            assert len(th) > 0, "Threshold list must contain at least one value."
-            if len(th) > 1:
-                assert len(th) > 3, (  # noqa: PLR2004
-                    "For multi-class classification, "
-                    "set more than 3 values as threshold."
-                )
-                # get max value, ignore nan
-                assert max(df[prop_name].dropna()) <= max(th), (
-                    "Make sure final threshold value is not smaller "
-                    "than largest value of property"
-                )
-                assert min(df[prop_name].dropna()) >= min(th), (
-                    "Make sure first threshold value is not larger "
-                    "than smallest value of property"
-                )
-                self.addProperty(
-                    f"{prop_name}_intervals",
-                    pd.cut(df[prop_name], bins=th, include_lowest=True).astype(str),
-                )
-                encoded_intervals = LabelEncoder().fit_transform(
-                    self.getProperty(f"{prop_name}_intervals")
-                )
-                self.addProperty(
-                    prop_name,
-                    np.where(df[prop_name].notna(), encoded_intervals, np.nan).astype(float),
+            # convert target values to discrete classes if needed
+            if th is None:
+                assert all(
+                    value is None or (type(value) in (int, bool)) or
+                    (isinstance(value, float) and value.is_integer())
+                    for value in target_values
+                ), (
+                    "Precomputed classification target must be integers or booleans."
+                    "Set the `th` argument to a list of threshold values to convert "
+                    "float values to discrete classes for classification."
                 )
             else:
-                binary_target = df[prop_name] > th[0]
-                self.addProperty(prop_name, binary_target.where(df[prop_name].notna(), np.nan).astype(float))
-            target_property.task = (
-                TargetTasks.SINGLECLASS if len(th) == 1 else TargetTasks.MULTICLASS
-            )
-            target_property.th = th
-        logger.info(f"Target property '{prop_name}' converted to classification.")
+                discretizer = Discretizer(target=target_property, th=th)
+                target_values = discretizer.fitTransform(None, target_values)[1][target_property]
+                self.addProperty(target_property, target_values)
 
-    @property
-    def targetPropertyNames(self) -> list[str]:
-        """Get the names of the target properties."""
-        return TargetProperty.getNames(self.targetProperties)
+            # update target specification
+            n_classes = len(target_values.dropna().unique())
+            task = TargetTasks.MULTICLASS if n_classes > 2 else TargetTasks.SINGLECLASS
+            target_spec.task = task
+            if th is None:
+                target_spec.setTh(th, n_classes=n_classes)
+            else:
+                target_spec.setTh(th)
+            logger.info(f"Target property '{target_property}' converted to classification.")
+
+
+    def makeRegression(self, target_property: str):
+        """Switch to regression task using the given target property.
+
+        Args:
+            target_property (str): name of the target property to use for regression
+        """
+        target_spec = self.getTargetSpec(target_property)
+        self.restoreTargetProperty(target_spec)
+        target_spec.task = TargetTasks.REGRESSION
+        if hasattr(target_spec, "th"):
+            del target_spec.th
+        logger.info(f"Target property '{target_property}' converted to regression.")
+
+
+    def checkClassification(
+        self,
+        target_property: str,
+    ) -> bool:
+        """Checks the validity of the target property for classification tasks.
+
+        Args:
+            target_property (str):
+                Name of the target property to use for classification
+
+        Returns:
+            bool: `True` if the target property is correctly set up for classification,
+            `False` otherwise.
+        """
+        target_values = self.getTarget(target_property)
+        target_spec = self.getTargetSpec(target_property)
+
+        if not all(
+            value is None or np.isnan(value) or (type(value) in (int, bool)) or
+            (isinstance(value, float) and value.is_integer())
+            for value in target_values
+        ):
+            logger.warning(
+                f"Classification target property '{target_property}' "
+                "should only contain integers or booleans. "
+                "Either convert it to discrete values using "
+                "`makeClassification` method with a threshold, "
+                "change the property values using `addProperty`, "
+                "or set the task to REGRESSION."
+            )
+            return False
+        n_classes = len(target_values.dropna().unique())
+        if n_classes == 1:
+            logger.warning(
+                f"Classification target property '{target_property}' task "
+                f"is set to {target_spec.task}, but it contains only "
+                "1 class. Perhaps you meant to set the task to REGRESSION? "
+                "Training a classification model with only one class "
+                "is not meaningful."
+            )
+            return False
+        elif n_classes == 2 and target_spec.task == TargetTasks.MULTICLASS:
+            logger.warning(
+                f"Classification target property '{target_property}' task "
+                "is set to MULTICLASS, but it contains only "
+                f"2 classes. Perhaps you meant to set the task to "
+                "SINGLECLASS?"
+            )
+            return False
+        elif n_classes > 2 and target_spec.task == TargetTasks.SINGLECLASS:
+            logger.warning(
+                f"Classification target property '{target_property}' task "
+                "is set to SINGLECLASS, but it contains more than "
+                f"2 classes ({n_classes}). Perhaps you meant to set the task to "
+                "MULTICLASS?"
+            )
+            return False
+        return True
 
     @property
     def isMultiTask(self) -> bool:
@@ -466,7 +519,21 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         Returns:
             (pd.DataFrame): target property values
         """
-        return self.getDF()[self.targetPropertyNames]
+        return self.getDF()[self.getTargetPropertiesNames()]
+
+    def getTarget(self, name: str | TargetSpec) -> pd.Series:
+        """Get the target property values for the given target property.
+
+        Args:
+            name (str | TargetSpec): name or specification of the target property
+
+        Returns:
+            (pd.Series): target property values
+        """
+        if isinstance(name, TargetSpec):
+            name = name.name
+        assert name in self.getTargetPropertiesNames(), f"Target property '{name}' not found in dataset."
+        return self.getDF()[name]
 
     def getSubset(
         self,
@@ -492,7 +559,7 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         """
         # add target properties if not already in the subset
         # as the QSPRTable requires them
-        subset = list(set(subset + self.targetPropertyNames))
+        subset = list(set(subset + self.getTargetPropertiesNames()))
         mt = super().getSubset(subset, ids, name, path, **kwargs)
         ds = self.fromMolTable(
             mt, self.targetProperties, name=mt.name, path=path, drop_empty_target_props=False, **kwargs
@@ -609,8 +676,6 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
     def split(
         self,
         split: DataSplit,
-        X: pd.DataFrame | None = None,
-        y: pd.DataFrame | None = None,
     ) -> Generator[
         tuple[
             pd.Index,
@@ -619,8 +684,8 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         None,
         None,
     ]:
-        """Create folds from X and y. Can be used either for cross-validation,
-        bootstrapping or train-test split.
+        """Create folds from Descriptors and Targets. Can be used either for 
+        cross-validation, bootstrapping or train-test split.
 
         Args:
             split (DataSplit): Split to apply to the data
@@ -628,18 +693,16 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
             y (pd.DataFrame | None): target data to apply the split to
 
         Yields:
-            tuple[pd.Index, pd.Index]: indices of the train and test set
+            pd.Index, pd.Index: indices of the train and test set
         """
         if hasattr(split, "dataSet"):
             split.setDataSet(self)
         if hasattr(split, "randomState"):
             if split.randomState is None:
                 split.randomState = self.randomState
-
-        X = self.getDescriptors() if X is None else X
-        y = self.getTargets() if y is None else y
+        X = self.getDescriptors()
+        y = self.getTargets()
         folds = split.split(X, y)
-
         for train_idx, test_idx in folds:
             # get QSPRTable indices from numerical index
             train_idx = X.index[train_idx]
@@ -667,7 +730,7 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         """Filter the data set using the given filters.
 
         Args:
-            table_filters (list[Callable]): list of filters to apply
+            table_filters (list[DataFilter]): list of filters to apply
         """
         for filter in table_filters:
             ret, _ = filter.transform(self.getDescriptors(), self.getTargets())
@@ -679,6 +742,6 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
 
     def __setstate__(self, state):
         super().__setstate__(state)
-        for name, split in self.splits.items():
-            if hasattr(split["split"], "setdataSet"):
+        for split in self.splits.values():
+            if hasattr(split["split"], "setDataSet"):
                 split["split"].setDataSet(self)

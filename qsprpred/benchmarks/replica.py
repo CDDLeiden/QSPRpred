@@ -16,7 +16,7 @@ from ..models.assessment.methods import ModelAssessor
 from ..models.hyperparam_optimization import HyperparameterOptimization
 from ..models.model import QSPRModel
 from ..models.monitors import NullMonitor
-from ..tasks import TargetProperty
+from ..tasks import TargetSpec
 from ..utils.serialization import JSONSerializable
 
 
@@ -63,7 +63,7 @@ class Replica(JSONSerializable):
         name: str,
         data_source: DataSource,
         descriptors: list[DescriptorSet],
-        target_props: list[TargetProperty],
+        target_props: list[TargetSpec],
         pipeline: DatasetPipeline,
         model: QSPRModel,
         optimizer: HyperparameterOptimization,
@@ -236,7 +236,7 @@ class Replica(JSONSerializable):
         self.model.initFromData(self.ds, self.pipeline)
         self.model.initRandomState(self.randomSeed)
         if self.optimizer is not None:
-            self.optimizer.optimize(self.model, self.ds)
+            self.optimizer.optimize(self.model, self.ds, self.pipeline)
         self.model.save()
 
     def runAssessment(self):
@@ -258,26 +258,13 @@ class Replica(JSONSerializable):
         self.results = None
         for assessor in self.assessors:
             if assessor.name in self.subsets:
-                # FIXME: this is a temporary fix to pass consistency check
-                # previously the KFold split random state was not explicitly set but
-                # only initialized in assessor.__call__ method where the seed now has 
-                # the Replica seed instead of the original dataset seed
-                assessor.split.random_state = self.randomSeed #FIXME
-                    
                 # apply assessor to subset of data only if specified
                 subset = self.subsets[assessor.name]
                 fold = [fold for fold in self.ds.split(subset[0])][subset[2]]
                 indices = fold[0] if subset[1] == "Train" else fold[1]
-                # FIXME: this is a temporary fix to pass consistency check
-                # previously the filters were only fitted on the training set of 
-                # the initial train/test split set on the dataset.
-                # instead of each individual fold trainingset
-                if "benchmarkfilter" in self.pipeline.steps.keys(): # FIXME
-                    self.pipeline.steps["benchmarkfilter"].fit(self.ds[indices].getDescriptors()) # FIXME
-                    self.pipeline.fixed = ["benchmarkfilter"] # FIXME
-                scores = assessor(self.model, self.ds[indices], self.pipeline, save=True, order=indices)
+                scores = assessor(self.model, self.ds[indices], self.pipeline)
             else:
-                scores = assessor(self.model, self.ds, self.pipeline, save=True)
+                scores = assessor(self.model, self.ds, self.pipeline)
             if isinstance(scores, float):
                 scores = np.array([scores])
             scores_df = pd.DataFrame()

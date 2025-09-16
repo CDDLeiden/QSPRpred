@@ -11,28 +11,18 @@ import numpy as np
 import pandas as pd
 
 from ...logs import logger
-from .pipeline import Step
-from typing import Optional
+from .step import Step
 from .applicability_domain import ApplicabilityDomain, MLChemAD
 from mlchemad.base import ApplicabilityDomain as MLChemADApplicabilityDomain
 from ..tables.interfaces.data_set_dependent import DataSetDependent
 from ..tables.interfaces.qspr_data_set import QSPRDataSet
 
 
-class DataFilter(Step):
+class DataFilter(Step, DataSetDependent):
     """Filter out some rows from a dataframe."""
 
     @abstractmethod
-    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
-        """Fit the filter to the data.
-
-        Args:
-            X (pd.DataFrame): training data
-            y (pd.DataFrame, optional): training targets
-        """
-
-    @abstractmethod
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> pd.DataFrame:
         """Remove rows from a dataframe.
 
         Args:
@@ -41,7 +31,7 @@ class DataFilter(Step):
                 requires it
         """
 
-class CategoryFilter(Step, DataSetDependent):
+class CategoryFilter(DataFilter):
     """To filter out values from column
 
     Attributes:
@@ -65,21 +55,13 @@ class CategoryFilter(Step, DataSetDependent):
             keep (bool, optional): whether to keep or discard the values. Defaults to
                 False.
         """
-        super().__init__(data_set)
+        super().__init__(dataset = data_set)
         self.prop = prop
         self.values = values
         self.keep = keep
-        
+        self._fitted = False
 
-    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
-        """Fit the filter to the data.
-
-        Args:
-            X (pd.DataFrame): training data
-            y (pd.DataFrame, optional): training targets
-        """
-
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame | None]:
         """Filter rows from dataframe.
 
         Args:
@@ -89,6 +71,7 @@ class CategoryFilter(Step, DataSetDependent):
 
         Returns:
             pd.DataFrame: filtered dataframe.
+            pd.DataFrame: target dataframe.
         """
         assert self.hasDataSet, (
             "No dataset attached to this filter, set dataset with setDataSet()"
@@ -122,11 +105,13 @@ class RepeatsFilter(DataFilter):
             so that compounds with same X but different proteinid
             are not removed.
     """
+    
     def __init__(
         self,
         keep: str | bool = False,
-        timecol: pd.Series | None = None,
-        additional_cols: Optional[dict[str, pd.Series]] = None
+        timecol: str | None = None,
+        additional_cols: list[str] | None = None,
+        data_set: QSPRDataSet | None = None
     ) -> None:
         """Initialize the RepeatsFilter with the keep, timecol and additional_cols
         attributes.
@@ -136,32 +121,30 @@ class RepeatsFilter(DataFilter):
                 are treated, if False remove both (/all) duplicate entries, if True
                 keep them, if first, keep row of first entry (based on time), if last
                 keep row of last entry based on time. Defaults to False.
-            timecol (pd.Series, optional): name of column containing time of publication
+            timecol (str, optional): name of column containing time of publication
                 used if keep is 'first' or 'last'. Defaults to None.
-            additional_cols (dict[str, pd.Series], optional): additional columns to use for
+            additional_cols (list[str], optional): additional columns to use for
                 determining duplicates (e.g. proteinid, in case of PCM modelling),
                 so that compounds with same X but different proteinid
-                are not removed.
+                are not removed. Defaults to None.
+            data_set (QSPRDataSet, optional): dataset to filter. Defaults to None.
         """
+        super().__init__(dataset = data_set)
         self.keep = keep
         self.timeCol = timecol
         self.additionalCols = additional_cols
 
-    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
-        """Fit the filter to the data.
-
-        Args:
-            X (pd.DataFrame): training data
-            y (pd.DataFrame, optional): training targets
-        """
-
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> pd.DataFrame:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame | None]:
         """Filter rows from dataframe.
 
         Arguments:
             X (pandas dataframe): dataframe to filter
             y (pandas dataframe, optional): output dataframe if the filtering method
                 requires it
+                
+        Returns:
+            tuple[pd.DataFrame, pd.DataFrame | None]: filtered dataframe and target
+            dataframe if provided.
         """
         def group_duplicate_index(df) -> list[list[int]]:
             """Group indices of duplicate rows
@@ -190,6 +173,24 @@ class RepeatsFilter(DataFilter):
 
             # Return list of lists of indices of duplicate rows
             return [sort_idxs[i:j] for i, j in zip(idx[::2], idx[1::2] + 1)]
+        assert self.hasDataSet, (
+            "No dataset attached to this filter, set dataset with setDataSet()"
+        )
+        if self.timeCol is not None:
+            assert (
+                self.timeCol in self.dataSet.getDF().columns
+            ), f"Column {self.timeCol} not found in dataset."
+            timecol = self.dataSet.getDF()[self.timeCol].copy()
+        if self.additionalCols is not None:
+            assert isinstance(self.additionalCols, list), (
+                "additionalCols must be a list of column names."
+            )
+            assert all(
+                col in self.dataSet.getDF().columns for col in self.additionalCols
+            ), f"Columns {self.additionalCols} not found in dataset."
+            additional_cols = {
+                col: self.dataSet.getDF()[col].copy() for col in self.additionalCols
+            }
 
         if X.shape[1] == 0:
             logger.warning("Dataframe is empty, nothing to filter.")
@@ -199,8 +200,8 @@ class RepeatsFilter(DataFilter):
 
         # Adding additional columns to X
         if self.additionalCols is not None:
-            for col in self.additionalCols:
-                X_copy[col] = self.additionalCols[col]
+            for col in additional_cols:
+                X_copy[col] = additional_cols[col]
 
         allrepeats = group_duplicate_index(X_copy)
 
@@ -215,9 +216,9 @@ class RepeatsFilter(DataFilter):
                 assert (
                     self.timeCol is not None
                 ), "timecol must be specified if keep is 'first' or 'last'"
-                self.timeCol = pd.to_numeric(self.timeCol, errors="coerce")
+                timecol = pd.to_numeric(timecol, errors="coerce")
                 for repeat in allrepeats:
-                    repeat_time = self.timeCol.loc[repeat]
+                    repeat_time = timecol.loc[repeat]
                     if self.keep == "first":
                         tokeep = repeat_time.idxmin()  # Use the first occurance
                     else:
@@ -246,11 +247,9 @@ class NaNFilter(DataFilter):
             keep (bool): whether to keep or discard rows with NaN values,
                 if True only warn about NaN values, if False remove rows with NaN values
         """
+        self._fitted = False
         self.keep = keep
         self.selected_features = features
-        
-    def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
-        pass
     
     def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         """Remove rows containing NaN values in the specified columns"""
@@ -277,15 +276,39 @@ class NaNFilter(DataFilter):
         return X, y
 
 class OutlierFilter(DataFilter):
+    """Remove outliers based on an applicability domain"""
+    
     def __init__(self, ad: ApplicabilityDomain):
+        """Initialize the OutlierFilter with an applicability domain from MLChemAD.
+
+        Args:
+            ad (MLChemAD | MLChemADApplicabilityDomain): The applicability domain to use.
+        """
+        self._fitted = False
         if isinstance(ad, MLChemADApplicabilityDomain):
             ad = MLChemAD(ad)
         self.ad = ad
         
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
-        self.ad.fit(X)
+        """Fit the applicability domain to the data.
         
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+        Args:
+            X (pd.DataFrame): training data
+            y (pd.DataFrame, optional): training targets
+        """
+        self.ad.fit(X)
+        self._fitted = True
+
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame | None]:
+        """Remove samples outside the applicability domain.
+        
+        Args:
+            X (pd.DataFrame): training data
+            y (pd.DataFrame, optional): training targets
+
+        Returns:
+            tuple[pd.DataFrame, pd.DataFrame]: filtered training data and targets
+        """
         indomain = self.ad.contains(X)
         logger.info(f"Removing {len(X) - indomain.sum()} samples outside the applicability domain.")
         logger.debug(f"Removing samples {X.index[~indomain].tolist()} outside the applicability domain.")

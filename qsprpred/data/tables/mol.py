@@ -1120,32 +1120,6 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         """
         return len(self.getClusterNames()) > 0
 
-    def imputeProperties(self, names: list[str], imputer: Callable):
-        """Impute missing property values.
-
-        Args:
-            names (list):
-                List of property names to impute.
-            imputer (Callable):
-                imputer object implementing the `fit_transform`
-                 method from scikit-learn API.
-        """
-        df_subset = self.getDF()[names].copy()
-        assert hasattr(imputer, "fit_transform"), (
-            "Imputer object must implement the `fit_transform` "
-            "method from scikit-learn API."
-        )
-        assert all(
-            name in df_subset.columns for name in names
-        ), "Not all properties in dataframe columns for imputation."
-        names_old = [f"{name}_before_impute" for name in names]
-        df_subset[names_old] = df_subset[names]
-        df_subset[names] = imputer.fit_transform(df_subset[names])
-        for name in df_subset.columns:
-            self.addProperty(name, df_subset[name])
-        logger.debug(f"Imputed missing values for properties: {names}")
-        logger.debug(f"Old values saved in: {names_old}")
-
     def processMols(
         self,
         processor: MolProcessor,

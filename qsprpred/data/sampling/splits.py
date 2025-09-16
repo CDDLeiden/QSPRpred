@@ -27,7 +27,7 @@ from ...utils.interfaces.randomized import Randomized
 from ...utils.serialization import JSONSerializable
 
 
-class DataSplit(JSONSerializable):
+class DataSplit(JSONSerializable, ABC):
     """Defines a function to split a dataframe into train and test set."""
 
     @abstractmethod
@@ -166,7 +166,7 @@ class ManualSplit(DataSplit, DataSetDependent):
     """Splits dataset in train and test subsets based on a column in the dataframe.
 
     Attributes: 
-        splitProp (pd.Series): pandas series with split information
+        splitProp (str): name of the column in the dataset that contains the split
         trainVal (str): value in splitcol that will be used for training
         testVal (str): value in splitcol that will be used for testing
 

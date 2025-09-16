@@ -17,21 +17,17 @@ models_base = "./data/models"
 success = True
 failed_files = []
 for f in os.listdir("expected"):
-    for type in ["ind", "cv"]:
-        file_name = f"{f}.{type}.tsv"
-        # FIXME: Filenames changed in the new version
-        new_type = "crossval" if type == "cv" else "test"
-        if "CLS" in file_name:
-            new_file_name = f"{f}_{new_type}_matthews_corrcoef.tsv"
+    for type in ["test", "crossval"]:
+        if "CLS" in f:
+            file_name = f"{f}_{type}_matthews_corrcoef.tsv"
         else:
-            new_file_name = f"{f}_{new_type}_neg_root_mean_squared_error.tsv"    
+            file_name = f"{f}_{type}_neg_root_mean_squared_error.tsv"
         try:
             print(f"Comparing file contents of {file_name}")
             relative_file_path = f"{f}/{file_name}"
-            new_relative_file_path = f"{f}/{new_file_name}"
 
             expected_file_path = f"expected/{relative_file_path}"
-            actual_file_path = f"{models_base}/{new_relative_file_path}"
+            actual_file_path = f"{models_base}/{relative_file_path}"
 
             expected_values = pd.read_csv(expected_file_path, sep="\t")
             expected_values = (
@@ -45,21 +41,19 @@ for f in os.listdir("expected"):
                 .set_index(actual_values.columns[0], drop=True)
                 .sort_index()
             )
-            # FIXME: In the old version, only test values are saved and
-            # the "Fold" column is only present for cross validation
-            # also all Fold values used to be float64 but now they are int
-            if type == "ind":
-                actual_values = actual_values.drop(columns=["Fold"])
-            else:
-                actual_values["Fold"] = actual_values["Fold"].astype(np.float64)
-            actual_values = actual_values[actual_values["Set"] == "Test"]
-            actual_values = actual_values.drop(columns=["Set"])
             assert expected_values.columns.equals(
                 actual_values.columns
             ), f"Column names do not match for file {file_name}."
             assert expected_values.index.equals(
                 actual_values.index
             ), f"Index values do not match for file {file_name}."
+            assert expected_values.dtypes.equals(
+                actual_values.dtypes
+            ), (
+                f"Data types do not match for file {file_name}.\n"
+                f"Expected: {expected_values.dtypes}\n"
+                f"Actual: {actual_values.dtypes}"
+            )
             try:
                 assert expected_values.equals(
                     actual_values
@@ -70,7 +64,7 @@ for f in os.listdir("expected"):
                 diff = expected_values.compare(actual_values)
                 overviews = []
                 for idx, row in diff.iterrows():
-                    overview = dict()
+                    overview = {}
                     for col in diff.columns:
                         name = col[0]
                         if name not in overview:
@@ -82,12 +76,12 @@ for f in os.listdir("expected"):
                     overview = {
                         k: v
                         for k, v in overview.items()
-                        if not (np.isnan(v["true"]) and np.isnan(v["expected"]))
+                        if not (pd.isna(v["true"]) and pd.isna(v["expected"]))
                     }
                     overviews.append(overview)
                 sys.stderr.write(json.dumps(overviews, indent=4))
                 raise e
-        except AssertionError as e:
+        except AssertionError:
             # print stack trace
             traceback.print_exc()
             success = False

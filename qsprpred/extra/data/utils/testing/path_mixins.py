@@ -4,7 +4,7 @@ from typing import Callable
 
 import pandas as pd
 
-from qsprpred import TargetProperty, TargetTasks
+from qsprpred import TargetSpec, TargetTasks
 from qsprpred.data.descriptors.sets import DescriptorSet
 from qsprpred.extra.data.descriptors.fingerprints import (
     CDKFP,
@@ -150,7 +150,7 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
     def createPCMDataSet(
         self,
         name: str = "QSPRDataset_test_pcm",
-        target_props: list[TargetProperty] | list[dict] = [
+        target_props: list[TargetSpec] | list[dict] = [
             {
                 "name": "pchembl_value_Median",
                 "task": TargetTasks.REGRESSION
