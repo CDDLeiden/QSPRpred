@@ -41,7 +41,7 @@ class RegressionPlot(ModelPlot, ABC):
                 columns: ID, Fold, Set, Property, Label, Prediction, Set
         """
         # Melt all property columns into one column
-        id_vars = ["ID", "Fold", "Set"]
+        id_vars = [assessment_df.columns[0], "Fold", "Set"]
         df = assessment_df.melt(id_vars=id_vars)
         # split the variable (<property_name>_<suffixes>_<Label/Prediction>) column
         # into the property name and the type (Label or Prediction)
@@ -78,8 +78,9 @@ class RegressionPlot(ModelPlot, ABC):
                     assessment = assessment.drop(columns=[col for col in assessment.columns if col.endswith("Label")])
                     # add suffix Label to the target columns
                     targets.columns = [f"{col}_Label" for col in targets.columns]
-                    assessment = pd.merge(assessment, targets, on="ID")
+                    assessment = pd.merge(assessment, targets, on=assessment.columns[0])
                 df = self.prepareAssessment(name, assessment)
+                df["Model"] = model.name
                 results.append(df)
             df = pd.concat(results)
             print(model.name)
@@ -301,8 +302,8 @@ class WilliamsPlot(RegressionPlot):
                 df_assessment = df[(df["Model"] == model.name) & (df["Assessment"] == assessment)]
                 for fold in df_assessment["Fold"].unique():
                     df_ = df_assessment[(df_assessment["Fold"] == fold)]
-                    train_ind = df_[df_["Set"] == "Train"]["ID"].to_list()
-                    test_ind = df_[df_["Set"] == "Test"]["ID"].to_list()
+                    train_ind = df_[df_["Set"] == "Train"][df_.columns[0]].to_list()
+                    test_ind = df_[df_["Set"] == "Test"][df_.columns[0]].to_list()
                     # FIXME: Pipeline is refit for each fold, this is not ideal
                     # this information should be ideally be retrieved from the
                     # assessment, pipeline or similar
@@ -318,7 +319,7 @@ class WilliamsPlot(RegressionPlot):
 
         # Add the leverages to the dataframe
         df["leverage"] = df.apply(
-            lambda x: model_leverages[f"{x['Model']}_{x['Assessment']}_{x['Fold']}"][x["ID"]],
+            lambda x: model_leverages[f"{x['Model']}_{x['Assessment']}_{x['Fold']}"][x[df.columns[0]]],
             axis=1,
         )
         df["n_features"] = df.apply(
@@ -393,6 +394,6 @@ class WilliamsPlot(RegressionPlot):
         plt.clf()
         return (
             g,
-            df[["ID", "Model", "Property", "Assessment", "Fold", "Set", "leverage", "std_resid"]],
+            df[[df.columns[0], "Model", "Property", "Assessment", "Fold", "Set", "leverage", "std_resid"]],
             model_h_star,
         )

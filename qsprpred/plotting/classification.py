@@ -60,7 +60,7 @@ class ClassifierPlot(ModelPlot, ABC):
                 columns: QSPRID, Fold, Property, Label, Prediction, Class, Set
         """
         # Melt all property columns into one column
-        id_vars = ["ID", "Fold", "Set"]
+        id_vars = [assessment_df.columns[0], "Fold", "Set"]
         df = assessment_df.melt(id_vars=id_vars)
         # split the variable (<property_name>_<suffixes>_<Label/Prediction/ProbabilityClass_X>) column
         # into the property name and the type (Label or Prediction or ProbabilityClass_X)
@@ -99,7 +99,7 @@ class ClassifierPlot(ModelPlot, ABC):
                     assessment = assessment.drop(columns=[col for col in assessment.columns if col.endswith("Label")])
                     # add suffix Label to the target columns
                     targets.columns = [f"{col}_Label" for col in targets.columns]
-                    assessment = pd.merge(assessment, targets, on="ID")
+                    assessment = pd.merge(assessment, targets, on=targets.index.name)
                 df = self.prepareAssessment(name, assessment)
                 results.append(df)
             # concatenate the cross-validation and independent test set results
@@ -300,7 +300,6 @@ class ROCPlot(ClassifierPlot):
         aucs = []
         mean_fpr = np.linspace(0, 1, 100)
         ax = plt.gca()
-        df = df.set_index("ID")
         for fold in df.Fold.unique():
             # get labels
             y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
@@ -437,7 +436,6 @@ class PRCPlot(ClassifierPlot):
         y_real = []
         y_predproba = []
         ax = plt.gca()
-        df = df.set_index("ID")
         for fold in df.Fold.unique():
             # get labels
             y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
