@@ -166,7 +166,7 @@ class ManualSplit(DataSplit, DataSetDependent):
     """Splits dataset in train and test subsets based on a column in the dataframe.
 
     Attributes: 
-        splitProp (str): name of the column in the dataset that contains the split
+        splitProp (str | list): name(s) of the column(s) in the dataset that contains the split
         trainVal (str): value in splitcol that will be used for training
         testVal (str): value in splitcol that will be used for testing
 
@@ -182,15 +182,15 @@ class ManualSplit(DataSplit, DataSetDependent):
     ) -> None:
         """Initialize the ManualSplit object with the splitcol, trainval and testval
         attributes.
+        
+        One or more columns can be provided in splitprop to generate multiple splits,
+        e.g. like cross-validation.
 
         Args:
-            splitProp (str): name of the column in the dataset that contains the split
-            trainVal (str): value in splitcol that will be used for training
-            testVal (str): value in splitcol that will be used for testing
-            dataset (QSPRDataSet): dataset that this splitter will be acting on
-
-        Raises:
-            ValueError: if there are more values in splitcol than trainval and testval
+            splitprop (str | list): name(s) of the column(s) in the dataset that contain(s) the split
+            trainval (str): value in a splitprop that will be used for training
+            testval (str): value in splitprop that will be used for testing
+            data_set (QSPRDataSet): dataset that this splitter will be acting on
         """
         super().__init__(data_set)
         if isinstance(splitprop, list):
@@ -203,7 +203,7 @@ class ManualSplit(DataSplit, DataSetDependent):
     def split(self, X, y):
         """
         Split the given data into one or multiple train/test subsets based on the
-        predefined splitcol.
+        predefined splitprop(s).
 
         Args:
             X (np.ndarray | pd.DataFrame): the input data matrix
@@ -228,7 +228,7 @@ class ManualSplit(DataSplit, DataSetDependent):
             # check if only trainval and testval are present in splitcol
             if not set(splitcol.unique()).issubset({self.trainVal, self.testVal}):
                 raise ValueError(
-                    "There are more values in splitcol than trainval and testval"
+                    f"There are more values in splitprop {splitprop} than trainval and testval"
                 )
 
             # Check if all samples are assigned to either train or test
