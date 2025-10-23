@@ -1,28 +1,26 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.processing.data_filters &mdash; QSPRpred 4.0.0a2.dev3+gdd1d34be documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
+  <title>qsprpred.data.processing.data_filters &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=87e54e7c" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=81d23b05"></script>
-        <script src="../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
-        <script>
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=ce9a7c35"></script>
+      <script src="../../../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script>
     </script>
-        <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
-        <script src="../../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+      <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
@@ -52,9 +50,6 @@
           <a href="../../../../index.html" class="icon icon-home">
             QSPRpred
           </a>
-              <div class="version">
-                v4.0.0a2.dev3+gdd1d34be
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -103,79 +98,92 @@
 <span class="sd">* Add a DataFilter subclass for your new filter</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">chain</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
-<span class="kn">from</span> <span class="nn">...logs</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...logs</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.step</span><span class="w"> </span><span class="kn">import</span> <span class="n">Step</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.applicability_domain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApplicabilityDomain</span><span class="p">,</span> <span class="n">MLChemAD</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlchemad.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApplicabilityDomain</span> <span class="k">as</span> <span class="n">MLChemADApplicabilityDomain</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..tables.interfaces.data_set_dependent</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSetDependent</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..tables.interfaces.qspr_data_set</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPRDataSet</span>
 
 
-<div class="viewcode-block" id="DataFilter"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.DataFilter">[docs]</a><span class="k">class</span> <span class="nc">DataFilter</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="DataFilter"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.DataFilter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">DataFilter</span><span class="p">(</span><span class="n">Step</span><span class="p">,</span> <span class="n">DataSetDependent</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Filter out some rows from a dataframe.&quot;&quot;&quot;</span>
-    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">descriptors</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter out some rows from a dataframe.</span>
+
+<div class="viewcode-block" id="DataFilter.transform"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.DataFilter.transform">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove rows from a dataframe.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            df (pd.DataFrame): dataframe to be filtered</span>
+<span class="sd">            X (pd.DataFrame): dataframe to be standardized</span>
+<span class="sd">            y (pd.DataFrame, optional): output dataframe if the standardization method</span>
+<span class="sd">                requires it</span>
+<span class="sd">        &quot;&quot;&quot;</span></div></div>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            The filtered pd.DataFrame</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
-
-
-<div class="viewcode-block" id="CategoryFilter"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.CategoryFilter">[docs]</a><span class="k">class</span> <span class="nc">CategoryFilter</span><span class="p">(</span><span class="n">DataFilter</span><span class="p">):</span>
+<div class="viewcode-block" id="CategoryFilter"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.CategoryFilter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">CategoryFilter</span><span class="p">(</span><span class="n">DataFilter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;To filter out values from column</span>
 
 <span class="sd">    Attributes:</span>
-<span class="sd">        name (str): column name.</span>
+<span class="sd">        prop (str): column based on which to filter.</span>
 <span class="sd">        values (list[str]): filter values.</span>
 <span class="sd">        keep (bool): whether to keep or discard values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">keep</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">prop</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">values</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">data_set</span><span class="p">:</span> <span class="n">QSPRDataSet</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">keep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the CategoryFilter with the name, values and keep attributes.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            name (str): name of the column.</span>
-<span class="sd">            values (list): list of values to filter.</span>
+<span class="sd">            prop (str): column based on which to filter.</span>
+<span class="sd">            values (list): list of values to filter from props.</span>
+<span class="sd">            data_set (QSPRDataSet): dataset to filter.</span>
 <span class="sd">            keep (bool, optional): whether to keep or discard the values. Defaults to</span>
 <span class="sd">                False.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">data_set</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prop</span> <span class="o">=</span> <span class="n">prop</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">values</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">keep</span> <span class="o">=</span> <span class="n">keep</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitted</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">descriptors</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="CategoryFilter.transform"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.CategoryFilter.transform">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter rows from dataframe.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            df (pd.DataFrame): dataframe to filter.</span>
+<span class="sd">            X (pd.DataFrame): dataframe to filter.</span>
+<span class="sd">            y (pd.DataFrame, optional): output dataframe if the filtering method</span>
+<span class="sd">                requires it</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            pd.DataFrame: filtered dataframe.</span>
+<span class="sd">            pd.DataFrame: target dataframe.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">old_len</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep</span><span class="p">:</span>
-                <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)]</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">old_len</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> rows filtered out.&quot;</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Filter column not in dataframe (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">), all data included.&quot;</span>
-            <span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDataSet</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;No dataset attached to this filter, set dataset with setDataSet()&quot;</span>
+        <span class="p">)</span>
+        <span class="n">prop_col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span><span class="o">.</span><span class="n">getDF</span><span class="p">()[</span><span class="bp">self</span><span class="o">.</span><span class="n">prop</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">old_len</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep</span><span class="p">:</span>
+            <span class="n">idx_to_keep</span> <span class="o">=</span> <span class="n">prop_col</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idx_to_keep</span> <span class="o">=</span> <span class="o">~</span><span class="n">prop_col</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx_to_keep</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx_to_keep</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">old_len</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> rows filtered out.&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">df</span></div>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span></div></div>
 
-
-<span class="n">papyrusLowQualityFilter</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">CategoryFilter</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Quality&quot;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Low&quot;</span><span class="p">])</span>
-
-
-<div class="viewcode-block" id="RepeatsFilter"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.RepeatsFilter">[docs]</a><span class="k">class</span> <span class="nc">RepeatsFilter</span><span class="p">(</span><span class="n">DataFilter</span><span class="p">):</span>
+<div class="viewcode-block" id="RepeatsFilter"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.RepeatsFilter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">RepeatsFilter</span><span class="p">(</span><span class="n">DataFilter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;To filter out duplicate molecules based on descriptor values.</span>
 
 <span class="sd">    Attributes:</span>
@@ -188,14 +196,16 @@
 <span class="sd">            used if keep is &#39;first&#39; or &#39;last&#39;</span>
 <span class="sd">        additionalCols (list[str], optional): additional columns to use for</span>
 <span class="sd">            determining duplicates (e.g. proteinid, in case of PCM modelling),</span>
-<span class="sd">            so that compounds with same descriptors but different proteinid</span>
+<span class="sd">            so that compounds with same X but different proteinid</span>
 <span class="sd">            are not removed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">keep</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">timecol</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">additional_cols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
+        <span class="n">additional_cols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">data_set</span><span class="p">:</span> <span class="n">QSPRDataSet</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the RepeatsFilter with the keep, timecol and additional_cols</span>
 <span class="sd">        attributes.</span>
@@ -209,21 +219,28 @@
 <span class="sd">                used if keep is &#39;first&#39; or &#39;last&#39;. Defaults to None.</span>
 <span class="sd">            additional_cols (list[str], optional): additional columns to use for</span>
 <span class="sd">                determining duplicates (e.g. proteinid, in case of PCM modelling),</span>
-<span class="sd">                so that compounds with same descriptors but different proteinid</span>
-<span class="sd">                are not removed. Defaults to [].</span>
+<span class="sd">                so that compounds with same X but different proteinid</span>
+<span class="sd">                are not removed. Defaults to None.</span>
+<span class="sd">            data_set (QSPRDataSet, optional): dataset to filter. Defaults to None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">data_set</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">keep</span> <span class="o">=</span> <span class="n">keep</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">timeCol</span> <span class="o">=</span> <span class="n">timecol</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">additionalCols</span> <span class="o">=</span> <span class="n">additional_cols</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">descriptors</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="RepeatsFilter.transform"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.RepeatsFilter.transform">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter rows from dataframe.</span>
 
 <span class="sd">        Arguments:</span>
-<span class="sd">            df (pandas dataframe): dataframe to filter</span>
-<span class="sd">            descriptors (pandas dataframe): dataframe containing descriptors</span>
+<span class="sd">            X (pandas dataframe): dataframe to filter</span>
+<span class="sd">            y (pandas dataframe, optional): output dataframe if the filtering method</span>
+<span class="sd">                requires it</span>
+<span class="sd">                </span>
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[pd.DataFrame, pd.DataFrame | None]: filtered dataframe and target</span>
+<span class="sd">            dataframe if provided.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">def</span> <span class="nf">group_duplicate_index</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">group_duplicate_index</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Group indices of duplicate rows</span>
 
 <span class="sd">            From https://stackoverflow.com/a/46629623</span>
@@ -250,41 +267,149 @@
 
             <span class="c1"># Return list of lists of indices of duplicate rows</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">sort_idxs</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">idx</span><span class="p">[::</span><span class="mi">2</span><span class="p">],</span> <span class="n">idx</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasDataSet</span><span class="p">,</span> <span class="p">(</span>
+            <span class="s2">&quot;No dataset attached to this filter, set dataset with setDataSet()&quot;</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeCol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">timeCol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span><span class="o">.</span><span class="n">getDF</span><span class="p">()</span><span class="o">.</span><span class="n">columns</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Column </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">timeCol</span><span class="si">}</span><span class="s2"> not found in dataset.&quot;</span>
+            <span class="n">timecol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span><span class="o">.</span><span class="n">getDF</span><span class="p">()[</span><span class="bp">self</span><span class="o">.</span><span class="n">timeCol</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">additionalCols</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">additionalCols</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="p">(</span>
+                <span class="s2">&quot;additionalCols must be a list of column names.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span>
+                <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span><span class="o">.</span><span class="n">getDF</span><span class="p">()</span><span class="o">.</span><span class="n">columns</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">additionalCols</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Columns </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">additionalCols</span><span class="si">}</span><span class="s2"> not found in dataset.&quot;</span>
+            <span class="n">additional_cols</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">col</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span><span class="o">.</span><span class="n">getDF</span><span class="p">()[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">additionalCols</span>
+            <span class="p">}</span>
 
-        <span class="c1"># Adding additional columns to descriptors</span>
-        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">additionalCols</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-                <span class="n">descriptors</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Dataframe is empty, nothing to filter.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">descriptors</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">df</span>
-        <span class="n">allrepeats</span> <span class="o">=</span> <span class="n">group_duplicate_index</span><span class="p">(</span><span class="n">descriptors</span><span class="p">)</span>
+        <span class="n">X_copy</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># Adding additional columns to X</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">additionalCols</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">additional_cols</span><span class="p">:</span>
+                <span class="n">X_copy</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">additional_cols</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+
+        <span class="n">allrepeats</span> <span class="o">=</span> <span class="n">group_duplicate_index</span><span class="p">(</span><span class="n">X_copy</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">allrepeats</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="c1"># print QSPRID of duplicate compounds</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s2">&quot;Dataframe contains duplicate compounds and/or compounds with &quot;</span>
-                    <span class="s2">&quot;identical descriptors.</span><span class="se">\n</span><span class="s2">The following rows contain duplicates: &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">repeats</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">repeats</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">allrepeats</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot;Dataframe contains compounds with duplicate features.&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">The following rows contain duplicates: </span><span class="si">{</span><span class="n">allrepeats</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="p">)</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="n">allrepeats</span><span class="p">)))</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;first&quot;</span><span class="p">,</span> <span class="s2">&quot;last&quot;</span><span class="p">]:</span>
-            <span class="k">assert</span> <span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">timeCol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="p">),</span> <span class="s2">&quot;timecol must be specified if keep is &#39;first&#39; or &#39;last&#39;&quot;</span>
-            <span class="k">for</span> <span class="n">repeat</span> <span class="ow">in</span> <span class="n">allrepeats</span><span class="p">:</span>
-                <span class="n">years</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">repeat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeCol</span><span class="p">]</span>
-                <span class="n">years</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">years</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;coerce&quot;</span><span class="p">)</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep</span> <span class="o">==</span> <span class="s2">&quot;first&quot;</span><span class="p">:</span>
-                    <span class="n">tokeep</span> <span class="o">=</span> <span class="n">years</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()</span>  <span class="c1"># Use the first occurance</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">tokeep</span> <span class="o">=</span> <span class="n">years</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()</span>
-                <span class="n">repeat</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tokeep</span><span class="p">)</span>  <span class="c1"># Remove the one to keep from the allrepeats list</span>
-            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="n">allrepeats</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;first&quot;</span><span class="p">,</span> <span class="s2">&quot;last&quot;</span><span class="p">]:</span>
+                <span class="k">assert</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">timeCol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="p">),</span> <span class="s2">&quot;timecol must be specified if keep is &#39;first&#39; or &#39;last&#39;&quot;</span>
+                <span class="n">timecol</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">timecol</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;coerce&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">repeat</span> <span class="ow">in</span> <span class="n">allrepeats</span><span class="p">:</span>
+                    <span class="n">repeat_time</span> <span class="o">=</span> <span class="n">timecol</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">repeat</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep</span> <span class="o">==</span> <span class="s2">&quot;first&quot;</span><span class="p">:</span>
+                        <span class="n">tokeep</span> <span class="o">=</span> <span class="n">repeat_time</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()</span>  <span class="c1"># Use the first occurance</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">tokeep</span> <span class="o">=</span> <span class="n">repeat_time</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()</span>
+                    <span class="c1"># Remove the data point to keep from the allrepeats list</span>
+                    <span class="n">repeat</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tokeep</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">df</span></div>
+            <span class="n">to_drop</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="n">allrepeats</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">to_drop</span><span class="p">)</span><span class="si">}</span><span class="s2"> duplicate rows filtered out.&quot;</span><span class="p">)</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="n">allrepeats</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="n">allrepeats</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span></div></div>
+
+<div class="viewcode-block" id="NaNFilter"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.NaNFilter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">NaNFilter</span><span class="p">(</span><span class="n">DataFilter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Step that removes rows containing NaN values in a specified column&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">features</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">keep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the step with the columns to check for NaN values</span>
+<span class="sd">        </span>
+<span class="sd">        If no columns are specified, all columns are checked for NaN values.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            features (list[str] | None): columns to check for NaN values</span>
+<span class="sd">            keep (bool): whether to keep or discard rows with NaN values,</span>
+<span class="sd">                if True only warn about NaN values, if False remove rows with NaN values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitted</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keep</span> <span class="o">=</span> <span class="n">keep</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_features</span> <span class="o">=</span> <span class="n">features</span>
+    
+<div class="viewcode-block" id="NaNFilter.transform"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.NaNFilter.transform">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove rows containing NaN values in the specified columns&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">selected_features</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">columns</span>
+        <span class="c1"># only take selected features that are in the current data</span>
+        <span class="n">selected_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_features</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep</span><span class="p">:</span>
+            <span class="n">nan_mask</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">selected_features</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span>
+            <span class="n">nan_rows</span><span class="p">,</span> <span class="n">nan_features</span> <span class="o">=</span> <span class="n">nan_mask</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">nan_mask</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)],</span> <span class="n">nan_mask</span><span class="o">.</span><span class="n">columns</span>
+            <span class="n">nan_features_per_row</span> <span class="o">=</span> <span class="n">nan_mask</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">nan_rows</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">nan_features</span><span class="p">[</span><span class="n">row</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">features</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">nan_rows</span><span class="p">,</span> <span class="n">nan_features_per_row</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Entry </span><span class="si">{</span><span class="n">row</span><span class="si">}</span><span class="s2"> contains NaN values in features </span><span class="si">{</span><span class="n">features</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">drop_rows</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="n">selected_features</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">drop_rows</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Removing rows </span><span class="si">{</span><span class="n">drop_rows</span><span class="si">}</span><span class="s2"> with NaN values in features.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">selected_features</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span></div></div>
+
+<div class="viewcode-block" id="OutlierFilter"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.OutlierFilter">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">OutlierFilter</span><span class="p">(</span><span class="n">DataFilter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove outliers based on an applicability domain&quot;&quot;&quot;</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ad</span><span class="p">:</span> <span class="n">ApplicabilityDomain</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the OutlierFilter with an applicability domain from MLChemAD.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ad (MLChemAD | MLChemADApplicabilityDomain): The applicability domain to use.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitted</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ad</span><span class="p">,</span> <span class="n">MLChemADApplicabilityDomain</span><span class="p">):</span>
+            <span class="n">ad</span> <span class="o">=</span> <span class="n">MLChemAD</span><span class="p">(</span><span class="n">ad</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ad</span> <span class="o">=</span> <span class="n">ad</span>
+        
+<div class="viewcode-block" id="OutlierFilter.fit"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.OutlierFilter.fit">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit the applicability domain to the data.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            X (pd.DataFrame): training data</span>
+<span class="sd">            y (pd.DataFrame, optional): training targets</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ad</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitted</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="OutlierFilter.transform"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.OutlierFilter.transform">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove samples outside the applicability domain.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            X (pd.DataFrame): training data</span>
+<span class="sd">            y (pd.DataFrame, optional): training targets</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[pd.DataFrame, pd.DataFrame]: filtered training data and targets</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">indomain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ad</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Removing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">indomain</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2"> samples outside the applicability domain.&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Removing samples </span><span class="si">{</span><span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">~</span><span class="n">indomain</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span><span class="si">}</span><span class="s2"> outside the applicability domain.&quot;</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">indomain</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">indomain</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span></div></div>
 </pre></div>
 
            </div>

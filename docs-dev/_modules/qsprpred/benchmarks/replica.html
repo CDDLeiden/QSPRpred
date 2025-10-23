@@ -1,28 +1,26 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.benchmarks.replica &mdash; QSPRpred 4.0.0a2.dev3+gdd1d34be documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+  <title>qsprpred.benchmarks.replica &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=81d23b05"></script>
-        <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
-        <script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=ce9a7c35"></script>
+      <script src="../../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script>
     </script>
-        <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
-        <script src="../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -52,9 +50,6 @@
           <a href="../../../index.html" class="icon icon-home">
             QSPRpred
           </a>
-              <div class="version">
-                v4.0.0a2.dev3+gdd1d34be
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -97,28 +92,29 @@
            <div itemprop="articleBody">
              
   <h1>Source code for qsprpred.benchmarks.replica</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">ClassVar</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassVar</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
-<span class="kn">from</span> <span class="nn">..data.descriptors.sets</span> <span class="kn">import</span> <span class="n">DescriptorSet</span>
-<span class="kn">from</span> <span class="nn">..data.sources.data_source</span> <span class="kn">import</span> <span class="n">DataSource</span>
-<span class="kn">from</span> <span class="nn">..data.tables.qspr</span> <span class="kn">import</span> <span class="n">QSPRTable</span>
-<span class="kn">from</span> <span class="nn">..logs</span> <span class="kn">import</span> <span class="n">logger</span>
-<span class="kn">from</span> <span class="nn">..models.assessment.methods</span> <span class="kn">import</span> <span class="n">ModelAssessor</span>
-<span class="kn">from</span> <span class="nn">..models.hyperparam_optimization</span> <span class="kn">import</span> <span class="n">HyperparameterOptimization</span>
-<span class="kn">from</span> <span class="nn">..models.model</span> <span class="kn">import</span> <span class="n">QSPRModel</span>
-<span class="kn">from</span> <span class="nn">..models.monitors</span> <span class="kn">import</span> <span class="n">NullMonitor</span>
-<span class="kn">from</span> <span class="nn">..tasks</span> <span class="kn">import</span> <span class="n">TargetProperty</span>
-<span class="kn">from</span> <span class="nn">..utils.serialization</span> <span class="kn">import</span> <span class="n">JSONSerializable</span>
-<span class="kn">from</span> <span class="nn">.settings.benchmark</span> <span class="kn">import</span> <span class="n">DataPrepSettings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..data.descriptors.sets</span><span class="w"> </span><span class="kn">import</span> <span class="n">DescriptorSet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..data.sources.data_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSource</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..data.sampling.splits</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSplit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..data.tables.qspr</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPRTable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..data.processing.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">DatasetPipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..logs</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..models.assessment.methods</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelAssessor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..models.hyperparam_optimization</span><span class="w"> </span><span class="kn">import</span> <span class="n">HyperparameterOptimization</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPRModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..models.monitors</span><span class="w"> </span><span class="kn">import</span> <span class="n">NullMonitor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..tasks</span><span class="w"> </span><span class="kn">import</span> <span class="n">TargetSpec</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..utils.serialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONSerializable</span>
 
 
-<div class="viewcode-block" id="Replica"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica">[docs]</a><span class="k">class</span> <span class="nc">Replica</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
+<div class="viewcode-block" id="Replica"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Replica</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class that determines settings for a single replica of a benchmarking run.</span>
 
 <span class="sd">    Attributes:</span>
@@ -133,8 +129,8 @@
 <span class="sd">            Descriptor sets to use.</span>
 <span class="sd">        targetProps (list[TargetProperty]):</span>
 <span class="sd">            Target properties to use.</span>
-<span class="sd">        prepSettings (DataPrepSettings):</span>
-<span class="sd">            Data preparation settings to use.</span>
+<span class="sd">        pipeline (DatasetPipeline):</span>
+<span class="sd">            Feature processing pipeline to use for the replica.</span>
 <span class="sd">        model (QSPRModel):</span>
 <span class="sd">            Current model. Use `initModel` to prepare it.</span>
 <span class="sd">        optimizer (HyperparameterOptimization):</span>
@@ -155,17 +151,18 @@
 
     <span class="n">_notJSON</span><span class="p">:</span> <span class="n">ClassVar</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">JSONSerializable</span><span class="o">.</span><span class="n">_notJSON</span><span class="p">,</span> <span class="s2">&quot;ds&quot;</span><span class="p">,</span> <span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">data_source</span><span class="p">:</span> <span class="n">DataSource</span><span class="p">,</span>
         <span class="n">descriptors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorSet</span><span class="p">],</span>
-        <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetProperty</span><span class="p">],</span>
-        <span class="n">prep_settings</span><span class="p">:</span> <span class="n">DataPrepSettings</span><span class="p">,</span>
+        <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetSpec</span><span class="p">],</span>
+        <span class="n">pipeline</span><span class="p">:</span> <span class="n">DatasetPipeline</span><span class="p">,</span>
         <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span>
         <span class="n">optimizer</span><span class="p">:</span> <span class="n">HyperparameterOptimization</span><span class="p">,</span>
         <span class="n">assessors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ModelAssessor</span><span class="p">],</span>
+        <span class="n">subsets</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">DataSplit</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]],</span>
         <span class="n">random_seed</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the replica.</span>
@@ -182,14 +179,18 @@
 <span class="sd">                Descriptor sets to use.</span>
 <span class="sd">            target_props (list[TargetProperty]):</span>
 <span class="sd">                Target properties to use.</span>
-<span class="sd">            prep_settings (DataPrepSettings):</span>
-<span class="sd">                Data preparation settings to use.</span>
+<span class="sd">            pipeline (DatasetPipeline):</span>
+<span class="sd">                Feature processing pipeline to use for the replica.</span>
 <span class="sd">            model (QSPRModel):</span>
 <span class="sd">                Model to use for the replica.</span>
 <span class="sd">            optimizer (HyperparameterOptimization):</span>
 <span class="sd">                Hyperparameter optimizer to use.</span>
 <span class="sd">            assessors (list[ModelAssessor]):</span>
 <span class="sd">                Model assessors to use.</span>
+<span class="sd">            subsets (dict[str, tuple[DataSplit, str, int]]):</span>
+<span class="sd">                Dictionary mapping assessor names to tuples of data split, set </span>
+<span class="sd">                (Train/Test), and fold index. Used to apply assessors to subsets of </span>
+<span class="sd">                the data.</span>
 <span class="sd">            random_seed (int):</span>
 <span class="sd">                Random seed to use for all random operations withing the replica.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -198,32 +199,33 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dataSource</span> <span class="o">=</span> <span class="n">data_source</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span> <span class="o">=</span> <span class="n">descriptors</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">targetProps</span> <span class="o">=</span> <span class="n">target_props</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">prepSettings</span> <span class="o">=</span> <span class="n">prep_settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span> <span class="o">=</span> <span class="n">pipeline</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assessors</span> <span class="o">=</span> <span class="n">assessors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subsets</span> <span class="o">=</span> <span class="n">subsets</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">randomSeed</span> <span class="o">=</span> <span class="n">random_seed</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ds</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">o_dict</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__getstate__</span><span class="p">()</span>
         <span class="n">o_dict</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
         <span class="n">o_dict</span><span class="p">[</span><span class="s2">&quot;ds&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">o_dict</span><span class="p">[</span><span class="s2">&quot;results&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">o_dict</span>
 
-    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setstate__</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">QSPRModel</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ds</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">requiresGpu</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">requiresGpu</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether the model requires a GPU.</span>
 
 <span class="sd">        Returns:</span>
@@ -232,7 +234,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;setGPUs&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Replica.setGPUs"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica.setGPUs">[docs]</a>    <span class="k">def</span> <span class="nf">setGPUs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gpus</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+<div class="viewcode-block" id="Replica.setGPUs"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica.setGPUs">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setGPUs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gpus</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the GPUs to use for the model.</span>
 
 <span class="sd">        Args:</span>
@@ -244,7 +246,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Model does not support GPU usage.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Replica.getGPUs"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica.getGPUs">[docs]</a>    <span class="k">def</span> <span class="nf">getGPUs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<div class="viewcode-block" id="Replica.getGPUs"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica.getGPUs">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getGPUs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Gets the GPUs to use for the model.</span>
 
 <span class="sd">        Returns:</span>
@@ -257,7 +259,7 @@
             <span class="k">return</span> <span class="p">[]</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;A unique identifier for the replica.</span>
 
 <span class="sd">        Returns:</span>
@@ -266,7 +268,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">randomSeed</span><span class="si">}</span><span class="s2">&quot;</span>
 
-<div class="viewcode-block" id="Replica.initData"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica.initData">[docs]</a>    <span class="k">def</span> <span class="nf">initData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reload</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Replica.initData"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica.initData">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">initData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reload</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the data set for this replica.</span>
 
 <span class="sd">        Args:</span>
@@ -279,7 +281,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">randomState</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomSeed</span></div>
 
-<div class="viewcode-block" id="Replica.addDescriptors"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica.addDescriptors">[docs]</a>    <span class="k">def</span> <span class="nf">addDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reload</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Replica.addDescriptors"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica.addDescriptors">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">addDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reload</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Adds descriptors to the current data set. Make sure to call</span>
 <span class="sd">        `initData` first to get it from the source.</span>
 
@@ -313,18 +315,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">randomState</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomSeed</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Replica.prepData"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica.prepData">[docs]</a>    <span class="k">def</span> <span class="nf">prepData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepares the data set for this replica.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            ValueError:</span>
-<span class="sd">                If the data set has not been initialized.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data set not initialized. Call initData first.&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span><span class="o">**</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prepSettings</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">),</span> <span class="p">)</span></div>
-
-<div class="viewcode-block" id="Replica.initModel"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica.initModel">[docs]</a>    <span class="k">def</span> <span class="nf">initModel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Replica.initModel"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica.initModel">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">initModel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the model for this replica. This includes</span>
 <span class="sd">        initializing the model from the data set and optimizing</span>
 <span class="sd">        the hyperparameters if an optimizer is specified.</span>
@@ -336,13 +327,13 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data set not initialized. Call initData first.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">initFromDataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">initFromData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">initRandomState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">randomSeed</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Replica.runAssessment"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica.runAssessment">[docs]</a>    <span class="k">def</span> <span class="nf">runAssessment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Replica.runAssessment"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica.runAssessment">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">runAssessment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Runs the model assessment for this replica. This includes</span>
 <span class="sd">        running all model assessors and saving the results.</span>
 
@@ -360,7 +351,14 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Model not initialized. Call initModel first.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">assessor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">assessors</span><span class="p">:</span>
-            <span class="n">scores</span> <span class="o">=</span> <span class="n">assessor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">assessor</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsets</span><span class="p">:</span>
+                <span class="c1"># apply assessor to subset of data only if specified</span>
+                <span class="n">subset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsets</span><span class="p">[</span><span class="n">assessor</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+                <span class="n">fold</span> <span class="o">=</span> <span class="p">[</span><span class="n">fold</span> <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">subset</span><span class="p">[</span><span class="mi">0</span><span class="p">])][</span><span class="n">subset</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+                <span class="n">indices</span> <span class="o">=</span> <span class="n">fold</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">subset</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Train&quot;</span> <span class="k">else</span> <span class="n">fold</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">scores</span> <span class="o">=</span> <span class="n">assessor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">indices</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">scores</span> <span class="o">=</span> <span class="n">assessor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipeline</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scores</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
                 <span class="n">scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">scores</span><span class="p">])</span>
             <span class="n">scores_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
@@ -372,7 +370,7 @@
                         <span class="n">tp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                     <span class="n">score_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
                         <span class="p">{</span>
-                            <span class="s2">&quot;Assessor&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">assessor</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">],</span>
+                            <span class="s2">&quot;Assessor&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">assessor</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
                             <span class="s2">&quot;ScoreFunc&quot;</span><span class="p">:</span>
                                 <span class="p">[</span>
                                     <span class="p">(</span>
@@ -391,7 +389,7 @@
                     <span class="k">for</span> <span class="n">tp_score</span><span class="p">,</span> <span class="n">tp</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">fold_score</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProps</span><span class="p">):</span>
                         <span class="n">score_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
                             <span class="p">{</span>
-                                <span class="s2">&quot;Assessor&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">assessor</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">],</span>
+                                <span class="s2">&quot;Assessor&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">assessor</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
                                 <span class="s2">&quot;ScoreFunc&quot;</span><span class="p">:</span>
                                     <span class="p">[</span>
                                         <span class="p">(</span>
@@ -411,7 +409,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">,</span> <span class="n">scores_df</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="Replica.createReport"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica.createReport">[docs]</a>    <span class="k">def</span> <span class="nf">createReport</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Replica.createReport"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.replica.Replica.createReport">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">createReport</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates a report from the results of this replica.</span>
 
 <span class="sd">        Returns:</span>

@@ -1,28 +1,26 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models.tests &mdash; QSPRpred 4.0.0a2.dev3+gdd1d34be documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+  <title>qsprpred.models.tests &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=81d23b05"></script>
-        <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
-        <script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=ce9a7c35"></script>
+      <script src="../../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script>
     </script>
-        <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
-        <script src="../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -52,9 +50,6 @@
           <a href="../../../index.html" class="icon icon-home">
             QSPRpred
           </a>
-              <div class="version">
-                v4.0.0a2.dev3+gdd1d34be
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -99,17 +94,17 @@
   <h1>Source code for qsprpred.models.tests</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;This module holds the tests for functions regarding QSPR modelling.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span>
-<span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">TestCase</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Type</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest</span><span class="w"> </span><span class="kn">import</span> <span class="n">TestCase</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">mlchemad.applicability_domains</span> <span class="kn">import</span> <span class="n">KNNApplicabilityDomain</span>
-<span class="kn">from</span> <span class="nn">parameterized</span> <span class="kn">import</span> <span class="n">parameterized</span>
-<span class="kn">from</span> <span class="nn">sklearn.cross_decomposition</span> <span class="kn">import</span> <span class="n">PLSRegression</span>
-<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="n">RandomForestRegressor</span>
-<span class="kn">from</span> <span class="nn">sklearn.impute</span> <span class="kn">import</span> <span class="n">SimpleImputer</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">mlchemad.applicability_domains</span><span class="w"> </span><span class="kn">import</span> <span class="n">KNNApplicabilityDomain</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">parameterized</span><span class="w"> </span><span class="kn">import</span> <span class="n">parameterized</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.cross_decomposition</span><span class="w"> </span><span class="kn">import</span> <span class="n">PLSRegression</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="n">RandomForestRegressor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.impute</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleImputer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">accuracy_score</span><span class="p">,</span>
     <span class="n">explained_variance_score</span><span class="p">,</span>
     <span class="n">log_loss</span><span class="p">,</span>
@@ -118,22 +113,23 @@
     <span class="n">roc_auc_score</span><span class="p">,</span>
     <span class="n">top_k_accuracy_score</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">sklearn.naive_bayes</span> <span class="kn">import</span> <span class="n">GaussianNB</span>
-<span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="kn">import</span> <span class="n">KNeighborsClassifier</span><span class="p">,</span> <span class="n">KNeighborsRegressor</span>
-<span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="kn">import</span> <span class="n">SVC</span><span class="p">,</span> <span class="n">SVR</span>
-<span class="kn">from</span> <span class="nn">xgboost</span> <span class="kn">import</span> <span class="n">XGBClassifier</span><span class="p">,</span> <span class="n">XGBRegressor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.naive_bayes</span><span class="w"> </span><span class="kn">import</span> <span class="n">GaussianNB</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.neighbors</span><span class="w"> </span><span class="kn">import</span> <span class="n">KNeighborsClassifier</span><span class="p">,</span> <span class="n">KNeighborsRegressor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.svm</span><span class="w"> </span><span class="kn">import</span> <span class="n">SVC</span><span class="p">,</span> <span class="n">SVR</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">xgboost</span><span class="w"> </span><span class="kn">import</span> <span class="n">XGBClassifier</span><span class="p">,</span> <span class="n">XGBRegressor</span>
 
-<span class="kn">from</span> <span class="nn">..data.processing.applicability_domain</span> <span class="kn">import</span> <span class="n">MLChemADWrapper</span>
-<span class="kn">from</span> <span class="nn">..models.early_stopping</span> <span class="kn">import</span> <span class="n">EarlyStopping</span><span class="p">,</span> <span class="n">EarlyStoppingMode</span><span class="p">,</span> <span class="n">early_stopping</span>
-<span class="kn">from</span> <span class="nn">..models.monitors</span> <span class="kn">import</span> <span class="n">BaseMonitor</span><span class="p">,</span> <span class="n">FileMonitor</span><span class="p">,</span> <span class="n">ListMonitor</span>
-<span class="kn">from</span> <span class="nn">..models.scikit_learn</span> <span class="kn">import</span> <span class="n">SklearnModel</span>
-<span class="kn">from</span> <span class="nn">..tasks</span> <span class="kn">import</span> <span class="n">ModelTasks</span><span class="p">,</span> <span class="n">TargetTasks</span>
-<span class="kn">from</span> <span class="nn">..utils.testing.base</span> <span class="kn">import</span> <span class="n">QSPRTestCase</span>
-<span class="kn">from</span> <span class="nn">..utils.testing.check_mixins</span> <span class="kn">import</span> <span class="n">ModelCheckMixIn</span><span class="p">,</span> <span class="n">MonitorsCheckMixIn</span>
-<span class="kn">from</span> <span class="nn">..utils.testing.path_mixins</span> <span class="kn">import</span> <span class="n">ModelDataSetsPathMixIn</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">SklearnMetrics</span>
-<span class="kn">from</span> <span class="nn">.assessment.classification</span> <span class="kn">import</span> <span class="n">create_metrics_summary</span>
-<span class="kn">from</span> <span class="nn">.assessment.metrics.classification</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..data.processing.applicability_domain</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLChemAD</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..data.processing.imputers</span><span class="w"> </span><span class="kn">import</span> <span class="n">TargetImputer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..models.early_stopping</span><span class="w"> </span><span class="kn">import</span> <span class="n">EarlyStopping</span><span class="p">,</span> <span class="n">EarlyStoppingMode</span><span class="p">,</span> <span class="n">early_stopping</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..models.monitors</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseMonitor</span><span class="p">,</span> <span class="n">FileMonitor</span><span class="p">,</span> <span class="n">ListMonitor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..models.scikit_learn</span><span class="w"> </span><span class="kn">import</span> <span class="n">SklearnModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..tasks</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelTasks</span><span class="p">,</span> <span class="n">TargetTasks</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..utils.testing.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPRTestCase</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..utils.testing.check_mixins</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelCheckMixIn</span><span class="p">,</span> <span class="n">MonitorsCheckMixIn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..utils.testing.path_mixins</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelDataSetsPathMixIn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">SklearnMetrics</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.assessment.classification</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_metrics_summary</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.assessment.metrics.classification</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">BEDROC</span><span class="p">,</span>
     <span class="n">BalancedCohenKappa</span><span class="p">,</span>
     <span class="n">BalancedMatthewsCorrcoeff</span><span class="p">,</span>
@@ -149,8 +145,8 @@
     <span class="n">Sensitivity</span><span class="p">,</span>
     <span class="n">Specificity</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.assessment.metrics.masked</span> <span class="kn">import</span> <span class="n">MaskedMetric</span>
-<span class="kn">from</span> <span class="nn">.assessment.metrics.regression</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.assessment.metrics.masked</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaskedMetric</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.assessment.metrics.regression</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">R20</span><span class="p">,</span>
     <span class="n">AbsoluteAverageFoldError</span><span class="p">,</span>
     <span class="n">AverageFoldError</span><span class="p">,</span>
@@ -161,17 +157,17 @@
     <span class="n">PercentageWithinFoldError</span><span class="p">,</span>
     <span class="n">RPrime20</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.assessment.regression</span> <span class="kn">import</span> <span class="n">create_correlation_summary</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.assessment.regression</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_correlation_summary</span>
 
 
-<div class="viewcode-block" id="SklearnBaseModelTestCase"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.SklearnBaseModelTestCase">[docs]</a><span class="k">class</span> <span class="nc">SklearnBaseModelTestCase</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">ModelCheckMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="SklearnBaseModelTestCase"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.SklearnBaseModelTestCase">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SklearnBaseModelTestCase</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">ModelCheckMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class holds the tests for the SklearnModel class.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="SklearnBaseModelTestCase.setUp"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.SklearnBaseModelTestCase.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SklearnBaseModelTestCase.setUp"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.SklearnBaseModelTestCase.setUp">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span> <span class="o">=</span> <span class="mi">2</span></div>
 
-<div class="viewcode-block" id="SklearnBaseModelTestCase.getModel"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.SklearnBaseModelTestCase.getModel">[docs]</a>    <span class="k">def</span> <span class="nf">getModel</span><span class="p">(</span>
+<div class="viewcode-block" id="SklearnBaseModelTestCase.getModel"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.SklearnBaseModelTestCase.getModel">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getModel</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">alg</span><span class="p">:</span> <span class="n">Type</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -201,7 +197,7 @@
         <span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="TestSklearnRegression"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnRegression">[docs]</a><span class="k">class</span> <span class="nc">TestSklearnRegression</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestSklearnRegression"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnRegression">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TestSklearnRegression</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the SklearnModel class for regression models.&quot;&quot;&quot;</span>
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
@@ -219,7 +215,7 @@
             <span class="p">)</span>
         <span class="p">]</span>
     <span class="p">)</span>
-    <span class="k">def</span> <span class="nf">testRegressionBasicFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model_class</span><span class="p">,</span> <span class="n">random_state</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testRegressionBasicFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model_class</span><span class="p">,</span> <span class="n">random_state</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model training for regression models.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">model_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;SVR&quot;</span><span class="p">,</span> <span class="s2">&quot;PLSR&quot;</span><span class="p">]:</span>
             <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">}</span>
@@ -231,8 +227,8 @@
                 <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span>
             <span class="p">}],</span>
-            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
         <span class="p">)</span>
+        <span class="n">pipeline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">()</span>
         <span class="c1"># initialize model for training from class</span>
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
@@ -240,7 +236,7 @@
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
             <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">)</span>
 
         <span class="c1"># load in model from file</span>
         <span class="n">predictor</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">)</span>
@@ -255,17 +251,17 @@
                 <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
                 <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">comparison_model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">comparison_model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span>
                 <span class="n">predictor</span><span class="p">,</span>  <span class="c1"># model loaded from file</span>
-                <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+                <span class="n">dataset</span><span class="p">,</span>
                 <span class="n">comparison_model</span><span class="o">=</span><span class="n">comparison_model</span><span class="p">,</span>  <span class="c1"># comparison model not saved/loaded</span>
                 <span class="n">expect_equal_result</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">random_state</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
 
-<div class="viewcode-block" id="TestSklearnRegression.testPLSRegressionSummaryWithSeed"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnRegression.testPLSRegressionSummaryWithSeed">[docs]</a>    <span class="k">def</span> <span class="nf">testPLSRegressionSummaryWithSeed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestSklearnRegression.testPLSRegressionSummaryWithSeed"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnRegression.testPLSRegressionSummaryWithSeed">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testPLSRegressionSummaryWithSeed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model training for regression models.&quot;&quot;&quot;</span>
         <span class="n">task</span> <span class="o">=</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
         <span class="n">model_name</span> <span class="o">=</span> <span class="s2">&quot;PLSR&quot;</span>
@@ -275,16 +271,16 @@
             <span class="n">target_props</span><span class="o">=</span><span class="p">[{</span>
                 <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span>
-            <span class="p">}],</span>
-            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
+            <span class="p">}]</span>
         <span class="p">)</span>
+        <span class="n">pipeline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">()</span>
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="n">alg</span><span class="o">=</span><span class="n">model_class</span><span class="p">,</span>
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
-        <span class="n">expected_summary</span> <span class="o">=</span> <span class="n">create_correlation_summary</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">)</span>
+        <span class="n">expected_summary</span> <span class="o">=</span> <span class="n">create_correlation_summary</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;crossval&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">])</span>
 
         <span class="c1"># Generate summary again, check that the result is identical</span>
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
@@ -292,16 +288,18 @@
             <span class="n">alg</span><span class="o">=</span><span class="n">model_class</span><span class="p">,</span>
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
-        <span class="n">summary</span> <span class="o">=</span> <span class="n">create_correlation_summary</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">)</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="n">create_correlation_summary</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;crossval&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">])</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;ModelName&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;ModelName&quot;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;R2&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;R2&quot;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;RMSE&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;RMSE&quot;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">])</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Metric&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Metric&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Assessment&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Assessment&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Fold&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Fold&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">])</span></div></div>
 
 
-<div class="viewcode-block" id="TestSklearnRegressionMultiTask"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnRegressionMultiTask">[docs]</a><span class="k">class</span> <span class="nc">TestSklearnRegressionMultiTask</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestSklearnRegressionMultiTask"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnRegressionMultiTask">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TestSklearnRegressionMultiTask</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the SklearnModel class for multi-task regression models.&quot;&quot;&quot;</span>
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
@@ -313,7 +311,7 @@
             <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">((</span><span class="n">KNeighborsRegressor</span><span class="p">,</span> <span class="s2">&quot;KNNR&quot;</span><span class="p">),</span> <span class="p">)</span>
         <span class="p">]</span>
     <span class="p">)</span>
-    <span class="k">def</span> <span class="nf">testRegressionMultiTaskFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model_class</span><span class="p">,</span> <span class="n">random_state</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testRegressionMultiTaskFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model_class</span><span class="p">,</span> <span class="n">random_state</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model training for multitask regression models.&quot;&quot;&quot;</span>
         <span class="c1"># initialize dataset</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span>
@@ -321,15 +319,12 @@
                 <span class="p">{</span>
                     <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span>
-                    <span class="s2">&quot;imputer&quot;</span><span class="p">:</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">),</span>
                 <span class="p">},</span>
                 <span class="p">{</span>
                     <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span>
-                    <span class="s2">&quot;imputer&quot;</span><span class="p">:</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">),</span>
                 <span class="p">},</span>
             <span class="p">],</span>
-            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="c1"># test classifier</span>
         <span class="c1"># initialize model for training from class</span>
@@ -338,7 +333,8 @@
             <span class="n">alg</span><span class="o">=</span><span class="n">model_class</span><span class="p">,</span>
             <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+        <span class="n">pipeline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(</span><span class="n">TargetImputer</span><span class="p">(</span><span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">=</span><span class="n">pipeline</span><span class="p">)</span>
 
         <span class="c1"># load in model from file</span>
         <span class="n">predictor</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="p">(</span>
@@ -354,7 +350,7 @@
                 <span class="n">alg</span><span class="o">=</span><span class="n">model_class</span><span class="p">,</span>
                 <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">comparison_model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">comparison_model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">=</span><span class="n">pipeline</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span>
                 <span class="n">predictor</span><span class="p">,</span>  <span class="c1"># model loaded from file</span>
                 <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
@@ -365,8 +361,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="TestSklearnSerialization"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnSerialization">[docs]</a><span class="k">class</span> <span class="nc">TestSklearnSerialization</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
-<div class="viewcode-block" id="TestSklearnSerialization.testJSON"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnSerialization.testJSON">[docs]</a>    <span class="k">def</span> <span class="nf">testJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestSklearnSerialization"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnSerialization">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TestSklearnSerialization</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestSklearnSerialization.testJSON"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnSerialization.testJSON">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testJSON</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="s2">&quot;TestSerialization&quot;</span><span class="p">,</span>
             <span class="n">alg</span><span class="o">=</span><span class="n">RandomForestClassifier</span><span class="p">,</span>
@@ -390,7 +386,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">toJSON</span><span class="p">(),</span> <span class="n">model4</span><span class="o">.</span><span class="n">toJSON</span><span class="p">())</span></div></div>
 
 
-<div class="viewcode-block" id="TestSklearnClassification"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnClassification">[docs]</a><span class="k">class</span> <span class="nc">TestSklearnClassification</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestSklearnClassification"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnClassification">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TestSklearnClassification</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the SklearnModel class for classification models.&quot;&quot;&quot;</span>
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
@@ -414,7 +410,7 @@
             <span class="p">)</span>
         <span class="p">]</span>
     <span class="p">)</span>
-    <span class="k">def</span> <span class="nf">testClassificationBasicFit</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testClassificationBasicFit</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model_class</span><span class="p">,</span> <span class="n">random_state</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model training for classification models.&quot;&quot;&quot;</span>
@@ -438,7 +434,6 @@
                 <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span>
                 <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="n">th</span>
             <span class="p">}],</span>
-            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
         <span class="p">)</span>
         <span class="c1"># test classifier</span>
         <span class="c1"># initialize model for training from class</span>
@@ -448,7 +443,7 @@
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
             <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">())</span>
 
         <span class="c1"># load in model from file</span>
         <span class="n">predictor</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">base_dir</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">baseDir</span><span class="p">)</span>
@@ -463,7 +458,7 @@
                 <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
                 <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">comparison_model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">comparison_model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">())</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span>
                 <span class="n">predictor</span><span class="p">,</span>  <span class="c1"># model loaded from file</span>
                 <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
@@ -473,7 +468,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span>
 
-<div class="viewcode-block" id="TestSklearnClassification.testRandomForestClassifierFitWithSeed"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnClassification.testRandomForestClassifierFitWithSeed">[docs]</a>    <span class="k">def</span> <span class="nf">testRandomForestClassifierFitWithSeed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestSklearnClassification.testRandomForestClassifierFitWithSeed"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnClassification.testRandomForestClassifierFitWithSeed">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testRandomForestClassifierFitWithSeed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">,</span>
         <span class="p">}</span>
@@ -484,7 +479,6 @@
                 <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
                 <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">]</span>
             <span class="p">}],</span>
-            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
             <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="c1"># test classifier</span>
@@ -494,8 +488,8 @@
             <span class="n">alg</span><span class="o">=</span><span class="n">RandomForestClassifier</span><span class="p">,</span>
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
-        <span class="n">expected_summary</span> <span class="o">=</span> <span class="n">create_metrics_summary</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">())</span>
+        <span class="n">expected_summary</span> <span class="o">=</span> <span class="n">create_metrics_summary</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">assessments</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;crossval&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">])</span>
 
         <span class="c1"># Generate summary again, check that the result is identical</span>
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getModel</span><span class="p">(</span>
@@ -504,16 +498,18 @@
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
             <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
-        <span class="n">summary</span> <span class="o">=</span> <span class="n">create_metrics_summary</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">())</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="n">create_metrics_summary</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">assessments</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;crossval&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">])</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Metric&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Metric&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;TestSet&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;TestSet&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Assessment&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Assessment&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Fold&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Fold&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">],</span> <span class="n">expected_summary</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">])</span></div></div>
 
 
-<div class="viewcode-block" id="TestSklearnClassificationMultiTask"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnClassificationMultiTask">[docs]</a><span class="k">class</span> <span class="nc">TestSklearnClassificationMultiTask</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestSklearnClassificationMultiTask"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestSklearnClassificationMultiTask">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TestSklearnClassificationMultiTask</span><span class="p">(</span><span class="n">SklearnBaseModelTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the SklearnModel class for multi-task classification models.&quot;&quot;&quot;</span>
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
@@ -525,7 +521,7 @@
             <span class="k">for</span> <span class="n">alg</span><span class="p">,</span> <span class="n">alg_name</span> <span class="ow">in</span> <span class="p">((</span><span class="n">KNeighborsClassifier</span><span class="p">,</span> <span class="s2">&quot;KNNC&quot;</span><span class="p">),</span> <span class="p">)</span>
         <span class="p">]</span>
     <span class="p">)</span>
-    <span class="k">def</span> <span class="nf">testClassificationMultiTaskFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model_class</span><span class="p">,</span> <span class="n">random_state</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testClassificationMultiTaskFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">model_name</span><span class="p">,</span> <span class="n">model_class</span><span class="p">,</span> <span class="n">random_state</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test model training for multitask classification models.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">model_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;NB&quot;</span><span class="p">,</span> <span class="s2">&quot;SVC&quot;</span><span class="p">]:</span>
             <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">}</span>
@@ -541,16 +537,14 @@
                     <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
                     <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.3</span><span class="p">],</span>
-                    <span class="s2">&quot;imputer&quot;</span><span class="p">:</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">),</span>
                 <span class="p">},</span>
                 <span class="p">{</span>
                     <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
                     <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">6.5</span><span class="p">],</span>
-                    <span class="s2">&quot;imputer&quot;</span><span class="p">:</span> <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">),</span>
                 <span class="p">},</span>
             <span class="p">],</span>
-            <span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
+            <span class="n">drop_empty_target_props</span><span class="o">=</span><span class="kc">False</span>
         <span class="p">)</span>
         <span class="c1"># test classifier</span>
         <span class="c1"># initialize model for training from class</span>
@@ -560,7 +554,10 @@
             <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
             <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+        <span class="n">pipeline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(</span>
+            <span class="n">TargetImputer</span><span class="p">(</span><span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;most_frequent&quot;</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">=</span><span class="n">pipeline</span><span class="p">)</span>
 
         <span class="c1"># load in model from file</span>
         <span class="n">predictor</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="p">(</span>
@@ -577,7 +574,7 @@
                 <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
                 <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">comparison_model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitTest</span><span class="p">(</span><span class="n">comparison_model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">=</span><span class="n">pipeline</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span>
                 <span class="n">predictor</span><span class="p">,</span>  <span class="c1"># model loaded from file</span>
                 <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
@@ -588,9 +585,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">predictorTest</span><span class="p">(</span><span class="n">predictor</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="TestMetrics"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics">[docs]</a><span class="k">class</span> <span class="nc">TestMetrics</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMetrics"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TestMetrics</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the SklearnMetrics from the metrics module.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="TestMetrics.sample_data"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.sample_data">[docs]</a>    <span class="k">def</span> <span class="nf">sample_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">ModelTasks</span><span class="p">,</span> <span class="n">use_proba</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMetrics.sample_data"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.sample_data">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">sample_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">:</span> <span class="n">ModelTasks</span><span class="p">,</span> <span class="n">use_proba</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sample data for testing.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">task</span> <span class="o">==</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">:</span>
             <span class="n">y_true</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">,</span> <span class="mf">5.2</span><span class="p">])</span>
@@ -639,7 +636,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid task or not implemented: </span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span></div>
 
-<div class="viewcode-block" id="TestMetrics.test_SklearnMetrics"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_SklearnMetrics">[docs]</a>    <span class="k">def</span> <span class="nf">test_SklearnMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMetrics.test_SklearnMetrics"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_SklearnMetrics">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_SklearnMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the sklearn metrics wrapper.&quot;&quot;&quot;</span>
 
         <span class="c1"># test regression metrics</span>
@@ -692,7 +689,11 @@
         <span class="c1">## multi-class with threshold</span>
         <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_data</span><span class="p">(</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTICLASS</span><span class="p">,</span> <span class="n">use_proba</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">qsprpred_scorer</span> <span class="o">=</span> <span class="n">SklearnMetrics</span><span class="p">(</span>
-            <span class="n">make_scorer</span><span class="p">(</span><span class="n">top_k_accuracy_score</span><span class="p">,</span> <span class="n">needs_threshold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">make_scorer</span><span class="p">(</span>
+                <span class="n">top_k_accuracy_score</span><span class="p">,</span>
+                <span class="n">response_method</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;predict_proba&quot;</span><span class="p">,</span> <span class="s2">&quot;decision_function&quot;</span><span class="p">),</span>
+                <span class="n">k</span><span class="o">=</span><span class="mi">2</span>
+            <span class="p">)</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
             <span class="n">qsprpred_scorer</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span>
@@ -719,7 +720,7 @@
             <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestMetrics.test_CalibrationError"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_CalibrationError">[docs]</a>    <span class="k">def</span> <span class="nf">test_CalibrationError</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMetrics.test_CalibrationError"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_CalibrationError">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_CalibrationError</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the calibration error metric.&quot;&quot;&quot;</span>
         <span class="c1"># test calibration error with single class probabilities</span>
         <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_data</span><span class="p">(</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="n">use_proba</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -736,25 +737,25 @@
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">):</span>
             <span class="n">cal_error</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample_data</span><span class="p">(</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="n">use_proba</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="TestMetrics.test_BEDROC"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_BEDROC">[docs]</a>    <span class="k">def</span> <span class="nf">test_BEDROC</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMetrics.test_BEDROC"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_BEDROC">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_BEDROC</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the BEDROC metric.&quot;&quot;&quot;</span>
         <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_data</span><span class="p">(</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="n">use_proba</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">bedroc</span> <span class="o">=</span> <span class="n">BEDROC</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">bedroc</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span> <span class="nb">float</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestMetrics.test_EnrichmentFactor"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_EnrichmentFactor">[docs]</a>    <span class="k">def</span> <span class="nf">test_EnrichmentFactor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMetrics.test_EnrichmentFactor"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_EnrichmentFactor">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_EnrichmentFactor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the enrichment factor metric.&quot;&quot;&quot;</span>
         <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_data</span><span class="p">(</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="n">use_proba</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">enrichment</span> <span class="o">=</span> <span class="n">EnrichmentFactor</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">enrichment</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span> <span class="nb">float</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestMetrics.test_RobustInitialEnhancement"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_RobustInitialEnhancement">[docs]</a>    <span class="k">def</span> <span class="nf">test_RobustInitialEnhancement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMetrics.test_RobustInitialEnhancement"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_RobustInitialEnhancement">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_RobustInitialEnhancement</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the robust initial enhancement metric.&quot;&quot;&quot;</span>
         <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_data</span><span class="p">(</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="n">use_proba</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">robust_enhancement</span> <span class="o">=</span> <span class="n">RobustInitialEnhancement</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">robust_enhancement</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span> <span class="nb">float</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestMetrics.test_ConfusionMatrixMetrics"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_ConfusionMatrixMetrics">[docs]</a>    <span class="k">def</span> <span class="nf">test_ConfusionMatrixMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMetrics.test_ConfusionMatrixMetrics"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_ConfusionMatrixMetrics">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_ConfusionMatrixMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_data</span><span class="p">(</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">Prevalence</span><span class="p">()(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span> <span class="nb">float</span><span class="p">)</span>
@@ -768,37 +769,37 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">BalancedMatthewsCorrcoeff</span><span class="p">()(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span> <span class="nb">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">BalancedCohenKappa</span><span class="p">()(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span> <span class="nb">float</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestMetrics.test_Pearson"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_Pearson">[docs]</a>    <span class="k">def</span> <span class="nf">test_Pearson</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMetrics.test_Pearson"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_Pearson">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_Pearson</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_data</span><span class="p">(</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">)</span>
         <span class="n">Pearson</span><span class="p">()(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestMetrics.test_Kendall"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_Kendall">[docs]</a>    <span class="k">def</span> <span class="nf">test_Kendall</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMetrics.test_Kendall"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_Kendall">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_Kendall</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_data</span><span class="p">(</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">)</span>
         <span class="n">Kendall</span><span class="p">()(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestMetrics.test_KPrimeSlope"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_KPrimeSlope">[docs]</a>    <span class="k">def</span> <span class="nf">test_KPrimeSlope</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMetrics.test_KPrimeSlope"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_KPrimeSlope">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_KPrimeSlope</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_data</span><span class="p">(</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">)</span>
         <span class="n">KPrimeSlope</span><span class="p">()(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestMetrics.test_KSlope"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_KSlope">[docs]</a>    <span class="k">def</span> <span class="nf">test_KSlope</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMetrics.test_KSlope"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_KSlope">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_KSlope</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_data</span><span class="p">(</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">)</span>
         <span class="n">KSlope</span><span class="p">()(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestMetrics.test_R20"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_R20">[docs]</a>    <span class="k">def</span> <span class="nf">test_R20</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMetrics.test_R20"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_R20">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_R20</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_data</span><span class="p">(</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">)</span>
         <span class="n">R20</span><span class="p">()(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestMetrics.test_RPrime20"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_RPrime20">[docs]</a>    <span class="k">def</span> <span class="nf">test_RPrime20</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMetrics.test_RPrime20"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_RPrime20">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_RPrime20</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_data</span><span class="p">(</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">)</span>
         <span class="n">RPrime20</span><span class="p">()(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestMetrics.test_FoldErrorMetrics"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_FoldErrorMetrics">[docs]</a>    <span class="k">def</span> <span class="nf">test_FoldErrorMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMetrics.test_FoldErrorMetrics"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_FoldErrorMetrics">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_FoldErrorMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_data</span><span class="p">(</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">AbsoluteAverageFoldError</span><span class="p">()(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span> <span class="nb">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">AverageFoldError</span><span class="p">()(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span> <span class="nb">float</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">PercentageWithinFoldError</span><span class="p">()(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span> <span class="nb">float</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestMetrics.test_MaskedMetric"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_MaskedMetric">[docs]</a>    <span class="k">def</span> <span class="nf">test_MaskedMetric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMetrics.test_MaskedMetric"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMetrics.test_MaskedMetric">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_MaskedMetric</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_data</span><span class="p">(</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">)</span>
         <span class="n">y_true</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -820,12 +821,12 @@
         <span class="n">y_true</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div></div>
 
 
-<div class="viewcode-block" id="TestEarlyStopping"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping">[docs]</a><span class="k">class</span> <span class="nc">TestEarlyStopping</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
-<div class="viewcode-block" id="TestEarlyStopping.setUp"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestEarlyStopping"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TestEarlyStopping</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestEarlyStopping.setUp"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.setUp">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="TestEarlyStopping.test_earlyStoppingMode"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.test_earlyStoppingMode">[docs]</a>    <span class="k">def</span> <span class="nf">test_earlyStoppingMode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestEarlyStopping.test_earlyStoppingMode"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.test_earlyStoppingMode">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_earlyStoppingMode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the early stopping mode enum.&quot;&quot;&quot;</span>
         <span class="c1"># get the enum values</span>
         <span class="n">recording</span> <span class="o">=</span> <span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">RECORDING</span>
@@ -844,7 +845,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s2">&quot;FIXED&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">fixed</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="s2">&quot;OPTIMAL&quot;</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">optimal</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="TestEarlyStopping.test_EarlyStopping"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.test_EarlyStopping">[docs]</a>    <span class="k">def</span> <span class="nf">test_EarlyStopping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestEarlyStopping.test_EarlyStopping"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.test_EarlyStopping">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_EarlyStopping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the early stopping class.&quot;&quot;&quot;</span>
 
         <span class="n">earlystopping</span> <span class="o">=</span> <span class="n">EarlyStopping</span><span class="p">(</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">RECORDING</span><span class="p">)</span>
@@ -894,15 +895,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">earlystopping2</span><span class="o">.</span><span class="n">optimalEpochs</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">earlystopping</span><span class="o">.</span><span class="n">numEpochs</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestEarlyStopping.test_early_stopping_decorator"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.test_early_stopping_decorator">[docs]</a>    <span class="k">def</span> <span class="nf">test_early_stopping_decorator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestEarlyStopping.test_early_stopping_decorator"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestEarlyStopping.test_early_stopping_decorator">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_early_stopping_decorator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the early stopping decorator.&quot;&quot;&quot;</span>
-        <span class="k">class</span> <span class="nc">test_class</span><span class="p">:</span>
-            <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">support</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">class</span><span class="w"> </span><span class="nc">test_class</span><span class="p">:</span>
+            <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">support</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">earlyStopping</span> <span class="o">=</span> <span class="n">EarlyStopping</span><span class="p">(</span><span class="n">EarlyStoppingMode</span><span class="o">.</span><span class="n">RECORDING</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">supportsEarlyStopping</span> <span class="o">=</span> <span class="n">support</span>
 
             <span class="nd">@early_stopping</span>
-            <span class="k">def</span> <span class="nf">test_func</span><span class="p">(</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">test_func</span><span class="p">(</span>
                 <span class="bp">self</span><span class="p">,</span>
                 <span class="n">X</span><span class="p">,</span>
                 <span class="n">y</span><span class="p">,</span>
@@ -946,12 +947,12 @@
             <span class="n">_</span> <span class="o">=</span> <span class="n">test_obj</span><span class="o">.</span><span class="n">test_func</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">best_epoch</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="TestMonitors"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors">[docs]</a><span class="k">class</span> <span class="nc">TestMonitors</span><span class="p">(</span><span class="n">MonitorsCheckMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
-<div class="viewcode-block" id="TestMonitors.setUp"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMonitors"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TestMonitors</span><span class="p">(</span><span class="n">MonitorsCheckMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMonitors.setUp"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors.setUp">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="TestMonitors.testBaseMonitor"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors.testBaseMonitor">[docs]</a>    <span class="k">def</span> <span class="nf">testBaseMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMonitors.testBaseMonitor"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors.testBaseMonitor">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testBaseMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the base monitor&quot;&quot;&quot;</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="p">(</span>
             <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
@@ -961,13 +962,14 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">runMonitorTest</span><span class="p">(</span>
             <span class="n">model</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span><span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">()),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
             <span class="n">BaseMonitor</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">baseMonitorTest</span><span class="p">,</span>
             <span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestMonitors.testFileMonitor"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors.testFileMonitor">[docs]</a>    <span class="k">def</span> <span class="nf">testFileMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMonitors.testFileMonitor"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors.testFileMonitor">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testFileMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the file monitor&quot;&quot;&quot;</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="p">(</span>
             <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
@@ -977,13 +979,14 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">runMonitorTest</span><span class="p">(</span>
             <span class="n">model</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span><span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">()),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
             <span class="n">FileMonitor</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fileMonitorTest</span><span class="p">,</span>
             <span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestMonitors.testListMonitor"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors.testListMonitor">[docs]</a>    <span class="k">def</span> <span class="nf">testListMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMonitors.testListMonitor"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestMonitors.testListMonitor">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testListMonitor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the list monitor&quot;&quot;&quot;</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="p">(</span>
             <span class="n">base_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedModelsPath</span><span class="p">,</span>
@@ -993,7 +996,8 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">runMonitorTest</span><span class="p">(</span>
             <span class="n">model</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span><span class="n">preparation_settings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">()),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
             <span class="n">ListMonitor</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">listMonitorTest</span><span class="p">,</span>
             <span class="kc">False</span><span class="p">,</span>
@@ -1001,12 +1005,12 @@
         <span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="TestAttachedApplicabilityDomain"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestAttachedApplicabilityDomain">[docs]</a><span class="k">class</span> <span class="nc">TestAttachedApplicabilityDomain</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
-<div class="viewcode-block" id="TestAttachedApplicabilityDomain.setUp"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestAttachedApplicabilityDomain.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestAttachedApplicabilityDomain"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestAttachedApplicabilityDomain">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TestAttachedApplicabilityDomain</span><span class="p">(</span><span class="n">ModelDataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestAttachedApplicabilityDomain.setUp"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestAttachedApplicabilityDomain.setUp">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="TestAttachedApplicabilityDomain.testAttachedApplicabilityDomain"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestAttachedApplicabilityDomain.testAttachedApplicabilityDomain">[docs]</a>    <span class="k">def</span> <span class="nf">testAttachedApplicabilityDomain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestAttachedApplicabilityDomain.testAttachedApplicabilityDomain"><a class="viewcode-back" href="../../../api/qsprpred.models.html#qsprpred.models.tests.TestAttachedApplicabilityDomain.testAttachedApplicabilityDomain">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testAttachedApplicabilityDomain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the attached applicability domain class.&quot;&quot;&quot;</span>
 
         <span class="c1"># initialize test dataset with attached applicability domain</span>
@@ -1015,11 +1019,6 @@
                 <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="s2">&quot;REGRESSION&quot;</span>
             <span class="p">}],</span>
-            <span class="n">preparation_settings</span><span class="o">=</span><span class="p">{</span>
-                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">(),</span>
-                <span class="s2">&quot;applicability_domain&quot;</span><span class="p">:</span>
-                    <span class="n">KNNApplicabilityDomain</span><span class="p">(</span><span class="n">dist</span><span class="o">=</span><span class="s2">&quot;euclidean&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span>
-            <span class="p">},</span>
         <span class="p">)</span>
         <span class="c1"># initialize model for training</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="p">(</span>
@@ -1029,28 +1028,29 @@
             <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nCPU</span><span class="p">},</span>
             <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">applicabilityDomain</span> <span class="o">=</span> <span class="n">KNNApplicabilityDomain</span><span class="p">(</span>
+            <span class="n">dist</span><span class="o">=</span><span class="s2">&quot;euclidean&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="kc">None</span>
+        <span class="p">)</span>
 
-        <span class="n">model</span><span class="o">.</span><span class="n">fitDataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">fitDataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">())</span>
 
         <span class="c1"># check if the applicability domain is attached to the model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;applicabilityDomain&quot;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">applicabilityDomain</span><span class="p">,</span> <span class="n">MLChemADWrapper</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">applicabilityDomain</span><span class="p">,</span> <span class="n">MLChemAD</span><span class="p">)</span>
 
         <span class="c1"># check if the applicability domain is saved and loaded correctly</span>
         <span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
         <span class="n">model2</span> <span class="o">=</span> <span class="n">SklearnModel</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">model2</span><span class="p">,</span> <span class="s2">&quot;applicabilityDomain&quot;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">model2</span><span class="o">.</span><span class="n">applicabilityDomain</span><span class="p">,</span> <span class="n">MLChemADWrapper</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">model2</span><span class="o">.</span><span class="n">applicabilityDomain</span><span class="p">,</span> <span class="n">MLChemAD</span><span class="p">)</span>
 
         <span class="c1"># make predictions with mlchemad ap on the dataset directly</span>
         <span class="n">comparison_ap</span> <span class="o">=</span> <span class="n">KNNApplicabilityDomain</span><span class="p">(</span>
             <span class="n">dist</span><span class="o">=</span><span class="s2">&quot;euclidean&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span> <span class="n">scaling</span><span class="o">=</span><span class="kc">None</span>
         <span class="p">)</span>
-        <span class="n">features</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">getFeatures</span><span class="p">(</span>
-            <span class="n">concat</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ordered</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">refit_standardizer</span><span class="o">=</span><span class="kc">False</span>
-        <span class="p">)</span>
-        <span class="n">comparison_ap</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
-        <span class="n">ap_pred</span> <span class="o">=</span> <span class="n">comparison_ap</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">features</span><span class="p">)</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">pipeline</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+        <span class="n">comparison_ap</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">ap_pred</span> <span class="o">=</span> <span class="n">comparison_ap</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
         <span class="c1"># check if the applicability domain predictions from the dataset are equal to the ones from the model</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">ap_preds_model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predictMols</span><span class="p">(</span>

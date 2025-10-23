@@ -1,28 +1,26 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.chem.standardizers.check_smiles &mdash; QSPRpred 4.0.0a2.dev3+gdd1d34be documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+  <title>qsprpred.data.chem.standardizers.check_smiles &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=87e54e7c" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=81d23b05"></script>
-        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
-        <script>
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=ce9a7c35"></script>
+      <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script>
     </script>
-        <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
-        <script src="../../../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+      <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
@@ -52,9 +50,6 @@
           <a href="../../../../../index.html" class="icon icon-home">
             QSPRpred
           </a>
-              <div class="version">
-                v4.0.0a2.dev3+gdd1d34be
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -97,20 +92,20 @@
            <div itemprop="articleBody">
              
   <h1>Source code for qsprpred.data.chem.standardizers.check_smiles</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">rdkit</span> <span class="kn">import</span> <span class="n">Chem</span>
-<span class="kn">from</span> <span class="nn">rdkit.Chem</span> <span class="kn">import</span> <span class="n">Mol</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rdkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chem</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rdkit.Chem</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mol</span>
 
-<span class="kn">from</span> <span class="nn">qsprpred.data.chem.standardizers</span> <span class="kn">import</span> <span class="n">ChemStandardizer</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.processing.mol_processor</span> <span class="kn">import</span> <span class="n">MolProcessorWithID</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.storage.interfaces.stored_mol</span> <span class="kn">import</span> <span class="n">StoredMol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.chem.standardizers</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChemStandardizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.processing.mol_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">MolProcessorWithID</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.storage.interfaces.stored_mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">StoredMol</span>
 
 
-<div class="viewcode-block" id="CheckSmilesValid"><a class="viewcode-back" href="../../../../../api/qsprpred.data.chem.standardizers.html#qsprpred.data.chem.standardizers.check_smiles.CheckSmilesValid">[docs]</a><span class="k">class</span> <span class="nc">CheckSmilesValid</span><span class="p">(</span><span class="n">MolProcessorWithID</span><span class="p">):</span>
+<div class="viewcode-block" id="CheckSmilesValid"><a class="viewcode-back" href="../../../../../api/qsprpred.data.chem.standardizers.html#qsprpred.data.chem.standardizers.check_smiles.CheckSmilesValid">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">CheckSmilesValid</span><span class="p">(</span><span class="n">MolProcessorWithID</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Processor to check the validity of the SMILES.&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">StoredMol</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Mol</span><span class="p">],</span>
         <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -165,19 +160,19 @@
         <span class="k">return</span> <span class="n">ret</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">supportsParallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">supportsParallel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return True if the processor supports parallel processing.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="ValidationStandardizer"><a class="viewcode-back" href="../../../../../api/qsprpred.data.chem.standardizers.html#qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer">[docs]</a><span class="k">class</span> <span class="nc">ValidationStandardizer</span><span class="p">(</span><span class="n">ChemStandardizer</span><span class="p">):</span>
+<div class="viewcode-block" id="ValidationStandardizer"><a class="viewcode-back" href="../../../../../api/qsprpred.data.chem.standardizers.html#qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ValidationStandardizer</span><span class="p">(</span><span class="n">ChemStandardizer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Standardizer that checks the validity of the SMILES by</span>
 <span class="sd">    attempting to sanitize the molecule using RDKit.</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        checker (CheckSmilesValid): Processor to check the validity of the SMILES</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the standardizer.</span>
 
 <span class="sd">        Raises:</span>
@@ -186,7 +181,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checker</span> <span class="o">=</span> <span class="n">CheckSmilesValid</span><span class="p">(</span><span class="n">id_prop</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ValidationStandardizer.convertSMILES"><a class="viewcode-back" href="../../../../../api/qsprpred.data.chem.standardizers.html#qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer.convertSMILES">[docs]</a>    <span class="k">def</span> <span class="nf">convertSMILES</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="ValidationStandardizer.convertSMILES"><a class="viewcode-back" href="../../../../../api/qsprpred.data.chem.standardizers.html#qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer.convertSMILES">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">convertSMILES</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check the validity of the SMILES.</span>
 
 <span class="sd">        Args:</span>
@@ -202,20 +197,20 @@
         <span class="k">return</span> <span class="n">smiles</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">settings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Settings of the standardizer.</span>
 <span class="sd">        Empty in this case since there is nothing to set except the default settings.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{}</span>
 
-<div class="viewcode-block" id="ValidationStandardizer.getID"><a class="viewcode-back" href="../../../../../api/qsprpred.data.chem.standardizers.html#qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer.getID">[docs]</a>    <span class="k">def</span> <span class="nf">getID</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ValidationStandardizer.getID"><a class="viewcode-back" href="../../../../../api/qsprpred.data.chem.standardizers.html#qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer.getID">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getID</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the unique identifier of the standardizer. In this case, it is</span>
 <span class="sd">        just &quot;ValidationStandardizer&quot;. There are no settings to consider.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;ValidationStandardizer&quot;</span></div>
 
 <div class="viewcode-block" id="ValidationStandardizer.fromSettings"><a class="viewcode-back" href="../../../../../api/qsprpred.data.chem.standardizers.html#qsprpred.data.chem.standardizers.check_smiles.ValidationStandardizer.fromSettings">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">fromSettings</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ValidationStandardizer&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fromSettings</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">settings</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ValidationStandardizer&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a standardizer from settings. In this case, the settings are ignored.</span>
 
 <span class="sd">        Args:</span>

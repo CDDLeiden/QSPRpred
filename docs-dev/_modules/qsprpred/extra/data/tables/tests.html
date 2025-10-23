@@ -1,28 +1,26 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.extra.data.tables.tests &mdash; QSPRpred 4.0.0a2.dev3+gdd1d34be documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+  <title>qsprpred.extra.data.tables.tests &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=87e54e7c" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=81d23b05"></script>
-        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
-        <script>
+      <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=ce9a7c35"></script>
+      <script src="../../../../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script>
     </script>
-        <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
-        <script src="../../../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+      <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="../../../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
@@ -52,9 +50,6 @@
           <a href="../../../../../index.html" class="icon icon-home">
             QSPRpred
           </a>
-              <div class="version">
-                v4.0.0a2.dev3+gdd1d34be
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -97,27 +92,29 @@
            <div itemprop="articleBody">
              
   <h1>Source code for qsprpred.extra.data.tables.tests</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
-<span class="kn">from</span> <span class="nn">unittest</span> <span class="kn">import</span> <span class="n">TestCase</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unittest</span><span class="w"> </span><span class="kn">import</span> <span class="n">TestCase</span>
 
-<span class="kn">from</span> <span class="nn">parameterized</span> <span class="kn">import</span> <span class="n">parameterized</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">parameterized</span><span class="w"> </span><span class="kn">import</span> <span class="n">parameterized</span>
 
-<span class="kn">from</span> <span class="nn">qsprpred.data.descriptors.sets</span> <span class="kn">import</span> <span class="n">DescriptorSet</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.processing.applicability_domain</span> <span class="kn">import</span> <span class="n">ApplicabilityDomain</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.processing.feature_standardizers</span> <span class="kn">import</span> <span class="n">SKLearnStandardizer</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.sampling.splits</span> <span class="kn">import</span> <span class="n">DataSplit</span>
-<span class="kn">from</span> <span class="nn">qsprpred.extra.data.tables.pcm</span> <span class="kn">import</span> <span class="n">PCMDataSet</span>
-<span class="kn">from</span> <span class="nn">qsprpred.extra.data.utils.testing.path_mixins</span> <span class="kn">import</span> <span class="n">DataSetsMixInExtras</span>
-<span class="kn">from</span> <span class="nn">qsprpred.utils.testing.check_mixins</span> <span class="kn">import</span> <span class="n">DataPrepCheckMixIn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.descriptors.sets</span><span class="w"> </span><span class="kn">import</span> <span class="n">DescriptorSet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.processing.applicability_domain</span><span class="w"> </span><span class="kn">import</span> <span class="n">ApplicabilityDomain</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.processing.feature_transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">SklearnStep</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.sampling.splits</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSplit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.extra.data.tables.pcm</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCMDataSet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.extra.data.utils.testing.path_mixins</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSetsMixInExtras</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.utils.testing.check_mixins</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataPrepCheckMixIn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.processing.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">DatasetPipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.processing.step</span><span class="w"> </span><span class="kn">import</span> <span class="n">Shuffle</span><span class="p">,</span> <span class="n">DummyStep</span>
 
 
-<div class="viewcode-block" id="TestPCMDataSetPreparation"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation">[docs]</a><span class="k">class</span> <span class="nc">TestPCMDataSetPreparation</span><span class="p">(</span><span class="n">DataSetsMixInExtras</span><span class="p">,</span> <span class="n">DataPrepCheckMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPCMDataSetPreparation"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TestPCMDataSetPreparation</span><span class="p">(</span><span class="n">DataSetsMixInExtras</span><span class="p">,</span> <span class="n">DataPrepCheckMixIn</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the preparation of the PCMDataSet.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="TestPCMDataSetPreparation.setUp"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.setUp">[docs]</a>    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestPCMDataSetPreparation.setUp"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.setUp">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="TestPCMDataSetPreparation.fetchDataset"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.fetchDataset">[docs]</a>    <span class="k">def</span> <span class="nf">fetchDataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PCMDataSet</span><span class="p">:</span>
+<div class="viewcode-block" id="TestPCMDataSetPreparation.fetchDataset"><a class="viewcode-back" href="../../../../../api/qsprpred.extra.data.tables.html#qsprpred.extra.data.tables.tests.TestPCMDataSetPreparation.fetchDataset">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">fetchDataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PCMDataSet</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a quick dataset with the given name.</span>
 
 <span class="sd">        Args:</span>
@@ -129,13 +126,13 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createPCMDataSet</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
 
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">DataSetsMixInExtras</span><span class="o">.</span><span class="n">getPrepCombos</span><span class="p">())</span>
-    <span class="k">def</span> <span class="nf">testPrepCombinations</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testPrepCombinations</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">_</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">feature_calculators</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorSet</span><span class="p">],</span>
         <span class="n">split</span><span class="p">:</span> <span class="n">DataSplit</span><span class="p">,</span>
-        <span class="n">feature_standardizer</span><span class="p">:</span> <span class="n">SKLearnStandardizer</span><span class="p">,</span>
+        <span class="n">feature_standardizer</span><span class="p">:</span> <span class="n">SklearnStep</span><span class="p">,</span>
         <span class="n">feature_filter</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
         <span class="n">data_filter</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
         <span class="n">applicability_domain</span><span class="p">:</span> <span class="n">ApplicabilityDomain</span><span class="p">,</span>
@@ -150,21 +147,26 @@
 <span class="sd">            feature_calculators (list[DescriptorsCalculator]):</span>
 <span class="sd">                List of feature calculators.</span>
 <span class="sd">            split (DataSplit): Splitting strategy.</span>
-<span class="sd">            feature_standardizer (SKLearnStandardizer): Feature standardizer.</span>
+<span class="sd">            feature_standardizer (SklearnStep): Feature standardizer.</span>
 <span class="sd">            feature_filter (Callable): Feature filter.</span>
 <span class="sd">            data_filter (Callable): Data filter.</span>
 <span class="sd">            applicability_domain (Callable): Applicability domain.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createPCMDataSet</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">pipeline</span> <span class="o">=</span> <span class="n">DatasetPipeline</span><span class="p">(</span>
+            <span class="n">feature_calculators</span><span class="o">=</span><span class="n">feature_calculators</span><span class="p">,</span>
+            <span class="n">steps</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;shuffle&quot;</span><span class="p">:</span> <span class="n">Shuffle</span><span class="p">(),</span>
+                <span class="s2">&quot;feature_standardizer&quot;</span><span class="p">:</span> <span class="n">feature_standardizer</span> <span class="k">if</span> <span class="n">feature_standardizer</span> <span class="k">else</span> <span class="n">DummyStep</span><span class="p">(),</span>
+                <span class="s2">&quot;feature_filter&quot;</span><span class="p">:</span> <span class="n">feature_filter</span> <span class="k">if</span> <span class="n">feature_filter</span> <span class="k">else</span> <span class="n">DummyStep</span><span class="p">(),</span>
+                <span class="s2">&quot;data_filter&quot;</span><span class="p">:</span> <span class="n">data_filter</span> <span class="k">if</span> <span class="n">data_filter</span> <span class="k">else</span> <span class="n">DummyStep</span><span class="p">(),</span>
+                <span class="s2">&quot;applicability_domain&quot;</span><span class="p">:</span> <span class="n">applicability_domain</span> <span class="k">if</span> <span class="n">applicability_domain</span> <span class="k">else</span> <span class="n">DummyStep</span><span class="p">(),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkPrep</span><span class="p">(</span>
             <span class="n">dataset</span><span class="p">,</span>
-            <span class="n">feature_calculators</span><span class="p">,</span>
+            <span class="n">pipeline</span><span class="p">,</span>
             <span class="n">split</span><span class="p">,</span>
-            <span class="n">feature_standardizer</span><span class="p">,</span>
-            <span class="n">feature_filter</span><span class="p">,</span>
-            <span class="n">data_filter</span><span class="p">,</span>
-            <span class="n">applicability_domain</span><span class="p">,</span>
-            <span class="p">[</span><span class="s2">&quot;pchembl_value_Median&quot;</span><span class="p">],</span>
         <span class="p">)</span></div>
 </pre></div>
 

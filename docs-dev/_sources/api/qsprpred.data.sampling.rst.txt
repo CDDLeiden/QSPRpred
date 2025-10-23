@@ -4,14 +4,6 @@ qsprpred.data.sampling package
 Submodules
 ----------
 
-qsprpred.data.sampling.folds module
------------------------------------
-
-.. automodule:: qsprpred.data.sampling.folds
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 qsprpred.data.sampling.splits module
 ------------------------------------
 

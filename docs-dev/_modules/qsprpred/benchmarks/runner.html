@@ -1,28 +1,26 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.benchmarks.runner &mdash; QSPRpred 4.0.0a2.dev3+gdd1d34be documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+  <title>qsprpred.benchmarks.runner &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=81d23b05"></script>
-        <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
-        <script>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=ce9a7c35"></script>
+      <script src="../../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script>
     </script>
-        <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
-        <script src="../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+      <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -52,9 +50,6 @@
           <a href="../../../index.html" class="icon icon-home">
             QSPRpred
           </a>
-              <div class="version">
-                v4.0.0a2.dev3+gdd1d34be
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -97,35 +92,35 @@
            <div itemprop="articleBody">
              
   <h1>Source code for qsprpred.benchmarks.runner</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">queue</span>
-<span class="kn">import</span> <span class="nn">random</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">traceback</span>
-<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Lock</span> <span class="k">as</span> <span class="n">TLock</span>
-<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generator</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">queue</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">Lock</span> <span class="k">as</span> <span class="n">TLock</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">threading</span><span class="w"> </span><span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generator</span>
 
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
-<span class="kn">from</span> <span class="nn">qsprpred.extra.gpu.utils.parallel</span> <span class="kn">import</span> <span class="n">TorchJITGenerator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.extra.gpu.utils.parallel</span><span class="w"> </span><span class="kn">import</span> <span class="n">TorchJITGenerator</span>
 
-<span class="kn">from</span> <span class="nn">..logs</span> <span class="kn">import</span> <span class="n">logger</span>
-<span class="kn">from</span> <span class="nn">..utils.parallel</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..logs</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..utils.parallel</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">MultiprocessingJITGenerator</span><span class="p">,</span>
     <span class="n">ParallelGenerator</span><span class="p">,</span>
     <span class="n">PebbleJITGenerator</span><span class="p">,</span>
     <span class="n">ThreadsJITGenerator</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.replica</span> <span class="kn">import</span> <span class="n">Replica</span>
-<span class="kn">from</span> <span class="nn">.settings.benchmark</span> <span class="kn">import</span> <span class="n">BenchmarkSettings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.replica</span><span class="w"> </span><span class="kn">import</span> <span class="n">Replica</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.settings.benchmark</span><span class="w"> </span><span class="kn">import</span> <span class="n">BenchmarkSettings</span>
 
 
-<div class="viewcode-block" id="ExcThread"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.ExcThread">[docs]</a><span class="k">class</span> <span class="nc">ExcThread</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+<div class="viewcode-block" id="ExcThread"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.ExcThread">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ExcThread</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Thread that can catch exceptions from the target function.&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the thread.</span>
 
 <span class="sd">        Args:</span>
@@ -137,7 +132,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bucket</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
 
-<div class="viewcode-block" id="ExcThread.run"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.ExcThread.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ExcThread.run"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.ExcThread.run">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the thread and catch exceptions.&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
@@ -145,7 +140,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">bucket</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">())</span></div></div>
 
 
-<div class="viewcode-block" id="BenchmarkRunner"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner">[docs]</a><span class="k">class</span> <span class="nc">BenchmarkRunner</span><span class="p">:</span>
+<div class="viewcode-block" id="BenchmarkRunner"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BenchmarkRunner</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class that runs benchmarking experiments as defined by</span>
 <span class="sd">    `BenchmarkSettings`. It translates the settings into</span>
 <span class="sd">    a list of `Replica` objects with its `iterReplicas` method and</span>
@@ -181,7 +176,7 @@
     <span class="n">lock_data_t</span> <span class="o">=</span> <span class="n">TLock</span><span class="p">()</span>
     <span class="n">lock_report_t</span> <span class="o">=</span> <span class="n">TLock</span><span class="p">()</span>
 
-<div class="viewcode-block" id="BenchmarkRunner.ReplicaException"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.ReplicaException">[docs]</a>    <span class="k">class</span> <span class="nc">ReplicaException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="BenchmarkRunner.ReplicaException"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.ReplicaException">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">ReplicaException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Custom exception for errors in a replica.</span>
 
 <span class="sd">        Attributes:</span>
@@ -190,7 +185,7 @@
 <span class="sd">            exception (Exception):</span>
 <span class="sd">                Exception that was raised.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replica_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exception</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replica_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exception</span><span class="p">:</span> <span class="ne">Exception</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Initialize the exception.</span>
 
 <span class="sd">            Args:</span>
@@ -204,7 +199,7 @@
 
     <span class="n">logLevel</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">settings</span><span class="p">:</span> <span class="n">BenchmarkSettings</span><span class="p">,</span>
         <span class="n">data_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./data&quot;</span><span class="p">,</span>
@@ -241,7 +236,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">toFile</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dataDir</span><span class="si">}</span><span class="s2">/settings.json&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">nRuns</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nRuns</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the total number of benchmarking runs. This is the product</span>
 <span class="sd">        of the number of replicas, data sources, descriptors, target properties,</span>
 <span class="sd">        data preparation settings and models as defined in the `BenchmarkSettings`.</span>
@@ -255,13 +250,13 @@
         <span class="n">ret</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">n_replicas</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">data_sources</span><span class="p">)</span> <span class="o">*</span>
             <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">descriptors</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">target_props</span><span class="p">)</span> <span class="o">*</span>
-            <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">prep_settings</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">pipelines</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">optimizers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">ret</span> <span class="o">*=</span> <span class="nb">len</span><span class="p">(</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">optimizers</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span>
 
-<div class="viewcode-block" id="BenchmarkRunner.createLocks"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.createLocks">[docs]</a>    <span class="k">def</span> <span class="nf">createLocks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generator</span><span class="p">:</span> <span class="n">ParallelGenerator</span><span class="p">):</span>
+<div class="viewcode-block" id="BenchmarkRunner.createLocks"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.createLocks">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">createLocks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">generator</span><span class="p">:</span> <span class="n">ParallelGenerator</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Creates locks for input and output operations done in `runReplica`.</span>
 <span class="sd">        This method should be</span>
 <span class="sd">        overridden if the generator uses a different multiprocessing library</span>
@@ -282,11 +277,11 @@
 <span class="sd">                lock types cannot be determined automatically.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">TorchJITGenerator</span><span class="p">):</span>
-            <span class="kn">import</span> <span class="nn">torch.multiprocessing</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">torch.multiprocessing</span>
 
             <span class="n">manager</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">multiprocessing</span><span class="o">.</span><span class="n">Manager</span><span class="p">()</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="p">(</span><span class="n">MultiprocessingJITGenerator</span><span class="p">,</span> <span class="n">PebbleJITGenerator</span><span class="p">)):</span>
-            <span class="kn">import</span> <span class="nn">multiprocessing</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">multiprocessing</span>
 
             <span class="n">manager</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Manager</span><span class="p">()</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">generator</span><span class="p">,</span> <span class="n">ThreadsJITGenerator</span><span class="p">):</span>
@@ -299,7 +294,7 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">manager</span><span class="o">.</span><span class="n">Lock</span><span class="p">(),</span> <span class="n">manager</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="BenchmarkRunner.processReplicas"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.processReplicas">[docs]</a>    <span class="k">def</span> <span class="nf">processReplicas</span><span class="p">(</span>
+<div class="viewcode-block" id="BenchmarkRunner.processReplicas"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.processReplicas">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">processReplicas</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">generator</span><span class="p">:</span> <span class="n">ParallelGenerator</span><span class="p">,</span>
         <span class="n">replicas</span><span class="p">:</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Replica</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
@@ -343,7 +338,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Return success from replica: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BenchmarkRunner.run"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raise_errors</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="BenchmarkRunner.run"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.run">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raise_errors</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Runs the benchmarking experiments.</span>
 
 <span class="sd">        Args:</span>
@@ -392,7 +387,7 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Finished all replica runs.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">resultsFile</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BenchmarkRunner.getSeedList"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.getSeedList">[docs]</a>    <span class="k">def</span> <span class="nf">getSeedList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+<div class="viewcode-block" id="BenchmarkRunner.getSeedList"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.getSeedList">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getSeedList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get a list of seeds for the replicas from one &#39;master&#39; randomSeed.</span>
 <span class="sd">        The list of seeds is generated by sampling from the range of</span>
@@ -421,7 +416,7 @@
         <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">31</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">nRuns</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BenchmarkRunner.iterReplicas"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.iterReplicas">[docs]</a>    <span class="k">def</span> <span class="nf">iterReplicas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Replica</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<div class="viewcode-block" id="BenchmarkRunner.iterReplicas"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.iterReplicas">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">iterReplicas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Replica</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generator that yields `Replica` objects for each benchmarking run.</span>
 <span class="sd">        This is done by iterating over the product of the data sources, descriptors,</span>
 <span class="sd">        target properties, data preparation settings, models and optimizers as defined</span>
@@ -446,7 +441,7 @@
             <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">data_sources</span><span class="p">,</span>
             <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">descriptors</span><span class="p">,</span>
             <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">target_props</span><span class="p">,</span>
-            <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">prep_settings</span><span class="p">,</span>
+            <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">pipelines</span><span class="p">,</span>
             <span class="n">benchmark_settings</span><span class="o">.</span><span class="n">models</span><span class="p">,</span>
             <span class="n">optimizers</span><span class="p">,</span>
         <span class="p">)</span>
@@ -456,9 +451,10 @@
                 <span class="o">*</span><span class="n">settings</span><span class="p">,</span>
                 <span class="n">random_seed</span><span class="o">=</span><span class="n">seeds</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span>
                 <span class="n">assessors</span><span class="o">=</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">assessors</span><span class="p">,</span>
+                <span class="n">subsets</span><span class="o">=</span><span class="n">benchmark_settings</span><span class="o">.</span><span class="n">subsets</span><span class="p">,</span>
             <span class="p">)</span></div>
 
-<div class="viewcode-block" id="BenchmarkRunner.makeReplica"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.makeReplica">[docs]</a>    <span class="k">def</span> <span class="nf">makeReplica</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Replica</span><span class="p">:</span>
+<div class="viewcode-block" id="BenchmarkRunner.makeReplica"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.makeReplica">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">makeReplica</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Replica</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a `Replica` object for the given settings. This is useful</span>
 <span class="sd">        for debugging.</span>
 
@@ -469,7 +465,7 @@
         <span class="k">return</span> <span class="n">Replica</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BenchmarkRunner.getLoggerForReplica"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.getLoggerForReplica">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">getLoggerForReplica</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">replica</span><span class="p">:</span> <span class="n">Replica</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getLoggerForReplica</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">replica</span><span class="p">:</span> <span class="n">Replica</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns a logger for the given replica.</span>
 
 <span class="sd">        Args:</span>
@@ -490,7 +486,7 @@
         <span class="k">return</span> <span class="n">replica_logger</span></div>
 
 <div class="viewcode-block" id="BenchmarkRunner.checkReplicaInResultsFile"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.checkReplicaInResultsFile">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">checkReplicaInResultsFile</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">replica</span><span class="p">:</span> <span class="n">Replica</span><span class="p">,</span> <span class="n">results_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">checkReplicaInResultsFile</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">replica</span><span class="p">:</span> <span class="n">Replica</span><span class="p">,</span> <span class="n">results_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks if the replica is already present in the results file.</span>
 <span class="sd">        This method is thread-safe.</span>
 
@@ -510,7 +506,7 @@
         <span class="k">return</span> <span class="n">df_results</span><span class="o">.</span><span class="n">ReplicaID</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="n">replica</span><span class="o">.</span><span class="n">id</span><span class="p">])</span><span class="o">.</span><span class="n">any</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BenchmarkRunner.replicaToReport"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.replicaToReport">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">replicaToReport</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">replica</span><span class="p">:</span> <span class="n">Replica</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">replicaToReport</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">replica</span><span class="p">:</span> <span class="n">Replica</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Converts a replica to a report.</span>
 
 <span class="sd">        Args:</span>
@@ -524,7 +520,7 @@
         <span class="k">return</span> <span class="n">replica</span><span class="o">.</span><span class="n">createReport</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BenchmarkRunner.appendReportToResults"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.appendReportToResults">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">appendReportToResults</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df_report</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">results_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">appendReportToResults</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df_report</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">results_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Appends a report to the results file. This method is thread-safe.</span>
 
 <span class="sd">        Args:</span>
@@ -542,7 +538,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="BenchmarkRunner.initData"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.initData">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">initData</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">replica</span><span class="p">:</span> <span class="n">Replica</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">initData</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">replica</span><span class="p">:</span> <span class="n">Replica</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initializes the data set for this replica.</span>
 <span class="sd">        This method is thread-safe.</span>
 
@@ -559,7 +555,7 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BenchmarkRunner.runReplica"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.runner.BenchmarkRunner.runReplica">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">runReplica</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">runReplica</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">replica</span><span class="p">:</span> <span class="n">Replica</span><span class="p">,</span>
         <span class="n">results_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -599,8 +595,6 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Initializing data...&quot;</span><span class="p">)</span>
                 <span class="bp">cls</span><span class="o">.</span><span class="n">initData</span><span class="p">(</span><span class="n">replica</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Preparing data set...&quot;</span><span class="p">)</span>
-            <span class="n">replica</span><span class="o">.</span><span class="n">prepData</span><span class="p">()</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Initializing model...&quot;</span><span class="p">)</span>
             <span class="n">replica</span><span class="o">.</span><span class="n">initModel</span><span class="p">()</span>

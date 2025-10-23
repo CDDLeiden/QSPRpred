@@ -1,28 +1,26 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data_CLI &mdash; QSPRpred 4.0.0a2.dev3+gdd1d34be documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+  <title>qsprpred.data_CLI &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
       <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=87e54e7c" />
       <link rel="stylesheet" type="text/css" href="../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=81d23b05"></script>
-        <script src="../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
-        <script>
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=ce9a7c35"></script>
+      <script src="../../_static/doctools.js?v=888ff710"></script>
+      <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script>
     </script>
-        <script src="../../_static/design-tabs.js?v=f930bc37"></script>
-        <script src="../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -52,9 +50,6 @@
           <a href="../../index.html" class="icon icon-home">
             QSPRpred
           </a>
-              <div class="version">
-                v4.0.0a2.dev3+gdd1d34be
-              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -99,26 +94,26 @@
   <h1>Source code for qsprpred.data_CLI</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
 
-<span class="kn">import</span> <span class="nn">argparse</span>
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">os.path</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os.path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">optuna</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">boruta</span> <span class="kn">import</span> <span class="n">BorutaPy</span>
-<span class="kn">from</span> <span class="nn">rdkit.Chem.rdFingerprintGenerator</span> <span class="kn">import</span> <span class="n">TopologicalTorsionFP</span>
-<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="n">RandomForestRegressor</span>
-<span class="kn">from</span> <span class="nn">sklearn.impute</span> <span class="kn">import</span> <span class="n">SimpleImputer</span>
-<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">optuna</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">boruta</span><span class="w"> </span><span class="kn">import</span> <span class="n">BorutaPy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rdkit.Chem.rdFingerprintGenerator</span><span class="w"> </span><span class="kn">import</span> <span class="n">TopologicalTorsionFP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="n">RandomForestRegressor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.impute</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleImputer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
 
-<span class="kn">from</span> <span class="nn">qsprpred.data.chem.clustering</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.chem.clustering</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">FPSimilarityLeaderPickerClusters</span><span class="p">,</span>
     <span class="n">FPSimilarityMaxMinClusters</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.descriptors.fingerprints</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.descriptors.fingerprints</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">AtomPairFP</span><span class="p">,</span>
     <span class="n">AvalonFP</span><span class="p">,</span>
     <span class="n">LayeredFP</span><span class="p">,</span>
@@ -127,35 +122,38 @@
     <span class="n">RDKitFP</span><span class="p">,</span>
     <span class="n">RDKitMACCSFP</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.descriptors.sets</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.descriptors.sets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DrugExPhyschem</span><span class="p">,</span>
     <span class="n">PredictorDesc</span><span class="p">,</span>
     <span class="n">RDKitDescs</span><span class="p">,</span>
     <span class="n">SmilesDesc</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.processing.data_filters</span> <span class="kn">import</span> <span class="n">papyrusLowQualityFilter</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.processing.feature_filters</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.processing.feature_filters</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">BorutaFilter</span><span class="p">,</span>
     <span class="n">HighCorrelationFilter</span><span class="p">,</span>
     <span class="n">LowVarianceFilter</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.sampling.splits</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.processing.imputers</span><span class="w"> </span><span class="kn">import</span> <span class="n">TargetImputer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.processing.target_transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleTargetTransformer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.sampling.splits</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">ClusterSplit</span><span class="p">,</span>
     <span class="n">ManualSplit</span><span class="p">,</span>
     <span class="n">RandomSplit</span><span class="p">,</span>
     <span class="n">ScaffoldSplit</span><span class="p">,</span>
     <span class="n">TemporalSplit</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">qsprpred.data.tables.qspr</span> <span class="kn">import</span> <span class="n">QSPRTable</span>
-<span class="kn">from</span> <span class="nn">qsprpred.tasks</span> <span class="kn">import</span> <span class="n">TargetTasks</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.processing.data_filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">NaNFilter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.processing.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">DatasetPipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.tables.qspr</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPRTable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.tasks</span><span class="w"> </span><span class="kn">import</span> <span class="n">TargetTasks</span>
 
-<span class="kn">from</span> <span class="nn">.data.chem.scaffolds</span> <span class="kn">import</span> <span class="n">BemisMurckoRDKit</span>
-<span class="kn">from</span> <span class="nn">.extra.gpu.models.dnn</span> <span class="kn">import</span> <span class="n">DNNModel</span>
-<span class="kn">from</span> <span class="nn">.logs.utils</span> <span class="kn">import</span> <span class="n">backup_files</span><span class="p">,</span> <span class="n">enable_file_logger</span>
-<span class="kn">from</span> <span class="nn">.models.scikit_learn</span> <span class="kn">import</span> <span class="n">SklearnModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.data.chem.scaffolds</span><span class="w"> </span><span class="kn">import</span> <span class="n">BemisMurckoRDKit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.extra.gpu.models.dnn</span><span class="w"> </span><span class="kn">import</span> <span class="n">DNNModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.logs.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">backup_files</span><span class="p">,</span> <span class="n">enable_file_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models.scikit_learn</span><span class="w"> </span><span class="kn">import</span> <span class="n">SklearnModel</span>
 
 
-<div class="viewcode-block" id="QSPRArgParser"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.data_CLI.QSPRArgParser">[docs]</a><span class="k">def</span> <span class="nf">QSPRArgParser</span><span class="p">(</span><span class="n">txt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="QSPRArgParser"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.data_CLI.QSPRArgParser">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">QSPRArgParser</span><span class="p">(</span><span class="n">txt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Define and read command line arguments.&quot;&quot;&quot;</span>
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
         <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentDefaultsHelpFormatter</span>
@@ -248,14 +246,6 @@
             <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">{&#39;CL&#39;:[6.5],&#39;fu&#39;:[0,1,2,3,4]}</span><span class="se">\&quot;</span><span class="s2">. Note: no spaces and surround &quot;</span>
             <span class="s2">&quot;by single quotes&quot;</span>
         <span class="p">),</span>
-    <span class="p">)</span>
-    <span class="c1"># Data pre-processing arguments</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;-lq&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;--low_quality&quot;</span><span class="p">,</span>
-        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
-        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;If lq, than low quality data will be should be a column &#39;Quality&#39; where &quot;</span>
-        <span class="s2">&quot;all &#39;Low&#39; will be removed&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
         <span class="s2">&quot;-tr&quot;</span><span class="p">,</span>
@@ -383,14 +373,6 @@
         <span class="s2">&quot;for percentile threshold for comparison between shadow and real features&quot;</span>
         <span class="s2">&quot;see https://github.com/scikit-learn-contrib/boruta_py for more info.&quot;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="c1"># other</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
-        <span class="s2">&quot;-fv&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;--fill_value&quot;</span><span class="p">,</span>
-        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
-        <span class="n">default</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
-        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Fill value for missing values in the calculated features&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
     <span class="k">if</span> <span class="n">txt</span><span class="p">:</span>
         <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -407,7 +389,7 @@
     <span class="k">return</span> <span class="n">args</span></div>
 
 
-<div class="viewcode-block" id="QSPR_dataprep"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.data_CLI.QSPR_dataprep">[docs]</a><span class="k">def</span> <span class="nf">QSPR_dataprep</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<div class="viewcode-block" id="QSPR_dataprep"><a class="viewcode-back" href="../../api/qsprpred.html#qsprpred.data_CLI.QSPR_dataprep">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">QSPR_dataprep</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Optimize, evaluate and train estimators.&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">regression</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">props</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">properties</span><span class="p">:</span>
@@ -424,13 +406,13 @@
                 <span class="n">th</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">threshold</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">threshold</span> <span class="k">else</span> <span class="kc">None</span>
                 <span class="k">if</span> <span class="n">reg</span><span class="p">:</span>
                     <span class="n">task</span> <span class="o">=</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span>
+                    <span class="n">th</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">elif</span> <span class="n">th</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">task</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">TargetTasks</span><span class="o">.</span><span class="n">MULTICLASS</span>
                         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">2</span>  <span class="c1"># noqa: PLR2004</span>
                         <span class="k">else</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span>
                     <span class="p">)</span>
-                    <span class="n">th</span> <span class="o">=</span> <span class="s2">&quot;precomputed&quot;</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">task</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="n">TargetTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span>
@@ -442,37 +424,7 @@
                         <span class="s2">&quot;Threshold will be ignored.&quot;</span>
                     <span class="p">)</span>
                     <span class="n">th</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="n">transform_dict</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s2">&quot;log10&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;numpy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span>
-                    <span class="s2">&quot;log2&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;numpy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span>
-                    <span class="s2">&quot;log&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;numpy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span>
-                    <span class="s2">&quot;sqrt&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;numpy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span>
-                    <span class="s2">&quot;cbrt&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;numpy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">cbrt</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span>
-                    <span class="s2">&quot;exp&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;numpy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)),</span>
-                    <span class="s2">&quot;square&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;numpy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-                    <span class="s2">&quot;cube&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;numpy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
-                    <span class="s2">&quot;reciprocal&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;numpy&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">reciprocal</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
-                <span class="p">}</span>
-                <span class="n">target_props</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="p">{</span>
-                        <span class="s2">&quot;name&quot;</span><span class="p">:</span>
-                            <span class="n">prop</span><span class="p">,</span>
-                        <span class="s2">&quot;task&quot;</span><span class="p">:</span>
-                            <span class="n">task</span><span class="p">,</span>
-                        <span class="s2">&quot;th&quot;</span><span class="p">:</span>
-                            <span class="n">th</span><span class="p">,</span>
-                        <span class="s2">&quot;transformer&quot;</span><span class="p">:</span>
-                            <span class="p">(</span>
-                                <span class="n">transform_dict</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">transform_data</span><span class="p">[</span><span class="n">prop</span><span class="p">]]</span>
-                                <span class="k">if</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">transform_data</span> <span class="k">else</span> <span class="kc">None</span>
-                            <span class="p">),</span>
-                        <span class="s2">&quot;imputer&quot;</span><span class="p">:</span>
-                            <span class="p">(</span>
-                                <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">imputation</span><span class="p">[</span><span class="n">prop</span><span class="p">])</span>
-                                <span class="k">if</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">imputation</span> <span class="k">else</span> <span class="kc">None</span>
-                            <span class="p">),</span>
-                    <span class="p">}</span>
-                <span class="p">)</span>
+                <span class="n">target_props</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">prop</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">task</span><span class="p">,</span> <span class="s2">&quot;th&quot;</span><span class="p">:</span> <span class="n">th</span><span class="p">})</span>
             <span class="n">dataset_name</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">props_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">data_suffix</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">data_suffix</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">props_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -488,22 +440,16 @@
                 <span class="n">args</span><span class="o">.</span><span class="n">random_state</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">random_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="p">)</span>
             <span class="n">mydataset</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">nJobs</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">ncpu</span>
-            <span class="c1"># data filters</span>
-            <span class="n">data_filters</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">low_quality</span><span class="p">:</span>
-                <span class="n">data_filters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">papyrusLowQualityFilter</span><span class="p">())</span>
             <span class="c1"># data splitter</span>
             <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">split</span> <span class="o">==</span> <span class="s2">&quot;scaffold&quot;</span><span class="p">:</span>
                 <span class="n">split</span> <span class="o">=</span> <span class="n">ScaffoldSplit</span><span class="p">(</span>
                     <span class="n">test_fraction</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">split_fraction</span><span class="p">,</span>
                     <span class="n">scaffold</span><span class="o">=</span><span class="n">BemisMurckoRDKit</span><span class="p">(),</span>
-                    <span class="n">dataset</span><span class="o">=</span><span class="n">mydataset</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">split</span> <span class="o">==</span> <span class="s2">&quot;time&quot;</span><span class="p">:</span>
                 <span class="n">split</span> <span class="o">=</span> <span class="n">TemporalSplit</span><span class="p">(</span>
                     <span class="n">timesplit</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">split_time</span><span class="p">,</span>
                     <span class="n">timeprop</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">split_timecolumn</span><span class="p">,</span>
-                    <span class="n">dataset</span><span class="o">=</span><span class="n">mydataset</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">split</span> <span class="o">==</span> <span class="s2">&quot;manual&quot;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s2">&quot;datasplit&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
@@ -513,7 +459,7 @@
                         <span class="s2">&quot;split.&quot;</span>
                     <span class="p">)</span>
                 <span class="n">split</span> <span class="o">=</span> <span class="n">ManualSplit</span><span class="p">(</span>
-                    <span class="n">splitcol</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;datasplit&quot;</span><span class="p">],</span> <span class="n">trainval</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="n">testval</span><span class="o">=</span><span class="s2">&quot;test&quot;</span>
+                    <span class="n">splitprop</span><span class="o">=</span><span class="s2">&quot;datasplit&quot;</span><span class="p">,</span> <span class="n">trainval</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="n">testval</span><span class="o">=</span><span class="s2">&quot;test&quot;</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">split</span> <span class="o">==</span> <span class="s2">&quot;cluster&quot;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">split_cluster_method</span> <span class="o">==</span> <span class="s2">&quot;MaxMin&quot;</span><span class="p">:</span>
@@ -523,18 +469,18 @@
                 <span class="n">split</span> <span class="o">=</span> <span class="n">ClusterSplit</span><span class="p">(</span>
                     <span class="n">test_fraction</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">split_fraction</span><span class="p">,</span>
                     <span class="n">clustering</span><span class="o">=</span><span class="n">clustering</span><span class="p">,</span>
-                    <span class="n">dataset</span><span class="o">=</span><span class="n">mydataset</span><span class="p">,</span>
+                    <span class="n">seed</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">split</span> <span class="o">=</span> <span class="n">RandomSplit</span><span class="p">(</span>
-                    <span class="n">test_fraction</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">split_fraction</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">mydataset</span>
+                    <span class="n">test_fraction</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">split_fraction</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">random_state</span>
                 <span class="p">)</span>
             <span class="c1"># feature calculator</span>
             <span class="n">descriptorsets</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="c1"># Avoid importing optional dependencies if not needed</span>
             <span class="n">f_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">features</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s2">&quot;Mordred&quot;</span><span class="p">,</span> <span class="s2">&quot;Mold2&quot;</span><span class="p">,</span> <span class="s2">&quot;PaDEL&quot;</span><span class="p">,</span> <span class="s2">&quot;Signature&quot;</span><span class="p">],</span> <span class="n">f_arr</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-                <span class="kn">from</span> <span class="nn">qsprpred.extra.data.descriptors.sets</span> <span class="kn">import</span> <span class="p">(</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.extra.data.descriptors.sets</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
                     <span class="n">ExtendedValenceSignature</span><span class="p">,</span>
                     <span class="n">Mold2</span><span class="p">,</span>
                     <span class="n">Mordred</span><span class="p">,</span>
@@ -581,12 +527,33 @@
                         <span class="n">descriptorsets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                             <span class="n">PredictorDesc</span><span class="p">(</span><span class="n">SklearnModel</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">predictor_path</span><span class="p">))</span>
                         <span class="p">)</span>
+            <span class="n">steps</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="c1"># Target imputers and transformations</span>
+            <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">props</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">imputation</span><span class="p">:</span>
+                    <span class="n">steps</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;imputer_</span><span class="si">{</span><span class="n">prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">TargetImputer</span><span class="p">(</span>
+                            <span class="n">SimpleImputer</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">imputation</span><span class="p">[</span><span class="n">prop</span><span class="p">]),</span>
+                            <span class="n">target_properties</span><span class="o">=</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+            <span class="c1"># transformation of target properties</span>
+            <span class="c1"># FIXME: assuming no transformation for classification tasks</span>
+            <span class="c1"># maybe this should be allowed?</span>
+            <span class="k">if</span> <span class="n">reg</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">props</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">transform_data</span><span class="p">:</span>
+                        <span class="n">steps</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;transform_</span><span class="si">{</span><span class="n">prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">SimpleTargetTransformer</span><span class="p">(</span>
+                                <span class="n">target</span><span class="o">=</span><span class="n">prop</span><span class="p">,</span>
+                                <span class="n">transformation</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">transform_data</span><span class="p">[</span><span class="n">prop</span><span class="p">],</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
             <span class="c1"># feature filters</span>
-            <span class="n">featurefilters</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">low_variability</span><span class="p">:</span>
-                <span class="n">featurefilters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LowVarianceFilter</span><span class="p">(</span><span class="n">th</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">low_variability</span><span class="p">))</span>
+                <span class="n">steps</span><span class="p">[</span><span class="s2">&quot;low_variability&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">LowVarianceFilter</span><span class="p">(</span><span class="n">th</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">low_variability</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">high_correlation</span><span class="p">:</span>
-                <span class="n">featurefilters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">HighCorrelationFilter</span><span class="p">(</span><span class="n">th</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">high_correlation</span><span class="p">))</span>
+                <span class="n">steps</span><span class="p">[</span><span class="s2">&quot;high_correlation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">HighCorrelationFilter</span><span class="p">(</span><span class="n">th</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">high_correlation</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">boruta_filter</span><span class="p">:</span>
                 <span class="c1"># boruta filter can not be used for multi-task models</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">props</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -597,26 +564,23 @@
                     <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ncpu</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">regression</span> <span class="k">else</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">ncpu</span><span class="p">)</span>
                 <span class="p">)</span>
-                <span class="n">featurefilters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">BorutaFilter</span><span class="p">(</span>
-                        <span class="n">BorutaPy</span><span class="p">(</span><span class="n">estimator</span><span class="o">=</span><span class="n">boruta_estimator</span><span class="p">,</span> <span class="n">perc</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">boruta_filter</span><span class="p">),</span>
-                        <span class="n">args</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
-                    <span class="p">)</span>
+                <span class="n">steps</span><span class="p">[</span><span class="s2">&quot;boruta&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">BorutaFilter</span><span class="p">(</span>
+                    <span class="n">BorutaPy</span><span class="p">(</span><span class="n">estimator</span><span class="o">=</span><span class="n">boruta_estimator</span><span class="p">,</span> <span class="n">perc</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">boruta_filter</span><span class="p">),</span>
+                    <span class="n">args</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
                 <span class="p">)</span>
-            <span class="c1"># prepare dataset for modelling</span>
-            <span class="n">mydataset</span><span class="o">.</span><span class="n">prepareDataset</span><span class="p">(</span>
+            <span class="k">if</span> <span class="s2">&quot;smiles&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">features</span><span class="p">:</span>
+                <span class="n">steps</span><span class="p">[</span><span class="s2">&quot;standardizer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+            <span class="n">steps</span><span class="p">[</span><span class="s2">&quot;remove_nans&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">NaNFilter</span><span class="p">()</span>
+            <span class="c1"># prepare dataset pipeline for modelling</span>
+            <span class="n">pipeline</span> <span class="o">=</span> <span class="n">DatasetPipeline</span><span class="p">(</span>
                 <span class="n">feature_calculators</span><span class="o">=</span><span class="n">descriptorsets</span><span class="p">,</span>
-                <span class="n">data_filters</span><span class="o">=</span><span class="n">data_filters</span><span class="p">,</span>
-                <span class="n">split</span><span class="o">=</span><span class="n">split</span><span class="p">,</span>
-                <span class="n">feature_filters</span><span class="o">=</span><span class="n">featurefilters</span><span class="p">,</span>
-                <span class="n">feature_standardizer</span><span class="o">=</span><span class="p">(</span>
-                    <span class="n">StandardScaler</span><span class="p">()</span> <span class="k">if</span> <span class="s2">&quot;Smiles&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">features</span> <span class="k">else</span> <span class="kc">None</span>
-                <span class="p">),</span>
-                <span class="n">feature_fill_value</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">fill_value</span><span class="p">,</span>
+                <span class="n">steps</span><span class="o">=</span><span class="n">steps</span>
             <span class="p">)</span>
+            <span class="n">mydataset</span><span class="o">.</span><span class="n">addSplit</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="s2">&quot;test_split&quot;</span><span class="p">)</span>
 
-            <span class="c1"># save dataset files and fingerprints</span>
-            <span class="n">mydataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+            <span class="c1"># save dataset files and pipeline</span>
+            <span class="n">mydataset</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="n">pipeline</span><span class="o">.</span><span class="n">toFile</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">mydataset</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">_pipeline.json&quot;</span><span class="p">)</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
