@@ -1,2 +1,31 @@
 install virtual python3 -m venv venv
 pust virtual source venv/bin/activate
+
+
+
+
+overit pripojeni na db: 
+
+> python scripts/test_connection.py
+
+Connecting to PostgreSQL...
+Database: neondb
+Version: PostgreSQL 18.4 (72c6e7c) on aarch64-unknown-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit
+Connection OK
+
+overit RDKit Cartridge
+> python scripts/test_rdkit.py
+Checking RDKit extension...
+RDKit extension installed.
+RDKit test OK:
+('CCO',)
+
+Iinicializace reladcni databaze
+>python scripts/init_postgres_chemstore.py
+Initialized public.molecules
+
+Nakonec test ze to dopadlo
+>python scripts/test_postgres_chemstore.py
+
+
+
