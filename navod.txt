@@ -1,0 +1,2 @@
+install virtual python3 -m venv venv
+pust virtual source venv/bin/activate
