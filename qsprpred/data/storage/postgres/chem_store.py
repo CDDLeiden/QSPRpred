@@ -20,6 +20,7 @@ class PostgresChemStore(ParallelizedChemStore):
         connection_string: str,
         table_name: str = "molecules",
         schema: str = "public",
+        run_id: str | None = None,
         smiles_col: str = "SMILES",
         id_col: str | None = None,
         autoindex_name: str | None = None,
@@ -33,8 +34,9 @@ class PostgresChemStore(ParallelizedChemStore):
     ):
         self._name = name
         self.connectionString = connection_string
-        self.tableName = table_name
-        self.schema = schema
+        self.tableName = self._safe_sql_identifier(table_name)
+        self.schema = self._safe_sql_identifier(schema)
+        self.runId = run_id
         self.useRdkitCartridge = use_rdkit_cartridge
         self._smilesProp = smiles_col
         self._idProp = id_col or autoindex_name or f"{name}_ID"
@@ -67,6 +69,8 @@ class PostgresChemStore(ParallelizedChemStore):
 
     @property
     def metaFile(self) -> str:
+        if self.runId:
+            return f"postgresql://{self.schema}.{self.tableName}?run_id={self.runId}"
         return f"postgresql://{self.schema}.{self.tableName}"
 
     @property
@@ -101,11 +105,22 @@ class PostgresChemStore(ParallelizedChemStore):
     def chunkProcessor(self, value: ParallelGenerator):
         self._chunkProcessor = value
 
+    @staticmethod
+    def _safe_sql_identifier(identifier: str) -> str:
+        if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", identifier):
+            raise ValueError(f"Unsafe SQL identifier: {identifier!r}")
+        return identifier
+
     def _connect(self):
         return psycopg.connect(self.connectionString, connect_timeout=10)
 
     def _qualified_table(self) -> str:
         return f"{self.schema}.{self.tableName}"
+
+    def _run_where(self, prefix: str = "WHERE") -> tuple[str, tuple]:
+        if self.runId is None:
+            return "", tuple()
+        return f"{prefix} run_id = %s", (self.runId,)
 
     def _create_storage(self):
         with self._connect() as conn:
@@ -113,17 +128,35 @@ class PostgresChemStore(ParallelizedChemStore):
                 if self.useRdkitCartridge:
                     cur.execute("CREATE EXTENSION IF NOT EXISTS rdkit;")
 
-                cur.execute(
-                    f"""
-                    CREATE TABLE IF NOT EXISTS {self._qualified_table()} (
-                        id TEXT PRIMARY KEY,
-                        smiles TEXT NOT NULL,
-                        mol MOL,
-                        library TEXT,
-                        props JSONB DEFAULT '{{}}'::jsonb
-                    );
-                    """
-                )
+                if self.runId is None:
+                    cur.execute(
+                        f"""
+                        CREATE TABLE IF NOT EXISTS {self._qualified_table()} (
+                            id TEXT PRIMARY KEY,
+                            smiles TEXT NOT NULL,
+                            mol MOL,
+                            library TEXT,
+                            props JSONB DEFAULT '{{}}'::jsonb
+                        );
+                        """
+                    )
+                else:
+                    cur.execute(
+                        f"""
+                        CREATE TABLE IF NOT EXISTS {self._qualified_table()} (
+                            run_id TEXT NOT NULL,
+                            id TEXT NOT NULL,
+                            smiles TEXT NOT NULL,
+                            mol MOL,
+                            library TEXT,
+                            props JSONB DEFAULT '{{}}'::jsonb,
+                            PRIMARY KEY (run_id, id),
+                            FOREIGN KEY (run_id)
+                                REFERENCES {self.schema}.chemstore_test_runs(run_id)
+                                ON DELETE CASCADE
+                        );
+                        """
+                    )
 
                 cur.execute(
                     f"""
@@ -138,6 +171,14 @@ class PostgresChemStore(ParallelizedChemStore):
                     ON {self._qualified_table()} USING GIN(props);
                     """
                 )
+
+                if self.runId is not None:
+                    cur.execute(
+                        f"""
+                        CREATE INDEX IF NOT EXISTS idx_{self.tableName}_run_id
+                        ON {self._qualified_table()}(run_id);
+                        """
+                    )
             conn.commit()
 
     def _row_to_mol(self, row) -> TabularMol:
@@ -146,12 +187,15 @@ class PostgresChemStore(ParallelizedChemStore):
         props[self.idProp] = mol_id
         props[self.smilesProp] = smiles
         props["library"] = library
+        if self.runId is not None:
+            props["run_id"] = self.runId
         return TabularMol(mol_id, self.name, smiles, props=props)
 
     def clear(self):
         with self._connect() as conn:
             with conn.cursor() as cur:
-                cur.execute(f"DELETE FROM {self._qualified_table()};")
+                where_sql, params = self._run_where()
+                cur.execute(f"DELETE FROM {self._qualified_table()} {where_sql};", params)
             conn.commit()
 
     def save(self) -> str:
@@ -159,6 +203,46 @@ class PostgresChemStore(ParallelizedChemStore):
 
     def reload(self):
         return self
+
+    def _insert_sql(self, raise_on_existing: bool) -> str:
+        if self.runId is None:
+            if raise_on_existing:
+                return f"""
+                    INSERT INTO {self._qualified_table()}
+                        (id, smiles, mol, library, props)
+                    VALUES
+                        (%s, %s, mol_from_smiles(%s), %s, %s::jsonb);
+                """
+            return f"""
+                INSERT INTO {self._qualified_table()}
+                    (id, smiles, mol, library, props)
+                VALUES
+                    (%s, %s, mol_from_smiles(%s), %s, %s::jsonb)
+                ON CONFLICT (id) DO UPDATE SET
+                    smiles = EXCLUDED.smiles,
+                    mol = EXCLUDED.mol,
+                    library = EXCLUDED.library,
+                    props = EXCLUDED.props;
+            """
+
+        if raise_on_existing:
+            return f"""
+                INSERT INTO {self._qualified_table()}
+                    (run_id, id, smiles, mol, library, props)
+                VALUES
+                    (%s, %s, %s, mol_from_smiles(%s), %s, %s::jsonb);
+            """
+        return f"""
+            INSERT INTO {self._qualified_table()}
+                (run_id, id, smiles, mol, library, props)
+            VALUES
+                (%s, %s, %s, mol_from_smiles(%s), %s, %s::jsonb)
+            ON CONFLICT (run_id, id) DO UPDATE SET
+                smiles = EXCLUDED.smiles,
+                mol = EXCLUDED.mol,
+                library = EXCLUDED.library,
+                props = EXCLUDED.props;
+        """
 
     def addMols(
         self,
@@ -173,49 +257,24 @@ class PostgresChemStore(ParallelizedChemStore):
         library = library or f"{self.name}_library"
 
         inserted_ids = []
+        sql = self._insert_sql(raise_on_existing)
 
         with self._connect() as conn:
             with conn.cursor() as cur:
                 for idx, smi in enumerate(smiles):
                     mol_id = self.identifier(smi)
 
-                    row_props = {}
-                    for key, values in props.items():
-                        row_props[key] = values[idx]
-
+                    row_props = {key: values[idx] for key, values in props.items()}
                     row_props[self.idProp] = mol_id
                     row_props[self.smilesProp] = smi
+                    if self.runId is not None:
+                        row_props["run_id"] = self.runId
 
-                    if raise_on_existing:
-                        sql = f"""
-                            INSERT INTO {self._qualified_table()}
-                                (id, smiles, mol, library, props)
-                            VALUES
-                                (%s, %s, mol_from_smiles(%s), %s, %s::jsonb);
-                        """
+                    if self.runId is None:
+                        params = (mol_id, smi, smi, library, json.dumps(row_props))
                     else:
-                        sql = f"""
-                            INSERT INTO {self._qualified_table()}
-                                (id, smiles, mol, library, props)
-                            VALUES
-                                (%s, %s, mol_from_smiles(%s), %s, %s::jsonb)
-                            ON CONFLICT (id) DO UPDATE SET
-                                smiles = EXCLUDED.smiles,
-                                mol = EXCLUDED.mol,
-                                library = EXCLUDED.library,
-                                props = EXCLUDED.props;
-                        """
-
-                    cur.execute(
-                        sql,
-                        (
-                            mol_id,
-                            smi,
-                            smi,
-                            library,
-                            json.dumps(row_props),
-                        ),
-                    )
+                        params = (self.runId, mol_id, smi, smi, library, json.dumps(row_props))
+                    cur.execute(sql, params)
                     inserted_ids.append(mol_id)
 
             conn.commit()
@@ -232,6 +291,7 @@ class PostgresChemStore(ParallelizedChemStore):
         if smiles_values is None:
             raise ValueError(f"Missing required property {self.smilesProp}")
 
+        sql = self._insert_sql(raise_on_existing)
         with self._connect() as conn:
             with conn.cursor() as cur:
                 for idx, mol_id in enumerate(ids):
@@ -239,49 +299,37 @@ class PostgresChemStore(ParallelizedChemStore):
                     row_props = {key: values[idx] for key, values in props.items()}
                     row_props[self.idProp] = mol_id
                     row_props[self.smilesProp] = smi
+                    if self.runId is not None:
+                        row_props["run_id"] = self.runId
 
-                    if raise_on_existing:
-                        sql = f"""
-                            INSERT INTO {self._qualified_table()}
-                                (id, smiles, mol, library, props)
-                            VALUES
-                                (%s, %s, mol_from_smiles(%s), %s, %s::jsonb);
-                        """
+                    if self.runId is None:
+                        params = (mol_id, smi, smi, self.name, json.dumps(row_props))
                     else:
-                        sql = f"""
-                            INSERT INTO {self._qualified_table()}
-                                (id, smiles, mol, library, props)
-                            VALUES
-                                (%s, %s, mol_from_smiles(%s), %s, %s::jsonb)
-                            ON CONFLICT (id) DO UPDATE SET
-                                smiles = EXCLUDED.smiles,
-                                mol = EXCLUDED.mol,
-                                props = EXCLUDED.props;
-                        """
-
-                    cur.execute(
-                        sql,
-                        (
-                            mol_id,
-                            smi,
-                            smi,
-                            self.name,
-                            json.dumps(row_props),
-                        ),
-                    )
+                        params = (self.runId, mol_id, smi, smi, self.name, json.dumps(row_props))
+                    cur.execute(sql, params)
             conn.commit()
 
     def getMol(self, mol_id: str) -> TabularMol:
         with self._connect() as conn:
             with conn.cursor() as cur:
-                cur.execute(
-                    f"""
-                    SELECT id, smiles, library, props
-                    FROM {self._qualified_table()}
-                    WHERE id = %s;
-                    """,
-                    (mol_id,),
-                )
+                if self.runId is None:
+                    cur.execute(
+                        f"""
+                        SELECT id, smiles, library, props
+                        FROM {self._qualified_table()}
+                        WHERE id = %s;
+                        """,
+                        (mol_id,),
+                    )
+                else:
+                    cur.execute(
+                        f"""
+                        SELECT id, smiles, library, props
+                        FROM {self._qualified_table()}
+                        WHERE run_id = %s AND id = %s;
+                        """,
+                        (self.runId, mol_id),
+                    )
                 row = cur.fetchone()
 
         if row is None:
@@ -299,43 +347,80 @@ class PostgresChemStore(ParallelizedChemStore):
 
         with self._connect() as conn:
             with conn.cursor() as cur:
-                cur.execute(
-                    f"""
-                    DELETE FROM {self._qualified_table()}
-                    WHERE id = ANY(%s);
-                    """,
-                    (ids,),
-                )
+                if self.runId is None:
+                    cur.execute(
+                        f"""
+                        DELETE FROM {self._qualified_table()}
+                        WHERE id = ANY(%s);
+                        """,
+                        (ids,),
+                    )
+                else:
+                    cur.execute(
+                        f"""
+                        DELETE FROM {self._qualified_table()}
+                        WHERE run_id = %s AND id = ANY(%s);
+                        """,
+                        (self.runId, ids),
+                    )
             conn.commit()
 
     def getMolIDs(self) -> tuple[str, ...]:
         with self._connect() as conn:
             with conn.cursor() as cur:
-                cur.execute(
-                    f"""
-                    SELECT id
-                    FROM {self._qualified_table()}
-                    ORDER BY id;
-                    """
-                )
+                if self.runId is None:
+                    cur.execute(
+                        f"""
+                        SELECT id
+                        FROM {self._qualified_table()}
+                        ORDER BY id;
+                        """
+                    )
+                else:
+                    cur.execute(
+                        f"""
+                        SELECT id
+                        FROM {self._qualified_table()}
+                        WHERE run_id = %s
+                        ORDER BY id;
+                        """,
+                        (self.runId,),
+                    )
                 return tuple(row[0] for row in cur.fetchall())
 
     def getMolCount(self) -> int:
         with self._connect() as conn:
             with conn.cursor() as cur:
-                cur.execute(f"SELECT COUNT(*) FROM {self._qualified_table()};")
+                if self.runId is None:
+                    cur.execute(f"SELECT COUNT(*) FROM {self._qualified_table()};")
+                else:
+                    cur.execute(
+                        f"SELECT COUNT(*) FROM {self._qualified_table()} WHERE run_id = %s;",
+                        (self.runId,),
+                    )
                 return cur.fetchone()[0]
 
     def getDF(self) -> pd.DataFrame:
         with self._connect() as conn:
             with conn.cursor() as cur:
-                cur.execute(
-                    f"""
-                    SELECT id, smiles, library, props
-                    FROM {self._qualified_table()}
-                    ORDER BY id;
-                    """
-                )
+                if self.runId is None:
+                    cur.execute(
+                        f"""
+                        SELECT id, smiles, library, props
+                        FROM {self._qualified_table()}
+                        ORDER BY id;
+                        """
+                    )
+                else:
+                    cur.execute(
+                        f"""
+                        SELECT id, smiles, library, props
+                        FROM {self._qualified_table()}
+                        WHERE run_id = %s
+                        ORDER BY id;
+                        """,
+                        (self.runId,),
+                    )
                 rows = cur.fetchall()
 
         records = []
@@ -344,6 +429,8 @@ class PostgresChemStore(ParallelizedChemStore):
             record[self.idProp] = mol_id
             record[self.smilesProp] = smiles
             record["library"] = library
+            if self.runId is not None:
+                record["run_id"] = self.runId
             records.append(record)
 
         if not records:
@@ -388,38 +475,63 @@ class PostgresChemStore(ParallelizedChemStore):
         with self._connect() as conn:
             with conn.cursor() as cur:
                 for mol_id, value in zip(ids, data):
-                    cur.execute(
-                        f"""
-                        UPDATE {self._qualified_table()}
-                        SET props = jsonb_set(
-                            COALESCE(props, '{{}}'::jsonb),
-                            %s,
-                            %s::jsonb,
-                            true
+                    if self.runId is None:
+                        cur.execute(
+                            f"""
+                            UPDATE {self._qualified_table()}
+                            SET props = jsonb_set(
+                                COALESCE(props, '{{}}'::jsonb),
+                                %s,
+                                %s::jsonb,
+                                true
+                            )
+                            WHERE id = %s;
+                            """,
+                            ([name], json.dumps(value), mol_id),
                         )
-                        WHERE id = %s;
-                        """,
-                        ([name], json.dumps(value), mol_id),
-                    )
+                    else:
+                        cur.execute(
+                            f"""
+                            UPDATE {self._qualified_table()}
+                            SET props = jsonb_set(
+                                COALESCE(props, '{{}}'::jsonb),
+                                %s,
+                                %s::jsonb,
+                                true
+                            )
+                            WHERE run_id = %s AND id = %s;
+                            """,
+                            ([name], json.dumps(value), self.runId, mol_id),
+                        )
             conn.commit()
 
     def removeProperty(self, name: str):
         with self._connect() as conn:
             with conn.cursor() as cur:
-                cur.execute(
-                    f"""
-                    UPDATE {self._qualified_table()}
-                    SET props = props - %s;
-                    """,
-                    (name,),
-                )
+                if self.runId is None:
+                    cur.execute(
+                        f"""
+                        UPDATE {self._qualified_table()}
+                        SET props = props - %s;
+                        """,
+                        (name,),
+                    )
+                else:
+                    cur.execute(
+                        f"""
+                        UPDATE {self._qualified_table()}
+                        SET props = props - %s
+                        WHERE run_id = %s;
+                        """,
+                        (name, self.runId),
+                    )
             conn.commit()
 
     def getSubset(
         self,
         subset: Iterable[str],
         ids: Iterable[str] | None = None,
-        ):
+    ):
         df = self.getDF()
 
         if ids is None:
@@ -441,15 +553,27 @@ class PostgresChemStore(ParallelizedChemStore):
         while True:
             with self._connect() as conn:
                 with conn.cursor() as cur:
-                    cur.execute(
-                        f"""
-                        SELECT id, smiles, library, props
-                        FROM {self._qualified_table()}
-                        ORDER BY id
-                        LIMIT %s OFFSET %s;
-                        """,
-                        (size, offset),
-                    )
+                    if self.runId is None:
+                        cur.execute(
+                            f"""
+                            SELECT id, smiles, library, props
+                            FROM {self._qualified_table()}
+                            ORDER BY id
+                            LIMIT %s OFFSET %s;
+                            """,
+                            (size, offset),
+                        )
+                    else:
+                        cur.execute(
+                            f"""
+                            SELECT id, smiles, library, props
+                            FROM {self._qualified_table()}
+                            WHERE run_id = %s
+                            ORDER BY id
+                            LIMIT %s OFFSET %s;
+                            """,
+                            (self.runId, size, offset),
+                        )
                     rows = cur.fetchall()
 
             if not rows:
@@ -491,25 +615,7 @@ class PostgresChemStore(ParallelizedChemStore):
             "applyStandardizer() is not implemented for PostgresChemStore yet."
         )
 
-    @staticmethod
-    def _safe_sql_identifier(identifier: str) -> str:
-        """Validate SQL identifiers used for generated subset table names.
-
-        Most SQL values are passed as query parameters, but table/schema names cannot be
-        parameterized. This helper keeps generated identifiers conservative and avoids
-        accidental SQL injection through user-provided names.
-        """
-        if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", identifier):
-            raise ValueError(f"Unsafe SQL identifier: {identifier!r}")
-        return identifier
-
     def _clone_with_ids(self, ids: Iterable[str], name: str | None = None) -> "PostgresChemStore":
-        """Create a new PostgreSQL-backed ChemStore containing selected IDs.
-
-        The original Pandas implementation returns a new filtered store that can be
-        filtered further. For PostgreSQL we materialize the subset into another table.
-        This keeps the public behavior similar while still using server-side filtering.
-        """
         ids = list(ids)
         subset_name = self._safe_sql_identifier(name or f"{self.tableName}_subset")
 
@@ -518,6 +624,7 @@ class PostgresChemStore(ParallelizedChemStore):
             connection_string=self.connectionString,
             table_name=subset_name,
             schema=self.schema,
+            run_id=self.runId,
             smiles_col=self.smilesProp,
             id_col=self.idProp,
             use_rdkit_cartridge=self.useRdkitCartridge,
@@ -534,21 +641,38 @@ class PostgresChemStore(ParallelizedChemStore):
 
         with self._connect() as conn:
             with conn.cursor() as cur:
-                cur.execute(
-                    f"""
-                    INSERT INTO {subset_store._qualified_table()}
-                        (id, smiles, mol, library, props)
-                    SELECT id, smiles, mol, library, props
-                    FROM {self._qualified_table()}
-                    WHERE id = ANY(%s)
-                    ON CONFLICT (id) DO UPDATE SET
-                        smiles = EXCLUDED.smiles,
-                        mol = EXCLUDED.mol,
-                        library = EXCLUDED.library,
-                        props = EXCLUDED.props;
-                    """,
-                    (ids,),
-                )
+                if self.runId is None:
+                    cur.execute(
+                        f"""
+                        INSERT INTO {subset_store._qualified_table()}
+                            (id, smiles, mol, library, props)
+                        SELECT id, smiles, mol, library, props
+                        FROM {self._qualified_table()}
+                        WHERE id = ANY(%s)
+                        ON CONFLICT (id) DO UPDATE SET
+                            smiles = EXCLUDED.smiles,
+                            mol = EXCLUDED.mol,
+                            library = EXCLUDED.library,
+                            props = EXCLUDED.props;
+                        """,
+                        (ids,),
+                    )
+                else:
+                    cur.execute(
+                        f"""
+                        INSERT INTO {subset_store._qualified_table()}
+                            (run_id, id, smiles, mol, library, props)
+                        SELECT run_id, id, smiles, mol, library, props
+                        FROM {self._qualified_table()}
+                        WHERE run_id = %s AND id = ANY(%s)
+                        ON CONFLICT (run_id, id) DO UPDATE SET
+                            smiles = EXCLUDED.smiles,
+                            mol = EXCLUDED.mol,
+                            library = EXCLUDED.library,
+                            props = EXCLUDED.props;
+                        """,
+                        (self.runId, ids),
+                    )
             conn.commit()
 
         return subset_store
@@ -558,7 +682,7 @@ class PostgresChemStore(ParallelizedChemStore):
         prop_name: str,
         values: list[float | int | str],
         exact: bool = False,
-        ):
+    ):
         df = self.getDF()
 
         if prop_name not in df.columns:
@@ -583,24 +707,6 @@ class PostgresChemStore(ParallelizedChemStore):
         name: str | None = None,
         match_function: Any | None = None,
     ) -> "PostgresChemStore":
-        """Search molecules with SMARTS patterns using RDKit Cartridge.
-
-        The PostgreSQL RDKit cartridge implements substructure search through the
-        `@>` operator. The expression `mol @> qmol_from_smarts(pattern)` returns true
-        if the SMARTS pattern is a substructure of the stored molecule.
-
-        Args:
-            patterns: SMARTS patterns to search with.
-            operator: Combine multiple patterns with "or" or "and".
-            use_chirality: Kept for compatibility with PandasChemStore. The current
-                RDKit Cartridge query does not expose a separate chirality flag here.
-            name: Name of the materialized subset table. Defaults to
-                `<tableName>_smarts_searched`.
-            match_function: Kept for API compatibility; not used by the SQL backend.
-
-        Returns:
-            PostgresChemStore: A new store backed by a subset table containing matches.
-        """
         if not self.useRdkitCartridge:
             raise RuntimeError(
                 "searchWithSMARTS() requires PostgreSQL with RDKit Cartridge enabled."
@@ -631,15 +737,26 @@ class PostgresChemStore(ParallelizedChemStore):
                     if not is_valid:
                         raise ValueError(f"Invalid SMARTS pattern: {pattern!r}")
 
-                cur.execute(
-                    f"""
-                    SELECT id
-                    FROM {self._qualified_table()}
-                    WHERE {conditions}
-                    ORDER BY id;
-                    """,
-                    tuple(patterns),
-                )
+                if self.runId is None:
+                    cur.execute(
+                        f"""
+                        SELECT id
+                        FROM {self._qualified_table()}
+                        WHERE {conditions}
+                        ORDER BY id;
+                        """,
+                        tuple(patterns),
+                    )
+                else:
+                    cur.execute(
+                        f"""
+                        SELECT id
+                        FROM {self._qualified_table()}
+                        WHERE run_id = %s AND ({conditions})
+                        ORDER BY id;
+                        """,
+                        tuple([self.runId, *patterns]),
+                    )
                 ids = [row[0] for row in cur.fetchall()]
 
         subset_name = name or f"{self.tableName}_smarts_searched"

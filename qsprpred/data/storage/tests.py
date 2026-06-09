@@ -65,44 +65,77 @@ def _postgres_test_config():
     }
 
 
-def _register_postgres_test_run(dsn: str, schema: str, run_id: str, test_name: str, table_name: str):
-    """Register a PostgreSQL test run and its generated table.
+def _register_postgres_test_run(
+    dsn: str,
+    schema: str,
+    run_id: str,
+    test_name: str,
+    table_name: str,
+    table_prefix: str,
+):
+    """Register a PostgreSQL test run and the stable table used by it.
 
-    The tables are intentionally not dropped by default. This makes it possible
-    to inspect the database after a test run and see which tables belong to which
-    test invocation.
+    The registry schema is migrated idempotently because local/cloud databases
+    may already contain older versions created by previous test iterations.
     """
     with psycopg.connect(dsn, connect_timeout=10) as conn:
         with conn.cursor() as cur:
             cur.execute(
                 f"""
                 CREATE TABLE IF NOT EXISTS {schema}.chemstore_test_runs (
-                    run_id TEXT PRIMARY KEY,
-                    started_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-                    backend TEXT NOT NULL,
-                    test_name TEXT NOT NULL,
-                    table_prefix TEXT NOT NULL
+                    run_id TEXT PRIMARY KEY
                 );
                 """
             )
             cur.execute(
                 f"""
                 CREATE TABLE IF NOT EXISTS {schema}.chemstore_test_tables (
-                    id BIGSERIAL PRIMARY KEY,
-                    run_id TEXT NOT NULL,
-                    table_name TEXT NOT NULL,
-                    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+                    id BIGSERIAL PRIMARY KEY
                 );
                 """
             )
+
+            for column_sql in [
+                "started_at TIMESTAMPTZ NOT NULL DEFAULT now()",
+                "backend TEXT NOT NULL DEFAULT 'postgres'",
+                "test_name TEXT",
+                "test_group TEXT",
+                "table_prefix TEXT NOT NULL DEFAULT 'unknown'",
+                "note TEXT",
+            ]:
+                cur.execute(
+                    f"ALTER TABLE {schema}.chemstore_test_runs ADD COLUMN IF NOT EXISTS {column_sql};"
+                )
+
+            for column_sql in [
+                "run_id TEXT",
+                "table_name TEXT",
+                "created_at TIMESTAMPTZ NOT NULL DEFAULT now()",
+            ]:
+                cur.execute(
+                    f"ALTER TABLE {schema}.chemstore_test_tables ADD COLUMN IF NOT EXISTS {column_sql};"
+                )
+
             cur.execute(
                 f"""
                 INSERT INTO {schema}.chemstore_test_runs
-                    (run_id, backend, test_name, table_prefix)
-                VALUES (%s, %s, %s, %s)
-                ON CONFLICT (run_id) DO NOTHING;
+                    (run_id, backend, test_name, test_group, table_prefix, note)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                ON CONFLICT (run_id) DO UPDATE SET
+                    backend = EXCLUDED.backend,
+                    test_name = EXCLUDED.test_name,
+                    test_group = EXCLUDED.test_group,
+                    table_prefix = EXCLUDED.table_prefix,
+                    note = EXCLUDED.note;
                 """,
-                (run_id, "postgres", test_name, table_name),
+                (
+                    run_id,
+                    "postgres",
+                    test_name,
+                    "PostgresTabularStorageTest",
+                    table_prefix,
+                    "Legacy storage test executed on PostgreSQL/RDKit backend.",
+                ),
             )
             cur.execute(
                 f"""
@@ -426,15 +459,23 @@ class PostgresTabularStorageTest(StorageTest, TestCase):
         self.postgres_dsn = cfg["dsn"]
         self.postgres_schema = cfg["schema"]
         self.postgres_use_rdkit = cfg["use_rdkit"]
-        self.postgres_run_id = f"{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
-        self.postgres_table = _safe_pg_identifier(
-            f"chemstore_{self.__class__.__name__}_{self._testMethodName}_{self.postgres_run_id}"
+        self.postgres_run_id = f"pgtest_{uuid.uuid4().hex[:10]}"
+        table_prefixes = {
+            "testAddMols": "cst_addmols",
+            "testMolProcess": "cst_molprocess",
+            "testSubsetting": "cst_subset",
+            "testSearch": "cst_search",
+        }
+        self.postgres_table = table_prefixes.get(
+            self._testMethodName,
+            _safe_pg_identifier(f"cst_{self._testMethodName}"),
         )
         _register_postgres_test_run(
             self.postgres_dsn,
             self.postgres_schema,
             self.postgres_run_id,
             self._testMethodName,
+            self.postgres_table,
             self.postgres_table,
         )
 
@@ -483,6 +524,7 @@ class PostgresTabularStorageTest(StorageTest, TestCase):
             connection_string=self.postgres_dsn,
             table_name=self.postgres_table,
             schema=self.postgres_schema,
+            run_id=self.postgres_run_id,
             use_rdkit_cartridge=self.postgres_use_rdkit,
             create=True,
             chunk_size=1,
