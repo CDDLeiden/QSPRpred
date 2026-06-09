@@ -12,6 +12,7 @@ from rdkit.Chem import Mol
 from qsprpred.data import MoleculeTable
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 from ..data.descriptors.sets import ProteinDescriptorSet
+from ...data.storage.interfaces.chem_store import ChemStore
 from ...data.storage.tabular.simple import PandasChemStore
 from ...models.model import QSPRModel
 from ...models.scikit_learn import SklearnModel
@@ -40,6 +41,7 @@ class PCMModel(QSPRModel, ABC):
             protein_id: str,
             n_jobs: int = 1,
             fill_value: float = np.nan,
+            storage: ChemStore | None = None,
     ) -> tuple[PCMDataSet, np.ndarray]:
         """
         Create a prediction data set of compounds using a PCM model
@@ -57,6 +59,11 @@ class PCMModel(QSPRModel, ABC):
                 Number of parallel jobs. Defaults to 1.
             fill_value (float, optional):
                 Value to fill missing features with. Defaults to np.nan.
+            storage (ChemStore | None):
+                Optional storage backend to use for the temporary prediction
+                molecule table. If not provided, a PandasChemStore is created.
+                If provided, the storage is cleared and filled with the prediction
+                molecules.
         Returns:
             PCMDataSet:
                 Dataset with the features calculated for the molecules.
@@ -64,13 +71,20 @@ class PCMModel(QSPRModel, ABC):
         # make a molecule table first and add the target properties
         if isinstance(mols[0], Mol):
             mols = [Chem.MolToSmiles(mol) for mol in mols]
-        storage = PandasChemStore(
-            f"{self.__class__.__name__}_{hash(self)}_store",
-            self.baseDir,
-            pd.DataFrame({"SMILES": mols}),
-            standardizer=self.chemStandardizer,
-            n_jobs=n_jobs,
-        )
+        if storage is None:
+            storage = PandasChemStore(
+                f"{self.__class__.__name__}_{hash(self)}_store",
+                self.baseDir,
+                pd.DataFrame({"SMILES": mols}),
+                standardizer=self.chemStandardizer,
+                n_jobs=n_jobs,
+            )
+        else:
+            storage.clear()
+            storage.addMols(
+                smiles=mols,
+                raise_on_existing=False,
+            )
         failed_mask = np.full(len(mols), False)
         if len(storage) != len(mols):
             original_smiles = storage.getProperty("SMILES_original")
@@ -109,6 +123,7 @@ class PCMModel(QSPRModel, ABC):
             use_probas: bool = False,
             n_jobs: int = 1,
             fill_value: float = np.nan,
+            storage: ChemStore | None = None,
     ) -> np.ndarray:
         """
         Predict the target properties of a list of molecules using a PCM model.
@@ -126,6 +141,9 @@ class PCMModel(QSPRModel, ABC):
                 Number of parallel jobs. Defaults to 1.
             fill_value (float, optional):
                 Value to fill missing features with. Defaults to np.nan.
+            storage (ChemStore | None):
+                Optional storage backend for the temporary prediction molecules.
+                If not provided, a PandasChemStore is used.
 
         Returns:
             np.ndarray:
@@ -164,7 +182,7 @@ class PCMModel(QSPRModel, ABC):
             )
         # create data set from mols
         dataset, failed_mask = self.createPredictionDatasetFromMols(
-            mols, protein_id, n_jobs, fill_value
+            mols, protein_id, n_jobs, fill_value, storage=storage
         )
         # make predictions for the dataset
         predictions = self.predictDataset(dataset, use_probas)

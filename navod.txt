@@ -1,0 +1,51 @@
+install virtual python3 -m venv venv
+pust virtual source venv/bin/activate
+
+Vzdy aktivovat vitualku
+> source .venv/bin/activate
+> which python
+
+
+overit pripojeni na db: 
+
+> python scripts/test_connection.py
+
+Connecting to PostgreSQL...
+Database: neondb
+Version: PostgreSQL 18.4 (72c6e7c) on aarch64-unknown-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit
+Connection OK
+
+overit RDKit Cartridge
+> python scripts/test_rdkit.py
+Checking RDKit extension...
+RDKit extension installed.
+RDKit test OK:
+('CCO',)
+
+Iinicializace reladcni databaze
+> python scripts/init_postgres_chemstore.py
+Initialized public.molecules
+
+Nakonec test ze to dopadlo:
+
+python -m pytest testing/storage/test_postgres_chemstore.py
+python -m pytest testing/storage/test_molecule_table_postgres.py
+python -m pytest testing/storage/test_model_postgres_storage.py
+
+Pripojeni na SQL a Overeni Integrace:
+
+python -m pytest qsprpred/data/storage/tests.py -k PostgresTabularStorageTest
+python -m pytest testing/storage/test_qsprmodel_training_postgres.py
+
+
+KOMPLETNI TEST PostgreSQL
+
+python -m pytest testing/storage/test_postgres_chemstore.py
+python -m pytest testing/storage/test_molecule_table_postgres.py
+python -m pytest testing/storage/test_model_postgres_storage.py
+python -m pytest testing/storage/test_qsprtable_postgres_workflow.py
+python -m pytest testing/storage/test_qsprmodel_training_postgres.py
+python -m pytest qsprpred/data/storage/tests.py -k PostgresTabularStorageTest
+
+
+

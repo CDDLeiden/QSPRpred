@@ -16,7 +16,7 @@ from .descriptor import DescriptorTable
 from .interfaces.molecule_data_set import MoleculeDataSet
 from ..chem.identifiers import ChemIdentifier
 from ..chem.standardizers import ChemStandardizer
-from ...data.chem.scaffolds import Scaffold
+from ..chem.scaffolds import Scaffold
 from ...logs import logger
 from ...utils.parallel import Parallelizable
 
@@ -229,6 +229,40 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
                 "The used storage does not seem to support parallelization."
             )
 
+    @staticmethod
+    def _fillStorageFromDF(
+            storage: ChemStore,
+            df: pd.DataFrame,
+            smiles_col: str = "SMILES",
+            clear_storage: bool = True,
+    ) -> ChemStore:
+        """Fill an arbitrary ChemStore implementation from a DataFrame.
+
+        This helper is intentionally small and backend-agnostic. It allows the
+        factory methods below to use either the original PandasChemStore or a custom
+        ChemStore implementation such as PostgresChemStore.
+        """
+        if smiles_col not in df.columns:
+            raise ValueError(f"SMILES column {smiles_col!r} not found in DataFrame.")
+
+        if clear_storage and hasattr(storage, "clear"):
+            storage.clear()
+
+        prop_df = df.drop(columns=[smiles_col])
+
+        # RDKit molecule objects loaded from SDF files are not JSON serializable and
+        # cannot be persisted directly into PostgreSQL JSONB properties. They are also
+        # not needed because the backend reconstructs mol values from SMILES.
+        prop_df = prop_df.drop(columns=["RDMol"], errors="ignore")
+
+        props = {column: prop_df[column].tolist() for column in prop_df.columns}
+        storage.addMols(
+            smiles=df[smiles_col].tolist(),
+            props=props,
+            raise_on_existing=False,
+        )
+        return storage
+
     @classmethod
     def fromDF(
             cls,
@@ -236,6 +270,8 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
             df: pd.DataFrame,
             path: str = ".",
             smiles_col: str = "SMILES",
+            storage: ChemStore | None = None,
+            clear_storage: bool = True,
             **kwargs,
     ) -> "MoleculeTable":
         """Create a `MoleculeTable` instance from a pandas DataFrame.
@@ -246,40 +282,82 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
             path (str): Path to the directory where the data set will be stored.
             smiles_col (str): Name of the column in the data frame containing the SMILES
                 sequences.
+            storage (ChemStore | None): Optional custom storage backend. If omitted,
+                the original PandasChemStore backend is used.
+            clear_storage (bool): Whether to clear a provided storage before loading
+                the DataFrame into it.
             **kwargs:
-                Additional keyword arguments to pass to the `MoleculeTable` constructor.
+                Additional keyword arguments to pass to the PandasChemStore constructor
+                when no custom storage is supplied.
 
         Returns:
             (MoleculeTable): The created data set.
         """
-        storage = PandasChemStore(
-            f"{name}_storage", path, df, smiles_col=smiles_col, **kwargs
-        )
+        if storage is None:
+            storage = PandasChemStore(
+                f"{name}_storage", path, df, smiles_col=smiles_col, **kwargs
+            )
+        else:
+            storage = cls._fillStorageFromDF(
+                storage, df, smiles_col=smiles_col, clear_storage=clear_storage
+            )
+
         return MoleculeTable(storage, name=name, path=path)
 
     @classmethod
-    def fromSMILES(cls, name: str, smiles: list, path: str, *args, **kwargs):
+    def fromSMILES(
+            cls,
+            name: str,
+            smiles: list,
+            path: str,
+            *args,
+            storage: ChemStore | None = None,
+            clear_storage: bool = True,
+            **kwargs,
+    ):
         """Create a `MoleculeTable` instance from a list of SMILES sequences.
 
         Args:
             name (str): Name of the data set.
             smiles (list): list of SMILES sequences.
             path (str): Path to the directory where the data set will be stored.
-            *args: Additional arguments to pass to the `MoleculeTable` constructor.
+            storage (ChemStore | None): Optional custom storage backend. If omitted,
+                the original PandasChemStore backend is used.
+            clear_storage (bool): Whether to clear a provided storage before loading
+                the SMILES values into it.
+            *args: Additional arguments to pass to the PandasChemStore constructor
+                when no custom storage is supplied.
             **kwargs:
-                Additional keyword arguments to pass to the `MoleculeTable` constructor.
+                Additional keyword arguments to pass to the PandasChemStore constructor
+                when no custom storage is supplied.
 
         Returns:
             (MoleculeTable): The created data set.
         """
         smiles_col = "SMILES"
         df = pd.DataFrame({smiles_col: smiles})
-        storage = PandasChemStore(name, path, df, *args, **kwargs)
-        return cls(storage, path=os.path.dirname(storage.path))
+
+        if storage is None:
+            storage = PandasChemStore(name, path, df, *args, **kwargs)
+            return cls(storage, path=os.path.dirname(storage.path))
+
+        storage = cls._fillStorageFromDF(
+            storage, df, smiles_col=smiles_col, clear_storage=clear_storage
+        )
+        return cls(storage, name=name, path=path)
 
     @classmethod
     def fromTableFile(
-            cls, name: str, filename: str, path: str, *args, sep="\t", **kwargs
+            cls,
+            name: str,
+            filename: str,
+            path: str,
+            *args,
+            sep="\t",
+            storage: ChemStore | None = None,
+            clear_storage: bool = True,
+            smiles_col: str = "SMILES",
+            **kwargs,
     ):
         """Create a `MoleculeTable` instance from a file containing a table of molecules
         (i.e. a CSV file).
@@ -289,6 +367,12 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
             filename (str): Path to the file containing the table.
             path (str): Path to the directory where the data set will be stored.
             sep (str): Separator used in the file for different columns.
+            storage (ChemStore | None): Optional custom storage backend. If omitted,
+                the original PandasChemStore backend is used.
+            clear_storage (bool): Whether to clear a provided storage before loading
+                the table into it.
+            smiles_col (str): Name of the SMILES column used when a custom storage is
+                supplied.
             *args: Additional arguments to pass to the `MoleculeTable` constructor.
             **kwargs:
                 Additional keyword arguments to pass to the `MoleculeTable` constructor.
@@ -297,12 +381,27 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
             (MoleculeTable): The created data set.
         """
         df = pd.read_table(filename, sep=sep)
-        storage = PandasChemStore(f"{name}_storage", path, df)
+
+        if storage is None:
+            storage = PandasChemStore(f"{name}_storage", path, df)
+        else:
+            storage = cls._fillStorageFromDF(
+                storage, df, smiles_col=smiles_col, clear_storage=clear_storage
+            )
+
         return MoleculeTable(storage, name, *args, path=path, **kwargs)
 
     @classmethod
     def fromSDF(
-            cls, name: str, filename: str, path: str, smiles_prop: str, *args, **kwargs
+            cls,
+            name: str,
+            filename: str,
+            path: str,
+            smiles_prop: str,
+            *args,
+            storage: ChemStore | None = None,
+            clear_storage: bool = True,
+            **kwargs,
     ):
         """Create a `MoleculeTable` instance from an SDF file.
 
@@ -312,18 +411,31 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
             path (str): Path to the directory where the data set will be stored.
             smiles_prop (str):
                 Name of the property in the SDF file containing the SMILES sequence.
-            *args: Additional arguments to pass to the `MoleculeTable` constructor.
+            storage (ChemStore | None): Optional custom storage backend. If omitted,
+                the original PandasChemStore backend is used.
+            clear_storage (bool): Whether to clear a provided storage before loading
+                the SDF content into it.
+            *args: Additional arguments to pass to the PandasChemStore constructor
+                when no custom storage is supplied.
             **kwargs:
-                Additional keyword arguments to pass to the `MoleculeTable` constructor.
+                Additional keyword arguments to pass to the PandasChemStore constructor
+                when no custom storage is supplied.
         """
         # FIXME: the RDKit mols are always added here, which might be unnecessary
         from rdkit.Chem import PandasTools
 
         df = PandasTools.LoadSDF(filename, molColName="RDMol")
-        storage = PandasChemStore(
-            name, path, df, *args, smiles_col=smiles_prop, **kwargs
+
+        if storage is None:
+            storage = PandasChemStore(
+                name, path, df, *args, smiles_col=smiles_prop, **kwargs
+            )
+            return cls(storage, path=os.path.dirname(storage.path))
+
+        storage = cls._fillStorageFromDF(
+            storage, df, smiles_col=smiles_prop, clear_storage=clear_storage
         )
-        return cls(storage, path=os.path.dirname(storage.path))
+        return cls(storage, name=name, path=path)
 
     @property
     def smilesProp(self) -> str:
