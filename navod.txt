@@ -32,5 +32,11 @@ python -m pytest testing/storage/test_postgres_chemstore.py
 python -m pytest testing/storage/test_molecule_table_postgres.py
 python -m pytest testing/storage/test_model_postgres_storage.py
 
+Pripojeni na SQL a Overeni Integrace:
+
+python -m pytest qsprpred/data/storage/tests.py -k PostgresTabularStorageTest
+python -m pytest testing/storage/test_qsprmodel_training_postgres.py
+
+
 
 
