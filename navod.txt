@@ -1,7 +1,9 @@
 install virtual python3 -m venv venv
 pust virtual source venv/bin/activate
 
-
+Vzdy aktivovat vitualku
+> source .venv/bin/activate
+> which python
 
 
 overit pripojeni na db: 
@@ -21,11 +23,12 @@ RDKit test OK:
 ('CCO',)
 
 Iinicializace reladcni databaze
->python scripts/init_postgres_chemstore.py
+> python scripts/init_postgres_chemstore.py
 Initialized public.molecules
 
 Nakonec test ze to dopadlo
->python scripts/test_postgres_chemstore.py
+> python scripts/test_postgres_chemstore.py
+> pytest testing/storage/test_postgres_chemstore.py
 
 
 

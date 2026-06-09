@@ -1,4 +1,5 @@
 import json
+import re
 from typing import Iterable, Generator, Literal, Sized, Any
 
 import pandas as pd
@@ -495,6 +496,68 @@ class PostgresChemStore(ParallelizedChemStore):
             "applyStandardizer() is not implemented for PostgresChemStore yet."
         )
 
+    @staticmethod
+    def _safe_sql_identifier(identifier: str) -> str:
+        """Validate SQL identifiers used for generated subset table names.
+
+        Most SQL values are passed as query parameters, but table/schema names cannot be
+        parameterized. This helper keeps generated identifiers conservative and avoids
+        accidental SQL injection through user-provided names.
+        """
+        if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", identifier):
+            raise ValueError(f"Unsafe SQL identifier: {identifier!r}")
+        return identifier
+
+    def _clone_with_ids(self, ids: Iterable[str], name: str | None = None) -> "PostgresChemStore":
+        """Create a new PostgreSQL-backed ChemStore containing selected IDs.
+
+        The original Pandas implementation returns a new filtered store that can be
+        filtered further. For PostgreSQL we materialize the subset into another table.
+        This keeps the public behavior similar while still using server-side filtering.
+        """
+        ids = list(ids)
+        subset_name = self._safe_sql_identifier(name or f"{self.tableName}_subset")
+
+        subset_store = PostgresChemStore(
+            name=f"{self.name}_subset",
+            connection_string=self.connectionString,
+            table_name=subset_name,
+            schema=self.schema,
+            smiles_col=self.smilesProp,
+            id_col=self.idProp,
+            use_rdkit_cartridge=self.useRdkitCartridge,
+            create=True,
+            standardizer=self.standardizer,
+            identifier=self.identifier,
+            chunk_size=self.chunkSize,
+            n_jobs=self.nJobs,
+        )
+        subset_store.clear()
+
+        if not ids:
+            return subset_store
+
+        with self._connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"""
+                    INSERT INTO {subset_store._qualified_table()}
+                        (id, smiles, mol, library, props)
+                    SELECT id, smiles, mol, library, props
+                    FROM {self._qualified_table()}
+                    WHERE id = ANY(%s)
+                    ON CONFLICT (id) DO UPDATE SET
+                        smiles = EXCLUDED.smiles,
+                        mol = EXCLUDED.mol,
+                        library = EXCLUDED.library,
+                        props = EXCLUDED.props;
+                    """,
+                    (ids,),
+                )
+            conn.commit()
+
+        return subset_store
+
     def searchOnProperty(
         self,
         prop_name: str,
@@ -515,10 +578,75 @@ class PostgresChemStore(ParallelizedChemStore):
 
         return df[mask]
 
-    def searchWithSMARTS(self, patterns: list[str]):
-        raise NotImplementedError(
-            "searchWithSMARTS() will be implemented through RDKit Cartridge in the next phase."
+    def searchWithSMARTS(
+        self,
+        patterns: list[str],
+        operator: Literal["or", "and"] = "or",
+        use_chirality: bool = False,
+        name: str | None = None,
+        match_function: Any | None = None,
+    ) -> "PostgresChemStore":
+        """Search molecules with SMARTS patterns using RDKit Cartridge.
+
+        The PostgreSQL RDKit cartridge implements substructure search through the
+        `@>` operator. The expression `mol @> qmol_from_smarts(pattern)` returns true
+        if the SMARTS pattern is a substructure of the stored molecule.
+
+        Args:
+            patterns: SMARTS patterns to search with.
+            operator: Combine multiple patterns with "or" or "and".
+            use_chirality: Kept for compatibility with PandasChemStore. The current
+                RDKit Cartridge query does not expose a separate chirality flag here.
+            name: Name of the materialized subset table. Defaults to
+                `<tableName>_smarts_searched`.
+            match_function: Kept for API compatibility; not used by the SQL backend.
+
+        Returns:
+            PostgresChemStore: A new store backed by a subset table containing matches.
+        """
+        if not self.useRdkitCartridge:
+            raise RuntimeError(
+                "searchWithSMARTS() requires PostgreSQL with RDKit Cartridge enabled."
+            )
+
+        if not patterns:
+            raise ValueError("At least one SMARTS pattern must be provided.")
+
+        if operator not in {"or", "and"}:
+            raise ValueError("operator must be either 'or' or 'and'.")
+
+        if match_function is not None:
+            raise ValueError(
+                "match_function is not supported by PostgresChemStore; "
+                "SMARTS matching is executed inside PostgreSQL through RDKit Cartridge."
+            )
+
+        sql_operator = " OR " if operator == "or" else " AND "
+        conditions = sql_operator.join(
+            ["mol @> qmol_from_smarts(%s)" for _ in patterns]
         )
+
+        with self._connect() as conn:
+            with conn.cursor() as cur:
+                for pattern in patterns:
+                    cur.execute("SELECT is_valid_smarts(%s);", (pattern,))
+                    is_valid = cur.fetchone()[0]
+                    if not is_valid:
+                        raise ValueError(f"Invalid SMARTS pattern: {pattern!r}")
+
+                cur.execute(
+                    f"""
+                    SELECT id
+                    FROM {self._qualified_table()}
+                    WHERE {conditions}
+                    ORDER BY id;
+                    """,
+                    tuple(patterns),
+                )
+                ids = [row[0] for row in cur.fetchall()]
+
+        subset_name = name or f"{self.tableName}_smarts_searched"
+        return self._clone_with_ids(ids, subset_name)
 
     def __len__(self):
         return self.getMolCount()
