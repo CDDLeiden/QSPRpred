@@ -26,9 +26,11 @@ Iinicializace reladcni databaze
 > python scripts/init_postgres_chemstore.py
 Initialized public.molecules
 
-Nakonec test ze to dopadlo
-> python scripts/test_postgres_chemstore.py
-> pytest testing/storage/test_postgres_chemstore.py
+Nakonec test ze to dopadlo:
+
+python -m pytest testing/storage/test_postgres_chemstore.py
+python -m pytest testing/storage/test_molecule_table_postgres.py
+python -m pytest testing/storage/test_model_postgres_storage.py
 
 
 
