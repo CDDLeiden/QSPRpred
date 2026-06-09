@@ -17,6 +17,7 @@ from rdkit import Chem
 from rdkit.Chem import Mol
 
 from qsprpred.data import QSPRTable
+from ..data.storage.interfaces.chem_store import ChemStore
 from ..data.storage.tabular.simple import PandasChemStore
 from ..data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ..data.tables.mol import MoleculeTable
@@ -456,6 +457,7 @@ class QSPRModel(JSONSerializable, ABC):
             mols: list[str | Mol],
             n_jobs: int = 1,
             fill_value: float = np.nan,
+            storage: ChemStore | None = None,
     ) -> tuple[QSPRDataSet, np.ndarray]:
         """Create a `QSPRDataSet` instance from a list of SMILES strings.
 
@@ -463,6 +465,11 @@ class QSPRModel(JSONSerializable, ABC):
             mols (list[str | Mol]): list of SMILES strings
             n_jobs (int): number of parallel jobs to use
             fill_value (float): value to fill for missing features
+            storage (ChemStore | None):
+                Optional storage backend to use for the temporary prediction
+                molecule table. If not provided, a PandasChemStore is created.
+                If provided, the storage is cleared and filled with the prediction
+                molecules.
 
         Returns:
             tuple:
@@ -472,13 +479,20 @@ class QSPRModel(JSONSerializable, ABC):
         # make a molecule table first and add the target properties
         if isinstance(mols[0], Mol):
             mols = [Chem.MolToSmiles(mol) for mol in mols]
-        storage = PandasChemStore(
-            f"{self.__class__.__name__}_{hash(self)}_store",
-            self.baseDir,
-            pd.DataFrame({"SMILES": mols}),
-            standardizer=self.chemStandardizer,
-            n_jobs=n_jobs,
-        )
+        if storage is None:
+            storage = PandasChemStore(
+                f"{self.__class__.__name__}_{hash(self)}_store",
+                self.baseDir,
+                pd.DataFrame({"SMILES": mols}),
+                standardizer=self.chemStandardizer,
+                n_jobs=n_jobs,
+            )
+        else:
+            storage.clear()
+            storage.addMols(
+                smiles=mols,
+                raise_on_existing=False,
+            )
         failed_mask = np.full(len(mols), False)
         if len(storage) != len(mols):
             original_smiles = storage.getProperty("SMILES_original")
@@ -541,6 +555,7 @@ class QSPRModel(JSONSerializable, ABC):
             n_jobs: int = 1,
             fill_value: float = np.nan,
             use_applicability_domain: bool = False,
+            storage: ChemStore | None = None,
     ) -> np.ndarray | list[np.ndarray]:
         """
         Make predictions for the given molecules.
@@ -552,6 +567,9 @@ class QSPRModel(JSONSerializable, ABC):
             fill_value: Value to use for missing values in the feature matrix.
             use_applicability_domain: Use applicability domain to return if a
                 molecule is within the applicability domain of the model.
+            storage (ChemStore | None):
+                Optional storage backend for the temporary prediction molecules.
+                If not provided, a PandasChemStore is used.
 
         Returns:
             np.ndarray | list[np.ndarray]:
@@ -564,7 +582,7 @@ class QSPRModel(JSONSerializable, ABC):
             raise ValueError("No feature calculator set on this instance.")
         # create data set from mols
         dataset, failed_mask = self.createPredictionDatasetFromMols(
-            mols, n_jobs, fill_value
+            mols, n_jobs, fill_value, storage=storage
         )
         # make predictions for the dataset
         predictions = self.predictDataset(dataset, use_probas)
