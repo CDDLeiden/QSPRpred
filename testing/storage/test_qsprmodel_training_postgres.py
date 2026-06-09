@@ -189,7 +189,7 @@ def postgres_store():
     schema = os.getenv("QSPR_POSTGRES_SCHEMA", "public")
 
     run_id = f"qsprmodel_training_{uuid.uuid4().hex[:8]}"
-    table_name = f"{run_id}_molecules"
+    table_name = "cst_qsprmodel_training"
 
     create_test_run(
         dsn=dsn,
@@ -204,6 +204,7 @@ def postgres_store():
         connection_string=dsn,
         table_name=table_name,
         schema=schema,
+        run_id=run_id,
         use_rdkit_cartridge=True,
         create=True,
     )

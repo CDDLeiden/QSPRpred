@@ -38,22 +38,21 @@ def main() -> None:
     patterns = [
         "chemstore_postgrestabularstoragetest_%",
         "chemstore_postgres_tabular_storage_test_%",
+        "qsprmodel_training_%_molecules",
     ]
 
     with psycopg.connect(dsn, connect_timeout=10) as conn:
         with conn.cursor() as cur:
+            like_sql = " OR ".join(["tablename LIKE %s" for _ in patterns])
             cur.execute(
-                """
+                f"""
                 SELECT tablename
                 FROM pg_tables
                 WHERE schemaname = %s
-                  AND (
-                    tablename LIKE %s
-                    OR tablename LIKE %s
-                  )
+                  AND ({like_sql})
                 ORDER BY tablename;
                 """,
-                (schema, patterns[0], patterns[1]),
+                (schema, *patterns),
             )
             tables = [row[0] for row in cur.fetchall()]
 
