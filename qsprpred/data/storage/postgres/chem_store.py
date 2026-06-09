@@ -14,6 +14,15 @@ from qsprpred.utils.parallel import MultiprocessingJITGenerator, ParallelGenerat
 
 
 class PostgresChemStore(ParallelizedChemStore):
+    """PostgreSQL-backed ChemStore implementation.
+
+    If ``run_id`` is provided, the physical PostgreSQL table is treated as a
+    stable shared table. Rows belonging to different runs are separated by the
+    ``run_id`` column and all read/write operations are automatically scoped to
+    this run. This is useful for tests and demos where repeated executions should
+    not create new physical tables.
+    """
+
     def __init__(
         self,
         name: str,
@@ -69,7 +78,7 @@ class PostgresChemStore(ParallelizedChemStore):
 
     @property
     def metaFile(self) -> str:
-        if self.runId:
+        if self.runId is not None:
             return f"postgresql://{self.schema}.{self.tableName}?run_id={self.runId}"
         return f"postgresql://{self.schema}.{self.tableName}"
 
@@ -107,6 +116,7 @@ class PostgresChemStore(ParallelizedChemStore):
 
     @staticmethod
     def _safe_sql_identifier(identifier: str) -> str:
+        """Validate SQL identifiers used for schema/table/index names."""
         if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", identifier):
             raise ValueError(f"Unsafe SQL identifier: {identifier!r}")
         return identifier
@@ -122,9 +132,98 @@ class PostgresChemStore(ParallelizedChemStore):
             return "", tuple()
         return f"{prefix} run_id = %s", (self.runId,)
 
+    def _ensure_test_run_registry(self, cur):
+        """Create/migrate registry tables and register the current run.
+
+        The registry tables may already exist from older test versions. This method
+        therefore creates only a minimal table first and then adds all expected
+        columns with ``ADD COLUMN IF NOT EXISTS``.
+        """
+        if self.runId is None:
+            return
+
+        cur.execute(
+            f"""
+            CREATE TABLE IF NOT EXISTS {self.schema}.chemstore_test_runs (
+                run_id TEXT PRIMARY KEY
+            );
+            """
+        )
+        cur.execute(
+            f"""
+            CREATE TABLE IF NOT EXISTS {self.schema}.chemstore_test_tables (
+                id BIGSERIAL PRIMARY KEY
+            );
+            """
+        )
+
+        for column_sql in [
+            "test_name TEXT",
+            "started_at TIMESTAMPTZ",
+            "backend TEXT",
+            "table_prefix TEXT",
+            "note TEXT",
+        ]:
+            cur.execute(
+                f"""
+                ALTER TABLE {self.schema}.chemstore_test_runs
+                ADD COLUMN IF NOT EXISTS {column_sql};
+                """
+            )
+
+        for column_sql in [
+            "run_id TEXT",
+            "table_name TEXT",
+            "created_at TIMESTAMPTZ DEFAULT now()",
+        ]:
+            cur.execute(
+                f"""
+                ALTER TABLE {self.schema}.chemstore_test_tables
+                ADD COLUMN IF NOT EXISTS {column_sql};
+                """
+            )
+
+        cur.execute(
+            f"""
+            INSERT INTO {self.schema}.chemstore_test_runs
+                (run_id, test_name, started_at, backend, table_prefix, note)
+            VALUES
+                (%s, %s, now(), %s, %s, %s)
+            ON CONFLICT (run_id) DO UPDATE SET
+                test_name = EXCLUDED.test_name,
+                backend = EXCLUDED.backend,
+                table_prefix = EXCLUDED.table_prefix,
+                note = COALESCE(EXCLUDED.note, {self.schema}.chemstore_test_runs.note),
+                started_at = COALESCE({self.schema}.chemstore_test_runs.started_at, EXCLUDED.started_at);
+            """,
+            (
+                self.runId,
+                self.name,
+                "postgres",
+                self.tableName,
+                "PostgresChemStore run-backed table",
+            ),
+        )
+
+        cur.execute(
+            f"""
+            INSERT INTO {self.schema}.chemstore_test_tables
+                (run_id, table_name, created_at)
+            SELECT %s, %s, now()
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM {self.schema}.chemstore_test_tables
+                WHERE run_id = %s AND table_name = %s
+            );
+            """,
+            (self.runId, self.tableName, self.runId, self.tableName),
+        )
+
     def _create_storage(self):
         with self._connect() as conn:
             with conn.cursor() as cur:
+                self._ensure_test_run_registry(cur)
+
                 if self.useRdkitCartridge:
                     cur.execute("CREATE EXTENSION IF NOT EXISTS rdkit;")
 
@@ -150,11 +249,16 @@ class PostgresChemStore(ParallelizedChemStore):
                             mol MOL,
                             library TEXT,
                             props JSONB DEFAULT '{{}}'::jsonb,
-                            PRIMARY KEY (run_id, id),
-                            FOREIGN KEY (run_id)
-                                REFERENCES {self.schema}.chemstore_test_runs(run_id)
-                                ON DELETE CASCADE
+                            PRIMARY KEY (run_id, id)
                         );
+                        """
+                    )
+                    # Existing stable tables created by older versions may not yet have
+                    # run_id. Add it so clearRun()/scoped reads can work.
+                    cur.execute(
+                        f"""
+                        ALTER TABLE {self._qualified_table()}
+                        ADD COLUMN IF NOT EXISTS run_id TEXT;
                         """
                     )
 
@@ -192,10 +296,29 @@ class PostgresChemStore(ParallelizedChemStore):
         return TabularMol(mol_id, self.name, smiles, props=props)
 
     def clear(self):
+        """Clear the whole store, or only the current run when run_id is set."""
         with self._connect() as conn:
             with conn.cursor() as cur:
                 where_sql, params = self._run_where()
                 cur.execute(f"DELETE FROM {self._qualified_table()} {where_sql};", params)
+            conn.commit()
+
+    def clearRun(self, run_id: str | None = None):
+        """Delete rows belonging to one run_id."""
+        run_id = run_id or self.runId
+
+        if not run_id:
+            raise ValueError("clearRun() requires run_id or self.runId.")
+
+        with self._connect() as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"""
+                    DELETE FROM {self._qualified_table()}
+                    WHERE run_id = %s;
+                    """,
+                    (run_id,),
+                )
             conn.commit()
 
     def save(self) -> str:
@@ -255,7 +378,6 @@ class PostgresChemStore(ParallelizedChemStore):
         smiles = list(smiles)
         props = props or {}
         library = library or f"{self.name}_library"
-
         inserted_ids = []
         sql = self._insert_sql(raise_on_existing)
 
@@ -273,7 +395,15 @@ class PostgresChemStore(ParallelizedChemStore):
                     if self.runId is None:
                         params = (mol_id, smi, smi, library, json.dumps(row_props))
                     else:
-                        params = (self.runId, mol_id, smi, smi, library, json.dumps(row_props))
+                        params = (
+                            self.runId,
+                            mol_id,
+                            smi,
+                            smi,
+                            library,
+                            json.dumps(row_props),
+                        )
+
                     cur.execute(sql, params)
                     inserted_ids.append(mol_id)
 
@@ -292,6 +422,7 @@ class PostgresChemStore(ParallelizedChemStore):
             raise ValueError(f"Missing required property {self.smilesProp}")
 
         sql = self._insert_sql(raise_on_existing)
+
         with self._connect() as conn:
             with conn.cursor() as cur:
                 for idx, mol_id in enumerate(ids):
@@ -305,7 +436,15 @@ class PostgresChemStore(ParallelizedChemStore):
                     if self.runId is None:
                         params = (mol_id, smi, smi, self.name, json.dumps(row_props))
                     else:
-                        params = (self.runId, mol_id, smi, smi, self.name, json.dumps(row_props))
+                        params = (
+                            self.runId,
+                            mol_id,
+                            smi,
+                            smi,
+                            self.name,
+                            json.dumps(row_props),
+                        )
+
                     cur.execute(sql, params)
             conn.commit()
 
@@ -395,7 +534,11 @@ class PostgresChemStore(ParallelizedChemStore):
                     cur.execute(f"SELECT COUNT(*) FROM {self._qualified_table()};")
                 else:
                     cur.execute(
-                        f"SELECT COUNT(*) FROM {self._qualified_table()} WHERE run_id = %s;",
+                        f"""
+                        SELECT COUNT(*)
+                        FROM {self._qualified_table()}
+                        WHERE run_id = %s;
+                        """,
                         (self.runId,),
                     )
                 return cur.fetchone()[0]
