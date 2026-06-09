@@ -419,20 +419,15 @@ class PostgresChemStore(ParallelizedChemStore):
         self,
         subset: Iterable[str],
         ids: Iterable[str] | None = None,
-    ):
+        ):
         df = self.getDF()
 
-        if ids is not None:
+        if ids is None:
+            ids = list(df[self.idProp])
+        else:
             ids = list(ids)
-            df = df[df[self.idProp].isin(ids)]
 
-        cols = [col for col in subset if col in df.columns]
-        if self.idProp not in cols:
-            cols.insert(0, self.idProp)
-        if self.smilesProp not in cols:
-            cols.append(self.smilesProp)
-
-        return df[cols]
+        return self._clone_with_ids(ids, f"{self.tableName}_subset")
 
     def iterChunks(
         self,
@@ -563,20 +558,22 @@ class PostgresChemStore(ParallelizedChemStore):
         prop_name: str,
         values: list[float | int | str],
         exact: bool = False,
-    ):
+        ):
         df = self.getDF()
 
         if prop_name not in df.columns:
-            return df.iloc[0:0]
+            return self._clone_with_ids([], f"{self.tableName}_property_searched")
 
         if exact:
-            return df[df[prop_name].isin(values)]
+            matched = df[df[prop_name].isin(values)]
+        else:
+            mask = pd.Series(False, index=df.index)
+            for value in values:
+                mask = mask | df[prop_name].astype(str).str.contains(str(value), na=False)
+            matched = df[mask]
 
-        mask = pd.Series(False, index=df.index)
-        for value in values:
-            mask = mask | df[prop_name].astype(str).str.contains(str(value), na=False)
-
-        return df[mask]
+        ids = list(matched[self.idProp])
+        return self._clone_with_ids(ids, f"{self.tableName}_property_searched")
 
     def searchWithSMARTS(
         self,
