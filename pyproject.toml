@@ -41,6 +41,7 @@ classifiers = [
 ]
 dependencies = [
     "parameterized",
+    "pytest",
     "pebble",
     "numpy",
     "scikit-learn >= 1.0.2",
@@ -80,10 +81,15 @@ chemprop = [
     "rdkit < 2023.9.6",
     "chemprop >= 1.6.0, < 2.0.0",
 ]
+postgres = [
+    "psycopg[binary]",
+    "dotenv",
+]
 full = [
     "qsprpred[deep]",
     "qsprpred[extra]",
     "qsprpred[chemprop]",
+    "qsprpred[postgres]",
 ]
 dev = [
     "qsprpred[full]",
@@ -91,7 +97,6 @@ dev = [
     "isort",
     "yapf",
     "ruff",
-    "pytest"
 ]
 
 [tool.setuptools.packages.find]
