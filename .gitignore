@@ -20,6 +20,9 @@
 /**/tutorials/tutorial_data/AR_LIGANDS_pivot.tsv
 /**/tutorials/tutorial_output
 
+# Mac stuff
+.DS_Store
+
 ### Python template
 # Byte-compiled / optimized / DLL files
 __pycache__/
