@@ -236,6 +236,8 @@ class PandasChemStore(ParallelizedChemStore):
                 f"Column '{smiles_col}' not found in the data frame. "
                 "Please provide a valid column name for the SMILES representations."
             )
+        assert path, f"Invalid path specified: '{path}'. Please, specify a valid path to the storage directory."
+        assert name, f"Storage name '{name}' is invalid."
         self.rootDir = path
         self.path = os.path.abspath(os.path.join(self.rootDir, name))
         self.name = name
