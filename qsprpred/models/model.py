@@ -17,11 +17,11 @@ from rdkit import Chem
 from rdkit.Chem import Mol
 
 from qsprpred.data import QSPRTable
+from ..data.processing.applicability_domain import MLChemAD, ApplicabilityDomain
+from ..data.processing.pipeline import DatasetPipeline
 from ..data.storage.tabular.simple import PandasChemStore
 from ..data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ..data.tables.mol import MoleculeTable
-from ..data.processing.pipeline import DatasetPipeline
-from ..data.processing.applicability_domain import MLChemAD, ApplicabilityDomain
 from ..logs import logger
 from ..models.early_stopping import EarlyStopping, EarlyStoppingMode
 from ..tasks import ModelTasks
@@ -60,9 +60,9 @@ class QSPRModel(JSONSerializable, ABC):
 
     @staticmethod
     def handleInvalidsInPredictions(
-        num_mols: int,
-        predictions: np.ndarray | list[np.ndarray],
-        failed_mask: np.ndarray,
+            num_mols: int,
+            predictions: np.ndarray | list[np.ndarray],
+            failed_mask: np.ndarray,
     ) -> np.ndarray:
         """Replace invalid predictions with None.
 
@@ -422,9 +422,9 @@ class QSPRModel(JSONSerializable, ABC):
         return has_data
 
     def convertToNumpy(
-        self,
-        X: pd.DataFrame | np.ndarray,
-        y: pd.DataFrame | np.ndarray | None = None,
+            self,
+            X: pd.DataFrame | np.ndarray,
+            y: pd.DataFrame | np.ndarray | None = None,
     ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
         """Convert the given data matrix and target matrix to np.ndarray format.
 
@@ -466,14 +466,14 @@ class QSPRModel(JSONSerializable, ABC):
         return parameters_out
 
     def createPredictionDatasetFromMols(
-        self,
-        mols: list[str | Mol],
-        n_jobs: int = 1
+            self,
+            mols: Iterable[str | Mol],
+            n_jobs: int = 1
     ) -> tuple[QSPRTable, np.ndarray]:
         """Create a `QSPRTable` instance from a list of SMILES strings.
 
         Args:
-            mols (list[str | Mol]): list of SMILES strings
+            mols (Iterable[str | Mol]): list of SMILES strings
             n_jobs (int): number of parallel jobs to use
 
         Returns:
@@ -482,6 +482,7 @@ class QSPRModel(JSONSerializable, ABC):
                 indicating which molecules failed to be processed
         """
         # make a molecule table first and add the target properties
+        mols = list(mols)
         if isinstance(mols[0], Mol):
             mols = [Chem.MolToSmiles(mol) for mol in mols]
         storage = PandasChemStore(
@@ -515,7 +516,7 @@ class QSPRModel(JSONSerializable, ABC):
         return dataset, failed_mask
 
     def predictDataset(
-        self, dataset: QSPRDataSet, use_probas: bool = False
+            self, dataset: QSPRDataSet, use_probas: bool = False
     ) -> np.ndarray | list[np.ndarray]:
         """
         Make predictions for the given dataset.
@@ -530,7 +531,7 @@ class QSPRModel(JSONSerializable, ABC):
                 (for classification models with use_probas=True)
         """
         if self.pipeline is not None:
-            X, _ = next(self.pipeline.apply(dataset, fit=False))
+            X, _ = next(self.pipeline.applyOnDataSet(dataset, fit=False))
         else:
             X = dataset.getDescriptors()
         failed_mask = np.full(len(dataset), False)
@@ -559,21 +560,22 @@ class QSPRModel(JSONSerializable, ABC):
                 .loc[dataset.getDF().index.intersection(X.index)]
                 .values
             )
-        predictions = self.handleInvalidsInPredictions(len(dataset), predictions, failed_mask)
+        predictions = self.handleInvalidsInPredictions(len(dataset), predictions,
+                                                       failed_mask)
         return predictions
 
     def predictMols(
-        self,
-        mols: Iterable[str | Mol],
-        use_probas: bool = False,
-        n_jobs: int = 1,
-        use_applicability_domain: bool = False,
+            self,
+            mols: Iterable[str | Mol],
+            use_probas: bool = False,
+            n_jobs: int = 1,
+            use_applicability_domain: bool = False,
     ) -> np.ndarray | list[np.ndarray]:
         """
         Make predictions for the given molecules.
 
         Args:
-            mols (List[str  | Mol]): list of SMILES strings
+            mols (Iterable[str  | Mol]): list of SMILES strings
             use_probas (bool): use probabilities for classification models
             n_jobs: Number of jobs to use for parallel processing.
             use_applicability_domain: Use applicability domain to return if a
@@ -595,16 +597,18 @@ class QSPRModel(JSONSerializable, ABC):
         # make predictions for the dataset
         predictions = self.predictDataset(dataset, use_probas)
         # handle invalids
-        predictions = self.handleInvalidsInPredictions(len(mols), predictions, failed_mask)
+        predictions = self.handleInvalidsInPredictions(len(mols), predictions,
+                                                       failed_mask)
 
         # return predictions and if mols are within applicability domain if requested
         if hasattr(self, "applicabilityDomain") and use_applicability_domain:
             if self.pipeline is not None:
-                X, _ = next(self.pipeline.apply(dataset, fit=False))
+                X, _ = next(self.pipeline.applyOnDataSet(dataset, fit=False))
             else:
                 X = dataset.getDescriptors()
             in_domain = self.applicabilityDomain.transform(X).values
-            in_domain = self.handleInvalidsInPredictions(len(mols), in_domain, failed_mask)
+            in_domain = self.handleInvalidsInPredictions(len(mols), in_domain,
+                                                         failed_mask)
 
             return predictions, in_domain
         return predictions
@@ -618,14 +622,14 @@ class QSPRModel(JSONSerializable, ABC):
             shutil.rmtree(self.outDir)
 
     def fitDataset(
-        self,
-        ds: QSPRDataSet,
-        pipeline: DatasetPipeline | None = None,
-        monitor=None,
-        mode=EarlyStoppingMode.OPTIMAL,
-        save_model=True,
-        save_data=False,
-        **kwargs,
+            self,
+            ds: QSPRDataSet,
+            pipeline: DatasetPipeline | None = None,
+            monitor=None,
+            mode=EarlyStoppingMode.OPTIMAL,
+            save_model=True,
+            save_data=False,
+            **kwargs,
     ) -> str:
         """Train model on the whole attached data set.
 
@@ -654,7 +658,7 @@ class QSPRModel(JSONSerializable, ABC):
         # get data
         self.pipeline = pipeline
         if self.pipeline is not None:
-            X_all, y_all = next(self.pipeline.apply(ds))
+            X_all, y_all = next(self.pipeline.applyOnDataSet(ds))
         else:
             X_all, y_all = ds.getDescriptors(), ds.getTargets()
         # init properties from data
@@ -671,7 +675,8 @@ class QSPRModel(JSONSerializable, ABC):
         logger.info(
             "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
-        if hasattr(self, "applicabilityDomain") and self.applicabilityDomain is not None:
+        if hasattr(self,
+                   "applicabilityDomain") and self.applicabilityDomain is not None:
             logger.info(
                 "Applicability domain fit started: %s" % datetime.now().strftime(
                     "%Y-%m-%d %H:%M:%S"

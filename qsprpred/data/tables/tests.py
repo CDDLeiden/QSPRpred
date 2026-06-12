@@ -1,29 +1,28 @@
-from copy import deepcopy
 import os
 import shutil
 import tempfile
+from copy import deepcopy
 
 import numpy as np
 import pandas as pd
 from parameterized import parameterized
 from sklearn.model_selection import KFold, ShuffleSplit
 
-from ...data.storage.tabular.simple import PandasChemStore
 from qsprpred.data.descriptors.sets import DrugExPhyschem
-
+from .interfaces.qspr_data_set import QSPRDataSet
+from .mol import MoleculeTable
+from ..chem.standardizers.papyrus import PapyrusStandardizer
+from ..descriptors.fingerprints import MorganFP
+from ..processing.data_filters import CategoryFilter, NaNFilter
+from ..processing.pipeline import DatasetPipeline
+from ..processing.step import Shuffle, DummyStep
 from ... import TargetSpec, TargetTasks
+from ...data.storage.tabular.simple import PandasChemStore
 from ...data.tables.qspr import QSPRTable
 from ...utils.stopwatch import StopWatch
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import DataPrepCheckMixIn
 from ...utils.testing.path_mixins import DataSetsPathMixIn, PathMixIn
-from ..chem.standardizers.papyrus import PapyrusStandardizer
-from ..descriptors.fingerprints import MorganFP
-from .interfaces.qspr_data_set import QSPRDataSet
-from .mol import MoleculeTable
-from ..processing.pipeline import DatasetPipeline
-from ..processing.step import Shuffle, DummyStep
-from ..processing.data_filters import CategoryFilter, NaNFilter
 
 
 class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
@@ -520,8 +519,8 @@ class TestQSPRTable(DataSetsPathMixIn, QSPRTestCase):
         split = ShuffleSplit(1, test_size=0.5, random_state=dataset.randomState)
         dataset.addSplit(split, "shufflesplit2")
         train2, test2 = next(dataset.iterSplit("shufflesplit2", as_type="ids"))
-        self.assertListEqual(train.tolist(), train2.tolist())
-        self.assertListEqual(test.tolist(), test2.tolist())
+        self.assertListEqual(train, train2)
+        self.assertListEqual(test, test2)
 
     def testRandomStateFolds(self):
         # create and save the data set (fixes the seed)
@@ -543,9 +542,10 @@ class TestQSPRTable(DataSetsPathMixIn, QSPRTestCase):
         self.assertListEqual(dataset.getDescriptors().index.tolist(), order_train)
         split = KFold(5, shuffle=True, random_state=dataset.randomState)
         dataset.addSplit(split, "kfold2")
-        for i, (train_index, test_index) in enumerate(dataset.getSplit("kfold2", as_type="ids")):
-            self.assertListEqual(train_index.tolist(), order_folds[i][0].tolist())
-            self.assertListEqual(test_index.tolist(), order_folds[i][1].tolist())
+        for i, (train_index, test_index) in enumerate(
+                dataset.getSplit("kfold2", as_type="ids")):
+            self.assertListEqual(train_index, order_folds[i][0])
+            self.assertListEqual(test_index, order_folds[i][1])
 
     def testFilter(self):
         """Test removing entries from the dataset using a DataFilter."""
@@ -560,6 +560,7 @@ class TestQSPRTable(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(len(dataset.getDF()), len(dataset.getDescriptors()))
         self.assertTrue((dataset.getDF()["moka_ionState7.4"] == "cationic").sum() == 0)
 
+
 class TestSearchFeatures(DataSetsPathMixIn, QSPRTestCase):
     def setUp(self):
         super().setUp()
@@ -572,7 +573,8 @@ class TestSearchFeatures(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(result.name, name)
         self.assertListEqual(dataset.getProperties(), result.getProperties())
         self.assertListEqual(dataset.getDescriptorNames(), result.getDescriptorNames())
-        self.assertListEqual(dataset.getTargetPropertiesNames(), result.getTargetPropertiesNames())
+        self.assertListEqual(dataset.getTargetPropertiesNames(),
+                             result.getTargetPropertiesNames())
         self.assertEqual(len(dataset.descriptorSets), len(result.descriptorSets))
         self.assertEqual(len(dataset.targetProperties), len(result.targetProperties))
 
@@ -625,8 +627,10 @@ class TestSearchFeatures(DataSetsPathMixIn, QSPRTestCase):
         )
         self.assertTrue(len(results) == 0)
 
+
 class TestTargetSpec(QSPRTestCase):
     """Test the TargetSpec class."""
+
     def checkTargetSpec(self, target_spec, name, task, th, n_classes=None):
         # Check the target spec creation consistency
         self.assertEqual(target_spec.name, name)
@@ -794,6 +798,7 @@ class TestTargetImputation(PathMixIn, QSPRTestCase):
             ),
             columns=["SMILES", *self.descriptors, "y", "z"],
         )
+
 
 class TestApply(DataSetsPathMixIn, QSPRTestCase):
     """Tests the apply method of the data set."""

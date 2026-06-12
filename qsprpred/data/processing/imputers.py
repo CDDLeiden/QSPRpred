@@ -1,12 +1,16 @@
-import pandas as pd
-from .step import Step
 from abc import abstractmethod
+
+import pandas as pd
 from sklearn.impute._base import _BaseImputer
+
+from .step import Step
+
 
 class Imputer(Step):
 
     @abstractmethod
-    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[
+        pd.DataFrame, pd.DataFrame]:
         """Impute values in the dataset.
         
         Args:
@@ -18,10 +22,11 @@ class Imputer(Step):
             pd.DataFrame: (imputed) target data
         """
         pass
-    
+
 
 class TargetImputer(Imputer):
-    def __init__(self, imputer: _BaseImputer, target_properties: list[str] | None = None):
+    def __init__(self, imputer: _BaseImputer,
+                 target_properties: list[str] | None = None):
         """Initialize the target imputer.
         
         Args:
@@ -33,7 +38,7 @@ class TargetImputer(Imputer):
         self.imputer = imputer
         self.target_properties = target_properties
         self._fitted = False
-    
+
     def fit(self, X: pd.DataFrame, y: pd.DataFrame):
         """Fit the imputer to the dataset
         
@@ -42,11 +47,12 @@ class TargetImputer(Imputer):
             y (pd.DataFrame): training targets
         """
         if self.target_properties is None:
-            self.target_properties = y.columns
+            self.target_properties = y.columns.tolist()
         self.imputer.fit(y[self.target_properties])
         self._fitted = True
-    
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame) -> tuple[
+        pd.DataFrame, pd.DataFrame]:
         """Impute values in the dataset.
         
         Args:
@@ -60,11 +66,14 @@ class TargetImputer(Imputer):
         if not self._fitted:
             raise ValueError("Imputer not fitted.")
         y_imputed = y.copy()
-        y_imputed[self.target_properties] = self.imputer.transform(y[self.target_properties])
+        y_imputed[self.target_properties] = self.imputer.transform(
+            y[self.target_properties])
         return X, y_imputed
-    
+
+
 class FeatureImputer(Imputer):
-    def __init__(self, imputer: _BaseImputer, feature_properties: list[str] | None = None):
+    def __init__(self, imputer: _BaseImputer,
+                 feature_properties: list[str] | None = None):
         """Initialize the feature imputer.
         
         Args:
@@ -78,7 +87,7 @@ class FeatureImputer(Imputer):
         self.imputer = imputer
         self.feature_properties = feature_properties
         self._fitted = False
-    
+
     def fit(self, X: pd.DataFrame, y: pd.DataFrame):
         """Fit the imputer to the dataset
         
@@ -88,12 +97,13 @@ class FeatureImputer(Imputer):
         """
         if self.feature_properties is None:
             self.feature_properties = X.columns
-        
+
         to_be_imputed = self.get_features_to_be_imputed(X)
         self.imputer.fit(X[to_be_imputed])
         self._fitted = True
-    
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame) -> tuple[
+        pd.DataFrame, pd.DataFrame]:
         """Impute values in the dataset.
         
         Args:
@@ -107,11 +117,11 @@ class FeatureImputer(Imputer):
         if not self._fitted:
             raise ValueError("Imputer not fitted.")
         X_imputed = X.copy()
-        
+
         to_be_imputed = self.get_features_to_be_imputed(X)
         X_imputed[to_be_imputed] = self.imputer.transform(X[to_be_imputed])
         return X_imputed, y
-    
+
     def get_features_to_be_imputed(self, X: pd.DataFrame) -> list[str]:
         """Get the features that will be imputed.
         

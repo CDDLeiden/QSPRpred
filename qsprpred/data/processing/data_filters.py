@@ -9,13 +9,13 @@ from itertools import chain
 
 import numpy as np
 import pandas as pd
-
-from ...logs import logger
-from .step import Step
-from .applicability_domain import ApplicabilityDomain, MLChemAD
 from mlchemad.base import ApplicabilityDomain as MLChemADApplicabilityDomain
+
+from .applicability_domain import ApplicabilityDomain, MLChemAD
+from .step import Step
 from ..tables.interfaces.data_set_dependent import DataSetDependent
 from ..tables.interfaces.qspr_data_set import QSPRDataSet
+from ...logs import logger
 
 
 class DataFilter(Step, DataSetDependent):
@@ -31,6 +31,7 @@ class DataFilter(Step, DataSetDependent):
                 requires it
         """
 
+
 class CategoryFilter(DataFilter):
     """To filter out values from column
 
@@ -39,12 +40,13 @@ class CategoryFilter(DataFilter):
         values (list[str]): filter values.
         keep (bool): whether to keep or discard values.
     """
+
     def __init__(
-        self,
-        prop: str,
-        values: list[str],
-        data_set: QSPRDataSet | None = None,
-        keep: bool = False
+            self,
+            prop: str,
+            values: list[str],
+            data_set: QSPRDataSet | None = None,
+            keep: bool = False
     ) -> None:
         """Initialize the CategoryFilter with the name, values and keep attributes.
 
@@ -55,13 +57,14 @@ class CategoryFilter(DataFilter):
             keep (bool, optional): whether to keep or discard the values. Defaults to
                 False.
         """
-        super().__init__(dataset = data_set)
+        super().__init__(dataset=data_set)
         self.prop = prop
         self.values = values
         self.keep = keep
         self._fitted = False
 
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame | None]:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[
+        pd.DataFrame, pd.DataFrame | None]:
         """Filter rows from dataframe.
 
         Args:
@@ -89,6 +92,7 @@ class CategoryFilter(DataFilter):
 
         return X, y
 
+
 class RepeatsFilter(DataFilter):
     """To filter out duplicate molecules based on descriptor values.
 
@@ -105,13 +109,13 @@ class RepeatsFilter(DataFilter):
             so that compounds with same X but different proteinid
             are not removed.
     """
-    
+
     def __init__(
-        self,
-        keep: str | bool = False,
-        timecol: str | None = None,
-        additional_cols: list[str] | None = None,
-        data_set: QSPRDataSet | None = None
+            self,
+            keep: str | bool = False,
+            timecol: str | None = None,
+            additional_cols: list[str] | None = None,
+            data_set: QSPRDataSet | None = None
     ) -> None:
         """Initialize the RepeatsFilter with the keep, timecol and additional_cols
         attributes.
@@ -129,12 +133,13 @@ class RepeatsFilter(DataFilter):
                 are not removed. Defaults to None.
             data_set (QSPRDataSet, optional): dataset to filter. Defaults to None.
         """
-        super().__init__(dataset = data_set)
+        super().__init__(dataset=data_set)
         self.keep = keep
         self.timeCol = timecol
         self.additionalCols = additional_cols
 
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame | None]:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[
+        pd.DataFrame, pd.DataFrame | None]:
         """Filter rows from dataframe.
 
         Arguments:
@@ -146,6 +151,7 @@ class RepeatsFilter(DataFilter):
             tuple[pd.DataFrame, pd.DataFrame | None]: filtered dataframe and target
             dataframe if provided.
         """
+
         def group_duplicate_index(df) -> list[list[int]]:
             """Group indices of duplicate rows
 
@@ -173,12 +179,13 @@ class RepeatsFilter(DataFilter):
 
             # Return list of lists of indices of duplicate rows
             return [sort_idxs[i:j] for i, j in zip(idx[::2], idx[1::2] + 1)]
+
         assert self.hasDataSet, (
             "No dataset attached to this filter, set dataset with setDataSet()"
         )
         if self.timeCol is not None:
             assert (
-                self.timeCol in self.dataSet.getDF().columns
+                    self.timeCol in self.dataSet.getDF().columns
             ), f"Column {self.timeCol} not found in dataset."
             timecol = self.dataSet.getDF()[self.timeCol].copy()
         if self.additionalCols is not None:
@@ -214,7 +221,7 @@ class RepeatsFilter(DataFilter):
         else:
             if self.keep in ["first", "last"]:
                 assert (
-                    self.timeCol is not None
+                        self.timeCol is not None
                 ), "timecol must be specified if keep is 'first' or 'last'"
                 timecol = pd.to_numeric(timecol, errors="coerce")
                 for repeat in allrepeats:
@@ -234,9 +241,10 @@ class RepeatsFilter(DataFilter):
 
         return X, y
 
+
 class NaNFilter(DataFilter):
     """Step that removes rows containing NaN values in a specified column"""
-    
+
     def __init__(self, features: list[str] | None = None, keep: bool = False):
         """Initialize the step with the columns to check for NaN values
         
@@ -250,20 +258,24 @@ class NaNFilter(DataFilter):
         self._fitted = False
         self.keep = keep
         self.selected_features = features
-    
-    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+
+    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[
+        pd.DataFrame, pd.DataFrame]:
         """Remove rows containing NaN values in the specified columns"""
         if self.selected_features is None:
-            self.selected_features = X.columns
+            self.selected_features = X.columns.tolist()
         # only take selected features that are in the current data
-        selected_features = list(set(self.selected_features) & set(X.columns))
-        
+        selected_features = list(set(self.selected_features) & set(X.columns.tolist()))
+
         if self.keep:
             nan_mask = X[selected_features].isnull()
-            nan_rows, nan_features = nan_mask.index[nan_mask.any(axis=1)], nan_mask.columns
-            nan_features_per_row = nan_mask.loc[nan_rows].apply(lambda row: nan_features[row].tolist(), axis=1)
+            nan_rows, nan_features = nan_mask.index[
+                nan_mask.any(axis=1)], nan_mask.columns
+            nan_features_per_row = nan_mask.loc[nan_rows].apply(
+                lambda row: nan_features[row].tolist(), axis=1)
             for row, features in zip(nan_rows, nan_features_per_row):
-                logger.warning(f"Entry {row} contains NaN values in features {features}.")
+                logger.warning(
+                    f"Entry {row} contains NaN values in features {features}.")
         else:
             drop_rows = X.index[X[selected_features].isnull().any(axis=1)]
             if len(drop_rows) > 0:
@@ -275,9 +287,10 @@ class NaNFilter(DataFilter):
                 y = y.loc[X.index]
         return X, y
 
+
 class OutlierFilter(DataFilter):
     """Remove outliers based on an applicability domain"""
-    
+
     def __init__(self, ad: ApplicabilityDomain):
         """Initialize the OutlierFilter with an applicability domain from MLChemAD.
 
@@ -288,7 +301,7 @@ class OutlierFilter(DataFilter):
         if isinstance(ad, MLChemADApplicabilityDomain):
             ad = MLChemAD(ad)
         self.ad = ad
-        
+
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
         """Fit the applicability domain to the data.
         
@@ -299,7 +312,8 @@ class OutlierFilter(DataFilter):
         self.ad.fit(X)
         self._fitted = True
 
-    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[pd.DataFrame, pd.DataFrame | None]:
+    def transform(self, X: pd.DataFrame, y: pd.DataFrame | None = None) -> tuple[
+        pd.DataFrame, pd.DataFrame | None]:
         """Remove samples outside the applicability domain.
         
         Args:
@@ -310,8 +324,10 @@ class OutlierFilter(DataFilter):
             tuple[pd.DataFrame, pd.DataFrame]: filtered training data and targets
         """
         indomain = self.ad.contains(X)
-        logger.info(f"Removing {len(X) - indomain.sum()} samples outside the applicability domain.")
-        logger.debug(f"Removing samples {X.index[~indomain].tolist()} outside the applicability domain.")
+        logger.info(
+            f"Removing {len(X) - indomain.sum()} samples outside the applicability domain.")
+        logger.debug(
+            f"Removing samples {X.index[~indomain].tolist()} outside the applicability domain.")
         X = X.loc[indomain]
         if y is not None:
             y = y.loc[indomain]

@@ -26,8 +26,9 @@ class ApplicabilityDomain(JSONSerializable, ABC):
     in the applicability domain or just to check if a molecule is in the applicability
     domain.
     """
+
     def __init__(
-        self, threshold: float | None = None, direction: str | None = None
+            self, threshold: float | None = None, direction: str | None = None
     ) -> None:
         """Initialize the applicability domain with a threshold.
 
@@ -139,10 +140,11 @@ class MLChemAD(ApplicabilityDomain):
         applicabilityDomain (MLChemApplicabilityDomain): applicability domain object
         fitted (bool): whether the applicability domain is fitted or not
     """
+
     def __init__(
-        self,
-        applicability_domain: MLChemADApplicabilityDomain,
-        astype: str | None = "float64",
+            self,
+            applicability_domain: MLChemADApplicabilityDomain,
+            astype: str | None = "float64",
     ) -> None:
         """Initialize the MLChemADFilter with the domain_type attribute.
 
@@ -218,16 +220,17 @@ class KNNApplicabilityDomain(ApplicabilityDomain):
     This class is adapted from the `KNNApplicabilityDomain` class in the
     `mlchemad` package.
     """
+
     def __init__(
-        self,
-        k: int = 5,
-        alpha: float | None = None,
-        hard_threshold: float | None = None,
-        scaling: str | None = "robust",
-        dist: str = "euclidean",
-        scaler_kwargs=None,
-        n_jobs: int = 1,
-        astype: str | None = "float64",
+            self,
+            k: int = 5,
+            alpha: float | None = None,
+            hard_threshold: float | None = None,
+            scaling: str | None = "robust",
+            dist: str = "euclidean",
+            scaler_kwargs=None,
+            n_jobs: int = 1,
+            astype: str | None = "float64",
     ):
         """Create the k-Nearest Neighbor applicability domain.
 
@@ -288,7 +291,8 @@ class KNNApplicabilityDomain(ApplicabilityDomain):
         :param X: feature matrix
         """
         # Normalize the data
-        self.X_norm = self.scaler.fit_transform(X) if self.scaler is not None else X
+        self.X_norm = self.scaler.fit_transform(
+            X.to_numpy()) if self.scaler is not None else X
         # Fit the NN
         self.nn.fit(self.X_norm)
         # Find the distance to the kNN neighbors

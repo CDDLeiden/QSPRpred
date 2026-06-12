@@ -12,7 +12,8 @@ from typing import Any, Generator
 import pandas as pd
 
 from qsprpred.extra.gpu.utils.parallel import TorchJITGenerator
-
+from .replica import Replica
+from .settings.benchmark import BenchmarkSettings
 from ..logs import logger
 from ..utils.parallel import (
     MultiprocessingJITGenerator,
@@ -20,12 +21,11 @@ from ..utils.parallel import (
     PebbleJITGenerator,
     ThreadsJITGenerator,
 )
-from .replica import Replica
-from .settings.benchmark import BenchmarkSettings
 
 
 class ExcThread(Thread):
     """Thread that can catch exceptions from the target function."""
+
     def __init__(self, *args, **kwargs):
         """Initialize the thread.
 
@@ -91,6 +91,7 @@ class BenchmarkRunner:
             exception (Exception):
                 Exception that was raised.
         """
+
         def __init__(self, replica_id: str, exception: Exception):
             """Initialize the exception.
 
@@ -106,12 +107,12 @@ class BenchmarkRunner:
     logLevel = logging.DEBUG
 
     def __init__(
-        self,
-        settings: BenchmarkSettings,
-        data_dir: str = "./data",
-        results_file: str | None = None,
-        parallel_generator_cpu: ParallelGenerator | None = None,
-        parallel_generator_gpu: ParallelGenerator | None = None,
+            self,
+            settings: BenchmarkSettings,
+            data_dir: str = "./data",
+            results_file: str | None = None,
+            parallel_generator_cpu: ParallelGenerator | None = None,
+            parallel_generator_gpu: ParallelGenerator | None = None,
     ):
         """Initialize the runner.
 
@@ -132,7 +133,7 @@ class BenchmarkRunner:
         logger.debug("Initializing BenchmarkRunner...")
         self.settings = settings
         self.parallelGeneratorCPU = (
-            parallel_generator_cpu or MultiprocessingJITGenerator(os.cpu_count())
+                parallel_generator_cpu or MultiprocessingJITGenerator(os.cpu_count())
         )
         self.parallelGeneratorGPU = parallel_generator_gpu
         self.dataDir = data_dir
@@ -154,9 +155,10 @@ class BenchmarkRunner:
         benchmark_settings = self.settings
         benchmark_settings.checkConsistency()
         ret = (
-            benchmark_settings.n_replicas * len(benchmark_settings.data_sources) *
-            len(benchmark_settings.descriptors) * len(benchmark_settings.target_props) *
-            len(benchmark_settings.pipelines) * len(benchmark_settings.models)
+                benchmark_settings.n_replicas * len(benchmark_settings.data_sources) *
+                len(benchmark_settings.descriptors) * len(
+            benchmark_settings.target_props) *
+                len(benchmark_settings.pipelines) * len(benchmark_settings.models)
         )
         if len(benchmark_settings.optimizers) > 0:
             ret *= len(benchmark_settings.optimizers)
@@ -189,7 +191,10 @@ class BenchmarkRunner:
         elif isinstance(generator, (MultiprocessingJITGenerator, PebbleJITGenerator)):
             import multiprocessing
 
-            manager = multiprocessing.Manager()
+            try:
+                manager = multiprocessing.get_context("fork").Manager()
+            except ValueError:
+                manager = multiprocessing.get_context("spawn").Manager()
         elif isinstance(generator, ThreadsJITGenerator):
             return self.lock_data_t, self.lock_report_t
         else:
@@ -201,10 +206,10 @@ class BenchmarkRunner:
         return manager.Lock(), manager.Lock()
 
     def processReplicas(
-        self,
-        generator: ParallelGenerator,
-        replicas: Generator[Replica, None, None],
-        raise_errors: bool = False,
+            self,
+            generator: ParallelGenerator,
+            replicas: Generator[Replica, None, None],
+            raise_errors: bool = False,
     ):
         """Processes replicas in parallel using the given `ParallelGenerator`.
         Each generated replica is run by the `runReplica` method, which
@@ -224,7 +229,7 @@ class BenchmarkRunner:
         """
         lock_data, lock_report = self.createLocks(generator)
         for result in generator(
-            replicas, self.runReplica, self.resultsFile, lock_data, lock_report
+                replicas, self.runReplica, self.resultsFile, lock_data, lock_report
         ):
             if isinstance(result, self.ReplicaException):
                 # show traceback and continue
@@ -320,7 +325,7 @@ class BenchmarkRunner:
         """
         seed = seed or self.settings.random_seed
         random.seed(seed)
-        return random.sample(range(2**31), self.nRuns)
+        return random.sample(range(2 ** 31), self.nRuns)
 
     def iterReplicas(self) -> Generator[Replica, None, None]:
         """Generator that yields `Replica` objects for each benchmarking run.
@@ -462,12 +467,12 @@ class BenchmarkRunner:
 
     @classmethod
     def runReplica(
-        cls,
-        replica: Replica,
-        results_file: str,
-        lock_data: Any,
-        lock_report: Any,
-        gpu: int | None = None,
+            cls,
+            replica: Replica,
+            results_file: str,
+            lock_data: Any,
+            lock_report: Any,
+            gpu: int | None = None,
     ) -> str | ReplicaException:
         """Runs a single replica. This is executed in parallel by the `run` method.
         It is a classmethod so that it can be pickled and executed in parallel
@@ -498,23 +503,17 @@ class BenchmarkRunner:
                 if cls.checkReplicaInResultsFile(replica, results_file):
                     logger.warning(f"Skipping {replica.id}. Already in results file.")
                     return replica.id
-                logger.debug("Initializing data...")
+                logger.debug(f"Initializing data ({replica.id})...")
                 cls.initData(replica)
-                logger.debug("Done.")
-            logger.debug("Done.")
-            logger.debug("Initializing model...")
+            logger.debug(f"Initializing model ({replica.id})...")
             replica.initModel()
-            logger.debug("Done.")
-            logger.debug("Running assessments...")
+            logger.debug(f"Running assessments ({replica.id})...")
             replica.runAssessment()
-            logger.debug("Done.")
-            logger.debug("Creating report...")
+            logger.debug(f"Creating report ({replica.id})...")
             df_report = cls.replicaToReport(replica)
-            logger.debug("Done.")
             with lock_report:
-                logger.debug(f"Adding report to: {results_file}")
+                logger.debug(f"Adding report to ({replica.id}): {results_file}")
                 cls.appendReportToResults(df_report, results_file)
-                logger.debug("Done.")
             logger.debug(f"Finished replica: {replica.id}")
             return replica.id
         except Exception as e:

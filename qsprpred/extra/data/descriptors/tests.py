@@ -6,13 +6,13 @@ from parameterized import parameterized
 from sklearn.preprocessing import StandardScaler
 
 from qsprpred.data import RandomSplit
-from qsprpred.data.processing.pipeline import DatasetPipeline
 from qsprpred.data.descriptors.fingerprints import MorganFP
 from qsprpred.data.descriptors.sets import DrugExPhyschem
 from qsprpred.data.processing.feature_filters import (
     HighCorrelationFilter,
     LowVarianceFilter,
 )
+from qsprpred.data.processing.pipeline import DatasetPipeline
 from qsprpred.extra.data.descriptors.fingerprints import (
     CDKFP,
     CDKMACCSFP,
@@ -44,6 +44,7 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, QSPRTestCase):
     Attributes:
         dataset (QSPRTable): dataset for testing, shuffled
     """
+
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -119,6 +120,7 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase, DescriptorCheckMixIn):
         sampleDescSet (DescriptorSet): descriptor set for testing
         defaultMSA (BioPythonMSA): MSA provider for testing
     """
+
     def setUp(self):
         """Set up the test Dataframe."""
         super().setUp()
@@ -143,15 +145,15 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase, DescriptorCheckMixIn):
         self.sampleDescSet.msaProvider = provider
         dataset = self.createPCMDataSet(self.__class__.__name__)
         split = RandomSplit(test_fraction=0.2)
-        pipeline=DatasetPipeline( 
+        pipeline = DatasetPipeline(
             feature_calculators=[self.sampleDescSet],
-            steps = {
+            steps={
                 "scaler": StandardScaler(),
                 "lowvar": LowVarianceFilter(0.05),
                 "highcorr": HighCorrelationFilter(0.9),
             }
         )
-        X_train, y_train, X_test, y_test = next(pipeline.apply(dataset, split))
+        X_train, y_train, X_test, y_test = next(pipeline.applyOnDataSet(dataset, split))
         ndata = dataset.getDF().shape[0]
         self.checkFeatures(X_train, y_train, X_test, y_test)
         self.assertEqual(X_test.shape[0], round(ndata * 0.2))
@@ -161,7 +163,8 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase, DescriptorCheckMixIn):
         # load dataset and test if all checks out after loading
         dataset_new = PCMDataSet.fromFile(dataset.metaFile)
         self.assertIsInstance(dataset_new, PCMDataSet)
-        X_train_new, y_train_new, X_test_new, y_test_new = next(pipeline.apply(dataset_new, split))
+        X_train_new, y_train_new, X_test_new, y_test_new = next(
+            pipeline.applyOnDataSet(dataset_new, split))
         self.checkFeatures(X_train_new, y_train_new, X_test_new, y_test_new)
         self.assertEqual(X_test_new.shape[0], round(ndata * 0.2))
         self.assertEqual(len(dataset_new.descriptorSets), len(dataset_new.descriptors))
@@ -178,7 +181,7 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase, DescriptorCheckMixIn):
         split = RandomSplit(test_fraction=0.5)
         pipeline = DatasetPipeline(
             feature_calculators=[self.sampleDescSet],
-            steps = {
+            steps={
                 "scaler": StandardScaler(),
                 "lowvar": LowVarianceFilter(0.05),
                 "highcorr": HighCorrelationFilter(0.9),
@@ -186,21 +189,21 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase, DescriptorCheckMixIn):
         )
         ndata = dataset.getDF().shape[0]
         self.assertEqual(len(dataset.descriptorSets), len(dataset.descriptors))
-        _, _, X_test, _ = next(pipeline.apply(dataset, split))
+        _, _, X_test, _ = next(pipeline.applyOnDataSet(dataset, split))
         self.assertEqual(X_test.shape[0], round(ndata * 0.5))
         n_features = X_test.shape[1]
         # create new dataset with different feature calculator
         dataset_next = self.createPCMDataSet(f"{self.__class__.__name__}_next")
         pipeline_next = DatasetPipeline(
             feature_calculators=[self.sampleDescSet],
-            steps = {
+            steps={
                 "scaler": StandardScaler(),
                 "lowvar": LowVarianceFilter(0.05),
                 "highcorr": HighCorrelationFilter(0.9),
             }
         )
         X_train_next, _, X_test_next, _ = next(
-            pipeline_next.apply(dataset_next, split)
+            pipeline_next.applyOnDataSet(dataset_next, split)
         )
         self.assertEqual(
             len(dataset_next.descriptorSets), len(dataset_next.descriptors)
@@ -219,13 +222,13 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase, DescriptorCheckMixIn):
             MorganFP(radius=2, nBits=128),
             DrugExPhyschem(),
         ]
-        split=RandomSplit(test_fraction=0.2)
+        split = RandomSplit(test_fraction=0.2)
         pipeline = DatasetPipeline(
             feature_calculators=calcs,
             steps={"scaler": StandardScaler()},
-            
+
         )
-        X_train, _, _, _ = next(pipeline.apply(self.dataset, split))
+        X_train, _, _, _ = next(pipeline.applyOnDataSet(self.dataset, split))
         # test if all descriptors are there
         expected_length = 0
         for calc in calcs:
@@ -238,9 +241,9 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase, DescriptorCheckMixIn):
                 "lowvar": LowVarianceFilter(0.05),
                 "highcorr": HighCorrelationFilter(0.9),
             },
-            
+
         )
-        X_train, _, _, _ = next(pipeline.apply(self.dataset, split))
+        X_train, _, _, _ = next(pipeline.applyOnDataSet(self.dataset, split))
         feats_left = X_train.shape[1]
         self.dataset.save()
         pipeline.toFile(f"{self.dataset.path}_pipeline.json")
@@ -257,10 +260,10 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase, DescriptorCheckMixIn):
         provider = provider_class(out_dir=self.generatedDataPath)
         descset = ProDec(sets=["Zscale Hellberg"], msa_provider=provider)
         self.dataset.addDescriptors([descset])
-        self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), len(descset)))
+        self.assertEqual(self.dataset.getDescriptors().shape,
+                         (len(self.dataset), len(descset)))
         self.assertTrue(self.dataset.getDescriptors().any().any())
         self.assertTrue(self.dataset.getDescriptors().any().sum() > 1)
-
 
 # class TestDescriptorsExtra(
 #     DataSetsMixInExtras, DescriptorInDataCheckMixIn, QSPRTestCase

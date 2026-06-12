@@ -7,10 +7,10 @@ import numpy as np
 import pandas as pd
 
 from ..data.descriptors.sets import DescriptorSet
-from ..data.sources.data_source import DataSource
-from ..data.sampling.splits import DataSplit
-from ..data.tables.qspr import QSPRTable
 from ..data.processing.pipeline import DatasetPipeline
+from ..data.sampling.splits import DataSplit
+from ..data.sources.data_source import DataSource
+from ..data.tables.qspr import QSPRTable
 from ..logs import logger
 from ..models.assessment.methods import ModelAssessor
 from ..models.hyperparam_optimization import HyperparameterOptimization
@@ -58,18 +58,18 @@ class Replica(JSONSerializable):
     _notJSON: ClassVar = [*JSONSerializable._notJSON, "ds", "results", "model"]
 
     def __init__(
-        self,
-        idx: int,
-        name: str,
-        data_source: DataSource,
-        descriptors: list[DescriptorSet],
-        target_props: list[TargetSpec],
-        pipeline: DatasetPipeline,
-        model: QSPRModel,
-        optimizer: HyperparameterOptimization,
-        assessors: list[ModelAssessor],
-        subsets: dict[str, tuple[DataSplit, str, int]],
-        random_seed: int,
+            self,
+            idx: int,
+            name: str,
+            data_source: DataSource,
+            descriptors: list[DescriptorSet],
+            target_props: list[TargetSpec],
+            pipeline: DatasetPipeline,
+            model: QSPRModel,
+            optimizer: HyperparameterOptimization,
+            assessors: list[ModelAssessor],
+            subsets: dict[str, tuple[DataSplit, str, int]],
+            random_seed: int,
     ):
         """Initializes the replica.
 
@@ -262,11 +262,23 @@ class Replica(JSONSerializable):
                 subset = self.subsets[assessor.name]
                 fold = [fold for fold in self.ds.split(subset[0])][subset[2]]
                 indices = fold[0] if subset[1] == "Train" else fold[1]
+                logger.debug(
+                    f"Applying assessor {assessor.name} to subset of data for replica {self.id}"
+                )
                 scores = assessor(self.model, self.ds[indices], self.pipeline)
+                logger.debug(
+                    f"Successfully applied assessor {assessor.name} to subset of data for replica {self.id}"
+                )
             else:
+                logger.debug(
+                    f"Applying assessor {assessor.name} on all data for replica {self.id}"
+                )
                 scores = assessor(self.model, self.ds, self.pipeline)
             if isinstance(scores, float):
                 scores = np.array([scores])
+            logger.debug(
+                f"Assessor {assessor.name} scored model {self.model.name} in replica {self.id}"
+            )
             scores_df = pd.DataFrame()
             for i, fold_score in enumerate(scores):
                 if isinstance(fold_score, float):

@@ -7,14 +7,15 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold
 
+from .path_mixins import ModelDataSetsPathMixIn, DataSetsPathMixIn
 from ...data.descriptors.sets import DescriptorSet
 from ...data.processing.pipeline import DatasetPipeline, Step
+from ...data.sampling.splits import DataSplit, RandomSplit
 from ...data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ...data.tables.qspr import QSPRTable
 from ...models import (
     AssessorMonitor,
     BaseMonitor,
-    Assessor,
     EarlyStoppingMode,
     FileMonitor,
     FitMonitor,
@@ -28,17 +29,17 @@ from ...models import (
 )
 from ...models.monitors import ListMonitor
 from ...tasks import TargetSpec
-from .path_mixins import ModelDataSetsPathMixIn, DataSetsPathMixIn
-from ...data.sampling.splits import DataSplit, RandomSplit
-from ...logs import logger
+
 
 class StepCheckMixIn(DataSetsPathMixIn):
     """Mixin class for common pipeline step checks."""
-    def checkFitTransform(self, step: Step, dataset: QSPRTable, fromfile=False) -> Tuple[pd.DataFrame, pd.DataFrame | None]:
+
+    def checkFitTransform(self, step: Step, dataset: QSPRTable, fromfile=False) -> \
+            Tuple[pd.DataFrame, pd.DataFrame | None]:
         """Check basic step fit and transform functionality."""
         X = dataset.getDescriptors()
         y = dataset.getTargets()
-        
+
         if fromfile:
             self.assertTrue(step.fitted)
         else:
@@ -49,20 +50,21 @@ class StepCheckMixIn(DataSetsPathMixIn):
         self.assertTrue(isinstance(X_out, pd.DataFrame))
         self.assertTrue(isinstance(y_out, pd.DataFrame))
         self.assertTrue(X_out.index.equals(y_out.index))
-        
+
         return X_out, y_out
 
-    def checkStep(self, step: Step, dataset: QSPRTable) -> Tuple[pd.DataFrame, pd.DataFrame | None]:
+    def checkStep(self, step: Step, dataset: QSPRTable) -> Tuple[
+        pd.DataFrame, pd.DataFrame | None]:
         """Check basic step functionality and serialization."""
         # check if the step can be fitted and transformed
         X_out, y_out = self.checkFitTransform(step, dataset)
-        
+
         # check if the step can be serialized and deserialized
         step.toFile(f"{self.generatedPath}/test_step.json")
         self.assertTrue(exists(f"{self.generatedPath}/test_step.json"))
         step_loaded = step.__class__.fromFile(f"{self.generatedPath}/test_step.json")
         self.assertTrue(isinstance(step_loaded, step.__class__))
-        
+
         # restore the dataset to the step if it has a dataSet attribute as this is not 
         # saved in the JSON file. If using a step in a DatasetPipeline, it will be 
         # restored automatically in the pipeline's apply method.
@@ -70,16 +72,18 @@ class StepCheckMixIn(DataSetsPathMixIn):
             step_loaded.dataSet = dataset
 
         # check if the deserialized step gives the same output
-        X_out_loaded, y_out_loaded = self.checkFitTransform(step_loaded, dataset, fromfile=True)
+        X_out_loaded, y_out_loaded = self.checkFitTransform(step_loaded, dataset,
+                                                            fromfile=True)
         self.assertTrue(X_out.equals(X_out_loaded))
         self.assertTrue(y_out.equals(y_out_loaded))
-        
+
         return X_out, y_out
-        
+
 
 class DescriptorCheckMixIn:
     """Mixin class for common descriptor checks."""
-    def checkFeatures(self, X_train, y_train, X_test = None, y_test = None):
+
+    def checkFeatures(self, X_train, y_train, X_test=None, y_test=None):
         """Check if features matrices are the correct type and shape and if the indices
         are consistent between features and targets. Also check if there is no overlap
         between the train and test indices if both are provided.
@@ -88,7 +92,7 @@ class DescriptorCheckMixIn:
         self.assertTrue(isinstance(y_train, pd.DataFrame))
         self.assertTrue(X_train.shape[0] == y_train.shape[0])
         self.assertTrue(X_train.index.equals(y_train.index))
-        
+
         if X_test is not None and y_test is not None:
             self.assertTrue(isinstance(X_test, pd.DataFrame))
             self.assertTrue(isinstance(y_test, pd.DataFrame))
@@ -97,9 +101,9 @@ class DescriptorCheckMixIn:
             self.assertTrue(X_train.shape[1] == X_test.shape[1])
             self.assertTrue(y_train.shape[1] == y_test.shape[1])
             self.assertTrue(X_train.index.intersection(X_test.index).empty)
-    
+
     def checkDescriptors(
-        self, dataset: QSPRDataSet, target_props: list[dict | TargetSpec]
+            self, dataset: QSPRDataSet, target_props: list[dict | TargetSpec]
     ):
         """Check if information about descriptors is consistent in the data set. Checks
         if calculators are consistent with the descriptors contained in the data set.
@@ -120,11 +124,11 @@ class DescriptorCheckMixIn:
 
         dataset.save()
         ds_loaded = dataset.__class__.fromFile(dataset.metaFile)
-        
+
         # check randomState, targetProperties and descriptorSets are loaded correctly
         self.assertEqual(ds_loaded.randomState, dataset.randomState)
         for ds_loaded_prop, target_prop in zip(
-            ds_loaded.targetProperties, target_props
+                ds_loaded.targetProperties, target_props
         ):
             if ds_loaded_prop.task.isClassification():
                 self.assertEqual(ds_loaded_prop.name, target_prop["name"])
@@ -135,15 +139,18 @@ class DescriptorCheckMixIn:
             self.assertTrue(isinstance(calc, DescriptorSet))
         self.assertEqual(len(ds_loaded.getDescriptors()), expected_length)
 
+
 class DataPrepCheckMixIn(DescriptorCheckMixIn):
     """Mixin for testing data preparation."""
+
     def checkPrep(
-        self,
-        dataset: QSPRDataSet,
-        pipeline: DatasetPipeline,
-        split: DataSplit | None = None,
+            self,
+            dataset: QSPRDataSet,
+            pipeline: DatasetPipeline,
+            split: DataSplit | None = None,
     ):
         """Check if the data preparation is consistent before and after reloading"""
+
         def checkIdenticalFeatures(features1, features2):
             """check that two sets of features and targets are identical
             
@@ -156,35 +163,41 @@ class DataPrepCheckMixIn(DescriptorCheckMixIn):
                     self.assertTrue(f1.index.equals(f2.index))
                     self.assertTrue(f1.columns.equals(f2.columns))
                     self.assertTrue(f1.equals(f2))
+
         # check if the features are the correct type and shape
         feature_list = []
-        for features in pipeline.apply(dataset, split):
+        for features in pipeline.applyOnDataSet(dataset, split):
             self.checkFeatures(*features)
             feature_list.append(features)
-        
+
         # check if the features are the same after reloading the dataset
         dataset.save()
         dataset_reload = dataset.__class__.fromFile(dataset.metaFile)
-        for i, features in enumerate(pipeline.apply(dataset_reload, split, fit=False)):
+        for i, features in enumerate(
+                pipeline.applyOnDataSet(dataset_reload, split, fit=False)):
             self.checkFeatures(*features)
             checkIdenticalFeatures(features, feature_list[i])
-            
+
         # check if the features are the same after reloading the pipeline
         pipeline.toFile(f"{dataset.path}_pipeline.json")
         pipeline_reload = DatasetPipeline.fromFile(f"{dataset.path}_pipeline.json")
-        for i, features in enumerate(pipeline_reload.apply(dataset, split, fit=False)):
+        for i, features in enumerate(
+                pipeline_reload.applyOnDataSet(dataset, split, fit=False)):
             self.checkFeatures(*features)
             checkIdenticalFeatures(features, feature_list[i])
 
     def checkSplit(self, dataset: QSPRDataSet, name: str):
         """Check if the split has the data it should have after splitting."""
-        self.assertTrue(isinstance(dataset.getSplit(name), DataSplit)) 
-        
-        for X_train, y_train, X_test, y_test in dataset.iterSplit(name, as_type="pandas"):
+        self.assertTrue(isinstance(dataset.getSplit(name), DataSplit))
+
+        for X_train, y_train, X_test, y_test in dataset.iterSplit(name,
+                                                                  as_type="pandas"):
             self.checkFeatures(X_train, y_train, X_test, y_test)
+
 
 class ModelCheckMixIn:
     """This class holds the tests for the QSPRmodel class."""
+
     @property
     def gridFile(self):
         return f"{os.path.dirname(__file__)}/test_files/search_space_test.json"
@@ -205,11 +218,11 @@ class ModelCheckMixIn:
         return grid_params[grid_params[:, 0] == mname, 1][0]
 
     def checkOptimization(
-        self,
-        model: QSPRModel,
-        ds: QSPRDataSet,
-        pipeline: DatasetPipeline,
-        optimizer: HyperparameterOptimization
+            self,
+            model: QSPRModel,
+            ds: QSPRDataSet,
+            pipeline: DatasetPipeline,
+            optimizer: HyperparameterOptimization
     ):
         model_path, est_path = model.save(save_estimator=True)
         # get last modified time stamp of the model file
@@ -300,12 +313,12 @@ class ModelCheckMixIn:
         self.assertEqual(path, model.metaFile)
 
     def predictorTest(
-        self,
-        model: QSPRModel,
-        dataset: QSPRDataSet,
-        comparison_model: QSPRModel | None = None,
-        expect_equal_result=True,
-        **pred_kwargs,
+            self,
+            model: QSPRModel,
+            dataset: QSPRDataSet,
+            comparison_model: QSPRModel | None = None,
+            expect_equal_result=True,
+            **pred_kwargs,
     ):
         """Test model predictions.
 
@@ -323,7 +336,9 @@ class ModelCheckMixIn:
             **pred_kwargs:
                 Extra keyword arguments to pass to the predictor's `predictMols` method.
         """
-        def reorder_predictions(predictions: np.ndarray, order: pd.Index, dataset: QSPRDataSet):
+
+        def reorder_predictions(predictions: np.ndarray, order: pd.Index,
+                                dataset: QSPRDataSet):
             """Reorder the predictions according to the order of the dataset."""
             if isinstance(predictions, list):
                 predictions = [
@@ -369,7 +384,7 @@ class ModelCheckMixIn:
         # Check if the predictMols function gives the same result as the
         # predict/predictProba function
         # get the expected result from the basic predict function
-        X, _ = next(model.pipeline.apply(dataset, fit=False))
+        X, _ = next(model.pipeline.applyOnDataSet(dataset, fit=False))
         expected_result = model.predict(X)
         expected_result = reorder_predictions(expected_result, X.index, dataset)
         # make predictions with the predictMols function and check with previous result
@@ -404,16 +419,17 @@ class ModelCheckMixIn:
                     predictions_proba, predictions_comparison_proba, expect_equal_result
                 )
 
+
 class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
     def trainModelWithMonitoring(
-        self,
-        model: QSPRModel,
-        ds: QSPRDataSet,
-        pipeline: DatasetPipeline,
-        hyperparam_monitor: HyperparameterOptimizationMonitor,
-        crossval_monitor: AssessorMonitor,
-        test_monitor: AssessorMonitor,
-        fit_monitor: FitMonitor,
+            self,
+            model: QSPRModel,
+            ds: QSPRDataSet,
+            pipeline: DatasetPipeline,
+            hyperparam_monitor: HyperparameterOptimizationMonitor,
+            crossval_monitor: AssessorMonitor,
+            test_monitor: AssessorMonitor,
+            fit_monitor: FitMonitor,
     ) -> Tuple[
         HyperparameterOptimizationMonitor,
         AssessorMonitor,
@@ -457,12 +473,13 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
         return hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
 
     def baseMonitorTest(
-        self,
-        monitor: BaseMonitor,
-        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
-        neural_net: bool,
+            self,
+            monitor: BaseMonitor,
+            monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
+            neural_net: bool,
     ):
         """Test the base monitor."""
+
         def check_fit_empty(monitor):
             self.assertEqual(len(monitor.fitLog), 0)
             self.assertEqual(len(monitor.batchLog), 0)
@@ -518,9 +535,11 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
         elif monitor_type == "crossval":
             # length should be the number of folds times the total length of the dataset
             # as both the training and test set are stored for each fold
-            check_assessor_monitor(monitor, 5, len(monitor.assessmentDataset.getTargets())*5)
+            check_assessor_monitor(monitor, 5,
+                                   len(monitor.assessmentDataset.getTargets()) * 5)
         elif monitor_type == "test":
-            check_assessor_monitor(monitor, 1, len(monitor.assessmentDataset.getTargets()))
+            check_assessor_monitor(monitor, 1,
+                                   len(monitor.assessmentDataset.getTargets()))
         elif monitor_type == "fit":
             if neural_net:
                 check_fit_monitor(monitor)
@@ -530,18 +549,21 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
             raise ValueError(f"Unknown monitor type {monitor_type}")
 
     def fileMonitorTest(
-        self,
-        monitor: FileMonitor,
-        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
-        neural_net: bool,
+            self,
+            monitor: FileMonitor,
+            monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
+            neural_net: bool,
     ):
         """Test if the correct files are generated"""
+
         def check_fit_files(path):
             self.assertTrue(os.path.exists(f"{path}/fit_log.tsv"))
             self.assertTrue(os.path.exists(f"{path}/batch_log.tsv"))
 
         def check_assessment_files(path, monitor):
-            assessment_name = monitor.assessmentName if hasattr(monitor, "assessmentName") else monitor["assessmentName"]
+            assessment_name = monitor.assessmentName if hasattr(monitor,
+                                                                "assessmentName") else \
+                monitor["assessmentName"]
             output_path = f"{path}/{assessment_name}"
             self.assertTrue(os.path.exists(output_path))
             self.assertTrue(
@@ -553,9 +575,11 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
                 exists(f"{output_path}/{assessment_name}_predictions.tsv")
             )
 
-            save_fits = monitor.saveFits if hasattr(monitor, "saveFits") else monitor["saveFits"]
+            save_fits = monitor.saveFits if hasattr(monitor, "saveFits") else monitor[
+                "saveFits"]
             if save_fits and neural_net:
-                fold_data = monitor.foldData if hasattr(monitor, "foldData") else monitor["foldData"]
+                fold_data = monitor.foldData if hasattr(monitor, "foldData") else \
+                    monitor["foldData"]
                 for fold in fold_data:
                     check_fit_files(f"{output_path}/fold_{fold}")
 
@@ -581,16 +605,17 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
             check_fit_files(monitor.outDir)
 
     def listMonitorTest(
-        self,
-        monitor: ListMonitor,
-        monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
-        neural_net: bool,
+            self,
+            monitor: ListMonitor,
+            monitor_type: Literal["hyperparam", "crossval", "test", "fit"],
+            neural_net: bool,
     ):
         self.baseMonitorTest(monitor.monitors[0], monitor_type, neural_net)
         self.fileMonitorTest(monitor.monitors[1], monitor_type, neural_net)
 
     def runMonitorTest(
-        self, model, data, pipeline, monitor_type, test_method, neural_net, *args, **kwargs
+            self, model, data, pipeline, monitor_type, test_method, neural_net, *args,
+            **kwargs
     ):
         hyperparam_monitor = monitor_type(*args, **kwargs)
         crossval_monitor = deepcopy(hyperparam_monitor)
@@ -602,7 +627,8 @@ class MonitorsCheckMixIn(ModelDataSetsPathMixIn, ModelCheckMixIn):
             test_monitor,
             fit_monitor,
         ) = self.trainModelWithMonitoring(
-            model, data, pipeline, hyperparam_monitor, crossval_monitor, test_monitor, fit_monitor
+            model, data, pipeline, hyperparam_monitor, crossval_monitor, test_monitor,
+            fit_monitor
         )
         test_method(hyperparam_monitor, "hyperparam", neural_net)
         test_method(crossval_monitor, "crossval", neural_net)

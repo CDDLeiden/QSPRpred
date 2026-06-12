@@ -7,15 +7,15 @@ import numpy as np
 import pandas as pd
 
 from qsprpred.data.storage.interfaces.property_storage import PropertyStorage
+from qsprpred.logs import logger
 from qsprpred.utils.interfaces.randomized import Randomized
-from ...logs import logger
-from ...utils.parallel import (
+from qsprpred.utils.parallel import (
     MultiprocessingJITGenerator,
     ParallelGenerator,
     batched_generator,
 )
-from ...utils.serialization import JSONSerializable
-from ...utils.stringops import generate_padded_index
+from qsprpred.utils.serialization import JSONSerializable
+from qsprpred.utils.stringops import generate_padded_index
 
 
 class PandasDataTable(PropertyStorage, Randomized):

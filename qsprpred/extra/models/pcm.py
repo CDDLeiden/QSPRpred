@@ -12,8 +12,8 @@ from rdkit.Chem import Mol
 from qsprpred.data import MoleculeTable
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 from ..data.descriptors.sets import ProteinDescriptorSet
-from ...data.storage.tabular.simple import PandasChemStore
 from ...data.processing.pipeline import DatasetPipeline
+from ...data.storage.tabular.simple import PandasChemStore
 from ...models.model import QSPRModel
 from ...models.scikit_learn import SklearnModel
 
@@ -30,16 +30,17 @@ class PCMModel(QSPRModel, ABC):
         if not hasattr(self, "proteins"):
             self.proteins = None
 
-    def initFromData(self, data: PCMDataSet | None, pipeline: DatasetPipeline | None = None):
+    def initFromData(self, data: PCMDataSet | None,
+                     pipeline: DatasetPipeline | None = None):
         super().initFromData(data, pipeline)
         if data:
             self.proteins = data.proteins
 
     def createPredictionDatasetFromMols(
-        self,
-        mols: list[str | Mol],
-        protein_id: str,
-        n_jobs: int = 1,
+            self,
+            mols: list[str | Mol],
+            protein_id: str,
+            n_jobs: int = 1,
     ) -> tuple[PCMDataSet, np.ndarray]:
         """
         Create a prediction data set of compounds using a PCM model
@@ -58,6 +59,7 @@ class PCMModel(QSPRModel, ABC):
                 Dataset with the features calculated for the molecules.
         """
         # make a molecule table first and add the target properties
+        mols = list(mols)
         if isinstance(mols[0], Mol):
             mols = [Chem.MolToSmiles(mol) for mol in mols]
         storage = PandasChemStore(
@@ -93,11 +95,11 @@ class PCMModel(QSPRModel, ABC):
         return dataset, failed_mask
 
     def predictMols(
-        self,
-        mols: list[str],
-        protein_id: str,
-        use_probas: bool = False,
-        n_jobs: int = 1,
+            self,
+            mols: list[str],
+            protein_id: str,
+            use_probas: bool = False,
+            n_jobs: int = 1,
     ) -> np.ndarray:
         """
         Predict the target properties of a list of molecules using a PCM model.

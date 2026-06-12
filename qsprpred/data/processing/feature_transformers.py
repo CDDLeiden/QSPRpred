@@ -1,9 +1,10 @@
 """This module is used for feature standardization and transformation in a pipeline."""
 
 import pandas as pd
+from sklearn.base import BaseEstimator
 
 from .step import Step
-from sklearn.base import BaseEstimator
+
 
 class FeatureTransformer(Step):
     """Base class for feature transformers
@@ -25,7 +26,7 @@ class SklearnStep(FeatureTransformer):
         transformer (BaseEstimator): scikit-learn transformer to wrap, should
             have implementations of the `fit` and `transform` methods.
     """
-    
+
     def __init__(self, transformer: BaseEstimator):
         """Initialize the SklearnStep
         
@@ -35,7 +36,7 @@ class SklearnStep(FeatureTransformer):
         """
         self._fitted = False
         self.transformer = transformer
-    
+
     def fit(self, X: pd.DataFrame, y: None | pd.DataFrame = None):
         """Fit the transformer to the data
         
@@ -45,8 +46,9 @@ class SklearnStep(FeatureTransformer):
         """
         self.transformer.fit(X, y)
         self._fitted = True
-    
-    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[pd.DataFrame, pd.DataFrame | None]:
+
+    def transform(self, X: pd.DataFrame, y: None | pd.DataFrame = None) -> tuple[
+        pd.DataFrame, pd.DataFrame | None]:
         """Transform the data using the transformer
         
         Args:
@@ -57,5 +59,9 @@ class SklearnStep(FeatureTransformer):
             pd.DataFrame: transformed data
             pd.DataFrame | None: (transformed) target data
         """
-        return pd.DataFrame(self.transformer.transform(X), columns=X.columns, index=X.index), y        
-
+        X_transformed = self.transformer.transform(X.to_numpy())
+        return pd.DataFrame(
+            X_transformed,
+            columns=X.columns,
+            index=X.index,
+        ), y

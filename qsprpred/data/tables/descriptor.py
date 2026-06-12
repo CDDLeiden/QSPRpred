@@ -1,7 +1,7 @@
 import pandas as pd
 
 from qsprpred.data.descriptors.sets import DescriptorSet
-from qsprpred.data.tables.pandas import PandasDataTable
+from qsprpred.data.tables.pnds import PandasDataTable
 from qsprpred.utils.parallel import ParallelGenerator
 
 

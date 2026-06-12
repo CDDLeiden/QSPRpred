@@ -17,7 +17,7 @@ from qsprpred.data.storage.interfaces.chem_store import ChemStore
 from qsprpred.data.storage.interfaces.searchable import SMARTSSearchable, PropSearchable
 from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 from qsprpred.data.storage.tabular.stored_mol import TabularMol
-from qsprpred.data.tables.pandas import PandasDataTable
+from qsprpred.data.tables.pnds import PandasDataTable
 from qsprpred.logs import logger
 from qsprpred.utils.interfaces.summarizable import Summarizable
 from qsprpred.utils.parallel import (

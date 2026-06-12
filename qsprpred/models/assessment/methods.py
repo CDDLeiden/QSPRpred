@@ -6,16 +6,15 @@ from typing import Callable, Iterable
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import KFold
 
+from .metrics.scikit_learn import SklearnMetrics
+from ...data.processing.pipeline import DatasetPipeline
 from ...data.sampling.splits import DataSplit
 from ...data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ...logs import logger
 from ...models.early_stopping import EarlyStoppingMode
 from ...models.model import QSPRModel
 from ...models.monitors import AssessorMonitor, BaseMonitor
-from .metrics.scikit_learn import SklearnMetrics
-from ...data.processing.pipeline import DatasetPipeline
 
 
 class ModelAssessor(ABC):
@@ -35,14 +34,15 @@ class ModelAssessor(ABC):
         scores (np.ndarray): Scores returned by the scoring function for each fold 
         predictions (pd.Dataframe): Predictions returned by the model for each fold
     """
+
     def __init__(
-        self,
-        name: str,
-        scoring: str | Callable[[Iterable, Iterable], float],
-        monitor: AssessorMonitor | None = None,
-        use_proba: bool = True,
-        mode: EarlyStoppingMode | None = None,
-        split_multitask_scores: bool = False,
+            self,
+            name: str,
+            scoring: str | Callable[[Iterable, Iterable], float],
+            monitor: AssessorMonitor | None = None,
+            use_proba: bool = True,
+            mode: EarlyStoppingMode | None = None,
+            split_multitask_scores: bool = False,
     ):
         """Initialize the evaluation method class.
 
@@ -67,13 +67,13 @@ class ModelAssessor(ABC):
 
     @abstractmethod
     def __call__(
-        self,
-        model: QSPRModel,
-        ds: QSPRDataSet,
-        save: bool = True,
-        parameters: dict | None = None,
-        monitor: AssessorMonitor | None = None,
-        **kwargs,
+            self,
+            model: QSPRModel,
+            ds: QSPRDataSet,
+            save: bool = True,
+            parameters: dict | None = None,
+            monitor: AssessorMonitor | None = None,
+            **kwargs,
     ) -> np.ndarray:
         """Evaluate the model.
 
@@ -93,13 +93,13 @@ class ModelAssessor(ABC):
         """
 
     def predictionsToDataFrame(
-        self,
-        model: QSPRModel,
-        y_train: np.ndarray,
-        y_test: np.ndarray,
-        train_preds: np.ndarray | list[np.ndarray],
-        test_preds: np.ndarray | list[np.ndarray],
-        fold: int,
+            self,
+            model: QSPRModel,
+            y_train: np.ndarray,
+            y_test: np.ndarray,
+            train_preds: np.ndarray | list[np.ndarray],
+            test_preds: np.ndarray | list[np.ndarray],
+            fold: int,
     ) -> pd.DataFrame:
         """Create a dataframe with true values and predictions.
 
@@ -123,7 +123,7 @@ class ModelAssessor(ABC):
             ]
         else:
             predictions = np.vstack([train_preds, test_preds])
-        
+
         # Combine target values into dataframe
         y = pd.concat([y_train, y_test])
         df_out = y.add_suffix("_Label")
@@ -136,17 +136,17 @@ class ModelAssessor(ABC):
                     [
                         df_out,
                         pd.DataFrame(predictions[idx], index=y.index
-                                    ).add_prefix(f"{prop.name}_ProbabilityClass_"),
+                                     ).add_prefix(f"{prop.name}_ProbabilityClass_"),
                     ],
                     axis=1,
                 )
             else:
                 df_out[f"{prop.name}_Prediction"] = predictions[:, idx]
-                
+
         # Add set labels
         set_labels = ["Train"] * len(y_train) + ["Test"] * len(y_test)
         df_out["Set"] = set_labels
-        
+
         # Add fold number
         df_out["Fold"] = fold
 
@@ -165,32 +165,34 @@ class Assessor(ModelAssessor):
         round (int): number of decimal places to round predictions to (default: 5)
         splitMultitaskScores (bool): whether to split the scores per task for multitask models
     """
+
     def __init__(
-        self,
-        name: str,
-        scoring: str | Callable[[Iterable, Iterable], float],
-        split: DataSplit,
-        monitor: AssessorMonitor | None = None,
-        use_proba: bool = True,
-        mode: EarlyStoppingMode | None = None,
-        round: int = 5,
-        split_multitask_scores: bool = False,
+            self,
+            name: str,
+            scoring: str | Callable[[Iterable, Iterable], float],
+            split: DataSplit,
+            monitor: AssessorMonitor | None = None,
+            use_proba: bool = True,
+            mode: EarlyStoppingMode | None = None,
+            round: int = 5,
+            split_multitask_scores: bool = False,
     ):
-        super().__init__(name, scoring, monitor, use_proba, mode, split_multitask_scores)
+        super().__init__(name, scoring, monitor, use_proba, mode,
+                         split_multitask_scores)
         self.split = split
         if monitor is None:
             self.monitor = BaseMonitor()
         self.round = round
 
     def __call__(
-        self,
-        model: QSPRModel,
-        ds: QSPRDataSet,
-        pipeline: DatasetPipeline | None = None,
-        parameters: dict | None = None,
-        monitor: AssessorMonitor | None = None,
-        save: bool = True,
-        **kwargs,
+            self,
+            model: QSPRModel,
+            ds: QSPRDataSet,
+            pipeline: DatasetPipeline | None = None,
+            parameters: dict | None = None,
+            monitor: AssessorMonitor | None = None,
+            save: bool = True,
+            **kwargs,
     ) -> np.ndarray:
         """Perform cross validation on the model with the given parameters.
 
@@ -213,13 +215,13 @@ class Assessor(ModelAssessor):
         evalparams = model.parameters if parameters is None else parameters
         pipeline = pipeline if pipeline is not None else DatasetPipeline()
         monitor.onAssessmentStart(
-            model, ds, pipeline, self.name, evalparams, self.split, 
+            model, ds, pipeline, self.name, evalparams, self.split,
         )
         # Assess model on each fold in the split
         self.scores = []
         self.predictions = []
         for i, (X_train, y_train, X_test, y_test) in enumerate(
-            pipeline.apply(ds, self.split)
+                pipeline.applyOnDataSet(ds, self.split)
         ):
             logger.debug(
                 "Model Assessment fold %s started: %s" %
@@ -278,5 +280,6 @@ class Assessor(ModelAssessor):
         monitor.onAssessmentEnd(pd.concat(self.predictions))
         if save:
             pd.concat(self.predictions).round(self.round
-                ).to_csv(f"{model.outPrefix}_{self.name}.tsv", sep="\t")
+                                              ).to_csv(
+                f"{model.outPrefix}_{self.name}.tsv", sep="\t")
         return np.array(self.scores)
