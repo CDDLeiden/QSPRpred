@@ -21,7 +21,7 @@ from qsprpred.data.tables.pnds import PandasDataTable
 from qsprpred.logs import logger
 from qsprpred.utils.interfaces.summarizable import Summarizable
 from qsprpred.utils.parallel import (
-    MultiprocessingJITGenerator,
+    PebbleJITGenerator,
     ParallelGenerator, Parallelizable,
 )
 
@@ -246,7 +246,7 @@ class PandasChemStore(ParallelizedChemStore):
         self.nJobs = n_jobs
         self.chunkSize = chunk_size
         self.chunkProcessor = (
-            MultiprocessingJITGenerator(n_workers=self.nJobs)
+            PebbleJITGenerator(n_workers=self.nJobs)
             if chunk_processor is None else chunk_processor
         )
         self._standardizer = standardizer
@@ -360,7 +360,7 @@ class PandasChemStore(ParallelizedChemStore):
             value (int): Number of parallel jobs.
         """
         self._nJobs = value if value is not None and value > 0 else os.cpu_count()
-        self.chunkProcessor = MultiprocessingJITGenerator(n_workers=self.nJobs)
+        self.chunkProcessor = PebbleJITGenerator(n_workers=self.nJobs)
         for lib in self._libraries.values():
             lib.nJobs = value
             lib.chunkProcessor = self.chunkProcessor

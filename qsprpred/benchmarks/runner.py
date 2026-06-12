@@ -133,7 +133,7 @@ class BenchmarkRunner:
         logger.debug("Initializing BenchmarkRunner...")
         self.settings = settings
         self.parallelGeneratorCPU = (
-                parallel_generator_cpu or MultiprocessingJITGenerator(os.cpu_count())
+                parallel_generator_cpu or PebbleJITGenerator(os.cpu_count())
         )
         self.parallelGeneratorGPU = parallel_generator_gpu
         self.dataDir = data_dir

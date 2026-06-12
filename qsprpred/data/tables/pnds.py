@@ -10,7 +10,7 @@ from qsprpred.data.storage.interfaces.property_storage import PropertyStorage
 from qsprpred.logs import logger
 from qsprpred.utils.interfaces.randomized import Randomized
 from qsprpred.utils.parallel import (
-    MultiprocessingJITGenerator,
+    PebbleJITGenerator,
     ParallelGenerator,
     batched_generator,
 )
@@ -157,7 +157,7 @@ class PandasDataTable(PropertyStorage, Randomized):
         # parallel settings
         self.nJobs = n_jobs
         self.chunkSize = chunk_size
-        self.parallelGenerator = parallel_generator or MultiprocessingJITGenerator(
+        self.parallelGenerator = parallel_generator or PebbleJITGenerator(
             self.nJobs
         )
 
@@ -278,7 +278,7 @@ class PandasDataTable(PropertyStorage, Randomized):
         """
         self._nJobs = value if value is not None and value > 0 else os.cpu_count()
         self.chunkSize = len(self) // self._nJobs
-        self.parallelGenerator = MultiprocessingJITGenerator(self.nJobs)
+        self.parallelGenerator = PebbleJITGenerator(self.nJobs)
 
     @property
     def baseDir(self) -> str:

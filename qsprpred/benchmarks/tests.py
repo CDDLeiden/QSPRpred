@@ -3,23 +3,21 @@ from sklearn.impute import SimpleImputer
 from sklearn.model_selection import KFold
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
-from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVR
 
 from qsprpred.models.assessment.methods import Assessor
-
+from . import BenchmarkRunner, BenchmarkSettings
 from .. import TargetSpec, TargetTasks
 from ..data import MoleculeTable, QSPRTable
-from ..data.processing.imputers import TargetImputer
 from ..data.descriptors.fingerprints import MorganFP
 from ..data.descriptors.sets import RDKitDescs
-from ..data.sources.data_source import DataSource
+from ..data.processing.imputers import TargetImputer
 from ..data.sampling.splits import RandomSplit
+from ..data.sources.data_source import DataSource
 from ..models.scikit_learn import SklearnModel
 from ..utils.stringops import get_random_string
 from ..utils.testing.base import QSPRTestCase
 from ..utils.testing.path_mixins import DataSetsPathMixIn
-from . import BenchmarkRunner, BenchmarkSettings
 
 
 class DataSourceTesting(DataSetsPathMixIn, DataSource):
@@ -37,10 +35,10 @@ class DataSourceTesting(DataSetsPathMixIn, DataSource):
         return self.createLargeTestDataSet(name)
 
     def getDataSet(
-        self,
-        target_props: list[TargetSpec | dict],
-        name: str | None = None,
-        **kwargs,
+            self,
+            target_props: list[TargetSpec | dict],
+            name: str | None = None,
+            **kwargs,
     ) -> QSPRTable:
         name = name or self.name
         return self.createLargeTestDataSet(name, target_props=target_props)
@@ -104,9 +102,10 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
                     base_dir=f"{self.generatedPath}/models",
                 ),
                 SklearnModel(
-                    name="MLPClassifier",
-                    alg=MLPClassifier,
+                    name="KNeighborsClassifier",
+                    alg=KNeighborsClassifier,
                     base_dir=f"{self.generatedPath}/models",
+                    parameters={"n_jobs": 1},
                 ),
             ],
             assessors=[
@@ -137,13 +136,13 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
                     split=RandomSplit(test_fraction=0.2)
                 )
             ],
-            optimizers=[],  # FIXME: needs to be tested
+            optimizers=[],  # FIXME: needs to be implemented and tested still
         )
         self.benchmark = BenchmarkRunner(
             self.settings,
             data_dir=f"{self.generatedPath}/benchmarks",
             results_file=f"{self.generatedPath}/benchmarks/results.tsv",
-            # parallel_generator_cpu=MultiprocessingJITGenerator(1),
+            # parallel_generator_cpu=PebbleJITGenerator(4), # set if you require a cap on cpus
         )
 
     def checkRunResults(self, results):
