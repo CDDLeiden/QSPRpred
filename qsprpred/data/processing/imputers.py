@@ -96,7 +96,7 @@ class FeatureImputer(Imputer):
             y (pd.DataFrame): training targets
         """
         if self.feature_properties is None:
-            self.feature_properties = X.columns
+            self.feature_properties = X.columns.tolist()
 
         to_be_imputed = self.get_features_to_be_imputed(X)
         self.imputer.fit(X[to_be_imputed])
@@ -132,6 +132,6 @@ class FeatureImputer(Imputer):
             list[str]: features to be imputed
         """
         return [
-            col for col in X.columns
+            col for col in X.columns.tolist()
             if any(col.startswith(prop) for prop in self.feature_properties)
         ]
