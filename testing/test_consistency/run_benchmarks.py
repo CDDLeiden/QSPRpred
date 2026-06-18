@@ -17,12 +17,10 @@ from qsprpred.data.processing.feature_filters import LowVarianceFilter
 from qsprpred.data.processing.pipeline import DatasetPipeline
 from qsprpred.data.sources import DataSource
 from qsprpred.models import SklearnModel, Assessor
-from qsprpred.utils.parallel import PebbleJITGenerator
 
 BASE_DIR = "./data/"
 os.makedirs(BASE_DIR, exist_ok=True)
 SEED = 42
-N_WORKERS = 2
 
 
 class DataSourceTesting(DataSource):
@@ -143,7 +141,6 @@ if __name__ == "__main__":
     runner = BenchmarkRunner(
         settings,
         data_dir=f"{BASE_DIR}/CLS",
-        parallel_generator_cpu=PebbleJITGenerator(N_WORKERS)
     )
     runner.run(raise_errors=True)
 
@@ -210,6 +207,5 @@ if __name__ == "__main__":
     runner = BenchmarkRunner(
         settings,
         data_dir=f"{BASE_DIR}/REG",
-        parallel_generator_cpu=PebbleJITGenerator(N_WORKERS)
     )
     runner.run(raise_errors=True)
