@@ -1,22 +1,22 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.plotting.regression &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+  <title>qsprpred.plotting.regression &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=ce9a7c35"></script>
-      <script src="../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
     </script>
       <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -110,13 +110,21 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">..tasks</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelTasks</span>
 
 
-<div class="viewcode-block" id="RegressionPlot"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.regression.RegressionPlot">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">RegressionPlot</span><span class="p">(</span><span class="n">ModelPlot</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="RegressionPlot">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.regression.RegressionPlot">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RegressionPlot</span><span class="p">(</span><span class="n">ModelPlot</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for all regression plots.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="RegressionPlot.getSupportedTasks"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.regression.RegressionPlot.getSupportedTasks">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getSupportedTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ModelTasks</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="RegressionPlot.getSupportedTasks">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.regression.RegressionPlot.getSupportedTasks">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getSupportedTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">ModelTasks</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of supported model tasks.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_REGRESSION</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="RegressionPlot.prepareAssessment"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.regression.RegressionPlot.prepareAssessment">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">prepareAssessment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">assessment_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+
+<div class="viewcode-block" id="RegressionPlot.prepareAssessment">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.regression.RegressionPlot.prepareAssessment">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prepareAssessment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">assessment_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare assessment dataframe for plotting</span>
 
 <span class="sd">        Args:</span>
@@ -134,7 +142,7 @@
 <span class="sd">                columns: ID, Fold, Set, Property, Label, Prediction, Set</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Melt all property columns into one column</span>
-        <span class="n">id_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">,</span> <span class="s2">&quot;Fold&quot;</span><span class="p">,</span> <span class="s2">&quot;Set&quot;</span><span class="p">]</span>
+        <span class="n">id_vars</span> <span class="o">=</span> <span class="p">[</span><span class="n">assessment_df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;Fold&quot;</span><span class="p">,</span> <span class="s2">&quot;Set&quot;</span><span class="p">]</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">assessment_df</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="n">id_vars</span><span class="p">)</span>
         <span class="c1"># split the variable (&lt;property_name&gt;_&lt;suffixes&gt;_&lt;Label/Prediction&gt;) column</span>
         <span class="c1"># into the property name and the type (Label or Prediction)</span>
@@ -144,14 +152,18 @@
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span>
             <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="o">*</span><span class="n">id_vars</span><span class="p">,</span> <span class="s2">&quot;Property&quot;</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="s2">&quot;value&quot;</span>
         <span class="p">)</span>
-        <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Label&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># Remove rows with missing values in the label column</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Label&quot;</span><span class="p">],</span>
+                  <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Remove rows with missing values in the label column</span>
         <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Assessment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
 
         <span class="k">return</span> <span class="n">df</span></div>
 
-<div class="viewcode-block" id="RegressionPlot.prepareRegressionResults"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.regression.RegressionPlot.prepareRegressionResults">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">prepareRegressionResults</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+
+<div class="viewcode-block" id="RegressionPlot.prepareRegressionResults">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.regression.RegressionPlot.prepareRegressionResults">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prepareRegressionResults</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare regression results dataframe for plotting.</span>
 
 <span class="sd">        Returns:</span>
@@ -168,26 +180,28 @@
                 <span class="c1"># Replace the assessment labels with the dataset labels</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">:</span>
                     <span class="n">targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">getTargets</span><span class="p">()</span>
-                    <span class="n">assessment</span> <span class="o">=</span> <span class="n">assessment</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">assessment</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;Label&quot;</span><span class="p">)])</span>
+                    <span class="n">assessment</span> <span class="o">=</span> <span class="n">assessment</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span>
+                        <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">assessment</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span>
+                                 <span class="n">col</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;Label&quot;</span><span class="p">)])</span>
                     <span class="c1"># add suffix Label to the target columns</span>
                     <span class="n">targets</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">_Label&quot;</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">targets</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
-                    <span class="n">assessment</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">assessment</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;ID&quot;</span><span class="p">)</span>
+                    <span class="n">assessment</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">assessment</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">assessment</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                 <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepareAssessment</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">assessment</span><span class="p">)</span>
+                <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span>
                 <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="n">model_results</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span>
         <span class="c1"># concatenate the results from all models and add the model name as a column</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
-                <span class="n">model_results</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">keys</span><span class="o">=</span><span class="n">model_results</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">]</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
-        <span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">model_results</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="n">df</span>
         <span class="k">return</span> <span class="n">df</span></div>
 
-<div class="viewcode-block" id="RegressionPlot.getSummary"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.regression.RegressionPlot.getSummary">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getSummary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+
+<div class="viewcode-block" id="RegressionPlot.getSummary">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.regression.RegressionPlot.getSummary">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getSummary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;calculate the R2 and RMSE for each model per set (cross-validation or independent test)&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;results&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">prepareRegressionResults</span><span class="p">()</span>
@@ -206,16 +220,23 @@
             <span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">summary</span> <span class="o">=</span> <span class="n">df_summary</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">summary</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">summary</span></div>
+</div>
 
 
-<div class="viewcode-block" id="CorrelationPlot"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.regression.CorrelationPlot">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">CorrelationPlot</span><span class="p">(</span><span class="n">RegressionPlot</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CorrelationPlot">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.regression.CorrelationPlot">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CorrelationPlot</span><span class="p">(</span><span class="n">RegressionPlot</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to plot the results of regression models. Plot predicted pX_train vs real pX_train.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="CorrelationPlot.make"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.regression.CorrelationPlot.make">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">out_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="CorrelationPlot.make">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.regression.CorrelationPlot.make">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">out_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">sns</span><span class="o">.</span><span class="n">FacetGrid</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot the results of regression models. Plot predicted pX_train vs real pX_train.</span>
 
@@ -282,12 +303,18 @@
             <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
         <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">g</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">summary</span></div></div>
+        <span class="k">return</span> <span class="n">g</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">summary</span></div>
+</div>
 
 
-<div class="viewcode-block" id="WilliamsPlot"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.regression.WilliamsPlot">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">WilliamsPlot</span><span class="p">(</span><span class="n">RegressionPlot</span><span class="p">):</span>
+
+<div class="viewcode-block" id="WilliamsPlot">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.regression.WilliamsPlot">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">WilliamsPlot</span><span class="p">(</span><span class="n">RegressionPlot</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Williams plot; plot of standardized residuals versus leverages&quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QSPRModel</span><span class="p">],</span> <span class="n">assessments</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">datasets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QSPRDataSet</span><span class="p">]):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QSPRModel</span><span class="p">],</span> <span class="n">assessments</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                 <span class="n">datasets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QSPRDataSet</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the Williams plot.</span>
 <span class="sd">        Args:</span>
 <span class="sd">            models (list[QSPRModel]):</span>
@@ -299,12 +326,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">assessments</span><span class="p">,</span> <span class="n">datasets</span><span class="p">)</span>
 
-<div class="viewcode-block" id="WilliamsPlot.make"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.regression.WilliamsPlot.make">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">out_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<div class="viewcode-block" id="WilliamsPlot.make">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.regression.WilliamsPlot.make">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">out_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">sns</span><span class="o">.</span><span class="n">FacetGrid</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;make Williams plot</span>
 
@@ -327,8 +356,9 @@
 <span class="sd">            dict[str, float]:</span>
 <span class="sd">                the h* values for the datasets</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">def</span><span class="w"> </span><span class="nf">calculateLeverages</span><span class="p">(</span>
-            <span class="n">features_train</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">features_test</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
+                <span class="n">features_train</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">features_test</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
         <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Calculate the leverages for each compound in the dataset.</span>
 
@@ -393,17 +423,21 @@
         <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
             <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">assessment</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Assessment&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
-                <span class="n">df_assessment</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Assessment&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">assessment</span><span class="p">)]</span>
+                <span class="n">df_assessment</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span>
+                    <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Assessment&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">assessment</span><span class="p">)]</span>
                 <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="n">df_assessment</span><span class="p">[</span><span class="s2">&quot;Fold&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
                     <span class="n">df_</span> <span class="o">=</span> <span class="n">df_assessment</span><span class="p">[(</span><span class="n">df_assessment</span><span class="p">[</span><span class="s2">&quot;Fold&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">fold</span><span class="p">)]</span>
-                    <span class="n">train_ind</span> <span class="o">=</span> <span class="n">df_</span><span class="p">[</span><span class="n">df_</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Train&quot;</span><span class="p">][</span><span class="s2">&quot;ID&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
-                    <span class="n">test_ind</span> <span class="o">=</span> <span class="n">df_</span><span class="p">[</span><span class="n">df_</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Test&quot;</span><span class="p">][</span><span class="s2">&quot;ID&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+                    <span class="n">train_ind</span> <span class="o">=</span> <span class="n">df_</span><span class="p">[</span><span class="n">df_</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Train&quot;</span><span class="p">][</span><span class="n">df_</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+                    <span class="n">test_ind</span> <span class="o">=</span> <span class="n">df_</span><span class="p">[</span><span class="n">df_</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Test&quot;</span><span class="p">][</span><span class="n">df_</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
                     <span class="c1"># FIXME: Pipeline is refit for each fold, this is not ideal</span>
                     <span class="c1"># this information should be ideally be retrieved from the</span>
                     <span class="c1"># assessment, pipeline or similar</span>
                     <span class="n">pipeline</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">pipeline</span><span class="p">)</span>
-                    <span class="n">X_train</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="n">train_ind</span><span class="p">],</span> <span class="n">seed</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">randomState</span><span class="p">))</span>
-                    <span class="n">X_test</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="n">test_ind</span><span class="p">],</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">randomState</span><span class="p">))</span>
+                    <span class="n">X_train</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">pipeline</span><span class="o">.</span><span class="n">applyOnDataSet</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="n">train_ind</span><span class="p">],</span>
+                                                              <span class="n">seed</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">randomState</span><span class="p">))</span>
+                    <span class="n">X_test</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+                        <span class="n">pipeline</span><span class="o">.</span><span class="n">applyOnDataSet</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="n">test_ind</span><span class="p">],</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                                <span class="n">seed</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">randomState</span><span class="p">))</span>
                     <span class="n">leverages</span><span class="p">,</span> <span class="n">h_star</span> <span class="o">=</span> <span class="n">calculateLeverages</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">)</span>
 
                     <span class="n">model_name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span>
@@ -413,7 +447,8 @@
 
         <span class="c1"># Add the leverages to the dataframe</span>
         <span class="n">df</span><span class="p">[</span><span class="s2">&quot;leverage&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
-            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">model_leverages</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;Model&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;Assessment&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;Fold&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">][</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">]],</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">model_leverages</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;Model&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;Assessment&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;Fold&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">][</span>
+                <span class="n">x</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]]],</span>
             <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">df</span><span class="p">[</span><span class="s2">&quot;n_features&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
@@ -433,7 +468,8 @@
 
         <span class="n">RSE</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="c1"># check if the degrees of freedom is greater than 0 for each model, assessment, property, and set</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">property</span><span class="p">,</span> <span class="n">assessment</span><span class="p">,</span> <span class="n">fold</span><span class="p">,</span> <span class="nb">set</span><span class="p">),</span> <span class="n">df_</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;Model&quot;</span><span class="p">,</span> <span class="s2">&quot;Property&quot;</span><span class="p">,</span> <span class="s2">&quot;Assessment&quot;</span><span class="p">,</span> <span class="s2">&quot;Fold&quot;</span><span class="p">,</span> <span class="s2">&quot;Set&quot;</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">property</span><span class="p">,</span> <span class="n">assessment</span><span class="p">,</span> <span class="n">fold</span><span class="p">,</span> <span class="nb">set</span><span class="p">),</span> <span class="n">df_</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
+                <span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">,</span> <span class="s2">&quot;Property&quot;</span><span class="p">,</span> <span class="s2">&quot;Assessment&quot;</span><span class="p">,</span> <span class="s2">&quot;Fold&quot;</span><span class="p">,</span> <span class="s2">&quot;Set&quot;</span><span class="p">]):</span>
             <span class="k">if</span> <span class="n">df_</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;Degrees of freedom is less than or equal to 0 for some models, &quot;</span>
@@ -441,11 +477,12 @@
                     <span class="s2">&quot;number of samples should be greater than the number of features.&quot;</span>
                 <span class="p">)</span>
             <span class="n">RSE</span><span class="p">[(</span><span class="n">model</span><span class="p">,</span> <span class="nb">property</span><span class="p">,</span> <span class="n">assessment</span><span class="p">,</span> <span class="n">fold</span><span class="p">,</span> <span class="nb">set</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
-                <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">df_</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">df_</span><span class="p">[</span><span class="s2">&quot;residual&quot;</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+                <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">df_</span><span class="p">[</span><span class="s2">&quot;df&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">df_</span><span class="p">[</span><span class="s2">&quot;residual&quot;</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
             <span class="p">)</span>
 
         <span class="c1"># add the residual standard error to the df</span>
-        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;RSE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">RSE</span><span class="p">[(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;Property&quot;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;Assessment&quot;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;Fold&quot;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">])],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;RSE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">RSE</span><span class="p">[</span>
+            <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;Property&quot;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;Assessment&quot;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;Fold&quot;</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">])],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="c1"># calculate the standardized residuals</span>
         <span class="n">df</span><span class="p">[</span><span class="s2">&quot;std_resid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;residual&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;RSE&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;leverage&quot;</span><span class="p">]))</span>
@@ -466,8 +503,11 @@
         <span class="c1"># and add hlines at +/- 3</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">axes_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">for</span> <span class="n">assessment</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s2">&quot;Assessment&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
-                <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Assessment&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">assessment</span><span class="p">)][</span><span class="s2">&quot;Fold&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
-                    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">model_h_star</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">assessment</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">fold</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;.2&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> \
+                        <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Assessment&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">assessment</span><span class="p">)][</span>
+                            <span class="s2">&quot;Fold&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">model_h_star</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">assessment</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">fold</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;.2&quot;</span><span class="p">,</span>
+                               <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;.2&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s2">&quot;.2&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
 
@@ -488,9 +528,12 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">g</span><span class="p">,</span>
-            <span class="n">df</span><span class="p">[[</span><span class="s2">&quot;ID&quot;</span><span class="p">,</span> <span class="s2">&quot;Model&quot;</span><span class="p">,</span> <span class="s2">&quot;Property&quot;</span><span class="p">,</span> <span class="s2">&quot;Assessment&quot;</span><span class="p">,</span> <span class="s2">&quot;Fold&quot;</span><span class="p">,</span> <span class="s2">&quot;Set&quot;</span><span class="p">,</span> <span class="s2">&quot;leverage&quot;</span><span class="p">,</span> <span class="s2">&quot;std_resid&quot;</span><span class="p">]],</span>
+            <span class="n">df</span><span class="p">[[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;Model&quot;</span><span class="p">,</span> <span class="s2">&quot;Property&quot;</span><span class="p">,</span> <span class="s2">&quot;Assessment&quot;</span><span class="p">,</span> <span class="s2">&quot;Fold&quot;</span><span class="p">,</span> <span class="s2">&quot;Set&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;leverage&quot;</span><span class="p">,</span> <span class="s2">&quot;std_resid&quot;</span><span class="p">]],</span>
             <span class="n">model_h_star</span><span class="p">,</span>
-        <span class="p">)</span></div></div>
+        <span class="p">)</span></div>
+</div>
+
 </pre></div>
 
            </div>

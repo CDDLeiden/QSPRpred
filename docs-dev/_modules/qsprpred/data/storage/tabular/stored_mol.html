@@ -1,22 +1,22 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.storage.tabular.stored_mol &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+  <title>qsprpred.data.storage.tabular.stored_mol &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=ce9a7c35"></script>
-      <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../../../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
     </script>
       <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -99,16 +99,20 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.storage.interfaces.stored_mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">StoredMol</span>
 
 
-<div class="viewcode-block" id="TabularMol"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.stored_mol.TabularMol">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TabularMol</span><span class="p">(</span><span class="n">StoredMol</span><span class="p">):</span>
+<div class="viewcode-block" id="TabularMol">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.stored_mol.TabularMol">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TabularMol</span><span class="p">(</span><span class="n">StoredMol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Simple implementation of a molecule that is stored in a tabular storage.&quot;&quot;&quot;</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">mol_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">parent</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;TabularMol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">rd_mol</span><span class="p">:</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Mol</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">representations</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="s2">&quot;TabularMol&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">mol_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">origin</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">smiles</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">parent</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;TabularMol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">rd_mol</span><span class="p">:</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Mol</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">representations</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="s2">&quot;TabularMol&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new molecule instance.</span>
 
@@ -120,6 +124,7 @@
 <span class="sd">            props (dict, optional): properties of the molecule</span>
 <span class="sd">            representations (tuple, optional): representations of the molecule</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span> <span class="o">=</span> <span class="n">origin</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">mol_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_smiles</span> <span class="o">=</span> <span class="n">smiles</span>
@@ -127,7 +132,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_props</span> <span class="o">=</span> <span class="n">props</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_representations</span> <span class="o">=</span> <span class="n">representations</span>
 
-<div class="viewcode-block" id="TabularMol.as_rd_mol"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.stored_mol.TabularMol.as_rd_mol">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">as_rd_mol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Mol</span><span class="p">:</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">origin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span>
+
+<div class="viewcode-block" id="TabularMol.as_rd_mol">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.stored_mol.TabularMol.as_rd_mol">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_rd_mol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Mol</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the rdkit molecule object.</span>
 
 <span class="sd">        Returns:</span>
@@ -137,10 +148,16 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_rd_mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smiles</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rd_mol</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TabularMol&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the parent molecule.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
+
+    <span class="nd">@parent</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="s2">&quot;TabularMol&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the parent molecule.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -160,40 +177,13 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">representations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="s2">&quot;TabularMol&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the representations of the molecule.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_representations</span></div>
-        <span class="c1"># sdfs = self.sdf()</span>
-        <span class="c1"># ret = []</span>
-        <span class="c1"># for sdf in sdfs:</span>
-        <span class="c1">#     mol = Chem.MolFromMolBlock(</span>
-        <span class="c1">#         sdf, strictParsing=False, sanitize=False, removeHs=False</span>
-        <span class="c1">#     )</span>
-        <span class="c1">#     properties = parse_sdf(next(sdf_to_lines(sdf.split(&quot;\n&quot;))))</span>
-        <span class="c1">#     for prop in properties:</span>
-        <span class="c1">#         mol.SetProp(prop, properties[prop])</span>
-        <span class="c1">#     ret.append(mol)</span>
-        <span class="c1"># return ret</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_representations</span>
 
-    <span class="c1"># def to_file(self, directory, extension=&quot;.csv&quot;) -&gt; str:</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     Write a minimal file containing the SMILES and the ID of the molecule.</span>
-    <span class="c1">#     Used for ligrep (.csv is the preferred format).</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     filename = os.path.join(directory, self._id + extension)</span>
-    <span class="c1">#     if not os.path.isfile(filename):</span>
-    <span class="c1">#         with open(filename, &quot;w&quot;) as f:</span>
-    <span class="c1">#             f.write(&quot;SMILES,id\n&quot;)</span>
-    <span class="c1">#             f.write(f&quot;{self._smiles},{self._id}\n&quot;)</span>
-    <span class="c1">#     return filename</span>
+    <span class="nd">@representations</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">representations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">representations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="s2">&quot;TabularMol&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the representations of the molecule.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_representations</span> <span class="o">=</span> <span class="n">representations</span></div>
 
-    <span class="c1"># def sdf(self) -&gt; List[str] or None:</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     Get the SDF file for this molecule.</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     sdfs = self.parent._sdf[self.parent._sdf.id == self.id].sdf.values</span>
-    <span class="c1">#     if len(sdfs) == 0:</span>
-    <span class="c1">#         return None</span>
-    <span class="c1">#     else:</span>
-    <span class="c1">#         return [decode(sdf) for sdf in sdfs]</span>
 </pre></div>
 
            </div>

@@ -1,22 +1,22 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.storage.interfaces.chem_store &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+  <title>qsprpred.data.storage.interfaces.chem_store &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=ce9a7c35"></script>
-      <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../../../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
     </script>
       <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -105,7 +105,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.storage.interfaces.stored_mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">StoredMol</span>
 
 
-<div class="viewcode-block" id="ChemStore"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ChemStore</span><span class="p">(</span><span class="n">PropertyStorage</span><span class="p">,</span> <span class="n">MolProcessable</span><span class="p">,</span> <span class="n">Identifiable</span><span class="p">,</span> <span class="n">Standardizable</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="ChemStore">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ChemStore</span><span class="p">(</span><span class="n">PropertyStorage</span><span class="p">,</span> <span class="n">MolProcessable</span><span class="p">,</span> <span class="n">Identifiable</span><span class="p">,</span> <span class="n">Standardizable</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Interface for storing and managing chemical data.</span>
 
 <span class="sd">    It can be used as an abstraction layer for different storage backends that</span>
@@ -113,6 +115,7 @@
 <span class="sd">    documentation of the specific implementation for more details on how to use it and</span>
 <span class="sd">    the base classes this class inherits from for more details on its functionality.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">smilesProp</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -128,7 +131,9 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generator of SMILES strings of all molecules in storage.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">smiles</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ChemStore.getMol"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.getMol">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="ChemStore.getMol">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.getMol">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">getMol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mol_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StoredMol</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a molecule from the store using its ID.</span>
 
@@ -139,13 +144,16 @@
 <span class="sd">            StoredMol: instance of the molecule</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="ChemStore.addMols"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.addMols">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="ChemStore.addMols">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.addMols">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">addMols</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">smiles</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">smiles</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+            <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">StoredMol</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a molecule to the store.</span>
 
@@ -166,7 +174,10 @@
 <span class="sd">            ValueError: if the molecules cannot be added</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="ChemStore.removeMol"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.removeMol">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="ChemStore.removeMol">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.removeMol">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">removeMol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mol_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove a molecule from the store.</span>
 
@@ -174,15 +185,21 @@
 <span class="sd">            mol_id (str): identifier of the molecule to remove</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="ChemStore.getMolIDs"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.getMolIDs">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">getMolIDs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="ChemStore.getMolIDs">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.getMolIDs">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getMolIDs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get all molecule IDs in the store.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            tuple[str]: molecule IDs</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="ChemStore.getMolCount"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.getMolCount">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="ChemStore.getMolCount">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.getMolCount">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">getMolCount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of molecules in the store.</span>
 
@@ -190,7 +207,10 @@
 <span class="sd">            (int) number of molecules</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="ChemStore.iterMols"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.iterMols">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="ChemStore.iterMols">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.iterMols">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">iterMols</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">StoredMol</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterate over all molecules in the store.</span>
 
@@ -198,12 +218,15 @@
 <span class="sd">            iterator over `StoredMol` instances</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="ChemStore.iterChunks"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.iterChunks">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="ChemStore.iterChunks">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.iterChunks">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">iterChunks</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">on_props</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">chunk_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;mol&quot;</span><span class="p">,</span> <span class="s2">&quot;smiles&quot;</span><span class="p">,</span> <span class="s2">&quot;rdkit&quot;</span><span class="p">,</span> <span class="s2">&quot;df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mol&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">on_props</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">chunk_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;mol&quot;</span><span class="p">,</span> <span class="s2">&quot;smiles&quot;</span><span class="p">,</span> <span class="s2">&quot;rdkit&quot;</span><span class="p">,</span> <span class="s2">&quot;df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mol&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">StoredMol</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Mol</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterate over chunks of molecules across the store.</span>
 
@@ -216,14 +239,17 @@
 <span class="sd">            an iterable of lists of stored molecules</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="ChemStore.apply"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.apply">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="ChemStore.apply">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore.apply">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">func</span><span class="p">:</span> <span class="nb">callable</span><span class="p">,</span>
-        <span class="n">func_args</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">func_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">on_props</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">chunk_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;mol&quot;</span><span class="p">,</span> <span class="s2">&quot;smiles&quot;</span><span class="p">,</span> <span class="s2">&quot;rdkit&quot;</span><span class="p">,</span> <span class="s2">&quot;df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mol&quot;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">func</span><span class="p">:</span> <span class="nb">callable</span><span class="p">,</span>
+            <span class="n">func_args</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">func_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">on_props</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">chunk_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;mol&quot;</span><span class="p">,</span> <span class="s2">&quot;smiles&quot;</span><span class="p">,</span> <span class="s2">&quot;rdkit&quot;</span><span class="p">,</span> <span class="s2">&quot;df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mol&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="n">StoredMol</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Mol</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a function on all or selected properties of the chunks of data.</span>
 <span class="sd">        The requested chunk type is supplied as the first positional argument</span>
@@ -242,6 +268,7 @@
 <span class="sd">            A generator that yields the results of the function applied to each chunk.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getMolCount</span><span class="p">()</span>
 
@@ -259,6 +286,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
+
 </pre></div>
 
            </div>

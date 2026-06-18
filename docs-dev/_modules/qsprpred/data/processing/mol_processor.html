@@ -1,22 +1,22 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.processing.mol_processor &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+  <title>qsprpred.data.processing.mol_processor &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=ce9a7c35"></script>
-      <script src="../../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
     </script>
       <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -102,18 +102,21 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.storage.interfaces.stored_mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">StoredMol</span>
 
 
-<div class="viewcode-block" id="MolProcessor"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.mol_processor.MolProcessor">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">MolProcessor</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="MolProcessor">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.mol_processor.MolProcessor">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MolProcessor</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A callable that processes a list of molecules either specified as strings, RDKit</span>
 <span class="sd">    molecules, or `StoredMol` instances. The processor can also accept additional</span>
 <span class="sd">    properties related to the molecules if specified by the caller.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Mol</span> <span class="o">|</span> <span class="n">StoredMol</span><span class="p">],</span>
-        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
-        <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">mols</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Mol</span> <span class="o">|</span> <span class="n">StoredMol</span><span class="p">],</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+            <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Process molecules.</span>
 
@@ -152,7 +155,10 @@
         <span class="k">return</span> <span class="p">[]</span></div>
 
 
-<div class="viewcode-block" id="MolProcessorWithID"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.mol_processor.MolProcessorWithID">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">MolProcessorWithID</span><span class="p">(</span><span class="n">MolProcessor</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MolProcessorWithID">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.mol_processor.MolProcessorWithID">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MolProcessorWithID</span><span class="p">(</span><span class="n">MolProcessor</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A processor that requires a unique identifier for each molecule. Callers are</span>
 <span class="sd">    instructed to pass this property with the `requiredProps` attribute.</span>
 
@@ -161,7 +167,8 @@
 <span class="sd">            The name of the passed property that contains</span>
 <span class="sd">            the molecule&#39;s unique identifier.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_prop</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_prop</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="s2">&quot;ID&quot;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the processor with the name of the property that contains the</span>
 <span class="sd">        molecule&#39;s unique identifier.</span>
@@ -171,9 +178,11 @@
 <span class="sd">                Name of the property that contains the molecule&#39;s unique identifier.</span>
 <span class="sd">                Defaults to &quot;QSPRID&quot;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">idProp</span> <span class="o">=</span> <span class="n">id_prop</span> <span class="k">if</span> <span class="n">id_prop</span> <span class="k">else</span> <span class="s2">&quot;ID&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">idProp</span> <span class="o">=</span> <span class="n">id_prop</span>
 
-<div class="viewcode-block" id="MolProcessorWithID.iterMolsAndIDs"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.mol_processor.MolProcessorWithID.iterMolsAndIDs">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">iterMolsAndIDs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">,</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="MolProcessorWithID.iterMolsAndIDs">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.mol_processor.MolProcessorWithID.iterMolsAndIDs">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">iterMolsAndIDs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">,</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterate over molecules and their corresponding IDs regardless of the input</span>
 <span class="sd">        molecule format. This is just a helper function that will detect the input</span>
 <span class="sd">        and yield the molecule and its ID.</span>
@@ -194,9 +203,11 @@
                 <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromSmiles</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">mol</span>
                 <span class="k">yield</span> <span class="n">mol</span><span class="p">,</span> <span class="n">props</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">][</span><span class="n">idx</span><span class="p">]</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">requiredProps</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">]</span></div>
+
 </pre></div>
 
            </div>

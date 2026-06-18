@@ -9,45 +9,45 @@ qsprpred.plotting.base\_plot module
 
 .. automodule:: qsprpred.plotting.base_plot
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.plotting.classification module
 ---------------------------------------
 
 .. automodule:: qsprpred.plotting.classification
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.plotting.grid\_visualizers module
 ------------------------------------------
 
 .. automodule:: qsprpred.plotting.grid_visualizers
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.plotting.regression module
 -----------------------------------
 
 .. automodule:: qsprpred.plotting.regression
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.plotting.tests module
 ------------------------------
 
 .. automodule:: qsprpred.plotting.tests
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.plotting
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

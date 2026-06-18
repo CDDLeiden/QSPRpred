@@ -1,22 +1,22 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.sources.papyrus.papyrus_class &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+  <title>qsprpred.data.sources.papyrus.papyrus_class &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=ce9a7c35"></script>
-      <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../../../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
     </script>
       <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -109,7 +109,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.papyrus_filter</span><span class="w"> </span><span class="kn">import</span> <span class="n">papyrus_filter</span>
 
 
-<div class="viewcode-block" id="Papyrus"><a class="viewcode-back" href="../../../../../api/qsprpred.data.sources.papyrus.html#qsprpred.data.sources.papyrus.papyrus_class.Papyrus">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Papyrus</span><span class="p">(</span><span class="n">DataSource</span><span class="p">):</span>
+<div class="viewcode-block" id="Papyrus">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.sources.papyrus.html#qsprpred.data.sources.papyrus.papyrus_class.Papyrus">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Papyrus</span><span class="p">(</span><span class="n">DataSource</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create new instance of Papyrus dataset.</span>
 <span class="sd">    See `papyrus_filter` and `Papyrus.download` and `Papyrus.getData` for more details.</span>
 
@@ -164,7 +166,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">plusplus</span> <span class="o">=</span> <span class="n">plus_only</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">diskMargin</span> <span class="o">=</span> <span class="n">disk_margin</span>
 
-<div class="viewcode-block" id="Papyrus.download"><a class="viewcode-back" href="../../../../../api/qsprpred.data.sources.papyrus.html#qsprpred.data.sources.papyrus.papyrus_class.Papyrus.download">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Papyrus.download">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.sources.papyrus.html#qsprpred.data.sources.papyrus.papyrus_class.Papyrus.download">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Download Papyrus database with the required information.</span>
 
 <span class="sd">        Only newly requested data is downloaded. Remove the files if you want to</span>
@@ -188,7 +192,10 @@
                 <span class="sa">f</span><span class="s2">&quot;Delete the following folder to reload the data: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_papyrusDir</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Papyrus.getData"><a class="viewcode-back" href="../../../../../api/qsprpred.data.sources.papyrus.html#qsprpred.data.sources.papyrus.papyrus_class.Papyrus.getData">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getData</span><span class="p">(</span>
+
+<div class="viewcode-block" id="Papyrus.getData">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.sources.papyrus.html#qsprpred.data.sources.papyrus.papyrus_class.Papyrus.getData">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getData</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">acc_keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -245,7 +252,10 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Finished creating MoleculeTable from &#39;</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ret</span></div>
 
-<div class="viewcode-block" id="Papyrus.getProteinData"><a class="viewcode-back" href="../../../../../api/qsprpred.data.sources.papyrus.html#qsprpred.data.sources.papyrus.papyrus_class.Papyrus.getProteinData">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getProteinData</span><span class="p">(</span>
+
+<div class="viewcode-block" id="Papyrus.getProteinData">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.sources.papyrus.html#qsprpred.data.sources.papyrus.papyrus_class.Papyrus.getProteinData">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getProteinData</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">acc_keys</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">output_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -279,7 +289,9 @@
             <span class="p">)</span>
             <span class="n">targets</span> <span class="o">=</span> <span class="n">protein_data</span><span class="p">[</span><span class="n">protein_data</span><span class="o">.</span><span class="n">accession</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">acc_keys</span><span class="p">)]</span>
             <span class="n">targets</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">targets</span></div></div>
+            <span class="k">return</span> <span class="n">targets</span></div>
+</div>
+
 </pre></div>
 
            </div>

@@ -18,13 +18,13 @@ qsprpred.data.storage.tests module
 
 .. automodule:: qsprpred.data.storage.tests
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.data.storage
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

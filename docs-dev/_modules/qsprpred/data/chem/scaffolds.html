@@ -1,22 +1,22 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.chem.scaffolds &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+  <title>qsprpred.data.chem.scaffolds &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=ce9a7c35"></script>
-      <script src="../../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
     </script>
       <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -103,7 +103,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.storage.interfaces.stored_mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">StoredMol</span>
 
 
-<div class="viewcode-block" id="Scaffold"><a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.scaffolds.Scaffold">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Scaffold</span><span class="p">(</span><span class="n">MolProcessorWithID</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="Scaffold">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.scaffolds.Scaffold">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Scaffold</span><span class="p">(</span><span class="n">MolProcessorWithID</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for calculating molecular scaffolds of different kinds.&quot;&quot;&quot;</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
@@ -145,7 +147,10 @@
         <span class="k">return</span> <span class="kc">True</span></div>
 
 
-<div class="viewcode-block" id="BemisMurckoRDKit"><a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.scaffolds.BemisMurckoRDKit">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BemisMurckoRDKit</span><span class="p">(</span><span class="n">Scaffold</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BemisMurckoRDKit">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.scaffolds.BemisMurckoRDKit">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BemisMurckoRDKit</span><span class="p">(</span><span class="n">Scaffold</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for calculating Murcko scaffolds of a given molecule</span>
 <span class="sd">    using the default implementation in RDKit. If you want an implementation</span>
 <span class="sd">    closer to the original paper, see the `BemisMurcko` class.</span>
@@ -175,7 +180,10 @@
         <span class="k">return</span> <span class="s2">&quot;BemisMurckoRDKit&quot;</span></div>
 
 
-<div class="viewcode-block" id="BemisMurcko"><a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.scaffolds.BemisMurcko">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BemisMurcko</span><span class="p">(</span><span class="n">Scaffold</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BemisMurcko">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.scaffolds.BemisMurcko">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BemisMurcko</span><span class="p">(</span><span class="n">Scaffold</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Extension of rdkit&#39;s BM-like scaffold to make it more true to the paper.</span>
 <span class="sd">    In BM&#39;s paper, exo bonds on linkers or on rings get cutoff but two</span>
 <span class="sd">    electrons remain.</span>
@@ -227,7 +235,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">realBemisMurcko</span> <span class="o">=</span> <span class="n">real_bemismurcko</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">useCSK</span> <span class="o">=</span> <span class="n">use_csk</span>
 
-<div class="viewcode-block" id="BemisMurcko.findTerminalAtoms"><a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.scaffolds.BemisMurcko.findTerminalAtoms">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BemisMurcko.findTerminalAtoms">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.chem.html#qsprpred.data.chem.scaffolds.BemisMurcko.findTerminalAtoms">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">findTerminalAtoms</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Chem</span><span class="o">.</span><span class="n">Atom</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Find terminal atoms in a molecule.</span>
 
@@ -242,6 +252,7 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">GetBonds</span><span class="p">())</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mols</span><span class="p">,</span> <span class="n">props</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the scaffold for a molecule.</span>
@@ -281,6 +292,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;Bemis-Murcko&quot;</span></div>
+
 </pre></div>
 
            </div>

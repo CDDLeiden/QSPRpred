@@ -18,5 +18,5 @@ Module contents
 
 .. automodule:: qsprpred.extra.data
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

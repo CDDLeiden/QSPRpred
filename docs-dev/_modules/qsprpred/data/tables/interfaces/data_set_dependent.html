@@ -1,22 +1,22 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.tables.interfaces.data_set_dependent &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+  <title>qsprpred.data.tables.interfaces.data_set_dependent &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=ce9a7c35"></script>
-      <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../../../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
     </script>
       <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -97,7 +97,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ClassVar</span>
 
 
-<div class="viewcode-block" id="DataSetDependent"><a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.data_set_dependent.DataSetDependent">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">DataSetDependent</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
+<div class="viewcode-block" id="DataSetDependent">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.data_set_dependent.DataSetDependent">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DataSetDependent</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Classes that need an attached `QSPRDataSet` should inherit from this class,</span>
 <span class="sd">    and it will be supplied to them via this API.</span>
 
@@ -116,16 +118,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span> <span class="o">=</span> <span class="n">dataset</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-<div class="viewcode-block" id="DataSetDependent.setDataSet"><a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.data_set_dependent.DataSetDependent.setDataSet">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">QSPRDataSet</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="DataSetDependent.setDataSet">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.data_set_dependent.DataSetDependent.setDataSet">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">QSPRDataSet</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the data set for this object.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span> <span class="o">=</span> <span class="n">dataset</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">hasDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Indicates if this object has a data set attached to it.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="DataSetDependent.getDataSet"><a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.data_set_dependent.DataSetDependent.getDataSet">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QSPRDataSet</span><span class="p">:</span>
+<div class="viewcode-block" id="DataSetDependent.getDataSet">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.data_set_dependent.DataSetDependent.getDataSet">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QSPRDataSet</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the data set attached to this object.</span>
 
 <span class="sd">        Returns:</span>
@@ -138,10 +145,12 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data set not set.&quot;</span><span class="p">)</span></div>
+
         
     <span class="k">def</span><span class="w"> </span><span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setstate__</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataSet</span> <span class="o">=</span> <span class="kc">None</span></div>
+
 </pre></div>
 
            </div>

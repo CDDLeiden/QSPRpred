@@ -17,13 +17,13 @@ qsprpred.data.sources.data\_source module
 
 .. automodule:: qsprpred.data.sources.data_source
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.data.sources
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

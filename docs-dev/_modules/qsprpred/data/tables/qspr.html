@@ -1,22 +1,22 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.tables.qspr &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+  <title>qsprpred.data.tables.qspr &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=ce9a7c35"></script>
-      <script src="../../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
     </script>
       <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -96,21 +96,21 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Generator</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.processing.target_transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Discretizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.sampling.splits</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSplit</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.interfaces.qspr_data_set</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPRDataSet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeTable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..storage.interfaces.chem_store</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChemStore</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...logs</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...tasks</span><span class="w"> </span><span class="kn">import</span> <span class="n">TargetSpec</span><span class="p">,</span> <span class="n">TargetTasks</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..storage.interfaces.chem_store</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChemStore</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeTable</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.sampling.splits</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSplit</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.processing.data_filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataFilter</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.processing.target_transformers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Discretizer</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 
-<div class="viewcode-block" id="QSPRTable"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">QSPRTable</span><span class="p">(</span><span class="n">QSPRDataSet</span><span class="p">,</span> <span class="n">MoleculeTable</span><span class="p">):</span>
+<div class="viewcode-block" id="QSPRTable">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">QSPRTable</span><span class="p">(</span><span class="n">QSPRDataSet</span><span class="p">,</span> <span class="n">MoleculeTable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Implementation of `QSPRDataSet` using a collection of `PandasDataTable` objects.</span>
 
 <span class="sd">    Attributes:</span>
@@ -118,14 +118,14 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">storage</span><span class="p">:</span> <span class="n">ChemStore</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
-        <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">store_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pkl&quot;</span><span class="p">,</span>
-        <span class="n">drop_empty_target_props</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">storage</span><span class="p">:</span> <span class="n">ChemStore</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">store_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pkl&quot;</span><span class="p">,</span>
+            <span class="n">drop_empty_target_props</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct QSPRdata, also apply transformations of output property if</span>
 <span class="sd">        specified.</span>
@@ -166,7 +166,8 @@
                 <span class="n">TargetSpec</span><span class="o">.</span><span class="n">fromJSON</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">target_props</span>
             <span class="p">]</span>
         <span class="k">elif</span> <span class="n">target_props</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Target specifications must be specified for a new QSPRTable.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Target specifications must be specified for a new QSPRTable.&quot;</span><span class="p">)</span>
         <span class="c1"># populate feature matrix and target specifications</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_targetProperties</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setTargetProperties</span><span class="p">(</span><span class="n">target_props</span><span class="p">,</span> <span class="n">drop_empty_target_props</span><span class="p">)</span>
@@ -190,16 +191,18 @@
             <span class="s2">&quot;the target properties.&quot;</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="QSPRTable.fromDF"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.fromDF">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="QSPRTable.fromDF">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.fromDF">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fromDF</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span>
-        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-        <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">],</span>
-        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
-        <span class="n">smiles_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;SMILES&quot;</span><span class="p">,</span>
-        <span class="n">drop_empty_target_props</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="bp">cls</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+            <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">],</span>
+            <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+            <span class="n">smiles_col</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;SMILES&quot;</span><span class="p">,</span>
+            <span class="n">drop_empty_target_props</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;QSPRTable&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create `QSPRTable` from a pandas DataFrame.</span>
 
@@ -217,18 +220,22 @@
 <span class="sd">            QSPRTable: created data set</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">mt</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fromDF</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">smiles_col</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">QSPRTable</span><span class="o">.</span><span class="n">fromMolTable</span><span class="p">(</span><span class="n">mt</span><span class="p">,</span> <span class="n">target_props</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">drop_empty_target_props</span><span class="o">=</span><span class="n">drop_empty_target_props</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">QSPRTable</span><span class="o">.</span><span class="n">fromMolTable</span><span class="p">(</span><span class="n">mt</span><span class="p">,</span> <span class="n">target_props</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
+                                      <span class="n">drop_empty_target_props</span><span class="o">=</span><span class="n">drop_empty_target_props</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="QSPRTable.fromTableFile"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.fromTableFile">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="QSPRTable.fromTableFile">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.fromTableFile">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fromTableFile</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span>
-        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
-        <span class="n">sep</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span>
-        <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="bp">cls</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+            <span class="n">sep</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create `QSPRTable` from table file (i.e. CSV or TSV).</span>
 
@@ -248,7 +255,10 @@
         <span class="n">mt</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fromTableFile</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="n">sep</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">QSPRTable</span><span class="o">.</span><span class="n">fromMolTable</span><span class="p">(</span><span class="n">mt</span><span class="p">,</span> <span class="n">target_props</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">mt</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="QSPRTable.fromSDF"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.fromSDF">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="QSPRTable.fromSDF">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.fromSDF">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fromSDF</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">smiles_prop</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create `QSPRTable` from SDF file.</span>
 
@@ -267,15 +277,18 @@
             <span class="s2">&quot;convert from &#39;MoleculeTable&#39; with &#39;fromMolTable&#39;.&quot;</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="QSPRTable.fromMolTable"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.fromMolTable">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="QSPRTable.fromMolTable">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.fromMolTable">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fromMolTable</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span>
-        <span class="n">mol_table</span><span class="p">:</span> <span class="n">MoleculeTable</span><span class="p">,</span>
-        <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">],</span>
-        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
-        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
-        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="bp">cls</span><span class="p">,</span>
+            <span class="n">mol_table</span><span class="p">:</span> <span class="n">MoleculeTable</span><span class="p">,</span>
+            <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">],</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+            <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;QSPRTable&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create QSPRTable from a MoleculeTable.</span>
 
@@ -313,7 +326,11 @@
         <span class="n">ds</span><span class="o">.</span><span class="n">descriptors</span> <span class="o">=</span> <span class="n">mol_table</span><span class="o">.</span><span class="n">descriptors</span>
         <span class="k">return</span> <span class="n">ds</span></div>
 
-<div class="viewcode-block" id="QSPRTable.addTargetProperty"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.addTargetProperty">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">addTargetProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_spec</span><span class="p">:</span> <span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">drop_empty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="QSPRTable.addTargetProperty">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.addTargetProperty">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">addTargetProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_spec</span><span class="p">:</span> <span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span>
+                          <span class="n">drop_empty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a target property to the dataset.</span>
 
 <span class="sd">        Args:</span>
@@ -328,10 +345,10 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_spec</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="n">target_spec</span> <span class="o">=</span> <span class="n">TargetSpec</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span><span class="n">target_spec</span><span class="p">)</span>
         <span class="k">assert</span> <span class="p">(</span>
-            <span class="n">target_spec</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getProperties</span><span class="p">()</span>
+                <span class="n">target_spec</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getProperties</span><span class="p">()</span>
         <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Property </span><span class="si">{</span><span class="n">target_spec</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> not found in data set.&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">restoreTargetProperty</span><span class="p">(</span><span class="n">target_spec</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">target_spec</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetPropertiesNames</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">target_spec</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTargetPropertiesNames</span><span class="p">():</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Target property &#39;</span><span class="si">{</span><span class="n">target_spec</span><span class="si">}</span><span class="s2">&#39; already exists in dataset. It will be overwritten.&quot;</span>
             <span class="p">)</span>
@@ -345,7 +362,10 @@
         <span class="k">if</span> <span class="n">drop_empty</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dropEmptyEntries</span><span class="p">([</span><span class="n">target_spec</span><span class="o">.</span><span class="n">name</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="QSPRTable.getTargetSpecs"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.getTargetSpecs">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getTargetSpecs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetSpec</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="QSPRTable.getTargetSpecs">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.getTargetSpecs">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getTargetSpecs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetSpec</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the target specifications with the given names.</span>
 
 <span class="sd">        Args:</span>
@@ -356,14 +376,17 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetPropertiesNames</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTargetPropertiesNames</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Some target properties </span><span class="si">{</span><span class="n">names</span><span class="si">}</span><span class="s2"> not found in dataset. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;Available target properties: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">targetPropertiesNames</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Available target properties: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">getTargetPropertiesNames</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">tp</span> <span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span> <span class="k">if</span> <span class="n">tp</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="QSPRTable.getTargetSpec"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.getTargetSpec">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getTargetSpec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TargetSpec</span><span class="p">:</span>
+
+<div class="viewcode-block" id="QSPRTable.getTargetSpec">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.getTargetSpec">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getTargetSpec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TargetSpec</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the target specification of a single target property by its name.</span>
 
 <span class="sd">        Args:</span>
@@ -380,10 +403,13 @@
                 <span class="k">return</span> <span class="n">tp</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Target property &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in dataset.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="QSPRTable.setTargetProperties"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.setTargetProperties">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setTargetProperties</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">],</span>
-        <span class="n">drop_empty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+
+<div class="viewcode-block" id="QSPRTable.setTargetProperties">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.setTargetProperties">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setTargetProperties</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">],</span>
+            <span class="n">drop_empty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set list of target properties for the dataset.</span>
 
@@ -396,8 +422,8 @@
 <span class="sd">                `True`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_props</span><span class="p">,</span> <span class="nb">list</span><span class="p">),</span> <span class="p">(</span>
-            <span class="s2">&quot;target_props should be a list of TargetSpec objects or dictionaries to &quot;</span>
-            <span class="s2">&quot;initialize TargetSpec objects from. Not a </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">target_props</span><span class="p">)</span>
+                <span class="s2">&quot;target_props should be a list of TargetSpec objects or dictionaries to &quot;</span>
+                <span class="s2">&quot;initialize TargetSpec objects from. Not a </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">target_props</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target_props</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">target_props</span><span class="p">),</span> <span class="p">(</span>
@@ -414,7 +440,10 @@
         <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">target_props</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">addTargetProperty</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">drop_empty</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="QSPRTable.unsetTargetProperty"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.unsetTargetProperty">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">unsetTargetProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">TargetSpec</span><span class="p">):</span>
+
+<div class="viewcode-block" id="QSPRTable.unsetTargetProperty">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.unsetTargetProperty">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unsetTargetProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">TargetSpec</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Unset a target property. It will not remove it from the data set, but</span>
 <span class="sd">        will make it unavailable for training.</span>
 
@@ -424,14 +453,17 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">TargetSpec</span><span class="p">)</span> <span class="k">else</span> <span class="n">name</span>
         <span class="k">assert</span> <span class="p">(</span>
-            <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetPropertiesNames</span>
+                <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTargetPropertiesNames</span><span class="p">()</span>
         <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Target property &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in dataset.&quot;</span>
         <span class="k">assert</span> <span class="p">(</span>
-            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
+                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span>
         <span class="p">),</span> <span class="s2">&quot;Cannot drop task from single-task dataset.&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_targetProperties</span> <span class="o">=</span> <span class="p">[</span><span class="n">tp</span> <span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span> <span class="k">if</span> <span class="n">tp</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">name</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="QSPRTable.restoreTargetProperty"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.restoreTargetProperty">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">restoreTargetProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop</span><span class="p">:</span> <span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">str</span><span class="p">):</span>
+
+<div class="viewcode-block" id="QSPRTable.restoreTargetProperty">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.restoreTargetProperty">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">restoreTargetProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop</span><span class="p">:</span> <span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Reset target property to its original value.</span>
 
 <span class="sd">        Args:</span>
@@ -445,11 +477,14 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># save original values for next reset</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">addProperty</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_original&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">name</span><span class="p">))</span></div>
-    
-<div class="viewcode-block" id="QSPRTable.makeClassification"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.makeClassification">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">makeClassification</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">target_property</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">th</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+
+
+<div class="viewcode-block" id="QSPRTable.makeClassification">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.makeClassification">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">makeClassification</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">target_property</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">th</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Switch to classification task using the given threshold values.</span>
 
@@ -474,9 +509,9 @@
                 <span class="s2">&quot;a list of at least 3 floats for multi-class classification.&quot;</span>
             <span class="p">)</span>
 
-        <span class="k">assert</span> <span class="n">target_property</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetPropertiesNames</span><span class="p">,</span> <span class="p">(</span>
+        <span class="k">assert</span> <span class="n">target_property</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTargetPropertiesNames</span><span class="p">(),</span> <span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Target property &#39;</span><span class="si">{</span><span class="n">target_property</span><span class="si">}</span><span class="s2">&#39; not found in dataset. &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;Available target properties: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">targetPropertiesNames</span><span class="si">}</span><span class="s2"> &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Available target properties: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">getTargetPropertiesNames</span><span class="p">()</span><span class="si">}</span><span class="s2"> &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;To convert a regression task to classification, first add the &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;property as a target property with the &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;`addTargetProperty` method.&quot;</span>
@@ -508,7 +543,8 @@
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">discretizer</span> <span class="o">=</span> <span class="n">Discretizer</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">target_property</span><span class="p">,</span> <span class="n">th</span><span class="o">=</span><span class="n">th</span><span class="p">)</span>
-                <span class="n">target_values</span> <span class="o">=</span> <span class="n">discretizer</span><span class="o">.</span><span class="n">fitTransform</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_values</span><span class="p">)[</span><span class="mi">1</span><span class="p">][</span><span class="n">target_property</span><span class="p">]</span>
+                <span class="n">target_values</span> <span class="o">=</span> <span class="n">discretizer</span><span class="o">.</span><span class="n">fitTransform</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_values</span><span class="p">)[</span><span class="mi">1</span><span class="p">][</span>
+                    <span class="n">target_property</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">addProperty</span><span class="p">(</span><span class="n">target_property</span><span class="p">,</span> <span class="n">target_values</span><span class="p">)</span>
 
             <span class="c1"># update target specification</span>
@@ -519,10 +555,13 @@
                 <span class="n">target_spec</span><span class="o">.</span><span class="n">setTh</span><span class="p">(</span><span class="n">th</span><span class="p">,</span> <span class="n">n_classes</span><span class="o">=</span><span class="n">n_classes</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">target_spec</span><span class="o">.</span><span class="n">setTh</span><span class="p">(</span><span class="n">th</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Target property &#39;</span><span class="si">{</span><span class="n">target_property</span><span class="si">}</span><span class="s2">&#39; converted to classification.&quot;</span><span class="p">)</span></div>
-        
-        
-<div class="viewcode-block" id="QSPRTable.makeRegression"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.makeRegression">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">makeRegression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_property</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Target property &#39;</span><span class="si">{</span><span class="n">target_property</span><span class="si">}</span><span class="s2">&#39; converted to classification.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="QSPRTable.makeRegression">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.makeRegression">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">makeRegression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_property</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Switch to regression task using the given target property.</span>
 
 <span class="sd">        Args:</span>
@@ -536,9 +575,11 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Target property &#39;</span><span class="si">{</span><span class="n">target_property</span><span class="si">}</span><span class="s2">&#39; converted to regression.&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="QSPRTable.checkClassification"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.checkClassification">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">checkClassification</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">target_property</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<div class="viewcode-block" id="QSPRTable.checkClassification">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.checkClassification">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">checkClassification</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">target_property</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks the validity of the target property for classification tasks.</span>
 
@@ -554,10 +595,10 @@
         <span class="n">target_spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTargetSpec</span><span class="p">(</span><span class="n">target_property</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
-            <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">))</span> <span class="ow">or</span>
-            <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">is_integer</span><span class="p">())</span>
-            <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">target_values</span>
-        <span class="p">):</span>  
+                <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">))</span> <span class="ow">or</span>
+                <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">is_integer</span><span class="p">())</span>
+                <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">target_values</span>
+        <span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Classification target property &#39;</span><span class="si">{</span><span class="n">target_property</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
                 <span class="s2">&quot;should only contain integers or booleans. &quot;</span>
@@ -595,10 +636,6 @@
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">targetPropertiesNames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the names of the target properties.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">TargetSpec</span><span class="o">.</span><span class="n">getNames</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">isMultiTask</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -614,15 +651,20 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of target properties in the dataset.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QSPRTable.getTargets"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.getTargets">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getTargets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="QSPRTable.getTargets">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.getTargets">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getTargets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the target property values</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            (pd.DataFrame): target property values</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDF</span><span class="p">()[</span><span class="bp">self</span><span class="o">.</span><span class="n">targetPropertiesNames</span><span class="p">]</span></div>
-    
-<div class="viewcode-block" id="QSPRTable.getTarget"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.getTarget">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getTarget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">TargetSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDF</span><span class="p">()[</span><span class="bp">self</span><span class="o">.</span><span class="n">getTargetPropertiesNames</span><span class="p">()]</span></div>
+
+
+<div class="viewcode-block" id="QSPRTable.getTarget">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.getTarget">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getTarget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">TargetSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the target property values for the given target property.</span>
 
 <span class="sd">        Args:</span>
@@ -633,16 +675,19 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">TargetSpec</span><span class="p">):</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">assert</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetPropertiesNames</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Target property &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in dataset.&quot;</span>
+        <span class="k">assert</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTargetPropertiesNames</span><span class="p">(),</span> <span class="sa">f</span><span class="s2">&quot;Target property &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in dataset.&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDF</span><span class="p">()[</span><span class="n">name</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="QSPRTable.getSubset"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.getSubset">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getSubset</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">subset</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+
+<div class="viewcode-block" id="QSPRTable.getSubset">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.getSubset">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getSubset</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">subset</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+            <span class="n">ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;QSPRTable&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a subset of the data set.</span>
 
@@ -660,14 +705,18 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># add target properties if not already in the subset</span>
         <span class="c1"># as the QSPRTable requires them</span>
-        <span class="n">subset</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">subset</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetPropertiesNames</span><span class="p">))</span>
+        <span class="n">subset</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">subset</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTargetPropertiesNames</span><span class="p">()))</span>
         <span class="n">mt</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">getSubset</span><span class="p">(</span><span class="n">subset</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fromMolTable</span><span class="p">(</span>
-            <span class="n">mt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">mt</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">drop_empty_target_props</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="n">mt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">mt</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
+            <span class="n">drop_empty_target_props</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">ds</span></div>
 
-<div class="viewcode-block" id="QSPRTable.addSplit"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.addSplit">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">addSplit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split</span><span class="p">:</span> <span class="n">DataSplit</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+
+<div class="viewcode-block" id="QSPRTable.addSplit">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.addSplit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">addSplit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">split</span><span class="p">:</span> <span class="n">DataSplit</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a split to the dataset.</span>
 
 <span class="sd">        Performs the split and stores the split object and the indices of the split.</span>
@@ -680,11 +729,15 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;split&quot;</span><span class="p">:</span> <span class="n">split</span><span class="p">,</span>
-            <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="n">train_idx</span><span class="p">,</span> <span class="n">test_idx</span><span class="p">)</span> <span class="k">for</span> <span class="n">train_idx</span><span class="p">,</span> <span class="n">test_idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">split</span><span class="p">)],</span>
+            <span class="s2">&quot;ids&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="n">train_idx</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">test_idx</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span> <span class="k">for</span> <span class="n">train_idx</span><span class="p">,</span> <span class="n">test_idx</span> <span class="ow">in</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">split</span><span class="p">)],</span>
         <span class="p">}</span></div>
 
-<div class="viewcode-block" id="QSPRTable.getSplit"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.getSplit">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getSplit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">as_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;split&quot;</span>
-        <span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">DataSplit</span> <span class="o">|</span><span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">]]):</span>
+
+<div class="viewcode-block" id="QSPRTable.getSplit">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.getSplit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getSplit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">as_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;split&quot;</span>
+                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span><span class="n">DataSplit</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">]]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the split with the given name.</span>
 
 <span class="sd">        Args:</span>
@@ -709,13 +762,18 @@
                 <span class="s2">&quot;should be &#39;split&#39; or &#39;ids&#39;.&quot;</span>
             <span class="p">)</span></div>
 
-<div class="viewcode-block" id="QSPRTable.iterSplit"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.iterSplit">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">iterSplit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">as_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ids&quot;</span>
-        <span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span>
+
+<div class="viewcode-block" id="QSPRTable.iterSplit">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.iterSplit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">iterSplit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">as_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ids&quot;</span>
+                  <span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span>
             <span class="n">Generator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span>
-            <span class="n">Generator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span>
-            <span class="n">Generator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span>
+            <span class="n">Generator</span><span class="p">[</span>
+                <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span>
+            <span class="n">Generator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">|</span>
             <span class="n">Generator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="s2">&quot;QSPRTable&quot;</span><span class="p">,</span> <span class="s2">&quot;QSPRTable&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-        <span class="p">):</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the split with the given name.</span>
 
 <span class="sd">        Args:</span>
@@ -745,7 +803,7 @@
             <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDescriptors</span><span class="p">()</span>
             <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTargets</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">ids</span> <span class="ow">in</span> <span class="n">split</span><span class="p">[</span><span class="s2">&quot;ids&quot;</span><span class="p">]:</span>
-                <span class="n">train_idx</span><span class="p">,</span> <span class="n">test_idx</span> <span class="o">=</span> <span class="n">ids</span>
+                <span class="n">train_idx</span><span class="p">,</span> <span class="n">test_idx</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ids</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                 <span class="k">yield</span> <span class="p">(</span>
                     <span class="n">X</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train_idx</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
                     <span class="n">y</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train_idx</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
@@ -774,9 +832,12 @@
                 <span class="s2">&quot;should be &#39;ids&#39;, &#39;numpy&#39;, &#39;pandas&#39; or &#39;QSPRTable&#39;.&quot;</span>
             <span class="p">)</span></div>
 
-<div class="viewcode-block" id="QSPRTable.split"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.split">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">split</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">split</span><span class="p">:</span> <span class="n">DataSplit</span><span class="p">,</span>
+
+<div class="viewcode-block" id="QSPRTable.split">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.split">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">split</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">split</span><span class="p">:</span> <span class="n">DataSplit</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span>
         <span class="nb">tuple</span><span class="p">[</span>
             <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">,</span>
@@ -790,6 +851,8 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            split (DataSplit): Split to apply to the data</span>
+<span class="sd">            X (pd.DataFrame): data to apply the split to</span>
+<span class="sd">            y (pd.DataFrame | None): target data to apply the split to</span>
 
 <span class="sd">        Yields:</span>
 <span class="sd">            pd.Index, pd.Index: indices of the train and test set</span>
@@ -799,16 +862,15 @@
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="s2">&quot;randomState&quot;</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">split</span><span class="o">.</span><span class="n">randomState</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">split</span><span class="o">.</span><span class="n">randomState</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">randomState</span>
-
         <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDescriptors</span><span class="p">()</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTargets</span><span class="p">()</span>
         <span class="n">folds</span> <span class="o">=</span> <span class="n">split</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-
         <span class="k">for</span> <span class="n">train_idx</span><span class="p">,</span> <span class="n">test_idx</span> <span class="ow">in</span> <span class="n">folds</span><span class="p">:</span>
             <span class="c1"># get QSPRTable indices from numerical index</span>
             <span class="n">train_idx</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">train_idx</span><span class="p">]</span>
             <span class="n">test_idx</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">test_idx</span><span class="p">]</span>
             <span class="k">yield</span> <span class="n">train_idx</span><span class="p">,</span> <span class="n">test_idx</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;QSPRTable&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a subset of the data set.</span>
@@ -823,11 +885,13 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            QSPRTable: subset of the data set</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1">#FIXME: setting the random state here is not ideal, this should be done in the</span>
+        <span class="c1"># FIXME: setting the random state here is not ideal, this should be done in the</span>
         <span class="c1"># getSubset method</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSubset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getProperties</span><span class="p">(),</span> <span class="n">ids</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">randomState</span><span class="p">)</span>
 
-<div class="viewcode-block" id="QSPRTable.filter"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.filter">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_filters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DataFilter</span><span class="p">]):</span>
+<div class="viewcode-block" id="QSPRTable.filter">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.QSPRTable.filter">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_filters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Callable</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter the data set using the given filters.</span>
 
 <span class="sd">        Args:</span>
@@ -841,11 +905,13 @@
             <span class="n">ids_to_drop</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[</span><span class="o">~</span><span class="n">ids</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">ret</span><span class="o">.</span><span class="n">index</span><span class="p">)]</span><span class="o">.</span><span class="n">values</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dropEntries</span><span class="p">(</span><span class="n">ids_to_drop</span><span class="p">)</span></div>
 
+
     <span class="k">def</span><span class="w"> </span><span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setstate__</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">splits</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="s2">&quot;split&quot;</span><span class="p">],</span> <span class="s2">&quot;setdataSet&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">split</span><span class="p">[</span><span class="s2">&quot;split&quot;</span><span class="p">],</span> <span class="s2">&quot;setDataSet&quot;</span><span class="p">):</span>
                 <span class="n">split</span><span class="p">[</span><span class="s2">&quot;split&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setDataSet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
 </pre></div>
 
            </div>

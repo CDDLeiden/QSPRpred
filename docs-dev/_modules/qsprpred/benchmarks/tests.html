@@ -1,22 +1,22 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.benchmarks.tests &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+  <title>qsprpred.benchmarks.tests &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=ce9a7c35"></script>
-      <script src="../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
     </script>
       <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -97,48 +97,60 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">KFold</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.naive_bayes</span><span class="w"> </span><span class="kn">import</span> <span class="n">GaussianNB</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.neighbors</span><span class="w"> </span><span class="kn">import</span> <span class="n">KNeighborsClassifier</span><span class="p">,</span> <span class="n">KNeighborsRegressor</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.neural_network</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLPClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.svm</span><span class="w"> </span><span class="kn">import</span> <span class="n">SVR</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.models.assessment.methods</span><span class="w"> </span><span class="kn">import</span> <span class="n">Assessor</span>
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">BenchmarkRunner</span><span class="p">,</span> <span class="n">BenchmarkSettings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">TargetSpec</span><span class="p">,</span> <span class="n">TargetTasks</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..data</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeTable</span><span class="p">,</span> <span class="n">QSPRTable</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..data.processing.imputers</span><span class="w"> </span><span class="kn">import</span> <span class="n">TargetImputer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..data.descriptors.fingerprints</span><span class="w"> </span><span class="kn">import</span> <span class="n">MorganFP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..data.descriptors.sets</span><span class="w"> </span><span class="kn">import</span> <span class="n">RDKitDescs</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..data.sources.data_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSource</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..data.processing.imputers</span><span class="w"> </span><span class="kn">import</span> <span class="n">TargetImputer</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..data.sampling.splits</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomSplit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..data.sources.data_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSource</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..models.scikit_learn</span><span class="w"> </span><span class="kn">import</span> <span class="n">SklearnModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..utils.parallel</span><span class="w"> </span><span class="kn">import</span> <span class="n">PebbleJITGenerator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..utils.stringops</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_random_string</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..utils.testing.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPRTestCase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..utils.testing.path_mixins</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSetsPathMixIn</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">BenchmarkRunner</span><span class="p">,</span> <span class="n">BenchmarkSettings</span>
 
 
-<div class="viewcode-block" id="DataSourceTesting"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.DataSourceTesting">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">DataSourceTesting</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">DataSource</span><span class="p">):</span>
+<div class="viewcode-block" id="DataSourceTesting">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.DataSourceTesting">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DataSourceTesting</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">DataSource</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data source for testing purposes. Simply prepares the default</span>
 <span class="sd">    data set from`DataSetsPathMixIn`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
 
-<div class="viewcode-block" id="DataSourceTesting.getData"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.DataSourceTesting.getData">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MoleculeTable</span><span class="p">:</span>
+<div class="viewcode-block" id="DataSourceTesting.getData">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.DataSourceTesting.getData">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MoleculeTable</span><span class="p">:</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataSourceTesting.getDataSet"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.DataSourceTesting.getDataSet">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getDataSet</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">],</span>
-        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+
+<div class="viewcode-block" id="DataSourceTesting.getDataSet">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.DataSourceTesting.getDataSet">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getDataSet</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">],</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QSPRTable</span><span class="p">:</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">target_props</span><span class="o">=</span><span class="n">target_props</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">target_props</span><span class="o">=</span><span class="n">target_props</span><span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="BenchMarkTestCase"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchMarkTestCase">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BenchMarkTestCase</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BenchMarkTestCase">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchMarkTestCase">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BenchMarkTestCase</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test benchmarking functionality on the test data set.</span>
 
 <span class="sd">    Attributes:</span>
@@ -147,13 +159,16 @@
 <span class="sd">        benchmark (BenchmarkRunner):</span>
 <span class="sd">            Benchmark runner.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<div class="viewcode-block" id="BenchMarkTestCase.setUp"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchMarkTestCase.setUp">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BenchMarkTestCase.setUp">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchMarkTestCase.setUp">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="mi">42</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nFolds</span> <span class="o">=</span> <span class="mi">3</span>
         <span class="n">pipeline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDefaultPrep</span><span class="p">()</span>
-        
+
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">BenchmarkSettings</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">get_random_string</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="p">),</span>
             <span class="n">n_replicas</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
@@ -195,9 +210,10 @@
                     <span class="n">base_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedPath</span><span class="si">}</span><span class="s2">/models&quot;</span><span class="p">,</span>
                 <span class="p">),</span>
                 <span class="n">SklearnModel</span><span class="p">(</span>
-                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;MLPClassifier&quot;</span><span class="p">,</span>
-                    <span class="n">alg</span><span class="o">=</span><span class="n">MLPClassifier</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;KNeighborsClassifier&quot;</span><span class="p">,</span>
+                    <span class="n">alg</span><span class="o">=</span><span class="n">KNeighborsClassifier</span><span class="p">,</span>
                     <span class="n">base_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedPath</span><span class="si">}</span><span class="s2">/models&quot;</span><span class="p">,</span>
+                    <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
                 <span class="p">),</span>
             <span class="p">],</span>
             <span class="n">assessors</span><span class="o">=</span><span class="p">[</span>
@@ -228,15 +244,19 @@
                     <span class="n">split</span><span class="o">=</span><span class="n">RandomSplit</span><span class="p">(</span><span class="n">test_fraction</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">],</span>
-            <span class="n">optimizers</span><span class="o">=</span><span class="p">[],</span>  <span class="c1"># FIXME: needs to be tested</span>
+            <span class="n">optimizers</span><span class="o">=</span><span class="p">[],</span>  <span class="c1"># FIXME: needs to be implemented and tested still</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">benchmark</span> <span class="o">=</span> <span class="n">BenchmarkRunner</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">,</span>
             <span class="n">data_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedPath</span><span class="si">}</span><span class="s2">/benchmarks&quot;</span><span class="p">,</span>
             <span class="n">results_file</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedPath</span><span class="si">}</span><span class="s2">/benchmarks/results.tsv&quot;</span><span class="p">,</span>
+            <span class="n">parallel_generator_cpu</span><span class="o">=</span><span class="n">PebbleJITGenerator</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span>  <span class="c1"># set if you require a cap on cpus</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="BenchMarkTestCase.checkRunResults"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchMarkTestCase.checkRunResults">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">checkRunResults</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BenchMarkTestCase.checkRunResults">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchMarkTestCase.checkRunResults">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">checkRunResults</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
         <span class="c1"># TODO: more checks should be done here in the future</span>
         <span class="k">for</span> <span class="n">tps</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">target_props</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">assessor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">assessors</span><span class="p">:</span>
@@ -247,7 +267,10 @@
                     <span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s2">&quot;TargetProperty&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="n">tp</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="n">tps</span><span class="p">]))]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">score_results</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BenchMarkTestCase.checkSettings"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchMarkTestCase.checkSettings">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">checkSettings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BenchMarkTestCase.checkSettings">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchMarkTestCase.checkSettings">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">checkSettings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">data_sources</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">descriptors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">target_props</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
@@ -263,18 +286,27 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">target_props</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">target_props</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">pipelines</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">pipelines</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">models</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">models</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">assessors</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">assessors</span><span class="p">))</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">assessors</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">assessors</span><span class="p">))</span></div>
+</div>
 
 
-<div class="viewcode-block" id="BenchmarkingTest"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchmarkingTest">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">BenchmarkingTest</span><span class="p">(</span><span class="n">BenchMarkTestCase</span><span class="p">):</span>
-<div class="viewcode-block" id="BenchmarkingTest.testSingleTaskCLS"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchmarkingTest.testSingleTaskCLS">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testSingleTaskCLS</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BenchmarkingTest">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchmarkingTest">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BenchmarkingTest</span><span class="p">(</span><span class="n">BenchMarkTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="BenchmarkingTest.testSingleTaskCLS">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchmarkingTest.testSingleTaskCLS">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testSingleTaskCLS</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run single task tests for classification.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkSettings</span><span class="p">()</span>
         <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">benchmark</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">raise_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkRunResults</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkSettings</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="BenchmarkingTest.testSingleTaskREG"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchmarkingTest.testSingleTaskREG">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testSingleTaskREG</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BenchmarkingTest.testSingleTaskREG">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchmarkingTest.testSingleTaskREG">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testSingleTaskREG</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">target_props</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">[</span><span class="n">TargetSpec</span><span class="o">.</span><span class="n">fromDict</span><span class="p">({</span>
                 <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span>
@@ -283,14 +315,22 @@
         <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">SklearnModel</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;SVR&quot;</span><span class="p">,</span>
+                <span class="n">alg</span><span class="o">=</span><span class="n">SVR</span><span class="p">,</span>
+                <span class="n">base_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedPath</span><span class="si">}</span><span class="s2">/models&quot;</span><span class="p">,</span>
+                <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;kernel&quot;</span><span class="p">:</span> <span class="s2">&quot;rbf&quot;</span><span class="p">},</span>
+            <span class="p">),</span>
+            <span class="n">SklearnModel</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="s2">&quot;RandomForestRegressor&quot;</span><span class="p">,</span>
                 <span class="n">alg</span><span class="o">=</span><span class="n">RandomForestRegressor</span><span class="p">,</span>
                 <span class="n">base_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedPath</span><span class="si">}</span><span class="s2">/models&quot;</span><span class="p">,</span>
+                <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
             <span class="p">),</span>
             <span class="n">SklearnModel</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="s2">&quot;KNeighborsRegressor&quot;</span><span class="p">,</span>
                 <span class="n">alg</span><span class="o">=</span><span class="n">KNeighborsRegressor</span><span class="p">,</span>
                 <span class="n">base_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedPath</span><span class="si">}</span><span class="s2">/models&quot;</span><span class="p">,</span>
+                <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
             <span class="p">),</span>
         <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">assessors</span> <span class="o">=</span> <span class="p">[</span>
@@ -320,7 +360,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">checkRunResults</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkSettings</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="BenchmarkingTest.testMultiTaskCLS"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchmarkingTest.testMultiTaskCLS">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testMultiTaskCLS</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BenchmarkingTest.testMultiTaskCLS">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchmarkingTest.testMultiTaskCLS">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testMultiTaskCLS</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the test benchmark.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">target_props</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">[</span>
@@ -345,11 +388,13 @@
                 <span class="n">name</span><span class="o">=</span><span class="s2">&quot;RandomForestClassifier&quot;</span><span class="p">,</span>
                 <span class="n">alg</span><span class="o">=</span><span class="n">RandomForestClassifier</span><span class="p">,</span>
                 <span class="n">base_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedPath</span><span class="si">}</span><span class="s2">/models&quot;</span><span class="p">,</span>
+                <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
             <span class="p">),</span>
             <span class="n">SklearnModel</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="s2">&quot;KNeighborsClassifier&quot;</span><span class="p">,</span>
                 <span class="n">alg</span><span class="o">=</span><span class="n">KNeighborsClassifier</span><span class="p">,</span>
                 <span class="n">base_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedPath</span><span class="si">}</span><span class="s2">/models&quot;</span><span class="p">,</span>
+                <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
             <span class="p">),</span>
         <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">pipelines</span> <span class="o">=</span> <span class="p">[</span>
@@ -388,7 +433,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">checkRunResults</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkSettings</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="BenchmarkingTest.testMultiTaskREG"><a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchmarkingTest.testMultiTaskREG">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testMultiTaskREG</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BenchmarkingTest.testMultiTaskREG">
+<a class="viewcode-back" href="../../../api/qsprpred.benchmarks.html#qsprpred.benchmarks.tests.BenchmarkingTest.testMultiTaskREG">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testMultiTaskREG</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">target_props</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">[</span>
                 <span class="n">TargetSpec</span><span class="o">.</span><span class="n">fromDict</span><span class="p">(</span>
@@ -410,11 +458,13 @@
                 <span class="n">name</span><span class="o">=</span><span class="s2">&quot;RandomForestRegressor&quot;</span><span class="p">,</span>
                 <span class="n">alg</span><span class="o">=</span><span class="n">RandomForestRegressor</span><span class="p">,</span>
                 <span class="n">base_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedPath</span><span class="si">}</span><span class="s2">/models&quot;</span><span class="p">,</span>
+                <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
             <span class="p">),</span>
             <span class="n">SklearnModel</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="s2">&quot;KNeighborsRegressor&quot;</span><span class="p">,</span>
                 <span class="n">alg</span><span class="o">=</span><span class="n">KNeighborsRegressor</span><span class="p">,</span>
                 <span class="n">base_dir</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedPath</span><span class="si">}</span><span class="s2">/models&quot;</span><span class="p">,</span>
+                <span class="n">parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
             <span class="p">),</span>
         <span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">pipelines</span> <span class="o">=</span> <span class="p">[</span>
@@ -449,7 +499,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">checkSettings</span><span class="p">()</span>
         <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">benchmark</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">raise_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkRunResults</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">checkSettings</span><span class="p">()</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkSettings</span><span class="p">()</span></div>
+</div>
+
 </pre></div>
 
            </div>

@@ -9,29 +9,29 @@ qsprpred.data.tables.interfaces.data\_set\_dependent module
 
 .. automodule:: qsprpred.data.tables.interfaces.data_set_dependent
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.data.tables.interfaces.molecule\_data\_set module
 ----------------------------------------------------------
 
 .. automodule:: qsprpred.data.tables.interfaces.molecule_data_set
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.data.tables.interfaces.qspr\_data\_set module
 ------------------------------------------------------
 
 .. automodule:: qsprpred.data.tables.interfaces.qspr_data_set
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.data.tables.interfaces
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

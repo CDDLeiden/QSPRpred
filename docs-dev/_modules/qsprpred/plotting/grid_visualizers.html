@@ -1,22 +1,22 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.plotting.grid_visualizers &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+  <title>qsprpred.plotting.grid_visualizers &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=ce9a7c35"></script>
-      <script src="../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
     </script>
       <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -102,7 +102,9 @@
 <span class="n">standard_grid</span> <span class="o">=</span> <span class="n">Draw</span><span class="o">.</span><span class="n">MolsToGridImage</span>
 
 
-<div class="viewcode-block" id="interactive_grid"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.grid_visualizers.interactive_grid">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">interactive_grid</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">molsPerRow</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="interactive_grid">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.grid_visualizers.interactive_grid">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">interactive_grid</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">molsPerRow</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    install mols2grid with pip to use</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -112,7 +114,10 @@
     <span class="k">return</span> <span class="n">mols2grid</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">n_cols</span><span class="o">=</span><span class="n">molsPerRow</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="smiles_to_grid"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.grid_visualizers.smiles_to_grid">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">smiles_to_grid</span><span class="p">(</span>
+
+<div class="viewcode-block" id="smiles_to_grid">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.grid_visualizers.smiles_to_grid">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">smiles_to_grid</span><span class="p">(</span>
     <span class="n">smiles</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">mols_per_row</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">impl</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">standard_grid</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
     <span class="n">mols</span> <span class="o">=</span> <span class="p">[]</span>
@@ -130,7 +135,10 @@
     <span class="k">return</span> <span class="n">impl</span><span class="p">(</span><span class="n">mols</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">molsPerRow</span><span class="o">=</span><span class="n">mols_per_row</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="table_to_grid"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.grid_visualizers.table_to_grid">[docs]</a><span class="k">def</span><span class="w"> </span><span class="nf">table_to_grid</span><span class="p">(</span>
+
+<div class="viewcode-block" id="table_to_grid">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.grid_visualizers.table_to_grid">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">table_to_grid</span><span class="p">(</span>
     <span class="n">table</span><span class="p">:</span> <span class="n">ChemStore</span><span class="p">,</span>
     <span class="n">mols_per_row</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
     <span class="n">impl</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">standard_grid</span><span class="p">,</span>
@@ -140,6 +148,7 @@
     <span class="k">return</span> <span class="n">smiles_to_grid</span><span class="p">(</span>
         <span class="n">table</span><span class="o">.</span><span class="n">smiles</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">mols_per_row</span><span class="o">=</span><span class="n">mols_per_row</span><span class="p">,</span> <span class="n">impl</span><span class="o">=</span><span class="n">impl</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span></div>
+
 </pre></div>
 
            </div>

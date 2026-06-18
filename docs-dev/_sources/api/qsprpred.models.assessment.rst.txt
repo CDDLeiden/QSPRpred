@@ -17,29 +17,29 @@ qsprpred.models.assessment.classification module
 
 .. automodule:: qsprpred.models.assessment.classification
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.models.assessment.methods module
 -----------------------------------------
 
 .. automodule:: qsprpred.models.assessment.methods
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.models.assessment.regression module
 --------------------------------------------
 
 .. automodule:: qsprpred.models.assessment.regression
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.models.assessment
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

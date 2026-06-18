@@ -9,29 +9,29 @@ qsprpred.data.descriptors.fingerprints module
 
 .. automodule:: qsprpred.data.descriptors.fingerprints
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.data.descriptors.sets module
 -------------------------------------
 
 .. automodule:: qsprpred.data.descriptors.sets
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.data.descriptors.tests module
 --------------------------------------
 
 .. automodule:: qsprpred.data.descriptors.tests
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.data.descriptors
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

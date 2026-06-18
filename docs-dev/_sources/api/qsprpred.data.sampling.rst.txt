@@ -9,21 +9,21 @@ qsprpred.data.sampling.splits module
 
 .. automodule:: qsprpred.data.sampling.splits
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.data.sampling.tests module
 -----------------------------------
 
 .. automodule:: qsprpred.data.sampling.tests
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.data.sampling
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

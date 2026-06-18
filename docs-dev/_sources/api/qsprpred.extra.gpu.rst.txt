@@ -15,5 +15,5 @@ Module contents
 
 .. automodule:: qsprpred.extra.gpu
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

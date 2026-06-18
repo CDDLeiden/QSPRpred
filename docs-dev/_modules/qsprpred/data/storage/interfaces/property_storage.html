@@ -1,22 +1,22 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.storage.interfaces.property_storage &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+  <title>qsprpred.data.storage.interfaces.property_storage &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=ce9a7c35"></script>
-      <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../../../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
     </script>
       <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -102,19 +102,29 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.storage.interfaces.searchable</span><span class="w"> </span><span class="kn">import</span> <span class="n">PropSearchable</span>
 
 
-<div class="viewcode-block" id="PropertyStorage"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">PropertyStorage</span><span class="p">(</span><span class="n">DataStorage</span><span class="p">,</span> <span class="n">ChunkIterable</span><span class="p">,</span> <span class="n">PropSearchable</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="PropertyStorage">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PropertyStorage</span><span class="p">(</span><span class="n">DataStorage</span><span class="p">,</span> <span class="n">ChunkIterable</span><span class="p">,</span> <span class="n">PropSearchable</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A simple `DataStorage` that maps property names to arbitrary data.</span>
 <span class="sd">    It is assumed that `PropertyStorage` stores entries with one or more properties</span>
 <span class="sd">    attached to each entry. It is up to the downstream implementation to decide how</span>
 <span class="sd">    the data is stored and how it is accessed as long as the interface is respected.</span>
 <span class="sd">    See the methods of this class and the base classes for more details.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the name of the storage.&quot;&quot;&quot;</span>
+
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">idProp</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the name of the property that contains the molecule IDs.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="PropertyStorage.getProperty"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.getProperty">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="PropertyStorage.getProperty">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.getProperty">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get values of a given property.</span>
 
@@ -123,11 +133,17 @@
 <span class="sd">            ids (list, optional): The IDs of the entries to get the property for.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="PropertyStorage.getProperties"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.getProperties">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="PropertyStorage.getProperties">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.getProperties">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">getProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the property names contained in the storage.&quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="PropertyStorage.addProperty"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.addProperty">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="PropertyStorage.addProperty">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.addProperty">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">addProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Sized</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a property to the dataset. The supplied data should be a sized list</span>
 <span class="sd">        of values of the same length as the number of entries in the storage.</span>
@@ -138,7 +154,10 @@
 <span class="sd">            ids (list, optional): The IDs of the entries to add the property for.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="PropertyStorage.hasProperty"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.hasProperty">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="PropertyStorage.hasProperty">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.hasProperty">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">hasProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check whether a property is present in the data frame.</span>
 
@@ -149,7 +168,10 @@
 <span class="sd">            bool: Whether the property is present.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="PropertyStorage.removeProperty"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.removeProperty">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="PropertyStorage.removeProperty">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.removeProperty">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">removeProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove a property from the dataset.</span>
 
@@ -157,11 +179,14 @@
 <span class="sd">            name (str): The name of the property.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="PropertyStorage.getSubset"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.getSubset">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="PropertyStorage.getSubset">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.getSubset">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">getSubset</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">subset</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">subset</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+            <span class="n">ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PropertyStorage&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a subset of the storage for the given properties.</span>
 
@@ -174,7 +199,10 @@
 <span class="sd">            PropertyStorage: The subset of the storage.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="PropertyStorage.getDF"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.getDF">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="PropertyStorage.getDF">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.getDF">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">getDF</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the stored properties as a pandas DataFrame.</span>
 
@@ -182,7 +210,10 @@
 <span class="sd">            pd.DataFrame: The data as a pandas DataFrame.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="PropertyStorage.iterChunks"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.iterChunks">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="PropertyStorage.iterChunks">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.iterChunks">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">iterChunks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                    <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                    <span class="n">on_props</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
@@ -192,14 +223,17 @@
 <span class="sd">            an iterable of lists of stored molecules</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="PropertyStorage.apply"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.apply">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="PropertyStorage.apply">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.apply">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">func</span><span class="p">:</span> <span class="nb">callable</span><span class="p">,</span>
-        <span class="n">func_args</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">func_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">on_props</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">as_df</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">func</span><span class="p">:</span> <span class="nb">callable</span><span class="p">,</span>
+            <span class="n">func_args</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">func_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">on_props</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">as_df</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">Iterable</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply a function on all or selected properties of the chunks of data.</span>
 <span class="sd">        The properties are supplied as the first positional argument to the function.</span>
@@ -217,7 +251,10 @@
 <span class="sd">            A generator that yields the results of the function applied to each chunk.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="PropertyStorage.dropEntries"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.dropEntries">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="PropertyStorage.dropEntries">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.dropEntries">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dropEntries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Drop entries from the storage.</span>
 
@@ -225,9 +262,12 @@
 <span class="sd">            ids (list): The IDs of the entries to drop.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="PropertyStorage.addEntries"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.addEntries">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="PropertyStorage.addEntries">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.PropertyStorage.addEntries">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">addEntries</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span> <span class="n">raise_on_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span> <span class="n">raise_on_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add entries to the storage.</span>
 
@@ -243,6 +283,7 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If an entry already exists and `overwrite` is `False`.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
+
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -261,16 +302,17 @@
         <span class="k">pass</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropEntries</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropEntries</span><span class="p">((</span><span class="n">key</span><span class="p">,))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
+
 </pre></div>
 
            </div>

@@ -1,22 +1,22 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.processing.target_transformers &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+  <title>qsprpred.data.processing.target_transformers &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=ce9a7c35"></script>
-      <script src="../../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
     </script>
       <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -99,9 +99,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">ClassVar</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">LabelEncoder</span>
 
-<div class="viewcode-block" id="TargetTransformer"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.TargetTransformer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TargetTransformer</span><span class="p">(</span><span class="n">Step</span><span class="p">):</span>
+<div class="viewcode-block" id="TargetTransformer">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.TargetTransformer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TargetTransformer</span><span class="p">(</span><span class="n">Step</span><span class="p">):</span>
 
-<div class="viewcode-block" id="TargetTransformer.transform"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.TargetTransformer.transform">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="TargetTransformer.transform">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.TargetTransformer.transform">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform the target data.</span>
 <span class="sd">        </span>
@@ -113,9 +117,13 @@
 <span class="sd">            pd.DataFrame: data</span>
 <span class="sd">            pd.DataFrame: (transformed) target data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span></div></div>
+        <span class="k">pass</span></div>
+</div>
+
     
-<div class="viewcode-block" id="Discretizer"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.Discretizer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Discretizer</span><span class="p">(</span><span class="n">TargetTransformer</span><span class="p">):</span>
+<div class="viewcode-block" id="Discretizer">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.Discretizer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Discretizer</span><span class="p">(</span><span class="n">TargetTransformer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Discretizes the target data into bins.</span>
 <span class="sd">    </span>
 <span class="sd">    Note. using this step in a pipeline may break the subsequent model training</span>
@@ -153,7 +161,9 @@
         
         <span class="bp">self</span><span class="o">.</span><span class="n">th</span> <span class="o">=</span> <span class="n">th</span>
     
-<div class="viewcode-block" id="Discretizer.transform"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.Discretizer.transform">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<div class="viewcode-block" id="Discretizer.transform">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.Discretizer.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Discretize the target data into bins.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -201,8 +211,11 @@
                 <span class="n">index</span><span class="o">=</span><span class="n">y</span><span class="o">.</span><span class="n">index</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y_transformed</span></div>
+
     
-<div class="viewcode-block" id="Discretizer.getIntervals"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.Discretizer.getIntervals">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getIntervals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">discrete_values</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<div class="viewcode-block" id="Discretizer.getIntervals">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.Discretizer.getIntervals">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getIntervals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">discrete_values</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform the discretized values to intervals.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -220,10 +233,14 @@
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">le</span><span class="o">.</span><span class="n">inverse_transform</span><span class="p">(</span><span class="n">discrete_values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)),</span>
             <span class="n">index</span><span class="o">=</span><span class="n">discrete_values</span><span class="o">.</span><span class="n">index</span>
-        <span class="p">)</span></div></div>
+        <span class="p">)</span></div>
+</div>
+
 
     
-<div class="viewcode-block" id="SimpleTargetTransformer"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.SimpleTargetTransformer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SimpleTargetTransformer</span><span class="p">(</span><span class="n">TargetTransformer</span><span class="p">):</span>
+<div class="viewcode-block" id="SimpleTargetTransformer">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.SimpleTargetTransformer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">SimpleTargetTransformer</span><span class="p">(</span><span class="n">TargetTransformer</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Applies a simple transformation to the target data.</span>
 
 <span class="sd">    Attributes:</span>
@@ -278,7 +295,9 @@
             <span class="p">)</span>
         
     
-<div class="viewcode-block" id="SimpleTargetTransformer.transform"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.SimpleTargetTransformer.transform">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span>
+<div class="viewcode-block" id="SimpleTargetTransformer.transform">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.SimpleTargetTransformer.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform the data using the transformer</span>
@@ -298,8 +317,11 @@
         
         <span class="n">y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTransformer</span><span class="p">()(</span><span class="n">y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span></div>
+
     
-<div class="viewcode-block" id="SimpleTargetTransformer.inverseTransform"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.SimpleTargetTransformer.inverseTransform">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">inverseTransform</span><span class="p">(</span>
+<div class="viewcode-block" id="SimpleTargetTransformer.inverseTransform">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.SimpleTargetTransformer.inverseTransform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inverseTransform</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Inverse transform the data using the inverse transformer</span>
@@ -319,8 +341,11 @@
         
         <span class="n">y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getInverseTransformer</span><span class="p">()(</span><span class="n">y</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span></div>
+
         
-<div class="viewcode-block" id="SimpleTargetTransformer.getTransformer"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.SimpleTargetTransformer.getTransformer">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getTransformer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">callable</span><span class="p">:</span>
+<div class="viewcode-block" id="SimpleTargetTransformer.getTransformer">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.SimpleTargetTransformer.getTransformer">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getTransformer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">callable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the transformer function</span>
 
 <span class="sd">        Returns:</span>
@@ -328,13 +353,18 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">transformation</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="SimpleTargetTransformer.getInverseTransformer"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.SimpleTargetTransformer.getInverseTransformer">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getInverseTransformer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">callable</span><span class="p">:</span>
+
+<div class="viewcode-block" id="SimpleTargetTransformer.getInverseTransformer">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.SimpleTargetTransformer.getInverseTransformer">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getInverseTransformer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">callable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the inverse transformer function</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            callable: inverse transformer function</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_transform_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">transformation</span><span class="p">]</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_transform_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">transformation</span><span class="p">]</span></div>
+</div>
+
 </pre></div>
 
            </div>

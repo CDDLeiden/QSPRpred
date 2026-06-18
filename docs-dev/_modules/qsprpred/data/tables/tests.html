@@ -1,22 +1,22 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.tables.tests &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+  <title>qsprpred.data.tables.tests &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=ce9a7c35"></script>
-      <script src="../../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
     </script>
       <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -92,10 +92,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for qsprpred.data.tables.tests</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -103,31 +103,35 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">KFold</span><span class="p">,</span> <span class="n">ShuffleSplit</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.descriptors.sets</span><span class="w"> </span><span class="kn">import</span> <span class="n">DrugExPhyschem</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.storage.tabular.basic_storage</span><span class="w"> </span><span class="kn">import</span> <span class="n">PandasChemStore</span>
-
+<span class="kn">from</span><span class="w"> </span><span class="nn">.interfaces.qspr_data_set</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPRDataSet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeTable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..chem.standardizers.papyrus</span><span class="w"> </span><span class="kn">import</span> <span class="n">PapyrusStandardizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..descriptors.fingerprints</span><span class="w"> </span><span class="kn">import</span> <span class="n">MorganFP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..processing.data_filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">CategoryFilter</span><span class="p">,</span> <span class="n">NaNFilter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..processing.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">DatasetPipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..processing.step</span><span class="w"> </span><span class="kn">import</span> <span class="n">Shuffle</span><span class="p">,</span> <span class="n">DummyStep</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...</span><span class="w"> </span><span class="kn">import</span> <span class="n">TargetSpec</span><span class="p">,</span> <span class="n">TargetTasks</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...data.storage.tabular.simple</span><span class="w"> </span><span class="kn">import</span> <span class="n">PandasChemStore</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...data.tables.qspr</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPRTable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...utils.stopwatch</span><span class="w"> </span><span class="kn">import</span> <span class="n">StopWatch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...utils.testing.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPRTestCase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...utils.testing.check_mixins</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataPrepCheckMixIn</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">...utils.testing.path_mixins</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSetsPathMixIn</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..chem.standardizers.papyrus</span><span class="w"> </span><span class="kn">import</span> <span class="n">PapyrusStandardizer</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..descriptors.fingerprints</span><span class="w"> </span><span class="kn">import</span> <span class="n">MorganFP</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.interfaces.qspr_data_set</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPRDataSet</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeTable</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..processing.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">DatasetPipeline</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..processing.step</span><span class="w"> </span><span class="kn">import</span> <span class="n">Shuffle</span><span class="p">,</span> <span class="n">DummyStep</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..processing.data_filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">CategoryFilter</span><span class="p">,</span> <span class="n">NaNFilter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...utils.testing.path_mixins</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">PathMixIn</span>
 
 
-<div class="viewcode-block" id="TestMolTable"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestMolTable">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TestMolTable</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
-<div class="viewcode-block" id="TestMolTable.setUp"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestMolTable.setUp">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMolTable">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestMolTable">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TestMolTable</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestMolTable.setUp">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestMolTable.setUp">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
-        <span class="c1"># self.nCPU = 2</span>
-        <span class="c1"># self.chunkSize = 2</span>
 
-<div class="viewcode-block" id="TestMolTable.getStorage"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestMolTable.getStorage">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getStorage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestMolTable.getStorage">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestMolTable.getStorage">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getStorage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSmallDF</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">PandasChemStore</span><span class="p">(</span>
             <span class="s2">&quot;test&quot;</span><span class="p">,</span>
@@ -138,11 +142,17 @@
             <span class="n">chunk_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chunkSize</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestMolTable.getTable"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestMolTable.getTable">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getTable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestMolTable.getTable">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestMolTable.getTable">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getTable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">storage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getStorage</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">MoleculeTable</span><span class="p">(</span><span class="n">storage</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestMolTable.testTableCreation"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestMolTable.testTableCreation">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testTableCreation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestMolTable.testTableCreation">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestMolTable.testTableCreation">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testTableCreation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test the creation of a table from a data set.&quot;&quot;&quot;</span>
         <span class="n">storage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getStorage</span><span class="p">()</span>
         <span class="n">mt</span> <span class="o">=</span> <span class="n">MoleculeTable</span><span class="p">(</span><span class="n">storage</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">generatedDataPath</span><span class="p">)</span>
@@ -165,7 +175,10 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mt</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">storage</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="TestMolTable.testTableSerialization"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestMolTable.testTableSerialization">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testTableSerialization</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestMolTable.testTableSerialization">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestMolTable.testTableSerialization">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testTableSerialization</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">mt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTable</span><span class="p">()</span>
         <span class="n">mt</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">mt</span><span class="o">.</span><span class="n">metaFile</span><span class="p">))</span>
@@ -181,11 +194,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mt</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">mt_moved</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">mt</span><span class="o">.</span><span class="n">smiles</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="n">mt_moved</span><span class="o">.</span><span class="n">smiles</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="TestMolTable.getDescriptorSets"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestMolTable.getDescriptorSets">[docs]</a>    <span class="nd">@staticmethod</span>
+
+<div class="viewcode-block" id="TestMolTable.getDescriptorSets">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestMolTable.getDescriptorSets">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">getDescriptorSets</span><span class="p">():</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">MorganFP</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">nBits</span><span class="o">=</span><span class="mi">128</span><span class="p">),</span> <span class="n">DrugExPhyschem</span><span class="p">()]</span></div>
 
-<div class="viewcode-block" id="TestMolTable.testDescriptors"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestMolTable.testDescriptors">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestMolTable.testDescriptors">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestMolTable.testDescriptors">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># add descriptors</span>
         <span class="n">mt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTable</span><span class="p">()</span>
         <span class="n">mt</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getDescriptorSets</span><span class="p">())</span>
@@ -253,7 +272,10 @@
         <span class="n">mt_moved</span><span class="o">.</span><span class="n">reload</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">mt_moved</span><span class="o">.</span><span class="n">getDescriptors</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">old_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="TestMolTable.testSubsetting"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestMolTable.testSubsetting">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testSubsetting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestMolTable.testSubsetting">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestMolTable.testSubsetting">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testSubsetting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">mt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTable</span><span class="p">()</span>
         <span class="n">mt</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getDescriptorSets</span><span class="p">())</span>
         <span class="c1"># get subset for all ids</span>
@@ -289,17 +311,27 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">mt_sample</span><span class="o">.</span><span class="n">getDescriptors</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">mt_sample</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
             <span class="n">mt_sample</span><span class="o">.</span><span class="n">getDescriptors</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">mt_sample</span><span class="o">.</span><span class="n">getDescriptorNames</span><span class="p">())</span>
-        <span class="p">)</span></div></div>
+        <span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="TestQSPRTable"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TestQSPRTable</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestQSPRTable">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TestQSPRTable</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Simple tests for dataset creation and serialization under different conditions</span>
 <span class="sd">    and error states.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="TestQSPRTable.setUp"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.setUp">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestQSPRTable.setUp">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.setUp">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="TestQSPRTable.checkConsistency"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.checkConsistency">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">checkConsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataSet</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestQSPRTable.checkConsistency">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.checkConsistency">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">checkConsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">QSPRDataSet</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertNotIn</span><span class="p">(</span><span class="s2">&quot;Notes&quot;</span><span class="p">,</span> <span class="n">ds</span><span class="o">.</span><span class="n">getProperties</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertNotIn</span><span class="p">(</span><span class="s2">&quot;HBD&quot;</span><span class="p">,</span> <span class="n">ds</span><span class="o">.</span><span class="n">getProperties</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getSmallDF</span><span class="p">())</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">))</span>
@@ -310,7 +342,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">getTargets</span><span class="p">()),</span> <span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">getDescriptors</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">128</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestQSPRTable.checkConsistencyMulticlass"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.checkConsistencyMulticlass">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">checkConsistencyMulticlass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestQSPRTable.checkConsistencyMulticlass">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.checkConsistencyMulticlass">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">checkConsistencyMulticlass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">isMultiTask</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">nTargetProperties</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
@@ -324,7 +359,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">getTargets</span><span class="p">()</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;CL&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">getTargets</span><span class="p">()</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;fu&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestQSPRTable.checkConsistencySingleclass"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.checkConsistencySingleclass">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">checkConsistencySingleclass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestQSPRTable.checkConsistencySingleclass">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.checkConsistencySingleclass">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">checkConsistencySingleclass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">isMultiTask</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">nTargetProperties</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
@@ -335,7 +373,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">getTargets</span><span class="p">()</span><span class="o">.</span><span class="n">columns</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">getTargets</span><span class="p">()</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;CL&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestQSPRTable.checkBadInit"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.checkBadInit">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">checkBadInit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestQSPRTable.checkBadInit">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.checkBadInit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">checkBadInit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">):</span>
         <span class="n">ds_copy</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">ds</span><span class="p">)</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">AssertionError</span><span class="p">):</span>
             <span class="n">ds_copy</span><span class="o">.</span><span class="n">makeClassification</span><span class="p">(</span><span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="p">[])</span>
@@ -351,7 +392,10 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">tp</span><span class="o">.</span><span class="n">th</span><span class="p">,</span> <span class="n">tp_copy</span><span class="o">.</span><span class="n">th</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">tp</span><span class="o">.</span><span class="n">nClasses</span><span class="p">,</span> <span class="n">tp_copy</span><span class="o">.</span><span class="n">nClasses</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestQSPRTable.checkClassification"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.checkClassification">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">checkClassification</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">target_names</span><span class="p">,</span> <span class="n">ths</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestQSPRTable.checkClassification">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.checkClassification">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">checkClassification</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">target_names</span><span class="p">,</span> <span class="n">ths</span><span class="p">):</span>
         <span class="c1"># Test that the dataset properties are correctly initialized</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_names</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">ths</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">target_prop</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">):</span>
@@ -375,14 +419,20 @@
                 <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">target_prop</span><span class="o">.</span><span class="n">th</span><span class="p">,</span> <span class="n">ths</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="TestQSPRTable.checkRegression"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.checkRegression">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">checkRegression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">target_names</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestQSPRTable.checkRegression">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.checkRegression">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">checkRegression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">target_names</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_names</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">target_prop</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">target_prop</span><span class="o">.</span><span class="n">task</span><span class="p">,</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">hasProperty</span><span class="p">(</span><span class="n">target_names</span><span class="p">[</span><span class="n">idx</span><span class="p">]))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">target_prop</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">target_names</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="TestQSPRTable.testDefaults"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.testDefaults">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testDefaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestQSPRTable.testDefaults">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.testDefaults">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testDefaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test basic dataset creation and serialization with mostly default options.&quot;&quot;&quot;</span>
         <span class="c1"># create a basic regression data set</span>
         <span class="n">storage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getStorage</span><span class="p">(</span>
@@ -488,7 +538,10 @@
             <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">targets_subset</span><span class="p">,</span> <span class="n">targets</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="p">:])</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestQSPRTable.testMultitask"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.testMultitask">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testMultitask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestQSPRTable.testMultitask">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.testMultitask">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testMultitask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test multi-task dataset creation and functionality.&quot;&quot;&quot;</span>
         <span class="n">storage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getStorage</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">getSmallDF</span><span class="p">(),</span>
@@ -524,7 +577,10 @@
         <span class="n">dataset</span><span class="o">.</span><span class="n">addTargetProperty</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fu&quot;</span><span class="p">,</span> <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">})</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkConsistencyMulticlass</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestQSPRTable.testTargetProperty"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.testTargetProperty">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testTargetProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestQSPRTable.testTargetProperty">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.testTargetProperty">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testTargetProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test target property creation and serialization</span>
 <span class="sd">        in the context of a dataset.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -595,7 +651,10 @@
         <span class="n">dataset_new</span> <span class="o">=</span> <span class="n">QSPRTable</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">checkRegression</span><span class="p">(</span><span class="n">dataset_new</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;CL&quot;</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="TestQSPRTable.testRandomStateSplit"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.testRandomStateSplit">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testRandomStateSplit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestQSPRTable.testRandomStateSplit">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.testRandomStateSplit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testRandomStateSplit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># create and save the data set</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">()</span>
         <span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">(</span>
@@ -606,6 +665,8 @@
         <span class="c1"># shuffle and split</span>
         <span class="n">split</span> <span class="o">=</span> <span class="n">ShuffleSplit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">randomState</span><span class="p">)</span>
         <span class="n">dataset</span><span class="o">.</span><span class="n">addSplit</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="s2">&quot;shufflesplit&quot;</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">iterSplit</span><span class="p">(</span><span class="s2">&quot;shufflesplit&quot;</span><span class="p">,</span> <span class="n">as_type</span><span class="o">=</span><span class="s2">&quot;numpy&quot;</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">iterSplit</span><span class="p">(</span><span class="s2">&quot;shufflesplit&quot;</span><span class="p">,</span> <span class="n">as_type</span><span class="o">=</span><span class="s2">&quot;QSPRTable&quot;</span><span class="p">))</span>
         <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">iterSplit</span><span class="p">(</span><span class="s2">&quot;shufflesplit&quot;</span><span class="p">,</span> <span class="n">as_type</span><span class="o">=</span><span class="s2">&quot;ids&quot;</span><span class="p">))</span>
         <span class="c1"># reload and check if orders are the same if we redo the split</span>
         <span class="c1"># with the same random state</span>
@@ -613,10 +674,13 @@
         <span class="n">split</span> <span class="o">=</span> <span class="n">ShuffleSplit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">randomState</span><span class="p">)</span>
         <span class="n">dataset</span><span class="o">.</span><span class="n">addSplit</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="s2">&quot;shufflesplit2&quot;</span><span class="p">)</span>
         <span class="n">train2</span><span class="p">,</span> <span class="n">test2</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">iterSplit</span><span class="p">(</span><span class="s2">&quot;shufflesplit2&quot;</span><span class="p">,</span> <span class="n">as_type</span><span class="o">=</span><span class="s2">&quot;ids&quot;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">train</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">train2</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">test2</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">train2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="n">test2</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestQSPRTable.testRandomStateFolds"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.testRandomStateFolds">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testRandomStateFolds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestQSPRTable.testRandomStateFolds">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.testRandomStateFolds">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testRandomStateFolds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># create and save the data set (fixes the seed)</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">()</span>
         <span class="n">dataset</span><span class="o">.</span><span class="n">addDescriptors</span><span class="p">(</span>
@@ -636,11 +700,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">getDescriptors</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">order_train</span><span class="p">)</span>
         <span class="n">split</span> <span class="o">=</span> <span class="n">KFold</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">randomState</span><span class="p">)</span>
         <span class="n">dataset</span><span class="o">.</span><span class="n">addSplit</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="s2">&quot;kfold2&quot;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">getSplit</span><span class="p">(</span><span class="s2">&quot;kfold2&quot;</span><span class="p">,</span> <span class="n">as_type</span><span class="o">=</span><span class="s2">&quot;ids&quot;</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">train_index</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">order_folds</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">test_index</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span> <span class="n">order_folds</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span></div>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+                <span class="n">dataset</span><span class="o">.</span><span class="n">getSplit</span><span class="p">(</span><span class="s2">&quot;kfold2&quot;</span><span class="p">,</span> <span class="n">as_type</span><span class="o">=</span><span class="s2">&quot;ids&quot;</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">train_index</span><span class="p">,</span> <span class="n">order_folds</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">test_index</span><span class="p">,</span> <span class="n">order_folds</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="TestQSPRTable.testFilter"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.testFilter">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestQSPRTable.testFilter">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestQSPRTable.testFilter">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Test removing entries from the dataset using a DataFilter.&quot;&quot;&quot;</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">()</span>
         <span class="n">remove_cation</span> <span class="o">=</span> <span class="n">CategoryFilter</span><span class="p">(</span>
@@ -651,27 +719,39 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">((</span><span class="n">dataset</span><span class="o">.</span><span class="n">getDF</span><span class="p">()[</span><span class="s2">&quot;moka_ionState7.4&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;cationic&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
         <span class="n">dataset</span><span class="o">.</span><span class="n">filter</span><span class="p">([</span><span class="n">remove_cation</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">getDF</span><span class="p">()),</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">getDescriptors</span><span class="p">()))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">((</span><span class="n">dataset</span><span class="o">.</span><span class="n">getDF</span><span class="p">()[</span><span class="s2">&quot;moka_ionState7.4&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;cationic&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">((</span><span class="n">dataset</span><span class="o">.</span><span class="n">getDF</span><span class="p">()[</span><span class="s2">&quot;moka_ionState7.4&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;cationic&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span></div>
+</div>
 
-<div class="viewcode-block" id="TestSearchFeatures"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestSearchFeatures">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TestSearchFeatures</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
-<div class="viewcode-block" id="TestSearchFeatures.setUp"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestSearchFeatures.setUp">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+
+<div class="viewcode-block" id="TestSearchFeatures">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestSearchFeatures">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TestSearchFeatures</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestSearchFeatures.setUp">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestSearchFeatures.setUp">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="TestSearchFeatures.validateSearch"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestSearchFeatures.validateSearch">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">validateSearch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">QSPRDataSet</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">QSPRDataSet</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestSearchFeatures.validateSearch">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestSearchFeatures.validateSearch">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validateSearch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">QSPRDataSet</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">QSPRDataSet</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate the results of a search.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">dataset</span><span class="p">)))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">getProperties</span><span class="p">(),</span> <span class="n">result</span><span class="o">.</span><span class="n">getProperties</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">getDescriptorNames</span><span class="p">(),</span> <span class="n">result</span><span class="o">.</span><span class="n">getDescriptorNames</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">targetPropertiesNames</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">targetPropertiesNames</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">descriptors</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">descriptors</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertListEqual</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">getTargetPropertiesNames</span><span class="p">(),</span>
+                             <span class="n">result</span><span class="o">.</span><span class="n">getTargetPropertiesNames</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">descriptorSets</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">descriptorSets</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">nTargetProperties</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">nTargetProperties</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="TestSearchFeatures.testSMARTS"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestSearchFeatures.testSMARTS">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testSMARTS</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestSearchFeatures.testSMARTS">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestSearchFeatures.testSMARTS">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testSMARTS</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">()</span>
         <span class="n">search_name</span> <span class="o">=</span> <span class="s2">&quot;search_name&quot;</span>
         <span class="n">results_and</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">searchWithSMARTS</span><span class="p">(</span>
@@ -691,7 +771,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">any</span><span class="p">(</span><span class="s2">&quot;S&quot;</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">results_or</span><span class="o">.</span><span class="n">smiles</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">results_and</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">results_or</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="TestSearchFeatures.testPropSearch"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestSearchFeatures.testPropSearch">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testPropSearch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestSearchFeatures.testPropSearch">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestSearchFeatures.testPropSearch">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testPropSearch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">()</span>
         <span class="n">search_name</span> <span class="o">=</span> <span class="s2">&quot;search_name&quot;</span>
         <span class="n">results</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">searchOnProperty</span><span class="p">(</span>
@@ -718,13 +801,19 @@
             <span class="n">name</span><span class="o">=</span><span class="n">search_name</span><span class="p">,</span>
             <span class="n">exact</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span></div>
+</div>
 
 
 
-<div class="viewcode-block" id="TestTargetSpec"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestTargetSpec">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TestTargetSpec</span><span class="p">(</span><span class="n">QSPRTestCase</span><span class="p">):</span>
+<div class="viewcode-block" id="TestTargetSpec">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestTargetSpec">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TestTargetSpec</span><span class="p">(</span><span class="n">QSPRTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test the TargetSpec class.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="TestTargetSpec.checkTargetSpec"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestTargetSpec.checkTargetSpec">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">checkTargetSpec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_spec</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="p">,</span> <span class="n">n_classes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestTargetSpec.checkTargetSpec">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestTargetSpec.checkTargetSpec">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">checkTargetSpec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_spec</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">th</span><span class="p">,</span> <span class="n">n_classes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="c1"># Check the target spec creation consistency</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">target_spec</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">target_spec</span><span class="o">.</span><span class="n">task</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
@@ -733,7 +822,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">target_spec</span><span class="o">.</span><span class="n">th</span><span class="p">,</span> <span class="n">th</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">target_spec</span><span class="o">.</span><span class="n">nClasses</span><span class="p">,</span> <span class="n">n_classes</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TestTargetSpec.testInit"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestTargetSpec.testInit">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">testInit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestTargetSpec.testInit">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestTargetSpec.testInit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">testInit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check the TargetSpec class on target spec creation.&quot;&quot;&quot;</span>
         <span class="c1"># Check the different task types</span>
         <span class="n">target_spec</span> <span class="o">=</span> <span class="n">TargetSpec</span><span class="p">(</span><span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">)</span>
@@ -800,6 +892,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">targetprops</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="s2">&quot;CL&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">targetprops</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;task&quot;</span><span class="p">],</span> <span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">)</span></div>
 
+
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span>
         <span class="p">[</span>
             <span class="p">(</span><span class="n">TargetTasks</span><span class="o">.</span><span class="n">REGRESSION</span><span class="p">,</span> <span class="s2">&quot;CL&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
@@ -817,25 +910,32 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">spec_from_json</span><span class="o">.</span><span class="n">nClasses</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">nClasses</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="TestDataSetPreProcessing"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestDataSetPreProcessing">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TestDataSetPreProcessing</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">DataPrepCheckMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestDataSetPreProcessing">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestDataSetPreProcessing">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TestDataSetPreProcessing</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">DataPrepCheckMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Test as many possible combinations of data sets and their preparation</span>
 <span class="sd">    settings. These can run potentially for a long time so use the ``skip`` decorator</span>
 <span class="sd">    if you want to skip all these tests to speed things up during development.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="TestDataSetPreProcessing.setUp"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestDataSetPreProcessing.setUp">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestDataSetPreProcessing.setUp">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestDataSetPreProcessing.setUp">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
 
+
     <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="o">.</span><span class="n">getPrepCombos</span><span class="p">())</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">testPrepCombos</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">_</span><span class="p">,</span>
-        <span class="n">name</span><span class="p">,</span>
-        <span class="n">feature_calculators</span><span class="p">,</span>
-        <span class="n">split</span><span class="p">,</span>
-        <span class="n">feature_standardizer</span><span class="p">,</span>
-        <span class="n">feature_filter</span><span class="p">,</span>
-        <span class="n">data_filter</span><span class="p">,</span>
-        <span class="n">applicability_domain</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">_</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">,</span>
+            <span class="n">feature_calculators</span><span class="p">,</span>
+            <span class="n">split</span><span class="p">,</span>
+            <span class="n">feature_standardizer</span><span class="p">,</span>
+            <span class="n">feature_filter</span><span class="p">,</span>
+            <span class="n">data_filter</span><span class="p">,</span>
+            <span class="n">applicability_domain</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tests one combination of a data set and its preparation settings.</span>
 
@@ -863,13 +963,57 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="TestApply"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestApply">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">TestApply</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestTargetImputation">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestTargetImputation">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TestTargetImputation</span><span class="p">(</span><span class="n">PathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Small tests to only check if the target imputation works on its own.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="TestTargetImputation.setUp">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestTargetImputation.setUp">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set up the test Dataframe.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;Descriptor_F1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Descriptor_F2&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Descriptor_F3&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Descriptor_F4&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Descriptor_F5&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                    <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                    <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">NaN</span><span class="p">],</span>
+                    <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                    <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                    <span class="p">[</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                <span class="p">]</span>
+            <span class="p">),</span>
+            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;SMILES&quot;</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">],</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="TestApply">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestApply">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TestApply</span><span class="p">(</span><span class="n">DataSetsPathMixIn</span><span class="p">,</span> <span class="n">QSPRTestCase</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Tests the apply method of the data set.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="TestApply.setUp"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestApply.setUp">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="TestApply.setUp">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestApply.setUp">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">setUpPaths</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="TestApply.regularFunc"><a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestApply.regularFunc">[docs]</a>    <span class="nd">@staticmethod</span>
+
+<div class="viewcode-block" id="TestApply.regularFunc">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.tables.html#qsprpred.data.tables.tests.TestApply.regularFunc">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">regularFunc</span><span class="p">(</span><span class="n">props</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">props</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
@@ -878,7 +1022,8 @@
             <span class="n">df</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">return</span> <span class="n">df</span></div>
 
-    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">([(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">50</span><span class="p">)])</span>
+
+    <span class="nd">@parameterized</span><span class="o">.</span><span class="n">expand</span><span class="p">([(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">25</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">25</span><span class="p">)])</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">testRegular</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_jobs</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">):</span>
         <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createLargeTestDataSet</span><span class="p">()</span>
         <span class="n">dataset</span><span class="o">.</span><span class="n">nJobs</span> <span class="o">=</span> <span class="n">n_jobs</span>
@@ -906,6 +1051,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;arg_2&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;A_col&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;A&quot;</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="nb">all</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;B_col&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;B&quot;</span><span class="p">))</span></div>
+
 </pre></div>
 
            </div>

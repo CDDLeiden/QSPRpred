@@ -1,22 +1,22 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.storage.interfaces.mol_processable &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+  <title>qsprpred.data.storage.interfaces.mol_processable &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=ce9a7c35"></script>
-      <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../../../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
     </script>
       <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -98,9 +98,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.processing.mol_processor</span><span class="w"> </span><span class="kn">import</span> <span class="n">MolProcessor</span>
 
 
-<div class="viewcode-block" id="MolProcessable"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.MolProcessable">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">MolProcessable</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="MolProcessable">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.MolProcessable">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MolProcessable</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Interface for processing molecules.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="MolProcessable.processMols"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.MolProcessable.processMols">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="MolProcessable.processMols">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.MolProcessable.processMols">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">processMols</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">processor</span><span class="p">:</span> <span class="n">MolProcessor</span><span class="p">,</span>
@@ -125,7 +129,9 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Generator: A generator that yields the processed molecules.</span>
-<span class="sd">        &quot;&quot;&quot;</span></div></div>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+</div>
+
 </pre></div>
 
            </div>

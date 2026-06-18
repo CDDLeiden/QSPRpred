@@ -1,22 +1,22 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.storage.interfaces.descriptor_provider &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+  <title>qsprpred.data.storage.interfaces.descriptor_provider &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=ce9a7c35"></script>
-      <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../../../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
     </script>
       <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -99,7 +99,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.descriptors.sets</span><span class="w"> </span><span class="kn">import</span> <span class="n">DescriptorSet</span>
 
 
-<div class="viewcode-block" id="DescriptorProvider"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">DescriptorProvider</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="DescriptorProvider">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DescriptorProvider</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Classes that implement this interface provide a way to store and retrieve</span>
 <span class="sd">    molecular descriptors or other high-dimensional embeddings of molecules. It</span>
 <span class="sd">    assumes that descriptors are divided into sets of related descriptors and</span>
@@ -114,7 +116,9 @@
 <span class="sd">            a `list` of descriptor sets</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="DescriptorProvider.dropDescriptorSets"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider.dropDescriptorSets">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="DescriptorProvider.dropDescriptorSets">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider.dropDescriptorSets">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dropDescriptorSets</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">descriptors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DescriptorSet</span> <span class="o">|</span> <span class="nb">str</span><span class="p">],</span>
@@ -126,7 +130,10 @@
 <span class="sd">                The descriptor sets to drop.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="DescriptorProvider.addDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider.addDescriptors">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="DescriptorProvider.addDescriptors">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider.addDescriptors">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">addDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descriptors</span><span class="p">:</span> <span class="n">DescriptorSet</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add descriptors to the dataset.</span>
 
@@ -136,7 +143,10 @@
 <span class="sd">            kwargs: Additional keyword arguments to be passed to each descriptor set.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="DescriptorProvider.getDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider.getDescriptors">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="DescriptorProvider.getDescriptors">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider.getDescriptors">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">getDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the table of descriptors that are currently in the storage.</span>
 
@@ -144,7 +154,10 @@
 <span class="sd">            a pd.DataFrame with the descriptors</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="DescriptorProvider.getDescriptorNames"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider.getDescriptorNames">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="DescriptorProvider.getDescriptorNames">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider.getDescriptorNames">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">getDescriptorNames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the names of the descriptors that are currently in the storage.</span>
 
@@ -152,9 +165,14 @@
 <span class="sd">            a `list` of descriptor names</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="DescriptorProvider.hasDescriptors"><a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider.hasDescriptors">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="DescriptorProvider.hasDescriptors">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.descriptor_provider.DescriptorProvider.hasDescriptors">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">hasDescriptors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Indicates if the storage has descriptors.&quot;&quot;&quot;</span></div></div>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Indicates if the storage has descriptors.&quot;&quot;&quot;</span></div>
+</div>
+
 </pre></div>
 
            </div>

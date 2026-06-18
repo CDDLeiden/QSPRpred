@@ -1,22 +1,22 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.plotting.classification &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+  <title>qsprpred.plotting.classification &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
       <script src="../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=ce9a7c35"></script>
-      <script src="../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
     </script>
       <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -95,7 +95,6 @@
 <span></span><span class="sd">&quot;&quot;&quot;Plotting functions for classification models.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">os.path</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Tuple</span>
@@ -118,16 +117,21 @@
     <span class="n">roc_auc_score</span><span class="p">,</span>
 <span class="p">)</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">..data.tables.qspr</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPRTable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..models.assessment.metrics.classification</span><span class="w"> </span><span class="kn">import</span> <span class="n">CalibrationError</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPRModel</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..data.tables.qspr</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPRTable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..plotting.base_plot</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelPlot</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">..tasks</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelTasks</span>
 
 
-<div class="viewcode-block" id="ClassifierPlot"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ClassifierPlot</span><span class="p">(</span><span class="n">ModelPlot</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="ClassifierPlot">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ClassifierPlot</span><span class="p">(</span><span class="n">ModelPlot</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for plots of classification models.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="ClassifierPlot.getSupportedTasks"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.getSupportedTasks">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getSupportedTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ModelTasks</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="ClassifierPlot.getSupportedTasks">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.getSupportedTasks">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getSupportedTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ModelTasks</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of tasks supported by this plotter.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span>
             <span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span>
@@ -136,7 +140,10 @@
             <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_MULTICLASS</span><span class="p">,</span>
         <span class="p">]</span></div>
 
-<div class="viewcode-block" id="ClassifierPlot.prepareAssessment"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.prepareAssessment">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">prepareAssessment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">assessment_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+
+<div class="viewcode-block" id="ClassifierPlot.prepareAssessment">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.prepareAssessment">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prepareAssessment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">assessment_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare assessment dataframe for plotting</span>
 
 <span class="sd">        Args:</span>
@@ -154,7 +161,7 @@
 <span class="sd">                columns: QSPRID, Fold, Property, Label, Prediction, Class, Set</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Melt all property columns into one column</span>
-        <span class="n">id_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">,</span> <span class="s2">&quot;Fold&quot;</span><span class="p">,</span> <span class="s2">&quot;Set&quot;</span><span class="p">]</span>
+        <span class="n">id_vars</span> <span class="o">=</span> <span class="p">[</span><span class="n">assessment_df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;Fold&quot;</span><span class="p">,</span> <span class="s2">&quot;Set&quot;</span><span class="p">]</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">assessment_df</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="n">id_vars</span><span class="p">)</span>
         <span class="c1"># split the variable (&lt;property_name&gt;_&lt;suffixes&gt;_&lt;Label/Prediction/ProbabilityClass_X&gt;) column</span>
         <span class="c1"># into the property name and the type (Label or Prediction or ProbabilityClass_X)</span>
@@ -165,7 +172,7 @@
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span>
             <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="o">*</span><span class="n">id_vars</span><span class="p">,</span> <span class="s2">&quot;Property&quot;</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="s2">&quot;value&quot;</span>
         <span class="p">)</span>
-        <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Label&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># Remove rows with missing values in the label column</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Label&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># Remove rows with missing values in the label column</span>
         <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Label&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Label&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
@@ -173,7 +180,10 @@
         <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Assessment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
         <span class="k">return</span> <span class="n">df</span></div>
 
-<div class="viewcode-block" id="ClassifierPlot.prepareClassificationResults"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.prepareClassificationResults">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">prepareClassificationResults</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+
+<div class="viewcode-block" id="ClassifierPlot.prepareClassificationResults">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.prepareClassificationResults">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">prepareClassificationResults</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare classification results dataframe for plotting.</span>
 
 <span class="sd">        Returns:</span>
@@ -193,7 +203,7 @@
                     <span class="n">assessment</span> <span class="o">=</span> <span class="n">assessment</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">assessment</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;Label&quot;</span><span class="p">)])</span>
                     <span class="c1"># add suffix Label to the target columns</span>
                     <span class="n">targets</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">_Label&quot;</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">targets</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
-                    <span class="n">assessment</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">assessment</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;ID&quot;</span><span class="p">)</span>
+                    <span class="n">assessment</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">assessment</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">targets</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
                 <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prepareAssessment</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">assessment</span><span class="p">)</span>
                 <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
             <span class="c1"># concatenate the cross-validation and independent test set results</span>
@@ -209,7 +219,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="n">df</span>
         <span class="k">return</span> <span class="n">df</span></div>
 
-<div class="viewcode-block" id="ClassifierPlot.calculateMultiClassMetrics"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.calculateMultiClassMetrics">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">calculateMultiClassMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">average_type</span><span class="p">,</span> <span class="n">n_classes</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ClassifierPlot.calculateMultiClassMetrics">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.calculateMultiClassMetrics">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculateMultiClassMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">average_type</span><span class="p">,</span> <span class="n">n_classes</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate metrics for a given dataframe.&quot;&quot;&quot;</span>
         <span class="c1"># check if ProbabilityClass_X columns exist</span>
         <span class="n">proba</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ProbabilityClass_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_classes</span><span class="p">))</span>
@@ -275,7 +288,10 @@
 
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ClassifierPlot.calculateSingleClassMetrics"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.calculateSingleClassMetrics">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">calculateSingleClassMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ClassifierPlot.calculateSingleClassMetrics">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.calculateSingleClassMetrics">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calculateSingleClassMetrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate metrics for a given dataframe.&quot;&quot;&quot;</span>
 
         <span class="c1"># check if ProbabilityClass_1 column exists</span>
@@ -287,7 +303,6 @@
                     <span class="s2">&quot;metrics that depend on them.&quot;</span>
                 <span class="p">)</span>
                 <span class="n">proba</span> <span class="o">=</span> <span class="kc">False</span>
-            
 
         <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;accuracy&quot;</span><span class="p">:</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">Prediction</span><span class="p">),</span>
@@ -310,7 +325,10 @@
 
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;metrics&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ClassifierPlot.getSummary"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.getSummary">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getSummary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ClassifierPlot.getSummary">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ClassifierPlot.getSummary">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getSummary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get summary statistics for classification results.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;results&quot;</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">prepareClassificationResults</span><span class="p">()</span>
@@ -337,7 +355,7 @@
                         <span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculateSingleClassMetrics</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="o">**</span><span class="n">extra_kwargs</span><span class="p">)</span>
                     <span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
                     <span class="n">summary_list</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_Binary&quot;</span><span class="p">][</span><span class="s2">&quot;Class&quot;</span>
-                                                                        <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Binary&quot;</span>
+                    <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Binary&quot;</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># calculate metrics for each class, average type and non-average type metrics</span>
                     <span class="n">class_list</span> <span class="o">=</span> <span class="p">[</span>
@@ -357,18 +375,28 @@
 
         <span class="n">df_summary</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">summary_list</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">summary</span> <span class="o">=</span> <span class="n">df_summary</span>
-        <span class="k">return</span> <span class="n">df_summary</span></div></div>
+        <span class="k">return</span> <span class="n">df_summary</span></div>
+</div>
 
 
-<div class="viewcode-block" id="ROCPlot"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ROCPlot">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ROCPlot</span><span class="p">(</span><span class="n">ClassifierPlot</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ROCPlot">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ROCPlot">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ROCPlot</span><span class="p">(</span><span class="n">ClassifierPlot</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot of ROC-curve (receiver operating characteristic curve)</span>
 <span class="sd">    for a given classification model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<div class="viewcode-block" id="ROCPlot.getSupportedTasks"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ROCPlot.getSupportedTasks">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getSupportedTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ModelTasks</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="ROCPlot.getSupportedTasks">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ROCPlot.getSupportedTasks">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getSupportedTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ModelTasks</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of tasks supported by this plotter.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="ROCPlot.makeROC"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ROCPlot.makeROC">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">makeROC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="ROCPlot.makeROC">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ROCPlot.makeROC">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">makeROC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given model using cross-validation data.</span>
 
 <span class="sd">        Many thanks to the scikit-learn documentation since the code below</span>
@@ -394,7 +422,6 @@
         <span class="n">aucs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">mean_fpr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">Fold</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
             <span class="c1"># get labels</span>
             <span class="n">y_pred</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_ProbabilityClass_1&quot;</span><span class="p">][</span><span class="n">df</span><span class="o">.</span><span class="n">Fold</span> <span class="o">==</span> <span class="n">fold</span><span class="p">]</span>
@@ -459,15 +486,18 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower right&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">assessment_name</span><span class="p">,</span> <span class="n">ax</span></div>
 
-<div class="viewcode-block" id="ROCPlot.make"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ROCPlot.make">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">fig_size</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+
+<div class="viewcode-block" id="ROCPlot.make">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ROCPlot.make">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">fig_size</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the ROC plot for a given model assessment.</span>
-<span class="sd">        </span>
+
 <span class="sd">        If multiple assessments are available, the first one will be used.</span>
 
 <span class="sd">        Args:</span>
@@ -501,16 +531,26 @@
             <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">axes</span></div></div>
+        <span class="k">return</span> <span class="n">axes</span></div>
+</div>
 
 
-<div class="viewcode-block" id="PRCPlot"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.PRCPlot">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">PRCPlot</span><span class="p">(</span><span class="n">ClassifierPlot</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PRCPlot">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.PRCPlot">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PRCPlot</span><span class="p">(</span><span class="n">ClassifierPlot</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot of Precision-Recall curve for a given model.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="PRCPlot.getSupportedTasks"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.PRCPlot.getSupportedTasks">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getSupportedTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ModelTasks</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="PRCPlot.getSupportedTasks">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.PRCPlot.getSupportedTasks">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getSupportedTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ModelTasks</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of tasks supported by this plotter.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="PRCPlot.makePRC"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.PRCPlot.makePRC">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">makePRC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="PRCPlot.makePRC">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.PRCPlot.makePRC">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">makePRC</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given model using cross-validation data.</span>
 
 <span class="sd">        Args:</span>
@@ -531,7 +571,6 @@
         <span class="n">y_real</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">y_predproba</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">Fold</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
             <span class="c1"># get labels</span>
             <span class="n">y_pred</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_ProbabilityClass_1&quot;</span><span class="p">][</span><span class="n">df</span><span class="o">.</span><span class="n">Fold</span> <span class="o">==</span> <span class="n">fold</span><span class="p">]</span>
@@ -578,12 +617,15 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">assessment_name</span><span class="p">,</span> <span class="n">ax</span></div>
 
-<div class="viewcode-block" id="PRCPlot.make"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.PRCPlot.make">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">fig_size</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+
+<div class="viewcode-block" id="PRCPlot.make">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.PRCPlot.make">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">fig_size</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given validation type.</span>
 
@@ -614,17 +656,27 @@
             <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">axes</span></div></div>
+        <span class="k">return</span> <span class="n">axes</span></div>
+</div>
 
 
-<div class="viewcode-block" id="CalibrationPlot"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">CalibrationPlot</span><span class="p">(</span><span class="n">ClassifierPlot</span><span class="p">):</span>
+
+<div class="viewcode-block" id="CalibrationPlot">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CalibrationPlot</span><span class="p">(</span><span class="n">ClassifierPlot</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot of calibration curve for a given model.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="CalibrationPlot.getSupportedTasks"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot.getSupportedTasks">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getSupportedTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ModelTasks</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="CalibrationPlot.getSupportedTasks">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot.getSupportedTasks">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getSupportedTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ModelTasks</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of tasks supported by this plotter.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">ModelTasks</span><span class="o">.</span><span class="n">SINGLECLASS</span><span class="p">,</span> <span class="n">ModelTasks</span><span class="o">.</span><span class="n">MULTITASK_SINGLECLASS</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="CalibrationPlot.makeCalibrationPlot"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot.makeCalibrationPlot">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">makeCalibrationPlot</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
+
+<div class="viewcode-block" id="CalibrationPlot.makeCalibrationPlot">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot.makeCalibrationPlot">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">makeCalibrationPlot</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given model assessment</span>
 
@@ -649,7 +701,7 @@
         <span class="n">y_real</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">y_pred_proba</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;ID&quot;</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">Fold</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
             <span class="c1"># get labels</span>
             <span class="n">y_pred</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_ProbabilityClass_1&quot;</span><span class="p">][</span><span class="n">df</span><span class="o">.</span><span class="n">Fold</span> <span class="o">==</span> <span class="n">fold</span><span class="p">]</span>
@@ -696,13 +748,16 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">assessment_name</span><span class="p">,</span> <span class="n">ax</span></div>
 
-<div class="viewcode-block" id="CalibrationPlot.make"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot.make">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">fig_size</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
-        <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
+
+<div class="viewcode-block" id="CalibrationPlot.make">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.CalibrationPlot.make">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">property_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">fig_size</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>
+            <span class="n">n_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given validation type.</span>
 
@@ -723,7 +778,7 @@
 <span class="sd">            fig_size (tuple):</span>
 <span class="sd">                The size of the figure to create.</span>
 <span class="sd">            n_bins (int):</span>
-<span class="sd">                The number of bins to use for the calibration curve.       </span>
+<span class="sd">                The number of bins to use for the calibration curve.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            axes (list[plt.Axes]):</span>
@@ -741,10 +796,14 @@
             <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">axes</span></div></div>
+        <span class="k">return</span> <span class="n">axes</span></div>
+</div>
 
 
-<div class="viewcode-block" id="MetricsPlot"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.MetricsPlot">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">MetricsPlot</span><span class="p">(</span><span class="n">ClassifierPlot</span><span class="p">):</span>
+
+<div class="viewcode-block" id="MetricsPlot">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.MetricsPlot">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MetricsPlot</span><span class="p">(</span><span class="n">ClassifierPlot</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot of metrics for a given model.</span>
 
 <span class="sd">    Attributes:</span>
@@ -753,32 +812,33 @@
 <span class="sd">            f1, matthews_corrcoef, precision, recall, accuracy, roc_auc, roc_auc_ovr,</span>
 <span class="sd">            roc_auc_ovo and calibration_error</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">QSPRModel</span><span class="p">],</span>
-        <span class="n">assessments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">datasets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">QSPRTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">metrics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span>
-            <span class="s2">&quot;f1&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;matthews_corrcoef&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;precision&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;recall&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;accuracy&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;calibration_error&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;roc_auc_ovr&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;roc_auc_ovo&quot;</span><span class="p">,</span>
-        <span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s2">&quot;f1&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;matthews_corrcoef&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;precision&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;recall&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;accuracy&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;calibration_error&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;roc_auc_ovr&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;roc_auc_ovo&quot;</span><span class="p">,</span>
-        <span class="p">],</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">QSPRModel</span><span class="p">],</span>
+            <span class="n">assessments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+            <span class="n">datasets</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">QSPRTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">metrics</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span>
+                <span class="s2">&quot;f1&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;matthews_corrcoef&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;precision&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;recall&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;accuracy&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;calibration_error&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;roc_auc_ovr&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;roc_auc_ovo&quot;</span><span class="p">,</span>
+            <span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s2">&quot;f1&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;matthews_corrcoef&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;precision&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;recall&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;accuracy&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;calibration_error&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;roc_auc&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;roc_auc_ovr&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;roc_auc_ovo&quot;</span><span class="p">,</span>
+            <span class="p">],</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise the metrics plot.</span>
 
@@ -793,11 +853,13 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">assessments</span><span class="p">,</span> <span class="n">datasets</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metrics</span> <span class="o">=</span> <span class="n">metrics</span>
 
-<div class="viewcode-block" id="MetricsPlot.make"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.MetricsPlot.make">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">out_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="MetricsPlot.make">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.MetricsPlot.make">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">out_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">sns</span><span class="o">.</span><span class="n">FacetGrid</span><span class="p">],</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot for a given validation type.</span>
 
@@ -861,12 +923,19 @@
             <span class="k">if</span> <span class="n">show</span><span class="p">:</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">figures</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">summary</span></div></div>
+        <span class="k">return</span> <span class="n">figures</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">summary</span></div>
+</div>
 
 
-<div class="viewcode-block" id="ConfusionMatrixPlot"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ConfusionMatrixPlot">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ConfusionMatrixPlot</span><span class="p">(</span><span class="n">ClassifierPlot</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ConfusionMatrixPlot">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ConfusionMatrixPlot">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConfusionMatrixPlot</span><span class="p">(</span><span class="n">ClassifierPlot</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot of confusion matrix for a given model as a heatmap.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="ConfusionMatrixPlot.getConfusionMatrixDict"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ConfusionMatrixPlot.getConfusionMatrixDict">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">getConfusionMatrixDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+
+<div class="viewcode-block" id="ConfusionMatrixPlot.getConfusionMatrixDict">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ConfusionMatrixPlot.getConfusionMatrixDict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getConfusionMatrixDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create dictionary of confusion matrices for each model, property and fold</span>
 
 <span class="sd">        Args:</span>
@@ -884,21 +953,24 @@
                 <span class="k">for</span> <span class="n">assessment</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">Assessment</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
                     <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">Fold</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
                         <span class="n">df_subset</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span>
-                            <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Model</span> <span class="o">==</span> <span class="n">model</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Property</span> <span class="o">==</span> <span class="nb">property</span><span class="p">)</span> <span class="o">&amp;</span> 
+                            <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Model</span> <span class="o">==</span> <span class="n">model</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Property</span> <span class="o">==</span> <span class="nb">property</span><span class="p">)</span> <span class="o">&amp;</span>
                             <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Assessment</span> <span class="o">==</span> <span class="n">assessment</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Fold</span> <span class="o">==</span> <span class="n">fold</span><span class="p">)</span> <span class="o">&amp;</span>
                             <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Set</span> <span class="o">==</span> <span class="s2">&quot;Test&quot;</span><span class="p">)</span>
-                        <span class="p">]</span>
+                            <span class="p">]</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">df_subset</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
                             <span class="n">conf_dict</span><span class="p">[(</span><span class="n">model</span><span class="p">,</span> <span class="nb">property</span><span class="p">,</span> <span class="n">assessment</span><span class="p">,</span> <span class="n">fold</span><span class="p">)]</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span>
                                 <span class="n">df_subset</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">df_subset</span><span class="o">.</span><span class="n">Prediction</span>
                             <span class="p">)</span>
         <span class="k">return</span> <span class="n">conf_dict</span></div>
 
-<div class="viewcode-block" id="ConfusionMatrixPlot.make"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ConfusionMatrixPlot.make">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">out_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ConfusionMatrixPlot.make">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.classification.ConfusionMatrixPlot.make">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">out_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make confusion matrix heatmap for each model, property and fold</span>
 
@@ -963,7 +1035,9 @@
                             <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
                             <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
                         <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">axes</span><span class="p">,</span> <span class="n">conf_dict</span></div></div>
+        <span class="k">return</span> <span class="n">axes</span><span class="p">,</span> <span class="n">conf_dict</span></div>
+</div>
+
 </pre></div>
 
            </div>

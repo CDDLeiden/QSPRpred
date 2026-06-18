@@ -9,85 +9,85 @@ qsprpred.data.processing.applicability\_domain module
 
 .. automodule:: qsprpred.data.processing.applicability_domain
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.data.processing.data\_filters module
 ---------------------------------------------
 
 .. automodule:: qsprpred.data.processing.data_filters
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.data.processing.feature\_filters module
 ------------------------------------------------
 
 .. automodule:: qsprpred.data.processing.feature_filters
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.data.processing.feature\_transformers module
 -----------------------------------------------------
 
 .. automodule:: qsprpred.data.processing.feature_transformers
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.data.processing.imputers module
 ----------------------------------------
 
 .. automodule:: qsprpred.data.processing.imputers
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.data.processing.mol\_processor module
 ----------------------------------------------
 
 .. automodule:: qsprpred.data.processing.mol_processor
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.data.processing.pipeline module
 ----------------------------------------
 
 .. automodule:: qsprpred.data.processing.pipeline
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.data.processing.step module
 ------------------------------------
 
 .. automodule:: qsprpred.data.processing.step
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.data.processing.target\_transformers module
 ----------------------------------------------------
 
 .. automodule:: qsprpred.data.processing.target_transformers
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.data.processing.tests module
 -------------------------------------
 
 .. automodule:: qsprpred.data.processing.tests
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.data.processing
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

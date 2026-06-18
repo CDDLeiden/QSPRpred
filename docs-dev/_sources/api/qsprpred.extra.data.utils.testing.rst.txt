@@ -9,13 +9,13 @@ qsprpred.extra.data.utils.testing.path\_mixins module
 
 .. automodule:: qsprpred.extra.data.utils.testing.path_mixins
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.extra.data.utils.testing
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

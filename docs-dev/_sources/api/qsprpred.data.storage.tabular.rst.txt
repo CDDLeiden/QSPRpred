@@ -4,26 +4,34 @@ qsprpred.data.storage.tabular package
 Submodules
 ----------
 
-qsprpred.data.storage.tabular.basic\_storage module
----------------------------------------------------
+qsprpred.data.storage.tabular.hierarchical module
+-------------------------------------------------
 
-.. automodule:: qsprpred.data.storage.tabular.basic_storage
+.. automodule:: qsprpred.data.storage.tabular.hierarchical
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
+
+qsprpred.data.storage.tabular.simple module
+-------------------------------------------
+
+.. automodule:: qsprpred.data.storage.tabular.simple
+   :members:
+   :show-inheritance:
+   :undoc-members:
 
 qsprpred.data.storage.tabular.stored\_mol module
 ------------------------------------------------
 
 .. automodule:: qsprpred.data.storage.tabular.stored_mol
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.data.storage.tabular
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

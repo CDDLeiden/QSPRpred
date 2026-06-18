@@ -1,22 +1,22 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.tables.interfaces.qspr_data_set &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+  <title>qsprpred.data.tables.interfaces.qspr_data_set &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
       <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=ce9a7c35"></script>
-      <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../../../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
     </script>
       <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -99,9 +99,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.tables.interfaces.molecule_data_set</span><span class="w"> </span><span class="kn">import</span> <span class="n">MoleculeDataSet</span>
 
 
-<div class="viewcode-block" id="QSPRDataSet"><a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">QSPRDataSet</span><span class="p">(</span><span class="n">MoleculeDataSet</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="QSPRDataSet">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">QSPRDataSet</span><span class="p">(</span><span class="n">MoleculeDataSet</span><span class="p">,</span> <span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Interface for storing and managing QSPR-specific data sets.&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="QSPRDataSet.setTargetProperties"><a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet.setTargetProperties">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="QSPRDataSet.setTargetProperties">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet.setTargetProperties">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">setTargetProperties</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">],</span>
@@ -114,7 +118,10 @@
 <span class="sd">            drop_empty (bool): If True, drop rows with missing target properties.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="QSPRDataSet.makeRegression"><a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet.makeRegression">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="QSPRDataSet.makeRegression">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet.makeRegression">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">makeRegression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_property</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make this a regression dataset for the given target property.</span>
 <span class="sd">           This is only possible if the target property was previously converted</span>
@@ -124,7 +131,10 @@
 <span class="sd">            target_property (str): The name of the target property.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="QSPRDataSet.makeClassification"><a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet.makeClassification">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="QSPRDataSet.makeClassification">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet.makeClassification">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">makeClassification</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target_property</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make this a classification dataset for the given target property.</span>
 
@@ -133,7 +143,10 @@
 <span class="sd">            threshold (float | list[float]): The threshold for the classification.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="QSPRDataSet.restoreTargetProperty"><a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet.restoreTargetProperty">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="QSPRDataSet.restoreTargetProperty">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet.restoreTargetProperty">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">restoreTargetProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop</span><span class="p">:</span> <span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Restore a target property to the original state.</span>
 
@@ -141,7 +154,10 @@
 <span class="sd">            prop (TargetSpec | str): The target property to restore.</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="QSPRDataSet.addTargetProperty"><a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet.addTargetProperty">[docs]</a>    <span class="nd">@abstractmethod</span>
+
+<div class="viewcode-block" id="QSPRDataSet.addTargetProperty">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet.addTargetProperty">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">addTargetProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop</span><span class="p">:</span> <span class="n">TargetSpec</span> <span class="o">|</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">drop_empty</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a target property to the dataset.</span>
 
@@ -151,29 +167,24 @@
 <span class="sd">            drop_empty (bool):</span>
 <span class="sd">                whether to drop rows with empty target property values. Defaults to</span>
 <span class="sd">                `True`.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the target properties with the given names.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            names (list): list of target property names</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            (list): list of target properties</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
+
 
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">isMultiTask</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Indicates if the dataset is a multi-task dataset.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="QSPRDataSet.unsetTargetProperty"><a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet.unsetTargetProperty">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="QSPRDataSet.unsetTargetProperty">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet.unsetTargetProperty">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">unsetTargetProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">TargetSpec</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Unset the target property with the given name.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            (str | TargetSpec): name of the target property to unset</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
+
 
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
@@ -182,7 +193,18 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            (list): list of target properties</span>
-<span class="sd">        &quot;&quot;&quot;</span></div>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="QSPRDataSet.getTargetPropertiesNames">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet.getTargetPropertiesNames">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getTargetPropertiesNames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the names of the target properties.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            (list[str]): list of target property names</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">TargetSpec</span><span class="o">.</span><span class="n">getNames</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
 
            </div>

@@ -17,53 +17,53 @@ qsprpred.models.early\_stopping module
 
 .. automodule:: qsprpred.models.early_stopping
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.models.hyperparam\_optimization module
 -----------------------------------------------
 
 .. automodule:: qsprpred.models.hyperparam_optimization
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.models.model module
 ----------------------------
 
 .. automodule:: qsprpred.models.model
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.models.monitors module
 -------------------------------
 
 .. automodule:: qsprpred.models.monitors
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.models.scikit\_learn module
 ------------------------------------
 
 .. automodule:: qsprpred.models.scikit_learn
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.models.tests module
 ----------------------------
 
 .. automodule:: qsprpred.models.tests
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.models
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

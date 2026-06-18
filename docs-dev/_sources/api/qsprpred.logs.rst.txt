@@ -9,21 +9,21 @@ qsprpred.logs.config module
 
 .. automodule:: qsprpred.logs.config
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 qsprpred.logs.utils module
 --------------------------
 
 .. automodule:: qsprpred.logs.utils
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.logs
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:

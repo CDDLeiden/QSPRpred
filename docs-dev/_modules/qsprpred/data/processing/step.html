@@ -1,22 +1,22 @@
 
 
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.processing.step &mdash; QSPRpred 4.0.0a2.dev175+gaa123e9e2 documentation</title>
+  <title>qsprpred.data.processing.step &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
       <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=ce9a7c35"></script>
-      <script src="../../../../_static/doctools.js?v=888ff710"></script>
-      <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+      <script src="../../../../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
     </script>
       <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -97,7 +97,9 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">...utils.serialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONSerializable</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">...utils.interfaces.randomized</span><span class="w"> </span><span class="kn">import</span> <span class="n">Randomized</span>
 
-<div class="viewcode-block" id="Step"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.Step">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Step</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
+<div class="viewcode-block" id="Step">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.Step">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Step</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A data preprocessing step that can be applied to a dataset&quot;&quot;&quot;</span>
     
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -105,7 +107,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_fitted</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     
-<div class="viewcode-block" id="Step.fit"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.Step.fit">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Step.fit">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.Step.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit the step to the dataset</span>
 <span class="sd">        </span>
 <span class="sd">        If the step requires fitting to the data, this method should be implemented.</span>
@@ -115,8 +119,11 @@
 <span class="sd">            y (pd.DataFrame): training targets</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fitted</span> <span class="o">=</span> <span class="kc">True</span></div>
+
     
-<div class="viewcode-block" id="Step.transform"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.Step.transform">[docs]</a>    <span class="nd">@abstractmethod</span>
+<div class="viewcode-block" id="Step.transform">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.Step.transform">[docs]</a>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the step to the dataset</span>
 <span class="sd">        </span>
@@ -131,8 +138,11 @@
 <span class="sd">            pd.DataFrame: (transformed) target data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">pass</span></div>
+
     
-<div class="viewcode-block" id="Step.fitTransform"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.Step.fitTransform">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">fitTransform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<div class="viewcode-block" id="Step.fitTransform">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.Step.fitTransform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fitTransform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit the step to the dataset and apply it</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -145,6 +155,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
+
     
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">fitted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -154,12 +165,17 @@
 <span class="sd">            bool: True if the step is fitted, False otherwise</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fitted</span></div>
+
         
     
-<div class="viewcode-block" id="DummyStep"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.DummyStep">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">DummyStep</span><span class="p">(</span><span class="n">Step</span><span class="p">):</span>
+<div class="viewcode-block" id="DummyStep">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.DummyStep">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DummyStep</span><span class="p">(</span><span class="n">Step</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Dummy step that does nothing&quot;&quot;&quot;</span>
     
-<div class="viewcode-block" id="DummyStep.transform"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.DummyStep.transform">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<div class="viewcode-block" id="DummyStep.transform">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.DummyStep.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Just return the input data</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -170,9 +186,13 @@
 <span class="sd">            pd.DataFrame: unchanged data</span>
 <span class="sd">            pd.DataFrame | None: unchanged target data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span></div></div>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span></div>
+</div>
+
     
-<div class="viewcode-block" id="Shuffle"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.Shuffle">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">Shuffle</span><span class="p">(</span><span class="n">Step</span><span class="p">,</span> <span class="n">Randomized</span><span class="p">):</span>
+<div class="viewcode-block" id="Shuffle">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.Shuffle">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Shuffle</span><span class="p">(</span><span class="n">Step</span><span class="p">,</span> <span class="n">Randomized</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Step that shuffles the data</span>
 <span class="sd">    </span>
 <span class="sd">    Attributes:</span>
@@ -204,7 +224,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
     
-<div class="viewcode-block" id="Shuffle.transform"><a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.Shuffle.transform">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+<div class="viewcode-block" id="Shuffle.transform">
+<a class="viewcode-back" href="../../../../api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.Shuffle.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Shuffle the data</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -217,7 +239,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">X_shuffled</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">randomState</span><span class="p">)</span>
         <span class="n">y_shuffled</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">X_shuffled</span><span class="o">.</span><span class="n">index</span><span class="p">]</span> <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="n">X_shuffled</span><span class="p">,</span> <span class="n">y_shuffled</span></div></div>
+        <span class="k">return</span> <span class="n">X_shuffled</span><span class="p">,</span> <span class="n">y_shuffled</span></div>
+</div>
+
 
 </pre></div>
 
