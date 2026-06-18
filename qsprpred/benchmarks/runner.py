@@ -376,14 +376,14 @@ class BenchmarkRunner:
         return Replica(*args, **kwargs)
 
     @classmethod
-    def getLoggerForReplica(cls, replica: Replica, level: int = logging.DEBUG):
+    def getLoggerForReplica(cls, replica: Replica, level: int = logging.INFO):
         """Returns a logger for the given replica.
 
         Args:
             replica (Replica):
                 Replica to get the logger for.
             level (int, optional):
-                Log level. Defaults to logging.DEBUG.
+                Log level. Defaults to logging.INFO.
         """
         replica_logger = logging.getLogger(replica.id)
         if len(replica_logger.handlers) > 0:
