@@ -86,7 +86,6 @@ full = [
     "qsprpred[chemprop]",
 ]
 dev = [
-    "qsprpred[full]",
     "pre-commit",
     "isort",
     "yapf",
