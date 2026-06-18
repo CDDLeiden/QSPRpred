@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.utils.testing package &mdash; QSPRpred 4.0.0a3.dev42+gd638acbe9 documentation</title>
+  <title>qsprpred.utils.testing package &mdash; QSPRpred 4.0.0a3.dev43+g75b7b350e documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
@@ -15,7 +15,7 @@
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=788b1653"></script>
+      <script src="../_static/documentation_options.js?v=25cbc593"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script>
@@ -628,7 +628,7 @@ function and returns the result of the __enter__ method.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.base.QSPRTestCase.failureException">
 <span class="sig-name descname"><span class="pre">failureException</span></span><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.failureException" title="Link to this definition"></a></dt>
-<dd><p>alias of <a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#AssertionError" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AssertionError</span></code></a></p>
+<dd><p>alias of <a class="reference external" href="https://docs.python.org/3.14/library/exceptions.html#AssertionError" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">AssertionError</span></code></a></p>
 </dd></dl>
 
 <dl class="py method">
@@ -712,7 +712,7 @@ block, allowing further test code to be executed.</p>
 <p>Mixin for testing data preparation.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn.checkDescriptors">
-<span class="sig-name descname"><span class="pre">checkDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetSpec" title="qsprpred.tasks.TargetSpec"><span class="pre">TargetSpec</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn.checkDescriptors" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">checkDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetSpec" title="qsprpred.tasks.TargetSpec"><span class="pre">TargetSpec</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn.checkDescriptors" title="Link to this definition"></a></dt>
 <dd><p>Check if information about descriptors is consistent in the data set. Checks
 if calculators are consistent with the descriptors contained in the data set.
 This is tested also before and after serialization.</p>
@@ -724,7 +724,7 @@ This is tested also before and after serialization.</p>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#AssertionError" title="(in Python v3.9)"><strong>AssertionError</strong></a> – If the consistency check fails.</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.14/library/exceptions.html#AssertionError" title="(in Python v3.14)"><strong>AssertionError</strong></a> – If the consistency check fails.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -739,13 +739,13 @@ between the train and test indices if both are provided.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn.checkPrep">
-<span class="sig-name descname"><span class="pre">checkPrep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.pipeline.DatasetPipeline" title="qsprpred.data.processing.pipeline.DatasetPipeline"><span class="pre">DatasetPipeline</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.sampling.html#qsprpred.data.sampling.splits.DataSplit" title="qsprpred.data.sampling.splits.DataSplit"><span class="pre">DataSplit</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#DataPrepCheckMixIn.checkPrep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn.checkPrep" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">checkPrep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.pipeline.DatasetPipeline" title="qsprpred.data.processing.pipeline.DatasetPipeline"><span class="pre">DatasetPipeline</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.sampling.html#qsprpred.data.sampling.splits.DataSplit" title="qsprpred.data.sampling.splits.DataSplit"><span class="pre">DataSplit</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#DataPrepCheckMixIn.checkPrep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn.checkPrep" title="Link to this definition"></a></dt>
 <dd><p>Check if the data preparation is consistent before and after reloading</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn.checkSplit">
-<span class="sig-name descname"><span class="pre">checkSplit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#DataPrepCheckMixIn.checkSplit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn.checkSplit" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">checkSplit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#DataPrepCheckMixIn.checkSplit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn.checkSplit" title="Link to this definition"></a></dt>
 <dd><p>Check if the split has the data it should have after splitting.</p>
 </dd></dl>
 
@@ -754,11 +754,11 @@ between the train and test indices if both are provided.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.check_mixins.</span></span><span class="sig-name descname"><span class="pre">DescriptorCheckMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#DescriptorCheckMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.14/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Mixin class for common descriptor checks.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn.checkDescriptors">
-<span class="sig-name descname"><span class="pre">checkDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetSpec" title="qsprpred.tasks.TargetSpec"><span class="pre">TargetSpec</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#DescriptorCheckMixIn.checkDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn.checkDescriptors" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">checkDescriptors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.html#qsprpred.tasks.TargetSpec" title="qsprpred.tasks.TargetSpec"><span class="pre">TargetSpec</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#DescriptorCheckMixIn.checkDescriptors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn.checkDescriptors" title="Link to this definition"></a></dt>
 <dd><p>Check if information about descriptors is consistent in the data set. Checks
 if calculators are consistent with the descriptors contained in the data set.
 This is tested also before and after serialization.</p>
@@ -770,7 +770,7 @@ This is tested also before and after serialization.</p>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/exceptions.html#AssertionError" title="(in Python v3.9)"><strong>AssertionError</strong></a> – If the consistency check fails.</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.14/library/exceptions.html#AssertionError" title="(in Python v3.14)"><strong>AssertionError</strong></a> – If the consistency check fails.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -788,7 +788,7 @@ between the train and test indices if both are provided.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.ModelCheckMixIn">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.check_mixins.</span></span><span class="sig-name descname"><span class="pre">ModelCheckMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#ModelCheckMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.14/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>This class holds the tests for the QSPRmodel class.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.ModelCheckMixIn.checkOptimization">
@@ -812,20 +812,20 @@ between the train and test indices if both are provided.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.ModelCheckMixIn.getParamGrid">
-<span class="sig-name descname"><span class="pre">getParamGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#ModelCheckMixIn.getParamGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.getParamGrid" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">getParamGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#ModelCheckMixIn.getParamGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.getParamGrid" title="Link to this definition"></a></dt>
 <dd><p>Get the parameter grid for a model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><em>QSPRModel</em></a>) – The model to get the parameter grid for.</p></li>
-<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The grid type to get the parameter grid for.</p></li>
+<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The grid type to get the parameter grid for.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The parameter grid.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -837,7 +837,7 @@ between the train and test indices if both are provided.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.ModelCheckMixIn.predictorTest">
-<span class="sig-name descname"><span class="pre">predictorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparison_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expect_equal_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">pred_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#ModelCheckMixIn.predictorTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.predictorTest" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">predictorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparison_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expect_equal_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">pred_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#ModelCheckMixIn.predictorTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.predictorTest" title="Link to this definition"></a></dt>
 <dd><p>Test model predictions.</p>
 <p>Checks if the shape of the predictions is as expected and if the predictions
 of the predictMols function are consistent with the predictions of the
@@ -849,7 +849,7 @@ the same as the predictions of the comparison model if given.</p>
 <li><p><strong>model</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><em>QSPRModel</em></a>) – The model to make predictions with.</p></li>
 <li><p><strong>dataset</strong> (<a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><em>QSPRDataSet</em></a>) – The dataset to make predictions for.</p></li>
 <li><p><strong>comparison_model</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><em>QSPRModel</em></a>) – another model to compare the predictions with.</p></li>
-<li><p><strong>expect_equal_result</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether the expected result should be equal or
+<li><p><strong>expect_equal_result</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Whether the expected result should be equal or
 not equal to the predictions of the comparison model.</p></li>
 <li><p><strong>**pred_kwargs</strong> – Extra keyword arguments to pass to the predictor’s <a class="reference internal" href="qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.base.QSPRModelGPU.predictMols" title="qsprpred.extra.gpu.models.base.QSPRModelGPU.predictMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">predictMols</span></code></a> method.</p></li>
 </ul>
@@ -865,7 +865,7 @@ not equal to the predictions of the comparison model.</p></li>
 <dd><p>Bases: <a class="reference internal" href="#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn" title="qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelDataSetsPathMixIn</span></code></a>, <a class="reference internal" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn" title="qsprpred.utils.testing.check_mixins.ModelCheckMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelCheckMixIn</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.baseMonitorTest">
-<span class="sig-name descname"><span class="pre">baseMonitorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.BaseMonitor" title="qsprpred.models.monitors.BaseMonitor"><span class="pre">BaseMonitor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Literal" title="(in Python v3.9)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'hyperparam'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'crossval'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'test'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'fit'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neural_net</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#MonitorsCheckMixIn.baseMonitorTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.baseMonitorTest" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">baseMonitorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.BaseMonitor" title="qsprpred.models.monitors.BaseMonitor"><span class="pre">BaseMonitor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'hyperparam'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'crossval'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'test'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'fit'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neural_net</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#MonitorsCheckMixIn.baseMonitorTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.baseMonitorTest" title="Link to this definition"></a></dt>
 <dd><p>Test the base monitor.</p>
 </dd></dl>
 
@@ -887,9 +887,9 @@ not equal to the predictions of the comparison model.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the dataset</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><em>TargetProperty</em>) – list of target properties</p></li>
-<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -908,9 +908,9 @@ not equal to the predictions of the comparison model.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the dataset</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><em>TargetProperty</em>) – list of target properties</p></li>
-<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -929,9 +929,9 @@ not equal to the predictions of the comparison model.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the dataset</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><em>TargetProperty</em>) – list of target properties</p></li>
-<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -951,12 +951,12 @@ not equal to the predictions of the comparison model.</p></li>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>df</strong> (<em>pd.DataFrame</em>) – data frame containing the dataset</p></li>
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the dataset</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><em>TargetProperty</em>) – list of target properties</p></li>
-<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
-<li><p><strong>prep</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
-<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of jobs to use for parallel processing</p></li>
-<li><p><strong>chunk_size</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – size of chunks to use per job in parallel processing</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>prep</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – number of jobs to use for parallel processing</p></li>
+<li><p><strong>chunk_size</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – size of chunks to use per job in parallel processing</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -970,7 +970,7 @@ not equal to the predictions of the comparison model.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.fileMonitorTest">
-<span class="sig-name descname"><span class="pre">fileMonitorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.FileMonitor" title="qsprpred.models.monitors.FileMonitor"><span class="pre">FileMonitor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Literal" title="(in Python v3.9)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'hyperparam'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'crossval'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'test'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'fit'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neural_net</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#MonitorsCheckMixIn.fileMonitorTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.fileMonitorTest" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">fileMonitorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.FileMonitor" title="qsprpred.models.monitors.FileMonitor"><span class="pre">FileMonitor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'hyperparam'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'crossval'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'test'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'fit'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neural_net</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#MonitorsCheckMixIn.fileMonitorTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.fileMonitorTest" title="Link to this definition"></a></dt>
 <dd><p>Test if the correct files are generated</p>
 </dd></dl>
 
@@ -998,10 +998,10 @@ they need to be added manually to the list below.</p>
 descriptor set registry that would hold all installed descriptor sets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1048,10 +1048,10 @@ Override this method if you want to test with other descriptor sets and
 calculator combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of created <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of created <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1064,20 +1064,20 @@ calculator combinations.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getParamGrid">
-<span class="sig-name descname"><span class="pre">getParamGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getParamGrid" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">getParamGrid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getParamGrid" title="Link to this definition"></a></dt>
 <dd><p>Get the parameter grid for a model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><em>QSPRModel</em></a>) – The model to get the parameter grid for.</p></li>
-<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – The grid type to get the parameter grid for.</p></li>
+<li><p><strong>grid</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – The grid type to get the parameter grid for.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>The parameter grid.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)">dict</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1090,10 +1090,10 @@ calculator combinations.</p>
 to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id1"><span class="problematic" id="id2">`</span></a>list`s of all possible combinations of preparation</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id1"><span class="problematic" id="id2">`</span></a>list`s of all possible combinations of preparation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1124,12 +1124,12 @@ to parameterize tests with the given named combinations.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.listMonitorTest">
-<span class="sig-name descname"><span class="pre">listMonitorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.ListMonitor" title="qsprpred.models.monitors.ListMonitor"><span class="pre">ListMonitor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Literal" title="(in Python v3.9)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'hyperparam'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'crossval'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'test'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'fit'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neural_net</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#MonitorsCheckMixIn.listMonitorTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.listMonitorTest" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">listMonitorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.ListMonitor" title="qsprpred.models.monitors.ListMonitor"><span class="pre">ListMonitor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'hyperparam'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'crossval'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'test'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'fit'</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neural_net</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#MonitorsCheckMixIn.listMonitorTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.listMonitorTest" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.predictorTest">
-<span class="sig-name descname"><span class="pre">predictorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparison_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expect_equal_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">pred_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.predictorTest" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">predictorTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">comparison_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expect_equal_result</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">pred_kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.predictorTest" title="Link to this definition"></a></dt>
 <dd><p>Test model predictions.</p>
 <p>Checks if the shape of the predictions is as expected and if the predictions
 of the predictMols function are consistent with the predictions of the
@@ -1141,7 +1141,7 @@ the same as the predictions of the comparison model if given.</p>
 <li><p><strong>model</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><em>QSPRModel</em></a>) – The model to make predictions with.</p></li>
 <li><p><strong>dataset</strong> (<a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><em>QSPRDataSet</em></a>) – The dataset to make predictions for.</p></li>
 <li><p><strong>comparison_model</strong> (<a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><em>QSPRModel</em></a>) – another model to compare the predictions with.</p></li>
-<li><p><strong>expect_equal_result</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Whether the expected result should be equal or
+<li><p><strong>expect_equal_result</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Whether the expected result should be equal or
 not equal to the predictions of the comparison model.</p></li>
 <li><p><strong>**pred_kwargs</strong> – Extra keyword arguments to pass to the predictor’s <a class="reference internal" href="qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.base.QSPRModelGPU.predictMols" title="qsprpred.extra.gpu.models.base.QSPRModelGPU.predictMols"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">predictMols</span></code></a> method.</p></li>
 </ul>
@@ -1168,7 +1168,7 @@ not equal to the predictions of the comparison model.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.trainModelWithMonitoring">
-<span class="sig-name descname"><span class="pre">trainModelWithMonitoring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.pipeline.DatasetPipeline" title="qsprpred.data.processing.pipeline.DatasetPipeline"><span class="pre">DatasetPipeline</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparam_monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.HyperparameterOptimizationMonitor" title="qsprpred.models.monitors.HyperparameterOptimizationMonitor"><span class="pre">HyperparameterOptimizationMonitor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">crossval_monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.AssessorMonitor" title="qsprpred.models.monitors.AssessorMonitor"><span class="pre">AssessorMonitor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.AssessorMonitor" title="qsprpred.models.monitors.AssessorMonitor"><span class="pre">AssessorMonitor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.FitMonitor" title="qsprpred.models.monitors.FitMonitor"><span class="pre">FitMonitor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Tuple" title="(in Python v3.9)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.HyperparameterOptimizationMonitor" title="qsprpred.models.monitors.HyperparameterOptimizationMonitor"><span class="pre">HyperparameterOptimizationMonitor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.AssessorMonitor" title="qsprpred.models.monitors.AssessorMonitor"><span class="pre">AssessorMonitor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.AssessorMonitor" title="qsprpred.models.monitors.AssessorMonitor"><span class="pre">AssessorMonitor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.FitMonitor" title="qsprpred.models.monitors.FitMonitor"><span class="pre">FitMonitor</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#MonitorsCheckMixIn.trainModelWithMonitoring"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.trainModelWithMonitoring" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">trainModelWithMonitoring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.model.QSPRModel" title="qsprpred.models.model.QSPRModel"><span class="pre">QSPRModel</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><span class="pre">QSPRDataSet</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.pipeline.DatasetPipeline" title="qsprpred.data.processing.pipeline.DatasetPipeline"><span class="pre">DatasetPipeline</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparam_monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.HyperparameterOptimizationMonitor" title="qsprpred.models.monitors.HyperparameterOptimizationMonitor"><span class="pre">HyperparameterOptimizationMonitor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">crossval_monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.AssessorMonitor" title="qsprpred.models.monitors.AssessorMonitor"><span class="pre">AssessorMonitor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.AssessorMonitor" title="qsprpred.models.monitors.AssessorMonitor"><span class="pre">AssessorMonitor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.FitMonitor" title="qsprpred.models.monitors.FitMonitor"><span class="pre">FitMonitor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.14/library/typing.html#typing.Tuple" title="(in Python v3.14)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.HyperparameterOptimizationMonitor" title="qsprpred.models.monitors.HyperparameterOptimizationMonitor"><span class="pre">HyperparameterOptimizationMonitor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.AssessorMonitor" title="qsprpred.models.monitors.AssessorMonitor"><span class="pre">AssessorMonitor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.AssessorMonitor" title="qsprpred.models.monitors.AssessorMonitor"><span class="pre">AssessorMonitor</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="qsprpred.models.html#qsprpred.models.monitors.FitMonitor" title="qsprpred.models.monitors.FitMonitor"><span class="pre">FitMonitor</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#MonitorsCheckMixIn.trainModelWithMonitoring"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.trainModelWithMonitoring" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1180,13 +1180,13 @@ not equal to the predictions of the comparison model.</p></li>
 <p>Mixin class for common pipeline step checks.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.StepCheckMixIn.checkFitTransform">
-<span class="sig-name descname"><span class="pre">checkFitTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.step.Step" title="qsprpred.data.processing.step.Step"><span class="pre">Step</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRTable" title="qsprpred.data.tables.qspr.QSPRTable"><span class="pre">QSPRTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fromfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Tuple" title="(in Python v3.9)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#StepCheckMixIn.checkFitTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.StepCheckMixIn.checkFitTransform" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">checkFitTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.step.Step" title="qsprpred.data.processing.step.Step"><span class="pre">Step</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRTable" title="qsprpred.data.tables.qspr.QSPRTable"><span class="pre">QSPRTable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fromfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.14/library/typing.html#typing.Tuple" title="(in Python v3.14)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#StepCheckMixIn.checkFitTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.StepCheckMixIn.checkFitTransform" title="Link to this definition"></a></dt>
 <dd><p>Check basic step fit and transform functionality.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.StepCheckMixIn.checkStep">
-<span class="sig-name descname"><span class="pre">checkStep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.step.Step" title="qsprpred.data.processing.step.Step"><span class="pre">Step</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRTable" title="qsprpred.data.tables.qspr.QSPRTable"><span class="pre">QSPRTable</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.9/library/typing.html#typing.Tuple" title="(in Python v3.9)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.9/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#StepCheckMixIn.checkStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.StepCheckMixIn.checkStep" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">checkStep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.processing.html#qsprpred.data.processing.step.Step" title="qsprpred.data.processing.step.Step"><span class="pre">Step</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.qspr.QSPRTable" title="qsprpred.data.tables.qspr.QSPRTable"><span class="pre">QSPRTable</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3.14/library/typing.html#typing.Tuple" title="(in Python v3.14)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#StepCheckMixIn.checkStep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.StepCheckMixIn.checkStep" title="Link to this definition"></a></dt>
 <dd><p>Check basic step functionality and serialization.</p>
 </dd></dl>
 
@@ -1203,9 +1203,9 @@ not equal to the predictions of the comparison model.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the dataset</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><em>TargetProperty</em>) – list of target properties</p></li>
-<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1224,9 +1224,9 @@ not equal to the predictions of the comparison model.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the dataset</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><em>TargetProperty</em>) – list of target properties</p></li>
-<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1245,9 +1245,9 @@ not equal to the predictions of the comparison model.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the dataset</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><em>TargetProperty</em>) – list of target properties</p></li>
-<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1267,12 +1267,12 @@ not equal to the predictions of the comparison model.</p></li>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>df</strong> (<em>pd.DataFrame</em>) – data frame containing the dataset</p></li>
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the dataset</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><em>TargetProperty</em>) – list of target properties</p></li>
-<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
-<li><p><strong>prep</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
-<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of jobs to use for parallel processing</p></li>
-<li><p><strong>chunk_size</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – size of chunks to use per job in parallel processing</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>prep</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – number of jobs to use for parallel processing</p></li>
+<li><p><strong>chunk_size</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – size of chunks to use per job in parallel processing</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1293,10 +1293,10 @@ they need to be added manually to the list below.</p>
 descriptor set registry that would hold all installed descriptor sets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1343,10 +1343,10 @@ Override this method if you want to test with other descriptor sets and
 calculator combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of created <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of created <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1365,10 +1365,10 @@ calculator combinations.</p>
 to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id3"><span class="problematic" id="id4">`</span></a>list`s of all possible combinations of preparation</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id3"><span class="problematic" id="id4">`</span></a>list`s of all possible combinations of preparation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1428,9 +1428,9 @@ preparation settings to use in tests.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the dataset</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><em>TargetProperty</em>) – list of target properties</p></li>
-<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1449,9 +1449,9 @@ preparation settings to use in tests.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the dataset</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><em>TargetProperty</em>) – list of target properties</p></li>
-<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1470,9 +1470,9 @@ preparation settings to use in tests.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the dataset</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><em>TargetProperty</em>) – list of target properties</p></li>
-<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1492,12 +1492,12 @@ preparation settings to use in tests.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>df</strong> (<em>pd.DataFrame</em>) – data frame containing the dataset</p></li>
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the dataset</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><em>TargetProperty</em>) – list of target properties</p></li>
-<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
-<li><p><strong>prep</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
-<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of jobs to use for parallel processing</p></li>
-<li><p><strong>chunk_size</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – size of chunks to use per job in parallel processing</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>prep</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – number of jobs to use for parallel processing</p></li>
+<li><p><strong>chunk_size</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – size of chunks to use per job in parallel processing</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1518,10 +1518,10 @@ they need to be added manually to the list below.</p>
 descriptor set registry that would hold all installed descriptor sets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1568,10 +1568,10 @@ Override this method if you want to test with other descriptor sets and
 calculator combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of created <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of created <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1590,10 +1590,10 @@ calculator combinations.</p>
 to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id5"><span class="problematic" id="id6">`</span></a>list`s of all possible combinations of preparation</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id5"><span class="problematic" id="id6">`</span></a>list`s of all possible combinations of preparation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1649,9 +1649,9 @@ to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the dataset</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><em>TargetProperty</em>) – list of target properties</p></li>
-<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1670,9 +1670,9 @@ to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the dataset</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><em>TargetProperty</em>) – list of target properties</p></li>
-<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1691,9 +1691,9 @@ to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the dataset</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><em>TargetProperty</em>) – list of target properties</p></li>
-<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1713,12 +1713,12 @@ to parameterize tests with the given named combinations.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>df</strong> (<em>pd.DataFrame</em>) – data frame containing the dataset</p></li>
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – name of the dataset</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – name of the dataset</p></li>
 <li><p><strong>target_props</strong> (<em>List</em><em> of </em><em>dicts</em><em> or </em><em>TargetProperty</em>) – list of target properties</p></li>
-<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
-<li><p><strong>prep</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#dict" title="(in Python v3.9)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
-<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – number of jobs to use for parallel processing</p></li>
-<li><p><strong>chunk_size</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – size of chunks to use per job in parallel processing</p></li>
+<li><p><strong>random_state</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – random state to use for splitting and shuffling</p></li>
+<li><p><strong>prep</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>) – dictionary containing preparation settings</p></li>
+<li><p><strong>n_jobs</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – number of jobs to use for parallel processing</p></li>
+<li><p><strong>chunk_size</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – size of chunks to use per job in parallel processing</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -1739,10 +1739,10 @@ they need to be added manually to the list below.</p>
 descriptor set registry that would hold all installed descriptor sets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1789,10 +1789,10 @@ Override this method if you want to test with other descriptor sets and
 calculator combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of created <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of created <code class="xref any docutils literal notranslate"><span class="pre">DescriptorCalculator</span></code> objects</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1811,10 +1811,10 @@ calculator combinations.</p>
 to parameterize tests with the given named combinations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id7"><span class="problematic" id="id8">`</span></a>list`s of all possible combinations of preparation</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><code class="xref any docutils literal notranslate"><span class="pre">list</span></code></a> of <a href="#id7"><span class="problematic" id="id8">`</span></a>list`s of all possible combinations of preparation</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#list" title="(in Python v3.9)">list</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1855,12 +1855,12 @@ to parameterize tests with the given named combinations.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.path_mixins.PathMixIn">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.path_mixins.</span></span><span class="sig-name descname"><span class="pre">PathMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#PathMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.PathMixIn" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.9/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.14/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Mix-in class that provides paths to test files and directories and handles their
 creation and deletion.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>generatedPath</strong> (<a class="reference external" href="https://docs.python.org/3.9/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – path to the directory where generated files are stored, this directory is
+<dd class="field-odd"><p><strong>generatedPath</strong> (<a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – path to the directory where generated files are stored, this directory is
 created before and cleared after each test</p>
 </dd>
 </dl>
