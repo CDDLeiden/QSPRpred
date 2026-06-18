@@ -22,6 +22,8 @@ from ...data.sampling.splits import ManualSplit
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import DataPrepCheckMixIn
 from ...utils.testing.path_mixins import DataSetsPathMixIn
+from ..descriptors.fingerprints import MorganFP
+from ..processing.pipeline import DatasetPipeline
 
 
 class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase, DataPrepCheckMixIn):
@@ -56,6 +58,26 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase, DataPrepCheckMixIn):
         train_ids_split, test_ids_split = dataset.getSplit("split", as_type="ids")[0]
         self.assertTrue(all(train_ids.sort_values() == train_ids_split))
         self.assertTrue(all(test_ids.sort_values() == test_ids_split))
+
+        #Test if also works for multiple splits
+        # Add extra column to the data frame to use for splitting
+        df = dataset.getDF()
+        test_ids2 = df.sample(frac=0.1, random_state=1).index
+        train_ids2 = df.index.difference(test_ids2)
+        dataset.addProperty("split2", "test", ids=test_ids2)
+        dataset.addProperty("split2", "train", ids=train_ids2)
+        double_split = ManualSplit(["split", "split2"], "train", "test")
+        dataset.addSplit(double_split, name="double_split")
+
+        # check if the split is correctly stored
+        self.checkSplit(dataset, "double_split")
+
+        # test if the split corresponds to the manually selected ids
+        double_split_iterator = dataset.getSplit("double_split", as_type="ids")
+        self.assertTrue(len(double_split_iterator) == 2)
+        train_ids_split, test_ids_split = double_split_iterator[1]
+        self.assertTrue(all(train_ids2.sort_values() == train_ids_split))
+        self.assertTrue(all(test_ids2.sort_values() == test_ids_split))
 
     @parameterized.expand([
         (False,),
@@ -145,9 +167,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase, DataPrepCheckMixIn):
         # check that smiles in custom_test_list are in the test set
         if custom_test_list:
             test_index = dataset.getSplit("scaffold_split", as_type="ids")[0][1]
-            self.assertTrue(
-                all(mol_id in test_index for mol_id in custom_test_list)
-            )
+            self.assertTrue(all(mol_id in test_index for mol_id in custom_test_list))
         # check folding by scaffold
         if multitask:
             dataset = self.createLargeMultitaskDataSet(name="ScaffoldSplit_folding_mt")
@@ -221,9 +241,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase, DataPrepCheckMixIn):
         # check that smiles in custom_test_list are in the test set
         if custom_test_list:
             test_index = dataset.getSplit("cluster_split", as_type="ids")[0][1]
-            self.assertTrue(
-                all(mol_id in test_index for mol_id in custom_test_list)
-            )
+            self.assertTrue(all(mol_id in test_index for mol_id in custom_test_list))
 
     def testSerialization(self):
         """Test the serialization of dataset with datasplit."""
@@ -235,8 +253,7 @@ class TestDataSplitters(DataSetsPathMixIn, QSPRTestCase, DataPrepCheckMixIn):
         dataset.save()
         dataset_new = QSPRTable.fromFile(dataset.metaFile)
         self.checkSplit(dataset_new, "scaffold_split")
-        train_ids_new, test_ids_new = \
-        dataset_new.getSplit("scaffold_split", as_type="ids")[0]
+        train_ids_new, test_ids_new = dataset_new.getSplit("scaffold_split", as_type="ids")[0]
         self.assertTrue(all(mol_id in train_ids_new for mol_id in train_ids))
         self.assertTrue(all(mol_id in test_ids_new for mol_id in test_ids))
         dataset_new.clear()

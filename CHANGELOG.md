@@ -58,6 +58,8 @@ From v3.2.1 to v4.0.0
   different splits can be added to a `QSPRTable` instance, which may be retrieved using
   the new `iterSplit` method by name. For more information, see the
   [data splitting tutorial](./tutorials/basics/data/data_splitting.ipynb).
+- Option was added to `ManualSplit` that makes it possible to return multiple splits. 
+  Is used when `splitprop` is list.
 
 ## New Features
 
