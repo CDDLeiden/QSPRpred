@@ -19,6 +19,7 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
     documentation of the specific implementation for more details on how to use it and
     the base classes this class inherits from for more details on its functionality.
     """
+
     @property
     @abstractmethod
     def smilesProp(self) -> str:
@@ -47,11 +48,11 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
 
     @abstractmethod
     def addMols(
-        self,
-        smiles: Iterable[str],
-        props: dict[str, list] | None = None,
-        *args,
-        **kwargs
+            self,
+            smiles: Iterable[str],
+            props: dict[str, list] | None = None,
+            *args,
+            **kwargs
     ) -> list[StoredMol]:
         """Add a molecule to the store.
 
@@ -81,7 +82,7 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
         """
 
     @abstractmethod
-    def getMolIDs(self) -> tuple[str]:
+    def getMolIDs(self) -> tuple[str, ...]:
         """Get all molecule IDs in the store.
 
         Returns:
@@ -106,10 +107,10 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
 
     @abstractmethod
     def iterChunks(
-        self,
-        size: int | None = None,
-        on_props: list | None = None,
-        chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
+            self,
+            size: int | None = None,
+            on_props: list | None = None,
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
     ) -> Generator[list[StoredMol | str | Chem.Mol | pd.DataFrame], None, None]:
         """Iterate over chunks of molecules across the store.
 
@@ -124,12 +125,12 @@ class ChemStore(PropertyStorage, MolProcessable, Identifiable, Standardizable, A
 
     @abstractmethod
     def apply(
-        self,
-        func: callable,
-        func_args: list | None = None,
-        func_kwargs: dict | None = None,
-        on_props: tuple[str, ...] | None = None,
-        chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
+            self,
+            func: callable,
+            func_args: list | None = None,
+            func_kwargs: dict | None = None,
+            on_props: tuple[str, ...] | None = None,
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
     ) -> Generator[Iterable[StoredMol | str | Chem.Mol | pd.DataFrame], None, None]:
         """Apply a function on all or selected properties of the chunks of data.
         The requested chunk type is supplied as the first positional argument

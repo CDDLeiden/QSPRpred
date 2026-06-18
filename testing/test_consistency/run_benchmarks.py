@@ -3,9 +3,9 @@ import os
 import pandas as pd
 from sklearn.cross_decomposition import PLSRegression
 from sklearn.ensemble import ExtraTreesClassifier, ExtraTreesRegressor
+from sklearn.model_selection import KFold
 from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import KFold
 from xgboost import XGBClassifier, XGBRegressor
 
 from qsprpred import TargetSpec, TargetTasks
@@ -13,11 +13,10 @@ from qsprpred.benchmarks import BenchmarkSettings, BenchmarkRunner
 from qsprpred.data import MoleculeTable, RandomSplit
 from qsprpred.data.descriptors.fingerprints import MorganFP
 from qsprpred.data.descriptors.sets import RDKitDescs
-from qsprpred.data.processing.pipeline import DatasetPipeline
 from qsprpred.data.processing.feature_filters import LowVarianceFilter
+from qsprpred.data.processing.pipeline import DatasetPipeline
 from qsprpred.data.sources import DataSource
 from qsprpred.models import SklearnModel, Assessor
-from qsprpred.utils.parallel import MultiprocessingJITGenerator
 
 BASE_DIR = "./data/"
 os.makedirs(BASE_DIR, exist_ok=True)
@@ -54,6 +53,7 @@ class DataSourceTesting(DataSource):
         mt.storeFormat = "csv"
         return mt
 
+
 if __name__ == "__main__":
     # run classification
     source = DataSourceTesting("ConsistencyChecks", f"{BASE_DIR}/data")
@@ -80,9 +80,9 @@ if __name__ == "__main__":
                 )
             ],
         ],
-        pipelines = [
+        pipelines=[
             DatasetPipeline(
-                steps = {
+                steps={
                     "benchmarkfilter": LowVarianceFilter(0.05),
                     "scaler": StandardScaler()
                 }
@@ -93,11 +93,13 @@ if __name__ == "__main__":
                 name="ExtraTreesClassifier",
                 alg=ExtraTreesClassifier,
                 base_dir=f"{BASE_DIR}/models",
+                parameters={"n_jobs": 1},
             ),
             SklearnModel(
                 name="XGBClassifier",
                 alg=XGBClassifier,
                 base_dir=f"{BASE_DIR}/models",
+                parameters={"n_jobs": 1},
             ),
             SklearnModel(
                 name="GaussianNB",
@@ -139,7 +141,6 @@ if __name__ == "__main__":
     runner = BenchmarkRunner(
         settings,
         data_dir=f"{BASE_DIR}/CLS",
-        parallel_generator_cpu = MultiprocessingJITGenerator(1)
     )
     runner.run(raise_errors=True)
 
@@ -181,18 +182,21 @@ if __name__ == "__main__":
     settings.subsets = {
         # apply cross-validation only to the training set
         "crossval_r2": (RandomSplit(test_fraction=0.2), "Train", 0),
-        "crossval_neg_root_mean_squared_error": (RandomSplit(test_fraction=0.2), "Train", 0)
+        "crossval_neg_root_mean_squared_error": (RandomSplit(test_fraction=0.2),
+                                                 "Train", 0)
     }
     settings.models = [
         SklearnModel(
             name="ExtraTreesRegressor",
             alg=ExtraTreesRegressor,
             base_dir=f"{BASE_DIR}/models",
+            parameters={"n_jobs": 1},
         ),
         SklearnModel(
             name="XGBRegressor",
             alg=XGBRegressor,
             base_dir=f"{BASE_DIR}/models",
+            parameters={"n_jobs": 1},
         ),
         SklearnModel(
             name="PLSRegression",
@@ -203,6 +207,5 @@ if __name__ == "__main__":
     runner = BenchmarkRunner(
         settings,
         data_dir=f"{BASE_DIR}/REG",
-        parallel_generator_cpu = MultiprocessingJITGenerator(5)
     )
     runner.run(raise_errors=True)

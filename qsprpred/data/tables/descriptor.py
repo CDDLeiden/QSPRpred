@@ -1,7 +1,7 @@
 import pandas as pd
 
 from qsprpred.data.descriptors.sets import DescriptorSet
-from qsprpred.data.tables.pandas import PandasDataTable
+from qsprpred.data.tables.pnds import PandasDataTable
 from qsprpred.utils.parallel import ParallelGenerator
 
 
@@ -12,20 +12,21 @@ class DescriptorTable(PandasDataTable):
         calculator (DescriptorSet):
             `DescriptorSet` used for descriptor calculation.
     """
+
     def __init__(
-        self,
-        calculator: DescriptorSet,
-        name: str,
-        df: pd.DataFrame | None = None,
-        store_dir: str = ".",
-        overwrite: bool = False,
-        index_cols: list[str] | None = None,
-        n_jobs: int = 1,
-        chunk_size: int | None = None,
-        autoindex_name: str = "ID",
-        random_state: int | None = None,
-        store_format: str = "pkl",
-        parallel_generator: ParallelGenerator | None = None,
+            self,
+            calculator: DescriptorSet,
+            name: str,
+            df: pd.DataFrame | None = None,
+            store_dir: str = ".",
+            overwrite: bool = False,
+            index_cols: list[str] | None = None,
+            n_jobs: int = 1,
+            chunk_size: int | None = None,
+            autoindex_name: str | None = None,
+            random_state: int | None = None,
+            store_format: str = "pkl",
+            parallel_generator: ParallelGenerator | None = None,
     ):
         """Initialize a `DescriptorTable` object.
 
@@ -80,12 +81,12 @@ class DescriptorTable(PandasDataTable):
         self.calculator = calculator
 
     def getSubset(
-        self,
-        properties: list[str],
-        ids: list[str] | None = None,
-        name: str | None = None,
-        path: str | None = None,
-        ignore_missing: bool = False,
+            self,
+            properties: list[str],
+            ids: list[str] | None = None,
+            name: str | None = None,
+            path: str | None = None,
+            ignore_missing: bool = False,
     ) -> "DescriptorTable":
         """Get a subset of the descriptor table.
 

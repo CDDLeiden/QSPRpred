@@ -27,12 +27,13 @@ from ...data.descriptors.sets import (
     RDKitDescs,
     TanimotoDistances,
 )
+
 from ...data.processing.pipeline import DatasetPipeline
 from ...data.processing.step import Shuffle, DummyStep
 from ...data.processing.data_filters import NaNFilter, OutlierFilter, RepeatsFilter
 from ...data.sampling.splits import RandomSplit
 from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
-from ...data.storage.tabular.basic_storage import PandasChemStore
+from ...data.storage.tabular.simple import PandasChemStore
 from ...data.tables.qspr import QSPRTable
 from ...models import SklearnModel
 from ...tasks import TargetTasks
@@ -48,6 +49,7 @@ class PathMixIn:
             created before and cleared after each test
 
     """
+
     def setUpPaths(self):
         """Create the directories that are used for testing."""
         self.generatedPath = tempfile.mkdtemp(prefix="qsprpred_test_")
@@ -68,6 +70,7 @@ class PathMixIn:
 class DataSetsPathMixIn(PathMixIn):
     """Mix-in class that provides a small and large testing data set and some common
     preparation settings to use in tests."""
+
     def setUpPaths(self):
         """Create the directories that are used for testing."""
         super().setUpPaths()
@@ -179,13 +182,13 @@ class DataSetsPathMixIn(PathMixIn):
         return (
             # deep copy to avoid conflicts caused by operating on one instance twice
             copy.deepcopy(combo) for combo in itertools.product(
-                descriptor_calculators,
-                splits,
-                feature_standardizers,
-                feature_filters,
-                data_filters,
-                applicability_domains,
-            )
+            descriptor_calculators,
+            splits,
+            feature_standardizers,
+            feature_filters,
+            data_filters,
+            applicability_domains,
+        )
         )
 
     @classmethod
@@ -197,6 +200,7 @@ class DataSetsPathMixIn(PathMixIn):
         Returns:
             list: `list` of `list`s of all possible combinations of preparation
         """
+
         def get_name(obj: object):
             """Get the name of a data preparation object, or its class name if it is not
             a string.
@@ -301,7 +305,7 @@ class DataSetsPathMixIn(PathMixIn):
             QSPRDataSet: a `QSPRDataSet` object
         """
         return self.createTestDataSetFromFrame(
-            self.getSmallDF(),
+            df=self.getSmallDF(),
             name=name,
             target_props=target_props,
             random_state=random_state,
@@ -392,6 +396,7 @@ class DataSetsPathMixIn(PathMixIn):
 
 class ModelDataSetsPathMixIn(DataSetsPathMixIn):
     """This class sets up the datasets for the model tests."""
+
     def setUpPaths(self):
         """Set up the test environment."""
         super().setUpPaths()

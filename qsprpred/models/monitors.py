@@ -93,7 +93,7 @@ class AssessorMonitor(FitMonitor):
         assessment_name: str,
         parameters: dict,
         split: DataSplit,
-        
+
     ):
         """Called before the assessment has started.
 
@@ -261,7 +261,7 @@ class NullMonitor(HyperparameterOptimizationMonitor):
         assessment_name: str,
         parameters: dict,
         split: DataSplit,
-        
+
     ):
         """Called before the assessment has started.
 
@@ -1036,7 +1036,7 @@ class FileMonitor(BaseMonitor):
                 "assessmentPipeline": self.assessmentPipeline.__str__(),
                 "assessmentParameters": self.assessmentParameters,
                 "assessmentSplit": self.assessmentSplit.__class__.__name__,
-                "targetProperties": self.assessmentDataset.targetPropertiesNames,
+                "targetProperties": self.assessmentDataset.getTargetPropertiesNames(),
                 "foldScores": self.foldScores,
             }
             if self.optimizationType is not None:
@@ -1046,7 +1046,7 @@ class FileMonitor(BaseMonitor):
             # save metadata to json
             with open(f"{self.assessmentPath}/{self.assessmentName}_settings.json", "w") as f:
                 json.dump(metadata, f, indent=4)
-            
+
             predictions.to_csv(
                 f"{self.assessmentPath}/{self.assessmentName}_predictions.tsv",
                 sep="\t"
@@ -1142,7 +1142,7 @@ class WandBMonitor(BaseMonitor):
             "assessmentPipeline": self.assessmentPipeline.__str__(),
             "assessmentParameters": self.assessmentParameters,
             "assessmentSplit": self.assessmentSplit.__class__.__name__,
-            "targetProperties": self.assessmentDataset.targetPropertiesNames,
+            "targetProperties": self.assessmentDataset.getTargetPropertiesNames(),
         }
         # add hyperparameter optimization parameters if available
         if self.optimizationType is not None:
@@ -1206,12 +1206,12 @@ class WandBMonitor(BaseMonitor):
 
         self.run.log({"Fold predictions": wandbTable})
         if isinstance(scores, list):
-            tasks = self.assessmentDataset.targetPropertiesNames
+            tasks = self.assessmentDataset.getTargetPropertiesNames()
             scores = {tasks[i]: scores[i] for i in range(len(tasks))}
         else:
             scores = {"fold score": scores}
         self.run.log(scores)
-        
+
         self.run.finish()
         self.run = None
 

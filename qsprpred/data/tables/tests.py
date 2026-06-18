@@ -1,7 +1,7 @@
-from copy import deepcopy
 import os
 import shutil
 import tempfile
+from copy import deepcopy
 
 import numpy as np
 import pandas as pd
@@ -9,29 +9,26 @@ from parameterized import parameterized
 from sklearn.model_selection import KFold, ShuffleSplit
 
 from qsprpred.data.descriptors.sets import DrugExPhyschem
-from qsprpred.data.storage.tabular.basic_storage import PandasChemStore
-
+from .interfaces.qspr_data_set import QSPRDataSet
+from .mol import MoleculeTable
+from ..chem.standardizers.papyrus import PapyrusStandardizer
+from ..descriptors.fingerprints import MorganFP
+from ..processing.data_filters import CategoryFilter, NaNFilter
+from ..processing.pipeline import DatasetPipeline
+from ..processing.step import Shuffle, DummyStep
 from ... import TargetSpec, TargetTasks
+from ...data.storage.tabular.simple import PandasChemStore
 from ...data.tables.qspr import QSPRTable
 from ...utils.stopwatch import StopWatch
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.check_mixins import DataPrepCheckMixIn
-from ...utils.testing.path_mixins import DataSetsPathMixIn
-from ..chem.standardizers.papyrus import PapyrusStandardizer
-from ..descriptors.fingerprints import MorganFP
-from .interfaces.qspr_data_set import QSPRDataSet
-from .mol import MoleculeTable
-from ..processing.pipeline import DatasetPipeline
-from ..processing.step import Shuffle, DummyStep
-from ..processing.data_filters import CategoryFilter, NaNFilter
+from ...utils.testing.path_mixins import DataSetsPathMixIn, PathMixIn
 
 
 class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
     def setUp(self):
         super().setUp()
         self.setUpPaths()
-        # self.nCPU = 2
-        # self.chunkSize = 2
 
     def getStorage(self):
         df = self.getSmallDF()
@@ -201,6 +198,7 @@ class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
 class TestQSPRTable(DataSetsPathMixIn, QSPRTestCase):
     """Simple tests for dataset creation and serialization under different conditions
     and error states."""
+
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -512,6 +510,8 @@ class TestQSPRTable(DataSetsPathMixIn, QSPRTestCase):
         # shuffle and split
         split = ShuffleSplit(1, test_size=0.5, random_state=dataset.randomState)
         dataset.addSplit(split, "shufflesplit")
+        _, _, _, _ = next(dataset.iterSplit("shufflesplit", as_type="numpy"))
+        _, _ = next(dataset.iterSplit("shufflesplit", as_type="QSPRTable"))
         train, test = next(dataset.iterSplit("shufflesplit", as_type="ids"))
         # reload and check if orders are the same if we redo the split
         # with the same random state
@@ -519,8 +519,8 @@ class TestQSPRTable(DataSetsPathMixIn, QSPRTestCase):
         split = ShuffleSplit(1, test_size=0.5, random_state=dataset.randomState)
         dataset.addSplit(split, "shufflesplit2")
         train2, test2 = next(dataset.iterSplit("shufflesplit2", as_type="ids"))
-        self.assertListEqual(train.tolist(), train2.tolist())
-        self.assertListEqual(test.tolist(), test2.tolist())
+        self.assertListEqual(train, train2)
+        self.assertListEqual(test, test2)
 
     def testRandomStateFolds(self):
         # create and save the data set (fixes the seed)
@@ -542,9 +542,10 @@ class TestQSPRTable(DataSetsPathMixIn, QSPRTestCase):
         self.assertListEqual(dataset.getDescriptors().index.tolist(), order_train)
         split = KFold(5, shuffle=True, random_state=dataset.randomState)
         dataset.addSplit(split, "kfold2")
-        for i, (train_index, test_index) in enumerate(dataset.getSplit("kfold2", as_type="ids")):
-            self.assertListEqual(train_index.tolist(), order_folds[i][0].tolist())
-            self.assertListEqual(test_index.tolist(), order_folds[i][1].tolist())
+        for i, (train_index, test_index) in enumerate(
+                dataset.getSplit("kfold2", as_type="ids")):
+            self.assertListEqual(train_index, order_folds[i][0])
+            self.assertListEqual(test_index, order_folds[i][1])
 
     def testFilter(self):
         """Test removing entries from the dataset using a DataFilter."""
@@ -559,6 +560,7 @@ class TestQSPRTable(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(len(dataset.getDF()), len(dataset.getDescriptors()))
         self.assertTrue((dataset.getDF()["moka_ionState7.4"] == "cationic").sum() == 0)
 
+
 class TestSearchFeatures(DataSetsPathMixIn, QSPRTestCase):
     def setUp(self):
         super().setUp()
@@ -571,11 +573,10 @@ class TestSearchFeatures(DataSetsPathMixIn, QSPRTestCase):
         self.assertEqual(result.name, name)
         self.assertListEqual(dataset.getProperties(), result.getProperties())
         self.assertListEqual(dataset.getDescriptorNames(), result.getDescriptorNames())
-        self.assertListEqual(dataset.targetPropertiesNames, result.targetPropertiesNames)
-        self.assertEqual(len(dataset.descriptors), len(result.descriptors))
+        self.assertListEqual(dataset.getTargetPropertiesNames(),
+                             result.getTargetPropertiesNames())
         self.assertEqual(len(dataset.descriptorSets), len(result.descriptorSets))
         self.assertEqual(len(dataset.targetProperties), len(result.targetProperties))
-        self.assertEqual(dataset.nTargetProperties, result.nTargetProperties)
 
     def testSMARTS(self):
         dataset = self.createLargeTestDataSet()
@@ -627,9 +628,9 @@ class TestSearchFeatures(DataSetsPathMixIn, QSPRTestCase):
         self.assertTrue(len(results) == 0)
 
 
-
 class TestTargetSpec(QSPRTestCase):
     """Test the TargetSpec class."""
+
     def checkTargetSpec(self, target_spec, name, task, th, n_classes=None):
         # Check the target spec creation consistency
         self.assertEqual(target_spec.name, name)
@@ -727,21 +728,22 @@ class TestDataSetPreProcessing(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCa
     """Test as many possible combinations of data sets and their preparation
     settings. These can run potentially for a long time so use the ``skip`` decorator
     if you want to skip all these tests to speed things up during development."""
+
     def setUp(self):
         super().setUp()
         self.setUpPaths()
 
     @parameterized.expand(DataSetsPathMixIn.getPrepCombos())
     def testPrepCombos(
-        self,
-        _,
-        name,
-        feature_calculators,
-        split,
-        feature_standardizer,
-        feature_filter,
-        data_filter,
-        applicability_domain,
+            self,
+            _,
+            name,
+            feature_calculators,
+            split,
+            feature_standardizer,
+            feature_filter,
+            data_filter,
+            applicability_domain,
     ):
         """Tests one combination of a data set and its preparation settings.
 
@@ -769,8 +771,38 @@ class TestDataSetPreProcessing(DataSetsPathMixIn, DataPrepCheckMixIn, QSPRTestCa
         )
 
 
+class TestTargetImputation(PathMixIn, QSPRTestCase):
+    """Small tests to only check if the target imputation works on its own."""
+
+    def setUp(self):
+        """Set up the test Dataframe."""
+        super().setUp()
+        self.setUpPaths()
+        self.descriptors = [
+            "Descriptor_F1",
+            "Descriptor_F2",
+            "Descriptor_F3",
+            "Descriptor_F4",
+            "Descriptor_F5",
+        ]
+        self.df = pd.DataFrame(
+            data=np.array(
+                [
+                    ["C", 1, 4, 2, 6, 2, 1, 2],
+                    ["C", 1, 8, 4, 2, 4, 1, 2],
+                    ["C", 1, 4, 3, 2, 5, 1, np.NaN],
+                    ["C", 1, 8, 4, 9, 8, 2, 2],
+                    ["C", 1, 4, 2, 3, 9, 2, 2],
+                    ["C", 1, 8, 4, 7, 12, 2, 2],
+                ]
+            ),
+            columns=["SMILES", *self.descriptors, "y", "z"],
+        )
+
+
 class TestApply(DataSetsPathMixIn, QSPRTestCase):
     """Tests the apply method of the data set."""
+
     def setUp(self):
         super().setUp()
         self.setUpPaths()
@@ -784,7 +816,7 @@ class TestApply(DataSetsPathMixIn, QSPRTestCase):
             df[key] = value
         return df
 
-    @parameterized.expand([(None, None), (2, None), (None, 50), (2, 50)])
+    @parameterized.expand([(1, None), (2, None), (1, 25), (2, 25)])
     def testRegular(self, n_jobs, chunk_size):
         dataset = self.createLargeTestDataSet()
         dataset.nJobs = n_jobs

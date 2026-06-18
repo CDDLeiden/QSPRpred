@@ -1,13 +1,15 @@
-import pandas as pd
-from .step import Step
-from .feature_transformers import SklearnStep
-from ...utils.serialization import JSONSerializable
-from ..descriptors.sets import DescriptorSet
-from qsprpred.data.sampling.splits import DataSplit
 from typing import Generator
-from qsprpred.data.tables.qspr import QSPRTable
-from ...utils.interfaces.randomized import Randomized
+
+import pandas as pd
 from sklearn.base import BaseEstimator
+
+from qsprpred.data.sampling.splits import DataSplit
+from qsprpred.data.tables.qspr import QSPRTable
+from .feature_transformers import SklearnStep
+from .step import Step
+from ..descriptors.sets import DescriptorSet
+from ...utils.interfaces.randomized import Randomized
+from ...utils.serialization import JSONSerializable
 
 
 class Pipeline(Randomized, JSONSerializable):
@@ -29,14 +31,15 @@ class Pipeline(Randomized, JSONSerializable):
         skip (list[str]): List of step names to skip
         fitted (bool): Whether the pipeline is fitted
     """
+
     def __init__(
-        self,
-        steps: dict[str, Step | BaseEstimator] | None = None,
-        fixed: list[str] | None = None,
-        fit_on: dict[str, str] | None = None,
-        apply_to: dict[str, str] | None = None,
-        skip: list[str] | None = None,
-        seed: int | None = None,
+            self,
+            steps: dict[str, Step | BaseEstimator] | None = None,
+            fixed: list[str] | None = None,
+            fit_on: dict[str, str] | None = None,
+            apply_to: dict[str, str] | None = None,
+            skip: list[str] | None = None,
+            seed: int | None = None,
     ):
         """Initialize the Pipeline
         
@@ -89,15 +92,16 @@ class Pipeline(Randomized, JSONSerializable):
                 a random seed is used instead of a fixed one.
         """
         self.seed = seed
-            
+
     def apply(
-        self,
-        X_train: pd.DataFrame,
-        y_train: pd.DataFrame | None = None,
-        X_test: pd.DataFrame | None = None,
-        y_test: pd.DataFrame | None = None,
-        fit: bool = True,
-    ) -> tuple[pd.DataFrame, pd.DataFrame | None, pd.DataFrame | None, pd.DataFrame | None]:
+            self,
+            X_train: pd.DataFrame,
+            y_train: pd.DataFrame | None = None,
+            X_test: pd.DataFrame | None = None,
+            y_test: pd.DataFrame | None = None,
+            fit: bool = True,
+    ) -> tuple[
+        pd.DataFrame, pd.DataFrame | None, pd.DataFrame | None, pd.DataFrame | None]:
         """Apply the pipeline to the data
         
         If fit is True, the pipeline is fitted to the training data and 
@@ -119,7 +123,7 @@ class Pipeline(Randomized, JSONSerializable):
         """
         if not self.fitted and not fit and len(self.steps) > 0:
             raise ValueError("Pipeline must be fitted before transforming data")
-        
+
         for name, step in self.steps.items():
             if name in self.skip:
                 continue
@@ -131,12 +135,14 @@ class Pipeline(Randomized, JSONSerializable):
                     if self.fitOn.get(name, 'train') == 'train':
                         step.fit(X_train, y_train)
                     elif self.fitOn.get(name, 'train') == 'both':
-                        X_all, y_all = pd.concat([X_train, X_test]), pd.concat([y_train, y_test])
+                        X_all, y_all = pd.concat([X_train, X_test]), pd.concat(
+                            [y_train, y_test])
                         step.fit(X_all, y_all)
                     elif self.fitOn.get(name, 'train') == 'test':
                         step.fit(X_test, y_test)
                     else:
-                        raise ValueError(f"Unknown value for {name} fit_on: {self.fitOn.get(name)}")
+                        raise ValueError(
+                            f"Unknown value for {name} fit_on: {self.fitOn.get(name)}")
                 self._fitted = True
             # Apply step on the specified data
             if self.applyTo.get(name, 'both') in ['train', 'both']:
@@ -145,15 +151,18 @@ class Pipeline(Randomized, JSONSerializable):
                 if X_test is not None:
                     X_test, y_test = step.transform(X_test, y_test)
             if self.applyTo.get(name, 'both') not in ['train', 'test', 'both']:
-                raise ValueError(f"Unknown value for {name} apply_to: {self.applyTo.get(name)}")
+                raise ValueError(
+                    f"Unknown value for {name} apply_to: {self.applyTo.get(name)}")
             # Check number of features is still consistent between training and test data
             if X_test is not None:
-                assert X_train.shape[1] == X_test.shape[1], f"Number of features in training and test data is not consistent after step {name}"
-                assert all(X_train.columns == X_test.columns), f"Feature names in training and test data are not consistent after step {name}"
+                assert X_train.shape[1] == X_test.shape[
+                    1], f"Number of features in training and test data is not consistent after step {name}"
+                assert all(
+                    X_train.columns == X_test.columns), f"Feature names in training and test data are not consistent after step {name}"
         self.featureNames = X_train.columns.tolist()
-        
+
         return X_train, y_train, X_test, y_test
-    
+
     def removeStep(self, name: str):
         """Remove a step from the pipeline
         
@@ -161,8 +170,9 @@ class Pipeline(Randomized, JSONSerializable):
             name (str): name of the step to remove
         """
         self.steps.pop(name)
-        
-    def addStep(self, name: str, step: Step, fit_on: str = 'train', apply_to: str = 'both', fixed: bool = False):
+
+    def addStep(self, name: str, step: Step, fit_on: str = 'train',
+                apply_to: str = 'both', fixed: bool = False):
         """Add a step to the pipeline
             
         Args:
@@ -180,7 +190,7 @@ class Pipeline(Randomized, JSONSerializable):
         self.applyTo[name] = apply_to
         if fixed:
             self.fixed.append(name)
-            
+
     def orderSteps(self, order: list[str]):
         """Order the steps in the pipeline
         
@@ -189,12 +199,12 @@ class Pipeline(Randomized, JSONSerializable):
         """
         assert set(order) == set(self.steps.keys()), "Order must contain all step names"
         self.steps = {name: self.steps[name] for name in order}
-    
+
     @property
     def fitted(self) -> bool:
         """Check if the pipeline is fitted"""
         return self._fitted
-    
+
     @property
     def skip(self) -> list[str]:
         """Get the steps to skip
@@ -206,7 +216,7 @@ class Pipeline(Randomized, JSONSerializable):
             list[str]: list of step names to skip
         """
         return self._skip
-    
+
     def addSkip(self, name: str):
         """Add a step to the skip list
         
@@ -214,7 +224,7 @@ class Pipeline(Randomized, JSONSerializable):
             name (str): name of the step to skip
         """
         self._skip.append(name)
-    
+
     def removeSkip(self, name: str):
         """Remove a step from the skip list
         
@@ -222,7 +232,7 @@ class Pipeline(Randomized, JSONSerializable):
             name (str): name of the step to remove from the skip list
         """
         self._skip.remove(name)
-    
+
     def __str__(self):
         steps = []
         for name, obj in self.steps.items():
@@ -237,14 +247,14 @@ class Pipeline(Randomized, JSONSerializable):
                 step += f", randomState={obj.randomState}"
             steps.append(step)
         return (
-            f"{self.__class__.__name__}\n"
-            f"steps:\n  " + 
-            f"\n  ".join(steps) + 
-            f"\nseed: {self.seed}"
-            f"\nfitted: {self.fitted}"
+                f"{self.__class__.__name__}\n"
+                f"steps:\n  " +
+                f"\n  ".join(steps) +
+                f"\nseed: {self.seed}"
+                f"\nfitted: {self.fitted}"
         )
-            
-    
+
+
 class DatasetPipeline(Pipeline):
     """Pipeline class for applying data preprocessing steps to a QSPRDataset.
     
@@ -254,15 +264,16 @@ class DatasetPipeline(Pipeline):
         originalfeatureNames (list[str] | None): Original feature names in the dataset 
             before applying the pipeline.
     """
+
     def __init__(
-        self,
-        feature_calculators: list[DescriptorSet] | None = None,
-        steps: dict[str, Step | BaseEstimator] | None = None,
-        fixed: list[str] | None = None,
-        fit_on: dict[str, str] | None = None,
-        apply_to: dict[str, str] | None = None,
-        skip: list[str] | None = None,
-        seed: int | None = None,
+            self,
+            feature_calculators: list[DescriptorSet] | None = None,
+            steps: dict[str, Step | BaseEstimator] | None = None,
+            fixed: list[str] | None = None,
+            fit_on: dict[str, str] | None = None,
+            apply_to: dict[str, str] | None = None,
+            skip: list[str] | None = None,
+            seed: int | None = None,
     ):
         """Initialize the DatasetPipeline
 
@@ -286,15 +297,16 @@ class DatasetPipeline(Pipeline):
         super().__init__(steps, fixed, fit_on, apply_to, skip, seed)
         self.originalfeatureNames = None
         self.feature_calculators = feature_calculators
-        
-    def apply(
-        self,
-        dataset: QSPRTable,
-        split: DataSplit | None = None,
-        fit: bool = True,
-        seed: int | None = None,
+
+    def applyOnDataSet(
+            self,
+            dataset: QSPRTable,
+            split: DataSplit | None = None,
+            fit: bool = True,
+            seed: int | None = None,
     ) -> Generator[
-        tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame] | tuple[pd.DataFrame, pd.DataFrame],
+        tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame] | tuple[
+            pd.DataFrame, pd.DataFrame],
         None,
         None,
     ]:
@@ -318,32 +330,40 @@ class DatasetPipeline(Pipeline):
         """
         if fit:
             self.randomState = dataset.randomState if seed is None else seed
-        
+
         # prepare X and y from the dataset
         if self.feature_calculators is not None:
             for feature_calculator in self.feature_calculators:
-                if hasattr(feature_calculator, 'randomState') and feature_calculator.randomState is None:
+                if hasattr(feature_calculator,
+                           'randomState') and feature_calculator.randomState is None:
                     feature_calculator.randomState = self.randomState
             dataset.addDescriptors(self.feature_calculators)
         X = dataset.getDescriptors()
         if self.fitted and not fit:
-            assert all(
-                feature in X.columns for feature in self.originalfeatureNames
-            ), "Some features are missing in the dataset, please check if any "
-            "descriptors that were added to the dataset directly "
-            "before fitting the pipeline are missing in the dataset."
+            expected_features = (
+                self.originalfeatureNames
+                if self.originalfeatureNames is not None
+                else []
+            )
+            missing_features = set(expected_features) - set(X.columns.tolist())
+            assert not missing_features, (
+                "Some features are missing in the dataset, please check if any "
+                "descriptors that were added to the dataset directly before fitting "
+                "the pipeline are missing in the dataset. "
+                f"Missing: {sorted(missing_features)}"
+            )
         else:
-            self.originalfeatureNames = X.columns
+            self.originalfeatureNames = X.columns.tolist()
         y = dataset.getTargets()
-            
+
         # set the dataset for each step
         for step in self.steps.values():
             if hasattr(step, 'setDataSet'):
                 step.setDataSet(dataset)
-        
+
         # split the dataset and apply the pipeline
         if split is None:
-            X, y, _, _ = super().apply(X, y, fit = fit)
+            X, y, _, _ = super().apply(X, y, fit=fit)
             yield X, y
         else:
             if isinstance(split, str):
@@ -351,19 +371,21 @@ class DatasetPipeline(Pipeline):
             if hasattr(split, 'setDataSet'):
                 split.setDataSet(dataset)
             if hasattr(split, 'randomState') and split.randomState is None:
-                    split.randomState = self.randomState
+                split.randomState = self.randomState
             if hasattr(split, 'random_state') and split.random_state is None:
                 # FIXME: this is to set the random state for scikit-learn splits,
                 # but it may give unexpected results in other contexts
                 split.random_state = self.randomState
             for train_index, test_index in dataset.split(split):
                 X_train, y_train, X_test, y_test = (
-                    X.loc[train_index], y.loc[train_index], X.loc[test_index], y.loc[test_index]
+                    X.loc[train_index], y.loc[train_index], X.loc[test_index],
+                    y.loc[test_index]
                 )
                 yield super().apply(X_train, y_train, X_test, y_test, fit)
-    
+
     def __str__(self):
-        feature_calculators = ["None"] if self.feature_calculators is None else self.feature_calculators
+        feature_calculators = [
+            "None"] if self.feature_calculators is None else self.feature_calculators
         return (
-            super().__str__() + 
-            f"\nfeature_calculators: {', '.join([str(fc) for fc in feature_calculators])}")
+                super().__str__() +
+                f"\nfeature_calculators: {', '.join([str(fc) for fc in feature_calculators])}")

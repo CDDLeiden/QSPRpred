@@ -15,16 +15,16 @@ from .testing.base import QSPRTestCase
 class TestMultiProcGenerators(QSPRTestCase):
     @staticmethod
     def func(x):
-        return x**2
+        return x ** 2
 
     @staticmethod
     def func_batched(x):
-        return [i**2 for i in x]
+        return [i ** 2 for i in x]
 
     @staticmethod
     def func_timeout(x):
         time.sleep(x)
-        return x**2
+        return x ** 2
 
     @staticmethod
     def func_args(x, *args, **kwargs):
@@ -38,13 +38,14 @@ class TestMultiProcGenerators(QSPRTestCase):
         ]
     )
     def testSimple(self, timeout, pool_type):
-        generator = (x for x in range(10))
+        n = 100
+        generator = (x for x in range(n))
         p_generator = (
             pool_type(self.nCPU)
             if not timeout else pool_type(self.nCPU, timeout=timeout)
         )
         self.assertListEqual(
-            [x**2 for x in range(10)],
+            [x ** 2 for x in range(n)],
             sorted(p_generator(
                 generator,
                 self.func,
@@ -80,13 +81,13 @@ class TestMultiProcGenerators(QSPRTestCase):
 
     @parameterized.expand(
         [
-            ((0, ), {
+            ((0,), {
                 "A": 1
             }, MultiprocessingJITGenerator),
             (None, {
                 "A": 1
             }, MultiprocessingJITGenerator),
-            ((0, ), None, MultiprocessingJITGenerator),
+            ((0,), None, MultiprocessingJITGenerator),
         ]
     )
     def testArgs(self, args, kwargs, pool_type):
@@ -107,21 +108,22 @@ class TestMultiProcGenerators(QSPRTestCase):
 
 class TestThreadedGenerators(QSPRTestCase):
     """Test processing using a pool of threads."""
+
     @staticmethod
     def func(x):
         time.sleep(1)
-        return x**2
+        return x ** 2
 
     @staticmethod
     def func_batched(x):
         time.sleep(1)
-        return [i**2 for i in x]
+        return [i ** 2 for i in x]
 
     def testSimple(self):
         generator = (x for x in range(10))
         p_generator = ThreadsJITGenerator(self.nCPU)
         self.assertListEqual(
-            [x**2 for x in range(10)],
+            [x ** 2 for x in range(10)],
             sorted(p_generator(
                 generator,
                 self.func,

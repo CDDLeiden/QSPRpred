@@ -1,13 +1,7 @@
+import numpy as np
 from parameterized import parameterized
 from rdkit.Chem import Descriptors
-import numpy as np
 
-from ...data import RandomSplit
-from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
-from ..processing.pipeline import DatasetPipeline
-from ...models import SklearnModel
-from ...utils.testing.base import QSPRTestCase
-from ...utils.testing.path_mixins import DataSetsPathMixIn
 from .fingerprints import MorganFP
 from .sets import (
     DrugExPhyschem,
@@ -17,10 +11,17 @@ from .sets import (
     TanimotoDistances,
     RandomDescs,
 )
+from ..processing.feature_filters import LowVarianceFilter, HighCorrelationFilter
+from ..processing.pipeline import DatasetPipeline
+from ...data import RandomSplit
+from ...models import SklearnModel
+from ...utils.testing.base import QSPRTestCase
+from ...utils.testing.path_mixins import DataSetsPathMixIn
 
 
 class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
     """Test the calculation of descriptors."""
+
     def setUp(self):
         """Set up the test Dataframe."""
         super().setUp()
@@ -69,7 +70,7 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
         dataset.restoreDescriptorSets(dataset.descriptorSets)
         self.assertTrue(dataset.getDescriptors().shape[1] == full_len)
 
-    @parameterized.expand([(None, None), (1, None), (2, None), (4, 50)])
+    @parameterized.expand([(1, None), (2, None), (1, 17), (2, 17)])
     def testSwitching(self, n_cpu, chunk_size):
         """Test if the feature calculator can be switched to a new dataset."""
         dataset = self.createLargeTestDataSet(
@@ -84,23 +85,32 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
             feature_calculators=feature_calculators,
             steps={
                 "low_var_filter": LowVarianceFilter(0.05),
-                "high_corr_filter": HighCorrelationFilter(0.9),
+                "high_corr_filter": HighCorrelationFilter(0.75),
             }
         )
-        X_train, y_train, X_test, y_test  = next(pipeline.apply(dataset, split))
+        X_train, y_train, X_test, y_test = next(pipeline.applyOnDataSet(dataset, split))
         # create new dataset with the same calculator
-        dataset_next = self.createLargeTestDataSet(self.__class__.__name__)
-        X_train_next, y_train_next, X_test_next, y_test_next = next(
-            pipeline.apply(dataset_next, split)
+        dataset_next = self.createLargeTestDataSet(
+            "TestSwitching", n_jobs=1, chunk_size=None
         )
-        self.assertEqual(X_train.shape, X_train_next.shape)
-        self.assertEqual(y_train.shape, y_train_next.shape)
-        self.assertEqual(X_test.shape, X_test_next.shape)
-        self.assertEqual(y_test.shape, y_test_next.shape)
+        X_train_next, y_train_next, X_test_next, y_test_next = next(
+            pipeline.applyOnDataSet(dataset_next, split)
+        )
+        # check if all matrices are identical
+        if not np.array_equal(X_train, X_train_next):
+            # check if IDs are the same in train and train_next
+            check = set([x.split("_")[-1] for x in X_train.index.tolist()]) - set(
+                [x.split("_")[-1] for x in X_train_next.index.tolist()])
+            print(f"X_train is not equal: {check}")
+        self.assertTrue(np.array_equal(X_train, X_train_next))
+        self.assertTrue(np.array_equal(y_train, y_train_next))
+        self.assertTrue(np.array_equal(X_test, X_test_next))
+        self.assertTrue(np.array_equal(y_test, y_test_next))
 
 
 class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
     """Test the descriptor sets."""
+
     def setUp(self):
         """Create the test Dataframe."""
         super().setUp()
@@ -162,14 +172,16 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
         desc_calc = [RDKitDescs()]
         self.dataset.addDescriptors(desc_calc)
         rdkit_desc_count = len(set(Descriptors._descList))
-        self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), rdkit_desc_count))
+        self.assertEqual(self.dataset.getDescriptors().shape,
+                         (len(self.dataset), rdkit_desc_count))
         self.assertTrue(self.dataset.getDescriptors().any().any())
         self.assertTrue(self.dataset.getDescriptors().any().sum() > 1)
         # with 3D
         desc_calc = [RDKitDescs(include_3d=True)]
         self.dataset.addDescriptors(desc_calc, recalculate=True)
         self.assertEqual(
-            self.dataset.getDescriptors().shape, (len(self.dataset), rdkit_desc_count + 10)
+            self.dataset.getDescriptors().shape,
+            (len(self.dataset), rdkit_desc_count + 10)
         )
 
     def testSmilesDesc(self):
@@ -188,30 +200,30 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
         self.assertTrue(self.dataset.getDescriptors().any().any())
         self.assertFalse(self.dataset.getDescriptors().isna().any().any())
         self.dataset.dropDescriptorSets(desc_calc, full_removal=True)
-        
+
         # test setting n
         desc_calc = [RandomDescs(n=100)]
         self.dataset.addDescriptors(desc_calc)
         self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 100))
         self.assertTrue(self.dataset.getDescriptors().any().any())
         self.dataset.dropDescriptorSets(desc_calc, full_removal=True)
-        
+
         # test setting randomseed
         desc_calc = [RandomDescs(n=10, seed=42)]
         self.dataset.addDescriptors(desc_calc)
         descriptors_42 = self.dataset.getDescriptors()
         self.dataset.dropDescriptorSets(desc_calc, full_removal=True)
-        
+
         desc_calc = [RandomDescs(n=10, seed=42)]
         self.dataset.addDescriptors(desc_calc)
         self.assertTrue(np.array_equal(self.dataset.getDescriptors(), descriptors_42))
         self.dataset.dropDescriptorSets(desc_calc, full_removal=True)
-        
+
         desc_calc = [RandomDescs(n=10, seed=1)]
         self.dataset.addDescriptors(desc_calc)
         self.assertFalse(np.array_equal(self.dataset.getDescriptors(), descriptors_42))
         self.dataset.dropDescriptorSets(desc_calc, full_removal=True)
-        
+
         # test add missing values
         desc_calc = [RandomDescs(n=10, missing=0.1)]
         self.dataset.addDescriptors(desc_calc)
@@ -220,13 +232,13 @@ class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
         n_missing = 10 * len(self.dataset) * 0.1
         self.assertEqual(self.dataset.getDescriptors().isna().sum().sum(), n_missing)
         self.dataset.dropDescriptorSets(desc_calc, full_removal=True)
-        
+
         desc_calc = [RandomDescs(n=10, missing=4)]
         self.dataset.addDescriptors(desc_calc)
         self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 10))
         self.assertTrue(self.dataset.getDescriptors().any().any())
-        self.assertEqual(self.dataset.getDescriptors().isna().sum().sum(), (len(self.dataset) * 4))
-
+        self.assertEqual(self.dataset.getDescriptors().isna().sum().sum(),
+                         (len(self.dataset) * 4))
 
 # class TestDescriptorsAll(DataSetsPathMixIn, DescriptorInDataCheckMixIn, QSPRTestCase):
 #     """Test all descriptor sets in all data sets."""

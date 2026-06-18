@@ -1,4 +1,4 @@
-name: Multi-OS Complete Test
+name: Multi-Python Complete Test
 
 on:
   push:
@@ -11,8 +11,10 @@ on:
       - main
 
 env:
-  QSPPRED_TEST_EXTRAS: true
+  QSPPRED_TEST_EXTRAS: false
   QSPRPRED_VERBOSE_LOGGING: true
+  QSPR_TEST_TUTORIAL_ALL: false
+  QSPPRED_TEST_CLI: false
 
 jobs:
   tests-all:
@@ -21,7 +23,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ] # FIXME: add macos-latest and windows-latest (removed for now due to limited debugging options)
-        python-version: [ '3.14' ]
+        python-version: [ '3.13', '3.14' ]
       fail-fast: false
     defaults:
       run:

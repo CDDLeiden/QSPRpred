@@ -29,7 +29,7 @@ Overview of available features
 
             .. tab-item:: Core
 
-                * :class:`~qsprpred.data.storage.tabular.basic_storage.PandasChemStore`: PandasChemStore
+                * :class:`~qsprpred.data.storage.tabular.simple.PandasChemStore`: PandasChemStore
 
 
     .. dropdown:: SMILES Standardizers

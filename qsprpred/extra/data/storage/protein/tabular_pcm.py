@@ -2,7 +2,7 @@ from typing import Any, Callable, Iterable, Optional
 
 import pandas as pd
 
-from qsprpred.data.tables.pandas import PandasDataTable
+from qsprpred.data.tables.pnds import PandasDataTable
 from qsprpred.extra.data.storage.protein.interfaces.protein_storage import (
     ProteinStorage,
 )
@@ -21,13 +21,14 @@ class TabularProtein(StoredProtein):
         props (dict[str, Any]): properties of the protein
         representations (Iterable[TabularProtein]): representations of the protein
     """
+
     def __init__(
-        self,
-        protein_id: str,
-        sequence: str | None = None,
-        parent: Optional["TabularProtein"] = None,
-        props: dict[str, Any] | None = None,
-        representations: Iterable["TabularProtein"] | None = None,
+            self,
+            protein_id: str,
+            sequence: str | None = None,
+            parent: Optional["TabularProtein"] = None,
+            props: dict[str, Any] | None = None,
+            representations: Iterable["TabularProtein"] | None = None,
     ) -> None:
         """Create a new protein instance.
 
@@ -72,6 +73,11 @@ class TabularProtein(StoredProtein):
         """Get all representations of the protein."""
         return self._representations
 
+    @property
+    def parent(self) -> "TabularProtein":
+        """Get the parent protein."""
+        return self._parent
+
 
 class TabularProteinStorage(ProteinStorage, PandasDataTable):
     """A storage class for proteins stored in a tabular format.
@@ -82,21 +88,22 @@ class TabularProteinStorage(ProteinStorage, PandasDataTable):
         sequenceProp (str): name of the property that contains all protein sequences
         proteins (Iterable[TabularProtein]): all proteins in the store
     """
+
     def __init__(
-        self,
-        name: str,
-        df: pd.DataFrame | None = None,
-        sequence_col: str = "Sequence",
-        sequence_provider: Optional[Callable] = None,
-        store_dir: str = ".",
-        overwrite: bool = False,
-        index_cols: list[str] | None = None,
-        n_jobs: int = 1,
-        chunk_size: int | None = None,
-        protein_col: str = "accession",
-        random_state: int | None = None,
-        store_format: str = "pkl",
-        parallel_generator: ParallelGenerator | None = None,
+            self,
+            name: str,
+            df: pd.DataFrame | None = None,
+            sequence_col: str = "Sequence",
+            sequence_provider: Optional[Callable] = None,
+            store_dir: str = ".",
+            overwrite: bool = False,
+            index_cols: list[str] | None = None,
+            n_jobs: int = 1,
+            chunk_size: int | None = None,
+            protein_col: str = "accession",
+            random_state: int | None = None,
+            store_format: str = "pkl",
+            parallel_generator: ParallelGenerator | None = None,
     ):
         """Create a new protein storage instance.
 
@@ -210,7 +217,7 @@ class TabularProteinStorage(ProteinStorage, PandasDataTable):
             [protein.id],
             {
                 prop: [val]
-                for prop, val in protein.props
+                for prop, val in protein.props.items()
             },
             raise_on_existing,
         )

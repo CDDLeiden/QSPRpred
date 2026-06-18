@@ -6,8 +6,8 @@ From v3.2.1 to v4.0.0
 
 - The random state was not set correctly in the `DNNModel` class. `torch.manual_seed`
   was only called when initializing the model, but not when calling `loadEstimator`.
-  This could lead to different results when running the same assessment multiple times 
-  in the same session. Thus, results generated with older versions were reproducible 
+  This could lead to different results when running the same assessment multiple times
+  in the same session. Thus, results generated with older versions were reproducible
   across sessions, but not within the same session.
 - Fix conversion of continous target properties to classification targets in the `QSPRTable`
   class when missing values are present. The conversion was not done correctly, where
@@ -16,6 +16,9 @@ From v3.2.1 to v4.0.0
 - When initializing a `QSPRModel` without setting `random_state` a message would be
   displayed that the random state was set to a random integer. However, the random
   state would not actually be set. This message is now removed.
+- When using multiple processes to calculate descriptors it was possible to get non-deterministic order of compounds in
+  the descriptor set matrices. This could cause reproducibility issues of some workflows. Matrices should now be stored
+  in deterministic order.
 
 ## Changes
 
@@ -31,9 +34,9 @@ From v3.2.1 to v4.0.0
 - A new argument `drop_empty_target_props` was added to the `QSPRTable.fromDF` method to
   pass through to the init of `QSPRTable`.
 - Renamed `TargetProperty` to `TargetSpec` to better reflect its purpose and avoid
-  confusion with properties as referred to in the context of `MoleculeTable` and 
-  `QSPRTable`. The `QSPRTable.getTargetProperties` function was renamed to 
-  `QSPRTable.getTargetSpecs` and a function `QSPRTable.getTargetSpec` was added to 
+  confusion with properties as referred to in the context of `MoleculeTable` and
+  `QSPRTable`. The `QSPRTable.getTargetProperties` function was renamed to
+  `QSPRTable.getTargetSpecs` and a function `QSPRTable.getTargetSpec` was added to
   retrieve the `TargetSpec` of a single specified target property.
 - `QSPRTable.getTargetPropertyNames` was renamed to `QSPRTable.getTargetPropertiesNames`
 - `SKlearnStandardizer` was replaced by `SklearnStep` which makes use of the new
@@ -42,22 +45,21 @@ From v3.2.1 to v4.0.0
 - `QSPRTable.dropEmptyProperties` was removed and this functionality is now covered by
   the new `MoleculeTable.dropEmptyEntries` method.
 - `MLChemADWrapper` was renamed to `MLChemAD`
-- `TemporalPerTarget` split arguments `year_col`, `split_years`, 
+- `TemporalPerTarget` split arguments `year_col`, `split_years`,
   `firts_year_per_compound`, and `dataset` were renamed to `time_prop`, `split_time`,
   `first_time_per_compound`, and `data_set`, respectively.
-- `CrossValAssessor` and `TestSetAssessor` are replaced by one class `Assessor`. which 
-  provides a unified interface for assessing models on different data splits. The 
-  `Assessor` class can be used with any `DataSetPipeline` and `DataSplit`. Also 
+- `CrossValAssessor` and `TestSetAssessor` are replaced by one class `Assessor`. which
+  provides a unified interface for assessing models on different data splits. The
+  `Assessor` class can be used with any `DataSetPipeline` and `DataSplit`. Also
   training set predictions are now saved in addition to the test set predictions.
 - The `QSPRTable.split` method no longer saves the train-test split, but returns the
   an generator that can iterate over the train-test indices for multiple folds.
   To save splits to the `QSPRTable` a function `addSplit` was added. Now multiple
   different splits can be added to a `QSPRTable` instance, which may be retrieved using
-  the new `iterSplit` method by name. For more information, see the 
+  the new `iterSplit` method by name. For more information, see the
   [data splitting tutorial](./tutorials/basics/data/data_splitting.ipynb).
 - Option was added to `ManualSplit` that makes it possible to return multiple splits. 
   Is used when `splitprop` is list.
-
 
 ## New Features
 
@@ -72,15 +74,15 @@ From v3.2.1 to v4.0.0
 - A new API definition (`Step`) was added. It describes a single processing step in a
   data pipeline and ensures all preprocessing steps can easily be applied in a
   customizable but consistent way.
-- `DummyStep` (does nothing) and `Shuffle` (shuffles the entries) were added as basic 
+- `DummyStep` (does nothing) and `Shuffle` (shuffles the entries) were added as basic
   `Step` data processing steps.
 - All implementations of `DataFilter` (`CategoryFilter` and `RepeatsFilter`)
   now conform to the `Step` API. Also `NaNFilter` (removes rows with NaN values) and
   `OutlierFilter` (removes rows with outlier feature values) were added.
 - All implementations of `FeatureFilter` (`LowVarianceFilter`, `HighCorrelationFilter`,
   `BorutaFilter`) now conform to the `Step` API.
-- A new API definition `Imputer` (implementation of `Step` API) was added to handle 
-  missing values in the dataset. `TargetImputer` and `FeatureImputer` classes were 
+- A new API definition `Imputer` (implementation of `Step` API) was added to handle
+  missing values in the dataset. `TargetImputer` and `FeatureImputer` classes were
   introduced to specifically address missing values in target and feature columns.
 - A new API definition `TargetTransformer` (implementation of `Step` API) was added to
   transform target variables in the dataset. `SimpleTargetTransformer` was added which
@@ -90,20 +92,29 @@ From v3.2.1 to v4.0.0
   return the values of the specified target properties/property.
 - A new descriptor set `RandomDescs` was added. It returns random numbers as
   descriptors for testing purposes.
+- EXPERIMENTAL/WIP: It is now possible to to save representations of compounds in the `PandasRepresentationStore`. This
+  way conformers and protomers of compounds can be saved alongside canonical representations. Descriptors can also be
+  calculated for these representations as well, but the currently available models do not support this kind of input,
+  yet. Therefore, a custom `QSPRModel` needs to be derived or the existing ones adjusted.
 
 ## Removed Features
+
 - The `prepareDataset` method of `QSPRTable` is removed in favour of the new
   `DatasetPipeline` class, which provides a more flexible way to preprocess data for
   QSPR modeling. See the [New Features](#new-features) section for more information.
 - The `QSPRTable.hasFeatures`, `QSPRTable.getFeatureNames`, `QSPRTable.getFeatures`,
   `QSPRTable.shuffle`, `QSPRTable.fillMissing`, `QSPRTable.filterFeatures`,
   `QSPRTable.transformProperties`, `QSPRTable.imputeProperties`\
-  `MoleculeTable.imputeProperties`, `QSPRTable.getApplicability`, 
-  `QSPRTable.dropOutliers`, and `QSPRTable.setApplicabilityDomain` methods as well as 
-  the `QSPRTable.X`, `QSPRTable.y`, `QSPRTable.X_ind`, and `QSPRTable.y_ind` attributes 
-  were removed due to the change to the new `DataSetPipeline` class mentioned above. 
-  Alternatives to these functions are available as `Step` objects in the new pipeline 
+  `MoleculeTable.imputeProperties`, `QSPRTable.getApplicability`,
+  `QSPRTable.dropOutliers`, and `QSPRTable.setApplicabilityDomain` methods as well as
+  the `QSPRTable.X`, `QSPRTable.y`, `QSPRTable.X_ind`, and `QSPRTable.y_ind` attributes
+  were removed due to the change to the new `DataSetPipeline` class mentioned above.
+  Alternatives to these functions are available as `Step` objects in the new pipeline
   framework.
+- Modules under `qsprpred.extra` are no longer being maintained and tested on the CI pipeline. Therefore, it is possible
+  they may
+  become broken over time. Likewise, we also ended automtic testing and maintenance for `tutorials/advanced` notebooks
+  and the CLI.
 
 
   

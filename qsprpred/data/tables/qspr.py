@@ -2,18 +2,16 @@ import json
 import os
 from typing import Callable, Generator
 
+import numpy as np
 import pandas as pd
 
-
+from qsprpred.data.processing.target_transformers import Discretizer
+from qsprpred.data.sampling.splits import DataSplit
 from .interfaces.qspr_data_set import QSPRDataSet
+from .mol import MoleculeTable
+from ..storage.interfaces.chem_store import ChemStore
 from ...logs import logger
 from ...tasks import TargetSpec, TargetTasks
-from ..storage.interfaces.chem_store import ChemStore
-from .mol import MoleculeTable
-from qsprpred.data.sampling.splits import DataSplit
-from qsprpred.data.processing.data_filters import DataFilter
-from qsprpred.data.processing.target_transformers import Discretizer
-import numpy as np
 
 
 class QSPRTable(QSPRDataSet, MoleculeTable):
@@ -24,14 +22,14 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
     """
 
     def __init__(
-        self,
-        storage: ChemStore | None = None,
-        name: str | None = None,
-        target_props: list[TargetSpec | dict] | None = None,
-        path: str = ".",
-        random_state: int | None = None,
-        store_format: str = "pkl",
-        drop_empty_target_props: bool = True,
+            self,
+            storage: ChemStore | None = None,
+            name: str | None = None,
+            target_props: list[TargetSpec | dict] | None = None,
+            path: str = ".",
+            random_state: int | None = None,
+            store_format: str = "pkl",
+            drop_empty_target_props: bool = True,
     ):
         """Construct QSPRdata, also apply transformations of output property if
         specified.
@@ -72,7 +70,8 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
                 TargetSpec.fromJSON(json.dumps(x)) for x in target_props
             ]
         elif target_props is None:
-            raise ValueError("Target specifications must be specified for a new QSPRTable.")
+            raise ValueError(
+                "Target specifications must be specified for a new QSPRTable.")
         # populate feature matrix and target specifications
         self._targetProperties = []
         self.setTargetProperties(target_props, drop_empty_target_props)
@@ -98,14 +97,14 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
 
     @classmethod
     def fromDF(
-        cls,
-        name: str,
-        df: pd.DataFrame,
-        target_props: list[TargetSpec | dict],
-        path: str = ".",
-        smiles_col: str = "SMILES",
-        drop_empty_target_props: bool = True,
-        **kwargs,
+            cls,
+            name: str,
+            df: pd.DataFrame,
+            target_props: list[TargetSpec | dict],
+            path: str = ".",
+            smiles_col: str = "SMILES",
+            drop_empty_target_props: bool = True,
+            **kwargs,
     ) -> "QSPRTable":
         """Create `QSPRTable` from a pandas DataFrame.
 
@@ -123,18 +122,19 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
             QSPRTable: created data set
         """
         mt = super().fromDF(name, df, path, smiles_col, **kwargs)
-        return QSPRTable.fromMolTable(mt, target_props, name=name, path=path, drop_empty_target_props=drop_empty_target_props)
+        return QSPRTable.fromMolTable(mt, target_props, name=name, path=path,
+                                      drop_empty_target_props=drop_empty_target_props)
 
     @classmethod
     def fromTableFile(
-        cls,
-        name: str,
-        filename: str,
-        path: str,
-        *args,
-        sep: str = "\t",
-        target_props: list[TargetSpec | dict] | None = None,
-        **kwargs,
+            cls,
+            name: str,
+            filename: str,
+            path: str,
+            *args,
+            sep: str = "\t",
+            target_props: list[TargetSpec | dict] | None = None,
+            **kwargs,
     ):
         r"""Create `QSPRTable` from table file (i.e. CSV or TSV).
 
@@ -175,13 +175,13 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
 
     @classmethod
     def fromMolTable(
-        cls,
-        mol_table: MoleculeTable,
-        target_props: list[TargetSpec | dict],
-        *args,
-        path: str = ".",
-        name: str | None = None,
-        **kwargs,
+            cls,
+            mol_table: MoleculeTable,
+            target_props: list[TargetSpec | dict],
+            *args,
+            path: str = ".",
+            name: str | None = None,
+            **kwargs,
     ) -> "QSPRTable":
         """Create QSPRTable from a MoleculeTable.
 
@@ -219,7 +219,8 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         ds.descriptors = mol_table.descriptors
         return ds
 
-    def addTargetProperty(self, target_spec: TargetSpec | dict, drop_empty: bool = True):
+    def addTargetProperty(self, target_spec: TargetSpec | dict,
+                          drop_empty: bool = True):
         """Add a target property to the dataset.
 
         Args:
@@ -234,10 +235,10 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         if isinstance(target_spec, dict):
             target_spec = TargetSpec.fromDict(target_spec)
         assert (
-            target_spec.name in self.getProperties()
+                target_spec.name in self.getProperties()
         ), f"Property {target_spec.name} not found in data set."
         self.restoreTargetProperty(target_spec)
-        if target_spec.name in self.targetPropertiesNames:
+        if target_spec.name in self.getTargetPropertiesNames():
             logger.warning(
                 f"Target property '{target_spec}' already exists in dataset. It will be overwritten."
             )
@@ -262,10 +263,10 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         """
         if names is None:
             return self.targetProperties
-        if not all(name in self.targetPropertiesNames for name in names):
+        if not all(name in self.getTargetPropertiesNames() for name in names):
             logger.warning(
                 f"Some target properties {names} not found in dataset. "
-                f"Available target properties: {self.targetPropertiesNames}"
+                f"Available target properties: {self.getTargetPropertiesNames()}"
             )
         return [tp for tp in self.targetProperties if tp.name in names]
 
@@ -287,9 +288,9 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         raise ValueError(f"Target property '{name}' not found in dataset.")
 
     def setTargetProperties(
-        self,
-        target_props: list[TargetSpec | dict],
-        drop_empty: bool = True,
+            self,
+            target_props: list[TargetSpec | dict],
+            drop_empty: bool = True,
     ):
         """Set list of target properties for the dataset.
 
@@ -302,8 +303,8 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
                 `True`.
         """
         assert isinstance(target_props, list), (
-            "target_props should be a list of TargetSpec objects or dictionaries to "
-            "initialize TargetSpec objects from. Not a %s." % type(target_props)
+                "target_props should be a list of TargetSpec objects or dictionaries to "
+                "initialize TargetSpec objects from. Not a %s." % type(target_props)
         )
         if isinstance(target_props[0], dict):
             assert all(isinstance(d, dict) for d in target_props), (
@@ -330,10 +331,10 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         """
         name = name.name if isinstance(name, TargetSpec) else name
         assert (
-            name in self.targetPropertiesNames
+                name in self.getTargetPropertiesNames()
         ), f"Target property '{name}' not found in dataset."
         assert (
-            len(self.targetProperties) > 1
+                len(self.targetProperties) > 1
         ), "Cannot drop task from single-task dataset."
         self._targetProperties = [tp for tp in self.targetProperties if tp.name != name]
 
@@ -351,11 +352,11 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         else:
             # save original values for next reset
             self.addProperty(f"{prop.name}_original", self.getProperty(prop.name))
-    
+
     def makeClassification(
-        self,
-        target_property: str,
-        th: list[float] | None = None,
+            self,
+            target_property: str,
+            th: list[float] | None = None,
     ):
         """Switch to classification task using the given threshold values.
 
@@ -380,9 +381,9 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
                 "a list of at least 3 floats for multi-class classification."
             )
 
-        assert target_property in self.targetPropertiesNames, (
+        assert target_property in self.getTargetPropertiesNames(), (
             f"Target property '{target_property}' not found in dataset. "
-            f"Available target properties: {self.targetPropertiesNames} "
+            f"Available target properties: {self.getTargetPropertiesNames()} "
             f"To convert a regression task to classification, first add the "
             f"property as a target property with the "
             f"`addTargetProperty` method."
@@ -414,7 +415,8 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
                 )
             else:
                 discretizer = Discretizer(target=target_property, th=th)
-                target_values = discretizer.fitTransform(None, target_values)[1][target_property]
+                target_values = discretizer.fitTransform(None, target_values)[1][
+                    target_property]
                 self.addProperty(target_property, target_values)
 
             # update target specification
@@ -425,9 +427,9 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
                 target_spec.setTh(th, n_classes=n_classes)
             else:
                 target_spec.setTh(th)
-            logger.info(f"Target property '{target_property}' converted to classification.")
-        
-        
+            logger.info(
+                f"Target property '{target_property}' converted to classification.")
+
     def makeRegression(self, target_property: str):
         """Switch to regression task using the given target property.
 
@@ -441,10 +443,9 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
             del target_spec.th
         logger.info(f"Target property '{target_property}' converted to regression.")
 
-
     def checkClassification(
-        self,
-        target_property: str,
+            self,
+            target_property: str,
     ) -> bool:
         """Checks the validity of the target property for classification tasks.
 
@@ -460,10 +461,10 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         target_spec = self.getTargetSpec(target_property)
 
         if not all(
-            value is None or np.isnan(value) or (type(value) in (int, bool)) or
-            (isinstance(value, float) and value.is_integer())
-            for value in target_values
-        ):  
+                value is None or np.isnan(value) or (type(value) in (int, bool)) or
+                (isinstance(value, float) and value.is_integer())
+                for value in target_values
+        ):
             logger.warning(
                 f"Classification target property '{target_property}' "
                 "should only contain integers or booleans. "
@@ -502,11 +503,6 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         return True
 
     @property
-    def targetPropertiesNames(self) -> list[str]:
-        """Get the names of the target properties."""
-        return TargetSpec.getNames(self.targetProperties)
-
-    @property
     def isMultiTask(self) -> bool:
         """Check if the dataset contains multiple target properties.
 
@@ -526,8 +522,8 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         Returns:
             (pd.DataFrame): target property values
         """
-        return self.getDF()[self.targetPropertiesNames]
-    
+        return self.getDF()[self.getTargetPropertiesNames()]
+
     def getTarget(self, name: str | TargetSpec) -> pd.Series:
         """Get the target property values for the given target property.
 
@@ -539,16 +535,16 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         """
         if isinstance(name, TargetSpec):
             name = name.name
-        assert name in self.targetPropertiesNames, f"Target property '{name}' not found in dataset."
+        assert name in self.getTargetPropertiesNames(), f"Target property '{name}' not found in dataset."
         return self.getDF()[name]
 
     def getSubset(
-        self,
-        subset: list[str],
-        ids: list[str] | None = None,
-        name: str | None = None,
-        path: str = ".",
-        **kwargs,
+            self,
+            subset: list[str],
+            ids: list[str] | None = None,
+            name: str | None = None,
+            path: str = ".",
+            **kwargs,
     ) -> "QSPRTable":
         """Get a subset of the data set.
 
@@ -566,10 +562,11 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         """
         # add target properties if not already in the subset
         # as the QSPRTable requires them
-        subset = list(set(subset + self.targetPropertiesNames))
+        subset = list(set(subset + self.getTargetPropertiesNames()))
         mt = super().getSubset(subset, ids, name, path, **kwargs)
         ds = self.fromMolTable(
-            mt, self.targetProperties, name=mt.name, path=path, drop_empty_target_props=False, **kwargs
+            mt, self.targetProperties, name=mt.name, path=path,
+            drop_empty_target_props=False, **kwargs
         )
         return ds
 
@@ -586,11 +583,12 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         """
         self.splits[name] = {
             "split": split,
-            "ids": [(train_idx, test_idx) for train_idx, test_idx in self.split(split)],
+            "ids": [(train_idx.tolist(), test_idx.tolist()) for train_idx, test_idx in
+                    self.split(split)],
         }
 
     def getSplit(self, name: str, as_type: str = "split"
-        ) -> (DataSplit |list[tuple[pd.Index, pd.Index]]):
+                 ) -> (DataSplit | list[tuple[pd.Index, pd.Index]]):
         """Get the split with the given name.
 
         Args:
@@ -616,12 +614,14 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
             )
 
     def iterSplit(self, name: str, as_type: str = "ids"
-        ) -> (
+                  ) -> (
             Generator[tuple[pd.Index, pd.Index], None, None] |
-            Generator[tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray], None, None] |
-            Generator[tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame], None, None] |
+            Generator[
+                tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray], None, None] |
+            Generator[tuple[
+                pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame], None, None] |
             Generator[tuple["QSPRTable", "QSPRTable"], None, None]
-        ):
+    ):
         """Get the split with the given name.
 
         Args:
@@ -651,7 +651,7 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
             X = self.getDescriptors()
             y = self.getTargets()
             for ids in split["ids"]:
-                train_idx, test_idx = ids
+                train_idx, test_idx = ids[0], ids[1]
                 yield (
                     X.loc[train_idx].values,
                     y.loc[train_idx].values,
@@ -681,8 +681,8 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
             )
 
     def split(
-        self,
-        split: DataSplit,
+            self,
+            split: DataSplit,
     ) -> Generator[
         tuple[
             pd.Index,
@@ -696,6 +696,8 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
 
         Args:
             split (DataSplit): Split to apply to the data
+            X (pd.DataFrame): data to apply the split to
+            y (pd.DataFrame | None): target data to apply the split to
 
         Yields:
             pd.Index, pd.Index: indices of the train and test set
@@ -705,11 +707,9 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         if hasattr(split, "randomState"):
             if split.randomState is None:
                 split.randomState = self.randomState
-
         X = self.getDescriptors()
         y = self.getTargets()
         folds = split.split(X, y)
-
         for train_idx, test_idx in folds:
             # get QSPRTable indices from numerical index
             train_idx = X.index[train_idx]
@@ -729,11 +729,11 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
         Returns:
             QSPRTable: subset of the data set
         """
-        #FIXME: setting the random state here is not ideal, this should be done in the
+        # FIXME: setting the random state here is not ideal, this should be done in the
         # getSubset method
         return self.getSubset(self.getProperties(), ids, random_state=self.randomState)
 
-    def filter(self, table_filters: list[DataFilter]):
+    def filter(self, table_filters: list[Callable]):
         """Filter the data set using the given filters.
 
         Args:
@@ -750,5 +750,5 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
     def __setstate__(self, state):
         super().__setstate__(state)
         for split in self.splits.values():
-            if hasattr(split["split"], "setdataSet"):
+            if hasattr(split["split"], "setDataSet"):
                 split["split"].setDataSet(self)

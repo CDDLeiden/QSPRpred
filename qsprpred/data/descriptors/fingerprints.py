@@ -22,6 +22,7 @@ class Fingerprint(DescriptorSet, ABC):
         isFP (bool): Whether the descriptor is a fingerprint
         dtype (type): Data type of the descriptor
     """
+
     def __init__(self, used_bits: list[int] | None = None):
         """Initialize the fingerprint.
 
@@ -48,7 +49,7 @@ class Fingerprint(DescriptorSet, ABC):
     @property
     def descriptors(self) -> list[str]:
         """list of descriptors."""
-        return [f"{self}_{i}" for i in self.usedBits]
+        return [str(i) for i in self.usedBits]
 
     @descriptors.setter
     def descriptors(self, value: list[str]):
@@ -81,11 +82,11 @@ class Fingerprint(DescriptorSet, ABC):
         return [Chem.AddHs(mol) for mol in self.iterMols(mols)]
 
     def __call__(
-        self,
-        mols: list[str | Mol | StoredMol],
-        props: dict[str, list[Any]] | None = None,
-        *args,
-        **kwargs,
+            self,
+            mols: list[str | Mol | StoredMol],
+            props: dict[str, list[Any]] | None = None,
+            *args,
+            **kwargs,
     ) -> pd.DataFrame:
         """Calculate binary fingerprints for the input molecules. Only the bits
         specified by `usedBits` will be returned if more bits are calculated.
@@ -111,7 +112,7 @@ class Fingerprint(DescriptorSet, ABC):
         df = pd.DataFrame(
             values,
             index=pd.Index(props[self.idProp], name=self.idProp),
-            columns=self.transformToFeatureNames(),
+            columns=self.descriptors,
         )
         return df
 
@@ -126,6 +127,7 @@ class MorganFP(Fingerprint):
             additional keyword arguments to pass to RDKit's
             `GetMorganFingerprintAsBitVect` function
     """
+
     def __init__(self, radius=2, nBits=2048, **kwargs):
         """Initialize the Morgan fingerprint.
 
@@ -140,7 +142,7 @@ class MorganFP(Fingerprint):
         self.kwargs = kwargs
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         """Calculate the Morgan fingerprints for the input molecules.
 
@@ -173,8 +175,9 @@ class MorganFP(Fingerprint):
 
 class RDKitMACCSFP(Fingerprint):
     """RDKits implementation of MACCS keys fingerprint."""
+
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         """Calculate the MACCS keys fingerprints for the input molecules.
 
@@ -214,6 +217,7 @@ class MaccsFP(Fingerprint):
             additional keyword arguments to pass to RDKit's `GetMACCSKeysFingerprint`
             function
     """
+
     def __init__(self, nBits=167, **kwargs):
         """Initialize the MACCS keys fingerprint.
 
@@ -228,7 +232,7 @@ class MaccsFP(Fingerprint):
         self.kwargs = kwargs
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         """Calculate the MACCS keys fingerprints for the input molecules.
 
@@ -264,6 +268,7 @@ class AvalonFP(Fingerprint):
         nBits (int): number of bits in the fingerprint
         kwargs (dict): additional keyword arguments to pass to Avalon's `GetAvalonFP`
     """
+
     def __init__(self, nBits=1024, **kwargs):
         """Initialize the Avalon fingerprint.
 
@@ -277,7 +282,7 @@ class AvalonFP(Fingerprint):
         self.kwargs = kwargs
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         """Calculate the Avalon fingerprints for the input molecules.
 
@@ -315,6 +320,7 @@ class TopologicalFP(Fingerprint):
             additional keyword arguments to pass to RDKit's
             `GetHashedTopologicalTorsionFingerprintAsBitVect` function
     """
+
     def __init__(self, nBits=2048, **kwargs):
         """Initialize the topological torsion fingerprint.
 
@@ -327,7 +333,7 @@ class TopologicalFP(Fingerprint):
         self.kwargs = kwargs
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         """Calculate the topological torsion fingerprints for the input molecules.
 
@@ -367,6 +373,7 @@ class AtomPairFP(Fingerprint):
             additional keyword arguments to pass to RDKit's
             `GetHashedAtomPairFingerprintAsBitVect` function
     """
+
     def __init__(self, nBits=2048, **kwargs):
         """Initialize the atom pair fingerprint.
 
@@ -381,7 +388,7 @@ class AtomPairFP(Fingerprint):
         self.kwargs = kwargs
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         """Calculate the atom pair fingerprints for the input molecules.
 
@@ -423,6 +430,7 @@ class RDKitFP(Fingerprint):
         nBits (int): number of bits in the fingerprint
         kwargs (dict): additional keyword arguments to pass to RDKit's `RDKFingerprint`
     """
+
     def __init__(self, minPath=1, maxPath=7, nBits=2048, **kwargs):
         """Initialize the RDKit fingerprint.
 
@@ -440,7 +448,7 @@ class RDKitFP(Fingerprint):
         self.kwargs = kwargs
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         """Calculate the RDKit fingerprints for the input molecules.
 
@@ -483,6 +491,7 @@ class PatternFP(Fingerprint):
         kwargs (dict):
             additional keyword arguments to pass to RDKit's `PatternFingerprint`
     """
+
     def __init__(self, nBits=2048, **kwargs):
         """Initialize the pattern fingerprint.
 
@@ -496,7 +505,7 @@ class PatternFP(Fingerprint):
         self.kwargs = kwargs
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         """Calculate the pattern fingerprints for the input molecules.
 
@@ -537,6 +546,7 @@ class LayeredFP(Fingerprint):
         kwargs (dict):
             additional keyword arguments to pass to RDKit's `LayeredFingerprint`
     """
+
     def __init__(self, minPath=1, maxPath=7, nBits=2048, **kwargs):
         """Initialize the layered fingerprint.
 
@@ -554,7 +564,7 @@ class LayeredFP(Fingerprint):
         self.kwargs = kwargs
 
     def getDescriptors(
-        self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
+            self, mols: list[Mol], props: dict[str, list[Any]], *args, **kwargs
     ) -> np.ndarray:
         """Calculate the layered fingerprints for the input molecules.
 

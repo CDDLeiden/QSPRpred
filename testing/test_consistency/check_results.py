@@ -29,14 +29,16 @@ for f in os.listdir("expected"):
             expected_file_path = f"expected/{relative_file_path}"
             actual_file_path = f"{models_base}/{relative_file_path}"
 
+            expected_values = pd.read_csv(expected_file_path, sep="\t")
             expected_values = (
-                pd.read_csv(expected_file_path, sep="\t")
-                .set_index("ID", drop=True)
+                expected_values
+                .set_index(expected_values.columns[0], drop=True)
                 .sort_index()
             )
+            actual_values = pd.read_csv(actual_file_path, sep="\t")
             actual_values = (
-                pd.read_csv(actual_file_path, sep="\t")
-                .set_index("ID", drop=True)
+                actual_values
+                .set_index(actual_values.columns[0], drop=True)
                 .sort_index()
             )
             assert expected_values.columns.equals(

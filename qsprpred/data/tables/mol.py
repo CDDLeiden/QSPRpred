@@ -11,15 +11,14 @@ from qsprpred.data.processing.mol_processor import MolProcessor
 from qsprpred.data.storage.interfaces.chem_store import ChemStore
 from qsprpred.data.storage.interfaces.property_storage import PropertyStorage
 from qsprpred.data.storage.interfaces.stored_mol import StoredMol
-from qsprpred.data.storage.tabular.basic_storage import PandasChemStore
-
+from qsprpred.data.storage.tabular.simple import PandasChemStore
+from .descriptor import DescriptorTable
+from .interfaces.molecule_data_set import MoleculeDataSet
+from ..chem.identifiers import ChemIdentifier
+from ..chem.standardizers import ChemStandardizer
 from ...data.chem.scaffolds import Scaffold
 from ...logs import logger
 from ...utils.parallel import Parallelizable
-from ..chem.identifiers import ChemIdentifier
-from ..chem.standardizers import ChemStandardizer
-from .descriptor import DescriptorTable
-from .interfaces.molecule_data_set import MoleculeDataSet
 
 
 class MoleculeTable(MoleculeDataSet, Parallelizable):
@@ -40,12 +39,12 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
     _notJSON: ClassVar = [*PropertyStorage._notJSON, "descriptors", "storage"]
 
     def __init__(
-        self,
-        storage: ChemStore | None = None,
-        name: str | None = None,
-        path: str = ".",
-        random_state: int | None = None,
-        store_format: str = "pkl",
+            self,
+            storage: ChemStore | None = None,
+            name: str | None = None,
+            path: str = ".",
+            random_state: int | None = None,
+            store_format: str = "pkl",
     ):
         """Initialize a `MoleculeTable` object.
 
@@ -60,7 +59,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
             store_format (str): Format to use for storing the data set.
         """
         assert (
-            storage is not None or name is not None
+                storage is not None or name is not None
         ), "Either storage or name must be provided."
         self.descriptors = []
         self.randomState = random_state
@@ -100,7 +99,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
     @randomState.setter
     def randomState(self, seed: int | None):
         """Set the random state to use for shuffling and other random ops."""
-        self._randomState = seed or int(np.random.randint(0, 2**31 - 1, dtype=np.int64))
+        self._randomState = seed or int(np.random.randint(0, 2 ** 31 - 1, dtype=np.int64))
 
     @property
     def name(self) -> str:
@@ -111,13 +110,13 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
     def name(self, name: str):
         """Set the name of the data set."""
         self._name = name
-        self.path = os.path.abspath(os.path.join(self.rootDir, self.name))
+        self.path = os.path.abspath(os.path.join(self.rootDir, self.name)) + os.sep
 
     def sample(
-        self,
-        n: int,
-        name: str | None = None,
-        random_state: int | None = None
+            self,
+            n: int,
+            name: str | None = None,
+            random_state: int | None = None
     ) -> "MoleculeTable":
         """Sample n molecules from the table.
 
@@ -232,12 +231,12 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
 
     @classmethod
     def fromDF(
-        cls,
-        name: str,
-        df: pd.DataFrame,
-        path: str = ".",
-        smiles_col: str = "SMILES",
-        **kwargs,
+            cls,
+            name: str,
+            df: pd.DataFrame,
+            path: str = ".",
+            smiles_col: str = "SMILES",
+            **kwargs,
     ) -> "MoleculeTable":
         """Create a `MoleculeTable` instance from a pandas DataFrame.
 
@@ -280,7 +279,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
 
     @classmethod
     def fromTableFile(
-        cls, name: str, filename: str, path: str, *args, sep="\t", **kwargs
+            cls, name: str, filename: str, path: str, *args, sep="\t", **kwargs
     ):
         """Create a `MoleculeTable` instance from a file containing a table of molecules
         (i.e. a CSV file).
@@ -303,7 +302,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
 
     @classmethod
     def fromSDF(
-        cls, name: str, filename: str, path: str, smiles_prop: str, *args, **kwargs
+            cls, name: str, filename: str, path: str, smiles_prop: str, *args, **kwargs
     ):
         """Create a `MoleculeTable` instance from an SDF file.
 
@@ -337,10 +336,10 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         return self.storage.smiles
 
     def addScaffolds(
-        self,
-        scaffolds: list[Scaffold],
-        add_rdkit_scaffold: bool = False,
-        recalculate: bool = False,
+            self,
+            scaffolds: list[Scaffold],
+            add_rdkit_scaffold: bool = False,
+            recalculate: bool = False,
     ):
         """Add scaffolds to the data frame.
 
@@ -371,9 +370,9 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
                 )
 
     def getScaffoldNames(
-        self,
-        scaffolds: list[Scaffold] | None = None,
-        include_mols: bool = False
+            self,
+            scaffolds: list[Scaffold] | None = None,
+            include_mols: bool = False
     ) -> list[str]:
         """Get the names of the scaffolds in the data frame.
 
@@ -386,7 +385,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         """
         all_names = [
             col for col in self.getProperties() if col.startswith("Scaffold_") and
-            (include_mols or not col.endswith("_RDMol"))
+                                                   (include_mols or not col.endswith("_RDMol"))
         ]
         if scaffolds:
             wanted = [str(x) for x in scaffolds]
@@ -394,9 +393,9 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         return all_names
 
     def getScaffolds(
-        self,
-        scaffolds: list[Scaffold] | None = None,
-        include_mols: bool = False
+            self,
+            scaffolds: list[Scaffold] | None = None,
+            include_mols: bool = False
     ) -> pd.DataFrame:
         """Get the subset of the data frame that contains only scaffolds.
 
@@ -443,7 +442,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
             self.storage.addProperty(name, groups)
 
     def getScaffoldGroups(
-        self, scaffold_name: str, mol_per_group: int = 10
+            self, scaffold_name: str, mol_per_group: int = 10
     ) -> pd.Series:
         """Get the scaffold groups for a given combination of scaffold and number of
         molecules per scaffold group.
@@ -468,12 +467,12 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
             (bool): Whether the data frame contains scaffold groups.
         """
         return (
-            len(
-                [
-                    col
-                    for col in self.getProperties() if col.startswith("ScaffoldGroup_")
-                ]
-            ) > 0
+                len(
+                    [
+                        col
+                        for col in self.getProperties() if col.startswith("ScaffoldGroup_")
+                    ]
+                ) > 0
         )
 
     @property
@@ -539,9 +538,9 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
             ds.keepDescriptors(to_keep)
 
     def dropDescriptorSets(
-        self,
-        descriptors: list[DescriptorSet | str],
-        full_removal: bool = False,
+            self,
+            descriptors: list[DescriptorSet | str],
+            full_removal: bool = False,
     ):
         """Drop descriptors from the given sets from the data frame.
 
@@ -561,7 +560,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         """
         # sanity check
         assert (
-            len(self.descriptors) != 0
+                len(self.descriptors) != 0
         ), "Cannot drop descriptors because the data set does not contain any."
         if len(descriptors) == 0:
             logger.warning(
@@ -611,10 +610,10 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
                 )
 
     def attachDescriptors(
-        self,
-        calculator: DescriptorSet,
-        descriptors: pd.DataFrame,
-        index_cols: list,
+            self,
+            calculator: DescriptorSet,
+            descriptors: pd.DataFrame,
+            index_cols: list,
     ):
         """Attach descriptors to the data frame.
 
@@ -637,11 +636,11 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         )
 
     def addDescriptors(
-        self,
-        descriptors: list[DescriptorSet],
-        recalculate: bool = False,
-        *args,
-        **kwargs,
+            self,
+            descriptors: list[DescriptorSet],
+            recalculate: bool = False,
+            *args,
+            **kwargs,
     ):
         """Add descriptors to the data frame with the given descriptor calculators.
 
@@ -675,7 +674,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         for calculator in to_calculate:
             df_descriptors = []
             for result in self.storage.processMols(
-                calculator, proc_args=args, proc_kwargs=kwargs
+                    calculator, proc_args=args, proc_kwargs=kwargs
             ):
                 if not isinstance(result, pd.DataFrame):
                     raise ValueError(
@@ -685,18 +684,24 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
                 result[self.idProp] = result.index.values
                 df_descriptors.append(result)
             df_descriptors = pd.concat(df_descriptors, axis=0)
-            before = list(df_descriptors.columns)
-            df_descriptors = df_descriptors[[
-                *calculator.transformToFeatureNames(), self.idProp
-            ]]
-            after = list(df_descriptors.columns)
-            if len(before) != len(after):
+            df_descriptors.sort_index(inplace=True)
+            cols = df_descriptors.columns.tolist()
+            if len(calculator.descriptors) == 0:
+                calculator.descriptors = [x for x in cols if x != self.idProp]
+            before = len(cols) - 1
+            df_descriptors = df_descriptors[[*calculator.descriptors, self.idProp]]
+            after = len(df_descriptors.columns) - 1
+            if before != after:
                 logger.warning(
                     f"Descriptor set {calculator} has been reduced from "
-                    f"{len(before)} to {len(after)} descriptors."
+                    f"{before} to {after} descriptors."
                     "Returned data frame contained more columns than expected."
-                    f"Extra columns: {set(before) - set(after)}"
+                    f"Extra columns: {set(cols) - set(df_descriptors.columns)}"
                 )
+            df_descriptors = df_descriptors[[*calculator.descriptors,
+                                             self.idProp]]
+            df_descriptors.columns = [*calculator.transformToFeatureNames(),
+                                      self.idProp]
             self.attachDescriptors(calculator, df_descriptors, [self.idProp])
 
     def getDescriptors(self, active_only: bool = True) -> pd.DataFrame:
@@ -705,12 +710,14 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         Returns:
             pd.DataFrame: Data frame containing only descriptors.
         """
-        ret = pd.DataFrame(
-            index=pd.Index(self.getProperty(self.idProp), name=self.idProp)
-        )
+        ret = None
         for descriptors in self.descriptors:
             df_descriptors = descriptors.getDescriptors(active_only=active_only)
-            ret = ret.join(df_descriptors, how="left")
+            ret = ret.join(df_descriptors,
+                           how="left") if ret is not None else df_descriptors
+        if ret is None:
+            ret = pd.DataFrame(
+                index=pd.Index(self.getProperty(self.idProp), name=self.idProp))
         return ret
 
     def getDescriptorNames(self) -> list[str]:
@@ -725,8 +732,8 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         return names
 
     def hasDescriptors(
-        self,
-        descriptors: list[DescriptorSet | str] | None = None
+            self,
+            descriptors: list[DescriptorSet | str] | None = None
     ) -> bool | list[bool]:
         """Check whether the data frame contains given descriptors.
 
@@ -798,12 +805,12 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         return self.storage.removeProperty(name)
 
     def getSubset(
-        self,
-        subset: Iterable[str],
-        ids: Iterable[str] | None = None,
-        name: str | None = None,
-        path: str = ".",
-        **kwargs,
+            self,
+            subset: Iterable[str],
+            ids: Iterable[str] | None = None,
+            name: str | None = None,
+            path: str = ".",
+            **kwargs,
     ) -> "MoleculeTable":
         """Get a subset of the data frame.
 
@@ -836,7 +843,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         return ret
 
     def transformProperties(
-        self, names: list[str], transformer: Callable[[Iterable[Any]], Iterable[Any]]
+            self, names: list[str], transformer: Callable[[Iterable[Any]], Iterable[Any]]
     ):
         """Transform the properties of the data frame.
 
@@ -855,12 +862,12 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         return self.storage.getDF()
 
     def apply(
-        self,
-        func: callable,
-        func_args: list | None = None,
-        func_kwargs: dict | None = None,
-        on_props: tuple[str, ...] | None = None,
-        chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
+            self,
+            func: callable,
+            func_args: list | None = None,
+            func_kwargs: dict | None = None,
+            on_props: tuple[str, ...] | None = None,
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
     ) -> Generator[Iterable[Any], None, None]:
         """Apply a function to the data set.
 
@@ -887,7 +894,7 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         self.storage.dropEntries(ids)
         for dset in self.descriptors:
             dset.dropEntries(ids)
-            
+
     def dropEmptyEntries(self, names: list[str]):
         """Drop rows with missing values in the properties.
 
@@ -906,7 +913,10 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         self.dropEntries(to_drop)
 
     def addEntries(
-        self, ids: list[str], props: dict[str, list], raise_on_existing: bool = True
+            self,
+            ids: list[str],
+            props: dict[str, list],
+            raise_on_existing: bool = True
     ):
         """Add entries to the data set.
 
@@ -962,10 +972,10 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         return ret
 
     def iterChunks(
-        self,
-        size: int | None = None,
-        on_props: list | None = None,
-        chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
+            self,
+            size: int | None = None,
+            on_props: list | None = None,
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
     ) -> Generator[list[StoredMol], None, None]:
         """Iterate over chunks of the data set.
 
@@ -993,12 +1003,12 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         raise NotImplementedError("Summary not yet available for MoleculeTable.")
 
     def searchWithSMARTS(
-        self,
-        patterns: list[str],
-        operator: Literal["or", "and"] = "or",
-        use_chirality: bool = False,
-        name: str | None = None,
-        path: str = ".",
+            self,
+            patterns: list[str],
+            operator: Literal["or", "and"] = "or",
+            use_chirality: bool = False,
+            name: str | None = None,
+            path: str = ".",
     ) -> "MoleculeTable":
         """Search the data set with SMARTS patterns.
 
@@ -1026,12 +1036,12 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         )
 
     def searchOnProperty(
-        self,
-        prop_name: str,
-        values: list[float | int | str],
-        exact=False,
-        name: str | None = None,
-        path: str = ".",
+            self,
+            prop_name: str,
+            values: list[float | int | str],
+            exact=False,
+            name: str | None = None,
+            path: str = ".",
     ) -> "MoleculeTable":
         """Search the data set based on a property.
 
@@ -1050,9 +1060,9 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         return self.getSubset(self.getProperties(), mol_ids, name=name, path=path)
 
     def addClusters(
-        self,
-        clusters: list[MoleculeClusters],
-        recalculate: bool = False,
+            self,
+            clusters: list[MoleculeClusters],
+            recalculate: bool = False,
     ):
         """Add clusters to the data frame.
 
@@ -1072,8 +1082,10 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
                     f"Cluster_{cluster}", _clusters.values, _clusters.index.values
                 )
 
-    def getClusterNames(self,
-                        clusters: list[MoleculeClusters] | None = None) -> list[str]:
+    def getClusterNames(
+            self,
+            clusters: list[MoleculeClusters] | None = None
+    ) -> list[str]:
         """Get the names of the clusters in the data frame.
 
         Args:
@@ -1110,12 +1122,12 @@ class MoleculeTable(MoleculeDataSet, Parallelizable):
         return len(self.getClusterNames()) > 0
 
     def processMols(
-        self,
-        processor: MolProcessor,
-        proc_args: tuple[Any, ...] | None = None,
-        proc_kwargs: dict[str, Any] | None = None,
-        mol_type: Literal["smiles", "mol", "rdkit"] = "mol",
-        add_props: Iterable[str] | None = None,
+            self,
+            processor: MolProcessor,
+            proc_args: tuple[Any, ...] | None = None,
+            proc_kwargs: dict[str, Any] | None = None,
+            mol_type: Literal["smiles", "mol", "rdkit"] = "mol",
+            add_props: Iterable[str] | None = None,
     ) -> Generator[Any, None, None]:
         """Process molecules in the data set.
 

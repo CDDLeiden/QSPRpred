@@ -1,7 +1,10 @@
 import os
 import shutil
+import uuid
+from abc import ABC, abstractmethod
 from typing import Any, Callable, ClassVar, Generator, Iterable, Literal, Sized
 
+import numpy as np
 import pandas as pd
 from rdkit import Chem
 
@@ -11,20 +14,168 @@ from qsprpred.data.chem.standardizers import ChemStandardizer
 from qsprpred.data.chem.standardizers.base import ChemStandardizationException
 from qsprpred.data.processing.mol_processor import MolProcessor
 from qsprpred.data.storage.interfaces.chem_store import ChemStore
-from qsprpred.data.storage.interfaces.searchable import SMARTSSearchable
+from qsprpred.data.storage.interfaces.searchable import SMARTSSearchable, PropSearchable
 from qsprpred.data.storage.interfaces.stored_mol import StoredMol
 from qsprpred.data.storage.tabular.stored_mol import TabularMol
-from qsprpred.data.tables.pandas import PandasDataTable
+from qsprpred.data.tables.pnds import PandasDataTable
 from qsprpred.logs import logger
 from qsprpred.utils.interfaces.summarizable import Summarizable
 from qsprpred.utils.parallel import (
-    MultiprocessingJITGenerator,
-    ParallelGenerator,
-    Parallelizable,
+    PebbleJITGenerator,
+    ParallelGenerator, Parallelizable,
 )
 
 
-class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable):
+class ParallelizedChemStore(
+    ChemStore,
+    SMARTSSearchable,
+    PropSearchable,
+    Summarizable,
+    Parallelizable,
+    ABC
+):
+    """Base class with default implementations of some parallel processing features
+    for `ChemStore` instances that want to support it. The mixin basically defines
+    some methods required by the `ChunkIterable` and `MolProcessable` interfaces to make
+    implementation of parallel processing for downstream instances of `ChemStore`
+    easier.
+    """
+
+    @property
+    @abstractmethod
+    def chunkProcessor(self) -> ParallelGenerator:
+        """Parallel generator to use for processing."""
+
+    def apply(
+            self,
+            func: callable,
+            func_args: list | None = None,
+            func_kwargs: dict | None = None,
+            on_props: tuple[str, ...] | None = None,
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
+            chunk_processor: ParallelGenerator | None = None,
+            no_parallel: bool = False,
+    ) -> Generator[Iterable[Any], None, None]:
+        """Apply a function to the molecules in the data frame.
+
+        Args:
+            func (callable): Function to apply to the molecules.
+            func_args (list, optional): Additional arguments to pass to the function.
+            func_kwargs (dict, optional):
+                Additional keyword arguments to pass to the function.
+            on_props (tuple, optional):
+                Properties to pass to the function. If `None`, all properties will be
+                passed.
+            chunk_type (str, optional):
+                Type of molecule to send to the function. Can be 'smiles', 'mol', or
+                'rdkit'. Defaults to 'mol', which implies `TabularMol` objects.
+            chunk_processor (ParallelGenerator, optional):
+                The parallel generator to use for processing. If not specified,
+                `self.chunkProcessor` is used.
+            no_parallel (bool, optional):
+                Whether to use parallel processing. Defaults to `False`.
+
+        Returns:
+            (Generator):
+                A generator that yields the results of the supplied function on the
+                chunked molecules from the data set.
+        """
+        chunk_processor = chunk_processor or self.chunkProcessor
+        func_args = func_args or []
+        func_kwargs = func_kwargs or {}
+        if self.nJobs > 1 and not no_parallel:
+            for result in chunk_processor(
+                    self.iterChunks(
+                        self.chunkSize, chunk_type=chunk_type, on_props=on_props
+                    ),
+                    func,
+                    *func_args,
+                    **func_kwargs,
+            ):
+                yield result
+        else:
+            # do not use the parallel generator if n_jobs is 1
+            for chunk in self.iterChunks(
+                    self.chunkSize, chunk_type=chunk_type, on_props=on_props
+            ):
+                yield func(chunk, *func_args, **func_kwargs)
+
+    def processMols(
+            self,
+            processor: MolProcessor,
+            proc_args: Iterable[Any] | None = None,
+            proc_kwargs: dict[str, Any] | None = None,
+            mol_type: Literal["smiles", "mol", "rdkit"] = "mol",
+            add_props: Iterable[str] | None = None,
+            chunk_processor: ParallelGenerator | None = None,
+    ) -> Generator:
+        """Apply a function to the molecules in the data frame.
+        The SMILES  or an RDKit molecule will be supplied as the first
+        positional argument to the function. Additional properties
+        to provide from the data set can be specified with 'add_props', which will be
+        a dictionary supplied as an additional positional argument to the function.
+
+        IMPORTANT: For successful parallel processing with `multiprocessing`,
+        the processor must be picklable.
+        Also note that
+        the returned generator may only produce results as soon as they are ready,
+        which means that the chunks of data may
+        not be in the same order as the original data frame. However, you can pass the
+        value of `idProp` in `add_props` to identify the processed molecules or
+        use `MolProcessorWithID` as the processor.
+
+        Args:
+            processor (MolProcessor):
+                `MolProcessor` object to use for processing.
+            proc_args (list, optional):
+                Any additional positional arguments to pass to the processor.
+            proc_kwargs (dict, optional):
+                Any additional keyword arguments to pass to the processor.
+            mol_type (str, optional):
+                Type of molecule to send to the processor. Can be 'smiles', 'mol', or
+                'rdkit'. Defaults to 'mol', which implies `TabularMol` objects.
+            add_props (list, optional):
+                List of data set properties to send to the processor. If `None`, all
+                properties will be sent.
+            chunk_processor (ParallelGenerator, optional):
+                The parallel generator to use for processing. If not specified,
+                `self.chunkProcessor` is used.
+
+        Returns:
+            Generator:
+                A generator that yields the results of the supplied processor on
+                the chunked molecules from the data set.
+        """
+        if hasattr(processor, "idProp"):
+            processor.idProp = self.idProp
+        proc_args = proc_args or ()
+        proc_kwargs = proc_kwargs or {}
+        if add_props is None:
+            add_props = self.getProperties()
+        else:
+            add_props = list(add_props)
+        add_props = add_props + list(processor.requiredProps)
+        chunk_processor = chunk_processor or self.chunkProcessor
+        for prop in add_props:
+            if prop not in self.getProperties():
+                raise ValueError(
+                    f"Cannot apply function '{processor}' to {self} because "
+                    f"it requires the property '{prop}', which is not present in the "
+                    "data set."
+                )
+        for result in self.apply(
+                processor,
+                func_args=proc_args,
+                func_kwargs=proc_kwargs,
+                on_props=add_props,
+                chunk_type=mol_type,
+                chunk_processor=chunk_processor,
+                no_parallel=not processor.supportsParallel,
+        ):
+            yield result
+
+
+class PandasChemStore(ParallelizedChemStore):
     """Tabular storage for molecules. An example implementations of `ChemStore`
     that uses `PandasDataTable` to store the data.
 
@@ -40,21 +191,22 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
     _notJSON: ClassVar = [*ChemStore._notJSON, "_libraries"]
 
     def __init__(
-        self,
-        name: str,
-        path: str,
-        df: pd.DataFrame | None = None,
-        smiles_col: str = "SMILES",
-        add_rdkit: bool = False,
-        overwrite: bool = False,
-        save: bool = False,
-        standardizer=None,
-        identifier=None,
-        id_col: str = "ID",
-        store_format: str = "pkl",
-        chunk_processor: ParallelGenerator = None,
-        chunk_size: int | None = None,
-        n_jobs: int = 1,
+            self,
+            name: str,
+            path: str,
+            df: pd.DataFrame | None = None,
+            smiles_col: str = "SMILES",
+            add_rdkit: bool = False,
+            overwrite: bool = False,
+            save: bool = False,
+            standardizer=None,
+            identifier=None,
+            id_col: str | None = None,
+            autoindex_name: str | None = None,
+            store_format: str = "pkl",
+            chunk_processor: ParallelGenerator = None,
+            chunk_size: int | None = None,
+            n_jobs: int = 1,
     ):
         """Initialize the storage. If the storage with the given name already exists
         in the destination it will be reloaded.
@@ -84,14 +236,17 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
                 f"Column '{smiles_col}' not found in the data frame. "
                 "Please provide a valid column name for the SMILES representations."
             )
+        assert path, f"Invalid path specified: '{path}'. Please, specify a valid path to the storage directory."
+        assert name, f"Storage name '{name}' is invalid."
+        self.rootDir = path
+        self.path = os.path.abspath(os.path.join(self.rootDir, name))
         self.name = name
-        self.path = os.path.abspath(os.path.join(path, self.name))
         self.storeFormat = store_format
         self._libraries = {}
         self.nJobs = n_jobs
         self.chunkSize = chunk_size
         self.chunkProcessor = (
-            MultiprocessingJITGenerator(n_workers=self.nJobs)
+            PebbleJITGenerator(n_workers=self.nJobs)
             if chunk_processor is None else chunk_processor
         )
         self._standardizer = standardizer
@@ -99,6 +254,7 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
         if overwrite and os.path.exists(self.metaFile):
             self.clear()
         if not os.path.exists(self.metaFile):
+            self._idProp = autoindex_name or f"{self.name}_ID"
             columns = [
                 self.idProp,
                 self.smilesProp,
@@ -116,6 +272,33 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
             )
         else:
             self.reload()
+
+    @property
+    def name(self) -> str:
+        """Name of the data set."""
+        return self._name
+
+    @name.setter
+    def name(self, value: str):
+        """Set the name of the data set."""
+        self._name = value
+        self.path = os.path.abspath(os.path.join(self.rootDir, value))
+
+    @property
+    def chunkProcessor(self) -> ParallelGenerator:
+        """Parallel generator to use for processing."""
+        return self._chunkProcessor
+
+    @chunkProcessor.setter
+    def chunkProcessor(self, value: ParallelGenerator):
+        """Set the parallel generator to use for processing.
+
+        Args:
+            value (ParallelGenerator): Parallel generator to use for processing.
+        """
+        self._chunkProcessor = value
+        for lib in self._libraries.values():
+            lib.chunkProcessor = value
 
     @property
     def libsPath(self):
@@ -137,7 +320,16 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
         """Name of the property containing unique molecule IDs.
         The values are determined by the attached `identifier`.
         """
-        return "ID"
+        return self._idProp
+
+    @idProp.setter
+    def idProp(self, value: str):
+        """Set the name of the property containing unique molecule IDs.
+
+        Args:
+            value (str): Name of the property.
+        """
+        self._idProp = value
 
     @property
     def chunkSize(self) -> int:
@@ -168,21 +360,21 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
             value (int): Number of parallel jobs.
         """
         self._nJobs = value if value is not None and value > 0 else os.cpu_count()
-        self.chunkProcessor = MultiprocessingJITGenerator(n_workers=self.nJobs)
+        self.chunkProcessor = PebbleJITGenerator(n_workers=self.nJobs)
         for lib in self._libraries.values():
             lib.nJobs = value
             lib.chunkProcessor = self.chunkProcessor
         self.chunkSize = None
 
     def addLibrary(
-        self,
-        name: str,
-        df: pd.DataFrame,
-        smiles_col: str = "SMILES",
-        id_col: str = "ID",
-        add_rdkit=False,
-        store_format="pkl",
-        save=False,
+            self,
+            name: str,
+            df: pd.DataFrame,
+            smiles_col: str = "SMILES",
+            id_col: str | None = None,
+            add_rdkit=False,
+            store_format="pkl",
+            save=False,
     ):
         """Reads molecules from a file and adds standardized SMILES to the store
         as a new library.
@@ -287,11 +479,11 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
 
     @classmethod
     def fromDF(
-        cls,
-        df: pd.DataFrame,
-        *args,
-        name: str | None = None,
-        **kwargs
+            cls,
+            df: pd.DataFrame,
+            *args,
+            name: str | None = None,
+            **kwargs
     ) -> "PandasChemStore":
         """Create a new instance from a pandas DataFrame.
 
@@ -309,7 +501,7 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
 
     @staticmethod
     def _apply_standardizer_to_data_frame(
-        df: pd.DataFrame, smiles_prop: str, standardizer: ChemStandardizer
+            df: pd.DataFrame, smiles_prop: str, standardizer: ChemStandardizer
     ) -> list[tuple[int, str, str]]:
         """Apply a standardizer to the SMILES in a data frame.
 
@@ -397,10 +589,10 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
 
     @staticmethod
     def _apply_identifier_to_data_frame(
-        df: pd.DataFrame,
-        smiles_col: str,
-        id_prop: str,
-        identifier: Callable[[str], str],
+            df: pd.DataFrame,
+            smiles_col: str,
+            id_prop: str,
+            identifier: Callable[[str], str],
     ) -> pd.Series:
         """Apply an identifier to the SMILES in a data frame.
 
@@ -418,11 +610,11 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
         return pd.Series(identifiers, index=ids)
 
     def addEntries(
-        self,
-        ids: list[str],
-        props: dict[str, list],
-        raise_on_existing: bool = True,
-        library: str | None = None,
+            self,
+            ids: list[str],
+            props: dict[str, list],
+            raise_on_existing: bool = True,
+            library: str | None = None,
     ):
         """Add entries to the storage.
 
@@ -437,16 +629,16 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
         lib.addEntries(ids, props, raise_on_existing)
 
     def addMols(
-        self,
-        smiles: Iterable[str],
-        props: dict[str, list] | None = None,
-        library: str | None = None,
-        raise_on_existing: bool = True,
-        add_rdkit: bool = False,
-        store_format: str = "pkl",
-        save: bool = False,
-        chunk_size: int | None = None,
-        chunk_processor: ParallelGenerator | None = None,
+            self,
+            smiles: Iterable[str],
+            props: dict[str, list] | None = None,
+            library: str | None = None,
+            raise_on_existing: bool = True,
+            add_rdkit: bool = False,
+            store_format: str = "pkl",
+            save: bool = False,
+            chunk_size: int | None = None,
+            chunk_processor: ParallelGenerator | None = None,
     ) -> list[TabularMol]:
         """Add a molecule to the store using its raw SMILES.
 
@@ -474,6 +666,12 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
         if props:
             data.update(props)
         df = pd.DataFrame(data)
+        if len(df) == 0:
+            logger.warning(
+                "No new or valid molecules detected in the list of SMILES."
+                "Nothing will be added to the store."
+            )
+            return []
         library = library or f"{self.name}_library"
         if library not in self._libraries:
             self.addLibrary(
@@ -485,7 +683,7 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
                 save=save,
             )
         else:
-            random_temp_name = f"{library}_temp"
+            random_temp_name = f"{library}_{uuid.uuid4().hex}"
             self.addLibrary(
                 name=random_temp_name,
                 df=df,
@@ -542,78 +740,6 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
         os.makedirs(self.path, exist_ok=True)
         return self.toFile(self.metaFile)
 
-    def processMols(
-        self,
-        processor: MolProcessor,
-        proc_args: Iterable[Any] | None = None,
-        proc_kwargs: dict[str, Any] | None = None,
-        mol_type: Literal["smiles", "mol", "rdkit"] = "mol",
-        add_props: Iterable[str] | None = None,
-        chunk_processor: ParallelGenerator | None = None,
-    ) -> Generator:
-        """Apply a function to the molecules in the data frame.
-        The SMILES  or an RDKit molecule will be supplied as the first
-        positional argument to the function. Additional properties
-        to provide from the data set can be specified with 'add_props', which will be
-        a dictionary supplied as an additional positional argument to the function.
-
-        IMPORTANT: For successful parallel processing with `multiprocessing`,
-        the processor must be picklable.
-        Also note that
-        the returned generator may only produce results as soon as they are ready,
-        which means that the chunks of data may
-        not be in the same order as the original data frame. However, you can pass the
-        value of `idProp` in `add_props` to identify the processed molecules or
-        use `MolProcessorWithID` as the processor.
-
-        Args:
-            processor (MolProcessor):
-                `MolProcessor` object to use for processing.
-            proc_args (list, optional):
-                Any additional positional arguments to pass to the processor.
-            proc_kwargs (dict, optional):
-                Any additional keyword arguments to pass to the processor.
-            mol_type (str, optional):
-                Type of molecule to send to the processor. Can be 'smiles', 'mol', or
-                'rdkit'. Defaults to 'mol', which implies `TabularMol` objects.
-            add_props (list, optional):
-                List of data set properties to send to the processor. If `None`, all
-                properties will be sent.
-            chunk_processor (ParallelGenerator, optional):
-                The parallel generator to use for processing. If not specified,
-                `self.chunkProcessor` is used.
-
-        Returns:
-            Generator:
-                A generator that yields the results of the supplied processor on
-                the chunked molecules from the data set.
-        """
-        proc_args = proc_args or ()
-        proc_kwargs = proc_kwargs or {}
-        if add_props is None:
-            add_props = self.getProperties()
-        else:
-            add_props = list(add_props)
-        add_props = add_props + list(processor.requiredProps)
-        chunk_processor = chunk_processor or self.chunkProcessor
-        for prop in add_props:
-            if prop not in self.getProperties():
-                raise ValueError(
-                    f"Cannot apply function '{processor}' to {self.name} because "
-                    f"it requires the property '{prop}', which is not present in the "
-                    "data set."
-                )
-        for result in self.apply(
-            processor,
-            func_args=proc_args,
-            func_kwargs=proc_kwargs,
-            on_props=add_props,
-            chunk_type=mol_type,
-            chunk_processor=chunk_processor,
-            no_parallel=not processor.supportsParallel,
-        ):
-            yield result
-
     def getProperty(self, name: str, ids: list[str] | None = None) -> pd.Series:
         """Get a property from the storage.
 
@@ -667,10 +793,10 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
             lib.removeProperty(name)
 
     def getSubset(
-        self,
-        subset: list[str],
-        ids: list[str] | None = None,
-        name: str | None = None
+            self,
+            subset: Iterable[str],
+            ids: list[str] | None = None,
+            name: str | None = None
     ) -> "PandasChemStore":
         """Get a subset of the storage for the given properties.
 
@@ -700,6 +826,7 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
             standardizer=None,
             identifier=None,
             id_col=self.idProp,
+            autoindex_name=self.idProp,
             smiles_col=self.smilesProp,
             chunk_size=self.chunkSize,
             n_jobs=self.nJobs,
@@ -718,8 +845,10 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
         """Reload the storage from disk."""
         self.__dict__.update(self.fromFile(self.metaFile).__dict__)
 
-    def clear(self):
+    def clear(self, files_only: bool = True):
         """Clear the storage."""
+        for lib in self._libraries.values():
+            lib.clear(files_only=files_only)
         if os.path.exists(self.path):
             shutil.rmtree(self.path)
 
@@ -728,66 +857,12 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
         """Path to the meta file."""
         return os.path.join(self.path, "meta.json")
 
-    def apply(
-        self,
-        func: callable,
-        func_args: list | None = None,
-        func_kwargs: dict | None = None,
-        on_props: tuple[str, ...] | None = None,
-        chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
-        chunk_processor: ParallelGenerator | None = None,
-        no_parallel: bool = False,
-    ) -> Generator[Iterable[Any], None, None]:
-        """Apply a function to the molecules in the data frame.
-
-        Args:
-            func (callable): Function to apply to the molecules.
-            func_args (list, optional): Additional arguments to pass to the function.
-            func_kwargs (dict, optional):
-                Additional keyword arguments to pass to the function.
-            on_props (tuple, optional):
-                Properties to pass to the function. If `None`, all properties will be
-                passed.
-            chunk_type (str, optional):
-                Type of molecule to send to the function. Can be 'smiles', 'mol', or
-                'rdkit'. Defaults to 'mol', which implies `TabularMol` objects.
-            chunk_processor (ParallelGenerator, optional):
-                The parallel generator to use for processing. If not specified,
-                `self.chunkProcessor` is used.
-            no_parallel (bool, optional):
-                Whether to use parallel processing. Defaults to `False`.
-
-        Returns:
-            (Generator):
-                A generator that yields the results of the supplied function on the
-                chunked molecules from the data set.
-        """
-        chunk_processor = chunk_processor or self.chunkProcessor
-        func_args = func_args or []
-        func_kwargs = func_kwargs or {}
-        if self.nJobs > 1 and not no_parallel:
-            for result in chunk_processor(
-                self.iterChunks(
-                    self.chunkSize, chunk_type=chunk_type, on_props=on_props
-                ),
-                func,
-                *func_args,
-                **func_kwargs,
-            ):
-                yield result
-        else:
-            # do not use the parallel generator if n_jobs is 1
-            for chunk in self.iterChunks(
-                self.chunkSize, chunk_type=chunk_type, on_props=on_props
-            ):
-                yield func(chunk, *func_args, **func_kwargs)
-
     def searchOnProperty(
-        self,
-        prop_name: str,
-        values: list[float | int | str],
-        exact=False,
-        name: str | None = None,
+            self,
+            prop_name: str,
+            values: list[float | int | str],
+            exact=False,
+            name: str | None = None,
     ) -> "PandasChemStore":
         """Search in this table using a property name and a list of values.
         It is assumed that the property is searchable with string matching
@@ -833,11 +908,11 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
         name = name or f"{self.name}_{prop_name}_searched"
         if value_type is str:
             prop = self.getProperty(prop_name)
-            mask = [False] * len(prop)
+            mask = np.array([False] * len(prop))
             for value in values:
                 mask = (
                     mask | (prop.str.contains(value)) if not exact else mask |
-                    (prop == value)
+                                                                        (prop == value)
                 )
             matches = self.getSubset(
                 self.getProperties(),
@@ -859,10 +934,10 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
 
     @staticmethod
     def _apply_match_function(
-        iterable: Iterable[StoredMol],
-        match_function: Callable[[Chem.Mol, list[str], ...], bool],
-        *args: list[str],
-        **kwargs: dict[str, Any],
+            iterable: Iterable[StoredMol],
+            match_function: Callable[[Chem.Mol, list[str], ...], bool],
+            *args: list[str],
+            **kwargs: dict[str, Any],
     ):
         """Apply a match function to an iterable of molecules.
 
@@ -883,12 +958,12 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
         return res
 
     def searchWithSMARTS(
-        self,
-        patterns: list[str],
-        operator: Literal["or", "and"] = "or",
-        use_chirality: bool = False,
-        name: str | None = None,
-        match_function: MolProcessor | None = None,
+            self,
+            patterns: list[str],
+            operator: Literal["or", "and"] = "or",
+            use_chirality: bool = False,
+            name: str | None = None,
+            match_function: MolProcessor | None = None,
     ) -> "PandasChemStore":
         """Search the molecules in the table with a SMARTS pattern.
 
@@ -912,8 +987,8 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
         match_function = match_function or SMARTSMatchProcessor()
         results = []
         for result in self.processMols(
-            match_function,
-            proc_args=(patterns, operator, use_chirality),
+                match_function,
+                proc_args=(patterns, operator, use_chirality),
         ):
             results.append(result)
         results = pd.concat(results)
@@ -978,7 +1053,7 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
                     for prop in lib.getProperties()
                 }
                 break
-        return TabularMol(mol_id, smiles.iloc[0], props=props)
+        return TabularMol(mol_id, self.name, smiles.iloc[0], props=props)
 
     def removeMol(self, mol_id):
         """Remove a molecule from the store.
@@ -1007,10 +1082,10 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
         return sum(len(lib) for lib in self._libraries.values())
 
     def iterChunks(
-        self,
-        size: int = 1000,
-        on_props: Iterable[str] | None = None,
-        chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
+            self,
+            size: int = 1000,
+            on_props: Iterable[str] | None = None,
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
     ) -> Generator[list[StoredMol | str | Chem.Mol | pd.DataFrame], None, None]:
         """Iterate over the molecules in the store in chunks.
 
@@ -1067,7 +1142,7 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
                     for prop in on_props
                 } if props else None
             )
-            mols.append(TabularMol(_id, smiles.iloc[idx], props=mol_props))
+            mols.append(TabularMol(_id, self.name, smiles.iloc[idx], props=mol_props))
         return mols
 
     def _convert_chunk_smiles(self, chunk: pd.DataFrame, on_props: list) -> list[str]:
@@ -1111,7 +1186,7 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
             for mol in chunk:
                 yield mol
 
-    def dropEntries(self, ids: tuple[str, ...]):
+    def dropEntries(self, ids: Iterable[str]):
         """Drop entries from the store.
 
         Args:
@@ -1131,11 +1206,11 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
         """
         ids = []
         for chunk in pd_table.apply(
-            self._apply_identifier_to_data_frame,
-            func_args=(self.smilesProp, self.idProp, self._identifier),
-            on_props=(self.smilesProp, self.idProp),
-            as_df=True,
-            n_jobs=self.nJobs,
+                self._apply_identifier_to_data_frame,
+                func_args=(self.smilesProp, self.idProp, self._identifier),
+                on_props=(self.smilesProp, self.idProp),
+                as_df=True,
+                n_jobs=self.nJobs,
         ):
             ids.append(chunk)
         ids = (
@@ -1152,11 +1227,11 @@ class PandasChemStore(ChemStore, SMARTSSearchable, Summarizable, Parallelizable)
         """
         output = []
         for chunk in pd_table.apply(
-            self._apply_standardizer_to_data_frame,
-            func_args=(self.smilesProp, self._standardizer),
-            on_props=(self.smilesProp, self.idProp),
-            as_df=True,
-            n_jobs=self.nJobs,
+                self._apply_standardizer_to_data_frame,
+                func_args=(self.smilesProp, self._standardizer),
+                on_props=(self.smilesProp, self.idProp),
+                as_df=True,
+                n_jobs=self.nJobs,
         ):
             output.extend(chunk)
         pd_table.addProperty(

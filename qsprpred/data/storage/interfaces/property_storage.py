@@ -15,6 +15,12 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
     the data is stored and how it is accessed as long as the interface is respected.
     See the methods of this class and the base classes for more details.
     """
+
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        """Get the name of the storage."""
+
     @property
     @abstractmethod
     def idProp(self) -> str:
@@ -65,9 +71,9 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
 
     @abstractmethod
     def getSubset(
-        self,
-        subset: Iterable[str],
-        ids: Iterable[str] | None = None,
+            self,
+            subset: Iterable[str],
+            ids: Iterable[str] | None = None,
     ) -> "PropertyStorage":
         """Get a subset of the storage for the given properties.
 
@@ -100,12 +106,12 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
 
     @abstractmethod
     def apply(
-        self,
-        func: callable,
-        func_args: list | None = None,
-        func_kwargs: dict | None = None,
-        on_props: tuple[str, ...] | None = None,
-        as_df: bool = False,
+            self,
+            func: callable,
+            func_args: list | None = None,
+            func_kwargs: dict | None = None,
+            on_props: tuple[str, ...] | None = None,
+            as_df: bool = False,
     ) -> Generator[Iterable[Any], None, None]:
         """Apply a function on all or selected properties of the chunks of data.
         The properties are supplied as the first positional argument to the function.
@@ -133,7 +139,7 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
 
     @abstractmethod
     def addEntries(
-        self, ids: list[str], props: dict[str, list], raise_on_existing: bool = True
+            self, ids: list[str], props: dict[str, list], raise_on_existing: bool = True
     ):
         """Add entries to the storage.
 
@@ -167,10 +173,10 @@ class PropertyStorage(DataStorage, ChunkIterable, PropSearchable, ABC):
         pass
 
     def __delitem__(self, key):
-        return self.dropEntries((key, ))
+        return self.dropEntries((key,))
 
     def __str__(self):
-        return f"{self.__class__.__name__} ({len(self)})"
+        return f"{self.__class__.__name__} ({self.name})"
 
     def __repr__(self):
         return str(self)

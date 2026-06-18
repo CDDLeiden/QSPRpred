@@ -23,7 +23,6 @@ from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.data.tables.qspr import QSPRTable
 from qsprpred.tasks import TargetSpec
 from sklearn.impute import SimpleImputer
-from qsprpred.data.processing.pipeline import DatasetPipeline
 
 
 class PCMSplit(DataSplit, Randomized, DataSetDependent):
@@ -60,7 +59,7 @@ class PCMSplit(DataSplit, Randomized, DataSetDependent):
                 self.randomState = self.splitter.randomState
             else:
                 self.randomState = seed
-        
+
 
     @property
     def randomState(self) -> int:
@@ -97,7 +96,7 @@ class PCMSplit(DataSplit, Randomized, DataSetDependent):
         assert isinstance(self.getDataSet(), PCMDataSet), (
             "PCMSplit only works for PCM datasets, set a PCMDataSet with setDataSet()"
         )
-        
+
         ds = self.getDataSet()
         df = ds.getDF()
         indices = df.index.tolist()
@@ -110,7 +109,7 @@ class PCMSplit(DataSplit, Randomized, DataSetDependent):
         assert (
             len(ds.targetProperties) == 1
         ), "PCMSplit only works for single-task datasets!"
-        
+
         df_mt = df.pivot(
             index=ds.smilesProp,
             columns=ds.proteinIDProp,
@@ -136,7 +135,7 @@ class PCMSplit(DataSplit, Randomized, DataSetDependent):
         # directly on the dataset values should be simplified
         values = pd.DataFrame(
             SimpleImputer(strategy="median").fit_transform(ds_mt.getTargets()),
-            columns=ds_mt.targetPropertiesNames
+            columns=ds_mt.getTargetPropertiesNames()
         )
         for target_prop in ds_mt.targetProperties:
             ds_mt.addProperty(
@@ -182,11 +181,11 @@ class LeaveTargetsOut(DataSplit, DataSetDependent):
         assert isinstance(self.getDataSet(), PCMDataSet), (
             "LeaveTargetsOut only works for PCM datasets, set a PCMDataSet with setDataSet()"
         )
-        
+
         protein_prop = self.getDataSet().getDF()[self.getDataSet().proteinIDProp]
         mask = protein_prop.isin(self.targets)
         mask = mask.loc[X.index].reset_index(drop=True)
-        
+
         indices = np.array(list(range(len(X))))
         train = indices[mask]
         test = indices[~mask]

@@ -18,6 +18,7 @@ from ..tasks import ModelTasks
 
 class RegressionPlot(ModelPlot, ABC):
     """Base class for all regression plots."""
+
     def getSupportedTasks(self) -> list[ModelTasks]:
         """Return a list of supported model tasks."""
         return [ModelTasks.REGRESSION, ModelTasks.MULTITASK_REGRESSION]
@@ -40,7 +41,7 @@ class RegressionPlot(ModelPlot, ABC):
                 columns: ID, Fold, Set, Property, Label, Prediction, Set
         """
         # Melt all property columns into one column
-        id_vars = ["ID", "Fold", "Set"]
+        id_vars = [assessment_df.columns[0], "Fold", "Set"]
         df = assessment_df.melt(id_vars=id_vars)
         # split the variable (<property_name>_<suffixes>_<Label/Prediction>) column
         # into the property name and the type (Label or Prediction)
@@ -50,7 +51,8 @@ class RegressionPlot(ModelPlot, ABC):
         df = df.pivot_table(
             index=[*id_vars, "Property"], columns="type", values="value"
         )
-        df.dropna(subset=["Label"], inplace=True) # Remove rows with missing values in the label column
+        df.dropna(subset=["Label"],
+                  inplace=True)  # Remove rows with missing values in the label column
         df.reset_index(inplace=True)
         df.columns.name = None
         df["Assessment"] = name
@@ -74,21 +76,20 @@ class RegressionPlot(ModelPlot, ABC):
                 # Replace the assessment labels with the dataset labels
                 if self.datasets is not None and model.name in self.datasets:
                     targets = self.datasets[model.name].getTargets()
-                    assessment = assessment.drop(columns=[col for col in assessment.columns if col.endswith("Label")])
+                    assessment = assessment.drop(
+                        columns=[col for col in assessment.columns if
+                                 col.endswith("Label")])
                     # add suffix Label to the target columns
                     targets.columns = [f"{col}_Label" for col in targets.columns]
-                    assessment = pd.merge(assessment, targets, on="ID")
+                    assessment = pd.merge(assessment, targets, on=assessment.columns[0])
                 df = self.prepareAssessment(name, assessment)
+                df["Model"] = model.name
                 results.append(df)
             df = pd.concat(results)
             print(model.name)
             model_results[model.name] = df
         # concatenate the results from all models and add the model name as a column
-        df = (
-            pd.concat(
-                model_results.values(), keys=model_results.keys(), names=["Model"]
-            ).reset_index(level=1, drop=True).reset_index()
-        )
+        df = pd.concat(model_results)
 
         self.results = df
         return df
@@ -117,11 +118,12 @@ class RegressionPlot(ModelPlot, ABC):
 
 class CorrelationPlot(RegressionPlot):
     """Class to plot the results of regression models. Plot predicted pX_train vs real pX_train."""
+
     def make(
-        self,
-        save: bool = True,
-        show: bool = False,
-        out_path: str | None = None
+            self,
+            save: bool = True,
+            show: bool = False,
+            out_path: str | None = None
     ) -> tuple[sns.FacetGrid, pd.DataFrame]:
         """Plot the results of regression models. Plot predicted pX_train vs real pX_train.
 
@@ -193,7 +195,9 @@ class CorrelationPlot(RegressionPlot):
 
 class WilliamsPlot(RegressionPlot):
     """Williams plot; plot of standardized residuals versus leverages"""
-    def __init__(self, models: list[QSPRModel], assessments: list[str], datasets: list[QSPRDataSet]):
+
+    def __init__(self, models: list[QSPRModel], assessments: list[str],
+                 datasets: list[QSPRDataSet]):
         """Initialize the Williams plot.
         Args:
             models (list[QSPRModel]):
@@ -206,11 +210,11 @@ class WilliamsPlot(RegressionPlot):
         super().__init__(models, assessments, datasets)
 
     def make(
-        self,
-        property_name: str,
-        save: bool = True,
-        show: bool = False,
-        out_path: str | None = None
+            self,
+            property_name: str,
+            save: bool = True,
+            show: bool = False,
+            out_path: str | None = None
     ) -> tuple[sns.FacetGrid, pd.DataFrame, List[float]]:
         """make Williams plot
 
@@ -233,8 +237,9 @@ class WilliamsPlot(RegressionPlot):
             dict[str, float]:
                 the h* values for the datasets
         """
+
         def calculateLeverages(
-            features_train: pd.DataFrame, features_test: pd.DataFrame
+                features_train: pd.DataFrame, features_test: pd.DataFrame
         ) -> pd.DataFrame:
             """Calculate the leverages for each compound in the dataset.
 
@@ -299,17 +304,21 @@ class WilliamsPlot(RegressionPlot):
         for model in self.models:
             dataset = self.datasets[model.name]
             for assessment in df["Assessment"].unique():
-                df_assessment = df[(df["Model"] == model.name) & (df["Assessment"] == assessment)]
+                df_assessment = df[
+                    (df["Model"] == model.name) & (df["Assessment"] == assessment)]
                 for fold in df_assessment["Fold"].unique():
                     df_ = df_assessment[(df_assessment["Fold"] == fold)]
-                    train_ind = df_[df_["Set"] == "Train"]["ID"].to_list()
-                    test_ind = df_[df_["Set"] == "Test"]["ID"].to_list()
+                    train_ind = df_[df_["Set"] == "Train"][df_.columns[0]].to_list()
+                    test_ind = df_[df_["Set"] == "Test"][df_.columns[0]].to_list()
                     # FIXME: Pipeline is refit for each fold, this is not ideal
                     # this information should be ideally be retrieved from the
                     # assessment, pipeline or similar
                     pipeline = deepcopy(model.pipeline)
-                    X_train, _ = next(pipeline.apply(dataset[train_ind], seed=model.randomState))
-                    X_test, _ = next(pipeline.apply(dataset[test_ind], fit=False, seed=model.randomState))
+                    X_train, _ = next(pipeline.applyOnDataSet(dataset[train_ind],
+                                                              seed=model.randomState))
+                    X_test, _ = next(
+                        pipeline.applyOnDataSet(dataset[test_ind], fit=False,
+                                                seed=model.randomState))
                     leverages, h_star = calculateLeverages(X_train, X_test)
 
                     model_name = model.name
@@ -319,7 +328,8 @@ class WilliamsPlot(RegressionPlot):
 
         # Add the leverages to the dataframe
         df["leverage"] = df.apply(
-            lambda x: model_leverages[f"{x['Model']}_{x['Assessment']}_{x['Fold']}"][x["ID"]],
+            lambda x: model_leverages[f"{x['Model']}_{x['Assessment']}_{x['Fold']}"][
+                x[df.columns[0]]],
             axis=1,
         )
         df["n_features"] = df.apply(
@@ -339,7 +349,8 @@ class WilliamsPlot(RegressionPlot):
 
         RSE = {}
         # check if the degrees of freedom is greater than 0 for each model, assessment, property, and set
-        for (model, property, assessment, fold, set), df_ in df.groupby(["Model", "Property", "Assessment", "Fold", "Set"]):
+        for (model, property, assessment, fold, set), df_ in df.groupby(
+                ["Model", "Property", "Assessment", "Fold", "Set"]):
             if df_["df"].iloc[0] <= 0:
                 raise ValueError(
                     "Degrees of freedom is less than or equal to 0 for some models, "
@@ -347,11 +358,12 @@ class WilliamsPlot(RegressionPlot):
                     "number of samples should be greater than the number of features."
                 )
             RSE[(model, property, assessment, fold, set)] = np.sqrt(
-                (1 / df_["df"].iloc[0]) * np.sum(df_["residual"]**2)
+                (1 / df_["df"].iloc[0]) * np.sum(df_["residual"] ** 2)
             )
 
         # add the residual standard error to the df
-        df["RSE"] = df.apply(lambda x: RSE[(x["Model"], x["Property"], x["Assessment"], x["Fold"], x["Set"])], axis=1)
+        df["RSE"] = df.apply(lambda x: RSE[
+            (x["Model"], x["Property"], x["Assessment"], x["Fold"], x["Set"])], axis=1)
 
         # calculate the standardized residuals
         df["std_resid"] = df["residual"] / (df["RSE"] * np.sqrt(1 - df["leverage"]))
@@ -372,8 +384,11 @@ class WilliamsPlot(RegressionPlot):
         # and add hlines at +/- 3
         for k, ax in g.axes_dict.items():
             for assessment in df[df["Model"] == k[0]]["Assessment"].unique():
-                for fold in df[(df["Model"] == k[0]) & (df["Assessment"] == assessment)]["Fold"].unique():
-                    ax.axvline(model_h_star[f"{k[0]}_{assessment}_{fold}"], c=".2", ls="--")
+                for fold in \
+                        df[(df["Model"] == k[0]) & (df["Assessment"] == assessment)][
+                            "Fold"].unique():
+                    ax.axvline(model_h_star[f"{k[0]}_{assessment}_{fold}"], c=".2",
+                               ls="--")
             ax.axhline(2, c=".2", ls="--")
             ax.axhline(-2, c=".2", ls="--")
 
@@ -394,6 +409,7 @@ class WilliamsPlot(RegressionPlot):
         plt.clf()
         return (
             g,
-            df[["ID", "Model", "Property", "Assessment", "Fold", "Set", "leverage", "std_resid"]],
+            df[[df.columns[0], "Model", "Property", "Assessment", "Fold", "Set",
+                "leverage", "std_resid"]],
             model_h_star,
         )

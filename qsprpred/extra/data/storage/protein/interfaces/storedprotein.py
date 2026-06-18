@@ -13,6 +13,7 @@ class StoredProtein(ABC):
         props (dict[str, Any]): properties of the protein
         representations (Iterable[StoredProtein]): representations of the protein
     """
+
     @property
     @abstractmethod
     def id(self) -> str:
@@ -46,3 +47,8 @@ class StoredProtein(ABC):
     @abstractmethod
     def representations(self) -> Iterable["StoredProtein"]:
         """Get all representations of the protein."""
+
+    @property
+    @abstractmethod
+    def parent(self) -> "StoredProtein":
+        """Get the parent protein."""

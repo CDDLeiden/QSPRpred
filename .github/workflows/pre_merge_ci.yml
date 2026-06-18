@@ -1,4 +1,4 @@
-# name: Latest Python CI with Basic Tests
+name: Basic Tests
 
 on:
   push:
@@ -11,6 +11,8 @@ on:
 env:
   QSPPRED_TEST_EXTRAS: false
   QSPRPRED_VERBOSE_LOGGING: true
+  QSPR_TEST_TUTORIAL_ALL: false
+  QSPPRED_TEST_CLI: false
 
 jobs:
   tests-basic:

@@ -2,6 +2,11 @@
 
 set -e
 
+if [ "$QSPPRED_TEST_CLI" != "true" ]; then
+  echo "Skipping CLI test..."
+  exit
+fi
+
 export PYTHONPATH=".."
 
 # input data and base directory

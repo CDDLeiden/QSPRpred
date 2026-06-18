@@ -12,6 +12,7 @@
 *.gzip
 *.tar.gz
 *.out
+*.nbconvert.ipynb
 /**/tutorial/test_files/
 /**/tutorial/cli_tutorial/
 /**/tutorials/tutorial_data/papyrus/
