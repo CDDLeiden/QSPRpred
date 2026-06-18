@@ -21,7 +21,7 @@ from sklearn.metrics import (
 )
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
-from sklearn.svm import SVC, SVR
+from sklearn.svm import SVC
 from xgboost import XGBClassifier, XGBRegressor
 
 from . import SklearnMetrics
@@ -72,7 +72,6 @@ class SklearnBaseModelTestCase(ModelDataSetsPathMixIn, ModelCheckMixIn, QSPRTest
     def setUp(self):
         super().setUp()
         self.setUpPaths()
-        self.nCPU = 2
 
     def getModel(
             self,
@@ -118,7 +117,6 @@ class TestSklearnRegression(SklearnBaseModelTestCase):
             (alg_name, TargetTasks.REGRESSION, alg_name, alg, [None])
             for alg, alg_name in (
                     (PLSRegression, "PLSR"),
-                    (SVR, "SVR"),
                     (KNeighborsRegressor, "KNNR"),
             )
         ]

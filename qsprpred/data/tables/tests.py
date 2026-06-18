@@ -29,8 +29,6 @@ class TestMolTable(DataSetsPathMixIn, QSPRTestCase):
     def setUp(self):
         super().setUp()
         self.setUpPaths()
-        # self.nCPU = 2
-        # self.chunkSize = 2
 
     def getStorage(self):
         df = self.getSmallDF()
@@ -512,6 +510,8 @@ class TestQSPRTable(DataSetsPathMixIn, QSPRTestCase):
         # shuffle and split
         split = ShuffleSplit(1, test_size=0.5, random_state=dataset.randomState)
         dataset.addSplit(split, "shufflesplit")
+        _, _, _, _ = next(dataset.iterSplit("shufflesplit", as_type="numpy"))
+        _, _ = next(dataset.iterSplit("shufflesplit", as_type="QSPRTable"))
         train, test = next(dataset.iterSplit("shufflesplit", as_type="ids"))
         # reload and check if orders are the same if we redo the split
         # with the same random state
@@ -816,7 +816,7 @@ class TestApply(DataSetsPathMixIn, QSPRTestCase):
             df[key] = value
         return df
 
-    @parameterized.expand([(None, None), (2, None), (None, 50), (2, 50)])
+    @parameterized.expand([(1, None), (2, None), (1, 25), (2, 25)])
     def testRegular(self, n_jobs, chunk_size):
         dataset = self.createLargeTestDataSet()
         dataset.nJobs = n_jobs

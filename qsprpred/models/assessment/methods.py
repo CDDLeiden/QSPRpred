@@ -230,9 +230,18 @@ class Assessor(ModelAssessor):
             monitor.onFoldStart(
                 fold=i, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test
             )
+            logger.debug(
+                f"Monitoring started for fold {i}."
+            )
             # fit model
+            logger.debug(
+                f"Loading model for fold {i} with parameters: {evalparams}."
+            )
             model.initFromData(ds, pipeline)
             estimator = model.loadEstimator(evalparams)
+            logger.debug(
+                f"Fitting model for fold {i}: {estimator}."
+            )
             model_fit = model.fit(
                 X_train,
                 y_train,
@@ -242,6 +251,9 @@ class Assessor(ModelAssessor):
                 **kwargs,
             )
             # make predictions
+            logger.debug(
+                f"Making predictions for fold {i}, model: {evalparams}"
+            )
             if model.task.isRegression() or not self.useProba:
                 test_preds = model.predict(X_test, estimator)
                 train_preds = model.predict(X_train, estimator)
@@ -249,6 +261,9 @@ class Assessor(ModelAssessor):
                 test_preds = model.predictProba(X_test, estimator)
                 train_preds = model.predictProba(X_train, estimator)
             # score
+            logger.debug(
+                f"Scoring predictions for fold {i}."
+            )
             if model.isMultiTask and self.splitMultitaskScores:
                 scores_tasks = []
                 for idx, prop in enumerate(model.targetProperties):
@@ -269,8 +284,11 @@ class Assessor(ModelAssessor):
                 self.scores.append(score)
             # Combine predictions and log fold results
             logger.debug(
-                "fold %s ended: %s" %
+                "Evaluation of fold %s ended: %s" %
                 (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            )
+            logger.debug(
+                f"Converting predictions to data frame for fold {i}. "
             )
             preds_df = self.predictionsToDataFrame(
                 model, y_train, y_test, train_preds, test_preds, fold=i
@@ -279,6 +297,9 @@ class Assessor(ModelAssessor):
             self.predictions.append(preds_df)
         monitor.onAssessmentEnd(pd.concat(self.predictions))
         if save:
+            logger.debug(
+                f"Saving assessment report ({len(self.predictions)})."
+            )
             pd.concat(self.predictions).round(self.round
                                               ).to_csv(
                 f"{model.outPrefix}_{self.name}.tsv", sep="\t")

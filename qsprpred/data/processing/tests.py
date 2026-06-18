@@ -35,7 +35,7 @@ from ...utils.testing.path_mixins import DataSetsPathMixIn
 def getCombos():
     return list(
         itertools.product(
-            [1, None],
+            [1, 2],
             [50, None],
             [None, ["fu", "CL"], ["SMILES"]],
             [True, False],

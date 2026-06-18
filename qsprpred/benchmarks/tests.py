@@ -15,6 +15,7 @@ from ..data.processing.imputers import TargetImputer
 from ..data.sampling.splits import RandomSplit
 from ..data.sources.data_source import DataSource
 from ..models.scikit_learn import SklearnModel
+from ..utils.parallel import PebbleJITGenerator
 from ..utils.stringops import get_random_string
 from ..utils.testing.base import QSPRTestCase
 from ..utils.testing.path_mixins import DataSetsPathMixIn
@@ -142,7 +143,7 @@ class BenchMarkTestCase(DataSetsPathMixIn, QSPRTestCase):
             self.settings,
             data_dir=f"{self.generatedPath}/benchmarks",
             results_file=f"{self.generatedPath}/benchmarks/results.tsv",
-            # parallel_generator_cpu=PebbleJITGenerator(4), # set if you require a cap on cpus
+            parallel_generator_cpu=PebbleJITGenerator(4),  # set if you require a cap on cpus
         )
 
     def checkRunResults(self, results):

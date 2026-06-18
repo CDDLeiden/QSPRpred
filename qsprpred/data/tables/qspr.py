@@ -651,7 +651,7 @@ class QSPRTable(QSPRDataSet, MoleculeTable):
             X = self.getDescriptors()
             y = self.getTargets()
             for ids in split["ids"]:
-                train_idx, test_idx = ids[0].tolist(), ids[1].tolist()
+                train_idx, test_idx = ids[0], ids[1]
                 yield (
                     X.loc[train_idx].values,
                     y.loc[train_idx].values,

@@ -468,7 +468,15 @@ class PebbleJITGenerator(JITParallelGenerator):
         try:
             from pebble import ProcessPool
 
-            return ProcessPool(max_workers=self.nWorkers)
+            try:
+                ctx = multiprocessing.get_context("fork")
+            except ValueError:
+                ctx = multiprocessing.get_context("spawn")
+
+            return ProcessPool(
+                max_workers=self.nWorkers,
+                context=ctx,
+            )
         except ImportError:
             raise ImportError("Failed to import pool type 'pebble'. Install it first.")
 

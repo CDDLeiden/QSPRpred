@@ -23,9 +23,9 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 
+from ..data.tables.qspr import QSPRTable
 from ..models.assessment.metrics.classification import CalibrationError
 from ..models.model import QSPRModel
-from ..data.tables.qspr import QSPRTable
 from ..plotting.base_plot import ModelPlot
 from ..tasks import ModelTasks
 
@@ -71,7 +71,7 @@ class ClassifierPlot(ModelPlot, ABC):
         df = df.pivot_table(
             index=[*id_vars, "Property"], columns="type", values="value"
         )
-        df.dropna(subset=["Label"], inplace=True) # Remove rows with missing values in the label column
+        df.dropna(subset=["Label"], inplace=True)  # Remove rows with missing values in the label column
         df.reset_index(inplace=True)
         df.columns.name = None
         df["Label"] = df["Label"].astype(int)
@@ -194,7 +194,6 @@ class ClassifierPlot(ModelPlot, ABC):
                 )
                 proba = False
 
-
         metrics = {
             "accuracy": accuracy_score(df.Label, df.Prediction),
             "precision": precision_score(df.Label, df.Prediction),
@@ -270,6 +269,7 @@ class ROCPlot(ClassifierPlot):
     """Plot of ROC-curve (receiver operating characteristic curve)
     for a given classification model.
     """
+
     def getSupportedTasks(self) -> List[ModelTasks]:
         """Return a list of tasks supported by this plotter."""
         return [ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS]
@@ -365,11 +365,11 @@ class ROCPlot(ClassifierPlot):
         return assessment_name, ax
 
     def make(
-        self,
-        save: bool = True,
-        show: bool = False,
-        property_name: str | None = None,
-        fig_size: tuple = (6, 6),
+            self,
+            save: bool = True,
+            show: bool = False,
+            property_name: str | None = None,
+            fig_size: tuple = (6, 6),
     ) -> list[plt.Axes]:
         """Make the ROC plot for a given model assessment.
 
@@ -411,6 +411,7 @@ class ROCPlot(ClassifierPlot):
 
 class PRCPlot(ClassifierPlot):
     """Plot of Precision-Recall curve for a given model."""
+
     def getSupportedTasks(self) -> List[ModelTasks]:
         """Return a list of tasks supported by this plotter."""
         return [ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS]
@@ -483,11 +484,11 @@ class PRCPlot(ClassifierPlot):
         return assessment_name, ax
 
     def make(
-        self,
-        save: bool = True,
-        show: bool = False,
-        property_name: str | None = None,
-        fig_size: tuple = (6, 6),
+            self,
+            save: bool = True,
+            show: bool = False,
+            property_name: str | None = None,
+            fig_size: tuple = (6, 6),
     ):
         """Make the plot for a given validation type.
 
@@ -523,12 +524,13 @@ class PRCPlot(ClassifierPlot):
 
 class CalibrationPlot(ClassifierPlot):
     """Plot of calibration curve for a given model."""
+
     def getSupportedTasks(self) -> List[ModelTasks]:
         """Return a list of tasks supported by this plotter."""
         return [ModelTasks.SINGLECLASS, ModelTasks.MULTITASK_SINGLECLASS]
 
     def makeCalibrationPlot(
-        self, model: QSPRModel, property_name: str, n_bins: int = 10
+            self, model: QSPRModel, property_name: str, n_bins: int = 10
     ) -> Tuple[str, plt.Axes]:
         """Make the plot for a given model assessment
 
@@ -553,7 +555,7 @@ class CalibrationPlot(ClassifierPlot):
         y_real = []
         y_pred_proba = []
         ax = plt.gca()
-        df = df.set_index("ID")
+        df = df.set_index(df.columns[0])
         for fold in df.Fold.unique():
             # get labels
             y_pred = df[f"{property_name}_ProbabilityClass_1"][df.Fold == fold]
@@ -601,12 +603,12 @@ class CalibrationPlot(ClassifierPlot):
         return assessment_name, ax
 
     def make(
-        self,
-        save: bool = True,
-        show: bool = False,
-        property_name: str | None = None,
-        fig_size: tuple = (6, 6),
-        n_bins: int = 10
+            self,
+            save: bool = True,
+            show: bool = False,
+            property_name: str | None = None,
+            fig_size: tuple = (6, 6),
+            n_bins: int = 10
     ) -> list[plt.Axes]:
         """Make the plot for a given validation type.
 
@@ -657,32 +659,33 @@ class MetricsPlot(ClassifierPlot):
             f1, matthews_corrcoef, precision, recall, accuracy, roc_auc, roc_auc_ovr,
             roc_auc_ovo and calibration_error
     """
+
     def __init__(
-        self,
-        models: List[QSPRModel],
-        assessments: List[str],
-        datasets: List[QSPRTable] = None,
-        metrics: List[Literal[
-            "f1",
-            "matthews_corrcoef",
-            "precision",
-            "recall",
-            "accuracy",
-            "calibration_error",
-            "roc_auc",
-            "roc_auc_ovr",
-            "roc_auc_ovo",
-        ]] = [
-            "f1",
-            "matthews_corrcoef",
-            "precision",
-            "recall",
-            "accuracy",
-            "calibration_error",
-            "roc_auc",
-            "roc_auc_ovr",
-            "roc_auc_ovo",
-        ],
+            self,
+            models: List[QSPRModel],
+            assessments: List[str],
+            datasets: List[QSPRTable] = None,
+            metrics: List[Literal[
+                "f1",
+                "matthews_corrcoef",
+                "precision",
+                "recall",
+                "accuracy",
+                "calibration_error",
+                "roc_auc",
+                "roc_auc_ovr",
+                "roc_auc_ovo",
+            ]] = [
+                "f1",
+                "matthews_corrcoef",
+                "precision",
+                "recall",
+                "accuracy",
+                "calibration_error",
+                "roc_auc",
+                "roc_auc_ovr",
+                "roc_auc_ovo",
+            ],
     ):
         """Initialise the metrics plot.
 
@@ -698,10 +701,10 @@ class MetricsPlot(ClassifierPlot):
         self.metrics = metrics
 
     def make(
-        self,
-        save: bool = True,
-        show: bool = False,
-        out_path: str | None = None,
+            self,
+            save: bool = True,
+            show: bool = False,
+            out_path: str | None = None,
     ) -> tuple[List[sns.FacetGrid], pd.DataFrame]:
         """Make the plot for a given validation type.
 
@@ -770,6 +773,7 @@ class MetricsPlot(ClassifierPlot):
 
 class ConfusionMatrixPlot(ClassifierPlot):
     """Plot of confusion matrix for a given model as a heatmap."""
+
     def getConfusionMatrixDict(self, df: pd.DataFrame) -> dict:
         """Create dictionary of confusion matrices for each model, property and fold
 
@@ -791,7 +795,7 @@ class ConfusionMatrixPlot(ClassifierPlot):
                             (df.Model == model) & (df.Property == property) &
                             (df.Assessment == assessment) & (df.Fold == fold) &
                             (df.Set == "Test")
-                        ]
+                            ]
                         if not df_subset.empty:
                             conf_dict[(model, property, assessment, fold)] = confusion_matrix(
                                 df_subset.Label, df_subset.Prediction
@@ -799,10 +803,10 @@ class ConfusionMatrixPlot(ClassifierPlot):
         return conf_dict
 
     def make(
-        self,
-        save: bool = True,
-        show: bool = False,
-        out_path: str | None = None
+            self,
+            save: bool = True,
+            show: bool = False,
+            out_path: str | None = None
     ) -> tuple[dict, plt.Axes]:
         """Make confusion matrix heatmap for each model, property and fold
 

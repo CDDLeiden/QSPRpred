@@ -11,9 +11,9 @@ from .sets import (
     TanimotoDistances,
     RandomDescs,
 )
+from ..processing.feature_filters import LowVarianceFilter, HighCorrelationFilter
 from ..processing.pipeline import DatasetPipeline
 from ...data import RandomSplit
-from ...data.processing.feature_filters import HighCorrelationFilter, LowVarianceFilter
 from ...models import SklearnModel
 from ...utils.testing.base import QSPRTestCase
 from ...utils.testing.path_mixins import DataSetsPathMixIn
@@ -70,7 +70,7 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
         dataset.restoreDescriptorSets(dataset.descriptorSets)
         self.assertTrue(dataset.getDescriptors().shape[1] == full_len)
 
-    @parameterized.expand([(None, None), (1, None), (2, None), (4, 50)])
+    @parameterized.expand([(1, None), (2, None), (1, 17), (2, 17)])
     def testSwitching(self, n_cpu, chunk_size):
         """Test if the feature calculator can be switched to a new dataset."""
         dataset = self.createLargeTestDataSet(
@@ -85,19 +85,27 @@ class TestDescriptorCalculation(DataSetsPathMixIn, QSPRTestCase):
             feature_calculators=feature_calculators,
             steps={
                 "low_var_filter": LowVarianceFilter(0.05),
-                "high_corr_filter": HighCorrelationFilter(0.9),
+                "high_corr_filter": HighCorrelationFilter(0.75),
             }
         )
         X_train, y_train, X_test, y_test = next(pipeline.applyOnDataSet(dataset, split))
         # create new dataset with the same calculator
-        dataset_next = self.createLargeTestDataSet(self.__class__.__name__)
+        dataset_next = self.createLargeTestDataSet(
+            "TestSwitching", n_jobs=1, chunk_size=None
+        )
         X_train_next, y_train_next, X_test_next, y_test_next = next(
             pipeline.applyOnDataSet(dataset_next, split)
         )
-        self.assertEqual(X_train.shape, X_train_next.shape)
-        self.assertEqual(y_train.shape, y_train_next.shape)
-        self.assertEqual(X_test.shape, X_test_next.shape)
-        self.assertEqual(y_test.shape, y_test_next.shape)
+        # check if all matrices are identical
+        if not np.array_equal(X_train, X_train_next):
+            # check if IDs are the same in train and train_next
+            check = set([x.split("_")[-1] for x in X_train.index.tolist()]) - set(
+                [x.split("_")[-1] for x in X_train_next.index.tolist()])
+            print(f"X_train is not equal: {check}")
+        self.assertTrue(np.array_equal(X_train, X_train_next))
+        self.assertTrue(np.array_equal(y_train, y_train_next))
+        self.assertTrue(np.array_equal(X_test, X_test_next))
+        self.assertTrue(np.array_equal(y_test, y_test_next))
 
 
 class TestDescriptorSets(DataSetsPathMixIn, QSPRTestCase):
