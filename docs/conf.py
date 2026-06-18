@@ -33,8 +33,7 @@ extensions = [
     "sphinx_design_elements",
 ]
 
-intersphinx_mapping = {'python': ('https://docs.python.org/3.10', None)}
-intersphinx_mapping = {'python': ('https://docs.python.org/3.9', None)}
+intersphinx_mapping = {'python': ('https://docs.python.org/3.14', None)}
 autoclass_content = "both"
 autodoc_default_options = {
     "members": True,
