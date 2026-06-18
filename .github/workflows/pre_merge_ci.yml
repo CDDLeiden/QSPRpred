@@ -1,4 +1,4 @@
-name: Python3.10 CI with Basic Tests
+name: Basic Tests
 
 on:
   push:
@@ -11,6 +11,7 @@ on:
 env:
   QSPPRED_TEST_EXTRAS: false
   QSPRPRED_VERBOSE_LOGGING: true
+  QSPR_TEST_TUTORIAL_ALL: false
 
 jobs:
   tests-basic:
@@ -28,7 +29,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: '3.14'
 
       - name: Cache Python Environment
         uses: actions/cache@v3

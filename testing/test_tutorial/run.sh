@@ -8,7 +8,18 @@ set -e
 
 # Run each notebook in the directory
 export TUTORIAL_BASE="../../tutorials"
-find $TUTORIAL_BASE -name "*.ipynb" | while read notebook
+cd $TUTORIAL_BASE
+find . -name "*.ipynb" | while read notebook
 do
+    # skip converted if file ends with 'nbconvert.ipynb'
+    if [[ "$notebook" == *"nbconvert.ipynb" ]]; then
+        continue
+    fi
+
+    if [[ "$notebook" == *"advanced"* ]] && [[ "${QSPR_TEST_TUTORIAL_ALL:-false}" != "true" ]]; then
+        continue
+    fi
+
+    # run normally
     jupyter nbconvert --to notebook --execute "$notebook"
 done

@@ -13,6 +13,7 @@ on:
 env:
   QSPPRED_TEST_EXTRAS: true
   QSPRPRED_VERBOSE_LOGGING: true
+  QSPR_TEST_TUTORIAL_ALL: true
 
 jobs:
   tests-all:
@@ -21,7 +22,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest ] # FIXME: add macos-latest and windows-latest (removed for now due to limited debugging options)
-        python-version: [ '3.12' ]
+        python-version: [ '3.12', '3.13', '3.14' ]
       fail-fast: false
     defaults:
       run:
