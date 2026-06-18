@@ -1,27 +1,29 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.utils.testing package &mdash; QSPRpred 4.0.0a3.dev43+g75b7b350e documentation</title>
+  <title>qsprpred.utils.testing package &mdash; QSPRpred 4.0.0a3.dev44+g87226e3b6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
-      <script src="../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=25cbc593"></script>
-      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
-      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
-      <script>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5e15a345"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>
     </script>
-      <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+        <script src="../_static/design-tabs.js?v=f930bc37"></script>
+        <script src="../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -52,6 +54,9 @@
           <a href="../index.html" class="icon icon-home">
             QSPRpred
           </a>
+              <div class="version">
+                v4.0.0a3.dev44+g87226e3b6
+              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -125,21 +130,21 @@
 <span id="qsprpred-utils-testing-base-module"></span><h2>qsprpred.utils.testing.base module<a class="headerlink" href="#module-qsprpred.utils.testing.base" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.base.QSPRTestCase">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.base.</span></span><span class="sig-name descname"><span class="pre">QSPRTestCase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/base.html#QSPRTestCase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.base.</span></span><span class="sig-name descname"><span class="pre">QSPRTestCase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/base.html#QSPRTestCase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TestCase</span></code></p>
 <p>Create an instance of the class that will use the named test
 method when executed. Raises a ValueError if the instance does
 not have a method with the specified name.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.base.QSPRTestCase.addClassCleanup">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">addClassCleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.addClassCleanup" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">addClassCleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.addClassCleanup" title="Link to this definition"></a></dt>
 <dd><p>Same as addCleanup, except the cleanup items are called even if
 setUpClass fails (unlike tearDownClass).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.base.QSPRTestCase.addCleanup">
-<span class="sig-name descname"><span class="pre">addCleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.addCleanup" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">addCleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.addCleanup" title="Link to this definition"></a></dt>
 <dd><p>Add a function, with arguments, to be called when the test is
 completed. Functions added are called on a LIFO basis and are
 called after tearDown on test failure or success.</p>
@@ -593,7 +598,7 @@ when assertWarnsRegex is used as a context manager.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.base.QSPRTestCase.doClassCleanups">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">doClassCleanups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.doClassCleanups" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">doClassCleanups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.doClassCleanups" title="Link to this definition"></a></dt>
 <dd><p>Execute all class cleanup functions. Normally called for you after
 tearDownClass.</p>
 </dd></dl>
@@ -607,7 +612,7 @@ tearDown.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.base.QSPRTestCase.enterClassContext">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">enterClassContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.enterClassContext" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enterClassContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.enterClassContext" title="Link to this definition"></a></dt>
 <dd><p>Same as enterContext, but class-wide.</p>
 </dd></dl>
 
@@ -638,12 +643,12 @@ function and returns the result of the __enter__ method.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.base.QSPRTestCase.longMessage">
-<span class="sig-name descname"><span class="pre">longMessage</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.longMessage" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">longMessage</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.longMessage" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.base.QSPRTestCase.maxDiff">
-<span class="sig-name descname"><span class="pre">maxDiff</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">640</span></span><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.maxDiff" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">maxDiff</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">640</span></em><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.maxDiff" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -659,7 +664,7 @@ function and returns the result of the __enter__ method.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.base.QSPRTestCase.setUpClass">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">setUpClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.setUpClass" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setUpClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.setUpClass" title="Link to this definition"></a></dt>
 <dd><p>Hook method for setting up class fixture before running tests in the class.</p>
 </dd></dl>
 
@@ -680,7 +685,7 @@ the specified test method’s docstring.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.base.QSPRTestCase.subTest">
-<span class="sig-name descname"><span class="pre">subTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;object</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.subTest" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">subTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg=&lt;object</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.subTest" title="Link to this definition"></a></dt>
 <dd><p>Return a context manager that will return the enclosed block
 of code in a subtest identified by the optional message and
 keyword parameters.  A failure in the subtest marks the test
@@ -696,7 +701,7 @@ block, allowing further test code to be executed.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.base.QSPRTestCase.tearDownClass">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">tearDownClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.tearDownClass" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tearDownClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.base.QSPRTestCase.tearDownClass" title="Link to this definition"></a></dt>
 <dd><p>Hook method for deconstructing the class fixture after running all tests in the class.</p>
 </dd></dl>
 
@@ -707,7 +712,7 @@ block, allowing further test code to be executed.</p>
 <span id="qsprpred-utils-testing-check-mixins-module"></span><h2>qsprpred.utils.testing.check_mixins module<a class="headerlink" href="#module-qsprpred.utils.testing.check_mixins" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.check_mixins.</span></span><span class="sig-name descname"><span class="pre">DataPrepCheckMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#DataPrepCheckMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.check_mixins.</span></span><span class="sig-name descname"><span class="pre">DataPrepCheckMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#DataPrepCheckMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DataPrepCheckMixIn" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn" title="qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">DescriptorCheckMixIn</span></code></a></p>
 <p>Mixin for testing data preparation.</p>
 <dl class="py method">
@@ -753,7 +758,7 @@ between the train and test indices if both are provided.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.check_mixins.</span></span><span class="sig-name descname"><span class="pre">DescriptorCheckMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#DescriptorCheckMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.check_mixins.</span></span><span class="sig-name descname"><span class="pre">DescriptorCheckMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#DescriptorCheckMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.DescriptorCheckMixIn" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.14/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Mixin class for common descriptor checks.</p>
 <dl class="py method">
@@ -787,7 +792,7 @@ between the train and test indices if both are provided.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.ModelCheckMixIn">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.check_mixins.</span></span><span class="sig-name descname"><span class="pre">ModelCheckMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#ModelCheckMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.check_mixins.</span></span><span class="sig-name descname"><span class="pre">ModelCheckMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#ModelCheckMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.14/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>This class holds the tests for the QSPRmodel class.</p>
 <dl class="py method">
@@ -832,7 +837,7 @@ between the train and test indices if both are provided.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.ModelCheckMixIn.gridFile">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">gridFile</span></span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.gridFile" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gridFile</span></span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn.gridFile" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -861,7 +866,7 @@ not equal to the predictions of the comparison model.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.check_mixins.</span></span><span class="sig-name descname"><span class="pre">MonitorsCheckMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#MonitorsCheckMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.check_mixins.</span></span><span class="sig-name descname"><span class="pre">MonitorsCheckMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#MonitorsCheckMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn" title="qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelDataSetsPathMixIn</span></code></a>, <a class="reference internal" href="#qsprpred.utils.testing.check_mixins.ModelCheckMixIn" title="qsprpred.utils.testing.check_mixins.ModelCheckMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelCheckMixIn</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.baseMonitorTest">
@@ -991,7 +996,7 @@ not equal to the predictions of the comparison model.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getAllDescriptorSets">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getAllDescriptorSets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getAllDescriptorSets" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getAllDescriptorSets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getAllDescriptorSets" title="Link to this definition"></a></dt>
 <dd><p>Return a list of (ideally) all available descriptor sets. For now
 they need to be added manually to the list below.</p>
 <p>TODO: would be nice to create the list automatically by implementing a
@@ -1022,7 +1027,7 @@ descriptor set registry that would hold all installed descriptor sets.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getDataPrepGrid">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getDataPrepGrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getDataPrepGrid" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDataPrepGrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getDataPrepGrid" title="Link to this definition"></a></dt>
 <dd><p>Return a list of many possible combinations of descriptor calculators,
 splits, feature standardizers, feature filters and data filters. Again, this is
 not exhaustive, but should cover a lot of cases.</p>
@@ -1040,7 +1045,7 @@ feature_standardizer, feature_filters, data_filters)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getDefaultCalculatorCombo">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getDefaultCalculatorCombo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getDefaultCalculatorCombo" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDefaultCalculatorCombo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getDefaultCalculatorCombo" title="Link to this definition"></a></dt>
 <dd><p>Makes a list of default descriptor calculators that can be used in tests.</p>
 <p>It creates a calculator with only morgan fingerprints and rdkit descriptors,
 but also one with them both to test behaviour with multiple descriptor sets.
@@ -1058,7 +1063,7 @@ calculator combinations.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getDefaultPrep">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getDefaultPrep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">add_imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getDefaultPrep" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDefaultPrep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">add_imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getDefaultPrep" title="Link to this definition"></a></dt>
 <dd><p>Return a dictionary with default preparation settings.</p>
 </dd></dl>
 
@@ -1084,7 +1089,7 @@ calculator combinations.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getPrepCombos">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getPrepCombos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getPrepCombos" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getPrepCombos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getPrepCombos" title="Link to this definition"></a></dt>
 <dd><p>Return a list of all possible preparation combinations as generated by
 <a class="reference internal" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getDataPrepGrid" title="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.getDataPrepGrid"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">getDataPrepGrid</span></code></a> as well as their names. The generated list can be used
 to parameterize tests with the given named combinations.</p>
@@ -1119,7 +1124,7 @@ to parameterize tests with the given named combinations.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.gridFile">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">gridFile</span></span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.gridFile" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">gridFile</span></span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.MonitorsCheckMixIn.gridFile" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1175,7 +1180,7 @@ not equal to the predictions of the comparison model.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.StepCheckMixIn">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.check_mixins.</span></span><span class="sig-name descname"><span class="pre">StepCheckMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#StepCheckMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.StepCheckMixIn" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.check_mixins.</span></span><span class="sig-name descname"><span class="pre">StepCheckMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/check_mixins.html#StepCheckMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.StepCheckMixIn" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSetsPathMixIn</span></code></a></p>
 <p>Mixin class for common pipeline step checks.</p>
 <dl class="py method">
@@ -1286,7 +1291,7 @@ not equal to the predictions of the comparison model.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.StepCheckMixIn.getAllDescriptorSets">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getAllDescriptorSets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.StepCheckMixIn.getAllDescriptorSets" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getAllDescriptorSets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.StepCheckMixIn.getAllDescriptorSets" title="Link to this definition"></a></dt>
 <dd><p>Return a list of (ideally) all available descriptor sets. For now
 they need to be added manually to the list below.</p>
 <p>TODO: would be nice to create the list automatically by implementing a
@@ -1317,7 +1322,7 @@ descriptor set registry that would hold all installed descriptor sets.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.StepCheckMixIn.getDataPrepGrid">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getDataPrepGrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.StepCheckMixIn.getDataPrepGrid" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDataPrepGrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.StepCheckMixIn.getDataPrepGrid" title="Link to this definition"></a></dt>
 <dd><p>Return a list of many possible combinations of descriptor calculators,
 splits, feature standardizers, feature filters and data filters. Again, this is
 not exhaustive, but should cover a lot of cases.</p>
@@ -1335,7 +1340,7 @@ feature_standardizer, feature_filters, data_filters)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.StepCheckMixIn.getDefaultCalculatorCombo">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getDefaultCalculatorCombo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.StepCheckMixIn.getDefaultCalculatorCombo" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDefaultCalculatorCombo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.StepCheckMixIn.getDefaultCalculatorCombo" title="Link to this definition"></a></dt>
 <dd><p>Makes a list of default descriptor calculators that can be used in tests.</p>
 <p>It creates a calculator with only morgan fingerprints and rdkit descriptors,
 but also one with them both to test behaviour with multiple descriptor sets.
@@ -1353,13 +1358,13 @@ calculator combinations.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.StepCheckMixIn.getDefaultPrep">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getDefaultPrep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">add_imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.StepCheckMixIn.getDefaultPrep" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDefaultPrep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">add_imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.StepCheckMixIn.getDefaultPrep" title="Link to this definition"></a></dt>
 <dd><p>Return a dictionary with default preparation settings.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.check_mixins.StepCheckMixIn.getPrepCombos">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getPrepCombos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.StepCheckMixIn.getPrepCombos" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getPrepCombos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.check_mixins.StepCheckMixIn.getPrepCombos" title="Link to this definition"></a></dt>
 <dd><p>Return a list of all possible preparation combinations as generated by
 <a class="reference internal" href="#qsprpred.utils.testing.check_mixins.StepCheckMixIn.getDataPrepGrid" title="qsprpred.utils.testing.check_mixins.StepCheckMixIn.getDataPrepGrid"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">getDataPrepGrid</span></code></a> as well as their names. The generated list can be used
 to parameterize tests with the given named combinations.</p>
@@ -1411,7 +1416,7 @@ to parameterize tests with the given named combinations.</p>
 <span id="qsprpred-utils-testing-path-mixins-module"></span><h2>qsprpred.utils.testing.path_mixins module<a class="headerlink" href="#module-qsprpred.utils.testing.path_mixins" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.path_mixins.</span></span><span class="sig-name descname"><span class="pre">DataSetsPathMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#DataSetsPathMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.path_mixins.</span></span><span class="sig-name descname"><span class="pre">DataSetsPathMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#DataSetsPathMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qsprpred.utils.testing.path_mixins.PathMixIn" title="qsprpred.utils.testing.path_mixins.PathMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">PathMixIn</span></code></a></p>
 <p>Mix-in class that provides a small and large testing data set and some common
 preparation settings to use in tests.</p>
@@ -1511,7 +1516,7 @@ preparation settings to use in tests.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getAllDescriptorSets">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getAllDescriptorSets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#DataSetsPathMixIn.getAllDescriptorSets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getAllDescriptorSets" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getAllDescriptorSets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#DataSetsPathMixIn.getAllDescriptorSets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getAllDescriptorSets" title="Link to this definition"></a></dt>
 <dd><p>Return a list of (ideally) all available descriptor sets. For now
 they need to be added manually to the list below.</p>
 <p>TODO: would be nice to create the list automatically by implementing a
@@ -1542,7 +1547,7 @@ descriptor set registry that would hold all installed descriptor sets.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDataPrepGrid">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getDataPrepGrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#DataSetsPathMixIn.getDataPrepGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDataPrepGrid" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDataPrepGrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#DataSetsPathMixIn.getDataPrepGrid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDataPrepGrid" title="Link to this definition"></a></dt>
 <dd><p>Return a list of many possible combinations of descriptor calculators,
 splits, feature standardizers, feature filters and data filters. Again, this is
 not exhaustive, but should cover a lot of cases.</p>
@@ -1560,7 +1565,7 @@ feature_standardizer, feature_filters, data_filters)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultCalculatorCombo">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getDefaultCalculatorCombo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#DataSetsPathMixIn.getDefaultCalculatorCombo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultCalculatorCombo" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDefaultCalculatorCombo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#DataSetsPathMixIn.getDefaultCalculatorCombo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultCalculatorCombo" title="Link to this definition"></a></dt>
 <dd><p>Makes a list of default descriptor calculators that can be used in tests.</p>
 <p>It creates a calculator with only morgan fingerprints and rdkit descriptors,
 but also one with them both to test behaviour with multiple descriptor sets.
@@ -1578,13 +1583,13 @@ calculator combinations.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getDefaultPrep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">add_imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#DataSetsPathMixIn.getDefaultPrep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDefaultPrep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">add_imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#DataSetsPathMixIn.getDefaultPrep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDefaultPrep" title="Link to this definition"></a></dt>
 <dd><p>Return a dictionary with default preparation settings.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getPrepCombos">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getPrepCombos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#DataSetsPathMixIn.getPrepCombos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getPrepCombos" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getPrepCombos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#DataSetsPathMixIn.getPrepCombos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getPrepCombos" title="Link to this definition"></a></dt>
 <dd><p>Return a list of all possible preparation combinations as generated by
 <a class="reference internal" href="#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDataPrepGrid" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn.getDataPrepGrid"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">getDataPrepGrid</span></code></a> as well as their names. The generated list can be used
 to parameterize tests with the given named combinations.</p>
@@ -1633,7 +1638,7 @@ to parameterize tests with the given named combinations.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.path_mixins.</span></span><span class="sig-name descname"><span class="pre">ModelDataSetsPathMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#ModelDataSetsPathMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.path_mixins.</span></span><span class="sig-name descname"><span class="pre">ModelDataSetsPathMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#ModelDataSetsPathMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSetsPathMixIn</span></code></a></p>
 <p>This class sets up the datasets for the model tests.</p>
 <dl class="py method">
@@ -1732,7 +1737,7 @@ to parameterize tests with the given named combinations.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getAllDescriptorSets">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getAllDescriptorSets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getAllDescriptorSets" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getAllDescriptorSets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getAllDescriptorSets" title="Link to this definition"></a></dt>
 <dd><p>Return a list of (ideally) all available descriptor sets. For now
 they need to be added manually to the list below.</p>
 <p>TODO: would be nice to create the list automatically by implementing a
@@ -1763,7 +1768,7 @@ descriptor set registry that would hold all installed descriptor sets.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getDataPrepGrid">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getDataPrepGrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getDataPrepGrid" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDataPrepGrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getDataPrepGrid" title="Link to this definition"></a></dt>
 <dd><p>Return a list of many possible combinations of descriptor calculators,
 splits, feature standardizers, feature filters and data filters. Again, this is
 not exhaustive, but should cover a lot of cases.</p>
@@ -1781,7 +1786,7 @@ feature_standardizer, feature_filters, data_filters)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getDefaultCalculatorCombo">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getDefaultCalculatorCombo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getDefaultCalculatorCombo" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDefaultCalculatorCombo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getDefaultCalculatorCombo" title="Link to this definition"></a></dt>
 <dd><p>Makes a list of default descriptor calculators that can be used in tests.</p>
 <p>It creates a calculator with only morgan fingerprints and rdkit descriptors,
 but also one with them both to test behaviour with multiple descriptor sets.
@@ -1799,13 +1804,13 @@ calculator combinations.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getDefaultPrep">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getDefaultPrep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">add_imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getDefaultPrep" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDefaultPrep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">add_imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getDefaultPrep" title="Link to this definition"></a></dt>
 <dd><p>Return a dictionary with default preparation settings.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getPrepCombos">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getPrepCombos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getPrepCombos" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getPrepCombos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getPrepCombos" title="Link to this definition"></a></dt>
 <dd><p>Return a list of all possible preparation combinations as generated by
 <a class="reference internal" href="#qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getDataPrepGrid" title="qsprpred.utils.testing.path_mixins.ModelDataSetsPathMixIn.getDataPrepGrid"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">getDataPrepGrid</span></code></a> as well as their names. The generated list can be used
 to parameterize tests with the given named combinations.</p>
@@ -1854,7 +1859,7 @@ to parameterize tests with the given named combinations.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.utils.testing.path_mixins.PathMixIn">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.path_mixins.</span></span><span class="sig-name descname"><span class="pre">PathMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#PathMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.PathMixIn" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.utils.testing.path_mixins.</span></span><span class="sig-name descname"><span class="pre">PathMixIn</span></span><a class="reference internal" href="../_modules/qsprpred/utils/testing/path_mixins.html#PathMixIn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.utils.testing.path_mixins.PathMixIn" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.14/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Mix-in class that provides paths to test files and directories and handles their
 creation and deletion.</p>

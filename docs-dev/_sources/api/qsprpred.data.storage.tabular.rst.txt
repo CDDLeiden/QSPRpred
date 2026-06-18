@@ -9,29 +9,29 @@ qsprpred.data.storage.tabular.hierarchical module
 
 .. automodule:: qsprpred.data.storage.tabular.hierarchical
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.data.storage.tabular.simple module
 -------------------------------------------
 
 .. automodule:: qsprpred.data.storage.tabular.simple
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.data.storage.tabular.stored\_mol module
 ------------------------------------------------
 
 .. automodule:: qsprpred.data.storage.tabular.stored_mol
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.data.storage.tabular
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:

@@ -17,45 +17,45 @@ qsprpred.data.tables.descriptor module
 
 .. automodule:: qsprpred.data.tables.descriptor
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.data.tables.mol module
 -------------------------------
 
 .. automodule:: qsprpred.data.tables.mol
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.data.tables.pnds module
 --------------------------------
 
 .. automodule:: qsprpred.data.tables.pnds
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.data.tables.qspr module
 --------------------------------
 
 .. automodule:: qsprpred.data.tables.qspr
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.data.tables.tests module
 ---------------------------------
 
 .. automodule:: qsprpred.data.tables.tests
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.data.tables
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:

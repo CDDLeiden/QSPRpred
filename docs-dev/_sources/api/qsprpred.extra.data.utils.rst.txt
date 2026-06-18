@@ -17,13 +17,13 @@ qsprpred.extra.data.utils.msa\_calculator module
 
 .. automodule:: qsprpred.extra.data.utils.msa_calculator
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.extra.data.utils
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:

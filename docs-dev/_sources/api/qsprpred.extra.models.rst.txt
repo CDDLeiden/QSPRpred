@@ -9,29 +9,29 @@ qsprpred.extra.models.pcm module
 
 .. automodule:: qsprpred.extra.models.pcm
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.extra.models.random module
 -----------------------------------
 
 .. automodule:: qsprpred.extra.models.random
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.extra.models.tests module
 ----------------------------------
 
 .. automodule:: qsprpred.extra.models.tests
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.extra.models
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:

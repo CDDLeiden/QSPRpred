@@ -1,27 +1,29 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.sources.papyrus package &mdash; QSPRpred 4.0.0a3.dev43+g75b7b350e documentation</title>
+  <title>qsprpred.data.sources.papyrus package &mdash; QSPRpred 4.0.0a3.dev44+g87226e3b6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
-      <script src="../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=25cbc593"></script>
-      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
-      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
-      <script>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5e15a345"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>
     </script>
-      <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+        <script src="../_static/design-tabs.js?v=f930bc37"></script>
+        <script src="../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -53,6 +55,9 @@
           <a href="../index.html" class="icon icon-home">
             QSPRpred
           </a>
+              <div class="version">
+                v4.0.0a3.dev44+g87226e3b6
+              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -128,7 +133,7 @@
 <p>Creating dataset from Papyrus database.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.papyrus_class.Papyrus">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qsprpred.data.sources.papyrus.papyrus_class.</span></span><span class="sig-name descname"><span class="pre">Papyrus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/home/runner/.Papyrus'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'latest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stereo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disk_margin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plus_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/sources/papyrus/papyrus_class.html#Papyrus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.sources.papyrus.papyrus_class.Papyrus" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.sources.papyrus.papyrus_class.</span></span><span class="sig-name descname"><span class="pre">Papyrus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/home/runner/.Papyrus'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'latest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stereo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disk_margin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plus_only</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/sources/papyrus/papyrus_class.html#Papyrus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.sources.papyrus.papyrus_class.Papyrus" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qsprpred.data.sources.html#qsprpred.data.sources.data_source.DataSource" title="qsprpred.data.sources.data_source.DataSource"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSource</span></code></a></p>
 <p>Create new instance of Papyrus dataset.
 See <a class="reference internal" href="#module-qsprpred.data.sources.papyrus.papyrus_filter" title="qsprpred.data.sources.papyrus.papyrus_filter"><code class="xref any py py-mod docutils literal notranslate"><span class="pre">papyrus_filter</span></code></a> and <a class="reference internal" href="#qsprpred.data.sources.papyrus.papyrus_class.Papyrus.download" title="qsprpred.data.sources.papyrus.papyrus_class.Papyrus.download"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">Papyrus.download</span></code></a> and <a class="reference internal" href="#qsprpred.data.sources.papyrus.papyrus_class.Papyrus.getData" title="qsprpred.data.sources.papyrus.papyrus_class.Papyrus.getData"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">Papyrus.getData</span></code></a> for more details.</p>
@@ -165,7 +170,7 @@ all descriptors, otherwise a list of descriptor names, see
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.papyrus_class.Papyrus.DEFAULT_DIR">
-<span class="sig-name descname"><span class="pre">DEFAULT_DIR</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/home/runner/.Papyrus'</span></span><a class="headerlink" href="#qsprpred.data.sources.papyrus.papyrus_class.Papyrus.DEFAULT_DIR" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">DEFAULT_DIR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'/home/runner/.Papyrus'</span></em><a class="headerlink" href="#qsprpred.data.sources.papyrus.papyrus_class.Papyrus.DEFAULT_DIR" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -292,21 +297,21 @@ outfile (str): path to the output file</p>
 <span id="qsprpred-data-sources-papyrus-tests-module"></span><h2>qsprpred.data.sources.papyrus.tests module<a class="headerlink" href="#module-qsprpred.data.sources.papyrus.tests" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qsprpred.data.sources.papyrus.tests.</span></span><span class="sig-name descname"><span class="pre">PapyrusSourceTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/sources/papyrus/tests.html#PapyrusSourceTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.sources.papyrus.tests.</span></span><span class="sig-name descname"><span class="pre">PapyrusSourceTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methodName</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'runTest'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qsprpred/data/sources/papyrus/tests.html#PapyrusSourceTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.path_mixins.DataSetsPathMixIn" title="qsprpred.utils.testing.path_mixins.DataSetsPathMixIn"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataSetsPathMixIn</span></code></a>, <a class="reference internal" href="qsprpred.utils.testing.html#qsprpred.utils.testing.base.QSPRTestCase" title="qsprpred.utils.testing.base.QSPRTestCase"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSPRTestCase</span></code></a></p>
 <p>Create an instance of the class that will use the named test
 method when executed. Raises a ValueError if the instance does
 not have a method with the specified name.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.addClassCleanup">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">addClassCleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.addClassCleanup" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">addClassCleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.addClassCleanup" title="Link to this definition"></a></dt>
 <dd><p>Same as addCleanup, except the cleanup items are called even if
 setUpClass fails (unlike tearDownClass).</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.addCleanup">
-<span class="sig-name descname"><span class="pre">addCleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.addCleanup" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">addCleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.addCleanup" title="Link to this definition"></a></dt>
 <dd><p>Add a function, with arguments, to be called when the test is
 completed. Functions added are called on a LIFO basis and are
 called after tearDown on test failure or success.</p>
@@ -854,7 +859,7 @@ when assertWarnsRegex is used as a context manager.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.doClassCleanups">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">doClassCleanups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.doClassCleanups" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">doClassCleanups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.doClassCleanups" title="Link to this definition"></a></dt>
 <dd><p>Execute all class cleanup functions. Normally called for you after
 tearDownClass.</p>
 </dd></dl>
@@ -868,7 +873,7 @@ tearDown.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.enterClassContext">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">enterClassContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.enterClassContext" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">enterClassContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.enterClassContext" title="Link to this definition"></a></dt>
 <dd><p>Same as enterContext, but class-wide.</p>
 </dd></dl>
 
@@ -894,7 +899,7 @@ function and returns the result of the __enter__ method.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getAllDescriptorSets">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getAllDescriptorSets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getAllDescriptorSets" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getAllDescriptorSets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getAllDescriptorSets" title="Link to this definition"></a></dt>
 <dd><p>Return a list of (ideally) all available descriptor sets. For now
 they need to be added manually to the list below.</p>
 <p>TODO: would be nice to create the list automatically by implementing a
@@ -925,7 +930,7 @@ descriptor set registry that would hold all installed descriptor sets.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDataPrepGrid">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getDataPrepGrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDataPrepGrid" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDataPrepGrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDataPrepGrid" title="Link to this definition"></a></dt>
 <dd><p>Return a list of many possible combinations of descriptor calculators,
 splits, feature standardizers, feature filters and data filters. Again, this is
 not exhaustive, but should cover a lot of cases.</p>
@@ -943,7 +948,7 @@ feature_standardizer, feature_filters, data_filters)</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDefaultCalculatorCombo">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getDefaultCalculatorCombo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDefaultCalculatorCombo" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDefaultCalculatorCombo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDefaultCalculatorCombo" title="Link to this definition"></a></dt>
 <dd><p>Makes a list of default descriptor calculators that can be used in tests.</p>
 <p>It creates a calculator with only morgan fingerprints and rdkit descriptors,
 but also one with them both to test behaviour with multiple descriptor sets.
@@ -961,13 +966,13 @@ calculator combinations.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDefaultPrep">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getDefaultPrep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">add_imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDefaultPrep" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getDefaultPrep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">add_imputer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDefaultPrep" title="Link to this definition"></a></dt>
 <dd><p>Return a dictionary with default preparation settings.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getPrepCombos">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getPrepCombos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getPrepCombos" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getPrepCombos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getPrepCombos" title="Link to this definition"></a></dt>
 <dd><p>Return a list of all possible preparation combinations as generated by
 <a class="reference internal" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDataPrepGrid" title="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.getDataPrepGrid"><code class="xref any py py-meth docutils literal notranslate"><span class="pre">getDataPrepGrid</span></code></a> as well as their names. The generated list can be used
 to parameterize tests with the given named combinations.</p>
@@ -1007,12 +1012,12 @@ to parameterize tests with the given named combinations.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.longMessage">
-<span class="sig-name descname"><span class="pre">longMessage</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.longMessage" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">longMessage</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.longMessage" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.maxDiff">
-<span class="sig-name descname"><span class="pre">maxDiff</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">640</span></span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.maxDiff" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">maxDiff</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">640</span></em><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.maxDiff" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1028,7 +1033,7 @@ to parameterize tests with the given named combinations.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.setUpClass">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">setUpClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.setUpClass" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">setUpClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.setUpClass" title="Link to this definition"></a></dt>
 <dd><p>Hook method for setting up class fixture before running tests in the class.</p>
 </dd></dl>
 
@@ -1055,7 +1060,7 @@ the specified test method’s docstring.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.subTest">
-<span class="sig-name descname"><span class="pre">subTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;object</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.subTest" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">subTest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg=&lt;object</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**params</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.subTest" title="Link to this definition"></a></dt>
 <dd><p>Return a context manager that will return the enclosed block
 of code in a subtest identified by the optional message and
 keyword parameters.  A failure in the subtest marks the test
@@ -1071,7 +1076,7 @@ block, allowing further test code to be executed.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.tearDownClass">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">tearDownClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.tearDownClass" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tearDownClass</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qsprpred.data.sources.papyrus.tests.PapyrusSourceTest.tearDownClass" title="Link to this definition"></a></dt>
 <dd><p>Hook method for deconstructing the class fixture after running all tests in the class.</p>
 </dd></dl>
 

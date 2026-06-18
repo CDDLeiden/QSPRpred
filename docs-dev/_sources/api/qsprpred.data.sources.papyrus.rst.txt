@@ -9,29 +9,29 @@ qsprpred.data.sources.papyrus.papyrus\_class module
 
 .. automodule:: qsprpred.data.sources.papyrus.papyrus_class
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.data.sources.papyrus.papyrus\_filter module
 ----------------------------------------------------
 
 .. automodule:: qsprpred.data.sources.papyrus.papyrus_filter
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.data.sources.papyrus.tests module
 ------------------------------------------
 
 .. automodule:: qsprpred.data.sources.papyrus.tests
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.data.sources.papyrus
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:

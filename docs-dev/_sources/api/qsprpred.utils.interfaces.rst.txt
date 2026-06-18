@@ -9,21 +9,21 @@ qsprpred.utils.interfaces.randomized module
 
 .. automodule:: qsprpred.utils.interfaces.randomized
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.utils.interfaces.summarizable module
 ---------------------------------------------
 
 .. automodule:: qsprpred.utils.interfaces.summarizable
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.utils.interfaces
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:

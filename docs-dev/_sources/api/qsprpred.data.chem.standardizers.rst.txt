@@ -9,45 +9,45 @@ qsprpred.data.chem.standardizers.base module
 
 .. automodule:: qsprpred.data.chem.standardizers.base
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.data.chem.standardizers.check\_smiles module
 -----------------------------------------------------
 
 .. automodule:: qsprpred.data.chem.standardizers.check_smiles
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.data.chem.standardizers.chembl module
 ----------------------------------------------
 
 .. automodule:: qsprpred.data.chem.standardizers.chembl
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.data.chem.standardizers.naive module
 ---------------------------------------------
 
 .. automodule:: qsprpred.data.chem.standardizers.naive
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.data.chem.standardizers.papyrus module
 -----------------------------------------------
 
 .. automodule:: qsprpred.data.chem.standardizers.papyrus
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.data.chem.standardizers
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:

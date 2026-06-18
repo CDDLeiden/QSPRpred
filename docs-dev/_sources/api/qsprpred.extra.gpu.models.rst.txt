@@ -9,53 +9,53 @@ qsprpred.extra.gpu.models.base module
 
 .. automodule:: qsprpred.extra.gpu.models.base
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.extra.gpu.models.base\_torch module
 --------------------------------------------
 
 .. automodule:: qsprpred.extra.gpu.models.base_torch
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.extra.gpu.models.chemprop module
 -----------------------------------------
 
 .. automodule:: qsprpred.extra.gpu.models.chemprop
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.extra.gpu.models.dnn module
 ------------------------------------
 
 .. automodule:: qsprpred.extra.gpu.models.dnn
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.extra.gpu.models.neural\_network module
 ------------------------------------------------
 
 .. automodule:: qsprpred.extra.gpu.models.neural_network
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.extra.gpu.models.tests module
 --------------------------------------
 
 .. automodule:: qsprpred.extra.gpu.models.tests
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.extra.gpu.models
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:

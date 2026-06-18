@@ -18,53 +18,53 @@ qsprpred.utils.inspect module
 
 .. automodule:: qsprpred.utils.inspect
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.utils.parallel module
 ------------------------------
 
 .. automodule:: qsprpred.utils.parallel
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.utils.serialization module
 -----------------------------------
 
 .. automodule:: qsprpred.utils.serialization
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.utils.stopwatch module
 -------------------------------
 
 .. automodule:: qsprpred.utils.stopwatch
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.utils.stringops module
 -------------------------------
 
 .. automodule:: qsprpred.utils.stringops
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.utils.tests module
 ---------------------------
 
 .. automodule:: qsprpred.utils.tests
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.utils
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:

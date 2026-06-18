@@ -17,13 +17,13 @@ qsprpred.extra.data.storage.protein.tabular\_pcm module
 
 .. automodule:: qsprpred.extra.data.storage.protein.tabular_pcm
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.extra.data.storage.protein
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:

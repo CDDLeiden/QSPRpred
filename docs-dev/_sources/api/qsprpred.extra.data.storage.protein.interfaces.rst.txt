@@ -9,21 +9,21 @@ qsprpred.extra.data.storage.protein.interfaces.protein\_storage module
 
 .. automodule:: qsprpred.extra.data.storage.protein.interfaces.protein_storage
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.extra.data.storage.protein.interfaces.storedprotein module
 -------------------------------------------------------------------
 
 .. automodule:: qsprpred.extra.data.storage.protein.interfaces.storedprotein
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.extra.data.storage.protein.interfaces
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:

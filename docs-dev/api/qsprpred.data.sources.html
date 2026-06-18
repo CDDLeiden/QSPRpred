@@ -1,27 +1,29 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.data.sources package &mdash; QSPRpred 4.0.0a3.dev43+g75b7b350e documentation</title>
+  <title>qsprpred.data.sources package &mdash; QSPRpred 4.0.0a3.dev44+g87226e3b6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
       <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
-      <script src="../_static/jquery.js?v=5d32c60e"></script>
-      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=25cbc593"></script>
-      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
-      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
-      <script>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5e15a345"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>
     </script>
-      <script src="../_static/design-tabs.js?v=f930bc37"></script>
-      <script src="../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+        <script src="../_static/design-tabs.js?v=f930bc37"></script>
+        <script src="../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -53,6 +55,9 @@
           <a href="../index.html" class="icon icon-home">
             QSPRpred
           </a>
+              <div class="version">
+                v4.0.0a3.dev44+g87226e3b6
+              </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
@@ -238,13 +243,13 @@
 <span id="qsprpred-data-sources-data-source-module"></span><h2>qsprpred.data.sources.data_source module<a class="headerlink" href="#module-qsprpred.data.sources.data_source" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.data.sources.data_source.DataSource">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qsprpred.data.sources.data_source.</span></span><span class="sig-name descname"><span class="pre">DataSource</span></span><a class="reference internal" href="../_modules/qsprpred/data/sources/data_source.html#DataSource"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.sources.data_source.DataSource" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.sources.data_source.</span></span><span class="sig-name descname"><span class="pre">DataSource</span></span><a class="reference internal" href="../_modules/qsprpred/data/sources/data_source.html#DataSource"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.sources.data_source.DataSource" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.14/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
 <p>General definition of a data source. It is essentially a factory
 for creating <a class="reference internal" href="qsprpred.data.html#qsprpred.data.MoleculeTable" title="qsprpred.data.MoleculeTable"><code class="xref any py py-class docutils literal notranslate"><span class="pre">MoleculeTable</span></code></a> and <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> instances.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.sources.data_source.DataSource.getData">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable" title="qsprpred.data.tables.mol.MoleculeTable"><span class="pre">MoleculeTable</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/sources/data_source.html#DataSource.getData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.sources.data_source.DataSource.getData" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable" title="qsprpred.data.tables.mol.MoleculeTable"><span class="pre">MoleculeTable</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/sources/data_source.html#DataSource.getData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.sources.data_source.DataSource.getData" title="Link to this definition"></a></dt>
 <dd><p>Get the molecule data from the source as a <a class="reference internal" href="qsprpred.data.html#qsprpred.data.MoleculeTable" title="qsprpred.data.MoleculeTable"><code class="xref any py py-class docutils literal notranslate"><span class="pre">MoleculeTable</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -293,13 +298,13 @@ method and the <a class="reference internal" href="qsprpred.data.tables.interfac
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qsprpred.data.sources" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="qsprpred.data.sources.DataSource">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qsprpred.data.sources.</span></span><span class="sig-name descname"><span class="pre">DataSource</span></span><a class="reference internal" href="../_modules/qsprpred/data/sources/data_source.html#DataSource"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.sources.DataSource" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">qsprpred.data.sources.</span></span><span class="sig-name descname"><span class="pre">DataSource</span></span><a class="reference internal" href="../_modules/qsprpred/data/sources/data_source.html#DataSource"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.sources.DataSource" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.14/library/abc.html#abc.ABC" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></a></p>
 <p>General definition of a data source. It is essentially a factory
 for creating <a class="reference internal" href="qsprpred.data.html#qsprpred.data.MoleculeTable" title="qsprpred.data.MoleculeTable"><code class="xref any py py-class docutils literal notranslate"><span class="pre">MoleculeTable</span></code></a> and <a class="reference internal" href="qsprpred.data.tables.interfaces.html#qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet" title="qsprpred.data.tables.interfaces.qspr_data_set.QSPRDataSet"><code class="xref any py py-class docutils literal notranslate"><span class="pre">QSPRDataSet</span></code></a> instances.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qsprpred.data.sources.DataSource.getData">
-<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">getData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable" title="qsprpred.data.tables.mol.MoleculeTable"><span class="pre">MoleculeTable</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/sources/data_source.html#DataSource.getData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.sources.DataSource.getData" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3.14/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3.14/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="qsprpred.data.tables.html#qsprpred.data.tables.mol.MoleculeTable" title="qsprpred.data.tables.mol.MoleculeTable"><span class="pre">MoleculeTable</span></a></span></span><a class="reference internal" href="../_modules/qsprpred/data/sources/data_source.html#DataSource.getData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qsprpred.data.sources.DataSource.getData" title="Link to this definition"></a></dt>
 <dd><p>Get the molecule data from the source as a <a class="reference internal" href="qsprpred.data.html#qsprpred.data.MoleculeTable" title="qsprpred.data.MoleculeTable"><code class="xref any py py-class docutils literal notranslate"><span class="pre">MoleculeTable</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

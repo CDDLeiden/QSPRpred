@@ -23,37 +23,37 @@ qsprpred.data\_CLI module
 
 .. automodule:: qsprpred.data_CLI
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.model\_CLI module
 --------------------------
 
 .. automodule:: qsprpred.model_CLI
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.predict\_CLI module
 ----------------------------
 
 .. automodule:: qsprpred.predict_CLI
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.tasks module
 ---------------------
 
 .. automodule:: qsprpred.tasks
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:

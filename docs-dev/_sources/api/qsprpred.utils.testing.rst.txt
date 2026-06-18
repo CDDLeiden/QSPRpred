@@ -9,29 +9,29 @@ qsprpred.utils.testing.base module
 
 .. automodule:: qsprpred.utils.testing.base
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.utils.testing.check\_mixins module
 -------------------------------------------
 
 .. automodule:: qsprpred.utils.testing.check_mixins
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 qsprpred.utils.testing.path\_mixins module
 ------------------------------------------
 
 .. automodule:: qsprpred.utils.testing.path_mixins
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
 
 .. automodule:: qsprpred.utils.testing
    :members:
-   :show-inheritance:
    :undoc-members:
+   :show-inheritance:
