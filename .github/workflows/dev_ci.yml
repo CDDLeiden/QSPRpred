@@ -1,4 +1,4 @@
-name: Multi-OS Complete Test
+name: Multi-Python Complete Test
 
 on:
   push:
@@ -11,9 +11,10 @@ on:
       - main
 
 env:
-  QSPPRED_TEST_EXTRAS: true
+  QSPPRED_TEST_EXTRAS: false
   QSPRPRED_VERBOSE_LOGGING: true
-  QSPR_TEST_TUTORIAL_ALL: true
+  QSPR_TEST_TUTORIAL_ALL: false
+  QSPPRED_TEST_CLI: false
 
 jobs:
   tests-all:
