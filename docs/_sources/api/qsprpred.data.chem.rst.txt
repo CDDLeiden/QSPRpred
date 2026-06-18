@@ -1,6 +1,14 @@
 qsprpred.data.chem package
 ==========================
 
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qsprpred.data.chem.standardizers
+
 Submodules
 ----------
 
@@ -8,6 +16,14 @@ qsprpred.data.chem.clustering module
 ------------------------------------
 
 .. automodule:: qsprpred.data.chem.clustering
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.data.chem.identifiers module
+-------------------------------------
+
+.. automodule:: qsprpred.data.chem.identifiers
    :members:
    :undoc-members:
    :show-inheritance:
@@ -24,14 +40,6 @@ qsprpred.data.chem.scaffolds module
 -----------------------------------
 
 .. automodule:: qsprpred.data.chem.scaffolds
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-qsprpred.data.chem.standardization module
------------------------------------------
-
-.. automodule:: qsprpred.data.chem.standardization
    :members:
    :undoc-members:
    :show-inheritance:

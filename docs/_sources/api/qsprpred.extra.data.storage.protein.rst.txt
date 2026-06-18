@@ -1,0 +1,29 @@
+qsprpred.extra.data.storage.protein package
+===========================================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qsprpred.extra.data.storage.protein.interfaces
+
+Submodules
+----------
+
+qsprpred.extra.data.storage.protein.tabular\_pcm module
+-------------------------------------------------------
+
+.. automodule:: qsprpred.extra.data.storage.protein.tabular_pcm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: qsprpred.extra.data.storage.protein
+   :members:
+   :undoc-members:
+   :show-inheritance:

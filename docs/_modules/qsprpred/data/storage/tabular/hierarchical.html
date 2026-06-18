@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qsprpred.data.storage.tabular.hierarchical &mdash; QSPRpred 4.0.0a3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../../_static/documentation_options.js?v=665135b5"></script>
+        <script src="../../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script>
+    </script>
+        <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
+        <script src="../../../../../_static/design-elements.bbdccc18c4abea9397628f9fea3d48c2.js?v=03c7770e"></script>
+    <script src="../../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+ 
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LJT8KBYKKV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LJT8KBYKKV');
+</script>
+
+
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../../index.html" class="icon icon-home">
+            QSPRpred
+          </a>
+              <div class="version">
+                v4.0.0a3
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../index.html">Welcome to QSPRpred’s documentation!</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../cli_usage.html">Command Line Interface Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../features.html">Overview of available features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../api/modules.html">Python API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../../index.html">QSPRpred</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qsprpred.data.storage.tabular.hierarchical</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qsprpred.data.storage.tabular.hierarchical</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Sized</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rdkit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Chem</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.chem.identifiers</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChemIdentifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.chem.standardizers</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChemStandardizer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.storage.interfaces.chem_store</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChemStore</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.storage.interfaces.stored_mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">StoredMol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.storage.tabular.simple</span><span class="w"> </span><span class="kn">import</span> <span class="n">PandasChemStore</span><span class="p">,</span> \
+    <span class="n">ParallelizedChemStore</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.data.storage.tabular.stored_mol</span><span class="w"> </span><span class="kn">import</span> <span class="n">TabularMol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.logs</span><span class="w"> </span><span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.utils.parallel</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParallelGenerator</span>
+
+
+<div class="viewcode-block" id="RepresentationMol">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.RepresentationMol">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RepresentationMol</span><span class="p">(</span><span class="n">TabularMol</span><span class="p">):</span>
+
+<div class="viewcode-block" id="RepresentationMol.as_rd_mol">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.RepresentationMol.as_rd_mol">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_rd_mol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">add_props</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Mol</span><span class="p">:</span>
+        <span class="n">sdf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s2">&quot;sdf&quot;</span><span class="p">]</span>
+        <span class="n">mol</span> <span class="o">=</span> <span class="n">Chem</span><span class="o">.</span><span class="n">MolFromMolBlock</span><span class="p">(</span>
+            <span class="n">sdf</span><span class="p">,</span> <span class="n">strictParsing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sanitize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">removeHs</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">add_props</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="p">:</span>
+                <span class="n">mol</span><span class="o">.</span><span class="n">SetProp</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="n">prop</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">mol</span></div>
+
+
+<div class="viewcode-block" id="RepresentationMol.sdf">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.RepresentationMol.sdf">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sdf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s2">&quot;sdf&quot;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="RepresentationMol.to_file">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.RepresentationMol.to_file">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="s2">&quot;.csv&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write a minimal file containing the SMILES and the ID of the molecule.</span>
+<span class="sd">        Used for ligrep (.csv is the preferred format).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">+</span> <span class="n">extension</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;SMILES,id</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">smiles</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">filename</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="PandasRepresentationStore">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PandasRepresentationStore</span><span class="p">(</span>
+    <span class="n">ParallelizedChemStore</span>
+<span class="p">):</span>
+    <span class="n">_notJSON</span><span class="p">:</span> <span class="n">ClassVar</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">ChemStore</span><span class="o">.</span><span class="n">_notJSON</span><span class="p">,</span> <span class="s2">&quot;representations&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">chem_store</span><span class="p">:</span> <span class="n">ChemStore</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">store_format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;pkl&quot;</span><span class="p">,</span>
+            <span class="n">add_rdkit</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">chunk_processor</span><span class="p">:</span> <span class="n">ParallelGenerator</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="n">chem_store</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootDir</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootDir</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;Supplying an initial set of representations is not yet supported.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Overwriting the representations will not clear the main storage.&quot;</span>
+                <span class="s2">&quot;Run clear() on the main storage to clear it separately.&quot;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating new representation store at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Storage with molecules must be provided&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">representations</span> <span class="o">=</span> <span class="n">PandasChemStore</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_representations&quot;</span><span class="p">,</span>
+                <span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span>
+                <span class="n">df</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                    <span class="n">columns</span><span class="o">=</span><span class="p">[</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">idProp</span><span class="p">,</span>
+                        <span class="s2">&quot;parent_id&quot;</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">,</span>
+                        <span class="s2">&quot;sdf&quot;</span>
+                    <span class="p">]</span>
+                <span class="p">),</span>
+                <span class="n">smiles_col</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smilesProp</span><span class="p">,</span>
+                <span class="n">add_rdkit</span><span class="o">=</span><span class="n">add_rdkit</span><span class="p">,</span>
+                <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
+                <span class="n">store_format</span><span class="o">=</span><span class="n">store_format</span><span class="p">,</span>
+                <span class="n">chunk_processor</span><span class="o">=</span><span class="n">chunk_processor</span><span class="p">,</span>
+                <span class="n">chunk_size</span><span class="o">=</span><span class="n">chunk_size</span><span class="p">,</span>
+                <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading representation store at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reload</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of the data set.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the name of the data set.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootDir</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nJobs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">nJobs</span>
+
+    <span class="nd">@nJobs</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nJobs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_jobs</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">nJobs</span> <span class="o">=</span> <span class="n">n_jobs</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">chunkProcessor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ParallelGenerator</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">chunkProcessor</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">baseDir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">metaFile</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="s2">&quot;meta.json&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">smilesProp</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">smilesProp</span>
+
+<div class="viewcode-block" id="PandasRepresentationStore.getRepresentations">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.getRepresentations">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getRepresentations</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">mol_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">is_root</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">StoredMol</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find all representations of a molecule recursively.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mol_id (str):</span>
+<span class="sd">                identifier of the molecule to find representations for</span>
+<span class="sd">            recursive (bool):</span>
+<span class="sd">                whether to find representations recursively or just one level</span>
+<span class="sd">            is_root (bool):</span>
+<span class="sd">                whether the molecule is the root molecule</span>
+<span class="sd">                (the parent of all representations) -&gt; will be searched for</span>
+<span class="sd">                in the main storage</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_root</span><span class="p">:</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">getMol</span><span class="p">(</span><span class="n">mol_id</span><span class="p">)</span>
+            <span class="n">mol</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">=</span> <span class="n">RepresentationMol</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">getMol</span><span class="p">(</span><span class="n">mol_id</span><span class="p">)</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">searchOnProperty</span><span class="p">(</span>
+            <span class="s2">&quot;parent_id&quot;</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">mol</span><span class="o">.</span><span class="n">id</span><span class="p">],</span>
+            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">exact</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">))</span> <span class="ow">or</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">children</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+                <span class="n">child</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">=</span> <span class="n">RepresentationMol</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">mol</span>
+                <span class="k">if</span> <span class="n">recursive</span><span class="p">:</span>
+                    <span class="n">child</span><span class="o">.</span><span class="n">representations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRepresentations</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">children</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_attach_reps_to_mol</span><span class="p">(</span><span class="n">mol</span><span class="p">:</span> <span class="n">StoredMol</span><span class="p">,</span> <span class="n">reps</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">StoredMol</span><span class="p">]):</span>
+        <span class="n">reps_orig</span> <span class="o">=</span> <span class="n">mol</span><span class="o">.</span><span class="n">representations</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="n">reps_new</span> <span class="o">=</span> <span class="n">reps</span> <span class="ow">or</span> <span class="p">[]</span>
+        <span class="n">reps_combined</span> <span class="o">=</span> <span class="n">reps_orig</span> <span class="o">+</span> <span class="n">reps_new</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">reps_combined</span><span class="p">:</span>
+            <span class="n">mol</span><span class="o">.</span><span class="n">representations</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mol</span><span class="o">.</span><span class="n">representations</span> <span class="o">=</span> <span class="n">reps_combined</span>
+            <span class="k">for</span> <span class="n">rep</span> <span class="ow">in</span> <span class="n">mol</span><span class="o">.</span><span class="n">representations</span><span class="p">:</span>
+                <span class="n">rep</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">mol</span>
+
+<div class="viewcode-block" id="PandasRepresentationStore.getMol">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.getMol">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getMol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mol_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StoredMol</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieve a molecule with all its representations attached.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mol_id (str):</span>
+<span class="sd">                identifier of the molecule to retrieve</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (StoredMol):</span>
+<span class="sd">                molecule with all its representations</span>
+<span class="sd">                attached to its `representations` attribute</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">is_root</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">getMol</span><span class="p">(</span><span class="n">mol_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">is_root</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">mol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">getMol</span><span class="p">(</span><span class="n">mol_id</span><span class="p">)</span>
+            <span class="n">mol</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getMol</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s2">&quot;parent_id&quot;</span><span class="p">])</span>
+
+        <span class="n">reps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRepresentations</span><span class="p">(</span><span class="n">mol_id</span><span class="p">,</span> <span class="n">is_root</span><span class="o">=</span><span class="n">is_root</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_attach_reps_to_mol</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">reps</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mol</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.addMols">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.addMols">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">addMols</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smiles</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">StoredMol</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add new representations to the store.</span>
+
+<span class="sd">        It is required that</span>
+<span class="sd">        the properties contain a &#39;parent_id&#39; property that points to the</span>
+<span class="sd">        parent molecule in the underlying `storage` object or another representation</span>
+<span class="sd">        stored in this object itself.</span>
+
+<span class="sd">        The &#39;sdf&#39; property</span>
+<span class="sd">        must also be provided, which defines the representation of the molecule</span>
+<span class="sd">        in SDF format. Other properties can be provided as well to indicate the nature</span>
+<span class="sd">        of the representation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            smiles:</span>
+<span class="sd">                The SMILES of the representations to add.</span>
+<span class="sd">            props:</span>
+<span class="sd">                The properties of the representations to add.</span>
+<span class="sd">            *args:</span>
+<span class="sd">                Additional arguments.</span>
+<span class="sd">            **kwargs:</span>
+<span class="sd">                Additional keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (list[StoredMol]):</span>
+<span class="sd">                The added representations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">props</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Properties must be provided.&quot;</span>
+        <span class="k">assert</span> <span class="s2">&quot;parent_id&quot;</span> <span class="ow">in</span> <span class="n">props</span><span class="p">,</span> \
+            <span class="s2">&quot;Parent ID is missing. It must be provided as &#39;parent_id&#39; property.&quot;</span>
+        <span class="k">assert</span> <span class="s2">&quot;sdf&quot;</span> <span class="ow">in</span> <span class="n">props</span><span class="p">,</span> \
+            <span class="s2">&quot;SDF table is missing. It must be provided as &#39;sdf&#39; property.&quot;</span>
+        <span class="c1"># TODO: add checks for the parent_id and sdf properties</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">addMols</span><span class="p">(</span><span class="n">smiles</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.removeRepresentations">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.removeRepresentations">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">removeRepresentations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mol_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all representations of a molecule from the store.&quot;&quot;&quot;</span>
+        <span class="n">reps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRepresentations</span><span class="p">(</span><span class="n">mol_id</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">is_root</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">reps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">reps</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">removeRepresentations</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">removeMol</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">id</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.removeMol">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.removeMol">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">removeMol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mol_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove all representations of a molecule from the store.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">removeRepresentations</span><span class="p">(</span><span class="n">mol_id</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.getMolIDs">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.getMolIDs">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getMolIDs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the identifiers of all representations in the store.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">getMolIDs</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.getMolCount">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.getMolCount">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getMolCount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the number of representations in the store.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">getMolCount</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.iterMols">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.iterMols">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">iterMols</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">StoredMol</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterate over all molecules in the attached storage</span>
+<span class="sd">        with their representations added.</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            (StoredMol):</span>
+<span class="sd">                molecule with all its representations attached to its `representations` attribute</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">iterMols</span><span class="p">():</span>
+            <span class="n">reps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRepresentations</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">is_root</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_attach_reps_to_mol</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">reps</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">mol</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.iterChunks">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.iterChunks">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">iterChunks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">on_props</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="n">chunk_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;mol&quot;</span><span class="p">,</span> <span class="s2">&quot;smiles&quot;</span><span class="p">,</span> <span class="s2">&quot;rdkit&quot;</span><span class="p">,</span> <span class="s2">&quot;df&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;mol&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> \
+            <span class="n">Generator</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">StoredMol</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Chem</span><span class="o">.</span><span class="n">Mol</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterate over chunks of molecules with their representations added.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            size (int):</span>
+<span class="sd">                size of the chunks to yield</span>
+<span class="sd">            on_props (list):</span>
+<span class="sd">                properties to chunk on</span>
+<span class="sd">            chunk_type (str):</span>
+<span class="sd">                type of the chunk to yield</span>
+
+<span class="sd">        Yields:</span>
+<span class="sd">            (list[StoredMol | str | Chem.Mol | pd.DataFrame]):</span>
+<span class="sd">                chunk of molecules with all representations</span>
+<span class="sd">                attached to their `representations` attribute</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">storage_props</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">getProperties</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">iterChunks</span><span class="p">(</span>
+                <span class="n">size</span><span class="p">,</span>
+                <span class="p">[</span><span class="n">prop</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">on_props</span> <span class="k">if</span>
+                 <span class="n">prop</span> <span class="ow">in</span> <span class="n">storage_props</span><span class="p">]</span> <span class="k">if</span> <span class="n">on_props</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">chunk_type</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">chunk_type</span> <span class="o">==</span> <span class="s2">&quot;mol&quot;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">mol</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">:</span>
+                    <span class="n">reps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getRepresentations</span><span class="p">(</span><span class="n">mol</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">is_root</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_attach_reps_to_mol</span><span class="p">(</span><span class="n">mol</span><span class="p">,</span> <span class="n">reps</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">chunk</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">idProp</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">idProp</span>
+
+<div class="viewcode-block" id="PandasRepresentationStore.getProperty">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.getProperty">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">hasProperty</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ids</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">hasProperty</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">getProperty</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ids</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Property &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; not found in storage.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.getProperties">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.getProperties">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">getProperties</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">getProperties</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.addProperty">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.addProperty">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">addProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Sized</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">addProperty</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ids</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.hasProperty">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.hasProperty">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">hasProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">hasProperty</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">hasProperty</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.removeProperty">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.removeProperty">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">removeProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">hasProperty</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">removeProperty</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">hasProperty</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">removeProperty</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.getSubset">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.getSubset">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getSubset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subset</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                  <span class="n">ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PandasRepresentationStore&quot;</span><span class="p">:</span>
+        <span class="c1"># FIXME: return a new instance of this store</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">getSubset</span><span class="p">(</span><span class="n">subset</span><span class="p">,</span> <span class="n">ids</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.getDF">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.getDF">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getDF</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">getDF</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.dropEntries">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.dropEntries">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dropEntries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">dropEntries</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.addEntries">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.addEntries">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">addEntries</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">props</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
+                   <span class="n">raise_on_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="s2">&quot;parent_id&quot;</span> <span class="ow">in</span> <span class="n">props</span><span class="p">,</span> \
+            <span class="s2">&quot;Parent ID is missing. It must be provided as &#39;parent_id&#39; property.&quot;</span>
+        <span class="k">assert</span> <span class="s2">&quot;sdf&quot;</span> <span class="ow">in</span> <span class="n">props</span><span class="p">,</span> \
+            <span class="s2">&quot;SDF table is missing. It must be provided as &#39;sdf&#39; property.&quot;</span>
+        <span class="c1"># FIXME: add checks for the parent_id and sdf properties</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">addEntries</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">props</span><span class="p">,</span> <span class="n">raise_on_existing</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">o_dict</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__getstate__</span><span class="p">()</span>
+        <span class="n">o_dict</span><span class="p">[</span><span class="s2">&quot;representations&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">save</span><span class="p">(),</span>
+                                                    <span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">o_dict</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setstate__</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">representations</span> <span class="o">=</span> <span class="n">PandasChemStore</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;representations&quot;</span><span class="p">])</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="PandasRepresentationStore.save">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.save">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">toFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.reload">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.reload">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metaFile</span><span class="p">)</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.clear">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.clear">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clear the storage.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">clear</span><span class="p">(</span><span class="n">files_only</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">chunkSize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">chunkSize</span>
+
+    <span class="nd">@chunkSize</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">chunkSize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">chunkSize</span> <span class="o">=</span> <span class="n">chunk_size</span>
+
+<div class="viewcode-block" id="PandasRepresentationStore.searchWithSMARTS">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.searchWithSMARTS">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">searchWithSMARTS</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">patterns</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;PandasRepresentationStore&quot;</span><span class="p">:</span>
+        <span class="c1"># FIXME: return a new instance of this store</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">searchWithSMARTS</span><span class="p">(</span><span class="n">patterns</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.searchOnProperty">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.searchOnProperty">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">searchOnProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">],</span>
+                         <span class="n">exact</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PandasRepresentationStore&quot;</span><span class="p">:</span>
+        <span class="c1"># FIXME: return a new instance of this store</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">searchOnProperty</span><span class="p">(</span><span class="n">prop_name</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">exact</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">identifier</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChemIdentifier</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">identifier</span>
+
+<div class="viewcode-block" id="PandasRepresentationStore.applyIdentifier">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.applyIdentifier">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">applyIdentifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="n">ChemIdentifier</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">applyIdentifier</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">standardizer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChemStandardizer</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">standardizer</span>
+
+<div class="viewcode-block" id="PandasRepresentationStore.applyStandardizer">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.applyStandardizer">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">applyStandardizer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">standardizer</span><span class="p">:</span> <span class="n">ChemStandardizer</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">applyStandardizer</span><span class="p">(</span><span class="n">standardizer</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PandasRepresentationStore.getSummary">
+<a class="viewcode-back" href="../../../../../api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.hierarchical.PandasRepresentationStore.getSummary">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getSummary</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Show the number of representations for each parent molecule.&quot;&quot;&quot;</span>
+        <span class="n">reps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">representations</span><span class="o">.</span><span class="n">getDF</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">reps</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;parent_id&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">to_frame</span><span class="p">(</span><span class="s2">&quot;num_reps&quot;</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

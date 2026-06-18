@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.benchmarks.settings.benchmark &mdash; QSPRpred 3.2.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+  <title>qsprpred.benchmarks.settings.benchmark &mdash; QSPRpred 4.0.0a3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
@@ -16,9 +16,9 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=c96f8916"></script>
-        <script src="../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../../_static/documentation_options.js?v=665135b5"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
     </script>
         <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.2.1
+                v4.0.0a3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -97,21 +97,25 @@
            <div itemprop="articleBody">
              
   <h1>Source code for qsprpred.benchmarks.settings.benchmark</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">ClassVar</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ClassVar</span>
 
-<span class="kn">from</span> <span class="nn">qsprpred.models.assessment.methods</span> <span class="kn">import</span> <span class="n">ModelAssessor</span>
-<span class="kn">from</span> <span class="nn">.data_prep</span> <span class="kn">import</span> <span class="n">DataPrepSettings</span>
-<span class="kn">from</span> <span class="nn">...data.descriptors.sets</span> <span class="kn">import</span> <span class="n">DescriptorSet</span>
-<span class="kn">from</span> <span class="nn">...data.sources.data_source</span> <span class="kn">import</span> <span class="n">DataSource</span>
-<span class="kn">from</span> <span class="nn">...models.hyperparam_optimization</span> <span class="kn">import</span> <span class="n">HyperparameterOptimization</span>
-<span class="kn">from</span> <span class="nn">...models.model</span> <span class="kn">import</span> <span class="n">QSPRModel</span>
-<span class="kn">from</span> <span class="nn">...tasks</span> <span class="kn">import</span> <span class="n">TargetProperty</span>
-<span class="kn">from</span> <span class="nn">...utils.serialization</span> <span class="kn">import</span> <span class="n">JSONSerializable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.models.assessment.methods</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelAssessor</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">...data.descriptors.sets</span><span class="w"> </span><span class="kn">import</span> <span class="n">DescriptorSet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...data.sources.data_source</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSource</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...data.sampling.splits</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataSplit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...data.processing.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">DatasetPipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...models.hyperparam_optimization</span><span class="w"> </span><span class="kn">import</span> <span class="n">HyperparameterOptimization</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPRModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...tasks</span><span class="w"> </span><span class="kn">import</span> <span class="n">TargetSpec</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">...utils.serialization</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONSerializable</span>
 
 
-<div class="viewcode-block" id="BenchmarkSettings"><a class="viewcode-back" href="../../../../api/qsprpred.benchmarks.settings.html#qsprpred.benchmarks.settings.benchmark.BenchmarkSettings">[docs]</a><span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">BenchmarkSettings</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
+<div class="viewcode-block" id="BenchmarkSettings">
+<a class="viewcode-back" href="../../../../api/qsprpred.benchmarks.settings.html#qsprpred.benchmarks.BenchmarkSettings">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BenchmarkSettings</span><span class="p">(</span><span class="n">JSONSerializable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class that determines settings for a benchmarking run.</span>
 
 <span class="sd">    Attributes:</span>
@@ -127,12 +131,15 @@
 <span class="sd">            Descriptor sets to use.</span>
 <span class="sd">        target_props (list[list[TargetProperty]]):</span>
 <span class="sd">            Target properties to use.</span>
-<span class="sd">        prep_settings (list[DataPrepSettings]):</span>
+<span class="sd">        prep_settings (list[DatasetPipeline]):</span>
 <span class="sd">            Data preparation settings to use.</span>
 <span class="sd">        models (list[QSPRModel]):</span>
 <span class="sd">            Models to use.</span>
 <span class="sd">        assessors (list[ModelAssessor]):</span>
 <span class="sd">            Model assessors to use.</span>
+<span class="sd">        subsets (dict[str, tuple[DataSplit, str, int]]):</span>
+<span class="sd">            Dictionary mapping assessor names to tuples of data split, set (Train/Test),</span>
+<span class="sd">            and fold index. Used to apply assessors to subsets of the data.</span>
 <span class="sd">        optimizers (list[HyperparameterOptimization]):</span>
 <span class="sd">            Hyperparameter optimizers to use.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -144,24 +151,27 @@
     <span class="n">random_seed</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">data_sources</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DataSource</span><span class="p">]</span>
     <span class="n">descriptors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">DescriptorSet</span><span class="p">]]</span>
-    <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">TargetProperty</span><span class="p">]]</span>
-    <span class="n">prep_settings</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DataPrepSettings</span><span class="p">]</span>
+    <span class="n">target_props</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">TargetSpec</span><span class="p">]]</span>
+    <span class="n">pipelines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">DatasetPipeline</span><span class="p">]</span>
     <span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QSPRModel</span><span class="p">]</span>
     <span class="n">assessors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ModelAssessor</span><span class="p">]</span>
-    <span class="n">optimizers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">HyperparameterOptimization</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+    <span class="n">subsets</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">DataSplit</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="n">optimizers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">HyperparameterOptimization</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">o_dict</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__getstate__</span><span class="p">()</span>
         <span class="n">o_dict</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
             <span class="n">o_dict</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">o_dict</span>
 
-    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__setstate__</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">[</span><span class="n">QSPRModel</span><span class="o">.</span><span class="n">fromFile</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">state</span><span class="p">[</span><span class="s2">&quot;models&quot;</span><span class="p">]]</span>
 
-<div class="viewcode-block" id="BenchmarkSettings.checkConsistency"><a class="viewcode-back" href="../../../../api/qsprpred.benchmarks.settings.html#qsprpred.benchmarks.settings.benchmark.BenchmarkSettings.checkConsistency">[docs]</a>    <span class="k">def</span> <span class="nf">checkConsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BenchmarkSettings.checkConsistency">
+<a class="viewcode-back" href="../../../../api/qsprpred.benchmarks.settings.html#qsprpred.benchmarks.BenchmarkSettings.checkConsistency">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">checkConsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Checks if the settings are consistent.</span>
 
 <span class="sd">        Raises:</span>
@@ -171,9 +181,20 @@
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_sources</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;No data sources defined.&quot;</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">descriptors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;No descriptors defined.&quot;</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target_props</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;No target properties defined.&quot;</span>
-        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prep_settings</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;No data preparation settings defined.&quot;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;No data preparation settings defined.&quot;</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;No models defined.&quot;</span>
-        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assessors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;No model assessors defined.&quot;</span></div></div>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assessors</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;No model assessors defined.&quot;</span>
+        <span class="n">assessor_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">assessor</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">assessor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">assessors</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subsets</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">assessor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsets</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">assert</span> <span class="n">assessor</span> <span class="ow">in</span> <span class="n">assessor_names</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Assessor </span><span class="si">{</span><span class="n">assessor</span><span class="si">}</span><span class="s2"> in subsets not found in assessors.&quot;</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subsets</span><span class="p">[</span><span class="n">assessor</span><span class="p">])</span> <span class="o">==</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;Subsets must be a tuple of DataSplit, set (Train/Test), and fold index.&quot;</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subsets</span><span class="p">[</span><span class="n">assessor</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">DataSplit</span><span class="p">),</span> <span class="s2">&quot;First element of subset must be a DataSplit.&quot;</span>
+                <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">subsets</span><span class="p">[</span><span class="n">assessor</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;Train&quot;</span><span class="p">,</span> <span class="s2">&quot;Test&quot;</span><span class="p">],</span> <span class="s2">&quot;Second element of subset must be &#39;Train&#39; or &#39;Test&#39;.&quot;</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subsets</span><span class="p">[</span><span class="n">assessor</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span> <span class="nb">int</span><span class="p">),</span> <span class="s2">&quot;Third element of subset must be an integer, the fold index.&quot;</span></div>
+</div>
+
+            
 </pre></div>
 
            </div>

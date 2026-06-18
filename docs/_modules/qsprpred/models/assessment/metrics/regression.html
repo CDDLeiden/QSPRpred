@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models.assessment.metrics.regression &mdash; QSPRpred 3.2.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=fa44fd50" />
+  <title>qsprpred.models.assessment.metrics.regression &mdash; QSPRpred 4.0.0a3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
@@ -16,9 +16,9 @@
   
         <script src="../../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js?v=c96f8916"></script>
-        <script src="../../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../../../_static/documentation_options.js?v=665135b5"></script>
+        <script src="../../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
     </script>
         <script src="../../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.2.1
+                v4.0.0a3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../../search.html" method="get">
@@ -97,13 +97,15 @@
            <div itemprop="articleBody">
              
   <h1>Source code for qsprpred.models.assessment.metrics.regression</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">scipy.stats</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.stats</span>
 
-<span class="kn">from</span> <span class="nn">qsprpred.models.assessment.metrics.base</span> <span class="kn">import</span> <span class="n">Metric</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qsprpred.models.assessment.metrics.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Metric</span>
 
 
-<div class="viewcode-block" id="KSlope"><a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.KSlope">[docs]</a><span class="k">class</span> <span class="nc">KSlope</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
+<div class="viewcode-block" id="KSlope">
+<a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.KSlope">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">KSlope</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the slope of the regression line through the origin</span>
 <span class="sd">    between the predicted and observed values.</span>
 
@@ -114,8 +116,7 @@
 <span class="sd">    Attributes:</span>
 <span class="sd">        name (str): Name of the scoring function (k_slope).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the slope of the regression line through the origin</span>
 <span class="sd">        between the predicted and observed values.</span>
 
@@ -130,14 +131,18 @@
         <span class="n">num</span><span class="p">,</span> <span class="n">denom</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_true</span><span class="p">)):</span>
             <span class="n">num</span> <span class="o">+=</span> <span class="n">y_true</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="n">denom</span> <span class="o">+=</span> <span class="n">y_true</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">denom</span> <span class="o">+=</span> <span class="n">y_true</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
         <span class="k">return</span> <span class="n">num</span> <span class="o">/</span> <span class="n">denom</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the scorer.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;k_slope&quot;</span></div>
 
-<div class="viewcode-block" id="RPrime20"><a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.RPrime20">[docs]</a><span class="k">class</span> <span class="nc">RPrime20</span><span class="p">(</span><span class="n">KSlope</span><span class="p">):</span>
+
+
+<div class="viewcode-block" id="RPrime20">
+<a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.RPrime20">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RPrime20</span><span class="p">(</span><span class="n">KSlope</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the coefficient of determination for regression line</span>
 <span class="sd">    through the origin between the predicted and observed values.</span>
 
@@ -148,8 +153,7 @@
 <span class="sd">    Attributes:</span>
 <span class="sd">        name (str): Name of the scoring function (r_prime_2_0).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the coefficient of determination for regression line</span>
 <span class="sd">        through the origin between the predicted and observed values.</span>
 
@@ -167,15 +171,18 @@
         <span class="n">num</span><span class="p">,</span> <span class="n">denom</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_true</span><span class="p">)):</span>
             <span class="n">num</span> <span class="o">+=</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">k</span> <span class="o">*</span> <span class="n">y_true</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="n">denom</span> <span class="o">+=</span> <span class="p">(</span><span class="n">y_pred</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">y_pred_mean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">denom</span> <span class="o">+=</span> <span class="p">(</span><span class="n">y_pred</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">y_pred_mean</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
         <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">num</span> <span class="o">/</span> <span class="n">denom</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the scorer.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;r_prime_2_0&quot;</span></div>
 
 
-<div class="viewcode-block" id="KPrimeSlope"><a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.KPrimeSlope">[docs]</a><span class="k">class</span> <span class="nc">KPrimeSlope</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
+
+<div class="viewcode-block" id="KPrimeSlope">
+<a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.KPrimeSlope">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">KPrimeSlope</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the slope of the regression line through the origin</span>
 <span class="sd">    between the observed and predicted values.</span>
 
@@ -187,8 +194,7 @@
 <span class="sd">    Attributes:</span>
 <span class="sd">        name (str): Name of the scoring function (k_prime_slope).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the slope of the regression line through the origin</span>
 <span class="sd">        between the observed and predicted values.</span>
 
@@ -203,15 +209,18 @@
         <span class="n">num</span><span class="p">,</span> <span class="n">denom</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_true</span><span class="p">)):</span>
             <span class="n">num</span> <span class="o">+=</span> <span class="n">y_true</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="n">denom</span> <span class="o">+=</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">denom</span> <span class="o">+=</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
         <span class="k">return</span> <span class="n">num</span> <span class="o">/</span> <span class="n">denom</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the scorer.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;k_prime_slope&quot;</span></div>
 
 
-<div class="viewcode-block" id="R20"><a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.R20">[docs]</a><span class="k">class</span> <span class="nc">R20</span><span class="p">(</span><span class="n">KPrimeSlope</span><span class="p">):</span>
+
+<div class="viewcode-block" id="R20">
+<a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.R20">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">R20</span><span class="p">(</span><span class="n">KPrimeSlope</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the coefficient of determination for regression line</span>
 <span class="sd">    through the origin between the observed and predicted values.</span>
 
@@ -222,8 +231,7 @@
 <span class="sd">    Attributes:</span>
 <span class="sd">        name (str): Name of the scoring function (r_2_0).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the coefficient of determination for regression line</span>
 <span class="sd">        through the origin between the observed and predicted values.</span>
 
@@ -241,22 +249,24 @@
         <span class="n">num</span><span class="p">,</span> <span class="n">denom</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_true</span><span class="p">)):</span>
             <span class="n">num</span> <span class="o">+=</span> <span class="n">y_true</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">k_prime</span> <span class="o">*</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="n">denom</span> <span class="o">+=</span> <span class="p">(</span><span class="n">y_true</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">y_true_mean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">denom</span> <span class="o">+=</span> <span class="p">(</span><span class="n">y_true</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">y_true_mean</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
         <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">num</span> <span class="o">/</span> <span class="n">denom</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the scorer.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;r_2_0&quot;</span></div>
 
 
-<div class="viewcode-block" id="Pearson"><a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.Pearson">[docs]</a><span class="k">class</span> <span class="nc">Pearson</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Pearson">
+<a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.Pearson">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Pearson</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the Pearson correlation coefficient.</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        name (str): Name of the scoring function (pearson).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the Pearson correlation coefficient.</span>
 
 <span class="sd">        Args:</span>
@@ -270,19 +280,21 @@
         <span class="n">y_pred</span> <span class="o">=</span> <span class="n">y_pred</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">pearsonr</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the scorer.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;pearson&quot;</span></div>
 
 
-<div class="viewcode-block" id="Spearman"><a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.Spearman">[docs]</a><span class="k">class</span> <span class="nc">Spearman</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Spearman">
+<a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.Spearman">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Spearman</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the Spearman correlation</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        name (str): Name of the scoring function (spearman).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the Spearman correlation</span>
 
 <span class="sd">        Args:</span>
@@ -295,19 +307,21 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">spearmanr</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the scorer.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;spearman&quot;</span></div>
 
 
-<div class="viewcode-block" id="Kendall"><a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.Kendall">[docs]</a><span class="k">class</span> <span class="nc">Kendall</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Kendall">
+<a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.Kendall">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Kendall</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the Kendall rank correlation coefficient.</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        name (str): Name of the scoring function (kendall).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the Kendall rank correlation coefficient.</span>
 
 <span class="sd">        Args:</span>
@@ -320,19 +334,21 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">kendalltau</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y_pred</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="k">else</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the scorer.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;kendall&quot;</span></div>
 
 
-<div class="viewcode-block" id="AverageFoldError"><a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.AverageFoldError">[docs]</a><span class="k">class</span> <span class="nc">AverageFoldError</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
+
+<div class="viewcode-block" id="AverageFoldError">
+<a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.AverageFoldError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AverageFoldError</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the average fold error (AFE).</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        name (str): Name of the scoring function (fold_error).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the fold error.</span>
 
 <span class="sd">        Args:</span>
@@ -343,14 +359,17 @@
 <span class="sd">            float: The fold error.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">y_pred</span> <span class="o">/</span> <span class="n">y_true</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">y_pred</span> <span class="o">/</span> <span class="n">y_true</span><span class="p">)))</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the scorer.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;average_fold_error&quot;</span></div>
 
 
-<div class="viewcode-block" id="AbsoluteAverageFoldError"><a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.AbsoluteAverageFoldError">[docs]</a><span class="k">class</span> <span class="nc">AbsoluteAverageFoldError</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
+
+<div class="viewcode-block" id="AbsoluteAverageFoldError">
+<a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.AbsoluteAverageFoldError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">AbsoluteAverageFoldError</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the absolute average fold error (AAFE).</span>
 
 <span class="sd">    The AAFE is also known as the geometric mean fold error (GMFE).</span>
@@ -358,8 +377,7 @@
 <span class="sd">    Attributes:</span>
 <span class="sd">        name (str): Name of the scoring function (absolute_average_fold_error).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the absolute fold error.</span>
 
 <span class="sd">        Args:</span>
@@ -370,21 +388,23 @@
 <span class="sd">            float: The absolute average fold error.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">y_pred</span> <span class="o">/</span> <span class="n">y_true</span><span class="p">))))</span>
+        <span class="k">return</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">y_pred</span> <span class="o">/</span> <span class="n">y_true</span><span class="p">))))</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the scorer.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;absolute_average_fold_error&quot;</span></div>
 
 
-<div class="viewcode-block" id="PercentageWithinFoldError"><a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.PercentageWithinFoldError">[docs]</a><span class="k">class</span> <span class="nc">PercentageWithinFoldError</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PercentageWithinFoldError">
+<a class="viewcode-back" href="../../../../../api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.PercentageWithinFoldError">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PercentageWithinFoldError</span><span class="p">(</span><span class="n">Metric</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the percentage of predictions within a certain fold error.</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        name (str): Name of the scoring function (percentage_within_{x}_fold_error).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fold_error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fold_error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the percentage within fold error scorer.</span>
 
 <span class="sd">        Args:</span>
@@ -392,7 +412,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fold_error</span> <span class="o">=</span> <span class="n">fold_error</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the percentage of predictions within a specified fold error.</span>
 
 <span class="sd">        Args:</span>
@@ -406,9 +426,10 @@
         <span class="n">fold_errors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">y_pred</span> <span class="o">/</span> <span class="n">y_true</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">fold_errors</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fold_error</span><span class="p">))</span> <span class="o">*</span> <span class="mi">100</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the name of the scorer.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;percentage_within_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">fold_error</span><span class="si">}</span><span class="s2">_fold_error&quot;</span></div>
+
 </pre></div>
 
            </div>

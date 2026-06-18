@@ -1,0 +1,53 @@
+qsprpred.data.chem.standardizers package
+========================================
+
+Submodules
+----------
+
+qsprpred.data.chem.standardizers.base module
+--------------------------------------------
+
+.. automodule:: qsprpred.data.chem.standardizers.base
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.data.chem.standardizers.check\_smiles module
+-----------------------------------------------------
+
+.. automodule:: qsprpred.data.chem.standardizers.check_smiles
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.data.chem.standardizers.chembl module
+----------------------------------------------
+
+.. automodule:: qsprpred.data.chem.standardizers.chembl
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.data.chem.standardizers.naive module
+---------------------------------------------
+
+.. automodule:: qsprpred.data.chem.standardizers.naive
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.data.chem.standardizers.papyrus module
+-----------------------------------------------
+
+.. automodule:: qsprpred.data.chem.standardizers.papyrus
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: qsprpred.data.chem.standardizers
+   :members:
+   :undoc-members:
+   :show-inheritance:

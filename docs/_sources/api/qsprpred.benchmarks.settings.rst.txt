@@ -12,14 +12,6 @@ qsprpred.benchmarks.settings.benchmark module
    :undoc-members:
    :show-inheritance:
 
-qsprpred.benchmarks.settings.data\_prep module
-----------------------------------------------
-
-.. automodule:: qsprpred.benchmarks.settings.data_prep
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 

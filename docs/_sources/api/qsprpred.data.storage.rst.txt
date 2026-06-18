@@ -1,0 +1,30 @@
+qsprpred.data.storage package
+=============================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qsprpred.data.storage.interfaces
+   qsprpred.data.storage.tabular
+
+Submodules
+----------
+
+qsprpred.data.storage.tests module
+----------------------------------
+
+.. automodule:: qsprpred.data.storage.tests
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: qsprpred.data.storage
+   :members:
+   :undoc-members:
+   :show-inheritance:

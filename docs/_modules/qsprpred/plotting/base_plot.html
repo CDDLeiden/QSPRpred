@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.plotting.base_plot &mdash; QSPRpred 3.2.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+  <title>qsprpred.plotting.base_plot &mdash; QSPRpred 4.0.0a3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
@@ -16,9 +16,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=c96f8916"></script>
-        <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../_static/documentation_options.js?v=665135b5"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
     </script>
         <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.2.1
+                v4.0.0a3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -98,14 +98,18 @@
              
   <h1>Source code for qsprpred.plotting.base_plot</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;This module contains the base class for all model plots.&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
 
-<span class="kn">from</span> <span class="nn">..models.model</span> <span class="kn">import</span> <span class="n">QSPRModel</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..models.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPRModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..data.tables.qspr</span><span class="w"> </span><span class="kn">import</span> <span class="n">QSPRTable</span>
 
 
-<div class="viewcode-block" id="ModelPlot"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.base_plot.ModelPlot">[docs]</a><span class="k">class</span> <span class="nc">ModelPlot</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelPlot">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.base_plot.ModelPlot">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ModelPlot</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for all model plots.</span>
 
 <span class="sd">    Attributes:</span>
@@ -115,73 +119,91 @@
 <span class="sd">            dictionary of model output paths</span>
 <span class="sd">        modelNames (dict[QSPRModel, str]):</span>
 <span class="sd">            dictionary of model names</span>
-<span class="sd">        cvPaths (dict[QSPRModel, str]):</span>
-<span class="sd">            dictionary of models mapped to their cross-validation set results paths</span>
-<span class="sd">        indPaths (dict[QSPRModel, str]):</span>
-<span class="sd">            dictionary of models mapped to their independent test set results paths</span>
+<span class="sd">        assesmentPaths (dict[QSPRModel, dict[str, str]):</span>
+<span class="sd">            dictionary of assessment names mapped to their</span>
+<span class="sd">            paths for each model</span>
+<span class="sd">        datasets (dict[str, QSPRTable]):</span>
+<span class="sd">            dictionary of model names mapped to their datasets used for training,</span>
+<span class="sd">            if datasets are provided, the plotter will use the dataset labels instead</span>
+<span class="sd">            of the assessment labels</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QSPRModel</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QSPRModel</span><span class="p">],</span> <span class="n">assessments</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">datasets</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QSPRTable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the base class for all model plots.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            models (list[QSPRModel]):</span>
 <span class="sd">                list of models to plot</span>
+<span class="sd">            assessments (list[str]):</span>
+<span class="sd">                list of assessment names</span>
+<span class="sd">            datasets (list[QSPRTable], optional):</span>
+<span class="sd">                list of datasets used for training the models, if provided,</span>
+<span class="sd">                the plotter will use the dataset labels instead of the assessment labels.</span>
+<span class="sd">                Must be the same length as `models`, use None to skip a model.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="n">models</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">modelOuts</span> <span class="o">=</span> <span class="p">{</span><span class="n">model</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">modelNames</span> <span class="o">=</span> <span class="p">{</span><span class="n">model</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cvPaths</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">indPaths</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assesmentPaths</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
-            <span class="n">cv_path</span><span class="p">,</span> <span class="n">ind_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkModel</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cvPaths</span><span class="p">[</span><span class="n">model</span><span class="p">]</span> <span class="o">=</span> <span class="n">cv_path</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">indPaths</span><span class="p">[</span><span class="n">model</span><span class="p">]</span> <span class="o">=</span> <span class="n">ind_path</span>
+            <span class="n">assesment_paths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkModel</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">assessments</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assesmentPaths</span><span class="p">[</span><span class="n">model</span><span class="p">]</span> <span class="o">=</span> <span class="n">assesment_paths</span>
+        <span class="k">if</span> <span class="n">datasets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">datasets</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Length of datasets must be the same as the length of models.&quot;</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span> <span class="o">=</span> <span class="p">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">dataset</span> <span class="k">for</span> <span class="n">model</span><span class="p">,</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">datasets</span><span class="p">)}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">datasets</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="ModelPlot.checkModel"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.base_plot.ModelPlot.checkModel">[docs]</a>    <span class="k">def</span> <span class="nf">checkModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="ModelPlot.checkModel">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.base_plot.ModelPlot.checkModel">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">checkModel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">QSPRModel</span><span class="p">,</span> <span class="n">assessments</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if the model has been evaluated and saved. If not, raise an exception.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            model (QSPRModel): model to check</span>
-
+<span class="sd">            assessments (list[str]): list of assessment names</span>
 <span class="sd">        Returns:</span>
-<span class="sd">            cvPath (str): path to the cross-validation set results file</span>
-<span class="sd">            indPath (str): path to the independent test set results file</span>
+<span class="sd">            assesment_paths (dict[str, str]): </span>
+<span class="sd">                dictionary of assessment names mapped to their paths</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: if the model type is not supported</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">cv_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">modelOuts</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="si">}</span><span class="s2">.cv.tsv&quot;</span>
-        <span class="n">ind_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">modelOuts</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="si">}</span><span class="s2">.ind.tsv&quot;</span>
-        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSupportedTasks</span><span class="p">():</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported model type: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">metaFile</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;Model output file does not exist: </span><span class="si">%s</span><span class="s2">. &quot;</span>
                 <span class="s2">&quot;Have you evaluated and saved the model, yet?&quot;</span> <span class="o">%</span> <span class="n">model</span><span class="o">.</span><span class="n">metaFile</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cv_path</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Model output file does not exist: </span><span class="si">%s</span><span class="s2">. &quot;</span>
-                <span class="s2">&quot;Have you evaluated and saved the model, yet?&quot;</span> <span class="o">%</span> <span class="n">cv_path</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">ind_path</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;Model output file does not exist: </span><span class="si">%s</span><span class="s2">. &quot;</span>
-                <span class="s2">&quot;Have you evaluated and saved the model, yet?&quot;</span> <span class="o">%</span> <span class="n">ind_path</span>
-            <span class="p">)</span>
-        <span class="k">return</span> <span class="n">cv_path</span><span class="p">,</span> <span class="n">ind_path</span></div>
+        <span class="n">assesment_paths</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">assessment</span> <span class="ow">in</span> <span class="n">assessments</span><span class="p">:</span>
+            <span class="n">assesment_paths</span><span class="p">[</span><span class="n">assessment</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">modelOuts</span><span class="p">[</span><span class="n">model</span><span class="p">]</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">assessment</span><span class="si">}</span><span class="s2">.tsv&quot;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">assesment_paths</span><span class="p">[</span><span class="n">assessment</span><span class="p">]):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Model output file does not exist: </span><span class="si">%s</span><span class="s2">. &quot;</span>
+                    <span class="s2">&quot;Have you evaluated the model, yet?&quot;</span> <span class="o">%</span> <span class="n">assesment_paths</span><span class="p">[</span><span class="n">assessment</span><span class="p">]</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSupportedTasks</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported model type: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">model</span><span class="o">.</span><span class="n">task</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">assesment_paths</span></div>
 
-<div class="viewcode-block" id="ModelPlot.getSupportedTasks"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.base_plot.ModelPlot.getSupportedTasks">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">getSupportedTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="ModelPlot.getSupportedTasks">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.base_plot.ModelPlot.getSupportedTasks">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">getSupportedTasks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the types of models this plotter supports.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            `list` of `TargetTasks`: list of supported `TargetTasks`</span>
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="ModelPlot.make"><a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.base_plot.ModelPlot.make">[docs]</a>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+
+<div class="viewcode-block" id="ModelPlot.make">
+<a class="viewcode-back" href="../../../api/qsprpred.plotting.html#qsprpred.plotting.base_plot.ModelPlot.make">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">show</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make the plot.</span>
 
 <span class="sd">        Opens a window to show the plot or returns a plot</span>
@@ -193,7 +215,9 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            plot (Any): plot representation</span>
-<span class="sd">        &quot;&quot;&quot;</span></div></div>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+</div>
+
 </pre></div>
 
            </div>

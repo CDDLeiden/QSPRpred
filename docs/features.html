@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Overview of available features &mdash; QSPRpred 3.2.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+  <title>Overview of available features &mdash; QSPRpred 4.0.0a3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
@@ -17,9 +17,9 @@
   
         <script src="_static/jquery.js?v=5d32c60e"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=c96f8916"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="_static/documentation_options.js?v=665135b5"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
     </script>
         <script src="_static/design-tabs.js?v=f930bc37"></script>
@@ -56,7 +56,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.2.1
+                v4.0.0a3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -99,7 +99,7 @@
            <div itemprop="articleBody">
              
   <section id="overview-of-available-features">
-<span id="features"></span><h1>Overview of available features<a class="headerlink" href="#overview-of-available-features" title="Permalink to this heading"></a></h1>
+<span id="features"></span><h1>Overview of available features<a class="headerlink" href="#overview-of-available-features" title="Link to this heading"></a></h1>
 <div class="dropdown-group docutils">
 <details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
 <summary class="sd-summary-title sd-card-header">
@@ -118,13 +118,47 @@ Core</label><div class="sd-tab-content docutils">
 </div>
 </details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
 <summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Storage</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.storage.interfaces.html#qsprpred.data.storage.interfaces.chem_store.ChemStore" title="qsprpred.data.storage.interfaces.chem_store.ChemStore"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChemStore</span></code></a>: Interface for storing and managing chemical data.</p>
+<p class="sd-card-text">Data storage classes are used to store and manage chemical data.
+More information can be found in the <code class="xref any docutils literal notranslate"><span class="pre">basic</span> <span class="pre">data</span> <span class="pre">representation</span> <span class="pre">tutorial</span></code>
+and the <code class="xref any docutils literal notranslate"><span class="pre">advanced</span> <span class="pre">data</span> <span class="pre">representation</span> <span class="pre">tutorial</span></code>.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-1" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Core</label><div class="sd-tab-content docutils">
+<ul class="simple">
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.storage.tabular.html#qsprpred.data.storage.tabular.simple.PandasChemStore" title="qsprpred.data.storage.tabular.simple.PandasChemStore"><code class="xref py py-class docutils literal notranslate"><span class="pre">PandasChemStore</span></code></a>: PandasChemStore</p></li>
+</ul>
+</div>
+</div>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">SMILES Standardizers</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.chem.standardizers.html#qsprpred.data.chem.standardizers.base.ChemStandardizer" title="qsprpred.data.chem.standardizers.base.ChemStandardizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChemStandardizer</span></code></a>: Base class for SMILES standardizers.</p>
+<p class="sd-card-text">Standardizers to convert SMILES to a standardized form.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+Core</label><div class="sd-tab-content docutils">
+<ul class="simple">
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.chem.standardizers.html#qsprpred.data.chem.standardizers.chembl.ChemblStandardizer" title="qsprpred.data.chem.standardizers.chembl.ChemblStandardizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChemblStandardizer</span></code></a>: ChemblStandardizer</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.chem.standardizers.html#qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer" title="qsprpred.data.chem.standardizers.papyrus.PapyrusStandardizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">PapyrusStandardizer</span></code></a>: PapyrusStandardizer</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.chem.standardizers.html#qsprpred.data.chem.standardizers.naive.NaiveStandardizer" title="qsprpred.data.chem.standardizers.naive.NaiveStandardizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">NaiveStandardizer</span></code></a>: NaiveStandardizer</p></li>
+</ul>
+</div>
+</div>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
 <span class="sd-summary-text">Data Filters</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
 <p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.DataFilter" title="qsprpred.data.processing.data_filters.DataFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFilter</span></code></a>: Base class for data filters.</p>
 <p class="sd-card-text">Data filters are used to filter data based on some criteria.
 Examples can be found in the <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/data/data_preparation.ipynb">data preparation tutorial</a>.</p>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-1" name="sd-tab-set-1" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-1">
+<input checked="checked" id="sd-tab-item-3" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-3">
 Core</label><div class="sd-tab-content docutils">
 <ul class="simple">
 <li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.CategoryFilter" title="qsprpred.data.processing.data_filters.CategoryFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">CategoryFilter</span></code></a>: CategoryFilter</p></li>
@@ -140,8 +174,8 @@ Core</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">Descriptor sets are used to calculate molecular descriptors for a set of molecules.
 Examples can be found in the <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/data/descriptors.ipynb">descriptor calculation tutorial</a>.</p>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-2" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-2">
+<input checked="checked" id="sd-tab-item-4" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-4">
 Core</label><div class="sd-tab-content docutils">
 <ul class="simple">
 <li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.DrugExPhyschem" title="qsprpred.data.descriptors.sets.DrugExPhyschem"><code class="xref py py-class docutils literal notranslate"><span class="pre">DrugExPhyschem</span></code></a>: DrugExPhyschem</p></li>
@@ -150,6 +184,7 @@ Core</label><div class="sd-tab-content docutils">
 <li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">SmilesDescs</span></code>: SmilesDescs</p></li>
 <li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.TanimotoDistances" title="qsprpred.data.descriptors.sets.TanimotoDistances"><code class="xref py py-class docutils literal notranslate"><span class="pre">TanimotoDistances</span></code></a>: TanimotoDistances</p></li>
 <li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.DataFrameDescriptorSet" title="qsprpred.data.descriptors.sets.DataFrameDescriptorSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrameDescriptorSet</span></code></a>: DataFrameDescriptorSet</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.sets.RandomDescs" title="qsprpred.data.descriptors.sets.RandomDescs"><code class="xref py py-class docutils literal notranslate"><span class="pre">RandomDescs</span></code></a>: RandomDescs</p></li>
 <li><dl class="simple">
 <dt><a class="reference internal" href="api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.Fingerprint" title="qsprpred.data.descriptors.fingerprints.Fingerprint"><code class="xref py py-class docutils literal notranslate"><span class="pre">Fingerprint</span></code></a>: Fingerprint</dt><dd><ul>
 <li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.AtomPairFP" title="qsprpred.data.descriptors.fingerprints.AtomPairFP"><code class="xref py py-class docutils literal notranslate"><span class="pre">AtomPairFP</span></code></a>: AtomPairFP</p></li>
@@ -167,32 +202,32 @@ Core</label><div class="sd-tab-content docutils">
 </li>
 </ul>
 </div>
-<input id="sd-tab-item-3" name="sd-tab-set-2" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-3">
+<input id="sd-tab-item-5" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-5">
 Extra</label><div class="sd-tab-content docutils">
 <ul class="simple">
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ExtendedValenceSignature" title="qsprpred.extra.data.descriptors.sets.ExtendedValenceSignature"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtendedValenceSignature</span></code></a>: ExtendedValenceSignature</p></li>
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.Mold2" title="qsprpred.extra.data.descriptors.sets.Mold2"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mold2</span></code></a>: Mold2</p></li>
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.Mordred" title="qsprpred.extra.data.descriptors.sets.Mordred"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mordred</span></code></a>: Mordred</p></li>
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.PaDEL" title="qsprpred.extra.data.descriptors.sets.PaDEL"><code class="xref py py-class docutils literal notranslate"><span class="pre">PaDEL</span></code></a>: PaDEL</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtendedValenceSignature</span></code>: ExtendedValenceSignature</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mold2</span></code>: Mold2</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mordred</span></code>: Mordred</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">PaDEL</span></code>: PaDEL</p></li>
 <li><dl class="simple">
-<dt><a class="reference internal" href="api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProteinDescriptorSet" title="qsprpred.extra.data.descriptors.sets.ProteinDescriptorSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProteinDescriptorSet</span></code></a>: ProteinDescriptorSet</dt><dd><ul>
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.sets.ProDec" title="qsprpred.extra.data.descriptors.sets.ProDec"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProDec</span></code></a>: ProDec</p></li>
+<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">ProteinDescriptorSet</span></code>: ProteinDescriptorSet</dt><dd><ul>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProDec</span></code>: ProDec</p></li>
 </ul>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
 <dt><a class="reference internal" href="api/qsprpred.data.descriptors.html#qsprpred.data.descriptors.fingerprints.Fingerprint" title="qsprpred.data.descriptors.fingerprints.Fingerprint"><code class="xref py py-class docutils literal notranslate"><span class="pre">Fingerprint</span></code></a>: Fingerprint</dt><dd><ul>
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKAtomPairs2DFP" title="qsprpred.extra.data.descriptors.fingerprints.CDKAtomPairs2DFP"><code class="xref py py-class docutils literal notranslate"><span class="pre">CDKAtomPairs2DFP</span></code></a>: CDKAtomPairs2DFP</p></li>
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKEStateFP" title="qsprpred.extra.data.descriptors.fingerprints.CDKEStateFP"><code class="xref py py-class docutils literal notranslate"><span class="pre">CDKEStateFP</span></code></a>: CDKEStateFP</p></li>
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKExtendedFP" title="qsprpred.extra.data.descriptors.fingerprints.CDKExtendedFP"><code class="xref py py-class docutils literal notranslate"><span class="pre">CDKExtendedFP</span></code></a>: CDKExtendedFP</p></li>
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKFP" title="qsprpred.extra.data.descriptors.fingerprints.CDKFP"><code class="xref py py-class docutils literal notranslate"><span class="pre">CDKFP</span></code></a>: CDKFP</p></li>
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKGraphOnlyFP" title="qsprpred.extra.data.descriptors.fingerprints.CDKGraphOnlyFP"><code class="xref py py-class docutils literal notranslate"><span class="pre">CDKGraphOnlyFP</span></code></a>: CDKGraphOnlyFP</p></li>
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKKlekotaRothFP" title="qsprpred.extra.data.descriptors.fingerprints.CDKKlekotaRothFP"><code class="xref py py-class docutils literal notranslate"><span class="pre">CDKKlekotaRothFP</span></code></a>: CDKKlekotaRothFP</p></li>
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKMACCSFP" title="qsprpred.extra.data.descriptors.fingerprints.CDKMACCSFP"><code class="xref py py-class docutils literal notranslate"><span class="pre">CDKMACCSFP</span></code></a>: CDKMACCSFP</p></li>
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKPubchemFP" title="qsprpred.extra.data.descriptors.fingerprints.CDKPubchemFP"><code class="xref py py-class docutils literal notranslate"><span class="pre">CDKPubchemFP</span></code></a>: CDKPubchemFP</p></li>
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.data.descriptors.html#qsprpred.extra.data.descriptors.fingerprints.CDKSubstructureFP" title="qsprpred.extra.data.descriptors.fingerprints.CDKSubstructureFP"><code class="xref py py-class docutils literal notranslate"><span class="pre">CDKSubstructureFP</span></code></a>: CDKSubstructureFP</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">CDKAtomPairs2DFP</span></code>: CDKAtomPairs2DFP</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">CDKEStateFP</span></code>: CDKEStateFP</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">CDKExtendedFP</span></code>: CDKExtendedFP</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">CDKFP</span></code>: CDKFP</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">CDKGraphOnlyFP</span></code>: CDKGraphOnlyFP</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">CDKKlekotaRothFP</span></code>: CDKKlekotaRothFP</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">CDKMACCSFP</span></code>: CDKMACCSFP</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">CDKPubchemFP</span></code>: CDKPubchemFP</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">CDKSubstructureFP</span></code>: CDKSubstructureFP</p></li>
 </ul>
 </dd>
 </dl>
@@ -208,8 +243,8 @@ Extra</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">Data splitters are used to split data into training and test sets.
 Examples can be found in the <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/data/data_splitting.ipynb">data splitting tutorial</a>.</p>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-4" name="sd-tab-set-3" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-4">
+<input checked="checked" id="sd-tab-item-6" name="sd-tab-set-5" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-6">
 Core</label><div class="sd-tab-content docutils">
 <ul class="simple">
 <li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.sampling.html#qsprpred.data.sampling.splits.RandomSplit" title="qsprpred.data.sampling.splits.RandomSplit"><code class="xref py py-class docutils literal notranslate"><span class="pre">RandomSplit</span></code></a>: RandomSplit</p></li>
@@ -227,18 +262,37 @@ Core</label><div class="sd-tab-content docutils">
 </li>
 </ul>
 </div>
-<input id="sd-tab-item-5" name="sd-tab-set-3" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-5">
+<input id="sd-tab-item-7" name="sd-tab-set-5" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-7">
 Extra</label><div class="sd-tab-content docutils">
 <ul class="simple">
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.splits.LeaveTargetsOut" title="qsprpred.extra.data.sampling.splits.LeaveTargetsOut"><code class="xref py py-class docutils literal notranslate"><span class="pre">LeaveTargetsOut</span></code></a>: LeaveTargetsOut</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">LeaveTargetsOut</span></code>: LeaveTargetsOut</p></li>
 <li><dl class="simple">
-<dt><a class="reference internal" href="api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.splits.PCMSplit" title="qsprpred.extra.data.sampling.splits.PCMSplit"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCMSplit</span></code></a>: PCMSplit</dt><dd><ul>
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.data.sampling.html#qsprpred.extra.data.sampling.splits.TemporalPerTarget" title="qsprpred.extra.data.sampling.splits.TemporalPerTarget"><code class="xref py py-class docutils literal notranslate"><span class="pre">TemporalPerTarget</span></code></a>: TemporalPerTarget</p></li>
+<dt><code class="xref py py-class docutils literal notranslate"><span class="pre">PCMSplit</span></code>: PCMSplit</dt><dd><ul>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">TemporalPerTarget</span></code>: TemporalPerTarget</p></li>
 </ul>
 </dd>
 </dl>
 </li>
+</ul>
+</div>
+</div>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Data Filters</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.DataFilter" title="qsprpred.data.processing.data_filters.DataFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFilter</span></code></a>: Base class for Data Filters.</p>
+<p class="sd-card-text">Data filters are used to filter rows from a dataframe.
+Examples can be found in the <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/data/data_preparation.ipynb">data preparation tutorial</a>.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-8" name="sd-tab-set-6" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-8">
+Core</label><div class="sd-tab-content docutils">
+<ul class="simple">
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.CategoryFilter" title="qsprpred.data.processing.data_filters.CategoryFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">CategoryFilter</span></code></a>: CategoryFilter</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.RepeatsFilter" title="qsprpred.data.processing.data_filters.RepeatsFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">RepeatsFilter</span></code></a>: RepeatsFilter</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.NaNFilter" title="qsprpred.data.processing.data_filters.NaNFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">NaNFilter</span></code></a>: NaNFilter</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.data_filters.OutlierFilter" title="qsprpred.data.processing.data_filters.OutlierFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">OutlierFilter</span></code></a>: OutlierFilter</p></li>
 </ul>
 </div>
 </div>
@@ -250,13 +304,63 @@ Extra</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">Feature filters are used to filter features based on some criteria.
 Examples can be found in the <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/data/data_preparation.ipynb">data preparation tutorial</a>.</p>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-6" name="sd-tab-set-4" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-6">
+<input checked="checked" id="sd-tab-item-9" name="sd-tab-set-7" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-9">
 Core</label><div class="sd-tab-content docutils">
 <ul class="simple">
 <li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.feature_filters.HighCorrelationFilter" title="qsprpred.data.processing.feature_filters.HighCorrelationFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">HighCorrelationFilter</span></code></a>: HighCorrelationFilter</p></li>
 <li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.feature_filters.LowVarianceFilter" title="qsprpred.data.processing.feature_filters.LowVarianceFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">LowVarianceFilter</span></code></a>: LowVarianceFilter</p></li>
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.feature_filters.BorutaFilter" title="qsprpred.data.processing.feature_filters.BorutaFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">BorutaFilter</span></code></a>: BorutaFilter (<code class="code docutils literal notranslate"><span class="pre">numpy</span></code> version restricted to <code class="code docutils literal notranslate"><span class="pre">numpy&lt;1.24.0</span></code>)</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.feature_filters.BorutaFilter" title="qsprpred.data.processing.feature_filters.BorutaFilter"><code class="xref py py-class docutils literal notranslate"><span class="pre">BorutaFilter</span></code></a>: BorutaFilter</p></li>
+</ul>
+</div>
+</div>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Feature Transformers</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.feature_transformers.FeatureTransformer" title="qsprpred.data.processing.feature_transformers.FeatureTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">FeatureTransformer</span></code></a>: Base class for feature transformers.</p>
+<p class="sd-card-text">Feature transformers are used for feature standardization and transformation
+Examples can be found in the <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/data/data_preparation.ipynb">data preparation tutorial</a>.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-10" name="sd-tab-set-8" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-10">
+Core</label><div class="sd-tab-content docutils">
+<ul class="simple">
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.feature_transformers.SklearnStep" title="qsprpred.data.processing.feature_transformers.SklearnStep"><code class="xref py py-class docutils literal notranslate"><span class="pre">SklearnStep</span></code></a>: SklearnStep</p></li>
+</ul>
+</div>
+</div>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Target Transformers</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.TargetTransformer" title="qsprpred.data.processing.target_transformers.TargetTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">TargetTransformer</span></code></a>: Base class for target transformers.</p>
+<p class="sd-card-text">Target transformers are used for target discretization and transformation.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-11" name="sd-tab-set-9" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-11">
+Core</label><div class="sd-tab-content docutils">
+<ul class="simple">
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.Discretizer" title="qsprpred.data.processing.target_transformers.Discretizer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discretizer</span></code></a>: Discretizer</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.target_transformers.SimpleTargetTransformer" title="qsprpred.data.processing.target_transformers.SimpleTargetTransformer"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleTargetTransformer</span></code></a>: SimpleTargetTransformer</p></li>
+</ul>
+</div>
+</div>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+<span class="sd-summary-text">Imputers</span><span class="sd-summary-state-marker sd-summary-chevron-right"><svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.72 18.78a.75.75 0 0 1 0-1.06L14.44 12 8.72 6.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018l6.25 6.25a.75.75 0 0 1 0 1.06l-6.25 6.25a.75.75 0 0 1-1.06 0Z"></path></svg></span></summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.imputers.Imputer" title="qsprpred.data.processing.imputers.Imputer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Imputer</span></code></a>: Base class for imputers.</p>
+<p class="sd-card-text">Imputers are used for filling missing values in the descriptor or target values.
+Examples can be found in the <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/data/data_preparation.ipynb">data preparation tutorial</a>
+and the <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/advanced/modelling/multi_task_modelling.ipynb">multi task modelling tutorial</a>.</p>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-12" name="sd-tab-set-10" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-12">
+Core</label><div class="sd-tab-content docutils">
+<ul class="simple">
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.imputers.TargetImputer" title="qsprpred.data.processing.imputers.TargetImputer"><code class="xref py py-class docutils literal notranslate"><span class="pre">TargetImputer</span></code></a>: TargetImputer</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.processing.html#qsprpred.data.processing.imputers.FeatureImputer" title="qsprpred.data.processing.imputers.FeatureImputer"><code class="xref py py-class docutils literal notranslate"><span class="pre">FeatureImputer</span></code></a>: FeatureImputer</p></li>
 </ul>
 </div>
 </div>
@@ -269,27 +373,27 @@ Core</label><div class="sd-tab-content docutils">
 A general example can be found in the <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/quick_start.ipynb">quick start tutorial</a>.
 More detailed information can be found throughout the basic and advanced modelling tutorials.</p>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-7" name="sd-tab-set-5" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-7">
+<input checked="checked" id="sd-tab-item-13" name="sd-tab-set-11" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-13">
 Core</label><div class="sd-tab-content docutils">
 <ul class="simple">
 <li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.html#qsprpred.models.scikit_learn.SklearnModel" title="qsprpred.models.scikit_learn.SklearnModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">SklearnModel</span></code></a>: SklearnModel</p></li>
 </ul>
 </div>
-<input id="sd-tab-item-8" name="sd-tab-set-5" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-8">
+<input id="sd-tab-item-14" name="sd-tab-set-11" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-14">
 Extra</label><div class="sd-tab-content docutils">
 <ul class="simple">
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.models.html#qsprpred.extra.models.pcm.PCMModel" title="qsprpred.extra.models.pcm.PCMModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCMModel</span></code></a>: PCMModel (See <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/advanced/modelling/PCM_modelling.ipynb">PCM tutorial</a>.)</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCMModel</span></code>: PCMModel (See <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/advanced/modelling/PCM_modelling.ipynb">PCM tutorial</a>.)</p></li>
 </ul>
 </div>
-<input id="sd-tab-item-9" name="sd-tab-set-5" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-9">
+<input id="sd-tab-item-15" name="sd-tab-set-11" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-15">
 GPU</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">More information can be found in the <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/advanced/modelling/deep_learning_models.ipynb">deep learning tutorial</a>.</p>
 <ul class="simple">
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.dnn.DNNModel" title="qsprpred.extra.gpu.models.dnn.DNNModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">DNNModel</span></code></a>: DNNModel</p></li>
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.extra.gpu.models.html#qsprpred.extra.gpu.models.chemprop.ChempropModel" title="qsprpred.extra.gpu.models.chemprop.ChempropModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChempropModel</span></code></a>: ChempropModel (See <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/advanced/modelling/chemprop_models.ipynb">Chemprop tutorial</a>.)</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">DNNModel</span></code>: DNNModel</p></li>
+<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChempropModel</span></code>: ChempropModel (See <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/advanced/modelling/chemprop_models.ipynb">Chemprop tutorial</a>.)</p></li>
 <li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyBoostModel</span></code>: PyBoostModel</p></li>
 </ul>
 </div>
@@ -302,36 +406,36 @@ GPU</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">Metrics are used to evaluate the performance of models.
 More information can be found in the <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/modelling/model_assessment.ipynb">model assessment tutorial</a>.</p>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-10" name="sd-tab-set-6" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-10">
+<input checked="checked" id="sd-tab-item-16" name="sd-tab-set-12" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-16">
 Core</label><div class="sd-tab-content docutils">
 <ul class="simple">
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">SklearnMetrics</span></code>: SklearnMetrics</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaskedMetric</span></code>: MaskedMetric</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">CalibrationError</span></code>: CalibrationError</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">BEDROC</span></code>: BEDROC</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnrichmentFactor</span></code>: EnrichmentFactor</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">RobustInitialEnhancement</span></code>: RobustInitialEnhancement</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Prevalence</span></code>: Prevalence</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sensitivity</span></code>: Sensitivity</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Specificity</span></code>: Specificity</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">PositivePredictivity</span></code>: PositivePredictivity</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">NegativePredictivity</span></code>: NegativePredictivity</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">CohenKappa</span></code>: CohenKappa</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">BalancedPositivePredictivity</span></code>: BalancedPositivePredictivity</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">BalancedNegativePredictivity</span></code>: BalancedNegativePredictivity</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">BalancedMatthewsCorrcoeff</span></code>: BalancedMatthewsCorrcoeff</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">BalancedCohenKappa</span></code>: BalancedCohenKappa</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">KSlope</span></code>: KSlope</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">R20</span></code>: R20</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">KPrimeSlope</span></code>: KPrimeSlope</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">RPrime20</span></code>: RPrime20</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pearson</span></code>: Pearson</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Spearman</span></code>: Spearman</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Kendall</span></code>: Kendall</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">AverageFoldError</span></code>: AverageFoldError</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsoluteAverageFoldError</span></code>: AbsoluteAverageFoldError</p></li>
-<li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">PercentageWithinFoldError</span></code>: PercentageWithinFoldError</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.scikit_learn.SklearnMetrics" title="qsprpred.models.assessment.metrics.scikit_learn.SklearnMetrics"><code class="xref py py-class docutils literal notranslate"><span class="pre">SklearnMetrics</span></code></a>: SklearnMetrics</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.masked.MaskedMetric" title="qsprpred.models.assessment.metrics.masked.MaskedMetric"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaskedMetric</span></code></a>: MaskedMetric</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.CalibrationError" title="qsprpred.models.assessment.metrics.classification.CalibrationError"><code class="xref py py-class docutils literal notranslate"><span class="pre">CalibrationError</span></code></a>: CalibrationError</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.BEDROC" title="qsprpred.models.assessment.metrics.classification.BEDROC"><code class="xref py py-class docutils literal notranslate"><span class="pre">BEDROC</span></code></a>: BEDROC</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.EnrichmentFactor" title="qsprpred.models.assessment.metrics.classification.EnrichmentFactor"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnrichmentFactor</span></code></a>: EnrichmentFactor</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.RobustInitialEnhancement" title="qsprpred.models.assessment.metrics.classification.RobustInitialEnhancement"><code class="xref py py-class docutils literal notranslate"><span class="pre">RobustInitialEnhancement</span></code></a>: RobustInitialEnhancement</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.Prevalence" title="qsprpred.models.assessment.metrics.classification.Prevalence"><code class="xref py py-class docutils literal notranslate"><span class="pre">Prevalence</span></code></a>: Prevalence</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.Sensitivity" title="qsprpred.models.assessment.metrics.classification.Sensitivity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sensitivity</span></code></a>: Sensitivity</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.Specificity" title="qsprpred.models.assessment.metrics.classification.Specificity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Specificity</span></code></a>: Specificity</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.PositivePredictivity" title="qsprpred.models.assessment.metrics.classification.PositivePredictivity"><code class="xref py py-class docutils literal notranslate"><span class="pre">PositivePredictivity</span></code></a>: PositivePredictivity</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.NegativePredictivity" title="qsprpred.models.assessment.metrics.classification.NegativePredictivity"><code class="xref py py-class docutils literal notranslate"><span class="pre">NegativePredictivity</span></code></a>: NegativePredictivity</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.CohenKappa" title="qsprpred.models.assessment.metrics.classification.CohenKappa"><code class="xref py py-class docutils literal notranslate"><span class="pre">CohenKappa</span></code></a>: CohenKappa</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.BalancedPositivePredictivity" title="qsprpred.models.assessment.metrics.classification.BalancedPositivePredictivity"><code class="xref py py-class docutils literal notranslate"><span class="pre">BalancedPositivePredictivity</span></code></a>: BalancedPositivePredictivity</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.BalancedNegativePredictivity" title="qsprpred.models.assessment.metrics.classification.BalancedNegativePredictivity"><code class="xref py py-class docutils literal notranslate"><span class="pre">BalancedNegativePredictivity</span></code></a>: BalancedNegativePredictivity</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.BalancedMatthewsCorrcoeff" title="qsprpred.models.assessment.metrics.classification.BalancedMatthewsCorrcoeff"><code class="xref py py-class docutils literal notranslate"><span class="pre">BalancedMatthewsCorrcoeff</span></code></a>: BalancedMatthewsCorrcoeff</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.classification.BalancedCohenKappa" title="qsprpred.models.assessment.metrics.classification.BalancedCohenKappa"><code class="xref py py-class docutils literal notranslate"><span class="pre">BalancedCohenKappa</span></code></a>: BalancedCohenKappa</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.KSlope" title="qsprpred.models.assessment.metrics.regression.KSlope"><code class="xref py py-class docutils literal notranslate"><span class="pre">KSlope</span></code></a>: KSlope</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.R20" title="qsprpred.models.assessment.metrics.regression.R20"><code class="xref py py-class docutils literal notranslate"><span class="pre">R20</span></code></a>: R20</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.KPrimeSlope" title="qsprpred.models.assessment.metrics.regression.KPrimeSlope"><code class="xref py py-class docutils literal notranslate"><span class="pre">KPrimeSlope</span></code></a>: KPrimeSlope</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.RPrime20" title="qsprpred.models.assessment.metrics.regression.RPrime20"><code class="xref py py-class docutils literal notranslate"><span class="pre">RPrime20</span></code></a>: RPrime20</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.Pearson" title="qsprpred.models.assessment.metrics.regression.Pearson"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pearson</span></code></a>: Pearson</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.Spearman" title="qsprpred.models.assessment.metrics.regression.Spearman"><code class="xref py py-class docutils literal notranslate"><span class="pre">Spearman</span></code></a>: Spearman</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.Kendall" title="qsprpred.models.assessment.metrics.regression.Kendall"><code class="xref py py-class docutils literal notranslate"><span class="pre">Kendall</span></code></a>: Kendall</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.AverageFoldError" title="qsprpred.models.assessment.metrics.regression.AverageFoldError"><code class="xref py py-class docutils literal notranslate"><span class="pre">AverageFoldError</span></code></a>: AverageFoldError</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.AbsoluteAverageFoldError" title="qsprpred.models.assessment.metrics.regression.AbsoluteAverageFoldError"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbsoluteAverageFoldError</span></code></a>: AbsoluteAverageFoldError</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.metrics.html#qsprpred.models.assessment.metrics.regression.PercentageWithinFoldError" title="qsprpred.models.assessment.metrics.regression.PercentageWithinFoldError"><code class="xref py py-class docutils literal notranslate"><span class="pre">PercentageWithinFoldError</span></code></a>: PercentageWithinFoldError</p></li>
 </ul>
 </div>
 </div>
@@ -343,12 +447,11 @@ Core</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">Model assessors are used to assess the performance of models.
 More information be found in the <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/basics/modelling/model_assessment.ipynb">model assessment tutorial</a>.</p>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-11" name="sd-tab-set-7" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-11">
+<input checked="checked" id="sd-tab-item-17" name="sd-tab-set-13" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-17">
 Core</label><div class="sd-tab-content docutils">
 <ul class="simple">
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.html#qsprpred.models.assessment.methods.CrossValAssessor" title="qsprpred.models.assessment.methods.CrossValAssessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">CrossValAssessor</span></code></a>: CrossValAssessor</p></li>
-<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.html#qsprpred.models.assessment.methods.TestSetAssessor" title="qsprpred.models.assessment.methods.TestSetAssessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">TestSetAssessor</span></code></a>: TestSetAssessor</p></li>
+<li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.assessment.html#qsprpred.models.assessment.methods.Assessor" title="qsprpred.models.assessment.methods.Assessor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Assessor</span></code></a>: Assessor</p></li>
 </ul>
 </div>
 </div>
@@ -360,8 +463,8 @@ Core</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">Hyperparameter optimizers are used to optimize the hyperparameters of models.
 More information can be found in the <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/advanced/modelling/hyperparameter_optimization.ipynb">hyperparameter optimization tutorial</a>.</p>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-12" name="sd-tab-set-8" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-12">
+<input checked="checked" id="sd-tab-item-18" name="sd-tab-set-14" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-18">
 Core</label><div class="sd-tab-content docutils">
 <ul class="simple">
 <li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.html#qsprpred.models.hyperparam_optimization.GridSearchOptimization" title="qsprpred.models.hyperparam_optimization.GridSearchOptimization"><code class="xref py py-class docutils literal notranslate"><span class="pre">GridSearchOptimization</span></code></a>: GridSearchOptimization</p></li>
@@ -377,8 +480,8 @@ Core</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">Model plots are used to visualize the performance of models.
 Examples can be found throughout the basic and advanced modelling tutorials.</p>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-13" name="sd-tab-set-9" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-13">
+<input checked="checked" id="sd-tab-item-19" name="sd-tab-set-15" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-19">
 Core</label><div class="sd-tab-content docutils">
 <ul class="simple">
 <li><dl class="simple">
@@ -415,8 +518,8 @@ Core</label><div class="sd-tab-content docutils">
 <p class="sd-card-text">Monitors are used to monitor the training of models.
 More information can be found in the <a class="reference external" href="https://github.com/CDDLeiden/QSPRpred/blob/main/tutorials/advanced/modelling/monitoring.ipynb">model monitoring tutorial</a>.</p>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-14" name="sd-tab-set-10" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-14">
+<input checked="checked" id="sd-tab-item-20" name="sd-tab-set-16" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-20">
 Core</label><div class="sd-tab-content docutils">
 <ul class="simple">
 <li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.models.html#qsprpred.models.monitors.NullMonitor" title="qsprpred.models.monitors.NullMonitor"><code class="xref py py-class docutils literal notranslate"><span class="pre">NullMonitor</span></code></a>: NullMonitor</p></li>
@@ -439,8 +542,8 @@ Core</label><div class="sd-tab-content docutils">
 <p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.chem.html#qsprpred.data.chem.scaffolds.Scaffold" title="qsprpred.data.chem.scaffolds.Scaffold"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scaffold</span></code></a>: Base class for scaffolds.</p>
 <p class="sd-card-text">Class for calculating molecular scaffolds of different kinds</p>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-15" name="sd-tab-set-11" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-15">
+<input checked="checked" id="sd-tab-item-21" name="sd-tab-set-17" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-21">
 Core</label><div class="sd-tab-content docutils">
 <ul class="simple">
 <li><p class="sd-card-text"><code class="xref py py-class docutils literal notranslate"><span class="pre">Murcko</span></code>: Murcko</p></li>
@@ -455,8 +558,8 @@ Core</label><div class="sd-tab-content docutils">
 <p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.chem.html#qsprpred.data.chem.clustering.MoleculeClusters" title="qsprpred.data.chem.clustering.MoleculeClusters"><code class="xref py py-class docutils literal notranslate"><span class="pre">MoleculeClusters</span></code></a>: Base class for clustering molecules.</p>
 <p class="sd-card-text">Classes for clustering molecules</p>
 <div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-16" name="sd-tab-set-12" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-16">
+<input checked="checked" id="sd-tab-item-22" name="sd-tab-set-18" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-22">
 Core</label><div class="sd-tab-content docutils">
 <ul class="simple">
 <li><p class="sd-card-text"><a class="reference internal" href="api/qsprpred.data.chem.html#qsprpred.data.chem.clustering.RandomClusters" title="qsprpred.data.chem.clustering.RandomClusters"><code class="xref py py-class docutils literal notranslate"><span class="pre">RandomClusters</span></code></a>: RandomClusters</p></li>

@@ -28,10 +28,18 @@ qsprpred.data.processing.feature\_filters module
    :undoc-members:
    :show-inheritance:
 
-qsprpred.data.processing.feature\_standardizers module
-------------------------------------------------------
+qsprpred.data.processing.feature\_transformers module
+-----------------------------------------------------
 
-.. automodule:: qsprpred.data.processing.feature_standardizers
+.. automodule:: qsprpred.data.processing.feature_transformers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.data.processing.imputers module
+----------------------------------------
+
+.. automodule:: qsprpred.data.processing.imputers
    :members:
    :undoc-members:
    :show-inheritance:
@@ -40,6 +48,30 @@ qsprpred.data.processing.mol\_processor module
 ----------------------------------------------
 
 .. automodule:: qsprpred.data.processing.mol_processor
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.data.processing.pipeline module
+----------------------------------------
+
+.. automodule:: qsprpred.data.processing.pipeline
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.data.processing.step module
+------------------------------------
+
+.. automodule:: qsprpred.data.processing.step
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+qsprpred.data.processing.target\_transformers module
+----------------------------------------------------
+
+.. automodule:: qsprpred.data.processing.target_transformers
    :members:
    :undoc-members:
    :show-inheritance:

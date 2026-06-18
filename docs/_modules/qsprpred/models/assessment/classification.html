@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.models.assessment.classification &mdash; QSPRpred 3.2.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+  <title>qsprpred.models.assessment.classification &mdash; QSPRpred 4.0.0a3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
@@ -16,9 +16,9 @@
   
         <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js?v=c96f8916"></script>
-        <script src="../../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../../_static/documentation_options.js?v=665135b5"></script>
+        <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
     </script>
         <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.2.1
+                v4.0.0a3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
@@ -97,17 +97,19 @@
            <div itemprop="articleBody">
              
   <h1>Source code for qsprpred.models.assessment.classification</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="p">(</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">accuracy_score</span><span class="p">,</span>
     <span class="n">f1_score</span><span class="p">,</span>
     <span class="n">matthews_corrcoef</span><span class="p">,</span>
     <span class="n">precision_score</span><span class="p">,</span>
     <span class="n">recall_score</span><span class="p">,</span>
-    <span class="n">accuracy_score</span><span class="p">,</span>
 <span class="p">)</span>
 
 
-<div class="viewcode-block" id="create_metrics_summary"><a class="viewcode-back" href="../../../../api/qsprpred.models.assessment.html#qsprpred.models.assessment.classification.create_metrics_summary">[docs]</a><span class="k">def</span> <span class="nf">create_metrics_summary</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="viewcode-block" id="create_metrics_summary">
+<a class="viewcode-back" href="../../../../api/qsprpred.models.assessment.html#qsprpred.models.assessment.classification.create_metrics_summary">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_metrics_summary</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">assessments</span><span class="p">):</span>
     <span class="n">decision_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span>
     <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">f1_score</span><span class="p">,</span>
@@ -116,40 +118,31 @@
         <span class="n">recall_score</span><span class="p">,</span>
         <span class="n">accuracy_score</span><span class="p">,</span>
     <span class="p">]</span>
-    <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Metric&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;Model&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;TestSet&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;Value&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+    <span class="n">summary</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Model&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;Metric&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;Assessment&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;Fold&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;Set&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">&quot;Value&quot;</span><span class="p">:</span> <span class="p">[]}</span>
     <span class="n">property_name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">targetProperties</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
 
-    <span class="n">cv_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">.cv.tsv&quot;</span>
-    <span class="n">ind_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">.ind.tsv&quot;</span>
+    <span class="n">assessment_paths</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">outPrefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">assessment</span><span class="si">}</span><span class="s2">.tsv&quot;</span> <span class="k">for</span> <span class="n">assessment</span> <span class="ow">in</span> <span class="n">assessments</span><span class="p">]</span>
 
-    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="n">cv_path</span><span class="p">)</span>
-
-    <span class="c1"># cross-validation</span>
-    <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Fold</span><span class="o">.</span><span class="n">unique</span><span class="p">()):</span>
-        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_ProbabilityClass_1&quot;</span><span class="p">][</span><span class="n">df</span><span class="o">.</span><span class="n">Fold</span> <span class="o">==</span> <span class="n">fold</span><span class="p">]</span>
-        <span class="n">y_pred_values</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">decision_threshold</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y_pred</span><span class="p">]</span>
-        <span class="n">y_true</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_Label&quot;</span><span class="p">][</span><span class="n">df</span><span class="o">.</span><span class="n">Fold</span> <span class="o">==</span> <span class="n">fold</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
-            <span class="n">val</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred_values</span><span class="p">)</span>
-            <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Metric&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-            <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;TestSet&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CV</span><span class="si">{</span><span class="n">fold</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
-
-    <span class="c1"># independent test set</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="n">ind_path</span><span class="p">)</span>
-    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_ProbabilityClass_1&quot;</span><span class="p">]</span>
-    <span class="n">th</span> <span class="o">=</span> <span class="mf">0.5</span>
-    <span class="n">y_pred_values</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">th</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y_pred</span><span class="p">]</span>
-    <span class="n">y_true</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_Label&quot;</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
-        <span class="n">val</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred_values</span><span class="p">)</span>
-        <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Metric&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-        <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;TestSet&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;IND&quot;</span><span class="p">)</span>
-        <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">assessment</span><span class="p">,</span> <span class="n">assessment_path</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">assessments</span><span class="p">,</span> <span class="n">assessment_paths</span><span class="p">):</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="n">assessment_path</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">fold</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">Fold</span><span class="o">.</span><span class="n">unique</span><span class="p">()):</span>
+                <span class="n">df_fold</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">Fold</span> <span class="o">==</span> <span class="n">fold</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">set_name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;Train&quot;</span><span class="p">,</span> <span class="s2">&quot;Test&quot;</span><span class="p">]:</span>
+                    <span class="n">df_set</span> <span class="o">=</span> <span class="n">df_fold</span><span class="p">[</span><span class="n">df_fold</span><span class="o">.</span><span class="n">Set</span> <span class="o">==</span> <span class="n">set_name</span><span class="p">]</span>
+                    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">df_set</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_ProbabilityClass_1&quot;</span><span class="p">]</span>
+                    <span class="n">y_pred_values</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">decision_threshold</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y_pred</span><span class="p">]</span>
+                    <span class="n">y_true</span> <span class="o">=</span> <span class="n">df_set</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">property_name</span><span class="si">}</span><span class="s2">_Label&quot;</span><span class="p">]</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="n">metric</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred_values</span><span class="p">)</span>
+                    <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Model&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Metric&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+                    <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Assessment&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">assessment</span><span class="p">)</span>
+                    <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Set&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">set_name</span><span class="p">)</span>
+                    <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Fold&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fold</span><span class="p">)</span>
+                    <span class="n">summary</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">summary</span></div>
+
 </pre></div>
 
            </div>

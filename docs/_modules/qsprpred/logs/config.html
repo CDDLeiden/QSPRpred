@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en">
+<html class="writer-html5" lang="en" data-content_root="../../../">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qsprpred.logs.config &mdash; QSPRpred 3.2.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+  <title>qsprpred.logs.config &mdash; QSPRpred 4.0.0a3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
-      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=87e54e7c" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/design-elements.e5416f61bae5d36adc6d722a2b6f8cff.css?v=452a8e97" />
 
   
@@ -16,9 +16,9 @@
   
         <script src="../../../_static/jquery.js?v=5d32c60e"></script>
         <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=c96f8916"></script>
-        <script src="../../../_static/doctools.js?v=888ff710"></script>
-        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+        <script src="../../../_static/documentation_options.js?v=665135b5"></script>
+        <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
         <script>
     </script>
         <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
@@ -53,7 +53,7 @@
             QSPRpred
           </a>
               <div class="version">
-                v3.2.1
+                v4.0.0a3
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -98,33 +98,41 @@
            <div itemprop="articleBody">
              
   <h1>Source code for qsprpred.logs.config</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">bisect</span> <span class="kn">import</span> <span class="n">bisect</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
-<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">config</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bisect</span><span class="w"> </span><span class="kn">import</span> <span class="n">bisect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
 
-<span class="kn">import</span> <span class="nn">git</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">git</span>
 
 <span class="c1"># Maximum runid is 9999</span>
 <span class="n">MAX_ID</span> <span class="o">=</span> <span class="mi">10000</span>
 
 
-<div class="viewcode-block" id="LevelFilter"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.LevelFilter">[docs]</a><span class="k">class</span> <span class="nc">LevelFilter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Filter</span><span class="p">):</span>
+<div class="viewcode-block" id="LevelFilter">
+<a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.LevelFilter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LevelFilter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Filter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    LoggingFilter used to filter one or more specific log levels messages</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__level</span> <span class="o">=</span> <span class="n">level</span>
 
-<div class="viewcode-block" id="LevelFilter.filter"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.LevelFilter.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">record</span><span class="o">.</span><span class="n">levelno</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__level</span></div></div>
+<div class="viewcode-block" id="LevelFilter.filter">
+<a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.LevelFilter.filter">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">record</span><span class="o">.</span><span class="n">levelno</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__level</span></div>
+</div>
+
 
 
 <span class="c1"># Adapted from https://stackoverflow.com/a/68154386</span>
-<div class="viewcode-block" id="LevelFormatter"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.LevelFormatter">[docs]</a><span class="k">class</span> <span class="nc">LevelFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">):</span>
+<div class="viewcode-block" id="LevelFormatter">
+<a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.LevelFormatter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LevelFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;LoggingFormatter used to specifiy the formatting per level&quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">formats</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">formats</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="s2">&quot;fmt&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
@@ -137,13 +145,19 @@
             <span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span> <span class="k">for</span> <span class="n">level</span><span class="p">,</span> <span class="n">fmt</span> <span class="ow">in</span> <span class="n">formats</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="LevelFormatter.format"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.LevelFormatter.format">[docs]</a>    <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">LogRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="LevelFormatter.format">
+<a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.LevelFormatter.format">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">LogRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="n">bisect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formats</span><span class="p">,</span> <span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">levelno</span><span class="p">,</span> <span class="p">),</span> <span class="n">hi</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formats</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">level</span><span class="p">,</span> <span class="n">formatter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formats</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="config_logger"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.config_logger">[docs]</a><span class="k">def</span> <span class="nf">config_logger</span><span class="p">(</span><span class="n">log_file_path</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">disable_existing_loggers</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+<div class="viewcode-block" id="config_logger">
+<a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.config_logger">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">config_logger</span><span class="p">(</span><span class="n">log_file_path</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">disable_existing_loggers</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Function to configure the logging.</span>
 <span class="sd">    All info is saved in a simple format on the log file path.</span>
@@ -218,10 +232,13 @@
                 <span class="kc">None</span><span class="p">:</span>
                     <span class="p">{</span>
                         <span class="s2">&quot;handlers&quot;</span><span class="p">:</span>
-                            <span class="p">[</span><span class="s2">&quot;stream_handler&quot;</span><span class="p">,</span> <span class="s2">&quot;file_handler&quot;</span><span class="p">,</span> <span class="s2">&quot;file_handler_debug&quot;</span><span class="p">]</span>
-                            <span class="k">if</span> <span class="n">debug</span> <span class="k">else</span> <span class="p">[</span><span class="s2">&quot;stream_handler&quot;</span><span class="p">,</span> <span class="s2">&quot;file_handler&quot;</span><span class="p">],</span>
-                        <span class="s2">&quot;level&quot;</span><span class="p">:</span>
-                            <span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span>
+                            <span class="p">(</span>
+                                <span class="p">[</span>
+                                    <span class="s2">&quot;stream_handler&quot;</span><span class="p">,</span> <span class="s2">&quot;file_handler&quot;</span><span class="p">,</span>
+                                    <span class="s2">&quot;file_handler_debug&quot;</span>
+                                <span class="p">]</span> <span class="k">if</span> <span class="n">debug</span> <span class="k">else</span> <span class="p">[</span><span class="s2">&quot;stream_handler&quot;</span><span class="p">,</span> <span class="s2">&quot;file_handler&quot;</span><span class="p">]</span>
+                            <span class="p">),</span>
+                        <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span>
                     <span class="p">}</span>
             <span class="p">},</span>
     <span class="p">}</span>
@@ -229,7 +246,10 @@
     <span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="n">LOGGING_CONFIG</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_git_info"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.get_git_info">[docs]</a><span class="k">def</span> <span class="nf">get_git_info</span><span class="p">():</span>
+
+<div class="viewcode-block" id="get_git_info">
+<a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.get_git_info">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_git_info</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get information of the current git commit</span>
 
@@ -238,7 +258,7 @@
 <span class="sd">    the git repo.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="kn">import</span> <span class="nn">qsprpred</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">qsprpred</span>
 
     <span class="n">path</span> <span class="o">=</span> <span class="n">qsprpred</span><span class="o">.</span><span class="n">__path__</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Package path: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -246,7 +266,7 @@
 
     <span class="k">if</span> <span class="n">is_pip_package</span><span class="p">:</span>
         <span class="c1"># Version info is extracted by setuptools_scm (default format)</span>
-        <span class="kn">from</span> <span class="nn">.._version</span> <span class="kn">import</span> <span class="n">__version__</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.._version</span><span class="w"> </span><span class="kn">import</span> <span class="n">__version__</span>
 
         <span class="n">info</span> <span class="o">=</span> <span class="n">__version__</span>
         <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Version info [from pip]: </span><span class="si">{</span><span class="n">info</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -270,7 +290,10 @@
         <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Version info [from git repo]: </span><span class="si">{</span><span class="n">info</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="init_logfile"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.init_logfile">[docs]</a><span class="k">def</span> <span class="nf">init_logfile</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="init_logfile">
+<a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.init_logfile">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">init_logfile</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Put some intial information in the logfile</span>
 
@@ -291,7 +314,10 @@
     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_runid"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.get_runid">[docs]</a><span class="k">def</span> <span class="nf">get_runid</span><span class="p">(</span><span class="n">log_folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;logs&quot;</span><span class="p">,</span> <span class="n">old</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="get_runid">
+<a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.get_runid">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_runid</span><span class="p">(</span><span class="n">log_folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;logs&quot;</span><span class="p">,</span> <span class="n">old</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Fetch runid that is used in all logfiles to identifiy a specific run.</span>
 
@@ -336,11 +362,15 @@
     <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%04d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">runid</span></div>
 
 
-<div class="viewcode-block" id="LogFileConfig"><a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.LogFileConfig">[docs]</a><span class="k">class</span> <span class="nc">LogFileConfig</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">debug</span><span class="p">):</span>
+
+<div class="viewcode-block" id="LogFileConfig">
+<a class="viewcode-back" href="../../../api/qsprpred.logs.html#qsprpred.logs.config.LogFileConfig">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LogFileConfig</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">debug</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">logger</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="n">debug</span></div>
+
 </pre></div>
 
            </div>

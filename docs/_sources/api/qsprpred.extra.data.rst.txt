@@ -9,6 +9,7 @@ Subpackages
 
    qsprpred.extra.data.descriptors
    qsprpred.extra.data.sampling
+   qsprpred.extra.data.storage
    qsprpred.extra.data.tables
    qsprpred.extra.data.utils
 

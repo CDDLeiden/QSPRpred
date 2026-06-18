@@ -1,0 +1,18 @@
+qsprpred.extra.data.storage package
+===================================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qsprpred.extra.data.storage.protein
+
+Module contents
+---------------
+
+.. automodule:: qsprpred.extra.data.storage
+   :members:
+   :undoc-members:
+   :show-inheritance:
