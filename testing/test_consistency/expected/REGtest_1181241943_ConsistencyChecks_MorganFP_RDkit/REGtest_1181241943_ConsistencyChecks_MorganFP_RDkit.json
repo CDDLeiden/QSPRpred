@@ -1,0 +1,1 @@
+{"unfitted": true, "meta": ["sklearn.cross_decomposition._pls", "PLSRegression"], "params": {"copy": true, "max_iter": 500, "n_components": 2, "scale": true, "tol": 1e-06}, "versions": ["sklearn", "1.4.0"]}

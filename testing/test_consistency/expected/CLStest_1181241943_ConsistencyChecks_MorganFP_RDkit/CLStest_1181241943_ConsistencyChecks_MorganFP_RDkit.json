@@ -1,0 +1,1 @@
+{"unfitted": true, "meta": ["sklearn.naive_bayes", "GaussianNB"], "params": {"priors": null, "var_smoothing": 1e-09}, "versions": ["sklearn", "1.4.0"]}
