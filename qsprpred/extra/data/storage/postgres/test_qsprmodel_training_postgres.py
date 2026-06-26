@@ -8,10 +8,10 @@ from dotenv import load_dotenv
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score
 
+from qsprpred import TargetSpec, TargetTasks
 from qsprpred.data.descriptors.fingerprints import MorganFP
-from qsprpred.data.storage.postgres import PostgresChemStore
 from qsprpred.data.tables.qspr import QSPRTable
-from qsprpred.tasks import TargetProperty, TargetTasks
+from .chem_store import PostgresChemStore
 
 load_dotenv()
 
@@ -238,36 +238,30 @@ def test_qsprmodel_training_with_postgres_storage(postgres_store, tmp_path):
         path=str(tmp_path),
         smiles_col="SMILES",
         target_props=[
-            TargetProperty(
+            TargetSpec(
                 name="activity",
                 task=TargetTasks.REGRESSION,
             )
         ],
         storage=postgres_store,
     )
+    dataset.addDescriptors([MorganFP(radius=2, nBits=128)], recalculate=True)
 
-    dataset.prepareDataset(
-        feature_calculators=[
-            MorganFP(radius=2, nBits=128),
-        ],
-        recalculate_features=True,
-    )
-
-    assert dataset.X is not None
-    assert dataset.y is not None
-    assert len(dataset.X) == len(df)
-    assert len(dataset.y) == len(df)
+    assert dataset is not None
+    assert dataset.getTargets() is not None
+    assert len(dataset.getDescriptors()) == len(df)
+    assert len(dataset.getTargets()) == len(df)
 
     model = RandomForestRegressor(
         n_estimators=20,
         random_state=42,
     )
 
-    model.fit(dataset.X, dataset.y.values.ravel())
-    preds = model.predict(dataset.X)
+    model.fit(dataset.getDescriptors(), dataset.getTargets().values.ravel())
+    preds = model.predict(dataset.getDescriptors())
 
     assert len(preds) == len(df)
-    assert r2_score(dataset.y.values.ravel(), preds) > 0.5
+    assert r2_score(dataset.getTargets().values.ravel(), preds) > 0.5
 
     stored_df = postgres_store.getDF()
     assert len(stored_df) == len(df)

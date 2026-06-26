@@ -9,8 +9,7 @@ import os
 import pytest
 from dotenv import load_dotenv
 
-from qsprpred.data.storage.postgres import PostgresChemStore
-
+from .chem_store import PostgresChemStore
 
 load_dotenv()
 
@@ -65,7 +64,8 @@ def test_postgres_chemstore_smarts_search():
         raise_on_existing=False,
     )
 
-    aromatic = store.searchWithSMARTS(["c1ccccc1"], name="test_molecules_pytest_smarts_aromatic")
+    aromatic = store.searchWithSMARTS(["c1ccccc1"],
+                                      name="test_molecules_pytest_smarts_aromatic")
     assert aromatic.getMolCount() == 2
     assert set(aromatic.getProperty("chem_name")) == {"benzene", "toluene"}
 

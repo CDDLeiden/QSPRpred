@@ -24,22 +24,22 @@ class PostgresChemStore(ParallelizedChemStore):
     """
 
     def __init__(
-        self,
-        name: str,
-        connection_string: str,
-        table_name: str = "molecules",
-        schema: str = "public",
-        run_id: str | None = None,
-        smiles_col: str = "SMILES",
-        id_col: str | None = None,
-        autoindex_name: str | None = None,
-        use_rdkit_cartridge: bool = True,
-        create: bool = True,
-        standardizer: ChemStandardizer | None = None,
-        identifier: ChemIdentifier | None = None,
-        chunk_processor: ParallelGenerator | None = None,
-        chunk_size: int | None = 1000,
-        n_jobs: int = 1,
+            self,
+            name: str,
+            connection_string: str,
+            table_name: str = "molecules",
+            schema: str = "public",
+            run_id: str | None = None,
+            smiles_col: str = "SMILES",
+            id_col: str | None = None,
+            autoindex_name: str | None = None,
+            use_rdkit_cartridge: bool = True,
+            create: bool = True,
+            standardizer: ChemStandardizer | None = None,
+            identifier: ChemIdentifier | None = None,
+            chunk_processor: ParallelGenerator | None = None,
+            chunk_size: int | None = 1000,
+            n_jobs: int = 1,
     ):
         self._name = name
         self.connectionString = connection_string
@@ -300,7 +300,8 @@ class PostgresChemStore(ParallelizedChemStore):
         with self._connect() as conn:
             with conn.cursor() as cur:
                 where_sql, params = self._run_where()
-                cur.execute(f"DELETE FROM {self._qualified_table()} {where_sql};", params)
+                cur.execute(f"DELETE FROM {self._qualified_table()} {where_sql};",
+                            params)
             conn.commit()
 
     def clearRun(self, run_id: str | None = None):
@@ -368,12 +369,12 @@ class PostgresChemStore(ParallelizedChemStore):
         """
 
     def addMols(
-        self,
-        smiles: Iterable[str],
-        props: dict[str, list] | None = None,
-        library: str | None = None,
-        raise_on_existing: bool = True,
-        **kwargs,
+            self,
+            smiles: Iterable[str],
+            props: dict[str, list] | None = None,
+            library: str | None = None,
+            raise_on_existing: bool = True,
+            **kwargs,
     ) -> list[TabularMol]:
         smiles = list(smiles)
         props = props or {}
@@ -412,10 +413,10 @@ class PostgresChemStore(ParallelizedChemStore):
         return [self.getMol(mol_id) for mol_id in inserted_ids]
 
     def addEntries(
-        self,
-        ids: list[str],
-        props: dict[str, list],
-        raise_on_existing: bool = True,
+            self,
+            ids: list[str],
+            props: dict[str, list],
+            raise_on_existing: bool = True,
     ):
         smiles_values = props.get(self.smilesProp) or props.get("smiles")
         if smiles_values is None:
@@ -592,7 +593,8 @@ class PostgresChemStore(ParallelizedChemStore):
             return pd.Series(df[self.idProp].values, index=df[self.idProp], name=name)
 
         if name == self.smilesProp:
-            return pd.Series(df[self.smilesProp].values, index=df[self.idProp], name=name)
+            return pd.Series(df[self.smilesProp].values, index=df[self.idProp],
+                             name=name)
 
         if name not in df.columns:
             return pd.Series(index=pd.Index([], name=self.idProp), name=name)
@@ -671,9 +673,9 @@ class PostgresChemStore(ParallelizedChemStore):
             conn.commit()
 
     def getSubset(
-        self,
-        subset: Iterable[str],
-        ids: Iterable[str] | None = None,
+            self,
+            subset: Iterable[str],
+            ids: Iterable[str] | None = None,
     ):
         df = self.getDF()
 
@@ -685,10 +687,10 @@ class PostgresChemStore(ParallelizedChemStore):
         return self._clone_with_ids(ids, f"{self.tableName}_subset")
 
     def iterChunks(
-        self,
-        size: int | None = None,
-        on_props: list | None = None,
-        chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
+            self,
+            size: int | None = None,
+            on_props: list | None = None,
+            chunk_type: Literal["mol", "smiles", "rdkit", "df"] = "mol",
     ) -> Generator[list[TabularMol | str | Chem.Mol | pd.DataFrame], None, None]:
         size = size or self.chunkSize or 1000
         offset = 0
@@ -758,7 +760,8 @@ class PostgresChemStore(ParallelizedChemStore):
             "applyStandardizer() is not implemented for PostgresChemStore yet."
         )
 
-    def _clone_with_ids(self, ids: Iterable[str], name: str | None = None) -> "PostgresChemStore":
+    def _clone_with_ids(self, ids: Iterable[str],
+                        name: str | None = None) -> "PostgresChemStore":
         ids = list(ids)
         subset_name = self._safe_sql_identifier(name or f"{self.tableName}_subset")
 
@@ -821,10 +824,10 @@ class PostgresChemStore(ParallelizedChemStore):
         return subset_store
 
     def searchOnProperty(
-        self,
-        prop_name: str,
-        values: list[float | int | str],
-        exact: bool = False,
+            self,
+            prop_name: str,
+            values: list[float | int | str],
+            exact: bool = False,
     ):
         df = self.getDF()
 
@@ -836,19 +839,20 @@ class PostgresChemStore(ParallelizedChemStore):
         else:
             mask = pd.Series(False, index=df.index)
             for value in values:
-                mask = mask | df[prop_name].astype(str).str.contains(str(value), na=False)
+                mask = mask | df[prop_name].astype(str).str.contains(str(value),
+                                                                     na=False)
             matched = df[mask]
 
         ids = list(matched[self.idProp])
         return self._clone_with_ids(ids, f"{self.tableName}_property_searched")
 
     def searchWithSMARTS(
-        self,
-        patterns: list[str],
-        operator: Literal["or", "and"] = "or",
-        use_chirality: bool = False,
-        name: str | None = None,
-        match_function: Any | None = None,
+            self,
+            patterns: list[str],
+            operator: Literal["or", "and"] = "or",
+            use_chirality: bool = False,
+            name: str | None = None,
+            match_function: Any | None = None,
     ) -> "PostgresChemStore":
         if not self.useRdkitCartridge:
             raise RuntimeError(
@@ -913,3 +917,15 @@ class PostgresChemStore(ParallelizedChemStore):
 
     def __getitem__(self, item):
         return self.getMol(item)
+
+    def getSummary(self) -> pd.DataFrame:
+        return pd.DataFrame({
+            "name": [self.name],
+            "table_name": [self.tableName],
+            "schema": [self.schema],
+            "run_id": [self.runId],
+            "smiles_col": [self.smilesProp],
+            "id_col": [self.idProp],
+            "use_rdkit_cartridge": [self.useRdkitCartridge],
+            "mol_count": [self.getMolCount()],
+        })

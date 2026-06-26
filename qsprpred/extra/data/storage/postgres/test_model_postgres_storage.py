@@ -5,10 +5,9 @@ import pytest
 from dotenv import load_dotenv
 
 import qsprpred.models.model as model_module
-
-from qsprpred.data.storage.postgres import PostgresChemStore
 from qsprpred.models.model import QSPRModel
-
+from qsprpred.utils.interfaces.randomized import Randomized
+from .chem_store import PostgresChemStore
 
 load_dotenv()
 
@@ -22,7 +21,11 @@ class FakeDataset:
         self.prepare_called = True
 
 
-class DummyQSPRModel(QSPRModel):
+class DummyQSPRModel(QSPRModel, Randomized):
+    @property
+    def randomState(self) -> int:
+        return 42
+
     @property
     def supportsEarlyStopping(self):
         return False
@@ -75,8 +78,8 @@ def make_dummy_qspr_model():
 
 
 def test_qspr_model_prediction_dataset_uses_postgres_storage(
-    postgres_store,
-    monkeypatch,
+        postgres_store,
+        monkeypatch,
 ):
     captured = {}
 

@@ -3,8 +3,8 @@ import os
 import pytest
 from dotenv import load_dotenv
 
-from qsprpred.data.storage.postgres import PostgresChemStore
 from qsprpred.data.tables.mol import MoleculeTable
+from .chem_store import PostgresChemStore
 
 load_dotenv()
 
@@ -30,7 +30,7 @@ def postgres_store():
 def test_molecule_table_from_smiles_with_postgres_storage(postgres_store):
     table = MoleculeTable.fromSMILES(
         name="molecule_table_test",
-        path=".",
+        path="../../../../../testing/storage",
         smiles=["CCO", "CCN", "c1ccccc1"],
         storage=postgres_store,
     )
@@ -46,7 +46,7 @@ def test_molecule_table_from_smiles_with_postgres_storage(postgres_store):
 def test_molecule_table_postgres_smarts_search(postgres_store):
     table = MoleculeTable.fromSMILES(
         name="molecule_table_test",
-        path=".",
+        path="../../../../../testing/storage",
         smiles=["CCO", "CCN", "c1ccccc1", "Cc1ccccc1"],
         storage=postgres_store,
     )

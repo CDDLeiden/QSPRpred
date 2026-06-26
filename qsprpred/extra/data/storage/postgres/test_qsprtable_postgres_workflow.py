@@ -4,11 +4,11 @@ import pandas as pd
 import pytest
 from dotenv import load_dotenv
 
+from qsprpred import TargetSpec
 from qsprpred.data.descriptors.fingerprints import MorganFP
-from qsprpred.data.storage.postgres import PostgresChemStore
 from qsprpred.data.tables.qspr import QSPRTable
-from qsprpred.tasks import TargetProperty, TargetTasks
-
+from qsprpred.tasks import TargetTasks
+from .chem_store import PostgresChemStore
 
 load_dotenv()
 
@@ -51,7 +51,7 @@ def test_qsprtable_prepare_dataset_with_postgres_storage(postgres_store, tmp_pat
         path=str(tmp_path),
         smiles_col="SMILES",
         target_props=[
-            TargetProperty(
+            TargetSpec(
                 name="activity",
                 task=TargetTasks.REGRESSION,
             )
@@ -62,18 +62,13 @@ def test_qsprtable_prepare_dataset_with_postgres_storage(postgres_store, tmp_pat
     assert dataset.storage is postgres_store
     assert dataset.storage.getMolCount() == 5
 
-    dataset.prepareDataset(
-        feature_calculators=[
-            MorganFP(radius=2, nBits=64),
-        ],
-        recalculate_features=True,
-    )
+    dataset.addDescriptors([MorganFP(radius=2, nBits=64)], recalculate_features=True)
 
-    assert dataset.X is not None
-    assert dataset.y is not None
-    assert len(dataset.X) == 5
-    assert len(dataset.y) == 5
-    assert dataset.X.shape[1] > 0
+    assert dataset.getDescriptors() is not None
+    assert dataset.getTargets() is not None
+    assert len(dataset.getDescriptors()) == 5
+    assert len(dataset.getTargets()) == 5
+    assert dataset.getDescriptors().shape[1] > 0
 
     df_storage = postgres_store.getDF()
     assert "activity" in df_storage.columns
