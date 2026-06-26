@@ -8,11 +8,13 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, ClassVar
 
 import jsonpickle
+import jsonpickle.ext.numpy as jsonpickle_numpy
 
 from ..logs import logger
 from ..utils.inspect import dynamic_import
 
 jsonpickle.set_encoder_options("json", indent=4)
+jsonpickle_numpy.register_handlers()
 
 
 class FileSerializable(ABC):
@@ -108,6 +110,8 @@ class JSONSerializable(FileSerializable):
             json_str = f.read()
         # inject the path to the JSON file itself as a hidden attribute
         new_dict = json.loads(json_str)
+        if "py/state" not in new_dict:
+            new_dict["py/state"] = {}
         new_dict["py/state"]["_json_main"] = os.path.abspath(filename)
         json_str = json.dumps(new_dict)
         return cls.fromJSON(json_str)

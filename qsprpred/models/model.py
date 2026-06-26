@@ -16,7 +16,9 @@ import pandas as pd
 from rdkit import Chem
 from rdkit.Chem import Mol
 
-from qsprpred.data import QSPRTable
+from ..data import QSPRTable
+from ..data.processing.applicability_domain import MLChemAD, ApplicabilityDomain
+from ..data.processing.pipeline import DatasetPipeline
 from ..data.storage.interfaces.chem_store import ChemStore
 from ..data.storage.tabular.simple import PandasChemStore
 from ..data.tables.interfaces.qspr_data_set import QSPRDataSet
@@ -43,9 +45,8 @@ class QSPRModel(JSONSerializable, ABC):
         featureCalculators (MoleculeDescriptorsCalculator):
             feature calculator instance taken from the data set or
             deserialized from file if the model is loaded without data
-        featureStandardizer (SKLearnStandardizer):
-            feature standardizer instance taken from the data set
-            or deserialized from file if the model is loaded without data
+        pipeline (DatasetPipeline):
+            pipeline to use for feature calculation and other data processing
         baseDir (str):
             base directory of the model,
             the model files are stored in a subdirectory `{baseDir}/{outDir}/`
@@ -60,14 +61,14 @@ class QSPRModel(JSONSerializable, ABC):
 
     @staticmethod
     def handleInvalidsInPredictions(
-            mols: list[str],
+            num_mols: int,
             predictions: np.ndarray | list[np.ndarray],
             failed_mask: np.ndarray,
     ) -> np.ndarray:
         """Replace invalid predictions with None.
 
         Args:
-            mols (MoleculeTable): molecules for which the predictions were made
+            num_mols (int): molecules for which the predictions were made
             predictions (np.ndarray): predictions made by the model
             failed_mask (np.ndarray): boolean mask of failed predictions
 
@@ -77,13 +78,13 @@ class QSPRModel(JSONSerializable, ABC):
         if any(failed_mask):
             if isinstance(predictions, list):
                 predictions_with_invalids = [
-                    np.full((len(mols), pred.shape[1]), None) for pred in predictions
+                    np.full((num_mols, pred.shape[1]), None) for pred in predictions
                 ]
                 for i, pred in enumerate(predictions):
                     predictions_with_invalids[i][~failed_mask, :] = pred
             else:
                 predictions_with_invalids = np.full(
-                    (len(mols), predictions.shape[1]), None
+                    (num_mols, predictions.shape[1]), None
                 )
                 predictions_with_invalids[~failed_mask, :] = predictions
             predictions = predictions_with_invalids
@@ -163,7 +164,7 @@ class QSPRModel(JSONSerializable, ABC):
         self.targetProperties = None
         self.nTargets = None
         self.featureCalculators = None
-        self.featureStandardizer = None
+        self.pipeline = None
         # initialize estimator
         self.earlyStopping = EarlyStopping() if self.supportsEarlyStopping else None
         if autoload and os.path.exists(self.metaFile):
@@ -173,8 +174,8 @@ class QSPRModel(JSONSerializable, ABC):
             self.baseDir = os.path.abspath(base_dir.rstrip("/"))
             if parameters:
                 logger.warning(
-                    f"Explicitly specified parameters ({parameters})"
-                    f"will override model settings read from file: {self.parameters}."
+                    f"Explicitly specified parameters ({parameters}) "
+                    f"will override model settings read from file: {self.parameters}. "
                     f"Estimator will be reloaded with the new parameters "
                     f"and will have to be re-fitted if fitted previously."
                 )
@@ -182,8 +183,10 @@ class QSPRModel(JSONSerializable, ABC):
                 self.estimator = self.loadEstimator(self.parameters)
             if random_state:
                 logger.warning(
-                    f"Explicitly specified random state ({random_state})"
+                    f"Explicitly specified random state ({random_state}) "
                     f"will override model settings read from file: {self.randomState}."
+                    f"Estimator will be reloaded with the new parameters "
+                    f"and will have to be re-fitted if fitted previously."
                 )
                 self.initRandomState(random_state)
         else:
@@ -221,12 +224,19 @@ class QSPRModel(JSONSerializable, ABC):
             self.alg = dynamic_import(self.alg)
         self.estimator = self.loadEstimator(self.parameters)
 
-    def initFromDataset(self, data: QSPRDataSet | None):
+    def initFromData(self, data: QSPRDataSet | None, pipeline: DatasetPipeline | None):
+        """Initialize the model from a data set and pipeline.
+        
+        Args:
+            data (QSPRDataSet):
+                data set to initialize the model with
+            pipeline (DatasetPipeline):
+                pipeline to use for feature calculation
+        """
         if data is not None:
             self.targetProperties = data.targetProperties
             self.nTargets = len(self.targetProperties)
             self.featureCalculators = data.descriptorSets
-            self.featureStandardizer = data.featureStandardizer
             if self.randomState is None:
                 self.initRandomState(data.randomState)
             self.chemStandardizer = data.standardizer
@@ -234,8 +244,8 @@ class QSPRModel(JSONSerializable, ABC):
             self.targetProperties = None
             self.nTargets = None
             self.featureCalculators = None
-            self.featureStandardizer = None
             self.chemStandardizer = None
+        self.pipeline = pipeline
 
     def initRandomState(self, random_state):
         """Set random state if applicable.
@@ -245,6 +255,12 @@ class QSPRModel(JSONSerializable, ABC):
             random_state (int):
                 Random state to use for shuffling and other random operations.
         """
+        # FIXME: random state is not set to random int if not provided
+        # It will be set to None if not provided after the logging message
+        # that it is set to a random int.
+        # However, perhaps it is better to set it to None if not provided
+        # As the initfromdata method will set it to the random state of the data
+        # if there is no random state provided.
         if random_state is None:
             self.randomState = int(np.random.randint(0, 2 ** 31 - 1, dtype=np.int64))
             logger.info(
@@ -408,32 +424,30 @@ class QSPRModel(JSONSerializable, ABC):
 
     def convertToNumpy(
             self,
-            X: pd.DataFrame | np.ndarray | QSPRDataSet,
-            y: pd.DataFrame | np.ndarray | QSPRDataSet | None = None,
+            X: pd.DataFrame | np.ndarray,
+            y: pd.DataFrame | np.ndarray | None = None,
     ) -> tuple[np.ndarray, np.ndarray] | np.ndarray:
         """Convert the given data matrix and target matrix to np.ndarray format.
 
         Args:
-            X (pd.DataFrame, np.ndarray, QSPRDataSet): data matrix
-            y (pd.DataFrame, np.ndarray, QSPRDataSet): target matrix
+            X (pd.DataFrame, np.ndarray): data matrix
+                if a `QSPRDataSet` instance is given, the features and targets are
+                extracted from the data set and returned
+            y (pd.DataFrame, np.ndarray): target matrix
 
         Returns:
                 data matrix and/or target matrix in np.ndarray format
         """
-        if isinstance(X, QSPRDataSet):
-            X = X.getFeatures(concat=True, refit_standardizer=False)
         if isinstance(X, pd.DataFrame):
             X = X.values
         if y is not None:
-            if isinstance(y, QSPRDataSet):
-                y = y.getTargets(concat=True)
             if isinstance(y, pd.DataFrame):
                 y = y.values
             return X, y
         else:
             return X
 
-    def getParameters(self, new_parameters) -> dict | None:
+    def getParameters(self, new_parameters: dict | None = None) -> dict | None:
         """Get the model parameters combined with the given parameters.
 
         If both the model and the given parameters contain the same key,
@@ -446,7 +460,7 @@ class QSPRModel(JSONSerializable, ABC):
             dict: dictionary of model parameters
         """
         parameters_out = copy.deepcopy(self.parameters)
-        if parameters_out is not None:
+        if parameters_out is not None and new_parameters is not None:
             parameters_out.update(new_parameters)
         else:
             parameters_out = new_parameters
@@ -454,7 +468,7 @@ class QSPRModel(JSONSerializable, ABC):
 
     def createPredictionDatasetFromMols(
             self,
-            mols: list[str | Mol],
+            mols: Iterable[str | Mol],
             n_jobs: int = 1,
             fill_value: float = np.nan,
             storage: ChemStore | None = None,
@@ -462,7 +476,7 @@ class QSPRModel(JSONSerializable, ABC):
         """Create a `QSPRDataSet` instance from a list of SMILES strings.
 
         Args:
-            mols (list[str | Mol]): list of SMILES strings
+            mols (Iterable[str | Mol]): list of SMILES strings
             n_jobs (int): number of parallel jobs to use
             fill_value (float): value to fill for missing features
             storage (ChemStore | None):
@@ -473,10 +487,11 @@ class QSPRModel(JSONSerializable, ABC):
 
         Returns:
             tuple:
-                a tuple containing the `QSPRDataSet` instance and a boolean mask
+                a tuple containing the `QSPRTable` instance and a boolean mask
                 indicating which molecules failed to be processed
         """
         # make a molecule table first and add the target properties
+        mols = list(mols)
         if isinstance(mols[0], Mol):
             mols = [Chem.MolToSmiles(mol) for mol in mols]
         if storage is None:
@@ -503,9 +518,9 @@ class QSPRModel(JSONSerializable, ABC):
             storage,
             f"{self.__class__.__name__}_{hash(self)}",
             path=self.baseDir,
+            random_state=self.randomState,
         )
         for target_property in self.targetProperties:
-            target_property.imputer = None
             dataset.addProperty(target_property.name, np.nan)
         # create the dataset and get failed molecules
         dataset = QSPRTable.fromMolTable(
@@ -513,19 +528,12 @@ class QSPRModel(JSONSerializable, ABC):
             self.targetProperties,
             drop_empty_target_props=False,
         )
-        # prepare dataset and return it
-        dataset.prepareDataset(
-            feature_calculators=self.featureCalculators,
-            feature_standardizer=self.featureStandardizer,
-            feature_fill_value=fill_value,
-            shuffle=False,
-            data_filters=None,
-        )
+        dataset.addDescriptors(self.featureCalculators)
         return dataset, failed_mask
 
-    def predictDataset(self,
-                       dataset: QSPRDataSet,
-                       use_probas: bool = False) -> np.ndarray | list[np.ndarray]:
+    def predictDataset(
+            self, dataset: QSPRDataSet, use_probas: bool = False
+    ) -> np.ndarray | list[np.ndarray]:
         """
         Make predictions for the given dataset.
 
@@ -538,14 +546,38 @@ class QSPRModel(JSONSerializable, ABC):
                 an array of predictions or a list of arrays of predictions
                 (for classification models with use_probas=True)
         """
+        if self.pipeline is not None:
+            X, _ = next(self.pipeline.applyOnDataSet(dataset, fit=False))
+        else:
+            X = dataset.getDescriptors()
+        failed_mask = np.full(len(dataset), False)
+        for i, idx in enumerate(dataset.getDF().index):
+            if idx not in X.index:
+                failed_mask[i] = True
         if self.task.isRegression() or not use_probas:
-            predictions = self.predict(dataset)
+            predictions = self.predict(X)
             # always return 2D array
             if self.task.isClassification():
                 predictions = predictions.astype(int)
         else:
             # return a list of 2D arrays
-            predictions = self.predictProba(dataset)
+            predictions = self.predictProba(X)
+        # order the predictions according to the original order of the molecules
+        # in case the pipeline has shuffled the data
+        if isinstance(predictions, list):
+            predictions = [
+                pd.DataFrame(pred, index=X.index)
+                .loc[dataset.getDF().index.intersection(X.index)]
+                .values for pred in predictions
+            ]
+        else:
+            predictions = (
+                pd.DataFrame(predictions, index=X.index)
+                .loc[dataset.getDF().index.intersection(X.index)]
+                .values
+            )
+        predictions = self.handleInvalidsInPredictions(len(dataset), predictions,
+                                                       failed_mask)
         return predictions
 
     def predictMols(
@@ -553,7 +585,6 @@ class QSPRModel(JSONSerializable, ABC):
             mols: Iterable[str | Mol],
             use_probas: bool = False,
             n_jobs: int = 1,
-            fill_value: float = np.nan,
             use_applicability_domain: bool = False,
             storage: ChemStore | None = None,
     ) -> np.ndarray | list[np.ndarray]:
@@ -561,10 +592,9 @@ class QSPRModel(JSONSerializable, ABC):
         Make predictions for the given molecules.
 
         Args:
-            mols (List[str  | Mol]): list of SMILES strings
+            mols (Iterable[str  | Mol]): list of SMILES strings
             use_probas (bool): use probabilities for classification models
             n_jobs: Number of jobs to use for parallel processing.
-            fill_value: Value to use for missing values in the feature matrix.
             use_applicability_domain: Use applicability domain to return if a
                 molecule is within the applicability domain of the model.
             storage (ChemStore | None):
@@ -578,28 +608,29 @@ class QSPRModel(JSONSerializable, ABC):
             np.ndarray[bool]: boolean mask indicating which molecules fall
                 within the applicability domain of the model
         """
-        if not self.featureCalculators:
+        if not self.featureCalculators and not self.pipeline.feature_calculators:
             raise ValueError("No feature calculator set on this instance.")
         # create data set from mols
         dataset, failed_mask = self.createPredictionDatasetFromMols(
-            mols, n_jobs, fill_value, storage=storage
+            mols, n_jobs, storage=storage
         )
         # make predictions for the dataset
         predictions = self.predictDataset(dataset, use_probas)
         # handle invalids
-        predictions = self.handleInvalidsInPredictions(mols, predictions, failed_mask)
+        predictions = self.handleInvalidsInPredictions(len(mols), predictions,
+                                                       failed_mask)
 
         # return predictions and if mols are within applicability domain if requested
         if hasattr(self, "applicabilityDomain") and use_applicability_domain:
-            in_domain = self.applicabilityDomain.contains(
-                dataset.getFeatures(
-                    concat=True, ordered=True, refit_standardizer=False
-                )
-            ).values
-            in_domain = self.handleInvalidsInPredictions(mols, in_domain, failed_mask)
+            if self.pipeline is not None:
+                X, _ = next(self.pipeline.applyOnDataSet(dataset, fit=False))
+            else:
+                X = dataset.getDescriptors()
+            in_domain = self.applicabilityDomain.transform(X).values
+            in_domain = self.handleInvalidsInPredictions(len(mols), in_domain,
+                                                         failed_mask)
 
             return predictions, in_domain
-
         return predictions
 
     def cleanFiles(self):
@@ -613,6 +644,7 @@ class QSPRModel(JSONSerializable, ABC):
     def fitDataset(
             self,
             ds: QSPRDataSet,
+            pipeline: DatasetPipeline | None = None,
             monitor=None,
             mode=EarlyStoppingMode.OPTIMAL,
             save_model=True,
@@ -621,12 +653,13 @@ class QSPRModel(JSONSerializable, ABC):
     ) -> str:
         """Train model on the whole attached data set.
 
-        ** IMPORTANT ** For models that supportEarlyStopping, `CrossValAssessor`
+        ** IMPORTANT ** For models that supportEarlyStopping, `Assessor`
         should be run first, so that the average number of epochs from the
         cross-validation with early stopping can be used for fitting the model.
 
         Args:
             ds (QSPRDataSet): data set to fit this model on
+            pipeline (DatasetPipeline): pipeline to use for fitting
             monitor (FitMonitor): monitor for the fitting process, if None, the base
                 monitor is used
             mode (EarlyStoppingMode): early stopping mode for models that support
@@ -642,11 +675,16 @@ class QSPRModel(JSONSerializable, ABC):
         """
         # do some checks
         self.checkData(ds)
-        # init properties from data
-        self.initFromDataset(ds)
         # get data
-        X_all = ds.getFeatures(concat=True).values
-        y_all = ds.getTargets(concat=True).values
+        self.pipeline = pipeline
+        if self.pipeline is not None:
+            X_all, y_all = next(self.pipeline.applyOnDataSet(ds))
+        else:
+            X_all, y_all = ds.getDescriptors(), ds.getTargets()
+        # init properties from data
+        self.initFromData(ds, pipeline)
+
+        X_all, y_all = self.convertToNumpy(X_all, y_all)
         # load estimator
         self.estimator = self.loadEstimator(self.parameters)
         # fit model
@@ -657,9 +695,19 @@ class QSPRModel(JSONSerializable, ABC):
         logger.info(
             "Model fit ended: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
-        if hasattr(ds, "applicabilityDomain") and ds.applicabilityDomain is not None:
-            ds.applicabilityDomain.fit(X_all)
-            self.applicabilityDomain = ds.applicabilityDomain
+        if hasattr(self,
+                   "applicabilityDomain") and self.applicabilityDomain is not None:
+            logger.info(
+                "Applicability domain fit started: %s" % datetime.now().strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
+            )
+            self.applicabilityDomain.fit(X_all)
+            logger.info(
+                "Applicability domain fit ended: %s" % datetime.now().strftime(
+                    "%Y-%m-%d %H:%M:%S"
+                )
+            )
         if save_data:
             ds.save()
         # save model and return path
@@ -825,3 +873,24 @@ class QSPRModel(JSONSerializable, ABC):
         Returns:
             path (str): absolute path to the saved estimator
         """
+
+    @property
+    def applicabilityDomain(self) -> Any:
+        """Return the applicability domain of the model.
+
+        Returns:
+            Any: applicability domain of the model
+        """
+        return self._applicabilityDomain
+
+    @applicabilityDomain.setter
+    def applicabilityDomain(self, apdomain: Any):
+        """Set the applicability domain of the model.
+
+        Args:
+            value (Any): applicability domain of the model
+        """
+        if not isinstance(apdomain, ApplicabilityDomain):
+            self._applicabilityDomain = MLChemAD(apdomain)
+        else:
+            self._applicabilityDomain = apdomain

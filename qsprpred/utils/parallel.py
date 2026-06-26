@@ -290,10 +290,18 @@ class JITParallelGenerator(ParallelGenerator, ABC):
                             **dict(**kwargs, gpu=gpu) if gpu is not None else kwargs,
                         )
                         queue.append(job)
+                        logger.debug(
+                            f"Submitted job {job} for input: {input_args}"
+                        )
+                        if gpu is not None:
+                            logger.debug(f"Assigned GPU {gpu} to job {job}.")
                         if self.workerType == "gpu":
                             gpus_to_jobs[job] = gpu
                     else:
                         # if only one worker, just run the job outside the pool entirely
+                        logger.debug(
+                            f"Running job for input: {input_args} without parallelization."
+                        )
                         result = process_func(*input_args, **kwargs)
                         yield result
                 except StopIteration:
@@ -307,8 +315,11 @@ class JITParallelGenerator(ParallelGenerator, ABC):
                     try:
                         # check process status
                         self.checkProcess(process)
+                        logger.debug(
+                            f"Process {process} check OK, checking for result...")
                         # check if result available
                         is_ready = self.checkResultAvailable(process)
+                        logger.debug(f"Process {process} ready?: {is_ready}")
                         if is_ready:
                             result = self.getResult(process)
                             logger.debug(
@@ -323,8 +334,14 @@ class JITParallelGenerator(ParallelGenerator, ABC):
                                     f"Deleting job {process} from gpus_to_jobs."
                                 )
                                 del gpus_to_jobs[process]
+                            logger.debug(
+                                f"Finished processing {process}, moving to the next one."
+                            )
                             break  # make sure to pop the next item from the generator
                         else:
+                            logger.debug(
+                                f"Result for process {process} not available yet, putting it back in the queue."
+                            )
                             # result not available yet, put process back in the queue
                             queue.append(process)
                     except Exception as exp:
@@ -375,7 +392,11 @@ class MultiprocessingJITGenerator(JITParallelGenerator):
     """
 
     def getPool(self):
-        return multiprocessing.Pool(processes=self.nWorkers)
+        try:
+            ctx = multiprocessing.get_context("fork")
+        except ValueError:
+            ctx = multiprocessing.get_context("spawn")
+        return ctx.Pool(processes=self.nWorkers)
 
     def checkResultAvailable(self, process):
         try:
@@ -383,11 +404,13 @@ class MultiprocessingJITGenerator(JITParallelGenerator):
             # check if process is done
             if not process.ready():
                 # not finished, return nothing
+                logger.debug(f"Process {process} not ready yet.")
                 return False
             else:
                 return True
         except (futures.TimeoutError, TimeoutError):
             # not done yet, return nothing
+            logger.debug(f"Process {process} timed out.")
             return False
 
     def getResult(self, process):
@@ -445,7 +468,15 @@ class PebbleJITGenerator(JITParallelGenerator):
         try:
             from pebble import ProcessPool
 
-            return ProcessPool(max_workers=self.nWorkers)
+            try:
+                ctx = multiprocessing.get_context("fork")
+            except ValueError:
+                ctx = multiprocessing.get_context("spawn")
+
+            return ProcessPool(
+                max_workers=self.nWorkers,
+                context=ctx,
+            )
         except ImportError:
             raise ImportError("Failed to import pool type 'pebble'. Install it first.")
 

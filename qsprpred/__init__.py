@@ -1,10 +1,17 @@
+import logging
 import os
 
 from rdkit import rdBase
 
-from .tasks import ModelTasks, TargetProperty, TargetTasks
+from .logs import logger, setLogger
+from .tasks import ModelTasks, TargetSpec, TargetTasks
 
-__all__ = ["ModelTasks", "TargetProperty", "TargetTasks"]
+_log_level = os.environ.get("QSPR_LOG_LEVEL", "INFO")
+
+logger.setLevel(getattr(logging, _log_level.upper(), logging.INFO))
+setLogger(logger)
+
+__all__ = ["ModelTasks", "TargetSpec", "TargetTasks"]
 
 rdBase.DisableLog("rdApp.error")
 rdBase.DisableLog("rdApp.info")

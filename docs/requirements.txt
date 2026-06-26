@@ -1,5 +1,5 @@
 sphinx
-sphinx_rtd_theme
+sphinx_rtd_theme==2.0.0
 sphinx_design
 sphinx_design_elements
 myst-parser

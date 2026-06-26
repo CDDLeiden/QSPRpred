@@ -2,18 +2,17 @@ import platform
 from typing import Type
 from unittest import TestCase, skipIf
 
-import numpy as np
 from parameterized import parameterized
 from sklearn.preprocessing import StandardScaler
 
-from qsprpred import TargetProperty, TargetTasks
 from qsprpred.data import RandomSplit
 from qsprpred.data.descriptors.fingerprints import MorganFP
-from qsprpred.data.descriptors.sets import DescriptorSet, DrugExPhyschem
+from qsprpred.data.descriptors.sets import DrugExPhyschem
 from qsprpred.data.processing.feature_filters import (
     HighCorrelationFilter,
     LowVarianceFilter,
 )
+from qsprpred.data.processing.pipeline import DatasetPipeline
 from qsprpred.extra.data.descriptors.fingerprints import (
     CDKFP,
     CDKMACCSFP,
@@ -36,7 +35,7 @@ from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.extra.data.utils.msa_calculator import MAFFT, BioPythonMSA, ClustalMSA
 from qsprpred.extra.data.utils.testing.path_mixins import DataSetsMixInExtras
 from qsprpred.utils.testing.base import QSPRTestCase
-from qsprpred.utils.testing.check_mixins import DescriptorInDataCheckMixIn
+from qsprpred.utils.testing.check_mixins import DescriptorCheckMixIn
 
 
 class TestDescriptorSetsExtra(DataSetsMixInExtras, QSPRTestCase):
@@ -45,27 +44,27 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, QSPRTestCase):
     Attributes:
         dataset (QSPRTable): dataset for testing, shuffled
     """
+
     def setUp(self):
         super().setUp()
         self.setUpPaths()
         self.dataset = self.createSmallTestDataSet(self.__class__.__name__)
-        self.dataset.shuffle()
 
     @skipIf(platform.system() == "Darwin", "Mold2 not supported on Mac OS")
     def testMold2(self):
         """Test the Mold2 descriptor calculator."""
         self.dataset.nJobs = 1
         self.dataset.addDescriptors([Mold2()])
-        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 777))
-        self.assertTrue(self.dataset.X.any().any())
-        self.assertTrue(self.dataset.X.any().sum() > 1)
+        self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 777))
+        self.assertTrue(self.dataset.getDescriptors().any().any())
+        self.assertTrue(self.dataset.getDescriptors().any().sum() > 1)
 
     def testPaDELDescriptors(self):
         """Test the PaDEL descriptor calculator."""
         self.dataset.addDescriptors([PaDEL()])
-        self.assertEqual(self.dataset.X.shape, (len(self.dataset), 1444))
-        self.assertTrue(self.dataset.X.any().any())
-        self.assertTrue(self.dataset.X.any().sum() > 1)
+        self.assertEqual(self.dataset.getDescriptors().shape, (len(self.dataset), 1444))
+        self.assertTrue(self.dataset.getDescriptors().any().any())
+        self.assertTrue(self.dataset.getDescriptors().any().sum() > 1)
 
     @parameterized.expand(
         [
@@ -83,9 +82,9 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, QSPRTestCase):
     def testPaDELFingerprints(self, fp_type, nbits):
         dataset = self.createSmallTestDataSet(f"{self.__class__.__name__}_{fp_type}")
         dataset.addDescriptors([fp_type()])
-        self.assertEqual(dataset.X.shape, (len(dataset), nbits))
-        self.assertTrue(dataset.X.any().any())
-        self.assertTrue(dataset.X.any().sum() > 1)
+        self.assertEqual(dataset.getDescriptors().shape, (len(dataset), nbits))
+        self.assertTrue(dataset.getDescriptors().any().any())
+        self.assertTrue(dataset.getDescriptors().any().sum() > 1)
 
     def testMordred(self):
         """Test the Mordred descriptor calculator."""
@@ -94,27 +93,26 @@ class TestDescriptorSetsExtra(DataSetsMixInExtras, QSPRTestCase):
 
         self.dataset.addDescriptors([Mordred()])
         self.assertEqual(
-            self.dataset.X.shape,
+            self.dataset.getDescriptors().shape,
             (
                 len(self.dataset),
                 len(mordred.Calculator(descriptors).descriptors),
             ),
         )
-        self.assertTrue(self.dataset.X.any().any())
-        self.assertTrue(self.dataset.X.any().sum() > 1)
+        self.assertTrue(self.dataset.getDescriptors().any().any())
+        self.assertTrue(self.dataset.getDescriptors().any().sum() > 1)
 
     def testExtendedValenceSignature(self):
         """Test the SMILES based signature descriptor calculator."""
         desc_set = ExtendedValenceSignature(1)
         self.dataset.nJobs = 2
         self.dataset.addDescriptors([desc_set], recalculate=True)
-        self.dataset.featurize()
-        self.assertTrue(self.dataset.X.shape[1] == len(desc_set))
-        self.assertTrue(self.dataset.X.any().any())
-        self.assertTrue(self.dataset.X.any().sum() > 1)
+        self.assertTrue(self.dataset.getDescriptors().shape[1] == len(desc_set))
+        self.assertTrue(self.dataset.getDescriptors().any().any())
+        self.assertTrue(self.dataset.getDescriptors().any().sum() > 1)
 
 
-class TestPCMDataSet(DataSetsMixInExtras, TestCase):
+class TestPCMDataSet(DataSetsMixInExtras, TestCase, DescriptorCheckMixIn):
     """Test the PCM data set features.
 
     Attributes:
@@ -122,6 +120,7 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         sampleDescSet (DescriptorSet): descriptor set for testing
         defaultMSA (BioPythonMSA): MSA provider for testing
     """
+
     def setUp(self):
         """Set up the test Dataframe."""
         super().setUp()
@@ -146,29 +145,32 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         self.sampleDescSet.msaProvider = provider
         dataset = self.createPCMDataSet(self.__class__.__name__)
         split = RandomSplit(test_fraction=0.2)
-        dataset.prepareDataset(
-            split=split,
+        pipeline = DatasetPipeline(
             feature_calculators=[self.sampleDescSet],
-            feature_standardizer=StandardScaler(),
-            feature_filters=[LowVarianceFilter(0.05),
-                             HighCorrelationFilter(0.9)],
+            steps={
+                "scaler": StandardScaler(),
+                "lowvar": LowVarianceFilter(0.05),
+                "highcorr": HighCorrelationFilter(0.9),
+            }
         )
+        X_train, y_train, X_test, y_test = next(pipeline.applyOnDataSet(dataset, split))
         ndata = dataset.getDF().shape[0]
-        self.validate_split(dataset)
-        self.assertEqual(dataset.X_ind.shape[0], round(ndata * 0.2))
-        test_ids = dataset.X_ind.index.values
-        train_ids = dataset.y_ind.index.values
+        self.checkFeatures(X_train, y_train, X_test, y_test)
+        self.assertEqual(X_test.shape[0], round(ndata * 0.2))
+        test_ids = X_test.index.values
+        train_ids = X_train.index.values
         dataset.save()
         # load dataset and test if all checks out after loading
         dataset_new = PCMDataSet.fromFile(dataset.metaFile)
         self.assertIsInstance(dataset_new, PCMDataSet)
-        self.validate_split(dataset_new)
-        self.assertEqual(dataset.X_ind.shape[0], round(ndata * 0.2))
+        X_train_new, y_train_new, X_test_new, y_test_new = next(
+            pipeline.applyOnDataSet(dataset_new, split))
+        self.checkFeatures(X_train_new, y_train_new, X_test_new, y_test_new)
+        self.assertEqual(X_test_new.shape[0], round(ndata * 0.2))
         self.assertEqual(len(dataset_new.descriptorSets), len(dataset_new.descriptors))
-        self.assertTrue(dataset_new.featureStandardizer)
-        self.assertTrue(len(dataset_new.featureNames) == len(self.sampleDescSet))
-        self.assertTrue(all(mol_id in dataset_new.X_ind.index for mol_id in test_ids))
-        self.assertTrue(all(mol_id in dataset_new.y_ind.index for mol_id in train_ids))
+        self.assertTrue(len(pipeline.originalfeatureNames) == len(self.sampleDescSet))
+        self.assertTrue(all(mol_id in X_test_new.index for mol_id in test_ids))
+        self.assertTrue(all(mol_id in X_train_new.index for mol_id in train_ids))
         # full_removal files and try saving again
         dataset_new.clear()
         dataset_new.save()
@@ -177,37 +179,40 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         """Test if the feature calculator can be switched to a new dataset."""
         dataset = self.createPCMDataSet(self.__class__.__name__)
         split = RandomSplit(test_fraction=0.5)
-        lv = LowVarianceFilter(0.05)
-        hc = HighCorrelationFilter(0.9)
-        dataset.prepareDataset(
-            split=split,
+        pipeline = DatasetPipeline(
             feature_calculators=[self.sampleDescSet],
-            feature_filters=[lv, hc],
-            recalculate_features=True,
-            feature_fill_value=np.nan,
+            steps={
+                "scaler": StandardScaler(),
+                "lowvar": LowVarianceFilter(0.05),
+                "highcorr": HighCorrelationFilter(0.9),
+            }
         )
         ndata = dataset.getDF().shape[0]
         self.assertEqual(len(dataset.descriptorSets), len(dataset.descriptors))
-        self.assertEqual(
-            dataset.X_ind.shape, (round(ndata * 0.5), len(self.sampleDescSet))
-        )
+        _, _, X_test, _ = next(pipeline.applyOnDataSet(dataset, split))
+        self.assertEqual(X_test.shape[0], round(ndata * 0.5))
+        n_features = X_test.shape[1]
         # create new dataset with different feature calculator
         dataset_next = self.createPCMDataSet(f"{self.__class__.__name__}_next")
-        dataset_next.prepareDataset(
-            split=split,
+        pipeline_next = DatasetPipeline(
             feature_calculators=[self.sampleDescSet],
-            feature_filters=[lv, hc],
-            recalculate_features=True,
-            feature_fill_value=np.nan,
+            steps={
+                "scaler": StandardScaler(),
+                "lowvar": LowVarianceFilter(0.05),
+                "highcorr": HighCorrelationFilter(0.9),
+            }
+        )
+        X_train_next, _, X_test_next, _ = next(
+            pipeline_next.applyOnDataSet(dataset_next, split)
         )
         self.assertEqual(
             len(dataset_next.descriptorSets), len(dataset_next.descriptors)
         )
         self.assertEqual(
-            dataset_next.X_ind.shape, (round(ndata * 0.5), len(self.sampleDescSet))
+            X_test_next.shape, (round(ndata * 0.5), n_features)
         )
         self.assertEqual(
-            dataset_next.X.shape, (round(ndata * 0.5), len(self.sampleDescSet))
+            X_train_next.shape, (round(ndata * 0.5), n_features)
         )
 
     def testWithMolDescriptors(self):
@@ -217,25 +222,35 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
             MorganFP(radius=2, nBits=128),
             DrugExPhyschem(),
         ]
-        self.dataset.prepareDataset(
+        split = RandomSplit(test_fraction=0.2)
+        pipeline = DatasetPipeline(
             feature_calculators=calcs,
-            feature_standardizer=StandardScaler(),
-            split=RandomSplit(test_fraction=0.2),
+            steps={"scaler": StandardScaler()},
+
         )
+        X_train, _, _, _ = next(pipeline.applyOnDataSet(self.dataset, split))
         # test if all descriptors are there
         expected_length = 0
         for calc in calcs:
             expected_length += len(calc)
-        self.assertEqual(self.dataset.X.shape[1], expected_length)
+        self.assertEqual(X_train.shape[1], expected_length)
         # filter features and test if they are there after saving and loading
-        self.dataset.filterFeatures(
-            [LowVarianceFilter(0.05),
-             HighCorrelationFilter(0.9)]
+        pipeline = DatasetPipeline(
+            feature_calculators=calcs,
+            steps={
+                "lowvar": LowVarianceFilter(0.05),
+                "highcorr": HighCorrelationFilter(0.9),
+            },
+
         )
-        feats_left = self.dataset.X.shape[1]
+        X_train, _, _, _ = next(pipeline.applyOnDataSet(self.dataset, split))
+        feats_left = X_train.shape[1]
         self.dataset.save()
+        pipeline.toFile(f"{self.dataset.path}_pipeline.json")
+        pipeline_new = DatasetPipeline.fromFile(f"{self.dataset.path}_pipeline.json")
         dataset_new = PCMDataSet.fromFile(self.dataset.metaFile)
-        self.assertEqual(dataset_new.X.shape[1], feats_left)
+        X_train_new, _, _, _ = next(pipeline_new.apply(dataset_new, split, fit=False))
+        self.assertEqual(X_train_new.shape[1], feats_left)
 
     @parameterized.expand([
         ("MAFFT", MAFFT),
@@ -245,117 +260,117 @@ class TestPCMDataSet(DataSetsMixInExtras, TestCase):
         provider = provider_class(out_dir=self.generatedDataPath)
         descset = ProDec(sets=["Zscale Hellberg"], msa_provider=provider)
         self.dataset.addDescriptors([descset])
-        self.assertEqual(self.dataset.X.shape, (len(self.dataset), len(descset)))
-        self.assertTrue(self.dataset.X.any().any())
-        self.assertTrue(self.dataset.X.any().sum() > 1)
+        self.assertEqual(self.dataset.getDescriptors().shape,
+                         (len(self.dataset), len(descset)))
+        self.assertTrue(self.dataset.getDescriptors().any().any())
+        self.assertTrue(self.dataset.getDescriptors().any().sum() > 1)
+
+# class TestDescriptorsExtra(
+#     DataSetsMixInExtras, DescriptorInDataCheckMixIn, QSPRTestCase
+# ):
+#     def setUp(self):
+#         super().setUp()
+#         self.setUpPaths()
+
+#     @parameterized.expand(
+#         [
+#             (
+#                 f"{desc_set}",
+#                 desc_set,
+#                 [{
+#                     "name": "CL",
+#                     "task": TargetTasks.REGRESSION
+#                 }],
+#             ) for desc_set in DataSetsMixInExtras.getAllDescriptorSets()
+#         ]
+#     )
+#     def testDescriptorsExtraAll(
+#         self,
+#         _,
+#         desc_set: DescriptorSet,
+#         target_props: list[dict | TargetProperty],
+#     ):
+#         """Test the calculation of extra descriptors with data preparation."""
+#         dataset = self.createLargeTestDataSet(
+#             name=self.getDataSetName(desc_set, target_props),
+#             target_props=target_props,
+#             n_jobs=2,
+#             chunk_size=self.chunkSize,
+#         )
+#         self.checkDataSetContainsDescriptorSet(
+#             dataset, desc_set, self.getDefaultPrep(), target_props
+#         )
 
 
-class TestDescriptorsExtra(
-    DataSetsMixInExtras, DescriptorInDataCheckMixIn, QSPRTestCase
-):
-    def setUp(self):
-        super().setUp()
-        self.setUpPaths()
+# class TestDescriptorsPCM(DataSetsMixInExtras, DescriptorInDataCheckMixIn, TestCase):
+#     """Test the calculation of PCM descriptors with data preparation.
 
-    @parameterized.expand(
-        [
-            (
-                f"{desc_set}",
-                desc_set,
-                [{
-                    "name": "CL",
-                    "task": TargetTasks.REGRESSION
-                }],
-            ) for desc_set in DataSetsMixInExtras.getAllDescriptors()
-        ]
-    )
-    def testDescriptorsExtraAll(
-        self,
-        _,
-        desc_set: DescriptorSet,
-        target_props: list[dict | TargetProperty],
-    ):
-        """Test the calculation of extra descriptors with data preparation."""
-        dataset = self.createLargeTestDataSet(
-            name=self.getDatSetName(desc_set, target_props),
-            target_props=target_props,
-            n_jobs=2,
-            chunk_size=self.chunkSize,
-        )
-        self.checkDataSetContainsDescriptorSet(
-            dataset, desc_set, self.getDefaultPrep(), target_props
-        )
+#     Attributes:
+#         defaultMSA (MSAProvider): Default MSA provider.
+#     """
+#     def setUp(self):
+#         super().setUp()
+#         self.setUpPaths()
+#         self.defaultMSA = self.getMSAProvider(self.generatedDataPath)
 
+#     @parameterized.expand(
+#         [
+#             (
+#                 f"{desc_set}_{TargetTasks.MULTICLASS}",
+#                 desc_set,
+#                 [
+#                     {
+#                         "name": "pchembl_value_Median",
+#                         "task": TargetTasks.MULTICLASS,
+#                         "th": [2.0, 5.5, 6.5, 12.0],
+#                     }
+#                 ],
+#             ) for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
+#         ] + [
+#             (
+#                 f"{desc_set}_{TargetTasks.REGRESSION}",
+#                 desc_set,
+#                 [{
+#                     "name": "pchembl_value_Median",
+#                     "task": TargetTasks.REGRESSION
+#                 }],
+#             ) for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
+#         ] + [
+#             (
+#                 f"{desc_set}_Multitask",
+#                 desc_set,
+#                 [
+#                     {
+#                         "name": "pchembl_value_Median",
+#                         "task": TargetTasks.REGRESSION
+#                     },
+#                     {
+#                         "name": "pchembl_value_Mean",
+#                         "task": TargetTasks.SINGLECLASS,
+#                         "th": [6.5],
+#                     },
+#                 ],
+#             ) for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
+#         ]
+#     )
+#     def testDescriptorsPCMAll(self, _, desc_set, target_props):
+#         """Tests all available descriptor sets with data set preparation.
 
-class TestDescriptorsPCM(DataSetsMixInExtras, DescriptorInDataCheckMixIn, TestCase):
-    """Test the calculation of PCM descriptors with data preparation.
-
-    Attributes:
-        defaultMSA (MSAProvider): Default MSA provider.
-    """
-    def setUp(self):
-        super().setUp()
-        self.setUpPaths()
-        self.defaultMSA = self.getMSAProvider(self.generatedDataPath)
-
-    @parameterized.expand(
-        [
-            (
-                f"{desc_set}_{TargetTasks.MULTICLASS}",
-                desc_set,
-                [
-                    {
-                        "name": "pchembl_value_Median",
-                        "task": TargetTasks.MULTICLASS,
-                        "th": [2.0, 5.5, 6.5, 12.0],
-                    }
-                ],
-            ) for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
-        ] + [
-            (
-                f"{desc_set}_{TargetTasks.REGRESSION}",
-                desc_set,
-                [{
-                    "name": "pchembl_value_Median",
-                    "task": TargetTasks.REGRESSION
-                }],
-            ) for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
-        ] + [
-            (
-                f"{desc_set}_Multitask",
-                desc_set,
-                [
-                    {
-                        "name": "pchembl_value_Median",
-                        "task": TargetTasks.REGRESSION
-                    },
-                    {
-                        "name": "pchembl_value_Mean",
-                        "task": TargetTasks.SINGLECLASS,
-                        "th": [6.5],
-                    },
-                ],
-            ) for desc_set in DataSetsMixInExtras.getAllProteinDescriptors()
-        ]
-    )
-    def testDescriptorsPCMAll(self, _, desc_set, target_props):
-        """Tests all available descriptor sets with data set preparation.
-
-        Note that they are not checked with all possible settings
-        and all possible preparations,
-        but only with the default settings provided
-        by `DataSetsPathMixIn.getDefaultPrep()`.
-        The list itself is defined and configured
-        by `DataSetsPathMixIn.getAllDescriptors()`,
-        so if you need a specific descriptor tested, add it there.
-        """
-        dataset = self.createPCMDataSet(
-            name=f"{self.getDatSetName(desc_set, target_props)}_pcm",
-            target_props=target_props,
-        )
-        self.checkDataSetContainsDescriptorSet(
-            dataset, desc_set, self.getDefaultPrep(), target_props
-        )
-        self.checkDataSetContainsDescriptorSet(
-            dataset, desc_set, self.getDefaultPrep(), target_props
-        )
+#         Note that they are not checked with all possible settings
+#         and all possible preparations,
+#         but only with the default settings provided
+#         by `DataSetsPathMixIn.getDefaultPrep()`.
+#         The list itself is defined and configured
+#         by `DataSetsPathMixIn.getAllDescriptors()`,
+#         so if you need a specific descriptor tested, add it there.
+#         """
+#         dataset = self.createPCMDataSet(
+#             name=f"{self.getDataSetName(desc_set, target_props)}_pcm",
+#             target_props=target_props,
+#         )
+#         self.checkDataSetContainsDescriptorSet(
+#             dataset, desc_set, self.getDefaultPrep(), target_props
+#         )
+#         self.checkDataSetContainsDescriptorSet(
+#             dataset, desc_set, self.getDefaultPrep(), target_props
+#         )

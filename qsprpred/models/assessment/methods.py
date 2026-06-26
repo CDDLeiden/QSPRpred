@@ -6,65 +6,74 @@ from typing import Callable, Iterable
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import KFold
 
+from .metrics.scikit_learn import SklearnMetrics
+from ...data.processing.pipeline import DatasetPipeline
 from ...data.sampling.splits import DataSplit
 from ...data.tables.interfaces.qspr_data_set import QSPRDataSet
 from ...logs import logger
 from ...models.early_stopping import EarlyStoppingMode
 from ...models.model import QSPRModel
 from ...models.monitors import AssessorMonitor, BaseMonitor
-from .metrics.scikit_learn import SklearnMetrics
 
 
 class ModelAssessor(ABC):
     """Base class for assessment methods.
 
     Attributes:
+        name (str): name of the assessment method
         scoreFunc (Metric): scoring function to use, should match the output of the
-                        evaluation method (e.g. if the evaluation methods returns
-                        class probabilities, the scoring function support class
-                        probabilities)
+            evaluation method (e.g. if the evaluation methods returns class 
+            probabilities, the scoring function support class probabilities)
         monitor (AssessorMonitor): monitor to use for assessment, if None, a BaseMonitor
             is used
-        useProba (bool): use probabilities for classification models
+        useProba (bool): wheter to use probabilities for classification models
         mode (EarlyStoppingMode): early stopping mode for fitting
-        splitMultitaskScores (bool): whether to split the scores per task for multitask models
+        splitMultitaskScores (bool): whether to split the scores per task for multitask 
+            models
+        scores (np.ndarray): Scores returned by the scoring function for each fold 
+        predictions (pd.Dataframe): Predictions returned by the model for each fold
     """
+
     def __init__(
-        self,
-        scoring: str | Callable[[Iterable, Iterable], float],
-        monitor: AssessorMonitor | None = None,
-        use_proba: bool = True,
-        mode: EarlyStoppingMode | None = None,
-        split_multitask_scores: bool = False,
+            self,
+            name: str,
+            scoring: str | Callable[[Iterable, Iterable], float],
+            monitor: AssessorMonitor | None = None,
+            use_proba: bool = True,
+            mode: EarlyStoppingMode | None = None,
+            split_multitask_scores: bool = False,
     ):
         """Initialize the evaluation method class.
 
         Args:
+            name (str): name of the evaluation method
             scoring: str | Callable[[Iterable, Iterable], float],
             monitor (AssessorMonitor): monitor to track the evaluation
             use_proba (bool): use probabilities for classification models
             mode (EarlyStoppingMode): early stopping mode for fitting
             split_multitask_scores (bool): whether to split the scores per task for multitask models
         """
-        self.monitor = monitor
-        self.useProba = use_proba
-        self.mode = mode
+        self.name = name
         self.scoreFunc = (
             SklearnMetrics(scoring) if isinstance(scoring, str) else scoring
         )
+        self.monitor = monitor
+        self.useProba = use_proba
+        self.mode = mode
         self.splitMultitaskScores = split_multitask_scores
+        self.scores = None
+        self.predictions = None
 
     @abstractmethod
     def __call__(
-        self,
-        model: QSPRModel,
-        ds: QSPRDataSet,
-        save: bool = True,
-        parameters: dict | None = None,
-        monitor: AssessorMonitor | None = None,
-        **kwargs,
+            self,
+            model: QSPRModel,
+            ds: QSPRDataSet,
+            save: bool = True,
+            parameters: dict | None = None,
+            monitor: AssessorMonitor | None = None,
+            **kwargs,
     ) -> np.ndarray:
         """Evaluate the model.
 
@@ -84,51 +93,67 @@ class ModelAssessor(ABC):
         """
 
     def predictionsToDataFrame(
-        self,
-        model: QSPRModel,
-        y: np.array,
-        predictions: np.ndarray | list[np.ndarray],
-        index: pd.Series,
-        extra_columns: dict[str, np.ndarray] | None = None,
+            self,
+            model: QSPRModel,
+            y_train: np.ndarray,
+            y_test: np.ndarray,
+            train_preds: np.ndarray | list[np.ndarray],
+            test_preds: np.ndarray | list[np.ndarray],
+            fold: int,
     ) -> pd.DataFrame:
         """Create a dataframe with true values and predictions.
 
         Args:
-            model (QSPRModel): model to evaluate
-            y (np.array): target values
-            predictions (np.ndarray | list[np.ndarray]): predictions
-            index (pd.Series): index of the data set
-            extra_columns (dict[str, np.ndarray]): extra columns to add to the output
+            model (QSPRModel): model to evaluate.
+            dataset (QSPRDataSet): dataset to evaluate on.
+            y_train (np.ndarray): training target values.
+            y_test (np.ndarray): testing target values.
+            train_preds (np.ndarray | list[np.ndarray]): training predictions.
+            test_preds (np.ndarray | list[np.ndarray]): testing predictions.
+            fold (int): current fold number.
+            
+        Returns:
+            pd.DataFrame: dataframe with true values and predictions.
         """
-        # Create dataframe with true values
-        df_out = pd.DataFrame(
-            y.values, columns=y.add_suffix("_Label").columns, index=index
-        )
+        # Combine predictions
+        if isinstance(train_preds, list):
+            predictions = [
+                np.concatenate((train_preds[idx], test_preds[idx]))
+                for idx in range(len(train_preds))
+            ]
+        else:
+            predictions = np.vstack([train_preds, test_preds])
+
+        # Combine target values into dataframe
+        y = pd.concat([y_train, y_test])
+        df_out = y.add_suffix("_Label")
+
         # Add predictions to dataframe
         for idx, prop in enumerate(model.targetProperties):
             if prop.task.isClassification() and self.useProba:
-                # convert one-hot encoded predictions to class labels
-                # and add to train and test
                 df_out[f"{prop.name}_Prediction"] = np.argmax(predictions[idx], axis=1)
-                # add probability columns to train and test set
                 df_out = pd.concat(
                     [
                         df_out,
-                        pd.DataFrame(predictions[idx], index=index
-                                    ).add_prefix(f"{prop.name}_ProbabilityClass_"),
+                        pd.DataFrame(predictions[idx], index=y.index
+                                     ).add_prefix(f"{prop.name}_ProbabilityClass_"),
                     ],
                     axis=1,
                 )
             else:
                 df_out[f"{prop.name}_Prediction"] = predictions[:, idx]
-        # Add extra columns to dataframe if given (such as fold indexes)
-        if extra_columns is not None:
-            for col_name, col_values in extra_columns.items():
-                df_out[col_name] = col_values
+
+        # Add set labels
+        set_labels = ["Train"] * len(y_train) + ["Test"] * len(y_test)
+        df_out["Set"] = set_labels
+
+        # Add fold number
+        df_out["Fold"] = fold
+
         return df_out
 
 
-class CrossValAssessor(ModelAssessor):
+class Assessor(ModelAssessor):
     """Perform cross validation on a model.
 
     Attributes:
@@ -140,30 +165,34 @@ class CrossValAssessor(ModelAssessor):
         round (int): number of decimal places to round predictions to (default: 5)
         splitMultitaskScores (bool): whether to split the scores per task for multitask models
     """
+
     def __init__(
-        self,
-        scoring: str | Callable[[Iterable, Iterable], float],
-        split: DataSplit | None = None,
-        monitor: AssessorMonitor | None = None,
-        use_proba: bool = True,
-        mode: EarlyStoppingMode | None = None,
-        round: int = 5,
-        split_multitask_scores: bool = False,
+            self,
+            name: str,
+            scoring: str | Callable[[Iterable, Iterable], float],
+            split: DataSplit,
+            monitor: AssessorMonitor | None = None,
+            use_proba: bool = True,
+            mode: EarlyStoppingMode | None = None,
+            round: int = 5,
+            split_multitask_scores: bool = False,
     ):
-        super().__init__(scoring, monitor, use_proba, mode, split_multitask_scores)
+        super().__init__(name, scoring, monitor, use_proba, mode,
+                         split_multitask_scores)
         self.split = split
         if monitor is None:
             self.monitor = BaseMonitor()
         self.round = round
 
     def __call__(
-        self,
-        model: QSPRModel,
-        ds: QSPRDataSet,
-        save: bool = True,
-        parameters: dict | None = None,
-        monitor: AssessorMonitor | None = None,
-        **kwargs,
+            self,
+            model: QSPRModel,
+            ds: QSPRDataSet,
+            pipeline: DatasetPipeline | None = None,
+            parameters: dict | None = None,
+            monitor: AssessorMonitor | None = None,
+            save: bool = True,
+            **kwargs,
     ) -> np.ndarray:
         """Perform cross validation on the model with the given parameters.
 
@@ -171,187 +200,107 @@ class CrossValAssessor(ModelAssessor):
             model (QSPRModel): model to assess
             ds (QSPRDataSet): dataset to assess on
             scoring (str | Callable): scoring function to use
-            save (bool): whether to save predictions to file
+            pipeline (DatasetPipeline): optional pipeline to apply to the dataset
             parameters (dict): optional model parameters to use in assessment
             monitor (AssessorMonitor): optional, overrides monitor set in constructor
+            order (pd.Index): optional, order of the indices in the dataset
             **kwargs: additional keyword arguments for the fit function
 
         Returns:
-            np.ndarray: scores for the validation sets. If splitMultitaskScores is True, each
-            column represents a task and each row a fold. Otherwise, a 1D array is
+            np.ndarray: scores for the validation sets. If splitMultitaskScores is True, 
+            each column represents a task and each row a fold. Otherwise, a 1D array is
             returned with the scores for each fold.
         """
-        model.initFromDataset(ds)
         monitor = monitor or self.monitor
-        split = self.split or KFold(
-            n_splits=5, shuffle=True, random_state=model.randomState
-        )
         evalparams = model.parameters if parameters is None else parameters
-        X, _ = ds.getFeatures()
-        y, _ = ds.getTargets()
-        monitor.onAssessmentStart(model, ds, self.__class__.__name__)
-        # cross validation
-        fold_counter = np.zeros(y.shape[0])
-        predictions = []
-        scores = []
-        for i, (X_train, X_test, y_train, y_test, idx_train, idx_test) in enumerate(
-            ds.iterFolds(split=split)
+        pipeline = pipeline if pipeline is not None else DatasetPipeline()
+        monitor.onAssessmentStart(
+            model, ds, pipeline, self.name, evalparams, self.split,
+        )
+        # Assess model on each fold in the split
+        self.scores = []
+        self.predictions = []
+        for i, (X_train, y_train, X_test, y_test) in enumerate(
+                pipeline.applyOnDataSet(ds, self.split)
         ):
             logger.debug(
-                "cross validation fold %s started: %s" %
+                "Model Assessment fold %s started: %s" %
                 (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             )
             monitor.onFoldStart(
                 fold=i, X_train=X_train, y_train=y_train, X_test=X_test, y_test=y_test
             )
+            logger.debug(
+                f"Monitoring started for fold {i}."
+            )
             # fit model
-            crossval_estimator = model.loadEstimator(evalparams)
+            logger.debug(
+                f"Loading model for fold {i} with parameters: {evalparams}."
+            )
+            model.initFromData(ds, pipeline)
+            estimator = model.loadEstimator(evalparams)
+            logger.debug(
+                f"Fitting model for fold {i}: {estimator}."
+            )
             model_fit = model.fit(
                 X_train,
                 y_train,
-                crossval_estimator,
+                estimator,
                 self.mode,
                 monitor=monitor,
                 **kwargs,
             )
             # make predictions
+            logger.debug(
+                f"Making predictions for fold {i}, model: {evalparams}"
+            )
             if model.task.isRegression() or not self.useProba:
-                fold_predictions = model.predict(X_test, crossval_estimator)
+                test_preds = model.predict(X_test, estimator)
+                train_preds = model.predict(X_train, estimator)
             else:
-                fold_predictions = model.predictProba(X_test, crossval_estimator)
+                test_preds = model.predictProba(X_test, estimator)
+                train_preds = model.predictProba(X_train, estimator)
             # score
+            logger.debug(
+                f"Scoring predictions for fold {i}."
+            )
             if model.isMultiTask and self.splitMultitaskScores:
                 scores_tasks = []
                 for idx, prop in enumerate(model.targetProperties):
                     if self.useProba and prop.task.isClassification():
-                        prop_predictions = [fold_predictions[idx]]
+                        prop_predictions = [test_preds[idx]]
                         scores_tasks.append(
-                            self.scoreFunc(y.iloc[idx_test, idx], prop_predictions)
+                            self.scoreFunc(y_test[prop.name], prop_predictions)
                         )
                     else:
                         scores_tasks.append(
                             self.scoreFunc(
-                                y.iloc[idx_test, idx], fold_predictions[:, idx]
+                                y_test[prop.name], test_preds[:, idx]
                             )
                         )
-                scores.append(scores_tasks)
+                self.scores.append(scores_tasks)
             else:
-                score = self.scoreFunc(y.iloc[idx_test], fold_predictions)
-                scores.append(score)
-            # save molecule ids and fold number
-            fold_counter[idx_test] = i
+                score = self.scoreFunc(y_test, test_preds)
+                self.scores.append(score)
+            # Combine predictions and log fold results
             logger.debug(
-                "cross validation fold %s ended: %s" %
+                "Evaluation of fold %s ended: %s" %
                 (i, datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             )
-            fold_predictions_df = self.predictionsToDataFrame(
-                model,
-                y.iloc[idx_test],
-                fold_predictions,
-                pd.Series(y.index).iloc[idx_test],
-                extra_columns={"Fold": fold_counter[idx_test]},
+            logger.debug(
+                f"Converting predictions to data frame for fold {i}. "
             )
-            monitor.onFoldEnd(model_fit, fold_predictions_df)
-            predictions.append(fold_predictions_df)
-        # save results
+            preds_df = self.predictionsToDataFrame(
+                model, y_train, y_test, train_preds, test_preds, fold=i
+            )
+            monitor.onFoldEnd(model_fit, preds_df, self.scores[i])
+            self.predictions.append(preds_df)
+        monitor.onAssessmentEnd(pd.concat(self.predictions))
         if save:
-            pd.concat(predictions).round(self.round
-                                        ).to_csv(f"{model.outPrefix}.cv.tsv", sep="\t")
-        monitor.onAssessmentEnd(pd.concat(predictions))
-        return np.array(scores)
-
-
-class TestSetAssessor(ModelAssessor):
-    """Assess a model on a test set.
-
-    Attributes:+
-        useProba (bool): use predictProba instead of predict for classification
-        monitor (AssessorMonitor): monitor to use for assessment, if None, a BaseMonitor
-            is used
-        mode (EarlyStoppingMode): mode to use for early stopping
-        round (int): number of decimal places to round predictions to (default: 3)
-        splitMultitaskScores (bool): whether to split the scores per task for multitask models
-    """
-    def __init__(
-        self,
-        scoring: str | Callable[[Iterable, Iterable], float],
-        monitor: AssessorMonitor | None = None,
-        use_proba: bool = True,
-        mode: EarlyStoppingMode | None = None,
-        round: int = 5,
-        split_multitask_scores: bool = False,
-    ):
-        super().__init__(scoring, monitor, use_proba, mode, split_multitask_scores)
-        if monitor is None:
-            self.monitor = BaseMonitor()
-        self.round = round
-
-    def __call__(
-        self,
-        model: QSPRModel,
-        ds: QSPRDataSet,
-        save: bool = True,
-        parameters: dict | None = None,
-        monitor: AssessorMonitor | None = None,
-        **kwargs,
-    ) -> np.ndarray:
-        """Make predictions for independent test set.
-
-        Arguments:
-            model (QSPRModel): model to assess
-            ds (QSPRDataSet): dataset to assess on
-            scoring (str | Callable): scoring function to use
-            save (bool): whether to save predictions to file
-            parameters (dict): optional model parameters to use in assessment
-            use_proba (bool): use predictProba instead of predict for classification
-            monitor (AssessorMonitor): optional, overrides monitor set in constructor
-            **kwargs: additional keyword arguments for the fit function
-
-        Returns:
-            np.ndarray: scores for the test set. If splitMultitaskScores is True, each
-            column represents a task. Otherwise, a 1D array is returned with the score
-            for the test set.
-        """
-        model.initFromDataset(ds)
-        monitor = monitor or self.monitor
-        evalparams = model.parameters if parameters is None else parameters
-        X, X_ind = ds.getFeatures()
-        y, y_ind = ds.getTargets()
-        monitor.onAssessmentStart(model, ds, self.__class__.__name__)
-        monitor.onFoldStart(fold=0, X_train=X, y_train=y, X_test=X_ind, y_test=y_ind)
-        # fit model
-        ind_estimator = model.loadEstimator(evalparams)
-        ind_estimator = model.fit(
-            X, y, ind_estimator, self.mode, monitor=monitor, **kwargs
-        )
-        # predict values for independent test set
-        if model.task.isRegression() or not self.useProba:
-            predictions = model.predict(X_ind, ind_estimator)
-        else:
-            predictions = model.predictProba(X_ind, ind_estimator)
-        # score
-        if model.isMultiTask and self.splitMultitaskScores:
-            scores_tasks = []
-            for idx, prop in enumerate(model.targetProperties):
-                if self.useProba and prop.task.isClassification():
-                    prop_predictions = [predictions[idx]]
-                    scores_tasks.append(
-                        self.scoreFunc(y_ind.iloc[:, idx], prop_predictions)
-                    )
-                else:
-                    scores_tasks.append(
-                        self.scoreFunc(y_ind.iloc[:, idx], predictions[:, idx])
-                    )
-            score = scores_tasks
-        else:
-            score = [self.scoreFunc(y_ind, predictions)]
-        predictions_df = self.predictionsToDataFrame(
-            model, y_ind, predictions, y_ind.index
-        )
-        monitor.onFoldEnd(ind_estimator, predictions_df)
-        # predict values for independent test set and save results
-        if save:
-            predictions_df.round(self.round
-                                ).to_csv(f"{model.outPrefix}.ind.tsv", sep="\t")
-        monitor.onAssessmentEnd(predictions_df)
-        return np.array(score)
+            logger.debug(
+                f"Saving assessment report ({len(self.predictions)})."
+            )
+            pd.concat(self.predictions).round(self.round
+                                              ).to_csv(
+                f"{model.outPrefix}_{self.name}.tsv", sep="\t")
+        return np.array(self.scores)

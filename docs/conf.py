@@ -33,8 +33,7 @@ extensions = [
     "sphinx_design_elements",
 ]
 
-intersphinx_mapping = {'python': ('https://docs.python.org/3.10', None)}
-intersphinx_mapping = {'python': ('https://docs.python.org/3.9', None)}
+intersphinx_mapping = {'python': ('https://docs.python.org/3.14', None)}
 autoclass_content = "both"
 autodoc_default_options = {
     "members": True,
@@ -90,3 +89,21 @@ html_domain_indices = True
 default_role = 'any'
 
 autoclass_content = 'both'
+
+# theme options
+html_theme_options = {
+    # 'analytics_id': 'G-XXXXXXXXXX',  #  Provided by Google in your dashboard
+    # 'analytics_anonymize_ip': False,
+    # 'logo_only': False,
+    'display_version': True,
+    # 'prev_next_buttons_location': 'bottom',
+    # 'style_external_links': False,
+    # 'vcs_pageview_mode': '',
+    # 'style_nav_header_background': 'white',
+    # Toc options
+    # 'collapse_navigation': True,
+    # 'sticky_navigation': True,
+    # 'navigation_depth': 4,
+    # 'includehidden': True,
+    # 'titles_only': False
+}

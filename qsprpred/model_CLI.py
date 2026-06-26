@@ -14,9 +14,11 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.svm import SVC, SVR
 from xgboost import XGBClassifier, XGBRegressor
+from sklearn.model_selection import KFold
 
 from qsprpred.data.tables.qspr import QSPRTable
-from qsprpred.models.assessment.methods import CrossValAssessor, TestSetAssessor
+from qsprpred.data.processing.pipeline import DatasetPipeline
+from qsprpred.models.assessment.methods import Assessor
 from qsprpred.tasks import TargetTasks
 
 from .extra.gpu.models.dnn import DNNModel
@@ -205,8 +207,10 @@ def QSPR_modelling(args):
             )
             sys.exit()
 
-    for dataset in args.datasets:
+    for dataset, pipeline in zip(args.datasets, args.pipelines):
         log.info(f"Dataset: {dataset.name}")
+        
+        train_indices, _ = dataset.getSplit("test_split", "ids")[0]
 
         tasks = [prop.task for prop in dataset.targetProperties]
         if all(TargetTasks.REGRESSION == task for task in tasks):
@@ -258,7 +262,7 @@ def QSPR_modelling(args):
                 class_weight = "balanced" if args.sample_weighing else None
                 if alg_dict[model_type] in [RandomForestClassifier, SVC]:
                     parameters["class_weight"] = class_weight
-                counts = dataset.y.value_counts()
+                counts = dataset.getTargets().value_counts()
                 scale_pos_weight = (
                     counts[0] / counts[1] if (
                         args.sample_weighing and len(tasks) == 1 and
@@ -312,10 +316,15 @@ def QSPR_modelling(args):
                 search_space_gs = grid_params[grid_params[:, 0] == model_type, 1][0]
                 log.info(search_space_gs)
                 gridsearcher = GridSearchOptimization(
-                    model_assessor=CrossValAssessor(scoring=score_func),
+                    model_assessor=Assessor(
+                        name=f"crossval_grid_opt",
+                        scoring=score_func,
+                        split=KFold(
+                            n_splits=5, shuffle=True, random_state=args.random_state)
+                        ),
                     param_grid=search_space_gs,
                 )
-                best_params = gridsearcher.optimize(qspr_model, dataset)
+                best_params = gridsearcher.optimize(qspr_model, dataset[train_indices], pipeline)
             elif args.optimization == "bayes":
                 search_space_bs = grid_params[grid_params[:, 0] == model_type, 1][0]
                 log.info(search_space_bs)
@@ -336,23 +345,34 @@ def QSPR_modelling(args):
                         {"criterion": ["categorical", ["gini", "entropy"]]}
                     )
                 bayesoptimizer = OptunaOptimization(
-                    model_assessor=CrossValAssessor(scoring=score_func),
+                    model_assessor=Assessor(
+                        name=f"crossval_optuna_opt",
+                        scoring=score_func,
+                        split=KFold(
+                            n_splits=5, shuffle=True, random_state=args.random_state
+                        ),
+                    ),
                     param_grid=search_space_bs,
                     n_trials=args.n_trials,
                     n_jobs=args.n_jobs,
                 )
-                best_params = bayesoptimizer.optimize(qspr_model, dataset)
+                best_params = bayesoptimizer.optimize(qspr_model, dataset[train_indices], pipeline)
             if best_params is not None:
                 qspr_model.setParams(best_params)
 
             if args.model_evaluation:
-                CrossValAssessor(mode=EarlyStoppingMode.RECORDING, scoring=score_func)(
-                    qspr_model,
-                    dataset,
-                )
-                TestSetAssessor(
-                    mode=EarlyStoppingMode.NOT_RECORDING, scoring=score_func
-                )(qspr_model, dataset)
+                Assessor(
+                    name="crossval",
+                    split=KFold(n_splits=5, shuffle=True, random_state=args.random_state),
+                    mode=EarlyStoppingMode.NOT_RECORDING,
+                    scoring=score_func
+                )(qspr_model, dataset[train_indices], pipeline)
+                Assessor(
+                    name="testset",
+                    split="test_split",
+                    mode=EarlyStoppingMode.RECORDING,
+                    scoring=score_func
+                )(qspr_model, dataset, pipeline)
 
             if args.save_model:
                 if (model_type == "DNN") and not (args.model_evaluation):
@@ -361,7 +381,7 @@ def QSPR_modelling(args):
                         "for determining optimal number of epochs to stop training."
                     )
                 else:
-                    qspr_model.fitDataset(dataset)
+                    qspr_model.fitDataset(dataset, pipeline)
 
 
 if __name__ == "__main__":
@@ -369,6 +389,7 @@ if __name__ == "__main__":
 
     # Backup files
     datasets = [QSPRTable.fromFile(data_file) for data_file in args.data_paths]
+    pipelines = [DatasetPipeline.fromFile(f"{dataset.path}_pipeline.json") for dataset in datasets]
     file_prefixes = [
         f"{alg}_{dataset.name}" for alg in args.model_types for dataset in datasets
     ]
@@ -413,6 +434,7 @@ if __name__ == "__main__":
     )
 
     args.datasets = datasets
+    args.pipelines = pipelines
     QSPR_modelling(args)
 
     log.info(
