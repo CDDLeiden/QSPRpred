@@ -323,7 +323,7 @@ class PandasDataTable(PropertyStorage, Randomized):
         self.df[self.idProp] = self.df[self.indexCols].apply(
             lambda x: "~".join(map(str, x.tolist())), axis=1
         )
-        self.df.set_index(self.idProp, inplace=True, verify_integrity=False, drop=False)
+        self.df.set_index(self.idProp, inplace=True, drop=False)
         self.df.drop(
             inplace=True,
             columns=[c for c in self.df.columns if c.startswith("Unnamed")],
@@ -415,14 +415,13 @@ class PandasDataTable(PropertyStorage, Randomized):
             ids: IDs of entries to get properties for.
             ignore_missing (bool): If `True`, missing IDs are ignored.
         """
-        if name == self.idProp:
-            logger.info(
-                "ID property will change. "
-                f"Old IDs saved to property: {name}_before_change."
-            )
-            self.df[f"{name}_before_change"] = self.df[name]
+        old_id_values = None
+        if name == self.idProp and name in self.df.columns:
+            old_id_values = self.df[name].copy()
+
         if isinstance(data, pd.Series):
             data = data.tolist()
+
         if ids is None:
             self.df[name] = data
         else:
@@ -435,12 +434,41 @@ class PandasDataTable(PropertyStorage, Randomized):
                 ids = self.df.index.intersection(ids)
                 data = data.loc[ids]
             self.df.loc[ids, name] = data
+
         if name == self.idProp:
+            # Re-adding exactly the same IDs is a no-op. This avoids repeated
+            # backup columns, unnecessary reindexing, and duplicate INFO logs.
+            if (
+                old_id_values is not None
+                and self.df[name].equals(old_id_values)
+            ):
+                return
+
+            # Explicit replacement for pandas' deprecated
+            # verify_integrity=True argument.
+            if not self.df[name].is_unique:
+                if old_id_values is not None:
+                    self.df[name] = old_id_values
+                raise ValueError(
+                    f"Property '{name}' cannot be used as ID because "
+                    "its values are not unique."
+                )
+
+            backup_name = f"{name}_before_change"
+            if old_id_values is not None and backup_name not in self.df.columns:
+                self.df[backup_name] = old_id_values
+                logger.info(
+                    "ID property will change. "
+                    "Old IDs saved to property: %s.",
+                    backup_name,
+                )
+
             logger.info(
                 "ID property was changed. "
                 "Updating index columns to match new ID property."
             )
-            self.df.set_index(name, inplace=True, verify_integrity=True, drop=False)
+            self.df.set_index(name, inplace=True, drop=False)
+            self.df.index.name = name
 
     def removeProperty(self, name):
         """Remove a property from the data frame.
@@ -772,4 +800,9 @@ class PandasDataTable(PropertyStorage, Randomized):
                 **props
             }, ),
         ])
-        self.df.set_index(self.idProp, inplace=True, verify_integrity=True, drop=False)
+        if not self.df[self.idProp].is_unique:
+            raise ValueError(
+                f"Property '{self.idProp}' cannot be used as ID because "
+                "its values are not unique."
+            )
+        self.df.set_index(self.idProp, inplace=True, drop=False)
