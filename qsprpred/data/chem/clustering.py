@@ -13,9 +13,10 @@ from ...logs import logger
 from ..descriptors.fingerprints import Fingerprint, MorganFP
 from ..storage.interfaces.stored_mol import StoredMol
 from .scaffolds import BemisMurckoRDKit, Scaffold
+from qsprpred.utils.serialization import JSONSerializable
 
 
-class MoleculeClusters(MolProcessorWithID, ABC):
+class MoleculeClusters(MolProcessorWithID, JSONSerializable, ABC):
     """Abstract base class for clustering molecules.
 
     Attributes:
@@ -304,12 +305,14 @@ class FPSimilarityMaxMinClusters(FPSimilarityClusters):
         """
         self._set_nClusters(len(fps))
         picker = rdSimDivPickers.MaxMinPicker()
-        self.centroid_indices = picker.LazyBitVectorPick(
-            fps,
-            len(fps),
-            self.nClusters,
-            firstPicks=self.initialCentroids if self.initialCentroids else [],
-            seed=ctypes.c_int(self.seed).value if self.seed is not None else -1,
+        self.centroid_indices = list(
+            picker.LazyBitVectorPick(
+                fps,
+                len(fps),
+                self.nClusters,
+                firstPicks=self.initialCentroids if self.initialCentroids else [],
+                seed=ctypes.c_int(self.seed).value if self.seed is not None else -1,
+            )
         )
 
         return self.centroid_indices
@@ -338,8 +341,8 @@ class FPSimilarityLeaderPickerClusters(FPSimilarityClusters):
     def _get_centroids(self, fps: list) -> list:
         """Get cluster centroids with LeaderPicker algorithm."""
         picker = rdSimDivPickers.LeaderPicker()
-        self.centroid_indices = picker.LazyBitVectorPick(
-            fps, len(fps), self.similarityThreshold
+        self.centroid_indices = list(
+            picker.LazyBitVectorPick(fps, len(fps), self.similarityThreshold)
         )
 
         return self.centroid_indices

@@ -5,11 +5,13 @@ from parameterized import parameterized
 
 from qsprpred.data.descriptors.sets import DescriptorSet
 from qsprpred.data.processing.applicability_domain import ApplicabilityDomain
-from qsprpred.data.processing.feature_standardizers import SKLearnStandardizer
+from qsprpred.data.processing.feature_transformers import SklearnStep
 from qsprpred.data.sampling.splits import DataSplit
 from qsprpred.extra.data.tables.pcm import PCMDataSet
 from qsprpred.extra.data.utils.testing.path_mixins import DataSetsMixInExtras
 from qsprpred.utils.testing.check_mixins import DataPrepCheckMixIn
+from qsprpred.data.processing.pipeline import DatasetPipeline
+from qsprpred.data.processing.step import Shuffle, DummyStep
 
 
 class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepCheckMixIn, TestCase):
@@ -36,7 +38,7 @@ class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepCheckMixIn, TestCas
         name: str,
         feature_calculators: list[DescriptorSet],
         split: DataSplit,
-        feature_standardizer: SKLearnStandardizer,
+        feature_standardizer: SklearnStep,
         feature_filter: Callable,
         data_filter: Callable,
         applicability_domain: ApplicabilityDomain,
@@ -51,19 +53,24 @@ class TestPCMDataSetPreparation(DataSetsMixInExtras, DataPrepCheckMixIn, TestCas
             feature_calculators (list[DescriptorsCalculator]):
                 List of feature calculators.
             split (DataSplit): Splitting strategy.
-            feature_standardizer (SKLearnStandardizer): Feature standardizer.
+            feature_standardizer (SklearnStep): Feature standardizer.
             feature_filter (Callable): Feature filter.
             data_filter (Callable): Data filter.
             applicability_domain (Callable): Applicability domain.
         """
         dataset = self.createPCMDataSet(name=name)
+        pipeline = DatasetPipeline(
+            feature_calculators=feature_calculators,
+            steps={
+                "shuffle": Shuffle(),
+                "feature_standardizer": feature_standardizer if feature_standardizer else DummyStep(),
+                "feature_filter": feature_filter if feature_filter else DummyStep(),
+                "data_filter": data_filter if data_filter else DummyStep(),
+                "applicability_domain": applicability_domain if applicability_domain else DummyStep(),
+            }
+        )
         self.checkPrep(
             dataset,
-            feature_calculators,
+            pipeline,
             split,
-            feature_standardizer,
-            feature_filter,
-            data_filter,
-            applicability_domain,
-            ["pchembl_value_Median"],
         )

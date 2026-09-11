@@ -4,7 +4,7 @@ from typing import Callable
 
 import pandas as pd
 
-from qsprpred import TargetProperty, TargetTasks
+from qsprpred import TargetSpec, TargetTasks
 from qsprpred.data.descriptors.sets import DescriptorSet
 from qsprpred.extra.data.descriptors.fingerprints import (
     CDKFP,
@@ -37,7 +37,7 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
         self.dataPathPCM = f"{os.path.dirname(__file__)}/test_files/data"
 
     @classmethod
-    def getAllDescriptors(cls) -> list[DescriptorSet]:
+    def getAllDescriptorSets(cls) -> list[DescriptorSet]:
         """Return a list of all available molecule descriptor sets.
 
         Returns:
@@ -150,13 +150,12 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
     def createPCMDataSet(
         self,
         name: str = "QSPRDataset_test_pcm",
-        target_props: list[TargetProperty] | list[dict] = [
+        target_props: list[TargetSpec] | list[dict] = [
             {
                 "name": "pchembl_value_Median",
                 "task": TargetTasks.REGRESSION
             }
         ],
-        preparation_settings: dict | None = None,
         protein_col: str = "accession",
         random_state: int | None = None,
     ):
@@ -167,8 +166,6 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
                 name of the dataset. Defaults to "QSPRDataset_test".
             target_props (list[TargetProperty] | list[dict], optional):
                 target properties.
-            preparation_settings (dict | None, optional):
-                preparation settings. Defaults to None.
             protein_col (str, optional):
                 name of the column with protein accessions. Defaults to "accession".
             random_state (int, optional):
@@ -196,6 +193,4 @@ class DataSetsMixInExtras(DataSetsPathMixIn):
             random_state=random_state,
             path=self.generatedDataPath,
         )
-        if preparation_settings:
-            ret.prepareDataset(**preparation_settings)
         return ret

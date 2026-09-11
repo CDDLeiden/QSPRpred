@@ -2,7 +2,7 @@ from typing import Any, Callable, Iterable, Optional
 
 import pandas as pd
 
-from qsprpred.data.tables.pandas import PandasDataTable
+from qsprpred.data.tables.pnds import PandasDataTable
 from qsprpred.extra.data.storage.protein.interfaces.protein_storage import (
     ProteinStorage,
 )

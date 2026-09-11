@@ -26,15 +26,16 @@ class ApplicabilityDomain(JSONSerializable, ABC):
     in the applicability domain or just to check if a molecule is in the applicability
     domain.
     """
+
     def __init__(
-        self, threshold: float | None = None, direction: str | None = None
+            self, threshold: float | None = None, direction: str | None = None
     ) -> None:
         """Initialize the applicability domain with a threshold.
 
         Args:
             threshold (float | None): threshold value
             direction (str | None): direction of the threshold, should be set if
-                threshold is set
+                threshold is set (">", "<", ">=", "<=")
         """
         self.threshold = threshold
         self._direction = direction
@@ -52,8 +53,7 @@ class ApplicabilityDomain(JSONSerializable, ABC):
         """Transform the features to a score for the applicability domain.
 
         The result could be a boolean array indicating if the features are in the
-        applicability domain or a score indicating how much the features are in the
-        applicability domain
+        applicability domain or a continous score indicating a measure of applicability
         (e.g., a probability or a distance).
 
         Args:
@@ -129,7 +129,7 @@ class ApplicabilityDomain(JSONSerializable, ABC):
             raise ValueError("Direction must be set to apply threshold")
 
 
-class MLChemADWrapper(ApplicabilityDomain):
+class MLChemAD(ApplicabilityDomain):
     """Define the applicability domain for a dataset using the MLChemAD package.
 
     This class uses the MLChemAD package to filter out molecules that are not in the
@@ -140,10 +140,11 @@ class MLChemADWrapper(ApplicabilityDomain):
         applicabilityDomain (MLChemApplicabilityDomain): applicability domain object
         fitted (bool): whether the applicability domain is fitted or not
     """
+
     def __init__(
-        self,
-        applicability_domain: MLChemADApplicabilityDomain,
-        astype: str | None = "float64",
+            self,
+            applicability_domain: MLChemADApplicabilityDomain,
+            astype: str | None = "float64",
     ) -> None:
         """Initialize the MLChemADFilter with the domain_type attribute.
 
@@ -219,16 +220,17 @@ class KNNApplicabilityDomain(ApplicabilityDomain):
     This class is adapted from the `KNNApplicabilityDomain` class in the
     `mlchemad` package.
     """
+
     def __init__(
-        self,
-        k: int = 5,
-        alpha: float | None = None,
-        hard_threshold: float | None = None,
-        scaling: str | None = "robust",
-        dist: str = "euclidean",
-        scaler_kwargs=None,
-        n_jobs: int = 1,
-        astype: str | None = "float64",
+            self,
+            k: int = 5,
+            alpha: float | None = None,
+            hard_threshold: float | None = None,
+            scaling: str | None = "robust",
+            dist: str = "euclidean",
+            scaler_kwargs=None,
+            n_jobs: int = 1,
+            astype: str | None = "float64",
     ):
         """Create the k-Nearest Neighbor applicability domain.
 
@@ -289,7 +291,8 @@ class KNNApplicabilityDomain(ApplicabilityDomain):
         :param X: feature matrix
         """
         # Normalize the data
-        self.X_norm = self.scaler.fit_transform(X) if self.scaler is not None else X
+        self.X_norm = self.scaler.fit_transform(
+            X.to_numpy()) if self.scaler is not None else X
         # Fit the NN
         self.nn.fit(self.X_norm)
         # Find the distance to the kNN neighbors

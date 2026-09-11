@@ -1,15 +1,14 @@
 import os
 import uuid
-from datetime import datetime, timezone
 
 import pandas as pd
 from dotenv import load_dotenv
 from sklearn.ensemble import RandomForestRegressor
 
 from qsprpred.data.descriptors.fingerprints import MorganFP
-from qsprpred.data.storage.postgres import PostgresChemStore
 from qsprpred.data.tables.qspr import QSPRTable
-from qsprpred.tasks import TargetProperty, TargetTasks
+from qsprpred.extra.data.storage.postgres import PostgresChemStore
+from qsprpred.tasks import TargetTasks, TargetSpec
 
 load_dotenv()
 
@@ -63,7 +62,7 @@ def main():
         path=".",
         smiles_col="SMILES",
         target_props=[
-            TargetProperty(
+            TargetSpec(
                 name="activity",
                 task=TargetTasks.REGRESSION,
             )

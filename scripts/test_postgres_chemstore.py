@@ -1,7 +1,8 @@
 import os
+
 from dotenv import load_dotenv
 
-from qsprpred.data.storage.postgres import PostgresChemStore
+from qsprpred.extra.data.storage.postgres import PostgresChemStore
 
 load_dotenv()
 

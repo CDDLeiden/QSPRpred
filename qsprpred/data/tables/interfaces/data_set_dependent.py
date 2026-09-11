@@ -1,14 +1,18 @@
+from qsprpred.utils.serialization import JSONSerializable
 from qsprpred.data.tables.interfaces.qspr_data_set import QSPRDataSet
+from typing import Any, ClassVar
 
 
-class DataSetDependent:
+class DataSetDependent(JSONSerializable):
     """Classes that need an attached `QSPRDataSet` should inherit from this class,
     and it will be supplied to them via this API.
 
     Attributes:
         dataSet (QSPRDataSet): The data set attached to this object.
     """
-    def __init__(self, dataset: QSPRDataSet | None = None):
+    _notJSON: ClassVar = ["dataSet"]
+    
+    def __init__(self, dataset: QSPRDataSet | None = None, **kwargs: Any) -> None:
         """Initialize the object with a data set.
 
         Args:
@@ -16,6 +20,7 @@ class DataSetDependent:
                 The data set to attach to this object. Defaults to None.
         """
         self.dataSet = dataset
+        super().__init__(**kwargs)
 
     def setDataSet(self, dataset: QSPRDataSet | None) -> None:
         """Set the data set for this object."""
@@ -39,3 +44,7 @@ class DataSetDependent:
             return self.dataSet
         else:
             raise ValueError("Data set not set.")
+        
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self.dataSet = None
